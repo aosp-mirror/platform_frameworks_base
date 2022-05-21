@@ -138,7 +138,7 @@ import android.window.ClientWindowFrames;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.ForceShowNavigationBarSettingsObserver;
+import com.android.internal.policy.ForceShowNavBarSettingsObserver;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.policy.SystemBarUtils;
@@ -300,10 +300,6 @@ public class DisplayPolicy {
     // needs to be opaque.
     private WindowState mNavBarBackgroundWindow;
 
-    // The window that draws fake rounded corners and should provide insets to calculate the correct
-    // rounded corner insets.
-    private WindowState mRoundedCornerWindow;
-
     /**
      * A collection of {@link AppearanceRegion} to indicate that which region of status bar applies
      * which appearance.
@@ -378,7 +374,7 @@ public class DisplayPolicy {
 
     private final WindowManagerInternal.AppTransitionListener mAppTransitionListener;
 
-    private final ForceShowNavigationBarSettingsObserver mForceShowNavigationBarSettingsObserver;
+    private final ForceShowNavBarSettingsObserver mForceShowNavBarSettingsObserver;
     private boolean mForceShowNavigationBarEnabled;
 
     private class PolicyHandler extends Handler {
@@ -653,17 +649,19 @@ public class DisplayPolicy {
         });
         mHandler.post(mGestureNavigationSettingsObserver::register);
 
-        mForceShowNavigationBarSettingsObserver = new ForceShowNavigationBarSettingsObserver(
+        mForceShowNavBarSettingsObserver = new ForceShowNavBarSettingsObserver(
                 mHandler, mContext);
-        mForceShowNavigationBarSettingsObserver.setOnChangeRunnable(() -> {
-            synchronized (mLock) {
-                mForceShowNavigationBarEnabled =
-                        mForceShowNavigationBarSettingsObserver.isEnabled();
-                updateSystemBarAttributes();
-            }
-        });
-        mForceShowNavigationBarEnabled = mForceShowNavigationBarSettingsObserver.isEnabled();
-        mHandler.post(mForceShowNavigationBarSettingsObserver::register);
+        mForceShowNavBarSettingsObserver.setOnChangeRunnable(this::updateForceShowNavBarSettings);
+        mForceShowNavigationBarEnabled = mForceShowNavBarSettingsObserver.isEnabled();
+        mHandler.post(mForceShowNavBarSettingsObserver::register);
+    }
+
+    private void updateForceShowNavBarSettings() {
+        synchronized (mLock) {
+            mForceShowNavigationBarEnabled =
+                    mForceShowNavBarSettingsObserver.isEnabled();
+            updateSystemBarAttributes();
+        }
     }
 
     /**
@@ -970,16 +968,10 @@ public class DisplayPolicy {
             mExtraNavBarAltPosition = getAltBarPosition(attrs);
         }
 
-        if (attrs.insetsRoundedCornerFrame) {
-            // Currently, only support one rounded corner window which is the TaskBar.
-            if (mRoundedCornerWindow != null && mRoundedCornerWindow != win) {
-                throw new IllegalArgumentException("Found multiple rounded corner window :"
-                        + " current = " + mRoundedCornerWindow
-                        + " new = " + win);
-            }
-            mRoundedCornerWindow = win;
-        } else if (mRoundedCornerWindow == win) {
-            mRoundedCornerWindow = null;
+        final InsetsSourceProvider provider = win.getControllableInsetProvider();
+        if (provider != null && provider.getSource().getInsetsRoundedCornerFrame()
+                != attrs.insetsRoundedCornerFrame) {
+            provider.getSource().setInsetsRoundedCornerFrame(attrs.insetsRoundedCornerFrame);
         }
     }
 
@@ -1146,8 +1138,13 @@ public class DisplayPolicy {
                 mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, win,
                         (displayFrames, windowContainer, inOutFrame) -> {
                             if (!mNavButtonForcedVisible) {
-                                inOutFrame.inset(win.getLayoutingAttrs(
-                                        displayFrames.mRotation).providedInternalInsets);
+                                final Insets[] providedInternalInsets = win.getLayoutingAttrs(
+                                        displayFrames.mRotation).providedInternalInsets;
+                                if (providedInternalInsets != null
+                                        && providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                                        && providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+                                    inOutFrame.inset(providedInternalInsets[ITYPE_NAVIGATION_BAR]);
+                                }
                                 inOutFrame.inset(win.mGivenContentInsets);
                             }
                         },
@@ -1193,13 +1190,17 @@ public class DisplayPolicy {
                 if (attrs.providesInsetsTypes != null) {
                     for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
                         final TriConsumer<DisplayFrames, WindowContainer, Rect> imeFrameProvider =
-                                !attrs.providedInternalImeInsets.equals(Insets.NONE)
+                                win.getAttrs().providedInternalImeInsets != null
                                         ? (displayFrames, windowContainer, inOutFrame) -> {
-                                            inOutFrame.inset(win.getLayoutingAttrs(
-                                                    displayFrames.mRotation)
-                                                    .providedInternalImeInsets);
-                                        }
-                                        : null;
+                                    final Insets[] providedInternalImeInsets =
+                                            win.getLayoutingAttrs(displayFrames.mRotation)
+                                                    .providedInternalImeInsets;
+                                    if (providedInternalImeInsets != null
+                                            && providedInternalImeInsets.length > insetsType
+                                            && providedInternalImeInsets[insetsType] != null) {
+                                        inOutFrame.inset(providedInternalImeInsets[insetsType]);
+                                    }
+                                } : null;
                         switch (insetsType) {
                             case ITYPE_STATUS_BAR:
                                 mStatusBarAlt = win;
@@ -1218,12 +1219,41 @@ public class DisplayPolicy {
                                 mExtraNavBarAltPosition = getAltBarPosition(attrs);
                                 break;
                         }
-                        mDisplayContent.setInsetProvider(insetsType, win, (displayFrames,
-                                windowContainer, inOutFrame) -> {
-                            inOutFrame.inset(win.getLayoutingAttrs(
-                                    displayFrames.mRotation).providedInternalInsets);
-                            inOutFrame.inset(win.mGivenContentInsets);
-                        }, imeFrameProvider);
+                        mDisplayContent.setInsetProvider(insetsType, win,
+                                win.getAttrs().providedInternalInsets != null ? (displayFrames,
+                                        windowContainer, inOutFrame) -> {
+                                    final Insets[] providedInternalInsets = win.getLayoutingAttrs(
+                                            displayFrames.mRotation).providedInternalInsets;
+                                    if (providedInternalInsets != null
+                                            && providedInternalInsets.length > insetsType
+                                            && providedInternalInsets[insetsType] != null) {
+                                        inOutFrame.inset(providedInternalInsets[insetsType]);
+                                    }
+                                    inOutFrame.inset(win.mGivenContentInsets);
+                                } : null, imeFrameProvider);
+                        if (mNavigationBar == null && (insetsType == ITYPE_NAVIGATION_BAR
+                                || insetsType == ITYPE_EXTRA_NAVIGATION_BAR)) {
+                            mDisplayContent.setInsetProvider(ITYPE_LEFT_GESTURES, win,
+                                    (displayFrames, windowState, inOutFrame) -> {
+                                final int leftSafeInset =
+                                        Math.max(displayFrames.mDisplayCutoutSafe.left,0);
+                                        inOutFrame.left = 0;
+                                        inOutFrame.top = 0;
+                                        inOutFrame.bottom = displayFrames.mDisplayHeight;
+                                        inOutFrame.right =
+                                                leftSafeInset + mLeftGestureInset;
+                                    });
+                            mDisplayContent.setInsetProvider(ITYPE_RIGHT_GESTURES, win,
+                                    (displayFrames, windowState, inOutFrame) -> {
+                                        final int rightSafeInset =
+                                                Math.min(displayFrames.mDisplayCutoutSafe.right,
+                                                        displayFrames.mUnrestricted.right);
+                                        inOutFrame.left = rightSafeInset - mRightGestureInset;
+                                        inOutFrame.top = 0;
+                                        inOutFrame.bottom = displayFrames.mDisplayHeight;
+                                        inOutFrame.right = displayFrames.mDisplayWidth;
+                                    });
+                        }
                         mInsetsSourceWindowsExceptIme.add(win);
                     }
                 }
@@ -1313,9 +1343,6 @@ public class DisplayPolicy {
         if (mLastFocusedWindow == win) {
             mLastFocusedWindow = null;
         }
-        if (mRoundedCornerWindow == win) {
-            mRoundedCornerWindow = null;
-        }
 
         mInsetsSourceWindowsExceptIme.remove(win);
     }
@@ -1345,10 +1372,6 @@ public class DisplayPolicy {
 
     WindowState getNavigationBar() {
         return mNavigationBar != null ? mNavigationBar : mNavigationBarAlt;
-    }
-
-    WindowState getRoundedCornerWindow() {
-        return mRoundedCornerWindow;
     }
 
     /**
@@ -1498,10 +1521,6 @@ public class DisplayPolicy {
         }
     }
 
-    // TODO(b/161810301): No one is calling this since we haven't moved window layout to the client.
-    //                    When that happens, this should be called when the display rotation is
-    //                    changed, so that we can dispatch the correct insets to all the clients
-    //                    before the insets source windows report their frames to the server.
     void updateInsetsSourceFramesExceptIme(DisplayFrames displayFrames) {
         for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
             final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
@@ -1552,7 +1571,7 @@ public class DisplayPolicy {
                 win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
                 sTmpClientFrames);
 
-        win.setFrames(sTmpClientFrames);
+        win.setFrames(sTmpClientFrames, win.mRequestedWidth, win.mRequestedHeight);
     }
 
     WindowState getTopFullscreenOpaqueWindow() {
@@ -1809,6 +1828,7 @@ public class DisplayPolicy {
      */
     public void switchUser() {
         updateCurrentUserResources();
+        updateForceShowNavBarSettings();
     }
 
     /**
@@ -1941,15 +1961,23 @@ public class DisplayPolicy {
                 && lp.paramsForRotation[rotation] != null) {
             lp = lp.paramsForRotation[rotation];
         }
+        final Insets providedInternalInsets;
+        if (lp.providedInternalInsets != null
+                && lp.providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                && lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+            providedInternalInsets = lp.providedInternalInsets[ITYPE_NAVIGATION_BAR];
+        } else {
+            providedInternalInsets = Insets.NONE;
+        }
         if (position == NAV_BAR_LEFT) {
-            if (lp.width > lp.providedInternalInsets.right) {
-                return lp.width - lp.providedInternalInsets.right;
+            if (lp.width > providedInternalInsets.right) {
+                return lp.width - providedInternalInsets.right;
             } else {
                 return 0;
             }
         } else if (position == NAV_BAR_RIGHT) {
-            if (lp.width > lp.providedInternalInsets.left) {
-                return lp.width - lp.providedInternalInsets.left;
+            if (lp.width > providedInternalInsets.left) {
+                return lp.width - providedInternalInsets.left;
             } else {
                 return 0;
             }
@@ -1998,10 +2026,18 @@ public class DisplayPolicy {
             return 0;
         }
         LayoutParams lp = mNavigationBar.getLayoutingAttrs(rotation);
-        if (lp.height < lp.providedInternalInsets.top) {
+        final Insets providedInternalInsets;
+        if (lp.providedInternalInsets != null
+                && lp.providedInternalInsets.length > ITYPE_NAVIGATION_BAR
+                && lp.providedInternalInsets[ITYPE_NAVIGATION_BAR] != null) {
+            providedInternalInsets = lp.providedInternalInsets[ITYPE_NAVIGATION_BAR];
+        } else {
+            providedInternalInsets = Insets.NONE;
+        }
+        if (lp.height < providedInternalInsets.top) {
             return 0;
         }
-        return lp.height - lp.providedInternalInsets.top;
+        return lp.height - providedInternalInsets.top;
     }
 
     /**
@@ -2396,7 +2432,9 @@ public class DisplayPolicy {
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
         final TaskDisplayArea defaultTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final boolean multiWindowTaskVisible =
-                defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_MULTI_WINDOW);
+                defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
+                        && task.getTopLeafTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
+                        != null;
         final boolean freeformRootTaskVisible =
                 defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
 
@@ -2836,7 +2874,7 @@ public class DisplayPolicy {
     void release() {
         mDisplayContent.mTransitionController.unregisterLegacyListener(mAppTransitionListener);
         mHandler.post(mGestureNavigationSettingsObserver::unregister);
-        mHandler.post(mForceShowNavigationBarSettingsObserver::unregister);
+        mHandler.post(mForceShowNavBarSettingsObserver::unregister);
         mImmersiveModeConfirmation.release();
     }
 

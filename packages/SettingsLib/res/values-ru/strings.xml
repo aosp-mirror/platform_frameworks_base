@@ -109,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Уровень заряда: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Л: батарея <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>; П: батарея <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Активно"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Активен, только левое ухо"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Активен, только правое ухо"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Активен, оба уха"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Профиль A2DP"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Звонки"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Профиль OPP"</string>
@@ -158,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Наушники"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Периферийное устройство ввода"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Подключаем левый слуховой аппарат…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Подключаем правый слуховой аппарат…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Левый слуховой аппарат: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряда"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Правый слуховой аппарат: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряда"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi выключен"</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi отключен"</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi: одно деление"</string>
@@ -180,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Режим модема"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Режим модема"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Корпоративные приложения"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Гость"</string>
     <string name="unknown" msgid="3544487229740637809">"Неизвестно"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Пользователь: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Установлены некоторые настройки по умолчанию"</string>
@@ -235,10 +233,10 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Этот пользователь не может изменять настройки режима модема"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Этот пользователь не может изменять настройки точки доступа"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Отладка по USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Включить режим отладки при подключении к компьютеру по USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Отозвать доступ для USB-отладки"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Режим отладки при подключении по USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Отозвать доступ для отладки по USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Отладка по Wi-Fi"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим отладки при подключении к сети Wi‑Fi"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим отладки при подключении по Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ошибка"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Отладка по Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы увидеть и использовать доступные устройства, включите отладку по Wi-Fi."</string>
@@ -283,7 +281,7 @@
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Подробный журнал Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Ограничивать поиск сетей Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Случайные MAC-адреса в сети Wi-Fi"</string>
-    <string name="mobile_data_always_on" msgid="8275958101875563572">"Не отключать мобильный Интернет"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"Не отключать мобильный интернет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Аппаратное ускорение в режиме модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Показывать Bluetooth-устройства без названий"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Отключить абсолютный уровень громкости"</string>
@@ -314,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Вести подробный журнал, показывать RSSI для каждого SSID при выборе сети"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Уменьшает расход заряда батареи и улучшает работу сети"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Если этот режим активирован, MAC-адрес устройства может меняться при каждом подключении к сети, в которой возможно создание случайных MAC-адресов."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Если этот режим активирован, MAC-адрес устройства может меняться при каждом подключении к сети, в которой возможно создание случайных MAC-адресов"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сеть с тарификацией трафика"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сеть без тарификации трафика"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Размер буфера журнала"</string>
@@ -382,7 +380,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"Показывать границы элементов"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Показывать границы обрезки, поля и т. п."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Отразить интерфейс"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудительно расположить элементы интерфейса справа налево во всех локалях"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудительно расположить элементы интерфейса справа налево вне зависимости от региональных настроек"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Размытие на уровне окон"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Включить 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Включить 4x MSAA в приложениях OpenGL ES 2.0"</string>
@@ -442,12 +440,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Сервис WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Настройки сервиса WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"Вариант недействителен. Повторите попытку."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Переход к шифрованию файлов"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Перейти…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Шифрование файлов уже включено"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Переход к шифрованию отдельных файлов"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Перейти к шифрованию отдельных файлов.\nВнимание! Все ваши данные будут удалены.\nЭто альфа-версия функции. Возможны ошибки.\nНажмите \"Очистить и перейти…\"."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Очистить и перейти…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Цветовой режим"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Использовать sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Отключено"</string>
@@ -456,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномалия (красный/зеленый)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомалия (синий/желтый)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Коррекция цвета"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Коррекция цвета поможет вам:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Добиться нужной цветопередачи.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Убрать цвета, которые мешают сосредоточиться.&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"Коррекция цвета поможет вам:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Добиться нужной цветопередачи.&lt;/li&gt; &lt;li&gt;&amp;nbsp;Включить черно-белый режим, чтобы меньше отвлекаться.&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Новая настройка: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"Уровень заряда – <xliff:g id="PERCENTAGE">%1$s</xliff:g>. <xliff:g id="TIME_STRING">%2$s</xliff:g>."</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Заряда хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -533,8 +525,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Уменьшить продолжительность"</string>
     <string name="cancel" msgid="5665114069455378395">"Отмена"</string>
     <string name="okay" msgid="949938843324579502">"ОК"</string>
-    <!-- no translation found for done (381184316122520313) -->
-    <skip />
+    <string name="done" msgid="381184316122520313">"Готово"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будильники и напоминания"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Разрешить установку будильников и напоминаний"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Будильники и напоминания"</string>
@@ -554,8 +545,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Пока вы не отключите"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Только что"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Этот смартфон"</string>
-    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
-    <skip />
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Этот планшет"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Этот смартфон"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Ошибка подключения. Выключите и снова включите устройство."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Проводное аудиоустройство"</string>
@@ -563,7 +553,7 @@
     <string name="storage_category" msgid="2287342585424631813">"Хранилище"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"Общие данные"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"Просмотр и изменение общих данных"</string>
-    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Нет общих данных для этого пользователя."</string>
+    <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Для этого пользователя нет общих данных"</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"При получении общих данных произошла ошибка. Повторите попытку."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Идентификатор общих данных: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"Срок действия истекает <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -599,16 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Не удалось создать пользователя"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Не удалось создать гостя."</string>
     <string name="user_nickname" msgid="262624187455825083">"Псевдоним"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Добавить пользователя"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Добавить гостя"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Удалить аккаунт гостя"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Сбросить гостевой сеанс"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Гость"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Сбросить гостевой сеанс?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Удалить гостя?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Сбросить"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Удалить"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Сброс гостевого сеанса…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сделать снимок"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбрать фото"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Выбрать фотографию"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Слишком много неудачных попыток. С устройства будут удалены все данные."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Слишком много неудачных попыток. Этот пользователь будет удален."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Слишком много неудачных попыток. Этот рабочий профиль и его данные будут удалены."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Закрыть"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Вариант по умолчанию"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Отключено"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Включено"</string>
@@ -653,4 +649,14 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Физическая клавиатура"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Выберите раскладку клавиатуры"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"По умолчанию"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Включение экрана"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Разрешить приложению включать экран"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Приложение сможет в любое время включать экран без явного согласия с вашей стороны"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Остановить трансляцию \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Если вы начнете транслировать \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\" или смените целевое устройство, текущая трансляция прервется."</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Транслировать \"<xliff:g id="SWITCHAPP">%1$s</xliff:g>\""</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Транслировать на другое устройство"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Анимации подсказки для жеста \"Назад\""</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Включить системную анимацию подсказки для жеста \"Назад\"."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"С помощью этого параметра можно включить системные анимации подсказок для жестов. Для этого нужно установить значение true для enableOnBackInvokedCallback в файле манифеста приложения."</string>
 </resources>

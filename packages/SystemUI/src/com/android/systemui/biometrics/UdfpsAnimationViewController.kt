@@ -19,14 +19,13 @@ import android.animation.ValueAnimator
 import android.graphics.PointF
 import android.graphics.RectF
 import com.android.systemui.Dumpable
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.util.ViewController
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 /**
@@ -55,14 +54,13 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
     private var dialogAlphaAnimator: ValueAnimator? = null
     private val dialogListener = SystemUIDialogManager.Listener { runDialogAlphaAnimator() }
 
-    private val panelExpansionListener =
-        PanelExpansionListener { fraction, expanded, tracking ->
-            // Notification shade can be expanded but not visible (fraction: 0.0), for example
-            // when a heads-up notification (HUN) is showing.
-            notificationShadeVisible = expanded && fraction > 0f
-            view.onExpansionChanged(fraction)
-            updatePauseAuth()
-        }
+    private val panelExpansionListener = PanelExpansionListener { event ->
+        // Notification shade can be expanded but not visible (fraction: 0.0), for example
+        // when a heads-up notification (HUN) is showing.
+        notificationShadeVisible = event.expanded && event.fraction > 0f
+        view.onExpansionChanged(event.fraction)
+        updatePauseAuth()
+    }
 
     /** If the notification shade is visible. */
     var notificationShadeVisible: Boolean = false
@@ -128,7 +126,7 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
      */
     private val dumpTag = "$tag ($this)"
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    override fun dump(pw: PrintWriter, args: Array<String>) {
         pw.println("mNotificationShadeVisible=$notificationShadeVisible")
         pw.println("shouldPauseAuth()=" + shouldPauseAuth())
         pw.println("isPauseAuth=" + view.isPauseAuth)
@@ -194,4 +192,9 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
      * Called on touches outside of the view if listenForTouchesOutsideView returns true
      */
     open fun onTouchOutsideView() {}
+
+    /**
+     * Called when a view should announce an accessibility event.
+     */
+    open fun doAnnounceForAccessibility(str: String) {}
 }

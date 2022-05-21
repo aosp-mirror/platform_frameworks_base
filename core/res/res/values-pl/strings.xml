@@ -87,8 +87,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Tymczasowo wyłączone przez operatora karty SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Brak zasięgu sieci komórkowej"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Spróbuj zmienić preferowaną sieć. Kliknij, by zmienić."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Połączenia alarmowe mogą nie być dostępne."</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> nie obsługuje połączeń alarmowych przez Wi-Fi. Kliknij, aby wyświetlić szczegóły."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Połączenia alarmowe są niedostępne"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Nie można nawiązywać połączeń alarmowych przez Wi‑Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alerty"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Przekierowanie połączeń"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Tryb alarmowego połączenia zwrotnego"</string>
@@ -307,12 +307,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"wysyłanie i wyświetlanie SMS‑ów"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Pliki i dokumenty"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Pliki i dokumenty"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"dostęp do plików i dokumentów na urządzeniu"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzyka i inne dźwięki"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"dostęp do plików audio na urządzeniu"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Zdjęcia i filmy"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"dostęp do plików graficznych i wideo na urządzeniu"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzyka i dźwięk"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"dostęp do muzyki i dźwięku na urządzeniu"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Zdjęcia i filmy"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"dostęp do zdjęć i filmów na urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nagrywanie dźwięku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Aktywność fizyczna"</string>
@@ -587,7 +587,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Podczas uwierzytelniania wystąpił błąd"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Używaj blokady ekranu"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Użyj blokady ekranu, aby kontynuować"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Wykryto częściowy odcisk palca"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Mocno naciśnij czujnik"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nie udało się przetworzyć odcisku palca. Spróbuj ponownie."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Wyczyść czytnik linii papilarnych i spróbuj ponownie"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Wyczyść czujnik i spróbuj ponownie"</string>
@@ -600,7 +600,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Nie rozpoznano odcisku palca"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Mocno naciśnij czujnik"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Nie rozpoznano odcisku palca"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Uwierzytelniono odciskiem palca"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Twarz rozpoznana"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Twarz rozpoznana, kliknij Potwierdź"</string>
@@ -642,7 +642,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Odsuń telefon."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Przybliż telefon."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Przesuń telefon wyżej."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Obniż telefon."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Przesuń telefon niżej."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Przesuń telefon w lewo."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Przesuń telefon w prawo."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Patrz prosto na urządzenie."</string>
@@ -1221,7 +1221,7 @@
     <string name="launch_warning_original" msgid="3332206576800169626">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została pierwotnie uruchomiona."</string>
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"Skala"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"Zawsze pokazuj"</string>
-    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemowe &gt; Aplikacje &gt; Pobrane."</string>
+    <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Włącz ponownie, wybierając Ustawienia systemu &gt; Aplikacje &gt; Pobrane."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> nie obsługuje obecnie ustawionego rozmiaru wyświetlacza i może działać niestabilnie."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Zawsze pokazuj"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została skompilowana pod niezgodną wersję systemu Android i może zachowywać się niezgodnie z oczekiwaniami. Sprawdź, czy jest dostępna zaktualizowana wersja aplikacji."</string>
@@ -1453,12 +1453,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Zezwala aplikacji na proszenie o uprawnienia do ignorowania optymalizacji wykorzystania baterii w przypadku danej aplikacji."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"zapytanie o wszystkie pakiety"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Pozwala aplikacji wyświetlać wszystkie zainstalowane pakiety."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"Dostęp do AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Zezwala na dostęp aplikacji do AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"Dostęp do interfejsów AdServices Attribution API"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Zezwala na dostęp aplikacji do interfejsów AdServices Attribution API."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"Dostęp do AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Zezwala na dostęp aplikacji do AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Dotknij dwukrotnie, aby sterować powiększeniem"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nie można dodać widżetu."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"OK"</string>
@@ -1687,7 +1681,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"WŁ."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"WYŁ."</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Pozwolić usłudze <xliff:g id="SERVICE">%1$s</xliff:g> na pełną kontrolę nad urządzeniem?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jeśli włączysz usługę <xliff:g id="SERVICE">%1$s</xliff:g>, Twoje urządzenie nie będzie korzystać z blokady ekranu, by usprawnić szyfrowanie danych."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pełna kontrola jest odpowiednia dla aplikacji, które pomagają Ci radzić sobie z niepełnosprawnością, ale nie należy jej przyznawać wszystkim aplikacjom."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i kontroluj ekran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Może odczytywać całą zawartość ekranu i wyświetlać treść nad innymi aplikacjami."</string>
@@ -1941,9 +1934,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – brak dostępu"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"W tej chwili nie można z tego skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Wymagane są uprawnienia"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Aparat niedostępny"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Kontynuuj na telefonie"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon niedostępny"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Ustawienia Androida TV są niedostępne"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Ustawienia tabletu są niedostępne"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Ustawienia telefonu są niedostępne"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Z aplikacji nie można skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj urządzenia z Androidem TV."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Z aplikacji nie można skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj tabletu."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Z aplikacji nie można skorzystać na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>. Użyj telefonu."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"W tej chwili na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g> nie można skorzystać z aplikacji. Użyj urządzenia z Androidem TV."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"W tej chwili na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g> nie można skorzystać z aplikacji. Użyj tabletu."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"W tej chwili na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g> nie można skorzystać z aplikacji. Użyj telefonu."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj urządzenia z Androidem TV."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj tabletu."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Ta aplikacja wymaga dodatkowych zabezpieczeń. Użyj telefonu."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ta aplikacja jest na starszą wersję Androida i może nie działać prawidłowo. Sprawdź dostępność aktualizacji lub skontaktuj się z programistą."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Sprawdź dostępność aktualizacji"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Masz nowe wiadomości"</string>
@@ -2034,9 +2040,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OTWÓRZ MIMO TO"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Wykryto szkodliwą aplikację"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Zezwolić aplikacji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> na dostęp do wszystkich dzienników urządzenia?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Tylko tym razem"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Zezwól na jednorazowy dostęp"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nie zezwalaj"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie miała dostęp do własnych, a producent urządzenia będzie mógł korzystać z niektórych dzienników na urządzeniu. Więcej informacji"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Dzienniki urządzenia zapisują, co dzieje się na urządzeniu. Aplikacje mogą ich używać do wykrywania i rozwiązywania problemów.\n\nNiektóre dzienniki mogą zawierać poufne dane, dlatego na dostęp do wszystkich dzienników zezwalaj tylko aplikacjom, którym ufasz. \n\nNawet jeśli nie zezwolisz tej aplikacji na dostęp do wszystkich dzienników na urządzeniu, będzie miała dostęp do własnych. Producent urządzenia nadal będzie mógł korzystać z niektórych dzienników na urządzeniu. Więcej informacji"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nie pokazuj ponownie"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacja <xliff:g id="APP_0">%1$s</xliff:g> chce pokazywać wycinki z aplikacji <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edytuj"</string>
@@ -2048,6 +2054,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Kliknij, by dowiedzieć się więcej i zmienić ustawienia."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Zmiany w trybie Nie przeszkadzać"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Kliknij, by sprawdzić, co jest zablokowane."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Sprawdź ustawienia powiadomień"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"W Androidzie 13 i nowszych zainstalowane aplikacje będą potrzebowały zezwolenia na wysyłanie powiadomień. Kliknij, aby zmienić uprawnienia dla istniejących aplikacji."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Przypomnij później"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Odrzuć"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ustawienia"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Aparat"</string>
@@ -2266,11 +2276,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Przetłumaczono wiadomość: <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Wiadomość przetłumaczono z języka: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> na język: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktywność w tle"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Aktywność w tle"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> działa w tle i zużywa baterię. Kliknij, aby sprawdzić."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> długo działa w tle. Kliknij, aby sprawdzić."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Aplikacja zużywa baterię"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Aplikacja jest wciąż aktywna"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> działa w tle. Kliknij, by zarządzać wykorzystaniem baterii."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Aplikacja <xliff:g id="APP">%1$s</xliff:g> może mieć wpływ na czas pracy na baterii. Kliknij, aby sprawdzić aktywne aplikacje."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Sprawdź aktywne aplikacje"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Nie można uzyskać dostępu do aparatu z tego urządzenia"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nie można korzystać z aparatu telefonu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nie można korzystać z aparatu tabletu na urządzeniu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Ustawienie domyślne systemu"</string>
 </resources>

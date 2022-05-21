@@ -23,7 +23,7 @@
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Sartu pantaila zatituan"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menua"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"Pantaila txiki gainjarrian dago <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea nahi ez baduzu, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="pip_play" msgid="3496151081459417097">"Erreproduzitu"</string>
     <string name="pip_pause" msgid="690688849510295232">"Pausatu"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Joan hurrengora"</string>

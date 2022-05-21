@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -74,6 +73,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private Rect mBounds = new Rect();
     private ValueAnimator mFadeAnimator;
 
+    private int mIconSize;
+
     public SplitDecorManager(Configuration configuration, IconProvider iconProvider,
             SurfaceSession surfaceSession) {
         super(configuration, null /* rootSurface */, null /* hostInputToken */);
@@ -105,6 +106,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
         mHostLeash = rootLeash;
         mViewHost = new SurfaceControlViewHost(context, context.getDisplay(), this);
 
+        mIconSize = context.getResources().getDimensionPixelSize(R.dimen.split_icon_size);
         final FrameLayout rootLayout = (FrameLayout) LayoutInflater.from(context)
                 .inflate(R.layout.split_decor, null);
         mResizingIconView = rootLayout.findViewById(R.id.split_resizing_icon);
@@ -162,7 +164,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
                     RESIZING_BACKGROUND_SURFACE_NAME, mSurfaceSession);
             t.setColor(mBackgroundLeash, getResizingBackgroundColor(resizingTask))
-                    .setLayer(mBackgroundLeash, SPLIT_DIVIDER_LAYER - 1);
+                    .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
         }
 
         if (mIcon == null && resizingTask.topActivityInfo != null) {
@@ -172,14 +174,14 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
             WindowManager.LayoutParams lp =
                     (WindowManager.LayoutParams) mViewHost.getView().getLayoutParams();
-            lp.width = mIcon.getIntrinsicWidth();
-            lp.height = mIcon.getIntrinsicHeight();
+            lp.width = mIconSize;
+            lp.height = mIconSize;
             mViewHost.relayout(lp);
-            t.setLayer(mIconLeash, SPLIT_DIVIDER_LAYER);
+            t.setLayer(mIconLeash, Integer.MAX_VALUE);
         }
         t.setPosition(mIconLeash,
-                newBounds.width() / 2 - mIcon.getIntrinsicWidth() / 2,
-                newBounds.height() / 2 - mIcon.getIntrinsicWidth() / 2);
+                newBounds.width() / 2 - mIconSize / 2,
+                newBounds.height() / 2 - mIconSize / 2);
 
         boolean show = newBounds.width() > mBounds.width() || newBounds.height() > mBounds.height();
         if (show != mShown) {

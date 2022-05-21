@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
+import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import android.annotation.NonNull;
 import android.os.Trace;
@@ -147,6 +148,48 @@ class BLASTSyncEngine {
             for (WindowContainer wc : mRootMembers) {
                 wc.finishSync(merged, false /* cancel */);
             }
+
+            final ArraySet<WindowContainer> wcAwaitingCommit = new ArraySet<>();
+            for (WindowContainer wc : mRootMembers) {
+                wc.waitForSyncTransactionCommit(wcAwaitingCommit);
+            }
+            class CommitCallback implements Runnable {
+                // Can run a second time if the action completes after the timeout.
+                boolean ran = false;
+                public void onCommitted() {
+                    synchronized (mWm.mGlobalLock) {
+                        if (ran) {
+                            return;
+                        }
+                        mWm.mH.removeCallbacks(this);
+                        ran = true;
+                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                        for (WindowContainer wc : wcAwaitingCommit) {
+                            wc.onSyncTransactionCommitted(t);
+                        }
+                        t.apply();
+                        wcAwaitingCommit.clear();
+                    }
+                }
+
+                // Called in timeout
+                @Override
+                public void run() {
+                    // Sometimes we get a trace, sometimes we get a bugreport without
+                    // a trace. Since these kind of ANRs can trigger such an issue,
+                    // try and ensure we will have some visibility in both cases.
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionCommitTimeout");
+                    Slog.e(TAG, "WM sent Transaction to organized, but never received" +
+                           " commit callback. Application ANR likely to follow.");
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    onCommitted();
+
+                }
+            };
+            CommitCallback callback = new CommitCallback();
+            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::onCommitted);
+            mWm.mH.postDelayed(callback, BLAST_TIMEOUT_DURATION);
+
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -227,7 +270,7 @@ class BLASTSyncEngine {
     }
 
     int startSyncSet(TransactionReadyListener listener) {
-        return startSyncSet(listener, WindowState.BLAST_TIMEOUT_DURATION, "");
+        return startSyncSet(listener, BLAST_TIMEOUT_DURATION, "");
     }
 
     int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
@@ -237,7 +280,7 @@ class BLASTSyncEngine {
     }
 
     void startSyncSet(SyncGroup s) {
-        startSyncSet(s, WindowState.BLAST_TIMEOUT_DURATION);
+        startSyncSet(s, BLAST_TIMEOUT_DURATION);
     }
 
     void startSyncSet(SyncGroup s, long timeoutMs) {

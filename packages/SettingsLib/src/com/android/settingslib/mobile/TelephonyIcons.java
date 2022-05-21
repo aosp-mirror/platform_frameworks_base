@@ -39,6 +39,8 @@ public class TelephonyIcons {
     public static final int ICON_3G = R.drawable.ic_3g_mobiledata;
     public static final int ICON_4G = R.drawable.ic_4g_mobiledata;
     public static final int ICON_4G_PLUS = R.drawable.ic_4g_plus_mobiledata;
+    public static final int ICON_4G_LTE = R.drawable.ic_4g_lte_mobiledata;
+    public static final int ICON_4G_LTE_PLUS = R.drawable.ic_4g_lte_plus_mobiledata;
     public static final int ICON_5G_E = R.drawable.ic_5g_e_mobiledata;
     public static final int ICON_1X = R.drawable.ic_1x_mobiledata;
     public static final int ICON_5G = R.drawable.ic_5g_mobiledata;
@@ -225,6 +227,34 @@ public class TelephonyIcons {
             TelephonyIcons.ICON_LTE_PLUS
     );
 
+    public static final MobileIconGroup FOUR_G_LTE = new MobileIconGroup(
+            "4G LTE",
+            null,
+            null,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
+            0,
+            0,
+            0,
+            0,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
+            R.string.data_connection_4g_lte,
+            TelephonyIcons.ICON_4G_LTE
+    );
+
+    public static final MobileIconGroup FOUR_G_LTE_PLUS = new MobileIconGroup(
+            "4G LTE+",
+            null,
+            null,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
+            0,
+            0,
+            0,
+            0,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
+            R.string.data_connection_4g_lte_plus,
+            TelephonyIcons.ICON_4G_LTE_PLUS
+    );
+
     public static final MobileIconGroup LTE_CA_5G_E = new MobileIconGroup(
             "5Ge",
             null,
@@ -327,6 +357,8 @@ public class TelephonyIcons {
         ICON_NAME_TO_ICON.put("h+", H_PLUS);
         ICON_NAME_TO_ICON.put("4g", FOUR_G);
         ICON_NAME_TO_ICON.put("4g+", FOUR_G_PLUS);
+        ICON_NAME_TO_ICON.put("4glte", FOUR_G_LTE);
+        ICON_NAME_TO_ICON.put("4glte+", FOUR_G_LTE_PLUS);
         ICON_NAME_TO_ICON.put("5ge", LTE_CA_5G_E);
         ICON_NAME_TO_ICON.put("lte", LTE);
         ICON_NAME_TO_ICON.put("lte+", LTE_PLUS);

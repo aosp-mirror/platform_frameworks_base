@@ -94,6 +94,9 @@ public class DragLayout extends LinearLayout {
         mDividerSize = context.getResources().getDimensionPixelSize(
                 R.dimen.split_divider_bar_width);
 
+        // Always use LTR because we assume dropZoneView1 is on the left and 2 is on the right when
+        // showing the highlight.
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
         mDropZoneView1 = new DropZoneView(context);
         mDropZoneView2 = new DropZoneView(context);
         addView(mDropZoneView1, new LinearLayout.LayoutParams(MATCH_PARENT,

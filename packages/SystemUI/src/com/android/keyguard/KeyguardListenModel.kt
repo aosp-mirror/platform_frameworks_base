@@ -21,7 +21,7 @@ data class KeyguardFingerprintListenModel(
     override val listening: Boolean,
     // keep sorted
     val biometricEnabledForUser: Boolean,
-    val bouncer: Boolean,
+    val bouncerIsOrWillShow: Boolean,
     val canSkipBouncer: Boolean,
     val credentialAttempted: Boolean,
     val deviceInteractive: Boolean,
@@ -51,9 +51,10 @@ data class KeyguardFaceListenModel(
     val authInterruptActive: Boolean,
     val becauseCannotSkipBouncer: Boolean,
     val biometricSettingEnabledForUser: Boolean,
-    val bouncer: Boolean,
+    val bouncerFullyShown: Boolean,
     val faceAuthenticated: Boolean,
     val faceDisabled: Boolean,
+    val goingToSleep: Boolean,
     val keyguardAwake: Boolean,
     val keyguardGoingAway: Boolean,
     val listeningForFaceAssistant: Boolean,
@@ -62,7 +63,8 @@ data class KeyguardFaceListenModel(
     val primaryUser: Boolean,
     val scanningAllowedByStrongAuth: Boolean,
     val secureCameraLaunched: Boolean,
-    val switchingUser: Boolean
+    val switchingUser: Boolean,
+    val udfpsBouncerShowing: Boolean
 ) : KeyguardListenModel()
 /**
  * Verbose debug information associated with [KeyguardUpdateMonitor.shouldTriggerActiveUnlock].
@@ -72,6 +74,7 @@ data class KeyguardActiveUnlockModel(
     override val userId: Int,
     override val listening: Boolean,
     // keep sorted
+    val awakeKeyguard: Boolean,
     val authInterruptActive: Boolean,
     val encryptedOrTimedOut: Boolean,
     val fpLockout: Boolean,

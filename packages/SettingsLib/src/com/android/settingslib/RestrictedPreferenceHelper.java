@@ -31,9 +31,10 @@ import android.util.TypedValue;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
-import androidx.core.os.BuildCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+
+import com.android.settingslib.utils.BuildCompatUtils;
 
 /**
  * Helper class for managing settings preferences that can be disabled
@@ -105,7 +106,7 @@ public class RestrictedPreferenceHelper {
         if (mDisabledSummary) {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
             if (summaryView != null) {
-                final CharSequence disabledText = BuildCompat.isAtLeastT()
+                final CharSequence disabledText = BuildCompatUtils.isAtLeastT()
                         ? getDisabledByAdminUpdatableString()
                         : mContext.getString(R.string.disabled_by_admin_summary_text);
                 if (mDisabledByAdmin) {
@@ -197,9 +198,8 @@ public class RestrictedPreferenceHelper {
         if (mDisabledByAdmin != disabled) {
             mDisabledByAdmin = disabled;
             changed = true;
+            updateDisabledState();
         }
-
-        updateDisabledState();
 
         return changed;
     }
@@ -209,9 +209,8 @@ public class RestrictedPreferenceHelper {
         if (mDisabledByAppOps != disabled) {
             mDisabledByAppOps = disabled;
             changed = true;
+            updateDisabledState();
         }
-
-        updateDisabledState();
 
         return changed;
     }
@@ -232,6 +231,11 @@ public class RestrictedPreferenceHelper {
     private void updateDisabledState() {
         if (!(mPreference instanceof RestrictedTopLevelPreference)) {
             mPreference.setEnabled(!(mDisabledByAdmin || mDisabledByAppOps));
+        }
+
+        if (mPreference instanceof PrimarySwitchPreference) {
+            ((PrimarySwitchPreference) mPreference)
+                    .setSwitchEnabled(!(mDisabledByAdmin || mDisabledByAppOps));
         }
     }
 }

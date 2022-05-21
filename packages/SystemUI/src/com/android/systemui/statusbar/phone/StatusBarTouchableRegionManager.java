@@ -39,7 +39,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
@@ -127,7 +126,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("StatusBarTouchableRegionManager state:");
         pw.print("  mTouchableRegion=");
         pw.println(mTouchableRegion);

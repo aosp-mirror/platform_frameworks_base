@@ -2695,4 +2695,13 @@ easier.
     <style name="Theme.DeviceDefault.DocumentsUI" parent="Theme.DeviceDefault.DayNight">
         <item name="actionModeCloseDrawable">@drawable/ic_clear_material</item>
     </style>
+
+    <!-- @hide DeviceDefault theme for the Autofill half screen dialog UI.  -->
+    <style name="Theme.DeviceDefault.AutofillHalfScreenDialogButton" parent="Theme.DeviceDefault.Panel">
+        <item name="selectableItemBackground">@android:color/transparent</item>
+        <item name="colorAccentPrimaryVariant">@color/system_accent1_600</item>
+        <item name="colorAccentPrimary">@color/system_accent1_100</item>
+        <item name="textColorPrimary">@color/system_neutral1_900</item>
+        <item name="textColorSecondary">@color/system_neutral2_700</item>
+    </style>
 </resources>

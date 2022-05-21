@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone.userswitcher
 
 import android.graphics.drawable.Drawable
 import android.os.UserManager
-
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -27,11 +26,8 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener
-
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
-
 import javax.inject.Inject
 
 /**
@@ -124,7 +120,7 @@ class StatusBarUserInfoTracker @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("  userSwitcherEnabled=$userSwitcherEnabled")
         pw.println("  listening=$listening")
     }

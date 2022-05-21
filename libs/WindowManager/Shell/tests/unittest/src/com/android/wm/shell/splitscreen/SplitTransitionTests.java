@@ -97,6 +97,7 @@ public class SplitTransitionTests extends ShellTestCase {
     @Mock private SurfaceSession mSurfaceSession;
     @Mock private SplitscreenEventLogger mLogger;
     @Mock private IconProvider mIconProvider;
+    @Mock private ShellExecutor mMainExecutor;
     private SplitLayout mSplitLayout;
     private MainStage mMainStage;
     private SideStage mSideStage;
@@ -124,9 +125,9 @@ public class SplitTransitionTests extends ShellTestCase {
                 mIconProvider, null);
         mSideStage.onTaskAppeared(new TestRunningTaskInfoBuilder().build(), createMockSurface());
         mStageCoordinator = new SplitTestUtils.TestStageCoordinator(mContext, DEFAULT_DISPLAY,
-                mSyncQueue, mRootTDAOrganizer, mTaskOrganizer, mMainStage, mSideStage,
-                mDisplayController, mDisplayImeController, mDisplayInsetsController, mSplitLayout,
-                mTransitions, mTransactionPool, mLogger, Optional.empty(), Optional::empty);
+                mSyncQueue, mTaskOrganizer, mMainStage, mSideStage, mDisplayController,
+                mDisplayImeController, mDisplayInsetsController, mSplitLayout, mTransitions,
+                mTransactionPool, mLogger, mMainExecutor, Optional.empty(), Optional::empty);
         mSplitScreenTransitions = mStageCoordinator.getSplitTransitions();
         doAnswer((Answer<IBinder>) invocation -> mock(IBinder.class))
                 .when(mTransitions).startTransition(anyInt(), any(), any());
@@ -138,6 +139,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testLaunchToSide() {
         ActivityManager.RunningTaskInfo newTask = new TestRunningTaskInfoBuilder()
                 .setParentTaskId(mSideStage.mRootTaskInfo.taskId).build();
@@ -172,6 +174,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testLaunchPair() {
         TransitionInfo info = createEnterPairInfo();
 
@@ -194,6 +197,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testMonitorInSplit() {
         enterSplit();
 
@@ -250,6 +254,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testEnterRecents() {
         enterSplit();
 
@@ -287,6 +292,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissFromBeingOccluded() {
         enterSplit();
 
@@ -324,6 +330,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissFromMultiWindowSupport() {
         enterSplit();
 
@@ -345,6 +352,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissSnap() {
         enterSplit();
 
@@ -369,6 +377,7 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     @Test
+    @UiThreadTest
     public void testDismissFromAppFinish() {
         enterSplit();
 
@@ -424,19 +433,14 @@ public class SplitTransitionTests extends ShellTestCase {
     }
 
     private boolean containsSplitEnter(@NonNull WindowContainerTransaction wct) {
-        boolean movedMainToFront = false;
-        boolean movedSideToFront = false;
         for (int i = 0; i < wct.getHierarchyOps().size(); ++i) {
             WindowContainerTransaction.HierarchyOp op = wct.getHierarchyOps().get(i);
-            if (op.getType() == HIERARCHY_OP_TYPE_REORDER) {
-                if (op.getContainer() == mMainStage.mRootTaskInfo.token.asBinder()) {
-                    movedMainToFront = true;
-                } else if (op.getContainer() == mSideStage.mRootTaskInfo.token.asBinder()) {
-                    movedSideToFront = true;
-                }
+            if (op.getType() == HIERARCHY_OP_TYPE_REORDER
+                    && op.getContainer() == mStageCoordinator.mRootTaskInfo.token.asBinder()) {
+                return true;
             }
         }
-        return movedMainToFront && movedSideToFront;
+        return false;
     }
 
     private boolean containsSplitExit(@NonNull WindowContainerTransaction wct) {

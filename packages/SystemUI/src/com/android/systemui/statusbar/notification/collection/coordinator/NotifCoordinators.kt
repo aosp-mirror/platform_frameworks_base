@@ -21,7 +21,6 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -58,7 +57,6 @@ class NotifCoordinatorsImpl @Inject constructor(
     viewConfigCoordinator: ViewConfigCoordinator,
     visualStabilityCoordinator: VisualStabilityCoordinator,
     sensitiveContentCoordinator: SensitiveContentCoordinator,
-    activityLaunchAnimCoordinator: ActivityLaunchAnimCoordinator
 ) : NotifCoordinators {
 
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
@@ -96,7 +94,6 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
         mCoordinators.add(sensitiveContentCoordinator)
-        mCoordinators.add(activityLaunchAnimCoordinator)
         if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator)
         }
@@ -130,7 +127,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         pipeline.setSections(mOrderedSections)
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+    override fun dump(pw: PrintWriter, args: Array<String>) {
         pw.println()
         pw.println("$TAG:")
         for (c in mCoordinators) {

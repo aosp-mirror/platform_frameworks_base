@@ -18,14 +18,15 @@ package com.android.systemui.decor
 
 import android.annotation.ArrayRes
 import android.annotation.DrawableRes
+import android.content.res.ColorStateList
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.DisplayUtils
 import android.util.Size
 import android.view.RoundedCorners
 import com.android.systemui.Dumpable
 import com.android.systemui.R
-import java.io.FileDescriptor
 import java.io.PrintWriter
 
 class RoundedCornerResDelegate(
@@ -36,10 +37,13 @@ class RoundedCornerResDelegate(
     private val density: Float
         get() = res.displayMetrics.density
 
-    var isMultipleRadius: Boolean = false
+    private var reloadToken: Int = 0
+
+    var hasTop: Boolean = false
         private set
 
-    private var roundedDrawable: Drawable? = null
+    var hasBottom: Boolean = false
+        private set
 
     var topRoundedDrawable: Drawable? = null
         private set
@@ -47,130 +51,111 @@ class RoundedCornerResDelegate(
     var bottomRoundedDrawable: Drawable? = null
         private set
 
-    private var roundedSize = Size(0, 0)
-
     var topRoundedSize = Size(0, 0)
         private set
 
     var bottomRoundedSize = Size(0, 0)
         private set
 
+    var colorTintList = ColorStateList.valueOf(Color.BLACK)
+
+    var tuningSizeFactor: Int? = null
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            reloadMeasures()
+        }
+
+    var physicalPixelDisplaySizeRatio: Float = 1f
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            reloadMeasures()
+        }
+
     init {
-        reloadDrawables()
+        reloadRes()
         reloadMeasures()
     }
 
-    fun reloadAll(newDisplayUniqueId: String?) {
-        displayUniqueId = newDisplayUniqueId
-        reloadDrawables()
+    private fun reloadAll(newReloadToken: Int) {
+        if (reloadToken == newReloadToken) {
+            return
+        }
+        reloadToken = newReloadToken
+        reloadRes()
         reloadMeasures()
     }
 
-    private fun reloadDrawables() {
+    fun updateDisplayUniqueId(newDisplayUniqueId: String?, newReloadToken: Int?) {
+        if (displayUniqueId != newDisplayUniqueId) {
+            displayUniqueId = newDisplayUniqueId
+            newReloadToken ?.let { reloadToken = it }
+            reloadRes()
+            reloadMeasures()
+        } else {
+            newReloadToken?.let { reloadAll(it) }
+        }
+    }
+
+    private fun reloadRes() {
         val configIdx = DisplayUtils.getDisplayUniqueIdConfigIndex(res, displayUniqueId)
-        isMultipleRadius = getIsMultipleRadius(configIdx)
 
-        roundedDrawable = getDrawable(
-                displayConfigIndex = configIdx,
-                arrayResId = R.array.config_roundedCornerDrawableArray,
-                backupDrawableId = R.drawable.rounded
-        )
+        val hasDefaultRadius = RoundedCorners.getRoundedCornerRadius(res, displayUniqueId) > 0
+        hasTop = hasDefaultRadius ||
+                (RoundedCorners.getRoundedCornerTopRadius(res, displayUniqueId) > 0)
+        hasBottom = hasDefaultRadius ||
+                (RoundedCorners.getRoundedCornerBottomRadius(res, displayUniqueId) > 0)
+
         topRoundedDrawable = getDrawable(
                 displayConfigIndex = configIdx,
                 arrayResId = R.array.config_roundedCornerTopDrawableArray,
                 backupDrawableId = R.drawable.rounded_corner_top
-        ) ?: roundedDrawable
+        )
         bottomRoundedDrawable = getDrawable(
                 displayConfigIndex = configIdx,
                 arrayResId = R.array.config_roundedCornerBottomDrawableArray,
                 backupDrawableId = R.drawable.rounded_corner_bottom
-        ) ?: roundedDrawable
-
-        // If config_roundedCornerMultipleRadius set as true, ScreenDecorations respect the
-        // (width, height) size of drawable/rounded.xml instead of rounded_corner_radius
-        if (isMultipleRadius) {
-            roundedSize = Size(
-                    roundedDrawable?.intrinsicWidth ?: 0,
-                    roundedDrawable?.intrinsicHeight ?: 0)
-            topRoundedDrawable?.let {
-                topRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
-            }
-            bottomRoundedDrawable?.let {
-                bottomRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
-            }
-        } else {
-            val defaultRadius = RoundedCorners.getRoundedCornerRadius(res, displayUniqueId)
-            val topRadius = RoundedCorners.getRoundedCornerTopRadius(res, displayUniqueId)
-            val bottomRadius = RoundedCorners.getRoundedCornerBottomRadius(res, displayUniqueId)
-            roundedSize = Size(defaultRadius, defaultRadius)
-            topRoundedSize = Size(topRadius, topRadius)
-            bottomRoundedSize = Size(bottomRadius, bottomRadius)
-        }
-
-        if (topRoundedSize.width == 0) {
-            topRoundedSize = roundedSize
-        }
-        if (bottomRoundedSize.width == 0) {
-            bottomRoundedSize = roundedSize
-        }
+        )
     }
 
-    private fun reloadMeasures(roundedSizeFactor: Int? = null) {
-        // If config_roundedCornerMultipleRadius set as true, ScreenDecorations respect the
-        // (width, height) size of drawable/rounded.xml instead of rounded_corner_radius
-        if (isMultipleRadius) {
-            roundedSize = Size(
-                    roundedDrawable?.intrinsicWidth ?: 0,
-                    roundedDrawable?.intrinsicHeight ?: 0)
-            topRoundedDrawable?.let {
-                topRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
-            }
-            bottomRoundedDrawable?.let {
-                bottomRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
-            }
-        } else {
-            val defaultRadius = RoundedCorners.getRoundedCornerRadius(res, displayUniqueId)
-            val topRadius = RoundedCorners.getRoundedCornerTopRadius(res, displayUniqueId)
-            val bottomRadius = RoundedCorners.getRoundedCornerBottomRadius(res, displayUniqueId)
-            roundedSize = Size(defaultRadius, defaultRadius)
-            topRoundedSize = Size(topRadius, topRadius)
-            bottomRoundedSize = Size(bottomRadius, bottomRadius)
+    private fun reloadMeasures() {
+        topRoundedDrawable?.let {
+            topRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
+        }
+        bottomRoundedDrawable?.let {
+            bottomRoundedSize = Size(it.intrinsicWidth, it.intrinsicHeight)
         }
 
-        roundedSizeFactor ?.let {
+        tuningSizeFactor?.let {
+            if (it <= 0) {
+                return
+            }
             val length: Int = (it * density).toInt()
-            roundedSize = Size(length, length)
-        }
-
-        if (topRoundedSize.width == 0) {
-            topRoundedSize = roundedSize
-        }
-        if (bottomRoundedSize.width == 0) {
-            bottomRoundedSize = roundedSize
-        }
-    }
-
-    fun updateTuningSizeFactor(factor: Int) {
-        reloadMeasures(factor)
-    }
-
-    /**
-     * Gets whether the rounded corners are multiple radii for current display.
-     *
-     * Loads the default config {@link R.bool#config_roundedCornerMultipleRadius} if
-     * {@link com.android.internal.R.array#config_displayUniqueIdArray} is not set.
-     */
-    private fun getIsMultipleRadius(displayConfigIndex: Int): Boolean {
-        val isMultipleRadius: Boolean
-        res.obtainTypedArray(R.array.config_roundedCornerMultipleRadiusArray).let { array ->
-            isMultipleRadius = if (displayConfigIndex >= 0 && displayConfigIndex < array.length()) {
-                array.getBoolean(displayConfigIndex, false)
-            } else {
-                res.getBoolean(R.bool.config_roundedCornerMultipleRadius)
+            if (topRoundedSize.width > 0) {
+                topRoundedSize = Size(length, length)
             }
-            array.recycle()
+            if (bottomRoundedSize.width > 0) {
+                bottomRoundedSize = Size(length, length)
+            }
         }
-        return isMultipleRadius
+
+        if (physicalPixelDisplaySizeRatio != 1f) {
+            if (topRoundedSize.width != 0) {
+                topRoundedSize = Size(
+                        (physicalPixelDisplaySizeRatio * topRoundedSize.width + 0.5f).toInt(),
+                        (physicalPixelDisplaySizeRatio * topRoundedSize.height + 0.5f).toInt())
+            }
+            if (bottomRoundedSize.width != 0) {
+                bottomRoundedSize = Size(
+                        (physicalPixelDisplaySizeRatio * bottomRoundedSize.width + 0.5f).toInt(),
+                        (physicalPixelDisplaySizeRatio * bottomRoundedSize.height + 0.5f).toInt())
+            }
+        }
     }
 
     private fun getDrawable(
@@ -190,12 +175,13 @@ class RoundedCornerResDelegate(
         return drawable
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("RoundedCornerResDelegate state:")
-        pw.println("  isMultipleRadius:$isMultipleRadius")
-        pw.println("  roundedSize(w,h)=(${roundedSize.width},${roundedSize.height})")
+        pw.println("  hasTop=$hasTop")
+        pw.println("  hasBottom=$hasBottom")
         pw.println("  topRoundedSize(w,h)=(${topRoundedSize.width},${topRoundedSize.height})")
         pw.println("  bottomRoundedSize(w,h)=(${bottomRoundedSize.width}," +
                 "${bottomRoundedSize.height})")
+        pw.println("  physicalPixelDisplaySizeRatio=$physicalPixelDisplaySizeRatio")
     }
 }

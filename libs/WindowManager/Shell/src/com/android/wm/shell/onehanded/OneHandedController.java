@@ -37,7 +37,6 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
-import android.view.Surface;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.window.WindowContainerTransaction;
@@ -349,8 +348,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
             return;
         }
 
-        final int currentRotation = mDisplayAreaOrganizer.getDisplayLayout().rotation();
-        if (currentRotation != Surface.ROTATION_0 && currentRotation != Surface.ROTATION_180) {
+        if (mDisplayAreaOrganizer.getDisplayLayout().isLandscape()) {
             Slog.w(TAG, "One handed mode only support portrait mode");
             return;
         }

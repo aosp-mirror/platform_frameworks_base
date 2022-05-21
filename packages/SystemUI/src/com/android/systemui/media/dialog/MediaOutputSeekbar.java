@@ -18,51 +18,41 @@ package com.android.systemui.media.dialog;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.widget.SeekBar;
 
 /**
- * Customized seekbar used by MediaOutputDialog, which only changes progress when dragging,
- * otherwise performs click.
+ * Customized SeekBar for MediaOutputDialog, apply scale between device volume and progress, to make
+ * adjustment smoother.
  */
 public class MediaOutputSeekbar extends SeekBar {
-    private static final int DRAGGING_THRESHOLD = 20;
-    private boolean mIsDragging = false;
-
-    public MediaOutputSeekbar(Context context) {
-        super(context);
-    }
+    private static final int SCALE_SIZE = 1000;
 
     public MediaOutputSeekbar(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setMin(0);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int width = getWidth()
-                - getPaddingLeft()
-                - getPaddingRight();
-        int thumbPos = getPaddingLeft()
-                + width
-                * getProgress()
-                / getMax();
-        if (event.getAction() == MotionEvent.ACTION_DOWN
-                && Math.abs(event.getX() - thumbPos) < DRAGGING_THRESHOLD) {
-            mIsDragging = true;
-            super.onTouchEvent(event);
-        } else if (event.getAction() == MotionEvent.ACTION_MOVE && mIsDragging) {
-            super.onTouchEvent(event);
-        } else if (event.getAction() == MotionEvent.ACTION_UP && mIsDragging) {
-            mIsDragging = false;
-            super.onTouchEvent(event);
-        } else if (event.getAction() == MotionEvent.ACTION_UP && !mIsDragging) {
-            performClick();
-        }
-        return true;
+    static int scaleProgressToVolume(int progress) {
+        return progress / SCALE_SIZE;
     }
 
-    @Override
-    public boolean performClick() {
-        return super.performClick();
+    static int scaleVolumeToProgress(int volume) {
+        return volume * SCALE_SIZE;
+    }
+
+    int getVolume() {
+        return getProgress() / SCALE_SIZE;
+    }
+
+    void setVolume(int volume) {
+        setProgress(volume * SCALE_SIZE, true);
+    }
+
+    void setMaxVolume(int maxVolume) {
+        setMax(maxVolume * SCALE_SIZE);
+    }
+
+    void resetVolume() {
+        setProgress(getMin());
     }
 }

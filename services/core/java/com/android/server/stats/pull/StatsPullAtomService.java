@@ -204,6 +204,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.health.HealthServiceWrapper;
 import com.android.server.notification.NotificationManagerService;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
@@ -1635,10 +1636,24 @@ public class StatsPullAtomService extends SystemService {
                     new SynchronousResultReceiver("bluetooth");
             adapter.requestControllerActivityEnergyInfo(
                     Runnable::run,
-                    info -> {
-                        Bundle bundle = new Bundle();
-                        bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
-                        bluetoothReceiver.send(0, bundle);
+                    new BluetoothAdapter.OnBluetoothActivityEnergyInfoCallback() {
+                        @Override
+                        public void onBluetoothActivityEnergyInfoAvailable(
+                                BluetoothActivityEnergyInfo info) {
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(
+                                    BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                            bluetoothReceiver.send(0, bundle);
+                        }
+
+                        @Override
+                        public void onBluetoothActivityEnergyInfoError(int errorCode) {
+                            Slog.w(TAG, "error reading Bluetooth stats: " + errorCode);
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(
+                                    BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, null);
+                            bluetoothReceiver.send(0, bundle);
+                        }
                     }
             );
             return awaitControllerInfo(bluetoothReceiver);
@@ -4092,11 +4107,24 @@ public class StatsPullAtomService extends SystemService {
             // Incremental is not enabled on this device. The result list will be empty.
             return StatsManager.PULL_SUCCESS;
         }
-        List<PackageInfo> installedPackages = pm.getInstalledPackages(0);
-        for (PackageInfo pi : installedPackages) {
-            if (IncrementalManager.isIncrementalPath(pi.applicationInfo.getBaseCodePath())) {
-                pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid));
+        final long token = Binder.clearCallingIdentity();
+        try {
+            int[] userIds = LocalServices.getService(UserManagerInternal.class).getUserIds();
+            for (int userId : userIds) {
+                List<PackageInfo> installedPackages = pm.getInstalledPackagesAsUser(0, userId);
+                for (PackageInfo pi : installedPackages) {
+                    if (IncrementalManager.isIncrementalPath(
+                            pi.applicationInfo.getBaseCodePath())) {
+                        pulledData.add(
+                                FrameworkStatsLog.buildStatsEvent(atomTag, pi.applicationInfo.uid));
+                    }
+                }
             }
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to pullInstalledIncrementalPackagesLocked", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -4338,7 +4366,8 @@ public class StatsPullAtomService extends SystemService {
             }
             RkpErrorStats atom = atomWrapper.payload.getRkpErrorStats();
             pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    FrameworkStatsLog.RKP_ERROR_STATS, atom.rkpError, atomWrapper.count));
+                    FrameworkStatsLog.RKP_ERROR_STATS, atom.rkpError, atomWrapper.count,
+                    atom.security_level));
         }
         return StatsManager.PULL_SUCCESS;
     }

@@ -8,7 +8,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -123,7 +122,7 @@ class StatusBarHideIconsForBouncerManager @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("---- State variables set externally ----")
         pw.println("panelExpanded=$panelExpanded")
         pw.println("isOccluded=$isOccluded")

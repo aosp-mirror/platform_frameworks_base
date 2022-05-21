@@ -20,6 +20,7 @@
 #define LOG_TAG "SoundPool-JNI"
 
 #include <utils/Log.h>
+#include <audio_utils/string.h>
 #include <jni.h>
 #include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedUtfChars.h>
@@ -181,6 +182,153 @@ inline auto setSoundPool(
     return getSoundPoolManager().set(env, thiz, soundPool);
 }
 
+/**
+ * ConcurrentHashMap is a locked hash map
+ *
+ * As from the name, this class is thread_safe.
+ *
+ * The type V must have 3 properties in the current implementation.
+ *    1) A V{} default constructor which represents a nullValue.
+ *    2) V::operator bool() const efficient detection of such a nullValue.
+ *    3) V must be copyable.
+ *
+ * Note: The Key cannot be a Java LocalRef, as those change between JNI calls.
+ * The Key could be the raw native object pointer if one wanted to associate
+ * extra data with a native object.
+ *
+ * Using set() with a nullValue V results in erasing the key entry.
+ * A nullValue V is returned by get() if there is no underlying entry.
+ *
+ * Design notes:
+ * 1) For objects of type V that do not naturally have a "nullValue",
+ *    wrapping VOpt = std::optional<V> or VShared = std::shared<V> is recommended.
+ *
+ * 2) An overload for an explicit equality comparable nullValue such as
+ *    get(..., const V& nullValue) or set(..., const V& nullValue)
+ *    is omitted.  An alternative is to pass a fixed nullValue into a special
+ *    constructor (omitted) for equality comparisons and return value.
+ *
+ * 3) This ConcurrentHashMap currently allows only one thread at a time.
+ *    It is not optimized for heavy multi-threaded use.
+ */
+template <typename K, typename V>
+class ConcurrentHashMap
+{
+public:
+
+    // Sets the value and returns the old one.
+    //
+    // If the old value doesn't exist, then nullValue V is returned.
+    // If the new value is false by operator bool(), the internal value is destroyed.
+    // Note: The old value is returned so if V is a smart pointer, it can be held
+    // by the caller to be deleted outside of any external lock.
+
+    V set(const K& key, const V& value) {
+        std::lock_guard lg(mLock);
+        auto it = mMap.find(key);
+        if (it == mMap.end()) {
+            if (value) {
+                mMap[key] = value;
+            }
+            return {};
+        }
+        V oldValue = std::move(it->second);
+        if (value) {
+            it->second = value;
+        } else {
+            mMap.erase(it);
+        }
+        return oldValue;
+    }
+
+    // Retrieves the associated object, returns nullValue V if not available.
+    V get(const K& key) const {
+        std::lock_guard lg(mLock);
+        auto it = mMap.find(key);
+        return it != mMap.end() ? it->second : V{};
+    }
+private:
+    mutable std::mutex mLock;
+    std::unordered_map<K, V> mMap GUARDED_BY(mLock);
+};
+
+// *jobject is needed to fit the jobject into a std::shared_ptr.
+// This is the Android type _jobject, but we derive this type as JObjectValue.
+using JObjectValue = std::remove_pointer_t<jobject>; // _jobject
+
+// Check that jobject is really a pointer to JObjectValue.
+// The JNI contract is that jobject is NULL comparable,
+// so jobject is pointer equivalent; we check here to be sure.
+// Note std::remove_ptr_t<NonPointerType> == NonPointerType.
+static_assert(std::is_same_v<JObjectValue*, jobject>);
+
+// *jweak is needed to fit the jweak into a std::shared_ptr.
+// This is the Android type _jobject, but we derive this type as JWeakValue.
+using JWeakValue = std::remove_pointer_t<jweak>; // this is just _jobject
+
+// Check that jweak is really a pointer to JWeakValue.
+static_assert(std::is_same_v<JWeakValue*, jweak>);
+
+// We store the ancillary data associated with a SoundPool object in a concurrent
+// hash map indexed on the SoundPool native object pointer.
+auto& getSoundPoolJavaRefManager() {
+    // Note this can store shared_ptrs to either jweak and jobject,
+    // as the underlying type is identical.
+    static ConcurrentHashMap<SoundPool *, std::shared_ptr<JWeakValue>> concurrentHashMap;
+    return concurrentHashMap;
+}
+
+// make_shared_globalref_from_localref() creates a sharable Java global
+// reference from a Java local reference. The equivalent type is
+// std::shared_ptr<_jobject> (where _jobject is JObjectValue,
+// and _jobject * is jobject),
+// and the jobject may be retrieved by .get() or pointer dereference.
+// This encapsulation gives the benefit of std::shared_ptr
+// ref counting, weak_ptr, etc.
+//
+// The Java global reference should be stable between JNI calls.  It is a limited
+// quantity so sparingly use global references.
+//
+// The Android JNI implementation is described here:
+// https://developer.android.com/training/articles/perf-jni
+// https://android-developers.googleblog.com/2011/11/jni-local-reference-changes-in-ics.html
+//
+// Consider using a weak reference if this is self-referential.
+[[maybe_unused]]
+inline auto make_shared_globalref_from_localref(JNIEnv *env, jobject localRef) {
+    return std::shared_ptr<JObjectValue>(
+            env->NewGlobalRef(localRef),
+            [](JObjectValue* object) { // cannot cache env as don't know which thread we're on.
+                if (object != nullptr) AndroidRuntime::getJNIEnv()->DeleteGlobalRef(object);
+            });
+}
+
+// Create a weak global reference from local ref.
+inline auto make_shared_weakglobalref_from_localref(JNIEnv *env, jobject localRef) {
+    return std::shared_ptr<JWeakValue>(
+            env->NewWeakGlobalRef(localRef),
+            [](JWeakValue* weak) { // cannot cache env as don't know which thread we're on.
+                if (weak != nullptr) AndroidRuntime::getJNIEnv()->DeleteWeakGlobalRef(weak);
+            });
+}
+
+// std::unique_ptr<> does not store a type-erased deleter like std::shared_ptr<>.
+// Define a lambda here to use for the std::unique_ptr<> type definition.
+auto LocalRefDeleter = [](JObjectValue* object) {
+    if (object != nullptr) AndroidRuntime::getJNIEnv()->DeleteLocalRef(object);
+};
+
+// Create a local reference from another reference.
+// This is a unique_ptr to avoid the temptation of sharing with other threads.
+//
+// This can be used to promote a WeakGlobalRef jweak into a stable LocalRef jobject.
+//
+inline auto make_unique_localref_from_ref(JNIEnv *env, jobject object) {
+    return std::unique_ptr<JObjectValue, decltype(LocalRefDeleter)>(
+            env->NewLocalRef(object),
+            LocalRefDeleter);
+}
+
 } // namespace
 
 static const char* const kAudioAttributesClassPathName = "android/media/AudioAttributes";
@@ -321,51 +469,68 @@ android_media_SoundPool_setRate(JNIEnv *env, jobject thiz, jint channelID,
 static void android_media_callback(SoundPoolEvent event, SoundPool* soundPool, void* user)
 {
     ALOGV("callback: (%d, %d, %d, %p, %p)", event.mMsg, event.mArg1, event.mArg2, soundPool, user);
+    auto weakRef = getSoundPoolJavaRefManager().get(soundPool); // shared_ptr to WeakRef
+    if (weakRef == nullptr) {
+        ALOGD("%s: no weak ref, object released, ignoring callback", __func__);
+        return;
+    }
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallStaticVoidMethod(
-            fields.mSoundPoolClass, fields.mPostEvent, user, event.mMsg, event.mArg1, event.mArg2,
-            nullptr /* object */);
+    // "promote" the WeakGlobalRef into a LocalRef.
+    auto javaSoundPool = make_unique_localref_from_ref(env, weakRef.get());
+    if (!javaSoundPool) {
+        ALOGW("%s: weak reference promotes to null (release() not called?), "
+                "ignoring callback", __func__);
+        return;
+    }
+    env->CallVoidMethod(javaSoundPool.get(), fields.mPostEvent,
+            event.mMsg, event.mArg1, event.mArg2, nullptr /* object */);
+
+    if (env->ExceptionCheck() != JNI_FALSE) {
+        ALOGE("%s: Uncaught exception returned from Java callback", __func__);
+        env->ExceptionDescribe();
+        env->ExceptionClear(); // Just clear it, hopefully all is ok.
+    }
 }
 
 static jint
-android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz, jobject weakRef,
+android_media_SoundPool_native_setup(JNIEnv *env, jobject thiz,
         jint maxChannels, jobject jaa, jstring opPackageName)
 {
+    ALOGV("android_media_SoundPool_native_setup");
     if (jaa == nullptr) {
         ALOGE("Error creating SoundPool: invalid audio attributes");
         return -1;
     }
 
-    audio_attributes_t *paa = nullptr;
+    // Use the AUDIO_ATTRIBUTES_INITIALIZER here to ensure all non-relevant fields are
+    // initialized properly. (note that .source is not explicitly initialized here).
+    audio_attributes_t audioAttributes = AUDIO_ATTRIBUTES_INITIALIZER;
     // read the AudioAttributes values
-    paa = (audio_attributes_t *) calloc(1, sizeof(audio_attributes_t));
     const auto jtags =
             (jstring) env->GetObjectField(jaa, javaAudioAttrFields.fieldFormattedTags);
     const char* tags = env->GetStringUTFChars(jtags, nullptr);
-    // copying array size -1, char array for tags was calloc'd, no need to NULL-terminate it
-    strncpy(paa->tags, tags, AUDIO_ATTRIBUTES_TAGS_MAX_SIZE - 1);
+    // infers array size and guarantees zero termination (does not zero fill to the end).
+    audio_utils_strlcpy(audioAttributes.tags, tags);
     env->ReleaseStringUTFChars(jtags, tags);
-    paa->usage = (audio_usage_t) env->GetIntField(jaa, javaAudioAttrFields.fieldUsage);
-    paa->content_type =
+    audioAttributes.usage =
+            (audio_usage_t) env->GetIntField(jaa, javaAudioAttrFields.fieldUsage);
+    audioAttributes.content_type =
             (audio_content_type_t) env->GetIntField(jaa, javaAudioAttrFields.fieldContentType);
-    paa->flags = (audio_flags_mask_t) env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
-
-    ALOGV("android_media_SoundPool_native_setup");
+    audioAttributes.flags =
+            (audio_flags_mask_t) env->GetIntField(jaa, javaAudioAttrFields.fieldFlags);
     ScopedUtfChars opPackageNameStr(env, opPackageName);
-    auto soundPool = std::make_shared<SoundPool>(maxChannels, paa, opPackageNameStr.c_str());
-
-    // set callback with weak reference
-    jobject globalWeakRef = env->NewGlobalRef(weakRef);
-    soundPool->setCallback(android_media_callback, globalWeakRef);
+    auto soundPool = std::make_shared<SoundPool>(
+            maxChannels, audioAttributes, opPackageNameStr.c_str());
+    soundPool->setCallback(android_media_callback, nullptr /* user */);
 
     // register with SoundPoolManager.
     auto oldSoundPool = setSoundPool(env, thiz, soundPool);
+    // register Java SoundPool WeakRef using native SoundPool * as the key, for the callback.
+    auto oldSoundPoolJavaRef = getSoundPoolJavaRefManager().set(
+            soundPool.get(), make_shared_weakglobalref_from_localref(env, thiz));
+
     ALOGW_IF(oldSoundPool != nullptr, "%s: Aliased SoundPool object %p",
             __func__, oldSoundPool.get());
-
-    // audio attributes were copied in SoundPool creation
-    free(paa);
-
     return 0;
 }
 
@@ -375,19 +540,12 @@ android_media_SoundPool_release(JNIEnv *env, jobject thiz)
     ALOGV("android_media_SoundPool_release");
 
     // Remove us from SoundPoolManager.
-    auto oldSoundPool = setSoundPool(env, thiz, nullptr);
 
-    // Caution: Deleting the weakRef is not race free from invoking
-    // the Java callback because we may not have the last remaining
-    // reference to the SoundPool object - another method could still
-    // be in progress.
+    auto oldSoundPool = setSoundPool(env, thiz, nullptr);
     if (oldSoundPool != nullptr) {
-        // release weak reference and clear callback
-        auto weakRef = (jobject) oldSoundPool->getUserData();
-        oldSoundPool->setCallback(nullptr /* callback */, nullptr /* user */);
-        if (weakRef != nullptr) {
-            env->DeleteGlobalRef(weakRef);
-        }
+        // Note: setting the weak ref is thread safe in case there is a callback
+        // simultaneously occurring.
+        auto oldSoundPoolJavaRef = getSoundPoolJavaRefManager().set(oldSoundPool.get(), nullptr);
     }
     // destructor to oldSoundPool should occur at exit.
 }
@@ -449,7 +607,7 @@ static JNINativeMethod gMethods[] = {
         (void *)android_media_SoundPool_setRate
     },
     {   "native_setup",
-        "(Ljava/lang/Object;ILjava/lang/Object;Ljava/lang/String;)I",
+        "(ILjava/lang/Object;Ljava/lang/String;)I",
         (void*)android_media_SoundPool_native_setup
     },
     {   "native_release",
@@ -484,8 +642,8 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
         return result;
     }
 
-    fields.mPostEvent = env->GetStaticMethodID(clazz, "postEventFromNative",
-                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    fields.mPostEvent = env->GetMethodID(
+            clazz, "postEventFromNative", "(IIILjava/lang/Object;)V");
     if (fields.mPostEvent == nullptr) {
         ALOGE("Can't find android/media/SoundPool.postEventFromNative");
         return result;

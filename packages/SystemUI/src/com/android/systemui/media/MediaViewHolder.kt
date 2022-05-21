@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,16 +49,13 @@ class MediaViewHolder constructor(itemView: View) {
 
     // Seekbar views
     val seekBar = itemView.requireViewById<SeekBar>(R.id.media_progress_bar)
-    open val elapsedTimeView: TextView? = null
-    open val totalTimeView: TextView? = null
+    // These views are only shown while the user is actively scrubbing
+    val scrubbingElapsedTimeView: TextView =
+        itemView.requireViewById(R.id.media_scrubbing_elapsed_time)
+    val scrubbingTotalTimeView: TextView =
+        itemView.requireViewById(R.id.media_scrubbing_total_time)
 
-    // Settings screen
-    val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
-    val cancel = itemView.requireViewById<View>(R.id.cancel)
-    val cancelText = itemView.requireViewById<TextView>(R.id.cancel_text)
-    val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
-    val dismissText = itemView.requireViewById<TextView>(R.id.dismiss_text)
-    val settings = itemView.requireViewById<ImageButton>(R.id.settings)
+    val gutsViewHolder = GutsViewHolder(itemView)
 
     // Action Buttons
     val actionPlayPause = itemView.requireViewById<ImageButton>(R.id.actionPlayPause)
@@ -72,23 +68,6 @@ class MediaViewHolder constructor(itemView: View) {
     val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
 
     val actionsTopBarrier = itemView.requireViewById<Barrier>(R.id.media_action_barrier_top)
-
-    init {
-        (player.background as IlluminationDrawable).let {
-            it.registerLightSource(seamless)
-            it.registerLightSource(cancel)
-            it.registerLightSource(dismiss)
-            it.registerLightSource(settings)
-            it.registerLightSource(actionPlayPause)
-            it.registerLightSource(actionNext)
-            it.registerLightSource(actionPrev)
-            it.registerLightSource(action0)
-            it.registerLightSource(action1)
-            it.registerLightSource(action2)
-            it.registerLightSource(action3)
-            it.registerLightSource(action4)
-        }
-    }
 
     fun getAction(id: Int): ImageButton {
         return when (id) {
@@ -119,12 +98,7 @@ class MediaViewHolder constructor(itemView: View) {
     }
 
     fun marquee(start: Boolean, delay: Long) {
-        val longPressTextHandler = longPressText.getHandler()
-        if (longPressTextHandler == null) {
-            Log.d(TAG, "marquee while longPressText.getHandler() is null", Exception())
-            return
-        }
-        longPressTextHandler.postDelayed({ longPressText.setSelected(start) }, delay)
+        gutsViewHolder.marquee(start, delay, TAG)
     }
 
     companion object {
@@ -165,13 +139,30 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.action2,
                 R.id.action3,
                 R.id.action4,
-                R.id.icon
+                R.id.icon,
+                R.id.media_scrubbing_elapsed_time,
+                R.id.media_scrubbing_total_time
         )
-        val gutsIds = setOf(
-                R.id.remove_text,
-                R.id.cancel,
-                R.id.dismiss,
-                R.id.settings
+
+        // Buttons used for notification-based actions
+        val genericButtonIds = setOf(
+            R.id.action0,
+            R.id.action1,
+            R.id.action2,
+            R.id.action3,
+            R.id.action4
+        )
+
+        val expandedBottomActionIds = setOf(
+            R.id.actionPrev,
+            R.id.actionNext,
+            R.id.action0,
+            R.id.action1,
+            R.id.action2,
+            R.id.action3,
+            R.id.action4,
+            R.id.media_scrubbing_elapsed_time,
+            R.id.media_scrubbing_total_time
         )
     }
 }

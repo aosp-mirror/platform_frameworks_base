@@ -27,7 +27,6 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.BatteryManager.BATTERY_PLUGGED_WIRELESS;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
@@ -130,7 +129,6 @@ import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
-import android.os.BatteryManagerInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeviceIdleManager;
@@ -396,7 +394,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
     StatusBarManagerInternal mStatusBarManagerInternal;
-    BatteryManagerInternal mBatteryManagerInternal;
     AudioManagerInternal mAudioManagerInternal;
     DisplayManager mDisplayManager;
     DisplayManagerInternal mDisplayManagerInternal;
@@ -791,8 +788,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void onWakeUp() {
             synchronized (mLock) {
-                if (shouldEnableWakeGestureLp()
-                        && getBatteryManagerInternal().getPlugType() != BATTERY_PLUGGED_WIRELESS) {
+                if (shouldEnableWakeGestureLp()) {
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY, false,
                             "Wake Up");
                     wakeUp(SystemClock.uptimeMillis(), mAllowTheaterModeWakeFromWakeGesture,
@@ -849,15 +845,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    BatteryManagerInternal getBatteryManagerInternal() {
-        synchronized (mServiceAcquireLock) {
-            if (mBatteryManagerInternal == null) {
-                mBatteryManagerInternal =
-                        LocalServices.getService(BatteryManagerInternal.class);
-            }
-            return mBatteryManagerInternal;
-        }
-    }
 
     // returns true if the key was handled and should not be passed to the user
     private boolean backKeyPress() {
@@ -4522,6 +4509,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         mCameraGestureTriggeredDuringGoingToSleep = false;
         mCameraGestureTriggered = false;
+    }
+
+    // Called on the PowerManager's Notifier thread.
+    @Override
+    public void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
+            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness) {
+        if (wakefulness != globalWakefulness
+                && wakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
+                && groupId == Display.DEFAULT_DISPLAY_GROUP
+                && mKeyguardDelegate != null) {
+            mKeyguardDelegate.doKeyguardTimeout(null);
+        }
     }
 
     // Called on the PowerManager's Notifier thread.

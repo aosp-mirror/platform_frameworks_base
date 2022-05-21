@@ -34,15 +34,19 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"التدوير التلقائي للشاشة"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"‏هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟\nلم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"هل تريد السماح لتطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" بالوصول إلى <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"هل تريد فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" لإدارة <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"‏لم يتم منح هذا التطبيق الإذن بتسجيل الصوت، ولكن يمكنه التقاط الصوت من خلال جهاز USB هذا. إنّ استخدام التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> مع هذا الجهاز قد يحول دون سماع المكالمات والإشعارات والمنبّهات."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"قد يحول استخدام التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> على هذا الجهاز دون سماع المكالمات والإشعارات والمنبّهات."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"هل تريد السماح لتطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> بالدخول إلى <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>؟"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"هل تريد فتح <xliff:g id="APPLICATION">%1$s</xliff:g> للتعامل مع <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"‏هل تريد فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> للتعامل مع <xliff:g id="USB_DEVICE">%2$s</xliff:g>؟\nلم يتم منح هذا التطبيق إذن تسجيل، ولكن يمكنه تسجيل الصوت من خلال جهاز USB هذا."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"هل تريد فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> للتعامل مع <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>؟"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"هل تريد فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" لإدارة <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>؟"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"‏لا يعمل أي تطبيق مثبت مع ملحق UEB هذا. مزيد من المعلومات عن هذا الملحق على <xliff:g id="URL">%1$s</xliff:g>."</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"‏ملحق USB"</string>
     <string name="label_view" msgid="6815442985276363364">"عرض"</string>
-    <string name="always_use_device" msgid="210535878779644679">"فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> دائمًا عند توصيل <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"فتح تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> دائمًا عند توصيل <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
+    <string name="always_use_device" msgid="210535878779644679">"فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" دائمًا عند توصيل <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"فتح تطبيق \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" دائمًا عند توصيل <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"‏الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"السماح دائمًا من هذا الكمبيوتر"</string>
@@ -74,6 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"جرّب أخذ لقطة الشاشة مرة أخرى"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"يتعذّر حفظ لقطة الشاشة."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"يحظر التطبيق أو تحظر مؤسستك التقاط لقطات شاشة"</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"حَظَر مشرف تكنولوجيا المعلومات عملية أخذ لقطات للشاشة."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"تعديل"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"تعديل لقطة الشاشة"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"مشاركة لقطة الشاشة"</string>
@@ -131,13 +136,13 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"تمّت مصادقة الوجه."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"تمّ التأكيد."</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"يمكنك النقر على \"تأكيد\" لإكمال المهمة."</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"تم فتح قفل الجهاز بالتعرف على وجهك. اضغط للمتابعة."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"فُتح القفل عندما تمّ التعرّف على وجهك. للمتابعة، اضغط على رمز فتح القفل."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"مصادقة"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"استخدام رقم تعريف شخصي"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"استخدام نقش"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"استخدام كلمة المرور"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"رقم تعريف شخصي خاطئ"</string>
-    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"نقش غير صحيح"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"النقش غير صحيح."</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"كلمة مرور غير صحيحة"</string>
     <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"تم إجراء عدد كبير جدًا من المحاولات غير الصحيحة.\nأعد المحاولة خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
     <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"يُرجى إعادة المحاولة. المحاولة <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> من <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>"</string>
@@ -295,6 +300,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"يؤدي هذا الخيار إلى إزالة حظر الوصول بالنسبة إلى كل التطبيقات والخدمات المسموح لها باستخدام الميكروفون."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"يؤدي هذا الخيار إلى إزالة حظر الوصول بالنسبة إلى كل التطبيقات والخدمات المسموح لها باستخدام الكاميرا."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"يؤدي هذا الخيار إلى إزالة حظر الوصول بالنسبة إلى كل التطبيقات والخدمات المسموح لها باستخدام الكاميرا أو الميكروفون."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"تم حظر الميكروفون"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"تم حظر الكاميرا"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"تم حظر الميكروفون والكاميرا"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"لإزالة الحظر، حرّك مفتاح الخصوصية بجهازك إلى وضع تفعيل الميكروفون للسماح بالوصول إلى الميكروفون. يُرجى الاطّلاع على دليل الجهاز لتحديد مكان مفتاح الخصوصية على جهازك."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"لإزالة الحظر، حرّك مفتاح الخصوصية بجهازك إلى وضع تفعيل الكاميرا للسماح بالوصول إلى الكاميرا. يُرجى الاطّلاع على دليل الجهاز لتحديد مكان مفتاح الخصوصية على جهازك."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"لإزالة حظر الكاميرا والميكروفون، حرّك مفتاح الخصوصية بجهازك إلى وضع إزالة الحظر للسماح بالوصول إلى الكاميرا. يُرجى الاطّلاع على دليل الجهاز لتحديد مكان مفتاح الخصوصية على جهازك."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"يمكنك الوصول إلى الميكروفون الآن."</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"يمكنك الوصول إلى الكاميرا الآن."</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"يمكنك الوصول إلى الميكروفون والكاميرا الآن."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"جهاز آخر"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"تبديل \"النظرة العامة\""</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى والفيديوهات والألعاب."</string>
@@ -305,7 +319,12 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"انقر مرة أخرى للفتح"</string>
     <string name="tap_again" msgid="1315420114387908655">"انقر مرة أخرى"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"يمكنك الفتح بالتمرير سريعًا لأعلى."</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"اضغط لفتح الجهاز."</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"اضغط على رمز فتح القفل لفتح قفل الشاشة."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"فُتح القفل عندما تمّ التعرّف على وجهك. اضغط على رمز فتح القفل لفتحه."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"مرِّر سريعًا للأعلى لإعادة المحاولة."</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏افتح قفل الشاشة لاستخدام تقنية NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"هذا الجهاز يخص مؤسستك."</string>
@@ -328,7 +347,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن على وحدة الإرساء • ستمتلئ البطارية خلال <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"تبديل المستخدم"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"سيتم حذف كل التطبيقات والبيانات في هذه الجلسة."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"إزالة"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"مرحبًا بك مجددًا في جلسة الضيف"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"هل تريد متابعة جلستك؟"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"البدء من جديد"</string>
@@ -364,20 +382,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"تملك مؤسستك هذا الجهاز ويمكنها تتبّع حركة بيانات الشبكة."</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"تملك مؤسسة <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> هذا الجهاز ويمكنها تتبّع حركة بيانات الشبكة"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"توفر مؤسسة \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\" هذا الجهاز."</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"هذا الجهاز يخص مؤسستك وتم ربطه بشبكة <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> وتم ربطه بشبكة <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"ينتمي هذا الجهاز إلى مؤسستك، ويتّصل بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ينتمي هذا الجهاز إلى <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>، ويتّصل بالإنترنت من خلال <xliff:g id="VPN_APP">%2$s</xliff:g>."</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"هذا الجهاز يخص مؤسستك."</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"‏هذا الجهاز يخص مؤسستك وتم ربطه بشبكات افتراضية خاصة (VPN)."</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"‏هذا الجهاز يخص <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> وتم ربطه بشبكات افتراضية خاصة (VPN)."</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"‏ينتمي هذا الجهاز إلى مؤسستك، ويتّصل بالإنترنت من خلال خدمات الشبكة الافتراضية الخاصة (VPN)."</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏ينتمي هذا الجهاز إلى <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>، ويتّصل بالإنترنت من خلال خدمات الشبكة الافتراضية الخاصة (VPN)."</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"يمكن لمؤسستك مراقبة حركة بيانات الشبكة في الملف الشخصي للعمل"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"يمكن لـ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> مراقبة حركة بيانات الشبكة في ملفك الشخصي للعمل"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"تكون أنشطة شبكة الملف الشخصي للعمل مرئية لمشرف تكنولوجيا المعلومات."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"قد تكون الشبكة خاضعة للمراقبة"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"‏تم ربط هذا الجهاز بشبكات افتراضية خاصة (VPN)."</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"تم ربط الملف الشخصي للعمل بشبكة <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"تم ربط ملفك الشخصي بشبكة <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"تم ربط هذا الجهاز بشبكة <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏هذا الجهاز متّصل بالإنترنت من خلال خدمات الشبكات الافتراضية الخاصة (VPN)."</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"تطبيقاتك الشخصية متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"توفر مؤسسة \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\" هذا الجهاز"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"إدارة الأجهزة"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"‏شبكة افتراضية خاصة (VPN)"</string>
@@ -393,10 +411,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"تم تثبيت مرجع مصدّق على هذا الجهاز. قد تتم مراقبة حركة بيانات شبكتك الآمنة أو تعديلها."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات في ملفك الشخصي للعمل ولكن لا تتم مراقبتها في ملفك الشخصي."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكن أن يراقب نشاط شبكتك، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP_0">%1$s</xliff:g> و<xliff:g id="VPN_APP_1">%2$s</xliff:g> اللذين يمكنهما مراقبة نشاط شبكتك، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"تم ربط الملف الشخصي للعمل بـ <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطتك الشخصية على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"تم ربط ملفك الشخصي بـ <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكنه مراقبة أنشطة شبكتك، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمشرف تكنولوجيا المعلومات."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"هذا الجهاز متّصل بالإنترنت من خلال <xliff:g id="VPN_APP_0">%1$s</xliff:g> و<xliff:g id="VPN_APP_1">%2$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمشرف تكنولوجيا المعلومات."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة في تطبيقات العمل، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمشرف تكنولوجيا المعلومات ومزوّد خدمة الشبكة الافتراضية الخاصة (VPN)."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏تطبيقاتك الشخصية متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمزوّد خدمة الشبكة الافتراضية الخاصة (VPN)."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏فتح إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"يتولّى أحد الوالدين إدارة هذا الجهاز. يمكن للوالدين عرض وإدارة معلوماتك، مثلاً التطبيقات التي تستخدمها وموقعك الجغرافي ووقت النظر إلى الشاشة."</string>
@@ -457,7 +475,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"المحفظة"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"يمكنك إعداد طريقة دفع لإجراء عمليات شراء بسرعة وأمان أكبر باستخدام هاتفك."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"عرض الكل"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"إضافة بطاقة"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"انقر لفتح قفل الجهاز."</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"جارٍ تحديث تطبيق المحفظة"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"فتح القفل للاستخدام"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"حدثت مشكلة أثناء الحصول على البطاقات، يُرجى إعادة المحاولة لاحقًا."</string>
@@ -490,7 +508,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"تلقائية"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"تلقائي"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في أسفل قسم المحادثات"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"السماح للنظام بتحديد ما إذا يجب اهتزاز الجهاز أو إصدار رنين عند تلقّي هذا الإشعار"</string>
@@ -505,6 +523,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"لا يدعم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> ميزات المحادثات."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"لا يمكن تعديل إشعارات المكالمات."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"يتعذّر ضبط مجموعة الإشعارات هذه هنا."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"إشعار مستند إلى خادم وكيل"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"جميع إشعارات <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -702,7 +721,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"بيانات الجوّال"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>، <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"‏تم إيقاف شبكة Wi-Fi"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"‏ميزة Wi-Fi غير مفعّلة"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"تم إيقاف البلوتوث."</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"تم إيقاف وضع \"عدم الإزعاج\""</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"تم تفعيل وضع \"عدم الإزعاج\" بواسطة قاعدة تلقائية (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -724,6 +743,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"فعِّل الميزة إذا كان من المرجح نفاد شحن البطارية."</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"لا، شكرًا"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"‏تفريغ ذاكرة SysUI"</string>
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"قيد الاستخدام"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
@@ -790,6 +810,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"إضافة"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"اقتراح من <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"الجهاز مُقفل."</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"هل تريد عرض أجهزتك والتحكم فيها من شاشة القفل؟"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"يمكنك إضافة عناصر تحكم لشاشة القفل الخاصة بأجهزتك الخارجية.\n\nقد يسمح لك تطبيق الجهاز بالتحكم في بعض الأجهزة بدون فتح قفل هاتفك أو جهازك اللوحي.\n\nيمكنك إجراء التغييرات في أي وقت من الإعدادات."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"هل تريد التحكم في الأجهزة من شاشة القفل؟"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"يمكنك التحكم في بعض الأجهزة بدون فتح قفل هاتفك أو جهازك اللوحي.\n\nيحدِّد تطبيق الجهاز أيًا من الأجهزة يمكن التحكم فيه على هذا النحو."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"لا، شكرًا"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"نعم"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"يشتمل رقم التعريف الشخصي على أحرف أو رموز."</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"إثبات ملكية <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"رقم تعريف شخصي خاطئ"</string>
@@ -799,8 +825,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"مرّر سريعًا لرؤية المزيد."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"جارٍ تحميل الاقتراحات"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"الوسائط"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"هل تريد إخفاء عنصر التحكم في الوسائط هذا للتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>؟"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"لا يمكن إخفاء جلسة الوسائط الحالية."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"إخفاء"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"استئناف التشغيل"</string>
@@ -811,6 +836,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"إيقاف مؤقت"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"المقطع الصوتي السابق"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"المقطع الصوتي التالي"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"يتم الاتصال الآن."</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"تشغيل"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"فتح <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"تشغيل <xliff:g id="SONG_NAME">%1$s</xliff:g> للفنان <xliff:g id="ARTIST_NAME">%2$s</xliff:g> من تطبيق <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -819,7 +845,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"عليك الاقتراب لتشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>."</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"يُرجى الاقتراب من <xliff:g id="DEVICENAME">%1$s</xliff:g> لتشغيل الوسائط هنا."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"جارٍ تشغيل الوسائط على <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"جارٍ تشغيل الوسائط على هذا الهاتف"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"حدث خطأ. يُرجى إعادة المحاولة."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>
@@ -840,6 +865,19 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"لبث هذه الجلسة، يُرجى فتح التطبيق"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"تطبيق غير معروف"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"إيقاف البث"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"كيفية عمل البث"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"البث"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"يمكن للأشخاص القريبين منك الذين لديهم أجهزة متوافقة تتضمّن بلوتوث الاستماع إلى الوسائط التي تبثها."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"لكي يتمكّنوا من الاستماع إلى البث الخاص بك، يمكن للمستخدمين القريبين منك الذين لديهم أجهزة تتضمَّن بلوتوث إجراء مسح ضوئي لرمز الاستجابة السريعة أو استخدام اسم البث وكلمة المرور الخاصين بك."</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"اسم البث"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"كلمة المرور"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"حفظ"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"جارٍ البدء…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"يتعذّر البث"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"لا يمكن إجراء الحفظ. يُرجى إعادة المحاولة."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"لا يمكن إجراء الحفظ."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"رقم الإصدار"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
@@ -895,7 +933,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"لا تتوفّر شبكات أخرى."</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"لا تتوفّر أي شبكات."</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"انقر على إحدى الشبكات للاتصال بالإنترنت"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"انقر على إحدى الشبكات للاتصال بالإنترنت."</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"فتح القفل لعرض الشبكات"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"جارٍ البحث عن شبكات…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"تعذّر الاتصال بالشبكة."</string>
@@ -908,25 +946,33 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"إضافة المربّع"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"عدم إضافة المربّع"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"اختيار المستخدم"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
       <item quantity="zero"><xliff:g id="COUNT_1">%s</xliff:g> تطبيق نشط</item>
-      <item quantity="two">تطبيقان (<xliff:g id="COUNT_1">%s</xliff:g>) نشطان</item>
+      <item quantity="two">تطبيقَان نشطَان (<xliff:g id="COUNT_1">%s</xliff:g>)</item>
       <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> تطبيقات نشطة</item>
       <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> تطبيقًا نشطًا</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> تطبيق نشط</item>
-      <item quantity="one">تطبيق واحد (<xliff:g id="COUNT_0">%s</xliff:g>) نشط</item>
+      <item quantity="one">تطبيق واحد نشط (<xliff:g id="COUNT_0">%s</xliff:g>)</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"معلومات جديدة"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"التطبيقات النشطة"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"حتى لو لم تكن تستخدم هذه التطبيقات، فإنّها ستظل نشطة وقد تؤثر على عمر البطارية."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"إيقاف"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"متوقّف"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"نسخ"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"تم"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"تم النسخ."</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"من <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"إغلاق واجهة مستخدم النسخ"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"تعديل النص المنسوخ"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"تعديل الصورة المنسوخة"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"الإرسال إلى جهاز مجاور"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"انقر لعرض المحتوى."</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"إضافة"</string>
     <string name="manage_users" msgid="1823875311934643849">"إدارة المستخدمين"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"لا يتيح هذا الإشعار السحب لتقسيم الشاشة."</string>

@@ -387,11 +387,16 @@ public abstract class ActivityTaskManagerInternal {
     public abstract ComponentName getActivityName(IBinder activityToken);
 
     /**
-     * @return the activity token and IApplicationThread for the top activity in the task or null
-     * if there isn't a top activity with a valid process.
+     * Returns non-finishing Activity that have a process attached for the given task and the token
+     * with the activity token and the IApplicationThread or null if there is no Activity with a
+     * valid process. Given the null token for the task will return the top Activity in the task.
+     *
+     * @param taskId the Activity task id.
+     * @param token the Activity token, set null if get top Activity for the given task id.
      */
     @Nullable
-    public abstract ActivityTokens getTopActivityForTask(int taskId);
+    public abstract ActivityTokens getAttachedNonFinishingActivityForTask(int taskId,
+            IBinder token);
 
     public abstract IIntentSender getIntentSender(int type, String packageName,
             @Nullable String featureId, int callingUid, int userId, IBinder token, String resultWho,
@@ -506,9 +511,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onUidActive(int uid, int procState);
     public abstract void onUidInactive(int uid);
     public abstract void onUidProcStateChanged(int uid, int procState);
-
-    public abstract void onUidAddedToPendingTempAllowlist(int uid, String tag);
-    public abstract void onUidRemovedFromPendingTempAllowlist(int uid);
 
     /** Handle app crash event in {@link android.app.IActivityController} if there is one. */
     public abstract boolean handleAppCrashInActivityController(String processName, int pid,
@@ -691,4 +693,15 @@ public abstract class ActivityTaskManagerInternal {
      * @return a task ID if a valid task ID is found. Otherwise, return INVALID_TASK_ID
      */
     public abstract int getTaskToShowPermissionDialogOn(String pkgName, int uid);
+
+    /**
+     * Attempts to restart the process associated with the top most Activity associated with the
+     * given {@code packageName} in the task associated with the given {@code taskId}.
+     *
+     * This will request the process of the activity to restart with its saved state (via
+     * {@link android.app.Activity#onSaveInstanceState(Bundle)}) if possible. If the activity is in
+     * background the process will be killed keeping its record.
+     */
+    public abstract void restartTaskActivityProcessIfVisible(
+            int taskId, @NonNull String packageName);
 }

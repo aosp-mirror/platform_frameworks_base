@@ -47,6 +47,7 @@ import static org.mockito.Mockito.when;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -60,6 +61,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
@@ -85,6 +87,7 @@ import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -100,6 +103,8 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
@@ -124,9 +129,9 @@ public class NavigationBarTest extends SysuiTestCase {
 
     private SysuiTestableContext mSysuiTestableContextExternal;
     @Mock
-    NavigationBarFrame mNavigationBarFrame;
-    @Mock
     NavigationBarView mNavigationBarView;
+    @Mock
+    NavigationBarFrame mNavigationBarFrame;
     @Mock
     ButtonDispatcher mHomeButton;
     @Mock
@@ -163,7 +168,7 @@ public class NavigationBarTest extends SysuiTestCase {
     @Mock
     private UiEventLogger mUiEventLogger;
     @Mock
-    EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
+    private ViewTreeObserver mViewTreeObserver;
     @Mock
     EdgeBackGestureHandler mEdgeBackGestureHandler;
     NavBarHelper mNavBarHelper;
@@ -187,6 +192,11 @@ public class NavigationBarTest extends SysuiTestCase {
     private DeadZone mDeadZone;
     @Mock
     private CentralSurfaces mCentralSurfaces;
+    @Mock
+    private UserContextProvider mUserContextProvider;
+    @Mock
+    private Resources mResources;
+    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private DeviceConfigProxyFake mDeviceConfigProxyFake = new DeviceConfigProxyFake();
 
     @Rule
@@ -196,8 +206,6 @@ public class NavigationBarTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mEdgeBackGestureHandlerFactory.create(any(Context.class)))
-                .thenReturn(mEdgeBackGestureHandler);
         when(mLightBarcontrollerFactory.create(any(Context.class))).thenReturn(mLightBarController);
         when(mAutoHideControllerFactory.create(any(Context.class))).thenReturn(mAutoHideController);
         when(mNavigationBarView.getHomeButton()).thenReturn(mHomeButton);
@@ -205,12 +213,15 @@ public class NavigationBarTest extends SysuiTestCase {
         when(mNavigationBarView.getAccessibilityButton()).thenReturn(mAccessibilityButton);
         when(mNavigationBarView.getImeSwitchButton()).thenReturn(mImeSwitchButton);
         when(mNavigationBarView.getBackButton()).thenReturn(mBackButton);
-        when(mNavigationBarView.getBarTransitions()).thenReturn(mNavigationBarTransitions);
         when(mNavigationBarView.getRotationButtonController())
                 .thenReturn(mRotationButtonController);
-        when(mNavigationBarView.getLightTransitionsController())
+        when(mNavigationBarTransitions.getLightTransitionsController())
                 .thenReturn(mLightBarTransitionsController);
         when(mStatusBarKeyguardViewManager.isNavBarVisible()).thenReturn(true);
+        when(mNavigationBarView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
+        when(mUserContextProvider.createCurrentUserContext(any(Context.class)))
+                .thenReturn(mContext);
+        when(mNavigationBarView.getResources()).thenReturn(mResources);
         setupSysuiDependency();
         // This class inflates views that call Dependency.get, thus these injections are still
         // necessary.
@@ -218,8 +229,6 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectMockDependency(KeyguardStateController.class);
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         mDependency.injectMockDependency(NavigationBarController.class);
-        mDependency.injectTestDependency(EdgeBackGestureHandler.Factory.class,
-                mEdgeBackGestureHandlerFactory);
         mDependency.injectTestDependency(OverviewProxyService.class, mOverviewProxyService);
         mDependency.injectTestDependency(NavigationModeController.class, mNavigationModeController);
         TestableLooper.get(this).runWithLooper(() -> {
@@ -448,7 +457,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),
                 mHandler,
-                mock(NavigationBarOverlayController.class),
+                mFakeExecutor,
+                mFakeExecutor,
                 mUiEventLogger,
                 mNavBarHelper,
                 mLightBarController,
@@ -459,7 +469,10 @@ public class NavigationBarTest extends SysuiTestCase {
                 mInputMethodManager,
                 mDeadZone,
                 mDeviceConfigProxyFake,
-                Optional.of(mock(BackAnimation.class))));
+                mNavigationBarTransitions,
+                mEdgeBackGestureHandler,
+                Optional.of(mock(BackAnimation.class)),
+                mUserContextProvider));
     }
 
     private void processAllMessages() {

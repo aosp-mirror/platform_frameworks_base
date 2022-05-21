@@ -27,6 +27,8 @@
     <dimen name="password_keyboard_spacebar_vertical_correction">2dip</dimen>
     <dimen name="preference_widget_width">72dp</dimen>
 
+    <!-- Height of the status bar -->
+    <dimen name="status_bar_height">@dimen/status_bar_height_landscape</dimen>
     <!-- Height of area above QQS where battery/time go -->
     <dimen name="quick_qs_offset_height">48dp</dimen>
     <!-- Default height of an action bar. -->

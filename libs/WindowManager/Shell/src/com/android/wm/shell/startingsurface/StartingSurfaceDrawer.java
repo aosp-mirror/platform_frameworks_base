@@ -50,6 +50,7 @@ import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
@@ -63,6 +64,7 @@ import android.window.TaskSnapshot;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
@@ -121,6 +123,9 @@ public class StartingSurfaceDrawer {
     private StartingSurface.SysuiProxy mSysuiProxy;
     private final StartingWindowRemovalInfo mTmpRemovalInfo = new StartingWindowRemovalInfo();
 
+    private static final int LIGHT_BARS_MASK =
+            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                    | WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
     /**
      * The minimum duration during which the splash screen is shown when the splash screen icon is
      * animated.
@@ -148,8 +153,7 @@ public class StartingSurfaceDrawer {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mSplashScreenExecutor = splashScreenExecutor;
-        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, iconProvider, pool,
-                mSplashScreenExecutor);
+        mSplashscreenContentDrawer = new SplashscreenContentDrawer(mContext, iconProvider, pool);
         mSplashScreenExecutor.execute(() -> mChoreographer = Choreographer.getInstance());
         mWindowManagerGlobal = WindowManagerGlobal.getInstance();
         mDisplayManager.getDisplay(DEFAULT_DISPLAY);
@@ -361,9 +365,27 @@ public class StartingSurfaceDrawer {
                 // the window before first round relayoutWindow, which will happen after insets
                 // animation.
                 mChoreographer.postCallback(CALLBACK_INSETS_ANIMATION, setViewSynchronized, null);
-                // Block until we get the background color.
                 final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
+                record.parseAppSystemBarColor(context);
+                // Block until we get the background color.
                 final SplashScreenView contentView = viewSupplier.get();
+                if (suggestType != STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
+                    contentView.addOnAttachStateChangeListener(
+                            new View.OnAttachStateChangeListener() {
+                                @Override
+                                public void onViewAttachedToWindow(View v) {
+                                    final int lightBarAppearance = ContrastColorUtil.isColorLight(
+                                            contentView.getInitBackgroundColor())
+                                            ? LIGHT_BARS_MASK : 0;
+                                    contentView.getWindowInsetsController().setSystemBarsAppearance(
+                                            lightBarAppearance, LIGHT_BARS_MASK);
+                                }
+
+                                @Override
+                                public void onViewDetachedFromWindow(View v) {
+                                }
+                            });
+                }
                 record.mBGColor = contentView.getInitBackgroundColor();
             } else {
                 // release the icon view host
@@ -613,6 +635,7 @@ public class StartingSurfaceDrawer {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                         "Removing splash screen window for task: %d", taskId);
                 if (record.mContentView != null) {
+                    record.clearSystemBarColor();
                     if (immediately
                             || record.mSuggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
                         removeWindowInner(record.mDecorView, false);
@@ -633,7 +656,7 @@ public class StartingSurfaceDrawer {
                     Slog.e(TAG, "Found empty splash screen, remove!");
                     removeWindowInner(record.mDecorView, false);
                 }
-                mStartingWindowRecords.remove(taskId);
+
             }
             if (record.mTaskSnapshotWindow != null) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
@@ -641,10 +664,10 @@ public class StartingSurfaceDrawer {
                 if (immediately) {
                     record.mTaskSnapshotWindow.removeImmediately();
                 } else {
-                    record.mTaskSnapshotWindow.scheduleRemove(() ->
-                            mStartingWindowRecords.remove(taskId), removalInfo.deferRemoveForIme);
+                    record.mTaskSnapshotWindow.scheduleRemove(removalInfo.deferRemoveForIme);
                 }
             }
+            mStartingWindowRecords.remove(taskId);
         }
     }
 
@@ -670,6 +693,8 @@ public class StartingSurfaceDrawer {
         private @StartingWindowType int mSuggestType;
         private int mBGColor;
         private final long mCreateTime;
+        private int mSystemBarAppearance;
+        private boolean mDrawsSystemBarBackgrounds;
 
         StartingWindowRecord(IBinder appToken, View decorView,
                 TaskSnapshotWindow taskSnapshotWindow, @StartingWindowType int suggestType) {
@@ -689,6 +714,38 @@ public class StartingSurfaceDrawer {
             }
             mContentView = splashScreenView;
             mSetSplashScreen = true;
+        }
+
+        private void parseAppSystemBarColor(Context context) {
+            final TypedArray a = context.obtainStyledAttributes(R.styleable.Window);
+            mDrawsSystemBarBackgrounds = a.getBoolean(
+                    R.styleable.Window_windowDrawsSystemBarBackgrounds, false);
+            if (a.getBoolean(R.styleable.Window_windowLightStatusBar, false)) {
+                mSystemBarAppearance |= WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+            }
+            if (a.getBoolean(R.styleable.Window_windowLightNavigationBar, false)) {
+                mSystemBarAppearance |= WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+            }
+            a.recycle();
+        }
+
+        // Reset the system bar color which set by splash screen, make it align to the app.
+        private void clearSystemBarColor() {
+            if (mDecorView == null) {
+                return;
+            }
+            if (mDecorView.getLayoutParams() instanceof WindowManager.LayoutParams) {
+                final WindowManager.LayoutParams lp =
+                        (WindowManager.LayoutParams) mDecorView.getLayoutParams();
+                if (mDrawsSystemBarBackgrounds) {
+                    lp.flags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+                } else {
+                    lp.flags &= ~WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+                }
+                mDecorView.setLayoutParams(lp);
+            }
+            mDecorView.getWindowInsetsController().setSystemBarsAppearance(
+                    mSystemBarAppearance, LIGHT_BARS_MASK);
         }
     }
 }

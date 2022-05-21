@@ -41,8 +41,10 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
@@ -682,31 +684,43 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseWidth = 1440;
         final int baseHeight = 2560;
         final int baseDensity = 300;
+        final float baseXDpi = 60;
+        final float baseYDpi = 60;
 
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseYDpi,
+                baseYDpi);
 
         final int maxWidth = 300;
-        final int resultingHeight = (maxWidth * baseHeight) / baseWidth;
-        final int resultingDensity = (baseDensity * maxWidth) / baseWidth;
+        final float ratioChange = maxWidth / (float) baseWidth;
+        final int resultingHeight = (int) (baseHeight * ratioChange);
+        final int resultingDensity = (int) (baseDensity * ratioChange);
+        final float resultingXDpi = baseXDpi * ratioChange;
+        final float resultingYDpi = baseYDpi * ratioChange;
 
         displayContent.setMaxUiWidth(maxWidth);
-        verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity);
+        verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity, resultingXDpi,
+                resultingYDpi);
 
         // Assert setting values again does not change;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
-        verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseXDpi,
+                baseYDpi);
+        verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity, resultingXDpi,
+                resultingYDpi);
 
         final int smallerWidth = 200;
         final int smallerHeight = 400;
         final int smallerDensity = 100;
 
         // Specify smaller dimension, verify that it is honored
-        displayContent.updateBaseDisplayMetrics(smallerWidth, smallerHeight, smallerDensity);
-        verifySizes(displayContent, smallerWidth, smallerHeight, smallerDensity);
+        displayContent.updateBaseDisplayMetrics(smallerWidth, smallerHeight, smallerDensity,
+                baseXDpi, baseYDpi);
+        verifySizes(displayContent, smallerWidth, smallerHeight, smallerDensity, baseXDpi,
+                baseYDpi);
 
         // Verify that setting the max width to a greater value than the base width has no effect
         displayContent.setMaxUiWidth(maxWidth);
-        verifySizes(displayContent, smallerWidth, smallerHeight, smallerDensity);
+        verifySizes(displayContent, smallerWidth, smallerHeight, smallerDensity, baseXDpi,
+                baseYDpi);
     }
 
     @Test
@@ -716,11 +730,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseWidth = 1280;
         final int baseHeight = 720;
         final int baseDensity = 320;
+        final float baseXDpi = 60;
+        final float baseYDpi = 60;
 
         displayContent.mInitialDisplayWidth = baseWidth;
         displayContent.mInitialDisplayHeight = baseHeight;
         displayContent.mInitialDisplayDensity = baseDensity;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseXDpi,
+                baseYDpi);
 
         final int forcedWidth = 1920;
         final int forcedHeight = 1080;
@@ -741,11 +758,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseWidth = 1280;
         final int baseHeight = 720;
         final int baseDensity = 320;
+        final float baseXDpi = 60;
+        final float baseYDpi = 60;
 
         displayContent.mInitialDisplayWidth = baseWidth;
         displayContent.mInitialDisplayHeight = baseHeight;
         displayContent.mInitialDisplayDensity = baseDensity;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseXDpi,
+                baseYDpi);
 
         displayContent.setMaxUiWidth(baseWidth);
 
@@ -767,11 +787,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final int baseWidth = 1280;
         final int baseHeight = 720;
         final int baseDensity = 320;
+        final float baseXDpi = 60;
+        final float baseYDpi = 60;
 
         displayContent.mInitialDisplayWidth = baseWidth;
         displayContent.mInitialDisplayHeight = baseHeight;
         displayContent.mInitialDisplayDensity = baseDensity;
-        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity);
+        displayContent.updateBaseDisplayMetrics(baseWidth, baseHeight, baseDensity, baseXDpi,
+                baseYDpi);
 
         final int forcedDensity = 600;
 
@@ -833,7 +856,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final Rect[] bounds = new Rect[]{zeroRect, new Rect(left, top, right, bottom), zeroRect,
                 zeroRect};
         final DisplayCutout.CutoutPathParserInfo info = new DisplayCutout.CutoutPathParserInfo(
-                displayWidth, displayHeight, density, "", Surface.ROTATION_0, 1f);
+                displayWidth, displayHeight, displayWidth, displayHeight, density, "",
+                Surface.ROTATION_0, 1f, 1f);
         final DisplayCutout cutout = new WmDisplayCutout(
                 DisplayCutout.constructDisplayCutout(bounds, Insets.NONE, info), null)
                         .computeSafeInsets(displayWidth, displayHeight).getDisplayCutout();
@@ -853,7 +877,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final Rect[] bounds90 = new Rect[]{new Rect(top, left, bottom, right), zeroRect, zeroRect,
                 zeroRect};
         final DisplayCutout.CutoutPathParserInfo info90 = new DisplayCutout.CutoutPathParserInfo(
-                displayWidth, displayHeight, density, "", Surface.ROTATION_90, 1f);
+                displayWidth, displayHeight, displayWidth, displayHeight, density, "",
+                Surface.ROTATION_90, 1f, 1f);
         assertEquals(new WmDisplayCutout(
                         DisplayCutout.constructDisplayCutout(bounds90, Insets.NONE, info90), null)
                         .computeSafeInsets(displayHeight, displayWidth).getDisplayCutout(),
@@ -1144,6 +1169,45 @@ public class DisplayContentTests extends WindowTestsBase {
         assertNull(mDisplayContent.computeImeParent());
     }
 
+    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @Test
+    public void testComputeImeParent_updateParentWhenTargetNotUseIme() throws Exception {
+        WindowState overlay = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay");
+        overlay.setBounds(100, 100, 200, 200);
+        overlay.mAttrs.flags = FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM;
+        WindowState app = createWindow(null, TYPE_BASE_APPLICATION, "app");
+        mDisplayContent.setImeLayeringTarget(overlay);
+        mDisplayContent.setImeInputTarget(app);
+        assertFalse(mDisplayContent.shouldImeAttachedToApp());
+        assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
+                mDisplayContent.computeImeParent());
+    }
+
+    @Test
+    public void testComputeImeParent_remoteControlTarget() throws Exception {
+        final DisplayContent dc = mDisplayContent;
+        WindowState app1 = createWindow(null, TYPE_BASE_APPLICATION, "app1");
+        WindowState app2 = createWindow(null, TYPE_BASE_APPLICATION, "app2");
+
+        dc.setImeLayeringTarget(app1);
+        dc.setImeInputTarget(app2);
+        dc.setRemoteInsetsController(createDisplayWindowInsetsController());
+        dc.getImeTarget(IME_TARGET_LAYERING).getWindow().setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+        dc.getImeInputTarget().getWindowState().setWindowingMode(
+                WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+
+        // Expect ImeParent is null since ImeLayeringTarget and ImeInputTarget are different.
+        assertNull(dc.computeImeParent());
+
+        // ImeLayeringTarget and ImeInputTarget are updated to the same.
+        dc.setImeInputTarget(app1);
+        assertEquals(dc.getImeTarget(IME_TARGET_LAYERING), dc.getImeInputTarget());
+
+        // The ImeParent should be the display.
+        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+    }
+
     @Test
     public void testInputMethodInputTarget_isClearedWhenWindowStateIsRemoved() throws Exception {
         final DisplayContent dc = createNewDisplay();
@@ -1178,6 +1242,20 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.setRemoteInsetsController(createDisplayWindowInsetsController());
         assertNotEquals(dc.getImeInputTarget().getWindowState(),
                 dc.computeImeControlTarget());
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testImeSecureFlagGetUpdatedAfterImeInputTarget() {
+        // Verify IME window can get up-to-date secure flag update when the IME input target
+        // set before setCanScreenshot called.
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        SurfaceControl.Transaction t = mDisplayContent.mInputMethodWindow.getPendingTransaction();
+        spyOn(t);
+        mDisplayContent.setImeInputTarget(app);
+        mDisplayContent.mInputMethodWindow.setCanScreenshot(t, false /* canScreenshot */);
+
+        verify(t).setSecure(eq(mDisplayContent.mInputMethodWindow.mSurfaceControl), eq(true));
     }
 
     @UseTestDisplay(addWindows = W_ACTIVITY)
@@ -2050,6 +2128,32 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mDisplayContent, never()).showImeScreenshot();
     }
 
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD})
+    @Test
+    public void testShowImeScreenshot_removeCurSnapshotBeforeCreateNext() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+
+        mDisplayContent.setImeLayeringTarget(win);
+        mDisplayContent.setImeInputTarget(win);
+        spyOn(mDisplayContent);
+        spyOn(mDisplayContent.mInputMethodWindow);
+        doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setImeShowing(true);
+
+        // Verify when the timing of 2 showImeScreenshot invocations are very close, will first
+        // detach the current snapshot then create the next one.
+        mDisplayContent.showImeScreenshot();
+        DisplayContent.ImeScreenshot curSnapshot = mDisplayContent.mImeScreenshot;
+        spyOn(curSnapshot);
+        mDisplayContent.showImeScreenshot();
+        verify(curSnapshot).detach(any());
+        assertNotNull(mDisplayContent.mImeScreenshot);
+        assertNotEquals(curSnapshot, mDisplayContent.mImeScreenshot);
+    }
+
     @Test
     public void testRotateBounds_keepSamePhysicalPosition() {
         final DisplayContent dc =
@@ -2111,7 +2215,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(windowingMode, windowConfig.getWindowingMode());
 
         // test misc display overrides
-        assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
+        assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
                 mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
@@ -2152,7 +2256,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(windowingMode, windowConfig.getWindowingMode());
 
         // test misc display overrides
-        assertEquals(ignoreOrientationRequests, testDisplayContent.mIgnoreOrientationRequest);
+        assertEquals(ignoreOrientationRequests, testDisplayContent.mSetIgnoreOrientationRequest);
         assertEquals(fixedOrientationLetterboxRatio,
                 mWm.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio(),
                 0 /* delta */);
@@ -2337,7 +2441,7 @@ public class DisplayContentTests extends WindowTestsBase {
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
                 tokenToMirror);
         session.setDisplayId(displayId);
-        mWm.setContentRecordingSession(session);
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
         actualDC.updateRecording();
 
         // THEN mirroring is not started, since a null surface indicates the VirtualDisplay is off.
@@ -2366,7 +2470,7 @@ public class DisplayContentTests extends WindowTestsBase {
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
                 tokenToMirror);
         session.setDisplayId(displayId);
-        mWm.setContentRecordingSession(session);
+        mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
         mWm.mRoot.onDisplayAdded(displayId);
 
         // WHEN getting the DisplayContent for the new virtual display.
@@ -2485,6 +2589,16 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(expectedBaseWidth, displayContent.mBaseDisplayWidth);
         assertEquals(expectedBaseHeight, displayContent.mBaseDisplayHeight);
         assertEquals(expectedBaseDensity, displayContent.mBaseDisplayDensity);
+    }
+
+    private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,
+            int expectedBaseHeight, int expectedBaseDensity, float expectedBaseXDpi,
+            float expectedBaseYDpi) {
+        assertEquals(expectedBaseWidth, displayContent.mBaseDisplayWidth);
+        assertEquals(expectedBaseHeight, displayContent.mBaseDisplayHeight);
+        assertEquals(expectedBaseDensity, displayContent.mBaseDisplayDensity);
+        assertEquals(expectedBaseXDpi, displayContent.mBaseDisplayPhysicalXDpi, 1.0f /* delta */);
+        assertEquals(expectedBaseYDpi, displayContent.mBaseDisplayPhysicalYDpi, 1.0f /* delta */);
     }
 
     private void updateFocusedWindow() {

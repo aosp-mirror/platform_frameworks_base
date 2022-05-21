@@ -19,10 +19,8 @@ package com.android.server.biometrics.sensors;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -42,7 +40,6 @@ import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -105,7 +102,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
-        mActivityTaskManager = ActivityTaskManager.getInstance();
+        mActivityTaskManager = getActivityTaskManager();
         mBiometricManager = context.getSystemService(BiometricManager.class);
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
@@ -131,6 +128,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     protected long getStartTimeMs() {
         return mStartTimeMs;
+    }
+
+    protected ActivityTaskManager getActivityTaskManager() {
+        return ActivityTaskManager.getInstance();
     }
 
     @Override
@@ -198,25 +199,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         if (!mAllowBackgroundAuthentication && authenticated
                 && !Utils.isKeyguard(getContext(), getOwnerString())
                 && !Utils.isSystem(getContext(), getOwnerString())) {
-            final List<ActivityManager.RunningTaskInfo> tasks =
-                    mActivityTaskManager.getTasks(1);
-            if (tasks == null || tasks.isEmpty()) {
-                Slog.e(TAG, "No running tasks reported");
-                isBackgroundAuth = true;
-            } else {
-                final ComponentName topActivity = tasks.get(0).topActivity;
-                if (topActivity == null) {
-                    Slog.e(TAG, "Unable to get top activity");
-                    isBackgroundAuth = true;
-                } else {
-                    final String topPackage = topActivity.getPackageName();
-                    if (!topPackage.contentEquals(getOwnerString())) {
-                        Slog.e(TAG, "Background authentication detected, top: " + topPackage
-                                + ", client: " + getOwnerString());
-                        isBackgroundAuth = true;
-                    }
-                }
-            }
+            isBackgroundAuth = Utils.isBackground(getOwnerString());
         }
 
         // Fail authentication if we can't confirm the client activity is on top.
@@ -310,45 +293,50 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                     sendCancelOnly(listener);
                 }
             });
-        } else {
-            // Allow system-defined limit of number of attempts before giving up
-            final @LockoutTracker.LockoutMode int lockoutMode =
-                    handleFailedAttempt(getTargetUserId());
-            if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
-                markAlreadyDone();
+        } else { // not authenticated
+            if (isBackgroundAuth) {
+                Slog.e(TAG, "cancelling due to background auth");
+                cancel();
+            } else {
+                // Allow system-defined limit of number of attempts before giving up
+                final @LockoutTracker.LockoutMode int lockoutMode =
+                        handleFailedAttempt(getTargetUserId());
+                if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
+                    markAlreadyDone();
+                }
+
+                final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+                coordinator.onAuthenticationRejected(SystemClock.uptimeMillis(), this, lockoutMode,
+                        new CoexCoordinator.Callback() {
+                            @Override
+                            public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
+                                if (listener != null) {
+                                    try {
+                                        listener.onAuthenticationFailed(getSensorId());
+                                    } catch (RemoteException e) {
+                                        Slog.e(TAG, "Unable to notify listener", e);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void sendHapticFeedback() {
+                                if (listener != null && mShouldVibrate) {
+                                    vibrateError();
+                                }
+                            }
+
+                            @Override
+                            public void handleLifecycleAfterAuth() {
+                                AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
+                            }
+
+                            @Override
+                            public void sendAuthenticationCanceled() {
+                                sendCancelOnly(listener);
+                            }
+                        });
             }
-
-            final CoexCoordinator coordinator = CoexCoordinator.getInstance();
-            coordinator.onAuthenticationRejected(SystemClock.uptimeMillis(), this, lockoutMode,
-                    new CoexCoordinator.Callback() {
-                @Override
-                public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
-                    if (listener != null) {
-                        try {
-                            listener.onAuthenticationFailed(getSensorId());
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Unable to notify listener", e);
-                        }
-                    }
-                }
-
-                @Override
-                public void sendHapticFeedback() {
-                    if (listener != null && mShouldVibrate) {
-                        vibrateError();
-                    }
-                }
-
-                @Override
-                public void handleLifecycleAfterAuth() {
-                    AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
-                }
-
-                @Override
-                public void sendAuthenticationCanceled() {
-                    sendCancelOnly(listener);
-                }
-            });
         }
     }
 
@@ -456,7 +444,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Override
     public void cancel() {
         super.cancel();
-
         if (mTaskStackListener != null) {
             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         }

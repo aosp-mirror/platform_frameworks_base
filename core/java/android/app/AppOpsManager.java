@@ -1335,9 +1335,17 @@ public class AppOpsManager {
     public static final int OP_ACCESS_RESTRICTED_SETTINGS =
             AppProtoEnums.APP_OP_ACCESS_RESTRICTED_SETTINGS;
 
+    /**
+     * Receive microphone audio from an ambient sound detection event
+     *
+     * @hide
+     */
+    public static final int OP_RECEIVE_AMBIENT_TRIGGER_AUDIO =
+            AppProtoEnums.APP_OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 120;
+    public static final int _NUM_OP = 121;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1800,6 +1808,14 @@ public class AppOpsManager {
     public static final String OPSTR_ACCESS_RESTRICTED_SETTINGS =
             "android:access_restricted_settings";
 
+    /**
+     * Receive microphone audio from an ambient sound detection event
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO =
+            "android:receive_ambient_trigger_audio";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2021,6 +2037,7 @@ public class AppOpsManager {
             OP_ESTABLISH_VPN_SERVICE,           // OP_ESTABLISH_VPN_SERVICE
             OP_ESTABLISH_VPN_MANAGER,           // OP_ESTABLISH_VPN_MANAGER
             OP_ACCESS_RESTRICTED_SETTINGS,      // OP_ACCESS_RESTRICTED_SETTINGS
+            OP_RECEIVE_AMBIENT_TRIGGER_AUDIO,      // RECEIVE_SOUNDTRIGGER_AUDIO
     };
 
     /**
@@ -2147,6 +2164,7 @@ public class AppOpsManager {
             OPSTR_ESTABLISH_VPN_SERVICE,
             OPSTR_ESTABLISH_VPN_MANAGER,
             OPSTR_ACCESS_RESTRICTED_SETTINGS,
+            OPSTR_RECEIVE_AMBIENT_TRIGGER_AUDIO,
     };
 
     /**
@@ -2274,6 +2292,7 @@ public class AppOpsManager {
             "ESTABLISH_VPN_SERVICE",
             "ESTABLISH_VPN_MANAGER",
             "ACCESS_RESTRICTED_SETTINGS",
+            "RECEIVE_SOUNDTRIGGER_AUDIO",
     };
 
     /**
@@ -2402,6 +2421,7 @@ public class AppOpsManager {
             null, // no permission for OP_ESTABLISH_VPN_SERVICE
             null, // no permission for OP_ESTABLISH_VPN_MANAGER
             null, // no permission for OP_ACCESS_RESTRICTED_SETTINGS,
+            null, // no permission for OP_RECEIVE_SOUNDTRIGGER_AUDIO
     };
 
     /**
@@ -2529,7 +2549,8 @@ public class AppOpsManager {
             null, // NEARBY_WIFI_DEVICES
             null, // ESTABLISH_VPN_SERVICE
             null, // ESTABLISH_VPN_MANAGER
-            null, // ACCESS_RESTRICTED_SETTINGS,
+            null, // ACCESS_RESTRICTED_SETTINGS
+            null, // RECEIVE_SOUNDTRIGGER_AUDIO
     };
 
     /**
@@ -2537,8 +2558,8 @@ public class AppOpsManager {
      * restriction} for a certain app-op.
      */
     private static RestrictionBypass[] sOpAllowSystemRestrictionBypass = new RestrictionBypass[] {
-            new RestrictionBypass(true, false), //COARSE_LOCATION
-            new RestrictionBypass(true, false), //FINE_LOCATION
+            new RestrictionBypass(true, false, false), //COARSE_LOCATION
+            new RestrictionBypass(true, false, false), //FINE_LOCATION
             null, //GPS
             null, //VIBRATE
             null, //READ_CONTACTS
@@ -2547,7 +2568,7 @@ public class AppOpsManager {
             null, //WRITE_CALL_LOG
             null, //READ_CALENDAR
             null, //WRITE_CALENDAR
-            new RestrictionBypass(true, false), //WIFI_SCAN
+            new RestrictionBypass(false, true, false), //WIFI_SCAN
             null, //POST_NOTIFICATION
             null, //NEIGHBORING_CELLS
             null, //CALL_PHONE
@@ -2561,10 +2582,10 @@ public class AppOpsManager {
             null, //READ_ICC_SMS
             null, //WRITE_ICC_SMS
             null, //WRITE_SETTINGS
-            new RestrictionBypass(true, false), //SYSTEM_ALERT_WINDOW
+            new RestrictionBypass(false, true, false), //SYSTEM_ALERT_WINDOW
             null, //ACCESS_NOTIFICATIONS
             null, //CAMERA
-            new RestrictionBypass(false, true), //RECORD_AUDIO
+            new RestrictionBypass(false, false, true), //RECORD_AUDIO
             null, //PLAY_AUDIO
             null, //READ_CLIPBOARD
             null, //WRITE_CLIPBOARD
@@ -2582,7 +2603,7 @@ public class AppOpsManager {
             null, //MONITOR_HIGH_POWER_LOCATION
             null, //GET_USAGE_STATS
             null, //MUTE_MICROPHONE
-            new RestrictionBypass(true, false), //TOAST_WINDOW
+            new RestrictionBypass(false, true, false), //TOAST_WINDOW
             null, //PROJECT_MEDIA
             null, //ACTIVATE_VPN
             null, //WALLPAPER
@@ -2614,7 +2635,7 @@ public class AppOpsManager {
             null, // ACCEPT_HANDOVER
             null, // MANAGE_IPSEC_HANDOVERS
             null, // START_FOREGROUND
-            new RestrictionBypass(true, false), // BLUETOOTH_SCAN
+            new RestrictionBypass(false, true, false), // BLUETOOTH_SCAN
             null, // USE_BIOMETRIC
             null, // ACTIVITY_RECOGNITION
             null, // SMS_FINANCIAL_TRANSACTIONS
@@ -2656,7 +2677,8 @@ public class AppOpsManager {
             null, // NEARBY_WIFI_DEVICES
             null, // ESTABLISH_VPN_SERVICE
             null, // ESTABLISH_VPN_MANAGER
-            null, // ACCESS_RESTRICTED_SETTINGS,
+            null, // ACCESS_RESTRICTED_SETTINGS
+            null, // RECEIVE_SOUNDTRIGGER_AUDIO
     };
 
     /**
@@ -2687,7 +2709,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // READ_ICC_SMS
             AppOpsManager.MODE_ALLOWED, // WRITE_ICC_SMS
             AppOpsManager.MODE_DEFAULT, // WRITE_SETTINGS
-            AppOpsManager.MODE_DEFAULT, // SYSTEM_ALERT_WINDOW /*Overridden in opToDefaultMode()*/
+            getSystemAlertWindowDefault(), // SYSTEM_ALERT_WINDOW
             AppOpsManager.MODE_ALLOWED, // ACCESS_NOTIFICATIONS
             AppOpsManager.MODE_ALLOWED, // CAMERA
             AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO
@@ -2765,7 +2787,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED, // OP_NO_ISOLATED_STORAGE
             AppOpsManager.MODE_ALLOWED, // PHONE_CALL_MICROPHONE
             AppOpsManager.MODE_ALLOWED, // PHONE_CALL_CAMERA
-            AppOpsManager.MODE_ALLOWED, // OP_RECORD_AUDIO_HOTWORD
+            AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO_HOTWORD
             AppOpsManager.MODE_DEFAULT, // MANAGE_ONGOING_CALLS
             AppOpsManager.MODE_DEFAULT, // MANAGE_CREDENTIALS
             AppOpsManager.MODE_DEFAULT, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
@@ -2783,6 +2805,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_SERVICE
             AppOpsManager.MODE_ALLOWED, // ESTABLISH_VPN_MANAGER
             AppOpsManager.MODE_ALLOWED, // ACCESS_RESTRICTED_SETTINGS,
+            AppOpsManager.MODE_ALLOWED, // RECEIVE_SOUNDTRIGGER_AUDIO
     };
 
     /**
@@ -2913,6 +2936,135 @@ public class AppOpsManager {
             false, // OP_ESTABLISH_VPN_SERVICE
             false, // OP_ESTABLISH_VPN_MANAGER
             true, // ACCESS_RESTRICTED_SETTINGS
+            false, // RECEIVE_SOUNDTRIGGER_AUDIO
+    };
+
+    /**
+     * This specifies whether each option is only allowed to be read
+     * by apps with manage appops permission.
+     */
+    private static boolean[] sOpRestrictRead = new boolean[] {
+            false, // COARSE_LOCATION
+            false, // FINE_LOCATION
+            false, // GPS
+            false, // VIBRATE
+            false, // READ_CONTACTS
+            false, // WRITE_CONTACTS
+            false, // READ_CALL_LOG
+            false, // WRITE_CALL_LOG
+            false, // READ_CALENDAR
+            false, // WRITE_CALENDAR
+            false, // WIFI_SCAN
+            false, // POST_NOTIFICATION
+            false, // NEIGHBORING_CELLS
+            false, // CALL_PHONE
+            false, // READ_SMS
+            false, // WRITE_SMS
+            false, // RECEIVE_SMS
+            false, // RECEIVE_EMERGENCY_BROADCAST
+            false, // RECEIVE_MMS
+            false, // RECEIVE_WAP_PUSH
+            false, // SEND_SMS
+            false, // READ_ICC_SMS
+            false, // WRITE_ICC_SMS
+            false, // WRITE_SETTINGS
+            false, // SYSTEM_ALERT_WINDOW
+            false, // ACCESS_NOTIFICATIONS
+            false, // CAMERA
+            false, // RECORD_AUDIO
+            false, // PLAY_AUDIO
+            false, // READ_CLIPBOARD
+            false, // WRITE_CLIPBOARD
+            false, // TAKE_MEDIA_BUTTONS
+            false, // TAKE_AUDIO_FOCUS
+            false, // AUDIO_MASTER_VOLUME
+            false, // AUDIO_VOICE_VOLUME
+            false, // AUDIO_RING_VOLUME
+            false, // AUDIO_MEDIA_VOLUME
+            false, // AUDIO_ALARM_VOLUME
+            false, // AUDIO_NOTIFICATION_VOLUME
+            false, // AUDIO_BLUETOOTH_VOLUME
+            false, // WAKE_LOCK
+            false, // MONITOR_LOCATION
+            false, // MONITOR_HIGH_POWER_LOCATION
+            false, // GET_USAGE_STATS
+            false, // MUTE_MICROPHONE
+            false, // TOAST_WINDOW
+            false, // PROJECT_MEDIA
+            false, // ACTIVATE_VPN
+            false, // WRITE_WALLPAPER
+            false, // ASSIST_STRUCTURE
+            false, // ASSIST_SCREENSHOT
+            false, // READ_PHONE_STATE
+            false, // ADD_VOICEMAIL
+            false, // USE_SIP
+            false, // PROCESS_OUTGOING_CALLS
+            false, // USE_FINGERPRINT
+            false, // BODY_SENSORS
+            false, // READ_CELL_BROADCASTS
+            false, // MOCK_LOCATION
+            false, // READ_EXTERNAL_STORAGE
+            false, // WRITE_EXTERNAL_STORAGE
+            false, // TURN_SCREEN_ON
+            false, // GET_ACCOUNTS
+            false, // RUN_IN_BACKGROUND
+            false, // AUDIO_ACCESSIBILITY_VOLUME
+            false, // READ_PHONE_NUMBERS
+            false, // REQUEST_INSTALL_PACKAGES
+            false, // PICTURE_IN_PICTURE
+            false, // INSTANT_APP_START_FOREGROUND
+            false, // ANSWER_PHONE_CALLS
+            false, // RUN_ANY_IN_BACKGROUND
+            false, // CHANGE_WIFI_STATE
+            false, // REQUEST_DELETE_PACKAGES
+            false, // BIND_ACCESSIBILITY_SERVICE
+            false, // ACCEPT_HANDOVER
+            false, // MANAGE_IPSEC_TUNNELS
+            false, // START_FOREGROUND
+            false, // BLUETOOTH_SCAN
+            false, // USE_BIOMETRIC
+            false, // ACTIVITY_RECOGNITION
+            false, // SMS_FINANCIAL_TRANSACTIONS
+            false, // READ_MEDIA_AUDIO
+            false, // WRITE_MEDIA_AUDIO
+            false, // READ_MEDIA_VIDEO
+            false,  // WRITE_MEDIA_VIDEO
+            false, // READ_MEDIA_IMAGES
+            false,  // WRITE_MEDIA_IMAGES
+            false,  // LEGACY_STORAGE
+            false, // ACCESS_ACCESSIBILITY
+            false, // READ_DEVICE_IDENTIFIERS
+            false, // ACCESS_MEDIA_LOCATION
+            false, // QUERY_ALL_PACKAGES
+            false, // MANAGE_EXTERNAL_STORAGE
+            false, // INTERACT_ACROSS_PROFILES
+            false, // ACTIVATE_PLATFORM_VPN
+            false, // LOADER_USAGE_STATS
+            false, // deprecated operation
+            false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+            false, // AUTO_REVOKE_MANAGED_BY_INSTALLER
+            false, // NO_ISOLATED_STORAGE
+            false, // PHONE_CALL_MICROPHONE
+            false, // PHONE_CALL_CAMERA
+            false, // RECORD_AUDIO_HOTWORD
+            false, // MANAGE_ONGOING_CALLS
+            false, // MANAGE_CREDENTIALS
+            false, // USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER
+            false, // RECORD_AUDIO_OUTPUT
+            false, // SCHEDULE_EXACT_ALARM
+            false, // ACCESS_FINE_LOCATION_SOURCE
+            false, // ACCESS_COARSE_LOCATION_SOURCE
+            false, // MANAGE_MEDIA
+            false, // BLUETOOTH_CONNECT
+            false, // UWB_RANGING
+            false, // ACTIVITY_RECOGNITION_SOURCE
+            false, // BLUETOOTH_ADVERTISE
+            false, // RECORD_INCOMING_PHONE_AUDIO
+            false, // NEARBY_WIFI_DEVICES
+            false, // OP_ESTABLISH_VPN_SERVICE
+            false, // OP_ESTABLISH_VPN_MANAGER
+            true, // ACCESS_RESTRICTED_SETTINGS
+            false, // RECEIVE_SOUNDTRIGGER_AUDIO
     };
 
     /**
@@ -3010,8 +3162,6 @@ public class AppOpsManager {
     private static final String DEBUG_LOGGING_PACKAGES_PROP = "appops.logging_packages";
     private static final String DEBUG_LOGGING_OPS_PROP = "appops.logging_ops";
     private static final String DEBUG_LOGGING_TAG = "AppOpsManager";
-
-    private static volatile Integer sOpSystemAlertWindowDefaultMode;
 
     /**
      * Retrieve the op switch that controls the given operation.
@@ -3111,9 +3261,6 @@ public class AppOpsManager {
      * @hide
      */
     public static @Mode int opToDefaultMode(int op) {
-        if (op == OP_SYSTEM_ALERT_WINDOW) {
-            return getSystemAlertWindowDefault();
-        }
         return sOpDefaultMode[op];
     }
 
@@ -3140,6 +3287,14 @@ public class AppOpsManager {
             return MODE_NAMES[mode];
         }
         return "mode=" + mode;
+    }
+
+    /**
+     * Retrieve whether the op can be read by apps with manage appops permission.
+     * @hide
+     */
+    public static boolean opRestrictsRead(int op) {
+        return sOpRestrictRead[op];
     }
 
     /**
@@ -3196,6 +3351,9 @@ public class AppOpsManager {
      * @hide
      */
     public static class RestrictionBypass {
+        /** Does the app need to be system uid to bypass the restriction */
+        public boolean isSystemUid;
+
         /** Does the app need to be privileged to bypass the restriction */
         public boolean isPrivileged;
 
@@ -3205,12 +3363,14 @@ public class AppOpsManager {
          */
         public boolean isRecordAudioRestrictionExcept;
 
-        public RestrictionBypass(boolean isPrivileged, boolean isRecordAudioRestrictionExcept) {
+        public RestrictionBypass(boolean isSystemUid, boolean isPrivileged,
+                boolean isRecordAudioRestrictionExcept) {
+            this.isSystemUid = isSystemUid;
             this.isPrivileged = isPrivileged;
             this.isRecordAudioRestrictionExcept = isRecordAudioRestrictionExcept;
         }
 
-        public static RestrictionBypass UNRESTRICTED = new RestrictionBypass(true, true);
+        public static RestrictionBypass UNRESTRICTED = new RestrictionBypass(false, true, true);
     }
 
     /**
@@ -10118,11 +10278,6 @@ public class AppOpsManager {
     }
 
     private static int getSystemAlertWindowDefault() {
-        // This is indeed racy but we aren't expecting the result to change so it's not worth
-        // the synchronization.
-        if (sOpSystemAlertWindowDefaultMode != null) {
-            return sOpSystemAlertWindowDefaultMode;
-        }
         final Context context = ActivityThread.currentApplication();
         if (context == null) {
             return AppOpsManager.MODE_DEFAULT;
@@ -10133,11 +10288,10 @@ public class AppOpsManager {
         // TVs are constantly plugged in and has less concern for memory/power
         if (ActivityManager.isLowRamDeviceStatic()
                 && !pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0)) {
-            sOpSystemAlertWindowDefaultMode = AppOpsManager.MODE_IGNORED;
-        } else {
-            sOpSystemAlertWindowDefaultMode = AppOpsManager.MODE_DEFAULT;
+            return AppOpsManager.MODE_IGNORED;
         }
-        return sOpSystemAlertWindowDefaultMode;
+
+        return AppOpsManager.MODE_DEFAULT;
     }
 
     /**

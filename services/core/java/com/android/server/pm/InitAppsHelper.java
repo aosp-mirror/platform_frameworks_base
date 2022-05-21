@@ -24,13 +24,14 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_APK_IN_APEX;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
+import static com.android.server.pm.PackageManagerService.SCAN_DROP_CACHE;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
 import static com.android.server.pm.PackageManagerService.SCAN_NO_DEX;
 import static com.android.server.pm.PackageManagerService.SCAN_REQUIRE_KNOWN;
 import static com.android.server.pm.PackageManagerService.SYSTEM_PARTITIONS;
 import static com.android.server.pm.PackageManagerService.TAG;
-import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_CHECK_MAX_SDK_VERSION;
+import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_APK_IN_APEX;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -167,7 +168,11 @@ final class InitAppsHelper {
                     sp.getFolder().getAbsolutePath())
                     || apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
                     sp.getFolder().getAbsolutePath() + File.separator)) {
-                return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
+                int flags = SCAN_AS_APK_IN_APEX;
+                if (apexInfo.activeApexChanged) {
+                    flags |= SCAN_DROP_CACHE;
+                }
+                return new ScanPartition(apexInfo.apexDirectory, sp, flags);
             }
         }
         return null;
@@ -359,7 +364,7 @@ final class InitAppsHelper {
         try {
             if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
                 // when scanning apk in apexes, we want to check the maxSdkVersion
-                parseFlags |= PARSE_CHECK_MAX_SDK_VERSION;
+                parseFlags |= PARSE_APK_IN_APEX;
             }
             mInstallPackageHelper.installPackagesFromDir(scanDir, frameworkSplits, parseFlags,
                     scanFlags, packageParser, executorService);

@@ -320,12 +320,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
-    public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
+    public void scheduleSyncDueToProcessStateChange(int flags, long delayMillis) {
         synchronized (BatteryExternalStatsWorker.this) {
             mProcessStateSync = scheduleDelayedSyncLocked(mProcessStateSync,
-                    () -> scheduleSync("procstate-change", UPDATE_ON_PROC_STATE_CHANGE),
+                    () -> scheduleSync("procstate-change", flags),
                     delayMillis);
-            return mProcessStateSync;
         }
     }
 
@@ -565,11 +564,24 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                         new SynchronousResultReceiver("bluetooth");
                 adapter.requestControllerActivityEnergyInfo(
                         Runnable::run,
-                        info -> {
-                            Bundle bundle = new Bundle();
-                            bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY,
-                                    info);
-                            resultReceiver.send(0, bundle);
+                        new BluetoothAdapter.OnBluetoothActivityEnergyInfoCallback() {
+                            @Override
+                            public void onBluetoothActivityEnergyInfoAvailable(
+                                    BluetoothActivityEnergyInfo info) {
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable(
+                                        BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                                resultReceiver.send(0, bundle);
+                            }
+
+                            @Override
+                            public void onBluetoothActivityEnergyInfoError(int errorCode) {
+                                Slog.w(TAG, "error reading Bluetooth stats: " + errorCode);
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable(
+                                        BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, null);
+                                resultReceiver.send(0, bundle);
+                            }
                         }
                 );
                 bluetoothReceiver = resultReceiver;

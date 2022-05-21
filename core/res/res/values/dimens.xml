@@ -39,14 +39,17 @@
     <!-- Elevation of toast view -->
     <dimen name="toast_elevation">2dp</dimen>
 
+    <!-- The default height of the status bar used in {@link SystemBarUtils#getStatusBarHeight} to
+         calculate the status bar height. -->
+    <dimen name="status_bar_height_default">24dp</dimen>
     <!-- Height of the status bar.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
-    <dimen name="status_bar_height">24dp</dimen>
+    <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
     <!-- Height of the status bar in portrait.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
-    <dimen name="status_bar_height_portrait">@dimen/status_bar_height</dimen>
+    <dimen name="status_bar_height_portrait">24dp</dimen>
     <!-- Height of the status bar in landscape.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
@@ -779,6 +782,10 @@
     <dimen name="notification_left_icon_start">@dimen/notification_icon_circle_start</dimen>
     <!-- The alpha of a disabled notification button -->
     <item type="dimen" format="float" name="notification_action_disabled_alpha">0.5</item>
+    <!-- The maximum size of Person avatar image in MessagingStyle notifications.
+         This is bigger than displayed because listeners can use it for other displays
+         e.g. wearables. -->
+    <dimen name="notification_person_icon_max_size">144dp</dimen>
 
     <!-- The maximum size of the small notification icon on low memory devices. -->
     <dimen name="notification_small_icon_size_low_ram">@dimen/notification_small_icon_size</dimen>
@@ -792,6 +799,10 @@
     <dimen name="notification_big_picture_max_width_low_ram">294dp</dimen>
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">@dimen/notification_right_icon_size</dimen>
+    <!-- The maximum size of Person avatar image in MessagingStyle notifications.
+     This is bigger than displayed because listeners can use it for other displays
+     e.g. wearables. -->
+    <dimen name="notification_person_icon_max_size_low_ram">96dp</dimen>
     <!-- The maximum size of the grayscale icon -->
     <dimen name="notification_grayscale_icon_max_size">256dp</dimen>
 
@@ -862,6 +873,7 @@
     <dimen name="autofill_save_title_start_padding">8dp</dimen>
     <dimen name="autofill_save_scroll_view_top_margin">4dp</dimen>
     <dimen name="autofill_save_button_bar_padding">16dp</dimen>
+    <dimen name="autofill_dialog_corner_radius">28dp</dimen>
 
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
@@ -877,7 +889,7 @@
     <integer name="autofill_max_visible_datasets">3</integer>
 
     <!-- Size of an icon in the Autolfill fill dialog -->
-    <dimen name="autofill_dialog_icon_size">24dp</dimen>
+    <dimen name="autofill_dialog_icon_size">32dp</dimen>
 
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>
@@ -948,7 +960,7 @@
     <dimen name="resolver_max_collapsed_height_with_default_with_tabs">300dp</dimen>
     <dimen name="resolver_tab_text_size">14sp</dimen>
     <dimen name="resolver_title_padding_bottom">0dp</dimen>
-    <dimen name="resolver_empty_state_container_padding_top">8dp</dimen>
+    <dimen name="resolver_empty_state_container_padding_top">48dp</dimen>
     <dimen name="resolver_empty_state_container_padding_bottom">8dp</dimen>
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>

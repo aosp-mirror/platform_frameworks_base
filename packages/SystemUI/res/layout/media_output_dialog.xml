@@ -71,10 +71,18 @@
         </LinearLayout>
     </LinearLayout>
 
+    <ViewStub
+        android:id="@+id/broadcast_qrcode"
+        android:layout="@layout/media_output_broadcast_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ViewStub>
+
     <LinearLayout
         android:id="@+id/device_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView

@@ -888,7 +888,6 @@ public abstract class WallpaperService extends Service {
             if (mShouldDimByDefault != mShouldDim && mWallpaperDimAmount == 0f) {
                 mShouldDim = mShouldDimByDefault;
                 updateSurfaceDimming();
-                updateSurface(false, false, true);
             }
         }
 
@@ -898,13 +897,16 @@ public abstract class WallpaperService extends Service {
          * @param dimAmount Float amount between [0.0, 1.0] to dim the wallpaper.
          */
         private void updateWallpaperDimming(float dimAmount) {
+            if (dimAmount == mWallpaperDimAmount) {
+                return;
+            }
+
             // Custom dim amount cannot be less than the default dim amount.
             mWallpaperDimAmount = Math.max(mDefaultDimAmount, dimAmount);
             // If dim amount is 0f (additional dimming is removed), then the wallpaper should dim
             // based on its default wallpaper color hints.
             mShouldDim = dimAmount != 0f || mShouldDimByDefault;
             updateSurfaceDimming();
-            updateSurface(false, false, true);
         }
 
         private void updateSurfaceDimming() {
@@ -941,6 +943,7 @@ public abstract class WallpaperService extends Service {
             } else {
                 Log.v(TAG, "Setting wallpaper dimming: " + 0);
                 surfaceControlTransaction.setAlpha(mBbqSurfaceControl, 1.0f).apply();
+                updateSurface(false, false, true);
             }
 
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
@@ -1195,7 +1198,6 @@ public abstract class WallpaperService extends Service {
                                     .setParent(mSurfaceControl)
                                     .setCallsite("Wallpaper#relayout")
                                     .build();
-                            updateSurfaceDimming();
                         }
                         // Propagate transform hint from WM, so we can use the right hint for the
                         // first frame.
@@ -1366,7 +1368,6 @@ public abstract class WallpaperService extends Service {
                             mSession.finishDrawing(mWindow, null /* postDrawTransaction */,
                                                    Integer.MAX_VALUE);
                             processLocalColors(mPendingXOffset, mPendingXOffsetStep);
-                            notifyColorsChanged();
                         }
                         reposition();
                         reportEngineShown(shouldWaitForEngineShown());
@@ -1632,6 +1633,7 @@ public abstract class WallpaperService extends Service {
             float finalXOffsetStep = xOffsetStep;
             float finalXOffset = xOffset;
             mHandler.post(() -> {
+                Trace.beginSection("WallpaperService#processLocalColors");
                 resetWindowPages();
                 int xPage = xCurrentPage;
                 EngineWindowPage current;
@@ -1662,6 +1664,7 @@ public abstract class WallpaperService extends Service {
                 }
                 current = mWindowPages[xPage];
                 updatePage(current, xPage, xPages, finalXOffsetStep);
+                Trace.endSection();
             });
         }
 
@@ -1683,13 +1686,12 @@ public abstract class WallpaperService extends Service {
 
         void updatePage(EngineWindowPage currentPage, int pageIndx, int numPages,
                 float xOffsetStep) {
-            // to save creating a runnable, check twice
-            long current = System.currentTimeMillis();
+            // in case the clock is zero, we start with negative time
+            long current = SystemClock.elapsedRealtime() - DEFAULT_UPDATE_SCREENSHOT_DURATION;
             long lapsed = current - currentPage.getLastUpdateTime();
             // Always update the page when the last update time is <= 0
             // This is important especially when the device first boots
-            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION
-                    && currentPage.getLastUpdateTime() > 0) {
+            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION) {
                 return;
             }
             Surface surface = mSurfaceHolder.getSurface();
@@ -1734,6 +1736,7 @@ public abstract class WallpaperService extends Service {
         private void updatePageColors(EngineWindowPage page, int pageIndx, int numPages,
                 float xOffsetStep) {
             if (page.getBitmap() == null) return;
+            Trace.beginSection("WallpaperService#updatePageColors");
             if (DEBUG) {
                 Log.d(TAG, "updatePageColorsLocked for page " + pageIndx + " with areas "
                         + page.getAreas().size() + " and bitmap size of "
@@ -1779,6 +1782,7 @@ public abstract class WallpaperService extends Service {
                     }
                 }
             }
+            Trace.endSection();
         }
 
         private RectF generateSubRect(RectF in, int pageInx, int numPages) {

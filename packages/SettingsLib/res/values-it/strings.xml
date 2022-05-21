@@ -109,6 +109,9 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"S: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D: batteria <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Attivo"</string>
+    <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Attivo, solo sinistra"</string>
+    <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Attivo, solo destra"</string>
+    <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Attivo, destra e sinistra"</string>
     <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Audio multimediale"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Telefonate"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Trasferimento file"</string>
@@ -148,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Annulla"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"L\'accoppiamento consente l\'accesso ai tuoi contatti e alla cronologia chiamate quando i dispositivi sono connessi."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La passkey o il PIN sono errati."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Impossibile eseguire l\'accoppiamento con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. La password o il PIN sono errati."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Impossibile comunicare con <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Accoppiamento rifiutato da <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computer"</string>
@@ -158,10 +161,6 @@
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"Cuffie"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"Periferica di immissione"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Accoppiamento dell\'apparecchio acustico sinistro…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"Accoppiamento dell\'apparecchio acustico destro…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Sinistro - Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"Destro - Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi non attivo."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Rete Wi-Fi scollegata."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi: una barra."</string>
@@ -180,7 +179,6 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Tethering"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Tethering/hotspot portatile"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Tutte le app di lavoro"</string>
-    <string name="user_guest" msgid="6939192779649870792">"Ospite"</string>
     <string name="unknown" msgid="3544487229740637809">"Sconosciuta"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Utente: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Alcune opzioni predefinite impostate"</string>
@@ -314,7 +312,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che il dispositivo si connette a una rete con randomizzazione degli indirizzi MAC attiva."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che il dispositivo si connette a una rete con randomizzazione degli indirizzi MAC attiva"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -361,17 +359,17 @@
     <string name="media_category" msgid="8122076702526144053">"Contenuti multimediali"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Monitoraggio"</string>
     <string name="strict_mode" msgid="889864762140862437">"Attiva StrictMode"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Schermo lampeggia per operazioni lunghe su thread principale"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Fai lampeggiare lo schermo per operazioni lunghe sul thread principale"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Posizione puntatore"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Overlay schermo che mostra i dati touch correnti"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra tocchi"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Mostra feedback visivi per i tocchi"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Aggiornamenti superficie"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Superfici delle finestre lampeggiano se aggiornate"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Fai lampeggiare le superfici delle finestre quando si aggiornano"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Aggiornam. visualizzazione"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Visualizz. lampeggiano dentro finestre se disegnate"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Fai lampeggiare gli elementi nelle finestre se disegnati"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Aggiornam. livelli hardware"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Livelli hardware lampeggiano in verde se aggiornati"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Fai lampeggiare in verde i livelli hardware se aggiornati"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Debug overdraw GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Disabilita overlay HW"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Usa sempre GPU per la composizione dello schermo"</string>
@@ -407,9 +405,9 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forza autorizzazione app su memoria esterna"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Consente l\'installazione di qualsiasi app su memoria esterna, indipendentemente dai valori manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imponi formato modificabile alle attività"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Rendi il formato di tutte le attività modificabile per la modalità multi-finestra, indipendentemente dai valori manifest"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Attiva finestre a forma libera"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali."</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Attiva il supporto delle finestre a forma libera sperimentali"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Password di backup desktop"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"I backup desktop completi non sono attualmente protetti"</string>
     <string name="local_backup_password_summary_change" msgid="1707357670383995567">"Tocca per modificare o rimuovere la password per i backup desktop completi"</string>
@@ -442,12 +440,6 @@
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementazione di WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Imposta l\'implementazione di WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"La selezione non è più valida. Riprova."</string>
-    <string name="convert_to_file_encryption" msgid="2828976934129751818">"Converti in crittografia basata su file"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converti…"</string>
-    <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Crittografia su base file già eseguita"</string>
-    <string name="title_convert_fbe" msgid="5780013350366495149">"Conversione in crittografia basata su file"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converti la partizione di dati in crittografia basata su file.\n Attenzione. Questa operazione eliminerà tutti i tuoi dati.\n Questa funzione è in versione alpha, pertanto potrebbe non funzionare correttamente.\n Premi \"Cancella e converti…\" per continuare."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Cancella e converti…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modalità colori immagini"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Use sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Disattivato"</string>
@@ -456,7 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalìa (rosso-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalìa (blu-giallo)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correzione del colore"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La correzione del colore può essere utile quando vuoi:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Vedere i colori con più precisione&lt;/li&gt; &lt;li&gt;&amp;nbsp;Rimuovere colori per mettere meglio a fuoco&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"La correzione del colore può essere utile quando vuoi:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;Vedere i colori con più precisione&lt;/li&gt; &lt;li&gt;&amp;nbsp;Rimuovere i colori per mettere meglio a fuoco&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Valore sostituito da <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Tempo rimanente: <xliff:g id="TIME_REMAINING">%1$s</xliff:g> circa"</string>
@@ -533,12 +525,11 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Meno tempo."</string>
     <string name="cancel" msgid="5665114069455378395">"Annulla"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
-    <!-- no translation found for done (381184316122520313) -->
-    <skip />
+    <string name="done" msgid="381184316122520313">"Fine"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Sveglie e promemoria"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Consenti l\'impostazione di sveglie e promemoria"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Sveglie e promemoria"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Consenti a questa app di impostare sveglie e programmare azioni per le quali il fattore temporale è decisivo. L\'app potrà essere eseguita in background, comportando un consumo maggiore della batteria.\n\nSe questa autorizzazione viene disattivata, le sveglie esistenti e gli eventi basati sull\'orario programmati da questa app non funzioneranno."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Consenti a questa app di impostare sveglie e programmare azioni per orari specifici. L\'app potrà essere eseguita in background, comportando un consumo maggiore della batteria.\n\nSe questa autorizzazione viene disattivata, le sveglie esistenti e gli eventi basati sull\'orario programmati da questa app non funzioneranno."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programmare, sveglia, promemoria, orologio"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Attiva"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Attiva Non disturbare"</string>
@@ -554,8 +545,7 @@
     <string name="zen_mode_forever" msgid="3339224497605461291">"Fino alla disattivazione"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Adesso"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Questo telefono"</string>
-    <!-- no translation found for media_transfer_this_device_name (3714653244000242800) -->
-    <skip />
+    <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Questo tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Questo telefono"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema di connessione. Spegni e riaccendi il dispositivo"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo audio cablato"</string>
@@ -580,7 +570,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profilo con limitazioni"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Aggiungere un nuovo utente?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Puoi condividere il dispositivo con altre persone creando altri utenti. Ogni utente ha un proprio spazio personalizzabile con app, sfondo e così via. Gli utenti possono anche regolare le impostazioni del dispositivo, come il Wi‑Fi, che riguardano tutti.\n\nQuando crei un nuovo utente, la persona in questione deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri utenti. I servizi e le impostazioni di accessibilità non potranno essere trasferiti al nuovo utente."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve impostare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Il nuovo utente, una volta aggiunto, deve configurare il proprio spazio.\n\nQualsiasi utente può aggiornare le app per tutti gli altri."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurare l\'utente ora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assicurati che la persona sia disponibile a prendere il dispositivo e configurare il suo spazio"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurare il profilo ora?"</string>
@@ -599,16 +589,22 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Creazione nuovo utente non riuscita"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Impossibile creare un nuovo ospite"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nickname"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Aggiungi utente"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Aggiungi ospite"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Reimposta sessione Ospite"</string>
-    <string name="guest_nickname" msgid="6332276931583337261">"Ospite"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Reimpostare sessione Ospite?"</string>
+    <string name="guest_remove_guest_dialog_title" msgid="4548511006624088072">"Vuoi rimuovere l\'ospite?"</string>
     <string name="guest_reset_guest_confirm_button" msgid="2989915693215617237">"Reimposta"</string>
+    <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Rimuovi"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Reimpostazione sessione Ospite in corso…"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Scatta una foto"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Scegli un\'immagine"</string>
     <string name="user_image_photo_selector" msgid="433658323306627093">"Seleziona la foto"</string>
+    <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Troppi tentativi sbagliati. I dati del dispositivo verranno eliminati."</string>
+    <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Troppi tentativi sbagliati. Questo utente verrà eliminato."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Troppi tentativi sbagliati. Questo profilo di lavoro e i relativi dati verranno eliminati."</string>
+    <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Ignora"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Parametro predefinito"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Non attivo"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Attivo"</string>
@@ -653,4 +649,14 @@
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Tastiera fisica"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Scegli layout tastiera"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"Predefinito"</string>
+    <string name="turn_screen_on_title" msgid="3266937298097573424">"Attiva lo schermo"</string>
+    <string name="allow_turn_screen_on" msgid="6194845766392742639">"Consenti l\'attivazione dello schermo"</string>
+    <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Consenti a un\'app di attivare lo schermo. Se la autorizzi, l\'app può attivare lo schermo in qualsiasi momento senza la tua autorizzazione esplicita."</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vuoi interrompere la trasmissione dell\'app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se trasmetti l\'app <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambi l\'uscita, la trasmissione attuale viene interrotta"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Trasmetti l\'app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Cambia uscita"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animazioni predittive con Indietro"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Attiva le animazioni di sistema per il gesto Indietro predittivo."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Questa impostazione attiva le animazioni di sistema per il gesto Indietro predittivo. Richiede di impostare il metodo enableOnBackInvokedCallback su true nel file manifest di tutte le app."</string>
 </resources>

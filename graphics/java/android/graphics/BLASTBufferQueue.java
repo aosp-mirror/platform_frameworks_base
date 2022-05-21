@@ -43,11 +43,17 @@ public final class BLASTBufferQueue {
     private static native boolean nativeIsSameSurfaceControl(long ptr, long surfaceControlPtr);
     private static native SurfaceControl.Transaction nativeGatherPendingTransactions(long ptr,
             long frameNumber);
+    private static native void nativeSetTransactionHangCallback(long ptr,
+            TransactionHangCallback callback);
+
+    public interface TransactionHangCallback {
+        void onTransactionHang(boolean isGpuHang);
+    }
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
             @PixelFormat.Format int format) {
-        this(name, false /* updateDestinationFrame */);
+        this(name, true /* updateDestinationFrame */);
         update(sc, width, height, format);
     }
 
@@ -183,5 +189,9 @@ public final class BLASTBufferQueue {
      */
     public SurfaceControl.Transaction gatherPendingTransactions(long frameNumber) {
         return nativeGatherPendingTransactions(mNativeObject, frameNumber);
+    }
+
+    public void setTransactionHangCallback(TransactionHangCallback hangCallback) {
+        nativeSetTransactionHangCallback(mNativeObject, hangCallback);
     }
 }

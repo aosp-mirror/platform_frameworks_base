@@ -28,6 +28,8 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 
+import javax.inject.Inject;
+
 /**
  * A class to control {@link MagnificationModeSwitch}. It shows the button UI with following
  * conditions:
@@ -44,6 +46,7 @@ public class ModeSwitchesController implements SwitchListener {
     private final DisplayIdIndexSupplier<MagnificationModeSwitch> mSwitchSupplier;
     private SwitchListener mSwitchListenerDelegate;
 
+    @Inject
     public ModeSwitchesController(Context context) {
         mSwitchSupplier = new SwitchSupplier(context,
                 context.getSystemService(DisplayManager.class), this::onSwitch);

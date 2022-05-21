@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Автоповорот экрана"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Предоставить приложению \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ к устройству \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Предоставить приложению \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ к устройству \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?\nПриложению не разрешено вести запись, однако с помощью этого USB-устройства оно может записывать звук."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Разрешить приложению \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ к устройству \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Открыть приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" для управления устройством \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Приложению не разрешено вести запись, однако оно может записывать аудио с помощью этого USB-устройства. Во время использования приложения \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" с этим устройством вы можете не услышать звуков уведомлений, звонков и будильников."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Во время использования приложения \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" с этим устройством вы можете не услышать звуков уведомлений, звонков и будильников."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Предоставить приложению \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" доступ к устройству \"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>\"?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Открыть приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" для управления устройством \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Открыть приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" для использования устройства \"<xliff:g id="USB_DEVICE">%2$s</xliff:g>\"?\nПриложению не разрешено вести запись, однако с помощью этого USB-устройства оно может записывать звук."</string>
@@ -74,6 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Попробуйте сделать скриншот снова."</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Не удалось сохранить скриншот."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Не удалось сделать скриншот: нет разрешения от приложения или организации."</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Системный администратор запретил делать скриншоты."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Изменить"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Изменить скриншот"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Поделиться скриншотом"</string>
@@ -131,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Лицо распознано"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Подтверждено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Нажмите \"Подтвердить\""</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"Сработало распознавание лица. Нажмите, чтобы продолжить."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Сканирование выполнено. Нажмите на значок разблокировки."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аутентификация выполнена"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN-код"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Использовать графический ключ"</string>
@@ -291,6 +296,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование микрофона."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование камеры."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Будет снята блокировка доступа для всех приложений и сервисов с разрешением на использование камеры или микрофона."</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон заблокирован"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера заблокирована"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон и камера заблокированы"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Чтобы разблокировать микрофон, установите защитный переключатель на вашем устройстве в положение \"Вкл.\". Расположение переключателя должно быть указано в инструкции к устройству."</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Чтобы разблокировать камеру, установите защитный переключатель на вашем устройстве в положение \"Вкл\". Расположение переключателя должно быть указано в инструкции к устройству."</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Для разблокировки установите защитный переключатель на вашем устройстве в положение \"Вкл.\". Расположение переключателя должно быть указано в инструкции к устройству."</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"Микрофон готов."</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Камера готова."</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Микрофон и камера готовы."</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Другое устройство"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Переключить режим обзора"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника, напоминаний, уведомлений о мероприятиях и звонков от помеченных контактов. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
@@ -301,7 +315,12 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Нажмите ещё раз, чтобы открыть"</string>
     <string name="tap_again" msgid="1315420114387908655">"Нажмите ещё раз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Проведите вверх, чтобы открыть"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"Нажмите, чтобы открыть."</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Нажмите на значок разблокировки."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Сканирование выполнено. Нажмите на значок разблокировки."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Чтобы повторить попытку, проведите вверх"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Чтобы использовать NFC, разблокируйте устройство."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Это устройство принадлежит вашей организации"</string>
@@ -324,7 +343,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядка от док-станции • Ещё <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Сменить пользователя."</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Все приложения и данные этого профиля будут удалены."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Удалить"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Рады видеть вас снова!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Продолжить сеанс?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Начать заново"</string>
@@ -340,7 +358,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Все приложения и данные этого пользователя будут удалены."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Удалить"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Во время записи или трансляции у приложения \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" будет доступ ко всей информации, которая видна на экране или воспроизводится с устройства, в том числе к паролям, сведениям о платежах, фотографиям, сообщениям и прослушиваемым аудиозаписям."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Во время записи или трансляции у сервиса, предоставляющего эту функцию, будет доступ ко всей информации, которая видна на экране или проигрывается на устройстве, включая пароли, сведения о платежах, фотографии, сообщения и воспроизводимые звуки."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Во время записи или трансляции у сервиса, предоставляющего эту функцию, будет доступ ко всей информации, которая видна на экране или воспроизводится на устройстве, включая пароли, сведения о платежах, фотографии, сообщения и звуки."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Начать запись или трансляцию?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Начать запись или трансляцию через приложение \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\"?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Очистить все"</string>
@@ -358,20 +376,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Ваша организация управляет этим устройством и может отслеживать сетевой трафик"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"Организация \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" управляет этим устройством и может отслеживать сетевой трафик"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Устройство предоставлено компанией \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\"."</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Это устройство принадлежит вашей организации и подключено к приложению \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" и подключено к приложению \"<xliff:g id="VPN_APP">%2$s</xliff:g>\""</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Это устройство принадлежит вашей организации и подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" и подключено к интернету через сервис \"<xliff:g id="VPN_APP">%2$s</xliff:g>\""</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Это устройство принадлежит вашей организации"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\""</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Это устройство принадлежит вашей организации и подключено к приложениям для VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" и подключено к приложениям для VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Это устройство принадлежит вашей организации и подключено к интернету через сети VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Это устройство принадлежит организации \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" и подключено к интернету через сети VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ваша организация может отслеживать сетевой трафик в рабочем профиле"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"Организация \"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>\" может отслеживать сетевой трафик в вашем рабочем профиле"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"История действий в сети доступна администратору в рабочем аккаунте."</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Сеть может отслеживаться"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"Это устройство подключено к приложениям для VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"Ваш рабочий профиль подключен к приложению \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"Ваш личный профиль подключен к приложению \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"Это устройство подключено к приложению \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Это устройство подключено к интернету через сети VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Рабочие приложения подключены к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Ваши личные приложения подключены к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Это устройство подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\""</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Устройство предоставлено компанией \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\""</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Управление устройством"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"Настройки VPN"</string>
@@ -387,10 +405,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На устройстве установлен сертификат ЦС. Ваш защищенный сетевой трафик могут отслеживать и изменять."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик на вашем устройстве."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик в вашем рабочем профиле (информация из личного профиля не собирается)."</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"Запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Оно может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"Запущены приложения \"<xliff:g id="VPN_APP_0">%1$s</xliff:g>\" и \"<xliff:g id="VPN_APP_1">%2$s</xliff:g>\". Они могут отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"В рабочем профиле запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\", которое может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и веб-сайтами."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"В личном профиле запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\", которое может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Это устройство подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Это устройство подключено к интернету через сервисы \"<xliff:g id="VPN_APP_0">%1$s</xliff:g>\" и \"<xliff:g id="VPN_APP_1">%2$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Рабочие приложения подключены к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши сетевые действия в этих приложениях, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору и поставщику услуг VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Личные приложения подключены к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны вашему поставщику услуг VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Открыть настройки VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Этим устройством управляет один из твоих родителей. Он может видеть, например, какими приложениями ты пользуешься и где находишься, а также задавать определенные настройки (например, ограничивать время использования устройства)."</string>
@@ -451,7 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Кошелек"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Расплачивайтесь через телефон быстро и безопасно."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показать все"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Добавьте карту"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Нажмите, чтобы открыть"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Обновление…"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблокировать для использования"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не удалось получить информацию о картах. Повторите попытку позже."</string>
@@ -499,6 +517,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает функции разговоров."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эти уведомления нельзя изменить."</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"Уведомления о звонках нельзя изменить."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Эту группу уведомлений нельзя настроить здесь."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Уведомление отправлено через прокси-сервер."</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Показывать все уведомления приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
@@ -584,8 +603,8 @@
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Гарнитура подключена"</string>
     <string name="data_saver" msgid="3484013368530820763">"Экономия трафика"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Режим экономии трафика включен"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Включено"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Отключено"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Откл."</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Недоступно"</string>
     <string name="tile_disabled" msgid="373212051546573069">"Отключено"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Панель навигации"</string>
@@ -714,6 +733,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Включать, если высока вероятность, что батарея скоро разрядится"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Нет, спасибо"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Передача SysUI"</string>
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Используется"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"В приложениях используется <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" и "</string>
@@ -778,6 +798,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Добавить"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Предложено приложением \"<xliff:g id="APP">%s</xliff:g>\""</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Устройство заблокировано"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Разрешить показывать устройства и управлять ими на заблокированном экране?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Вы можете добавить элементы управления внешними устройствами на заблокированный экран.\n\nПриложение на вашем устройстве может разрешать управление некоторыми устройствами с заблокированного экрана.\n\nИзменить параметры можно в любое время в настройках."</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Управлять устройствами на заблокированном экране?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Вы можете управлять некоторыми устройствами с заблокированного телефона или планшета.\n\nКакими именно устройствами можно управлять, зависит от приложения на вашем устройстве."</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Не сейчас"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Да"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-код содержит буквы или символы"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Подтвердите устройство \"<xliff:g id="DEVICE">%s</xliff:g>\""</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Неверный PIN-код"</string>
@@ -787,8 +813,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Проведите по экрану, чтобы увидеть больше"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загрузка рекомендаций…"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Скрыть этот элемент в приложении \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Этот мультимедийный сеанс невозможно скрыть."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скрыть"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Возобновить"</string>
@@ -799,6 +824,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"Приостановить"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"Предыдущий трек"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"Следующий трек"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"Подключение…"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"Воспроизведение"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Открыть приложение \"<xliff:g id="APP_LABEL">%1$s</xliff:g>\""</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Воспроизвести медиафайл \"<xliff:g id="SONG_NAME">%1$s</xliff:g>\" (исполнитель: <xliff:g id="ARTIST_NAME">%2$s</xliff:g>) из приложения \"<xliff:g id="APP_LABEL">%3$s</xliff:g>\""</string>
@@ -807,7 +833,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Чтобы начать трансляцию на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\", подойдите к нему ближе."</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Для воспроизведения на этом устройстве подойдите ближе к другому (<xliff:g id="DEVICENAME">%1$s</xliff:g>)."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Воспроизводится на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\"."</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Воспроизводится на этом телефоне."</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Произошла ошибка. Повторите попытку."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Нет ответа. Проверьте приложение."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
@@ -828,6 +853,19 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Чтобы начать трансляцию сеанса, откройте приложение"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестное приложение"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Остановить трансляцию"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работают трансляции"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляция"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Находящиеся рядом с вами люди с совместимыми устройствами Bluetooth могут слушать медиафайлы, которые вы транслируете."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"Чтобы подключиться к вашей трансляции, пользователи с совместимыми устройствами Bluetooth могут отсканировать ваш QR-код или ввести название и пароль трансляции"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"Название трансляции"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"Пароль"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Сохранить"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Запуск…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Не удалось запустить трансляцию"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Не удалось сохранить. Повторите попытку."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Не удалось сохранить."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер сборки"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер сборки скопирован в буфер обмена."</string>
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
@@ -896,23 +934,31 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Добавить параметр"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не добавлять"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Выберите профиль"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> активное приложение</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> активных приложения</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> активных приложений</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> активного приложения</item>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="one">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложение</item>
+      <item quantity="few">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложения</item>
+      <item quantity="many">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложений</item>
+      <item quantity="other">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложения</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Новая информация"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активные приложения"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Эти приложения активны и могут влиять на время работы от батареи, даже когда вы ими не пользуетесь."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Остановить"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Остановлено"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Копировать"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Готово"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Скопировано."</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Из приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Закрыть меню копирования"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Изменить скопированный текст"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Изменить скопированное изображение"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Отправить на устройство поблизости"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Нажмите, чтобы посмотреть"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Добавить"</string>
     <string name="manage_users" msgid="1823875311934643849">"Управление пользователями"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Это уведомление нельзя перетаскивать между частями разделенного экрана."</string>

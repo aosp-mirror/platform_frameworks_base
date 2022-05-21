@@ -23,7 +23,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -40,7 +43,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.ForceShowNavigationBarSettingsObserver;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -85,8 +87,15 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
     private int mDisplayWidth;
     private int mDisplayHeight;
 
-    private ForceShowNavigationBarSettingsObserver mForceShowNavigationBarSettingsObserver;
+    private KidsModeSettingsObserver mKidsModeSettingsObserver;
     private boolean mEnabled;
+
+    private final BroadcastReceiver mUserSwitchIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateKidsModeState();
+        }
+    };
 
     DisplayController.OnDisplaysChangedListener mOnDisplaysChangedListener =
             new DisplayController.OnDisplaysChangedListener() {
@@ -138,14 +147,14 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
             Optional<RecentTasksController> recentTasks,
-            ForceShowNavigationBarSettingsObserver forceShowNavigationBarSettingsObserver) {
+            KidsModeSettingsObserver kidsModeSettingsObserver) {
         super(taskOrganizerController, mainExecutor, context, /* compatUI= */ null, recentTasks);
         mContext = context;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
-        mForceShowNavigationBarSettingsObserver = forceShowNavigationBarSettingsObserver;
+        mKidsModeSettingsObserver = kidsModeSettingsObserver;
     }
 
     public KidsModeTaskOrganizer(
@@ -169,13 +178,16 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
      */
     public void initialize(StartingWindowController startingWindowController) {
         initStartingWindow(startingWindowController);
-        if (mForceShowNavigationBarSettingsObserver == null) {
-            mForceShowNavigationBarSettingsObserver = new ForceShowNavigationBarSettingsObserver(
-                    mMainHandler, mContext);
+        if (mKidsModeSettingsObserver == null) {
+            mKidsModeSettingsObserver = new KidsModeSettingsObserver(mMainHandler, mContext);
         }
-        mForceShowNavigationBarSettingsObserver.setOnChangeRunnable(() -> updateKidsModeState());
+        mKidsModeSettingsObserver.setOnChangeRunnable(() -> updateKidsModeState());
         updateKidsModeState();
-        mForceShowNavigationBarSettingsObserver.register();
+        mKidsModeSettingsObserver.register();
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiverForAllUsers(mUserSwitchIntentReceiver, filter, null, mMainHandler);
     }
 
     @Override
@@ -211,7 +223,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     void updateKidsModeState() {
-        final boolean enabled = mForceShowNavigationBarSettingsObserver.isEnabled();
+        final boolean enabled = mKidsModeSettingsObserver.isEnabled();
         if (mEnabled == enabled) {
             return;
         }
@@ -225,6 +237,10 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     void enable() {
+        // Needed since many Kids apps aren't optimised to support both orientations and it will be
+        // hard for kids to understand the app compat mode.
+        // TODO(229961548): Remove ignoreOrientationRequest exception for Kids Mode once possible.
+        setIsIgnoreOrientationRequestDisabled(true);
         final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
         if (displayLayout != null) {
             mDisplayWidth = displayLayout.width();
@@ -245,6 +261,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     void disable() {
+        setIsIgnoreOrientationRequestDisabled(false);
         mDisplayInsetsController.removeInsetsChangedListener(DEFAULT_DISPLAY,
                 mOnInsetsChangedListener);
         mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);

@@ -171,39 +171,53 @@ public final class PackageUtils {
     }
 
     /**
-     * @see #computeSha256DigestForLargeFile(String, String)
+     * Creates a fixed size buffer based on whether the device is low ram or not. This is to be used
+     * with the {@link #computeSha256DigestForLargeFile(String, byte[])} and
+     * {@link #computeSha256DigestForLargeFile(String, byte[], String)} methods.
+     * @return a byte array of size {@link #LOW_RAM_BUFFER_SIZE_BYTES} if the device is a low RAM
+     *          device, otherwise a byte array of size {@link #HIGH_RAM_BUFFER_SIZE_BYTES}
      */
-    public static @Nullable String computeSha256DigestForLargeFile(@NonNull String filePath) {
-        return computeSha256DigestForLargeFile(filePath, null);
+    public static @NonNull byte[] createLargeFileBuffer() {
+        int bufferSize = ActivityManager.isLowRamDeviceStatic()
+                ? LOW_RAM_BUFFER_SIZE_BYTES : HIGH_RAM_BUFFER_SIZE_BYTES;
+        return new byte[bufferSize];
     }
 
     /**
-     * Computes the SHA256 digest of large files.
-     * @param filePath The path to which the file's content is to be hashed.
-     * @param separator Separator between each pair of characters, such as colon, or null to omit.
-     * @return The digest or null if an error occurs.
+     * @see #computeSha256DigestForLargeFile(String, byte[], String)
      */
     public static @Nullable String computeSha256DigestForLargeFile(@NonNull String filePath,
-            @Nullable String separator) {
+            @NonNull byte[] fileBuffer) {
+        return computeSha256DigestForLargeFile(filePath, fileBuffer, null);
+    }
+
+    /**
+     * Computes the SHA256 digest of large files. This is typically useful for large APEXs.
+     * @param filePath The path to which the file's content is to be hashed.
+     * @param fileBuffer A buffer to read file's content into memory. It is strongly recommended to
+     *                   make use of the {@link #createLargeFileBuffer()} method to create this
+     *                   buffer.
+     * @param separator Separator between each pair of characters, such as colon, or null to omit.
+     * @return The SHA256 digest or null if an error occurs.
+     */
+    public static @Nullable String computeSha256DigestForLargeFile(@NonNull String filePath,
+            @NonNull byte[] fileBuffer, @Nullable String separator) {
         MessageDigest messageDigest;
         try {
             messageDigest = MessageDigest.getInstance("SHA256");
             messageDigest.reset();
         } catch (NoSuchAlgorithmException e) {
-            // this shouldn't happen!
+            // this really shouldn't happen!
             return null;
         }
 
-        boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
-        int bufferSize = isLowRamDevice ? LOW_RAM_BUFFER_SIZE_BYTES : HIGH_RAM_BUFFER_SIZE_BYTES;
-
         File f = new File(filePath);
         try {
-            DigestInputStream digestStream = new DigestInputStream(new FileInputStream(f),
+            DigestInputStream digestInputStream = new DigestInputStream(new FileInputStream(f),
                     messageDigest);
-            byte[] buffer = new byte[bufferSize];
-            while (digestStream.read(buffer) != -1);
+            while (digestInputStream.read(fileBuffer) != -1);
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
 

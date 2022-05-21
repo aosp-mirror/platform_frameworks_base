@@ -16,11 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
 import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
@@ -86,6 +82,7 @@ abstract class InsetsSourceProvider {
     private boolean mIsLeashReadyForDispatching;
     private final Rect mSourceFrame = new Rect();
     private final Rect mLastSourceFrame = new Rect();
+    private @NonNull Insets mInsetsHint = Insets.NONE;
 
     private final Consumer<Transaction> mSetLeashPositionConsumer = t -> {
         if (mControl != null) {
@@ -127,19 +124,8 @@ abstract class InsetsSourceProvider {
         mDisplayContent = displayContent;
         mStateController = stateController;
         mFakeControl = new InsetsSourceControl(
-                source.getType(), null /* leash */, new Point(), Insets.NONE);
-
-        switch (source.getType()) {
-            case ITYPE_STATUS_BAR:
-            case ITYPE_NAVIGATION_BAR:
-            case ITYPE_IME:
-            case ITYPE_CLIMATE_BAR:
-            case ITYPE_EXTRA_NAVIGATION_BAR:
-                mControllable = true;
-                break;
-            default:
-                mControllable = false;
-        }
+                source.getType(), null /* leash */, new Point(), InsetsSourceControl.INVALID_HINTS);
+        mControllable = InsetsPolicy.isInsetsTypeControllable(source.getType());
     }
 
     InsetsSource getSource() {
@@ -185,6 +171,7 @@ abstract class InsetsSourceProvider {
         if (windowContainer == null) {
             setServerVisible(false);
             mSource.setVisibleFrame(null);
+            mSource.setInsetsRoundedCornerFrame(false);
             mSourceFrame.setEmpty();
         } else {
             mWindowContainer.getProvidedInsetsSources().put(mSource.getType(), mSource);
@@ -312,6 +299,7 @@ abstract class InsetsSourceProvider {
                 if (!insetsHint.equals(mControl.getInsetsHint())) {
                     changed = true;
                     mControl.setInsetsHint(insetsHint);
+                    mInsetsHint = insetsHint;
                 }
                 mLastSourceFrame.set(mSource.getFrame());
             }
@@ -447,8 +435,8 @@ abstract class InsetsSourceProvider {
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         mControlTarget = target;
         updateVisibility();
-        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition,
-                mSource.calculateInsets(mWindowContainer.getBounds(), true /* ignoreVisibility */));
+        mControl = new InsetsSourceControl(mSource.getType(), leash, surfacePosition, mInsetsHint);
+
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource Control %s for target %s", mControl, mControlTarget);
     }

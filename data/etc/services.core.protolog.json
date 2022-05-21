@@ -397,6 +397,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
+    "-1717147904": {
+      "message": "Current focused window is embeddedWindow. Dispatch KEYCODE_BACK.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-1715268616": {
       "message": "Last window, removing starting window %s",
       "level": "VERBOSE",
@@ -847,6 +853,12 @@
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "-1277068810": {
+      "message": "startBackNavigation currentTask=%s, topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-1270731689": {
       "message": "Attempted to set replacing window on app token with no content %s",
       "level": "WARN",
@@ -1104,6 +1116,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-997565097": {
+      "message": "Focused window found using getFocusedWindowToken",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-993378225": {
       "message": "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING %s in %s",
@@ -1639,6 +1657,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/Task.java"
     },
+    "-451552570": {
+      "message": "Current focused window being animated by recents. Overriding back callback to recents controller callback.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-449118559": {
       "message": "Trying to update display configuration for invalid process, pid=%d",
       "level": "WARN",
@@ -1668,12 +1692,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
-    "-432881038": {
-      "message": "startBackNavigation task=%s, topRunningActivity=%s, applicationBackCallback=%s, systemBackCallback=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-415865166": {
       "message": "findFocusedWindow: Found new focus @ %s",
@@ -1932,12 +1950,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
-    },
-    "-172900257": {
-      "message": "addTaskToTargets, target: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
     "-172326720": {
       "message": "Saving icicle of %s: %s",
@@ -2479,6 +2491,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "323235828": {
+      "message": "Delaying app transition for recents animation to finish",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
     "327461496": {
       "message": "Complete pause: %s",
       "level": "VERBOSE",
@@ -2568,12 +2586,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowContainer.java"
-    },
-    "397105698": {
-      "message": "grantEmbeddedWindowFocus remove request for win=%s dropped since no candidate was found",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "397382873": {
       "message": "Moving to PAUSED: %s %s",
@@ -2677,6 +2689,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowContainerThumbnail.java"
     },
+    "531891870": {
+      "message": "Previous Destination is Activity:%s Task:%s removedContainer:%s, backType=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "535103992": {
       "message": "Wallpaper may change!  Adjusting",
       "level": "VERBOSE",
@@ -2754,12 +2772,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/WindowState.java"
-    },
-    "599897753": {
-      "message": "Previous Activity is %s. Back type is %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "600140673": {
       "message": "checkBootAnimationComplete: Waiting for anim complete",
@@ -3019,6 +3031,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
+    "873160948": {
+      "message": "Activity=%s reparent to taskId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/TaskFragmentOrganizerController.java"
+    },
     "873914452": {
       "message": "goodToGo()",
       "level": "DEBUG",
@@ -3090,6 +3108,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
+    "958338552": {
+      "message": "grantEmbeddedWindowFocus win=%s dropped focus so setting focus to null since no candidate was found",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "959486822": {
       "message": "setSyncGroup #%d on %s",
@@ -3289,6 +3313,12 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
     },
+    "1151072840": {
+      "message": "collectTaskRemoteAnimations, target: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
+    },
     "1164325516": {
       "message": "onExitAnimationDone in %s: exiting=%b remove=%b selfAnimating=%b anim=%s",
       "level": "VERBOSE",
@@ -3300,12 +3330,6 @@
       "level": "WARN",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
-    "1172542963": {
-      "message": "onBackNavigationDone backType=%s, task=%s, prevTaskTopActivity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "1175495463": {
       "message": "ImeContainer just became organized. Reparenting under parent. imeParentSurfaceControl=%s",
@@ -3379,6 +3403,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "1264179654": {
+      "message": "No focused window, defaulting to top current task's window",
+      "level": "WARN",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "1270792394": {
       "message": "Resumed after relaunch %s",
       "level": "DEBUG",
@@ -3396,6 +3426,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "1288920916": {
+      "message": "Error sending initial insets change to WindowContainer overlay",
+      "level": "ERROR",
+      "group": "WM_DEBUG_ANIM",
+      "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
     "1305412562": {
       "message": "Report configuration: %s %s",
@@ -3822,6 +3858,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1778919449": {
+      "message": "onBackNavigationDone backType=%s, task=%s, prevActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "1781673113": {
       "message": "onAnimationFinished(): targetRootTask=%s targetActivity=%s mRestoreTargetBehindRootTask=%s",

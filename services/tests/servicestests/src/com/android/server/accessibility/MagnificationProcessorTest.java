@@ -18,8 +18,11 @@ package com.android.server.accessibility;
 
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_WINDOW;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -252,6 +255,20 @@ public class MagnificationProcessorTest {
         int currentMode = mMagnificationProcessor.getControllingMode(TEST_DISPLAY);
 
         assertEquals(MAGNIFICATION_MODE_WINDOW, currentMode);
+    }
+
+    @Test
+    public void getCurrentMode_changeOtherDisplayMode_returnDefaultModeOnDefaultDisplay() {
+        final int otherDisplayId = TEST_DISPLAY + 1;
+        setMagnificationActivated(otherDisplayId, MAGNIFICATION_MODE_WINDOW);
+
+        int currentMode = mMagnificationProcessor.getControllingMode(TEST_DISPLAY);
+
+        assertFalse(mMockMagnificationController.isActivated(TEST_DISPLAY,
+                ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
+        assertFalse(mMockMagnificationController.isActivated(TEST_DISPLAY,
+                ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
+        assertEquals(MAGNIFICATION_MODE_FULLSCREEN, currentMode);
     }
 
     @Test

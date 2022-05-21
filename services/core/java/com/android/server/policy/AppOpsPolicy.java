@@ -87,8 +87,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private final VoiceInteractionManagerInternal mVoiceInteractionManagerInternal;
 
     /**
-     * Whether this device allows only the HotwordDetectionService to use OP_RECORD_AUDIO_HOTWORD
-     * which doesn't incur the privacy indicator.
+     * Whether this device allows only the HotwordDetectionService to use
+     * OP_RECORD_AUDIO_HOTWORD which doesn't incur the privacy indicator.
      */
     private final boolean mIsHotwordDetectionServiceRequired;
 
@@ -187,8 +187,12 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
         initializeActivityRecognizersTags();
 
-        // If this device does not have telephony, restrict the phone call ops
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+        // Restrict phone call ops if the TelecomService will not start (conditioned on having
+        // FEATURE_MICROPHONE, FEATURE_TELECOM, or FEATURE_TELEPHONY).
+        PackageManager pm = mContext.getPackageManager();
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
+                && !pm.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+                && !pm.hasSystemFeature(PackageManager.FEATURE_TELECOM)) {
             AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
             appOps.setUserRestrictionForUser(AppOpsManager.OP_PHONE_CALL_MICROPHONE, true, mToken,
                     null, UserHandle.USER_ALL);
@@ -424,8 +428,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             if (!mIsHotwordDetectionServiceRequired) {
                 return code;
             }
-            // Only the HotwordDetectionService can use the HOTWORD op which doesn't incur the
-            // privacy indicator. Downgrade to standard RECORD_AUDIO for other processes.
+            // Only the HotwordDetectionService can use the RECORD_AUDIO_HOTWORD op which doesn't
+            // incur the privacy indicator. Downgrade to standard RECORD_AUDIO for other processes.
             final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
                     mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
             if (hotwordDetectionServiceIdentity != null

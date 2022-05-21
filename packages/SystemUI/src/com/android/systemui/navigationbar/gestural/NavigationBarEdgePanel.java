@@ -360,11 +360,10 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
         mSwipeProgressThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_progress_threshold);
-        if (mBackAnimation != null) {
-            mBackAnimation.setSwipeThresholds(mSwipeTriggerThreshold, mSwipeProgressThreshold);
-        }
+        initializeBackAnimation();
 
         setVisibility(GONE);
+
         Executor backgroundExecutor = Dependency.get(Dependency.BACKGROUND_EXECUTOR);
         boolean isPrimaryDisplay = mContext.getDisplayId() == DEFAULT_DISPLAY;
         mRegionSamplingHelper = new RegionSamplingHelper(this,
@@ -391,6 +390,13 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
     public void setBackAnimation(BackAnimation backAnimation) {
         mBackAnimation = backAnimation;
+        initializeBackAnimation();
+    }
+
+    private void initializeBackAnimation() {
+        if (mBackAnimation != null) {
+            mBackAnimation.setSwipeThresholds(mSwipeTriggerThreshold, mSwipeProgressThreshold);
+        }
     }
 
     @Override
@@ -480,7 +486,9 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     public void onMotionEvent(MotionEvent event) {
         if (mBackAnimation != null) {
             mBackAnimation.onBackMotion(
-                    event, mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
+                    event,
+                    event.getActionMasked(),
+                    mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
         }
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();

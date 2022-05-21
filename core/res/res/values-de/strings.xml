@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Von deinem Mobilfunkanbieter für SIM <xliff:g id="SIMNUMBER">%d</xliff:g> vorübergehend deaktiviert"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilfunknetz nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Versuche, das bevorzugte Netzwerk zu ändern. Tippe, um ein anderes auszuwählen."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Notrufe sind eventuell nicht verfügbar"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> unterstützt keine Notrufe über WLAN. Weitere Informationen."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Notrufe nicht möglich"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Notrufe über WLAN nicht möglich"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Warnmeldungen"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Anrufweiterleitung"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Notfallrückrufmodus"</string>
@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"auf deinen Kalender zugreifen"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS senden und abrufen"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Dateien und Dokumente"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Dateien und Dokumente"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"Auf Dateien und Dokumente auf deinem Gerät zugreifen"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musik &amp; andere Audiodateien"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"Zugriff auf Audiodateien auf deinem Gerät"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotos &amp; Videos"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"Zugriff auf Bild- und Videodateien auf deinem Gerät"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musik und Audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"Zugriff auf Musik und Audio auf deinem Gerät"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos und Videos"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"Zugriff auf Fotos und Videos auf deinem Gerät"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"Audio aufnehmen"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Körperliche Aktivität"</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Fehler bei der Authentifizierung"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Displaysperre verwenden"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Displaysperre eingeben, um fortzufahren"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Fingerabdruck wurde nur teilweise erkannt"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Drücke fest auf den Sensor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Fingerabdruck konnte nicht verarbeitet werden. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Reinige den Fingerabdrucksensor und versuch es noch einmal"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Reinige den Sensor und versuche es noch einmal"</string>
@@ -594,11 +594,11 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Anderen Fingerabdruck verwenden"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zu hell"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Versuche, den Finger anders aufzulegen"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ändere jedes Mal die Position deines Fingers"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ändere jedes Mal leicht die Position deines Fingers"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Fingerabdruck nicht erkannt"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Drücke fest auf den Sensor"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Fingerabdruck nicht erkannt"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingerabdruck wurde authentifiziert"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Gesicht authentifiziert"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gesicht authentifiziert, bitte bestätigen"</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Erlaubt einer App, nach der Berechtigung zum Ignorieren der Akku-Leistungsoptimierungen zu fragen."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Alle Pakete abfragen"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Ermöglicht der App, alle installierten Pakete zu sehen."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"Zugriff auf die AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Ermöglicht einer App den Zugriff auf die AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"Zugriff auf AdServices Attribution APIs"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Ermöglicht einer App den Zugriff auf AdServices Attribution APIs."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"Zugriff auf die AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Ermöglicht einer App den Zugriff auf die AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Für Zoomeinstellung zweimal berühren"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget konnte nicht hinzugefügt werden."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Los"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AUS"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> die vollständige Kontrolle über dein Gerät geben?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Wenn du <xliff:g id="SERVICE">%1$s</xliff:g> aktivierst, verwendet dein Gerät nicht die Displaysperre, um die Datenverschlüsselung zu verbessern."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Die vollständige Kontrolle sollte nur für Apps aktiviert werden, die dir Zugang zu App-Funktionen erleichtern. Das ist in der Regel nur ein kleiner Teil der Apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bildschirm aufrufen und steuern"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Die Funktion kann alle Inhalte auf dem Bildschirm lesen und diese Inhalte über andere Apps anzeigen."</string>
@@ -1856,8 +1849,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Von deinem Administrator gelöscht"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Der Energiesparmodus aktiviert das dunkle Design und schränkt Hintergrundaktivitäten, einige Funktionen und optische Effekte sowie manche Netzwerkverbindungen ein oder deaktiviert sie."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Der Energiesparmodus aktiviert das dunkle Design und schränkt Hintergrundaktivitäten, einige Funktionen und optische Effekte und manche Netzwerkverbindungen ein oder deaktiviert sie."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Der Energiesparmodus aktiviert das dunkle Design. Hintergrundaktivitäten, einige Funktionen und optische Effekte und manche Netzwerkverbindungen werden eingeschränkt oder deaktiviert."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Der Energiesparmodus aktiviert das dunkle Design. Hintergrundaktivitäten, einige Funktionen und optische Effekte und manche Netzwerkverbindungen werden eingeschränkt oder deaktiviert."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Der Datensparmodus verhindert, dass manche Apps im Hintergrund Daten senden oder empfangen, sodass weniger Daten verbraucht werden. Auch werden die Datenzugriffe der gerade aktiven App eingeschränkt, was z. B. dazu führen kann, dass Bilder erst angetippt werden müssen, bevor sie sichtbar werden."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktivieren"</string>
@@ -1939,9 +1932,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"App ist nicht verfügbar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ist derzeit nicht verfügbar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nicht verfügbar"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Android TV-Gerät."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Tablet."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Smartphone."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Berechtigung erforderlich"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Weiter auf Smartphone"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-Einstellungen nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tablet-Einstellungen nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Smartphone-Einstellungen nicht verfügbar"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Smartphone."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Diese App wurde für eine ältere Android-Version entwickelt und funktioniert möglicherweise nicht mehr richtig. Prüfe, ob Updates verfügbar sind oder kontaktiere den Entwickler."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Auf Updates prüfen"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du hast neue Nachrichten"</string>
@@ -2032,9 +2038,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"TROTZDEM ÖFFNEN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Schädliche App erkannt"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> den Zugriff auf alle Geräteprotokolle erlauben?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Nur dieses Mal"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Einmaligen Zugriff zulassen"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nicht zulassen"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können diese Protokolle verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen. Daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle gewähren. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugriff auf einige Protokolle oder Informationen auf deinem Gerät. Weitere Informationen"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können sie verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen, daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle erlauben. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugriff auf einige Protokolle oder Informationen auf deinem Gerät. Weitere Informationen"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nicht mehr anzeigen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> möchte Teile von <xliff:g id="APP_2">%2$s</xliff:g> anzeigen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bearbeiten"</string>
@@ -2046,6 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Für weitere Informationen und zum Ändern tippen."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Bitte nicht stören“ wurde geändert"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Benachrichtigungseinstellungen überprüfen"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Ab Android 13 benötigen Apps, die du installierst, die Berechtigung zum Senden von Benachrichtigungen. Wenn du diese Berechtigung für bereits installierte Apps ändern möchtest, tippe hier."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Später erinnern"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Schließen"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Einstellungen"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
@@ -2264,11 +2274,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"„<xliff:g id="MESSAGE">%1$s</xliff:g>“ wurde übersetzt."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Nachricht wurde von <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> auf <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> übersetzt."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Hintergrundaktivität"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Hintergrundaktivität"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> wird im Hintergrund ausgeführt und belastet den Akku. Zum Prüfen tippen."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> wird schon längere Zeit im Hintergrund ausgeführt. Zum Prüfen tippen."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Eine App belastet den Akku übermäßig"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Eine App ist immer noch aktiv"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> läuft im Hintergrund. Tippe hier, um die Akkunutzung zu verwalten."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> kann die Akkulaufzeit beeinträchtigen. Tippe, um die aktiven Apps zu prüfen."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktive Apps prüfen"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Von diesem Gerät aus ist kein Zugriff auf die Kamera möglich"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Zugriff auf die Kamera des Smartphones über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Zugriff auf die Kamera des Tablets über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Standardeinstellung des Systems"</string>
 </resources>

@@ -28,7 +28,6 @@ import androidx.core.graphics.ColorUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Set;
 
@@ -48,7 +47,6 @@ public class KeyguardStatusView extends GridLayout {
 
     private float mDarkAmount = 0;
     private int mTextColor;
-    private float mChildrenAlphaExcludingSmartSpace = 1f;
 
     public KeyguardStatusView(Context context) {
         this(context, null, 0);
@@ -96,23 +94,6 @@ public class KeyguardStatusView extends GridLayout {
         mClockView.setTextColor(blendedTextColor);
     }
 
-    public void setChildrenAlphaExcludingClockView(float alpha) {
-        setChildrenAlphaExcluding(alpha, Set.of(mClockView));
-    }
-
-    /** Sets an alpha value on every view except for the views in the provided set. */
-    public void setChildrenAlphaExcluding(float alpha, Set<View> excludedViews) {
-        mChildrenAlphaExcludingSmartSpace = alpha;
-
-        for (int i = 0; i < mStatusViewContainer.getChildCount(); i++) {
-            final View child = mStatusViewContainer.getChildAt(i);
-
-            if (!excludedViews.contains(child)) {
-                child.setAlpha(alpha);
-            }
-        }
-    }
-
     /** Sets a translationY value on every child view except for the media view. */
     public void setChildrenTranslationYExcludingMediaView(float translationY) {
         setChildrenTranslationYExcluding(translationY, Set.of(mMediaHostContainer));
@@ -129,19 +110,15 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
-    public float getChildrenAlphaExcludingSmartSpace() {
-        return mChildrenAlphaExcludingSmartSpace;
-    }
-
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusView:");
         pw.println("  mDarkAmount: " + mDarkAmount);
         pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
         if (mClockView != null) {
-            mClockView.dump(fd, pw, args);
+            mClockView.dump(pw, args);
         }
         if (mKeyguardSlice != null) {
-            mKeyguardSlice.dump(fd, pw, args);
+            mKeyguardSlice.dump(pw, args);
         }
     }
 }

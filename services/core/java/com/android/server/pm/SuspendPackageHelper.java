@@ -16,10 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.content.pm.PackageManagerInternal.PACKAGE_INSTALLER;
-import static android.content.pm.PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER;
-import static android.content.pm.PackageManagerInternal.PACKAGE_UNINSTALLER;
-import static android.content.pm.PackageManagerInternal.PACKAGE_VERIFIER;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -31,7 +27,6 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Intent;
-import android.content.pm.PackageManagerInternal.KnownPackage;
 import android.content.pm.SuspendDialogInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -489,13 +484,14 @@ public final class SuspendPackageHelper {
             final String activeLauncherPackageName = defaultAppProvider.getDefaultHome(userId);
             final String dialerPackageName = defaultAppProvider.getDefaultDialer(userId);
             final String requiredInstallerPackage =
-                    getKnownPackageName(snapshot, PACKAGE_INSTALLER, userId);
+                    getKnownPackageName(snapshot, KnownPackages.PACKAGE_INSTALLER, userId);
             final String requiredUninstallerPackage =
-                    getKnownPackageName(snapshot, PACKAGE_UNINSTALLER, userId);
+                    getKnownPackageName(snapshot, KnownPackages.PACKAGE_UNINSTALLER, userId);
             final String requiredVerifierPackage =
-                    getKnownPackageName(snapshot, PACKAGE_VERIFIER, userId);
+                    getKnownPackageName(snapshot, KnownPackages.PACKAGE_VERIFIER, userId);
             final String requiredPermissionControllerPackage =
-                    getKnownPackageName(snapshot, PACKAGE_PERMISSION_CONTROLLER, userId);
+                    getKnownPackageName(snapshot, KnownPackages.PACKAGE_PERMISSION_CONTROLLER,
+                            userId);
             for (int i = 0; i < packageNames.length; i++) {
                 canSuspend[i] = false;
                 final String packageName = packageNames[i];
@@ -602,7 +598,7 @@ public final class SuspendPackageHelper {
             final String pkgName = pkgList[i];
             final int uid = uidList[i];
             SparseArray<int[]> allowList = mInjector.getAppsFilter().getVisibilityAllowList(
-                    snapshot.getPackageStateInternal(pkgName, SYSTEM_UID),
+                    snapshot, snapshot.getPackageStateInternal(pkgName, SYSTEM_UID),
                     userIds, snapshot.getPackageStates());
             if (allowList == null) {
                 allowList = new SparseArray<>(0);
@@ -638,8 +634,8 @@ public final class SuspendPackageHelper {
         }
     }
 
-    private String getKnownPackageName(@NonNull Computer snapshot, @KnownPackage int knownPackage,
-            int userId) {
+    private String getKnownPackageName(@NonNull Computer snapshot,
+            @KnownPackages.KnownPackage int knownPackage, int userId) {
         final String[] knownPackages =
                 mPm.getKnownPackageNamesInternal(snapshot, knownPackage, userId);
         return knownPackages.length > 0 ? knownPackages[0] : null;

@@ -261,6 +261,9 @@ class PendingJobQueue {
             }
             final JobStatus job1 = aj1.job;
             final JobStatus job2 = aj2.job;
+            if (job1 == job2) {
+                return 0;
+            }
             // Jobs with an override state set (via adb) should be put first as tests/developers
             // expect the jobs to run immediately.
             if (job1.overrideState != job2.overrideState) {
@@ -381,18 +384,18 @@ class PendingJobQueue {
             return indexOf(job) >= 0;
         }
 
+        /** Returns the current index of the job, or -1 if the job isn't in the list. */
         private int indexOf(@NonNull JobStatus jobStatus) {
-            AdjustedJobStatus adjustedJobStatus = mAdjustedJobStatusPool.acquire();
-            if (adjustedJobStatus == null) {
-                adjustedJobStatus = new AdjustedJobStatus();
+            // Binary search can't guarantee returning the correct index
+            // if there are multiple jobs whose sorting comparison are 0, so we need to iterate
+            // through the entire list.
+            for (int i = 0, size = mJobs.size(); i < size; ++i) {
+                AdjustedJobStatus adjustedJobStatus = mJobs.get(i);
+                if (adjustedJobStatus.job == jobStatus) {
+                    return i;
+                }
             }
-            adjustedJobStatus.adjustedEnqueueTime = jobStatus.enqueueTime;
-            adjustedJobStatus.job = jobStatus;
-
-            int where = Collections.binarySearch(mJobs, adjustedJobStatus, sJobComparator);
-            adjustedJobStatus.clear();
-            mAdjustedJobStatusPool.release(adjustedJobStatus);
-            return where;
+            return -1;
         }
 
         @Nullable

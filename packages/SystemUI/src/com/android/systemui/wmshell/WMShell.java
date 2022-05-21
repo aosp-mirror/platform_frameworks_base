@@ -68,7 +68,6 @@ import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.splitscreen.SplitScreen;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
@@ -201,9 +200,13 @@ public final class WMShell extends CoreStartable
         mPipKeyguardCallback = new KeyguardUpdateMonitorCallback() {
             @Override
             public void onKeyguardVisibilityChanged(boolean showing) {
-                if (showing) {
-                    pip.hidePipMenu(null, null);
-                }
+                pip.onKeyguardVisibilityChanged(showing,
+                        mKeyguardStateController.isAnimatingBetweenKeyguardAndSurfaceBehind());
+            }
+
+            @Override
+            public void onKeyguardDismissAnimationFinished() {
+                pip.onKeyguardDismissAnimationFinished();
             }
         };
         mKeyguardUpdateMonitor.registerCallback(mPipKeyguardCallback);
@@ -399,7 +402,7 @@ public final class WMShell extends CoreStartable
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         // Handle commands if provided
         if (mShellCommandHandler.isPresent()
                 && mShellCommandHandler.get().handleCommand(args, pw)) {

@@ -46,6 +46,10 @@
     <!-- Show PiP enter split icon, which allows apps to directly enter splitscreen from PiP. -->
     <bool name="config_pipEnableEnterSplitButton">false</bool>
 
+    <!-- Time (duration in milliseconds) that the shell waits for an app to close the PiP by itself
+         if a custom action is present before closing it. -->
+    <integer name="config_pipForceCloseDelay">1000</integer>
+
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 
@@ -96,4 +100,7 @@
     <!-- The default gravity for the picture-in-picture window.
          Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
     <integer name="config_defaultPictureInPictureGravity">0x55</integer>
+
+    <!-- Whether to dim a split-screen task when the other is the IME target -->
+    <bool name="config_dimNonImeAttachedSide">true</bool>
 </resources>

@@ -1464,6 +1464,31 @@ please see styles_device_defaults.xml.
         <item name="successColor">@color/lock_pattern_view_success_color</item>
     </style>
 
+    <!-- @hide The style for Autofill half screen dialog button -->
+    <style name="AutofillHalfSheetButton" parent="Widget.Material.Button">
+        <item name="textSize">14sp</item>
+        <item name="fontFamily">google-sans-text-medium</item>
+        <item name="textStyle">normal</item>
+        <item name="textAllCaps">false</item>
+        <item name="layout_marginTop">6dp</item>
+        <item name="layout_marginBottom">6dp</item>
+        <item name="paddingStart">16dp</item>
+        <item name="paddingEnd">16dp</item>
+        <item name="paddingTop">8dp</item>
+        <item name="paddingBottom">8dp</item>
+    </style>
+    <!-- @hide Tonal button for Autofill half screen dialog -->
+    <style name="AutofillHalfSheetTonalButton" parent="AutofillHalfSheetButton">
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="background">@drawable/btn_tonal</item>
+        <item name="stateListAnimator">@null</item>
+    </style>
+    <!-- @hide Outline button for Autofill half screen dialog -->
+    <style name="AutofillHalfSheetOutlinedButton" parent="AutofillHalfSheetButton">
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="background">@drawable/btn_outlined</item>
+    </style>
+
     <!-- @hide Autofill background for popup window (not for fullscreen) -->
     <style name="AutofillDatasetPicker">
         <item name="elevation">4dp</item>
@@ -1501,17 +1526,19 @@ please see styles_device_defaults.xml.
 
     <!-- The style for log access consent text -->
     <style name="AllowLogAccess">
-        <item name="android:layout_width">332dp</item>
         <item name="android:textSize">24sp</item>
-        <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:fontFamily">google-sans</item>
     </style>
 
     <style name="PrimaryAllowLogAccess">
-        <item name="android:layout_width">332dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">google-sans-text</item>
+    </style>
+
+    <style name="PermissionGrantButtonTextAppearance">
+        <item name="android:fontFamily">google-sans-medium</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@android:color/system_neutral1_900</item>
-        <item name="android:fontFamily">google-sans</item>
     </style>
 
     <style name="PermissionGrantButtonTop"
@@ -1520,9 +1547,6 @@ please see styles_device_defaults.xml.
         <item name="android:layout_height">56dp</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:layout_marginBottom">2dp</item>
-        <item name="android:fontFamily">google-sans-medium</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:background">@drawable/grant_permissions_buttons_top</item>
     </style>
 
@@ -1532,9 +1556,6 @@ please see styles_device_defaults.xml.
         <item name="android:layout_height">56dp</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:layout_marginBottom">2dp</item>
-        <item name="android:fontFamily">google-sans-medium</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@android:color/system_neutral1_900</item>
         <item name="android:background">@drawable/grant_permissions_buttons_bottom</item>
     </style>
 

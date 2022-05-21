@@ -47,11 +47,10 @@
 
     <include layout="@layout/quick_status_bar_expanded_header" />
 
-    <ViewStub
-        android:id="@+id/container_stub"
-        android:inflatedId="@+id/qs_footer_actions"
-        android:layout="@layout/new_footer_actions"
-        android:layout_height="@dimen/new_footer_height"
+    <include
+        layout="@layout/footer_actions"
+        android:id="@+id/qs_footer_actions"
+        android:layout_height="@dimen/footer_actions_height"
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
         />

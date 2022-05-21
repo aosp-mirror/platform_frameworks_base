@@ -160,7 +160,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Test
     public void testShow_notifiesVisibility() {
         mBouncer.show(true);
-        verify(mViewMediatorCallback).onBouncerVisiblityChanged(eq(true));
+        verify(mKeyguardStateController).notifyBouncerShowing(eq(true));
         verify(mExpansionCallback).onStartingToShow();
 
         // Not called again when visible
@@ -238,7 +238,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     @Test
     public void testHide_notifiesVisibility() {
         mBouncer.hide(false);
-        verify(mViewMediatorCallback).onBouncerVisiblityChanged(eq(false));
+        verify(mKeyguardStateController).notifyBouncerShowing(eq(false));
     }
 
     @Test
@@ -474,5 +474,20 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         bouncerHideAmount = 0.5f;
         mBouncer.setExpansion(bouncerHideAmount);
         verify(callback, never()).onExpansionChanged(bouncerHideAmount);
+    }
+
+    @Test
+    public void testOnResumeCalledForFullscreenBouncerOnSecondShow() {
+        // GIVEN a security mode which requires fullscreen bouncer
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
+                .thenReturn(KeyguardSecurityModel.SecurityMode.SimPin);
+        mBouncer.show(true);
+
+        // WHEN a second call to show occurs, the bouncer will already by visible
+        reset(mKeyguardHostViewController);
+        mBouncer.show(true);
+
+        // THEN ensure the ViewController is told to resume
+        verify(mKeyguardHostViewController).onResume();
     }
 }

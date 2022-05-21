@@ -42,7 +42,7 @@ import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
-import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter
 import com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA
@@ -63,7 +63,7 @@ class UserSwitcherActivity @Inject constructor(
     private val layoutInflater: LayoutInflater,
     private val falsingManager: FalsingManager,
     private val userManager: UserManager,
-    private val shadeController: ShadeController
+    private val userTracker: UserTracker
 ) : LifecycleActivity() {
 
     private lateinit var parent: ViewGroup
@@ -71,6 +71,11 @@ class UserSwitcherActivity @Inject constructor(
     private var popupMenu: UserSwitcherPopupMenu? = null
     private lateinit var addButton: View
     private var addUserRecords = mutableListOf<UserRecord>()
+    private val userSwitchedCallback: UserTracker.Callback = object : UserTracker.Callback {
+        override fun onUserChanged(newUser: Int, userContext: Context) {
+            finish()
+        }
+    }
     // When the add users options become available, insert another option to manage users
     private val manageUserRecord = UserRecord(
         null /* info */,
@@ -215,6 +220,7 @@ class UserSwitcherActivity @Inject constructor(
         initBroadcastReceiver()
 
         parent.post { buildUserViews() }
+        userTracker.addCallback(userSwitchedCallback, mainExecutor)
     }
 
     private fun showPopupMenu() {
@@ -335,6 +341,7 @@ class UserSwitcherActivity @Inject constructor(
         super.onDestroy()
 
         broadcastDispatcher.unregisterReceiver(broadcastReceiver)
+        userTracker.removeCallback(userSwitchedCallback)
     }
 
     private fun initBroadcastReceiver() {

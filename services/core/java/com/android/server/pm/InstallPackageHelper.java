@@ -72,6 +72,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VIRTUAL_PRELOAD;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
+import static com.android.server.pm.PackageManagerService.SCAN_DROP_CACHE;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_IGNORE_FROZEN;
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
@@ -152,6 +153,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.ViewCompiler;
+import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -266,8 +268,11 @@ final class InstallPackageHelper {
                 // Prune unused SharedUserSetting
                 if (mPm.mSettings.checkAndPruneSharedUserLPw(requestSharedUserSetting, false)) {
                     // Set the app ID in removed info for UID_REMOVED broadcasts
-                    reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId =
-                            requestSharedUserSetting.mAppId;
+                    if (reconciledPkg.mInstallResult != null
+                            && reconciledPkg.mInstallResult.mRemovedInfo != null) {
+                        reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId =
+                                requestSharedUserSetting.mAppId;
+                    }
                 }
             }
         }
@@ -427,7 +432,7 @@ final class InstallPackageHelper {
         } else {
             // We're doing major surgery on this package, so it better be frozen
             // right now to keep it from launching
-            mPm.checkPackageFrozen(pkgName);
+            mPm.snapshotComputer().checkPackageFrozen(pkgName);
         }
 
         final boolean isReplace =
@@ -461,9 +466,9 @@ final class InstallPackageHelper {
             KeySetManagerService ksms = mPm.mSettings.getKeySetManagerService();
             ksms.addScannedPackageLPw(pkg);
 
-            mPm.mComponentResolver.addAllComponents(pkg, chatty, mPm.mSetupWizardPackage,
-                    mPm.snapshotComputer());
-            mPm.mAppsFilter.addPackage(pkgSetting, isReplace);
+            final Computer snapshot = mPm.snapshotComputer();
+            mPm.mComponentResolver.addAllComponents(pkg, chatty, mPm.mSetupWizardPackage, snapshot);
+            mPm.mAppsFilter.addPackage(snapshot, pkgSetting, isReplace);
             mPm.addAllPackageProperties(pkg);
 
             if (oldPkgSetting == null || oldPkgSetting.getPkg() == null) {
@@ -643,6 +648,10 @@ final class InstallPackageHelper {
             int userId, PackageInstalledInfo res, @Nullable PostInstallData data) {
         if (DEBUG_INSTALL) {
             Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package=" + res.mPkg);
+        }
+
+        if (res.mPkg != null) {
+            PackageManagerServiceUtils.verifySelinuxLabels(res.mPkg.getPath());
         }
 
         // A restore should be requested at this point if (a) the install
@@ -1913,7 +1922,7 @@ final class InstallPackageHelper {
                         .setLastUpdateTime(System.currentTimeMillis());
 
                 res.mRemovedInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
-                        reconciledPkg.mPkgSetting, request.mAllUsers,
+                        mPm.snapshotComputer(), reconciledPkg.mPkgSetting, request.mAllUsers,
                         mPm.mSettings.getPackagesLocked());
                 if (reconciledPkg.mPrepareResult.mSystem) {
                     // Remove existing system package
@@ -2542,7 +2551,6 @@ final class InstallPackageHelper {
         ArrayList<String>[] components;
         int size = 0;
         int[] uids;
-        Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
 
         synchronized (mPm.mLock) {
             final SparseArray<ArrayMap<String, ArrayList<String>>> userIdToPackagesToComponents =
@@ -2581,7 +2589,6 @@ final class InstallPackageHelper {
             mPm.sendPackageChangedBroadcast(snapshot, packages[i], true /* dontKillApp */,
                     components[i], uids[i], null /* reason */);
         }
-        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
     }
 
     void handlePackagePostInstall(PackageInstalledInfo res, InstallArgs installArgs,
@@ -2709,9 +2716,9 @@ final class InstallPackageHelper {
                 // Send to all running apps.
                 final SparseArray<int[]> newBroadcastAllowList;
                 synchronized (mPm.mLock) {
-                    newBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
-                            mPm.snapshotComputer()
-                                    .getPackageStateInternal(packageName, Process.SYSTEM_UID),
+                    final Computer snapshot = mPm.snapshotComputer();
+                    newBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(snapshot,
+                            snapshot.getPackageStateInternal(packageName, Process.SYSTEM_UID),
                             updateUserIds, mPm.mSettings.getPackagesLocked());
                 }
                 mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
@@ -3413,6 +3420,11 @@ final class InstallPackageHelper {
                 // Ignore entries which are not packages
                 continue;
             }
+            if ((scanFlags & SCAN_DROP_CACHE) != 0) {
+                final PackageCacher cacher = new PackageCacher(mPm.getCacheDir());
+                Log.w(TAG, "Dropping cache of " + file.getAbsolutePath());
+                cacher.cleanCachedResult(file);
+            }
             parallelPackageParser.submit(file, parseFlags);
             fileCount++;
         }
@@ -3565,6 +3577,7 @@ final class InstallPackageHelper {
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
+        PackageManagerServiceUtils.verifySelinuxLabels(parsedPackage.getPath());
 
         final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
                 parsedPackage, parseFlags, scanFlags, user);
@@ -4186,8 +4199,8 @@ final class InstallPackageHelper {
                 assertOverlayIsValid(pkg, parseFlags, scanFlags);
             }
 
-            // If the package is not on a system partition ensure it is signed with at least the
-            // minimum signature scheme version required for its target SDK.
+            // Ensure the package is signed with at least the minimum signature scheme version
+            // required for its target SDK.
             ScanPackageUtils.assertMinSignatureSchemeIsValid(pkg, parseFlags);
         }
     }

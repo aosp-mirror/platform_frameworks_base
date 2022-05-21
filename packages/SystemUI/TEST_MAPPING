@@ -16,12 +16,6 @@
         },
         {
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
-        },
-        {
-            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
-        },
-        {
-            "exclude-annotation": "android.platform.test.scenario.annotation.FoldableOnly"
         }
       ]
     }
@@ -93,12 +87,6 @@
         },
         {
             "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
-        },
-        {
-            "exclude-annotation": "android.platform.test.scenario.annotation.FoldableOnly"
         }
       ]
     }
@@ -115,12 +103,6 @@
         },
         {
             "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
-        },
-        {
-            "exclude-annotation": "android.platform.test.scenario.annotation.FoldableOnly"
         }
       ]
     }
@@ -140,69 +122,6 @@
         {
           "include-filter": "android.platform.tests.NotificationTest"
         }
-      ]
-    }
-  ],
-  "large-screen-postsubmit": [
-      {
-        "name": "PlatformScenarioTests",
-        "options" : [
-          {
-              "include-filter": "android.platform.test.scenario.sysui"
-          },
-          {
-              "include-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
-          },
-          {
-              "exclude-annotation": "org.junit.Ignore"
-          },
-          {
-              "exclude-annotation": "androidx.test.filters.FlakyTest"
-          }
-        ]
-      }
-  ],
-  "hubui-postsubmit": [
-      {
-        "name": "PlatformScenarioTests",
-        "options": [
-          {
-              "include-filter": "android.platform.test.scenario.hubui"
-          },
-          {
-              "include-annotation": "android.platform.test.scenario.annotation.HubUi"
-          },
-          {
-              "exclude-annotation": "org.junit.Ignore"
-          },
-          {
-              "exclude-annotation": "androidx.test.filters.FlakyTest"
-          }
-      ]
-    }
-  ],
-  "hubui-presubmit": [
-      {
-        "name": "PlatformScenarioTests",
-        "options": [
-          {
-              "include-annotation": "android.platform.test.annotations.Presubmit"
-          },
-          {
-              "include-annotation": "android.platform.test.scenario.annotation.HubUi"
-          },
-          {
-              "include-filter": "android.platform.test.scenario.hubui"
-          },
-          {
-              "exclude-annotation": "org.junit.Ignore"
-          },
-          {
-              "exclude-annotation": "androidx.test.filters.FlakyTest"
-          },
-          {
-              "exclude-annotation": "android.platform.test.annotations.Postsubmit"
-          }
       ]
     }
   ]

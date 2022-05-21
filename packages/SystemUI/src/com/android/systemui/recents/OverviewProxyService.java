@@ -41,6 +41,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_D
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING;
 
 import android.annotation.FloatRange;
 import android.app.ActivityTaskManager;
@@ -77,6 +78,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.AssistUtils;
+import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
@@ -114,7 +117,6 @@ import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.transition.ShellTransitions;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -507,6 +509,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     backAnimation.createExternalInterface().asBinder()));
 
             try {
+                Log.d(TAG_OPS, "OverviewProxyService connected, initializing overview proxy");
                 mOverviewProxy.onInitialize(params);
             } catch (RemoteException e) {
                 mCurrentBoundedUserId = -1;
@@ -551,6 +554,30 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
             = this::cleanupAfterDeath;
 
+    private final IVoiceInteractionSessionListener mVoiceInteractionSessionListener =
+            new IVoiceInteractionSessionListener.Stub() {
+        @Override
+        public void onVoiceSessionShown() {
+            // Do nothing
+        }
+
+        @Override
+        public void onVoiceSessionHidden() {
+            // Do nothing
+        }
+
+        @Override
+        public void onVoiceSessionWindowVisibilityChanged(boolean visible) {
+            mContext.getMainExecutor().execute(() ->
+                    OverviewProxyService.this.onVoiceSessionWindowVisibilityChanged(visible));
+        }
+
+        @Override
+        public void onSetUiHints(Bundle hints) {
+            // Do nothing
+        }
+    };
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyService(Context context, CommandQueue commandQueue,
@@ -569,6 +596,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             ScreenLifecycle screenLifecycle,
             UiEventLogger uiEventLogger,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
+            AssistUtils assistUtils,
             DumpManager dumpManager) {
         super(broadcastDispatcher);
         mContext = context;
@@ -640,12 +668,20 @@ public class OverviewProxyService extends CurrentUserTracker implements
         startConnectionToCurrentUser();
         mStartingSurface = startingSurface;
         mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
+
+        // Listen for assistant changes
+        assistUtils.registerVoiceInteractionSessionListener(mVoiceInteractionSessionListener);
     }
 
     @Override
     public void onUserSwitched(int newUserId) {
         mConnectionBackoffAttempts = 0;
         internalConnectToCurrentUser();
+    }
+
+    public void onVoiceSessionWindowVisibilityChanged(boolean visible) {
+        mSysUiState.setFlag(SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING, visible)
+                .commitUpdate(mContext.getDisplayId());
     }
 
     public void notifyBackAction(boolean completed, int downX, int downY, boolean isButton,
@@ -1014,7 +1050,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
         pw.print("  isConnected="); pw.println(mOverviewProxy != null);
         pw.print("  mIsEnabled="); pw.println(isEnabled());
@@ -1031,7 +1067,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         pw.print("  mNavBarButtonAlpha="); pw.println(mNavBarButtonAlpha);
         pw.print("  mActiveNavBarRegion="); pw.println(mActiveNavBarRegion);
         pw.print("  mNavBarMode="); pw.println(mNavBarMode);
-        mSysUiState.dump(fd, pw, args);
+        mSysUiState.dump(pw, args);
     }
 
     public interface OverviewProxyListener {

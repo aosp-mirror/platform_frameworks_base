@@ -16,6 +16,8 @@
 
 package com.android.server.power;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,6 +58,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.Executor;
+
 /**
  * Tests for {@link com.android.server.power.Notifier}
  */
@@ -79,6 +83,7 @@ public class NotifierTest {
     private Context mContextSpy;
     private Resources mResourcesSpy;
     private TestLooper mTestLooper = new TestLooper();
+    private FakeExecutor mTestExecutor = new FakeExecutor();
     private Notifier mNotifier;
 
     @Before
@@ -107,6 +112,7 @@ public class NotifierTest {
         // WHEN wired charging starts
         mNotifier.onWiredChargingStarted(USER_ID);
         mTestLooper.dispatchAll();
+        mTestExecutor.simulateAsyncExecutionOfLastCommand();
 
         // THEN the device vibrates once
         verify(mVibrator, times(1)).vibrate(any(), any(VibrationAttributes.class));
@@ -122,6 +128,7 @@ public class NotifierTest {
         // WHEN wired charging starts
         mNotifier.onWiredChargingStarted(USER_ID);
         mTestLooper.dispatchAll();
+        mTestExecutor.simulateAsyncExecutionOfLastCommand();
 
         // THEN the device doesn't vibrate
         verify(mVibrator, never()).vibrate(any(), any(VibrationAttributes.class));
@@ -137,6 +144,7 @@ public class NotifierTest {
         // WHEN wireless charging starts
         mNotifier.onWirelessChargingStarted(5, USER_ID);
         mTestLooper.dispatchAll();
+        mTestExecutor.simulateAsyncExecutionOfLastCommand();
 
         // THEN the device vibrates once
         verify(mVibrator, times(1)).vibrate(any(), any(VibrationAttributes.class));
@@ -152,6 +160,7 @@ public class NotifierTest {
         // WHEN wireless charging starts
         mNotifier.onWirelessChargingStarted(5, USER_ID);
         mTestLooper.dispatchAll();
+        mTestExecutor.simulateAsyncExecutionOfLastCommand();
 
         // THEN the device doesn't vibrate
         verify(mVibrator, never()).vibrate(any(), any(VibrationAttributes.class));
@@ -170,6 +179,7 @@ public class NotifierTest {
         // WHEN wired charging starts
         mNotifier.onWiredChargingStarted(USER_ID);
         mTestLooper.dispatchAll();
+        mTestExecutor.simulateAsyncExecutionOfLastCommand();
 
         // THEN the device doesn't vibrate
         verify(mVibrator, never()).vibrate(any(), any(VibrationAttributes.class));
@@ -186,6 +196,7 @@ public class NotifierTest {
         // WHEN wireless charging starts
         mNotifier.onWirelessChargingStarted(5, USER_ID);
         mTestLooper.dispatchAll();
+        mTestExecutor.simulateAsyncExecutionOfLastCommand();
 
         // THEN the charging animation is triggered
         verify(mStatusBarManagerInternal, times(1)).showChargingAnimation(5);
@@ -202,6 +213,7 @@ public class NotifierTest {
         // WHEN wireless charging starts
         mNotifier.onWirelessChargingStarted(5, USER_ID);
         mTestLooper.dispatchAll();
+        mTestExecutor.simulateAsyncExecutionOfLastCommand();
 
         // THEN the charging animation never gets called
         verify(mStatusBarManagerInternal, never()).showChargingAnimation(anyInt());
@@ -211,7 +223,8 @@ public class NotifierTest {
         @Override
         Notifier createNotifier(Looper looper, Context context, IBatteryStats batteryStats,
                 SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-                FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector) {
+                FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector,
+                Executor backgroundExecutor) {
             return mNotifierMock;
         }
 
@@ -300,6 +313,32 @@ public class NotifierTest {
                 mInjector.createSuspendBlocker(mService, "testBlocker"),
                 null,
                 null,
-                null);
+                null,
+                mTestExecutor);
     }
+
+    private static class FakeExecutor implements Executor {
+        private Runnable mLastCommand;
+
+        @Override
+        public void execute(Runnable command) {
+            assertNull(mLastCommand);
+            assertNotNull(command);
+            mLastCommand = command;
+        }
+
+        public Runnable getAndResetLastCommand() {
+            Runnable toReturn = mLastCommand;
+            mLastCommand = null;
+            return toReturn;
+        }
+
+        public void simulateAsyncExecutionOfLastCommand() {
+            Runnable toRun = getAndResetLastCommand();
+            if (toRun != null) {
+                toRun.run();
+            }
+        }
+    }
+
 }

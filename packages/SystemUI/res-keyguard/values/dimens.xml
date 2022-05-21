@@ -38,6 +38,9 @@
     <!-- Margin around the various security views -->
     <dimen name="keyguard_security_view_top_margin">8dp</dimen>
 
+    <!-- Minimum bottom margin under the security view -->
+    <dimen name="keyguard_security_view_bottom_margin">60dp</dimen>
+
     <dimen name="keyguard_eca_top_margin">18dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
 

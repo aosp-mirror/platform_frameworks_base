@@ -41,7 +41,6 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
@@ -237,7 +236,7 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(TAG);
         mMagnificationControllerSupplier.forEach(
                 magnificationController -> magnificationController.dump(pw));

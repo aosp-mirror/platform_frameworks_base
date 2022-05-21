@@ -319,7 +319,7 @@ public class GnssManagerService {
         }
 
         if (mGnssAntennaInfoProvider.isSupported()) {
-            ipw.println("Navigation Message Provider:");
+            ipw.println("Antenna Info Provider:");
             ipw.increaseIndent();
             ipw.println("Antenna Infos: " + mGnssAntennaInfoProvider.getAntennaInfos());
             mGnssAntennaInfoProvider.dump(fd, ipw, args);

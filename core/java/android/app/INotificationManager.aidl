@@ -57,6 +57,7 @@ interface INotificationManager
     @UnsupportedAppUsage
     void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id, int userId);
 
+    boolean isInCall(String pkg, int uid);
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
     boolean hasSentValidMsg(String pkg, int uid);
@@ -76,6 +77,7 @@ interface INotificationManager
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
+    boolean isImportanceLocked(String pkg, int uid);
 
     List<String> getAllowedAssistantAdjustments(String pkg);
     void allowAssistantAdjustment(String adjustmentType);

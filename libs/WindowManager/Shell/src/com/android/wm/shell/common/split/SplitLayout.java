@@ -23,7 +23,6 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
-import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
@@ -56,6 +55,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.R;
@@ -63,6 +63,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.InteractionJankMonitorUtils;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 
 import java.io.PrintWriter;
@@ -72,6 +73,10 @@ import java.io.PrintWriter;
  * divide position changes.
  */
 public final class SplitLayout implements DisplayInsetsController.OnInsetsChangedListener {
+
+    public static final int PARALLAX_NONE = 0;
+    public static final int PARALLAX_DISMISSING = 1;
+    public static final int PARALLAX_ALIGN_CENTER = 2;
 
     private final int mDividerWindowWidth;
     private final int mDividerInsets;
@@ -88,7 +93,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private final SplitWindowManager mSplitWindowManager;
     private final DisplayImeController mDisplayImeController;
     private final ImePositionProcessor mImePositionProcessor;
-    private final DismissingEffectPolicy mDismissingEffectPolicy;
+    private final ResizingEffectPolicy mSurfaceEffectPolicy;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final InsetsState mInsetsState = new InsetsState();
 
@@ -102,11 +107,13 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private int mOrientation;
     private int mRotation;
 
+    private final boolean mDimNonImeSide;
+
     public SplitLayout(String windowName, Context context, Configuration configuration,
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
             DisplayImeController displayImeController, ShellTaskOrganizer taskOrganizer,
-            boolean applyDismissingParallax) {
+            int parallaxType) {
         mContext = context.createConfigurationContext(configuration);
         mOrientation = configuration.orientation;
         mRotation = configuration.windowConfiguration.getRotation();
@@ -116,7 +123,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 parentContainerCallbacks);
         mTaskOrganizer = taskOrganizer;
         mImePositionProcessor = new ImePositionProcessor(mContext.getDisplayId());
-        mDismissingEffectPolicy = new DismissingEffectPolicy(applyDismissingParallax);
+        mSurfaceEffectPolicy = new ResizingEffectPolicy(parallaxType);
 
         final Resources resources = context.getResources();
         mDividerSize = resources.getDimensionPixelSize(R.dimen.split_divider_bar_width);
@@ -126,6 +133,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mRootBounds.set(configuration.windowConfiguration.getBounds());
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds, null);
         resetDividerPosition();
+
+        mDimNonImeSide = resources.getBoolean(R.bool.config_dimNonImeAttachedSide);
     }
 
     private int getDividerInsets(Resources resources, Display display) {
@@ -202,24 +211,24 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Applies new configuration, returns {@code false} if there's no effect to the layout. */
     public boolean updateConfiguration(Configuration configuration) {
+        // Always update configuration after orientation changed to make sure to render divider bar
+        // with proper resources that matching screen orientation.
+        final int orientation = configuration.orientation;
+        if (mOrientation != orientation) {
+            mContext = mContext.createConfigurationContext(configuration);
+            mSplitWindowManager.setConfiguration(configuration);
+            mOrientation = orientation;
+        }
+
         // Update the split bounds when necessary. Besides root bounds changed, split bounds need to
         // be updated when the rotation changed to cover the case that users rotated the screen 180
         // degrees.
-        // Make sure to render the divider bar with proper resources that matching the screen
-        // orientation.
         final int rotation = configuration.windowConfiguration.getRotation();
         final Rect rootBounds = configuration.windowConfiguration.getBounds();
-        final int orientation = configuration.orientation;
-
-        if (mOrientation == orientation
-                && rotation == mRotation
-                && mRootBounds.equals(rootBounds)) {
+        if (mRotation == rotation && mRootBounds.equals(rootBounds)) {
             return false;
         }
 
-        mContext = mContext.createConfigurationContext(configuration);
-        mSplitWindowManager.setConfiguration(configuration);
-        mOrientation = orientation;
         mTempRect.set(mRootBounds);
         mRootBounds.set(rootBounds);
         mRotation = rotation;
@@ -282,7 +291,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         }
         DockedDividerUtils.sanitizeStackBounds(mBounds1, true /** topLeft */);
         DockedDividerUtils.sanitizeStackBounds(mBounds2, false /** topLeft */);
-        mDismissingEffectPolicy.applyDividerPosition(position, isLandscape);
+        mSurfaceEffectPolicy.applyDividerPosition(position, isLandscape);
     }
 
     /** Inflates {@link DividerView} on the root surface. */
@@ -431,6 +440,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             mSplitLayoutHandler.onLayoutSizeChanged(this);
             return;
         }
+        InteractionJankMonitorUtils.beginTracing(InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE,
+                mSplitWindowManager.getDividerView(), "Divider fling");
         ValueAnimator animator = ValueAnimator
                 .ofInt(from, to)
                 .setDuration(250);
@@ -443,6 +454,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                 if (flingFinishedCallback != null) {
                     flingFinishedCallback.run();
                 }
+                InteractionJankMonitorUtils.endTracing(
+                        InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE);
             }
 
             @Override
@@ -487,13 +500,14 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Apply recorded surface layout to the {@link SurfaceControl.Transaction}. */
     public void applySurfaceChanges(SurfaceControl.Transaction t, SurfaceControl leash1,
-            SurfaceControl leash2, SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
+            SurfaceControl leash2, SurfaceControl dimLayer1, SurfaceControl dimLayer2,
+            boolean applyResizingOffset) {
         final SurfaceControl dividerLeash = getDividerLeash();
         if (dividerLeash != null) {
             mTempRect.set(getRefDividerBounds());
             t.setPosition(dividerLeash, mTempRect.left, mTempRect.top);
             // Resets layer of divider bar to make sure it is always on top.
-            t.setLayer(dividerLeash, SPLIT_DIVIDER_LAYER);
+            t.setLayer(dividerLeash, Integer.MAX_VALUE);
         }
         mTempRect.set(getRefBounds1());
         t.setPosition(leash1, mTempRect.left, mTempRect.top)
@@ -507,7 +521,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             return;
         }
 
-        mDismissingEffectPolicy.adjustDismissingSurface(t, leash1, leash2, dimLayer1, dimLayer2);
+        mSurfaceEffectPolicy.adjustDimSurface(t, dimLayer1, dimLayer2);
+        if (applyResizingOffset) {
+            mSurfaceEffectPolicy.adjustRootSurface(t, leash1, leash2);
+        }
     }
 
     /** Apply recorded task layout to the {@link WindowContainerTransaction}. */
@@ -591,7 +608,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
          * Calls when resizing the split bounds.
          *
          * @see #applySurfaceChanges(SurfaceControl.Transaction, SurfaceControl, SurfaceControl,
-         * SurfaceControl, SurfaceControl)
+         * SurfaceControl, SurfaceControl, boolean)
          */
         void onLayoutSizeChanging(SplitLayout layout);
 
@@ -601,7 +618,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
          * @see #applyTaskChanges(WindowContainerTransaction, ActivityManager.RunningTaskInfo,
          * ActivityManager.RunningTaskInfo)
          * @see #applySurfaceChanges(SurfaceControl.Transaction, SurfaceControl, SurfaceControl,
-         * SurfaceControl, SurfaceControl)
+         * SurfaceControl, SurfaceControl, boolean)
          */
         void onLayoutSizeChanged(SplitLayout layout);
 
@@ -610,7 +627,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
          * panel.
          *
          * @see #applySurfaceChanges(SurfaceControl.Transaction, SurfaceControl, SurfaceControl,
-         * SurfaceControl, SurfaceControl)
+         * SurfaceControl, SurfaceControl, boolean)
          */
         void onLayoutPositionChanging(SplitLayout layout);
 
@@ -638,21 +655,25 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
      * Calculates and applies proper dismissing parallax offset and dimming value to hint users
      * dismissing gesture.
      */
-    private class DismissingEffectPolicy {
+    private class ResizingEffectPolicy {
         /** Indicates whether to offset splitting bounds to hint dismissing progress or not. */
-        private final boolean mApplyParallax;
+        private final int mParallaxType;
+
+        int mShrinkSide = DOCKED_INVALID;
 
         // The current dismissing side.
         int mDismissingSide = DOCKED_INVALID;
 
         // The parallax offset to hint the dismissing side and progress.
-        final Point mDismissingParallaxOffset = new Point();
+        final Point mParallaxOffset = new Point();
 
         // The dimming value to hint the dismissing side and progress.
         float mDismissingDimValue = 0.0f;
+        final Rect mContentBounds = new Rect();
+        final Rect mSurfaceBounds = new Rect();
 
-        DismissingEffectPolicy(boolean applyDismissingParallax) {
-            mApplyParallax = applyDismissingParallax;
+        ResizingEffectPolicy(int parallaxType) {
+            mParallaxType = parallaxType;
         }
 
         /**
@@ -663,7 +684,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
          */
         void applyDividerPosition(int position, boolean isLandscape) {
             mDismissingSide = DOCKED_INVALID;
-            mDismissingParallaxOffset.set(0, 0);
+            mParallaxOffset.set(0, 0);
             mDismissingDimValue = 0;
 
             int totalDismissingDistance = 0;
@@ -677,15 +698,39 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                         - mDividerSnapAlgorithm.getDismissEndTarget().position;
             }
 
+            final boolean topLeftShrink = isLandscape
+                    ? position < mWinBounds1.right : position < mWinBounds1.bottom;
+            if (topLeftShrink) {
+                mShrinkSide = isLandscape ? DOCKED_LEFT : DOCKED_TOP;
+                mContentBounds.set(mWinBounds1);
+                mSurfaceBounds.set(mBounds1);
+            } else {
+                mShrinkSide = isLandscape ? DOCKED_RIGHT : DOCKED_BOTTOM;
+                mContentBounds.set(mWinBounds2);
+                mSurfaceBounds.set(mBounds2);
+            }
+
             if (mDismissingSide != DOCKED_INVALID) {
                 float fraction = Math.max(0,
                         Math.min(mDividerSnapAlgorithm.calculateDismissingFraction(position), 1f));
                 mDismissingDimValue = DIM_INTERPOLATOR.getInterpolation(fraction);
-                fraction = calculateParallaxDismissingFraction(fraction, mDismissingSide);
+                if (mParallaxType == PARALLAX_DISMISSING) {
+                    fraction = calculateParallaxDismissingFraction(fraction, mDismissingSide);
+                    if (isLandscape) {
+                        mParallaxOffset.x = (int) (fraction * totalDismissingDistance);
+                    } else {
+                        mParallaxOffset.y = (int) (fraction * totalDismissingDistance);
+                    }
+                }
+            }
+
+            if (mParallaxType == PARALLAX_ALIGN_CENTER) {
                 if (isLandscape) {
-                    mDismissingParallaxOffset.x = (int) (fraction * totalDismissingDistance);
+                    mParallaxOffset.x =
+                            (mSurfaceBounds.width() - mContentBounds.width()) / 2;
                 } else {
-                    mDismissingParallaxOffset.y = (int) (fraction * totalDismissingDistance);
+                    mParallaxOffset.y =
+                            (mSurfaceBounds.height() - mContentBounds.height()) / 2;
                 }
             }
         }
@@ -705,41 +750,66 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         }
 
         /** Applies parallax offset and dimming value to the root surface at the dismissing side. */
-        boolean adjustDismissingSurface(SurfaceControl.Transaction t,
-                SurfaceControl leash1, SurfaceControl leash2,
+        void adjustRootSurface(SurfaceControl.Transaction t,
+                SurfaceControl leash1, SurfaceControl leash2) {
+            SurfaceControl targetLeash = null;
+
+            if (mParallaxType == PARALLAX_DISMISSING) {
+                switch (mDismissingSide) {
+                    case DOCKED_TOP:
+                    case DOCKED_LEFT:
+                        targetLeash = leash1;
+                        mTempRect.set(mBounds1);
+                        break;
+                    case DOCKED_BOTTOM:
+                    case DOCKED_RIGHT:
+                        targetLeash = leash2;
+                        mTempRect.set(mBounds2);
+                        break;
+                }
+            } else if (mParallaxType == PARALLAX_ALIGN_CENTER) {
+                switch (mShrinkSide) {
+                    case DOCKED_TOP:
+                    case DOCKED_LEFT:
+                        targetLeash = leash1;
+                        mTempRect.set(mBounds1);
+                        break;
+                    case DOCKED_BOTTOM:
+                    case DOCKED_RIGHT:
+                        targetLeash = leash2;
+                        mTempRect.set(mBounds2);
+                        break;
+                }
+            }
+            if (mParallaxType != PARALLAX_NONE && targetLeash != null) {
+                t.setPosition(targetLeash,
+                        mTempRect.left + mParallaxOffset.x, mTempRect.top + mParallaxOffset.y);
+                // Transform the screen-based split bounds to surface-based crop bounds.
+                mTempRect.offsetTo(-mParallaxOffset.x, -mParallaxOffset.y);
+                t.setWindowCrop(targetLeash, mTempRect);
+            }
+        }
+
+        void adjustDimSurface(SurfaceControl.Transaction t,
                 SurfaceControl dimLayer1, SurfaceControl dimLayer2) {
-            SurfaceControl targetLeash, targetDimLayer;
+            SurfaceControl targetDimLayer;
             switch (mDismissingSide) {
                 case DOCKED_TOP:
                 case DOCKED_LEFT:
-                    targetLeash = leash1;
                     targetDimLayer = dimLayer1;
-                    mTempRect.set(mBounds1);
                     break;
                 case DOCKED_BOTTOM:
                 case DOCKED_RIGHT:
-                    targetLeash = leash2;
                     targetDimLayer = dimLayer2;
-                    mTempRect.set(mBounds2);
                     break;
                 case DOCKED_INVALID:
                 default:
                     t.setAlpha(dimLayer1, 0).hide(dimLayer1);
                     t.setAlpha(dimLayer2, 0).hide(dimLayer2);
-                    return false;
-            }
-
-            if (mApplyParallax) {
-                t.setPosition(targetLeash,
-                        mTempRect.left + mDismissingParallaxOffset.x,
-                        mTempRect.top + mDismissingParallaxOffset.y);
-                // Transform the screen-based split bounds to surface-based crop bounds.
-                mTempRect.offsetTo(-mDismissingParallaxOffset.x, -mDismissingParallaxOffset.y);
-                t.setWindowCrop(targetLeash, mTempRect);
+                    return;
             }
             t.setAlpha(targetDimLayer, mDismissingDimValue)
                     .setVisibility(targetDimLayer, mDismissingDimValue > 0.001f);
-            return true;
         }
     }
 
@@ -794,10 +864,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // Update target dim values
             mLastDim1 = mDimValue1;
             mTargetDim1 = imeTargetPosition == SPLIT_POSITION_BOTTOM_OR_RIGHT && mImeShown
-                    ? ADJUSTED_NONFOCUS_DIM : 0.0f;
+                    && mDimNonImeSide ? ADJUSTED_NONFOCUS_DIM : 0.0f;
             mLastDim2 = mDimValue2;
             mTargetDim2 = imeTargetPosition == SPLIT_POSITION_TOP_OR_LEFT && mImeShown
-                    ? ADJUSTED_NONFOCUS_DIM : 0.0f;
+                    && mDimNonImeSide ? ADJUSTED_NONFOCUS_DIM : 0.0f;
 
             // Calculate target bounds offset for IME
             mLastYOffset = mYOffsetForIme;

@@ -219,6 +219,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runStopService(pw);
                 case "broadcast":
                     return runSendBroadcast(pw);
+                case "compact":
+                    return runCompact(pw);
                 case "instrument":
                     getOutPrintWriter().println("Error: must be invoked through 'am instrument'.");
                     return -1;
@@ -802,8 +804,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
         pw.flush();
         Bundle bundle = mBroadcastOptions == null ? null : mBroadcastOptions.toBundle();
         mInterface.broadcastIntentWithFeature(null, null, intent, null, receiver, 0, null, null,
-                requiredPermissions, null, android.app.AppOpsManager.OP_NONE, bundle, true, false,
-                mUserId);
+                requiredPermissions, null, null, android.app.AppOpsManager.OP_NONE, bundle, true,
+                false, mUserId);
         if (!mAsync) {
             receiver.waitForFinish();
         }
@@ -963,6 +965,36 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 //removeWallOption();
             }
         }
+        return 0;
+    }
+
+    @NeverCompile
+    int runCompact(PrintWriter pw) {
+        String processName = getNextArgRequired();
+        String uid = getNextArgRequired();
+        String op = getNextArgRequired();
+        ProcessRecord app;
+        synchronized (mInternal.mProcLock) {
+            app = mInternal.getProcessRecordLocked(processName, Integer.parseInt(uid));
+        }
+        pw.println("Process record found pid: " + app.mPid);
+        if (op.equals("full")) {
+            pw.println("Executing full compaction for " + app.mPid);
+            synchronized (mInternal.mProcLock) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppFull(app, true);
+            }
+            pw.println("Finished full compaction for " + app.mPid);
+        } else if (op.equals("some")) {
+            pw.println("Executing some compaction for " + app.mPid);
+            synchronized (mInternal.mProcLock) {
+                mInternal.mOomAdjuster.mCachedAppOptimizer.compactAppSome(app, true);
+            }
+            pw.println("Finished some compaction for " + app.mPid);
+        } else {
+            getErrPrintWriter().println("Error: unknown compact command '" + op + "'");
+            return -1;
+        }
+
         return 0;
     }
 
@@ -1200,8 +1232,19 @@ final class ActivityManagerShellCommand extends ShellCommand {
         } catch (NumberFormatException e) {
             packageName = arg;
         }
-        mInterface.crashApplicationWithType(-1, pid, packageName, userId, "shell-induced crash",
-                false, CrashedByAdbException.TYPE_ID);
+
+        int[] userIds = (userId == UserHandle.USER_ALL) ? mInternal.mUserController.getUserIds()
+                : new int[]{userId};
+        for (int id : userIds) {
+            if (mInternal.mUserController.hasUserRestriction(
+                    UserManager.DISALLOW_DEBUGGING_FEATURES, id)) {
+                getOutPrintWriter().println(
+                        "Shell does not have permission to crash packages for user " + id);
+                continue;
+            }
+            mInterface.crashApplicationWithType(-1, pid, packageName, id, "shell-induced crash",
+                    false, CrashedByAdbException.TYPE_ID);
+        }
         return 0;
     }
 
@@ -1677,6 +1720,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     StrictMode.setThreadPolicy(oldPolicy);
                 }
             }
+        }
+
+        @Override
+        public void onUidProcAdjChanged(int uid) throws RemoteException {
         }
 
         @Override
@@ -3431,6 +3478,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --allow-background-activity-starts: The receiver may start activities");
             pw.println("          even if in the background.");
             pw.println("      --async: Send without waiting for the completion of the receiver.");
+            pw.println("  compact <process_name> <Package UID> [some|full]");
+            pw.println("      Force process compaction.");
+            pw.println("      some: execute file compaction.");
+            pw.println("      full: execute anon + file compaction.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current]");
             pw.println("          [--no-hidden-api-checks [--no-test-api-access]]");
@@ -3510,6 +3561,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("     Enable/disable rate limit on FGS notification deferral policy.");
             pw.println("  force-stop [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      Completely stop the given application package.");
+            pw.println("  stop-app [--user <USER_ID> | all | current] <PACKAGE>");
+            pw.println("      Stop an app and all of its services.  Unlike `force-stop` this does");
+            pw.println("      not cancel the app's scheduled alarms and jobs.");
             pw.println("  crash [--user <USER_ID>] <PACKAGE|PID>");
             pw.println("      Induce a VM crash in the specified package or process");
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");

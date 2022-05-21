@@ -23,7 +23,7 @@ object BouncerPanelExpansionCalculator {
      *  Scale the alpha/position of the host view.
      */
     @JvmStatic
-    fun getHostViewScaledExpansion(fraction: Float): Float {
+    fun showBouncerProgress(fraction: Float): Float {
         return when {
                     fraction >= 0.9f -> 1f
                     fraction < 0.6 -> 0f
@@ -35,7 +35,7 @@ object BouncerPanelExpansionCalculator {
      *  Scale the alpha/tint of the back scrim.
      */
     @JvmStatic
-    fun getBackScrimScaledExpansion(fraction: Float): Float {
+    fun aboutToShowBouncerProgress(fraction: Float): Float {
         return MathUtils.constrain((fraction - 0.9f) / 0.1f, 0f, 1f)
     }
 
@@ -45,5 +45,25 @@ object BouncerPanelExpansionCalculator {
     @JvmStatic
     fun getKeyguardClockScaledExpansion(fraction: Float): Float {
         return MathUtils.constrain((fraction - 0.7f) / 0.3f, 0f, 1f)
+    }
+
+    /**
+     *  Scale the position of the dream complications.
+     */
+    @JvmStatic
+    fun getDreamYPositionScaledExpansion(fraction: Float): Float {
+        return when {
+            fraction >= 0.98f -> 1f
+            fraction < 0.93 -> 0f
+            else -> (fraction - 0.93f) / 0.05f
+        }
+    }
+
+    /**
+     *  Scale the alpha of the dream complications.
+     */
+    @JvmStatic
+    fun getDreamAlphaScaledExpansion(fraction: Float): Float {
+        return MathUtils.constrain((fraction - 0.94f) / 0.06f, 0f, 1f)
     }
 }

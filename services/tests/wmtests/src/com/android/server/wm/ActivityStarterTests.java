@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.Activity.RESULT_CANCELED;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CANCELED;
@@ -784,6 +785,34 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     /**
+     * This test ensures that {@link ActivityStarter#setTargetRootTaskIfNeeded} will task the
+     * adjacent task of indicated launch target into account. So the existing task will be launched
+     * into closer target.
+     */
+    @Test
+    public void testAdjustLaunchTargetWithAdjacentTask() {
+        // Create adjacent tasks and put one activity under it
+        final Task parent = new TaskBuilder(mSupervisor).build();
+        final Task adjacentParent = new TaskBuilder(mSupervisor).build();
+        parent.setAdjacentTaskFragment(adjacentParent, true);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setParentTask(parent)
+                .setCreateTask(true).build();
+
+        // Launch the activity to its adjacent parent
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchRootTask(adjacentParent.mRemoteToken.toWindowContainerToken());
+        prepareStarter(FLAG_ACTIVITY_NEW_TASK, false /* mockGetRootTask */)
+                .setReason("testAdjustLaunchTargetWithAdjacentTask")
+                .setIntent(activity.intent)
+                .setActivityOptions(options.toBundle())
+                .execute();
+
+        // Verify the activity will be launched into the original parent
+        assertTrue(activity.isDescendantOf(parent));
+    }
+
+    /**
      * This test ensures that {@link ActivityStarter#setTargetRootTaskIfNeeded} will
      * move the existing task to front if the current focused root task doesn't have running task.
      */
@@ -1139,18 +1168,8 @@ public class ActivityStarterTests extends WindowTestsBase {
                 true /* createdByOrganizer */);
         sourceRecord.getTask().addChild(taskFragment, POSITION_TOP);
 
-        starter.startActivityInner(
-                /* r */targetRecord,
-                /* sourceRecord */ sourceRecord,
-                /* voiceSession */null,
-                /* voiceInteractor */ null,
-                /* startFlags */ 0,
-                /* doResume */true,
-                /* options */null,
-                /* inTask */null,
-                /* inTaskFragment */ taskFragment,
-                /* restrictedBgActivity */false,
-                /* intentGrants */null);
+        startActivityInner(starter, targetRecord, sourceRecord, null /* options */,
+                null /* inTask */, taskFragment);
 
         assertFalse(taskFragment.hasChild());
     }
@@ -1167,18 +1186,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         taskFragment.setTaskFragmentOrganizer(mock(TaskFragmentOrganizerToken.class), SYSTEM_UID,
                 "system_uid");
 
-        starter.startActivityInner(
-                /* r */targetRecord,
-                /* sourceRecord */ sourceRecord,
-                /* voiceSession */null,
-                /* voiceInteractor */ null,
-                /* startFlags */ 0,
-                /* doResume */true,
-                /* options */null,
-                /* inTask */null,
-                /* inTaskFragment */ taskFragment,
-                /* restrictedBgActivity */false,
-                /* intentGrants */null);
+        startActivityInner(starter, targetRecord, sourceRecord, null /* options */,
+                null /* inTask */, taskFragment);
 
         assertTrue(taskFragment.hasChild());
     }
@@ -1195,18 +1204,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         taskFragment.setTaskFragmentOrganizer(mock(TaskFragmentOrganizerToken.class),
                 targetRecord.getUid(), "test_process_name");
 
-        starter.startActivityInner(
-                /* r */targetRecord,
-                /* sourceRecord */ sourceRecord,
-                /* voiceSession */null,
-                /* voiceInteractor */ null,
-                /* startFlags */ 0,
-                /* doResume */true,
-                /* options */null,
-                /* inTask */null,
-                /* inTaskFragment */ taskFragment,
-                /* restrictedBgActivity */false,
-                /* intentGrants */null);
+        startActivityInner(starter, targetRecord, sourceRecord, null /* options */,
+                null /* inTask */, taskFragment);
 
         assertTrue(taskFragment.hasChild());
     }
@@ -1231,18 +1230,8 @@ public class ActivityStarterTests extends WindowTestsBase {
         doReturn(true).when(signingDetails).hasAncestorOrSelfWithDigest(any());
         doReturn(signingDetails).when(androidPackage).getSigningDetails();
 
-        starter.startActivityInner(
-                /* r */targetRecord,
-                /* sourceRecord */ sourceRecord,
-                /* voiceSession */null,
-                /* voiceInteractor */ null,
-                /* startFlags */ 0,
-                /* doResume */true,
-                /* options */null,
-                /* inTask */null,
-                /* inTaskFragment */ taskFragment,
-                /* restrictedBgActivity */false,
-                /* intentGrants */null);
+        startActivityInner(starter, targetRecord, sourceRecord, null /* options */,
+                null /* inTask */, taskFragment);
 
         assertTrue(taskFragment.hasChild());
     }
@@ -1258,20 +1247,27 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         targetRecord.info.flags |= ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 
-        starter.startActivityInner(
-                /* r */targetRecord,
-                /* sourceRecord */ sourceRecord,
-                /* voiceSession */null,
-                /* voiceInteractor */ null,
-                /* startFlags */ 0,
-                /* doResume */true,
-                /* options */null,
-                /* inTask */null,
-                /* inTaskFragment */ taskFragment,
-                /* restrictedBgActivity */false,
-                /* intentGrants */null);
+        startActivityInner(starter, targetRecord, sourceRecord, null /* options */,
+                null /* inTask */, taskFragment);
 
         assertTrue(taskFragment.hasChild());
+    }
+
+    @Test
+    public void testStartActivityInner_inTask() {
+        final ActivityStarter starter = prepareStarter(0, false);
+        // Simulate an app uses AppTask to create a non-attached task, and then it requests to
+        // start activity in the task.
+        final Task inTask = new TaskBuilder(mSupervisor).setTaskDisplayArea(null).setTaskId(123)
+                .build();
+        inTask.inRecents = true;
+        assertFalse(inTask.isAttached());
+        final ActivityRecord target = new ActivityBuilder(mAtm).build();
+        startActivityInner(starter, target, null /* source */, null /* options */, inTask,
+                null /* inTaskFragment */);
+
+        assertTrue(inTask.isAttached());
+        assertEquals(inTask, target.getTask());
     }
 
     @Test
@@ -1322,21 +1318,36 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         // Start the target launch-into-pip activity from a source
         final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        starter.startActivityInner(
-                /* r */ targetRecord,
-                /* sourceRecord */ sourceRecord,
-                /* voiceSession */ null,
-                /* voiceInteractor */ null,
-                /* startFlags */ 0,
-                /* doResume */ true,
-                /* options */ opts,
-                /* inTask */ null,
-                /* inTaskFragment */ null,
-                /* restrictedBgActivity */ false,
-                /* intentGrants */ null);
+        startActivityInner(starter, targetRecord, sourceRecord, opts,
+                null /* inTask */, null /* inTaskFragment */);
 
         // Verify the ActivityRecord#getLaunchIntoPipHostActivity points to sourceRecord.
         assertThat(targetRecord.getLaunchIntoPipHostActivity()).isNotNull();
         assertEquals(targetRecord.getLaunchIntoPipHostActivity(), sourceRecord);
+    }
+
+    @Test
+    public void testResultCanceledWhenNotAllowedStartingActivity() {
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).build();
+        targetRecord.resultTo = sourceRecord;
+
+        // Abort the activity start and ensure the sourceRecord gets the result (RESULT_CANCELED).
+        spyOn(starter);
+        doReturn(START_ABORTED).when(starter).isAllowedToStart(any(), anyBoolean(), any());
+        startActivityInner(starter, targetRecord, sourceRecord, null /* options */,
+                null /* inTask */, null /* inTaskFragment */);
+        verify(sourceRecord).sendResult(anyInt(), any(), anyInt(), eq(RESULT_CANCELED), any(),
+                any());
+    }
+
+    private static void startActivityInner(ActivityStarter starter, ActivityRecord target,
+            ActivityRecord source, ActivityOptions options, Task inTask,
+            TaskFragment inTaskFragment) {
+        starter.startActivityInner(target, source, null /* voiceSession */,
+                null /* voiceInteractor */, 0 /* startFlags */, true /* doResume */,
+                options, inTask, inTaskFragment, false /* restrictedBgActivity */,
+                null /* intentGrants */);
     }
 }

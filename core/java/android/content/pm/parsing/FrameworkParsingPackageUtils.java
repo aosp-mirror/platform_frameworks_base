@@ -36,6 +36,7 @@ import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -57,6 +58,7 @@ public class FrameworkParsingPackageUtils {
     private static final int MAX_FILE_NAME_SIZE = 223;
 
     public static final int PARSE_IGNORE_OVERLAY_REQUIRED_SYSTEM_PROPERTY = 1 << 7;
+    public static final int PARSE_APK_IN_APEX = 1 << 9;
 
     /**
      * Check if the given name is valid.
@@ -314,6 +316,15 @@ public class FrameworkParsingPackageUtils {
             return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
         }
 
+        // STOPSHIP: hack for the pre-release SDK
+        if (platformSdkCodenames.length == 0
+                && Build.VERSION.KNOWN_CODENAMES.stream().max(String::compareTo).orElse("").equals(
+                        minCode)) {
+            Slog.w(TAG, "Parsed package requires min development platform " + minCode
+                    + ", returning current version " + Build.VERSION.SDK_INT);
+            return input.success(Build.VERSION.SDK_INT);
+        }
+
         // Otherwise, we're looking at an incompatible pre-release SDK.
         if (platformSdkCodenames.length > 0) {
             return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK,
@@ -334,8 +345,9 @@ public class FrameworkParsingPackageUtils {
      * If {@code targetCode} is not specified, e.g. the value is {@code null}, then the {@code
      * targetVers} will be returned unmodified.
      * <p>
-     * Otherwise, the behavior varies based on whether the current platform is a pre-release
-     * version, e.g. the {@code platformSdkCodenames} array has length > 0:
+     * When {@code allowUnknownCodenames} is false, the behavior varies based on whether the
+     * current platform is a pre-release version, e.g. the {@code platformSdkCodenames} array has
+     * length > 0:
      * <ul>
      * <li>If this is a pre-release platform and the value specified by
      * {@code targetCode} is contained within the array of allowed pre-release
@@ -343,17 +355,23 @@ public class FrameworkParsingPackageUtils {
      * <li>If this is a released platform, this method will return -1 to
      * indicate that the package is not compatible with this platform.
      * </ul>
+     * <p>
+     * When {@code allowUnknownCodenames} is true, any codename that is not known (presumed to be
+     * a codename announced after the build of the current device) is allowed and this method will
+     * return {@link Build.VERSION_CODES#CUR_DEVELOPMENT}.
      *
-     * @param targetVers           targetSdkVersion number, if specified in the application
-     *                             manifest, or 0 otherwise
-     * @param targetCode           targetSdkVersion code, if specified in the application manifest,
-     *                             or {@code null} otherwise
-     * @param platformSdkCodenames array of allowed pre-release SDK codenames for this platform
+     * @param targetVers            targetSdkVersion number, if specified in the application
+     *                              manifest, or 0 otherwise
+     * @param targetCode            targetSdkVersion code, if specified in the application manifest,
+     *                              or {@code null} otherwise
+     * @param platformSdkCodenames  array of allowed pre-release SDK codenames for this platform
+     * @param allowUnknownCodenames allow unknown codenames, if true this method will accept unknown
+     *                              (presumed to be future) codenames
      * @return the targetSdkVersion to use at runtime if successful
      */
     public static ParseResult<Integer> computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
             @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
-            @NonNull ParseInput input) {
+            @NonNull ParseInput input, boolean allowUnknownCodenames) {
         // If it's a release SDK, return the version number unmodified.
         if (targetCode == null) {
             return input.success(targetVers);
@@ -363,6 +381,23 @@ public class FrameworkParsingPackageUtils {
         // definitely targets this SDK.
         if (matchTargetCode(platformSdkCodenames, targetCode)) {
             return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
+        }
+
+        // STOPSHIP: hack for the pre-release SDK
+        if (platformSdkCodenames.length == 0
+                && Build.VERSION.KNOWN_CODENAMES.stream().max(String::compareTo).orElse("").equals(
+                        targetCode)) {
+            Slog.w(TAG, "Parsed package requires development platform " + targetCode
+                    + ", returning current version " + Build.VERSION.SDK_INT);
+            return input.success(Build.VERSION.SDK_INT);
+        }
+
+        try {
+            if (allowUnknownCodenames && UnboundedSdkLevel.isAtMost(targetCode)) {
+                return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
+            }
+        } catch (IllegalArgumentException e) {
+            return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK, "Bad package SDK");
         }
 
         // Otherwise, we're looking at an incompatible pre-release SDK.

@@ -35,6 +35,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -53,10 +55,10 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.SurfaceControl;
-import android.view.View;
 import android.window.SplashScreenView;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
@@ -69,7 +71,6 @@ import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.BaseIconFactory;
 import com.android.launcher3.icons.IconProvider;
-import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
@@ -103,7 +104,7 @@ public class SplashscreenContentDrawer {
      */
     private static final float NO_BACKGROUND_SCALE = 192f / 160;
     private final Context mContext;
-    private final IconProvider mIconProvider;
+    private final HighResIconProvider mHighResIconProvider;
 
     private int mIconSize;
     private int mDefaultIconSize;
@@ -116,12 +117,10 @@ public class SplashscreenContentDrawer {
     private final Handler mSplashscreenWorkerHandler;
     @VisibleForTesting
     final ColorCache mColorCache;
-    private final ShellExecutor mSplashScreenExecutor;
 
-    SplashscreenContentDrawer(Context context, IconProvider iconProvider, TransactionPool pool,
-            ShellExecutor splashScreenExecutor) {
+    SplashscreenContentDrawer(Context context, IconProvider iconProvider, TransactionPool pool) {
         mContext = context;
-        mIconProvider = iconProvider;
+        mHighResIconProvider = new HighResIconProvider(mContext, iconProvider);
         mTransactionPool = pool;
 
         // Initialize Splashscreen worker thread
@@ -132,7 +131,6 @@ public class SplashscreenContentDrawer {
         shellSplashscreenWorkerThread.start();
         mSplashscreenWorkerHandler = shellSplashscreenWorkerThread.getThreadHandler();
         mColorCache = new ColorCache(mContext, mSplashscreenWorkerHandler);
-        mSplashScreenExecutor = splashScreenExecutor;
     }
 
     /**
@@ -363,6 +361,7 @@ public class SplashscreenContentDrawer {
         private Drawable[] mFinalIconDrawables;
         private int mFinalIconSize = mIconSize;
         private Consumer<Runnable> mUiThreadInitTask;
+        /** @see #setAllowHandleSolidColor(boolean) **/
         private boolean mAllowHandleSolidColor;
 
         StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
@@ -390,6 +389,12 @@ public class SplashscreenContentDrawer {
             return this;
         }
 
+        /**
+         * If true, the application will receive a the
+         * {@link
+         * android.window.SplashScreen.OnExitAnimationListener#onSplashScreenExit(SplashScreenView)}
+         * callback, effectively copying the {@link SplashScreenView} into the client process.
+         */
         StartingWindowViewBuilder setAllowHandleSolidColor(boolean allowHandleSolidColor) {
             mAllowHandleSolidColor = allowHandleSolidColor;
             return this;
@@ -410,18 +415,16 @@ public class SplashscreenContentDrawer {
                         || mTmpAttrs.mIconBgColor == mThemeColor) {
                     mFinalIconSize *= NO_BACKGROUND_SCALE;
                 }
-                createIconDrawable(iconDrawable, false);
+                createIconDrawable(iconDrawable, false /* legacy */, false /* loadInDetail */);
             } else {
                 final float iconScale = (float) mIconSize / (float) mDefaultIconSize;
                 final int densityDpi = mContext.getResources().getConfiguration().densityDpi;
                 final int scaledIconDpi =
                         (int) (0.5f + iconScale * densityDpi * NO_BACKGROUND_SCALE);
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "getIcon");
-                iconDrawable = mIconProvider.getIcon(mActivityInfo, scaledIconDpi);
+                iconDrawable = mHighResIconProvider.getIcon(
+                        mActivityInfo, densityDpi, scaledIconDpi);
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                if (iconDrawable == null) {
-                    iconDrawable = mContext.getPackageManager().getDefaultActivityIcon();
-                }
                 if (!processAdaptiveIcon(iconDrawable)) {
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                             "The icon is not an AdaptiveIconDrawable");
@@ -431,7 +434,8 @@ public class SplashscreenContentDrawer {
                             scaledIconDpi, mFinalIconSize);
                     final Bitmap bitmap = factory.createScaledBitmapWithoutShadow(iconDrawable);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                    createIconDrawable(new BitmapDrawable(bitmap), true);
+                    createIconDrawable(new BitmapDrawable(bitmap), true,
+                            mHighResIconProvider.mLoadInDetail);
                 }
             }
 
@@ -444,14 +448,16 @@ public class SplashscreenContentDrawer {
             }
         }
 
-        private void createIconDrawable(Drawable iconDrawable, boolean legacy) {
+        private void createIconDrawable(Drawable iconDrawable, boolean legacy,
+                boolean loadInDetail) {
             if (legacy) {
                 mFinalIconDrawables = SplashscreenIconDrawableFactory.makeLegacyIconDrawable(
-                        iconDrawable, mDefaultIconSize, mFinalIconSize, mSplashscreenWorkerHandler);
+                        iconDrawable, mDefaultIconSize, mFinalIconSize, loadInDetail,
+                        mSplashscreenWorkerHandler);
             } else {
                 mFinalIconDrawables = SplashscreenIconDrawableFactory.makeIconDrawable(
                         mTmpAttrs.mIconBgColor, mThemeColor, iconDrawable, mDefaultIconSize,
-                        mFinalIconSize, mSplashscreenWorkerHandler);
+                        mFinalIconSize, loadInDetail, mSplashscreenWorkerHandler);
             }
         }
 
@@ -500,11 +506,11 @@ public class SplashscreenContentDrawer {
                 // Using AdaptiveIconDrawable here can help keep the shape consistent with the
                 // current settings.
                 mFinalIconSize = (int) (0.5f + mIconSize * noBgScale);
-                createIconDrawable(iconForeground, false);
+                createIconDrawable(iconForeground, false, mHighResIconProvider.mLoadInDetail);
             } else {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                         "processAdaptiveIcon: draw whole icon");
-                createIconDrawable(iconDrawable, false);
+                createIconDrawable(iconDrawable, false, mHighResIconProvider.mLoadInDetail);
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return true;
@@ -536,22 +542,6 @@ public class SplashscreenContentDrawer {
                         mBrandingImageHeight);
             }
             final SplashScreenView splashScreenView = builder.build();
-            if (mSuggestType != STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN) {
-                splashScreenView.addOnAttachStateChangeListener(
-                        new View.OnAttachStateChangeListener() {
-                            @Override
-                            public void onViewAttachedToWindow(View v) {
-                                SplashScreenView.applySystemBarsContrastColor(
-                                        v.getWindowInsetsController(),
-                                        splashScreenView.getInitBackgroundColor());
-                            }
-
-                            @Override
-                            public void onViewDetachedFromWindow(View v) {
-                            }
-                        });
-            }
-
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return splashScreenView;
         }
@@ -1023,6 +1013,79 @@ public class SplashscreenContentDrawer {
             view.postDelayed(playAnimation, delayed);
         } else {
             playAnimation.run();
+        }
+    }
+
+    /**
+     * When loading a BitmapDrawable object with specific density, there will decode the image based
+     * on the density from display metrics, so even when load with higher override density, the
+     * final intrinsic size of a BitmapDrawable can still not big enough to draw on expect size.
+     *
+     * So here we use a standalone IconProvider object to load the Drawable object for higher
+     * density, and the resources object won't affect the entire system.
+     *
+     */
+    private static class HighResIconProvider {
+        private final Context mSharedContext;
+        private final IconProvider mSharedIconProvider;
+        private boolean mLoadInDetail;
+
+        // only create standalone icon provider when the density dpi is low.
+        private Context mStandaloneContext;
+        private IconProvider mStandaloneIconProvider;
+
+        HighResIconProvider(Context context, IconProvider sharedIconProvider) {
+            mSharedContext = context;
+            mSharedIconProvider = sharedIconProvider;
+        }
+
+        Drawable getIcon(ActivityInfo activityInfo, int currentDpi, int iconDpi) {
+            mLoadInDetail = false;
+            Drawable drawable;
+            if (currentDpi < iconDpi && currentDpi < DisplayMetrics.DENSITY_XHIGH) {
+                drawable = loadFromStandalone(activityInfo, currentDpi, iconDpi);
+            } else {
+                drawable = mSharedIconProvider.getIcon(activityInfo, iconDpi);
+            }
+
+            if (drawable == null) {
+                drawable = mSharedContext.getPackageManager().getDefaultActivityIcon();
+            }
+            return drawable;
+        }
+
+        private Drawable loadFromStandalone(ActivityInfo activityInfo, int currentDpi,
+                int iconDpi) {
+            if (mStandaloneContext == null) {
+                final Configuration defConfig = mSharedContext.getResources().getConfiguration();
+                mStandaloneContext = mSharedContext.createConfigurationContext(defConfig);
+                mStandaloneIconProvider = new IconProvider(mStandaloneContext);
+            }
+            Resources resources;
+            try {
+                resources = mStandaloneContext.getPackageManager()
+                        .getResourcesForApplication(activityInfo.applicationInfo);
+            } catch (PackageManager.NameNotFoundException | Resources.NotFoundException exc) {
+                resources = null;
+            }
+            if (resources != null) {
+                updateResourcesDpi(resources, iconDpi);
+            }
+            final Drawable drawable = mStandaloneIconProvider.getIcon(activityInfo, iconDpi);
+            mLoadInDetail = true;
+            // reset density dpi
+            if (resources != null) {
+                updateResourcesDpi(resources, currentDpi);
+            }
+            return drawable;
+        }
+
+        private void updateResourcesDpi(Resources resources, int densityDpi) {
+            final Configuration config = resources.getConfiguration();
+            final DisplayMetrics displayMetrics = resources.getDisplayMetrics();
+            config.densityDpi = densityDpi;
+            displayMetrics.densityDpi = densityDpi;
+            resources.updateConfiguration(config, displayMetrics);
         }
     }
 }

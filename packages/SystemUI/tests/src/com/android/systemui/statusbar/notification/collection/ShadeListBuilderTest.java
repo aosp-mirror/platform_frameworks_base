@@ -1439,15 +1439,36 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // WHEN a new child is added and the old one gets filtered while group changes are disabled.
         mStabilityManager.setAllowGroupChanges(false);
+        mStabilityManager.setAllowGroupPruning(false);
         mFinalizeFilter.mIndicesToFilter.add(1);
         addGroupChild(2, PACKAGE_1, GROUP_1);
 
         dispatchBuild();
 
         // THEN the new child should be shown without a group
+        // (Note that this is the same as the expected result if there were no stability rules.)
         verifyBuiltList(
-                notif(2)  // previously promoted child
+                notif(2)  // new child
         );
+    }
+
+    @Test
+    public void testGroupWithChildRemovedByFilterIsPrunedWhenOtherwiseEmpty() {
+        // GIVEN a group with only one child
+        addGroupSummary(0, PACKAGE_1, GROUP_1);
+        addGroupChild(1, PACKAGE_1, GROUP_1);
+        dispatchBuild();
+        // NOTICE that the group is pruned and the child is moved to the top level
+        verifyBuiltList(
+                notif(1)  // group with only one child is promoted
+        );
+
+        // WHEN the only child is filtered
+        mFinalizeFilter.mIndicesToFilter.add(1);
+        dispatchBuild();
+
+        // THEN the new list should be empty (the group summary should not be promoted)
+        verifyBuiltList();
     }
 
     @Test
@@ -1466,25 +1487,6 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         verifyBuiltList(
                 notif(1),
                 notif(2)
-        );
-    }
-
-    @Test
-    public void testFinalizeFilteredChildrenPromotesSummary() {
-        // GIVEN a group with only one child was already drawn
-        addGroupSummary(0, PACKAGE_1, GROUP_1);
-        addGroupChild(1, PACKAGE_1, GROUP_1);
-        addGroupChild(2, PACKAGE_1, GROUP_1);
-
-        // WHEN the parent is filtered out at the finalize step
-        mFinalizeFilter.mIndicesToFilter.add(1);
-        mFinalizeFilter.mIndicesToFilter.add(2);
-
-        dispatchBuild();
-
-        // THEN the children should be promoted to the top level
-        verifyBuiltList(
-                notif(0)
         );
     }
 
@@ -1523,6 +1525,34 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                 notif(2),
                 notif(3)
         );
+    }
+
+    @Test
+    public void testContiguousSections() {
+        mListBuilder.setSectioners(List.of(
+                new PackageSectioner("pkg", 1),
+                new PackageSectioner("pkg", 1),
+                new PackageSectioner("pkg", 3),
+                new PackageSectioner("pkg", 2)
+        ));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testNonContiguousSections() {
+        mListBuilder.setSectioners(List.of(
+                new PackageSectioner("pkg", 1),
+                new PackageSectioner("pkg", 1),
+                new PackageSectioner("pkg", 3),
+                new PackageSectioner("pkg", 1)
+        ));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testBucketZeroNotAllowed() {
+        mListBuilder.setSectioners(List.of(
+                new PackageSectioner("pkg", 0),
+                new PackageSectioner("pkg", 1)
+        ));
     }
 
     @Test
@@ -2187,7 +2217,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
 
         PackageSectioner(String pkg) {
-            super("PackageSection_" + pkg, 0);
+            this(pkg, 0);
+        }
+
+        PackageSectioner(String pkg, int bucket) {
+            super("PackageSection_" + pkg, bucket);
             mPackages = List.of(pkg);
             mComparator = null;
         }
@@ -2250,6 +2284,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     private static class TestableStabilityManager extends NotifStabilityManager {
         boolean mAllowPipelineRun = true;
         boolean mAllowGroupChanges = true;
+        boolean mAllowGroupPruning = true;
         boolean mAllowSectionChanges = true;
         boolean mAllowEntryReodering = true;
 
@@ -2259,6 +2294,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         TestableStabilityManager setAllowGroupChanges(boolean allowGroupChanges) {
             mAllowGroupChanges = allowGroupChanges;
+            return this;
+        }
+
+        TestableStabilityManager setAllowGroupPruning(boolean allowGroupPruning) {
+            mAllowGroupPruning = allowGroupPruning;
             return this;
         }
 
@@ -2289,6 +2329,11 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         @Override
         public boolean isGroupChangeAllowed(@NonNull NotificationEntry entry) {
             return mAllowGroupChanges;
+        }
+
+        @Override
+        public boolean isGroupPruneAllowed(@NonNull GroupEntry entry) {
+            return mAllowGroupPruning;
         }
 
         @Override

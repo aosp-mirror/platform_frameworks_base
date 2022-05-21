@@ -24,7 +24,9 @@
 
 #include <memory>
 
+#include <aidl/android/hardware/graphics/common/PixelFormat.h>
 #include <android-base/chrono_utils.h>
+#include <android/graphics/properties.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnScreenCaptureListener.h>
 #include <android/hardware/display/IDeviceProductInfoConstants.h>
@@ -320,7 +322,8 @@ public:
                 env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
                                             gScreenshotHardwareBufferClassInfo.builder,
                                             jhardwareBuffer, namedColorSpace,
-                                            captureResults.capturedSecureLayers);
+                                            captureResults.capturedSecureLayers,
+                                            captureResults.capturedHdrLayers);
         env->CallVoidMethod(screenCaptureListenerObject,
                             gScreenCaptureListenerClassInfo.onScreenCaptureComplete,
                             screenshotHardwareBuffer);
@@ -849,6 +852,14 @@ static void nativeSetDamageRegion(JNIEnv* env, jclass clazz, jlong transactionOb
     }
 
     transaction->setSurfaceDamageRegion(surfaceControl, region);
+}
+
+static void nativeSetDimmingEnabled(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                    jlong nativeObject, jboolean dimmingEnabled) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setDimmingEnabled(ctrl, dimmingEnabled);
 }
 
 static void nativeSetAlpha(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1880,6 +1891,11 @@ static jobject nativeGetDisplayDecorationSupport(JNIEnv* env, jclass clazz,
         return nullptr;
     }
 
+    using aidl::android::hardware::graphics::common::PixelFormat;
+    if (support.value().format == PixelFormat::R_8 && !hwui_uses_vulkan()) {
+        return nullptr;
+    }
+
     jobject jDisplayDecorationSupport =
             env->NewObject(gDisplayDecorationSupportInfo.clazz, gDisplayDecorationSupportInfo.ctor);
     if (jDisplayDecorationSupport == nullptr) {
@@ -1905,6 +1921,7 @@ static void nativeRemoveCurrentInputFocus(JNIEnv* env, jclass clazz, jlong trans
     FocusRequest request;
     request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
     request.displayId = displayId;
+    request.windowName = "<null>";
     transaction->setFocusedWindow(request);
 }
 
@@ -2095,8 +2112,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetSize },
     {"nativeSetTransparentRegionHint", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetTransparentRegionHint },
-    { "nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
+    {"nativeSetDamageRegion", "(JJLandroid/graphics/Region;)V",
             (void*)nativeSetDamageRegion },
+    {"nativeSetDimmingEnabled", "(JJZ)V", (void*)nativeSetDimmingEnabled },
     {"nativeSetAlpha", "(JJF)V",
             (void*)nativeSetAlpha },
     {"nativeSetColor", "(JJ[F)V",
@@ -2383,7 +2401,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
             MakeGlobalRefOrDie(env, screenshotGraphicsBufferClazz);
     gScreenshotHardwareBufferClassInfo.builder =
             GetStaticMethodIDOrDie(env, screenshotGraphicsBufferClazz, "createFromNative",
-                                   "(Landroid/hardware/HardwareBuffer;IZ)Landroid/view/"
+                                   "(Landroid/hardware/HardwareBuffer;IZZ)Landroid/view/"
                                    "SurfaceControl$ScreenshotHardwareBuffer;");
 
     jclass displayedContentSampleClazz = FindClassOrDie(env,

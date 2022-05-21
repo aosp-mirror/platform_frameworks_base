@@ -40,6 +40,9 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Rule
@@ -48,6 +51,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
@@ -81,8 +85,29 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun testNotifiesAnimatedIn() {
+        initializeContainer()
+        verify(callback).onDialogAnimatedIn()
+    }
+
+    @Test
+    fun testIgnoresAnimatedInWhenDismissed() {
+        val container = initializeContainer(addToView = false)
+        container.dismissFromSystemServer()
+        waitForIdleSync()
+
+        verify(callback, never()).onDialogAnimatedIn()
+
+        container.addToView()
+        waitForIdleSync()
+
+        // attaching the view resets the state and allows this to happen again
+        verify(callback).onDialogAnimatedIn()
+    }
+
+    @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
         container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_AUTHENTICATED
         )
@@ -97,7 +122,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testActionUserCanceled_sendsDismissedUserCanceled() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
         container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_USER_CANCELED
         )
@@ -115,7 +140,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testActionButtonNegative_sendsDismissedButtonNegative() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
         container.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE
         )
@@ -141,7 +166,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testActionError_sendsDismissedError() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
         authContainer!!.mBiometricCallback.onAction(
             AuthBiometricView.Callback.ACTION_ERROR
         )
@@ -183,7 +208,7 @@ class AuthContainerViewTest : SysuiTestCase() {
 
     @Test
     fun testShowBiometricUI() {
-        val container = initializeContainer(BiometricManager.Authenticators.BIOMETRIC_WEAK)
+        val container = initializeContainer()
 
         waitForIdleSync()
 
@@ -252,7 +277,10 @@ class AuthContainerViewTest : SysuiTestCase() {
         assertThat((layoutParams.fitInsetsTypes and WindowInsets.Type.ime()) == 0).isTrue()
     }
 
-    private fun initializeContainer(authenticators: Int): TestAuthContainerView {
+    private fun initializeContainer(
+        authenticators: Int = BiometricManager.Authenticators.BIOMETRIC_WEAK,
+        addToView: Boolean = true
+    ): TestAuthContainerView {
         val config = AuthContainerView.Config()
         config.mContext = mContext
         config.mCallback = callback
@@ -289,9 +317,14 @@ class AuthContainerViewTest : SysuiTestCase() {
             wakefulnessLifecycle,
             userManager,
             lockPatternUtils,
-            Handler(TestableLooper.get(this).looper)
+            Handler(TestableLooper.get(this).looper),
+            FakeExecutor(FakeSystemClock())
         )
-        ViewUtils.attachView(authContainer)
+
+        if (addToView) {
+            authContainer!!.addToView()
+        }
+
         return authContainer!!
     }
 
@@ -302,10 +335,11 @@ class AuthContainerViewTest : SysuiTestCase() {
         wakefulnessLifecycle: WakefulnessLifecycle,
         userManager: UserManager,
         lockPatternUtils: LockPatternUtils,
-        mainHandler: Handler
+        mainHandler: Handler,
+        bgExecutor: DelayableExecutor
     ) : AuthContainerView(
         config, fpProps, faceProps,
-        wakefulnessLifecycle, userManager, lockPatternUtils, mainHandler
+        wakefulnessLifecycle, userManager, lockPatternUtils, mainHandler, bgExecutor
     ) {
         override fun postOnAnimation(runnable: Runnable) {
             runnable.run()
@@ -315,6 +349,12 @@ class AuthContainerViewTest : SysuiTestCase() {
     override fun waitForIdleSync() {
         TestableLooper.get(this).processAllMessages()
         super.waitForIdleSync()
+    }
+
+    private fun AuthContainerView.addToView() {
+        ViewUtils.attachView(this)
+        waitForIdleSync()
+        assertThat(isAttachedToWindow).isTrue()
     }
 }
 

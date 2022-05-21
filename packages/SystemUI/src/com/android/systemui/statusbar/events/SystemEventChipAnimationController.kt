@@ -22,6 +22,7 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Rect
+import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -32,6 +33,7 @@ import android.widget.FrameLayout
 import com.android.systemui.R
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -45,6 +47,7 @@ class SystemEventChipAnimationController @Inject constructor(
 ) : SystemStatusAnimationCallback {
 
     private lateinit var animationWindowView: FrameLayout
+    private lateinit var themedContext: ContextThemeWrapper
 
     private var currentAnimatedView: BackgroundAnimatableView? = null
 
@@ -75,7 +78,7 @@ class SystemEventChipAnimationController @Inject constructor(
 
         // Initialize the animated view
         val insets = contentInsetsProvider.getStatusBarContentInsetsForCurrentRotation()
-        currentAnimatedView = viewCreator(context).also {
+        currentAnimatedView = viewCreator(themedContext).also {
             animationWindowView.addView(
                     it.view,
                     layoutParamsDefault(
@@ -109,14 +112,14 @@ class SystemEventChipAnimationController @Inject constructor(
         initializeAnimRect()
 
         val alphaIn = ValueAnimator.ofFloat(0f, 1f).apply {
-            startDelay = 117
-            duration = 83
+            startDelay = 7.frames
+            duration = 5.frames
             interpolator = null
             addUpdateListener { currentAnimatedView?.view?.alpha = animatedValue as Float }
         }
         val moveIn = ValueAnimator.ofInt(chipMinWidth, chipWidth).apply {
-            startDelay = 117
-            duration = 383
+            startDelay = 7.frames
+            duration = 23.frames
             interpolator = STATUS_BAR_X_MOVE_IN
             addUpdateListener {
                 updateAnimatedViewBoundsWidth(animatedValue as Int)
@@ -146,7 +149,7 @@ class SystemEventChipAnimationController @Inject constructor(
 
     private fun createMoveOutAnimationForDot(): Animator {
         val width1 = ValueAnimator.ofInt(chipWidth, chipMinWidth).apply {
-            duration = 150
+            duration = 9.frames
             interpolator = STATUS_CHIP_WIDTH_TO_DOT_KEYFRAME_1
             addUpdateListener {
                 updateAnimatedViewBoundsWidth(it.animatedValue as Int)
@@ -154,8 +157,8 @@ class SystemEventChipAnimationController @Inject constructor(
         }
 
         val width2 = ValueAnimator.ofInt(chipMinWidth, dotSize).apply {
-            startDelay = 150
-            duration = 333
+            startDelay = 9.frames
+            duration = 20.frames
             interpolator = STATUS_CHIP_WIDTH_TO_DOT_KEYFRAME_2
             addUpdateListener {
                 updateAnimatedViewBoundsWidth(it.animatedValue as Int)
@@ -167,8 +170,8 @@ class SystemEventChipAnimationController @Inject constructor(
         val chipVerticalCenter = v.top + v.measuredHeight / 2
         val height1 = ValueAnimator.ofInt(
                 currentAnimatedView!!.view.measuredHeight, keyFrame1Height).apply {
-            startDelay = 133
-            duration = 100
+            startDelay = 8.frames
+            duration = 6.frames
             interpolator = STATUS_CHIP_HEIGHT_TO_DOT_KEYFRAME_1
             addUpdateListener {
                 updateAnimatedViewBoundsHeight(it.animatedValue as Int, chipVerticalCenter)
@@ -176,8 +179,8 @@ class SystemEventChipAnimationController @Inject constructor(
         }
 
         val height2 = ValueAnimator.ofInt(keyFrame1Height, dotSize).apply {
-            startDelay = 233
-            duration = 250
+            startDelay = 14.frames
+            duration = 15.frames
             interpolator = STATUS_CHIP_HEIGHT_TO_DOT_KEYFRAME_2
             addUpdateListener {
                 updateAnimatedViewBoundsHeight(it.animatedValue as Int, chipVerticalCenter)
@@ -187,8 +190,8 @@ class SystemEventChipAnimationController @Inject constructor(
         // Move the chip view to overlap exactly with the privacy dot. The chip displays by default
         // exactly adjacent to the dot, so we can just move over by the diameter of the dot itself
         val moveOut = ValueAnimator.ofInt(0, dotSize).apply {
-            startDelay = 50
-            duration = 183
+            startDelay = 3.frames
+            duration = 11.frames
             interpolator = STATUS_CHIP_MOVE_TO_DOT
             addUpdateListener {
                 // If RTL, we can just invert the move
@@ -208,7 +211,7 @@ class SystemEventChipAnimationController @Inject constructor(
 
     private fun createMoveOutAnimationDefault(): Animator {
         val moveOut = ValueAnimator.ofInt(chipWidth, chipMinWidth).apply {
-            duration = 383
+            duration = 23.frames
             addUpdateListener {
                 currentAnimatedView?.apply {
                     updateAnimatedViewBoundsWidth(it.animatedValue as Int)
@@ -220,7 +223,8 @@ class SystemEventChipAnimationController @Inject constructor(
 
     private fun init() {
         initialized = true
-        animationWindowView = LayoutInflater.from(context)
+        themedContext = ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings)
+        animationWindowView = LayoutInflater.from(themedContext)
                 .inflate(R.layout.system_event_animation_window, null) as FrameLayout
         val lp = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         lp.gravity = Gravity.END or Gravity.CENTER_VERTICAL

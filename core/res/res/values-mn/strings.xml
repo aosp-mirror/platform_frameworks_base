@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"<xliff:g id="SIMNUMBER">%d</xliff:g> SIM-н оператор компаниас түр унтраасан"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобайл сүлжээнд холбогдох боломжгүй байна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Сонгосон сүлжээг өөрчлөхөөр оролдоно уу. Өөрчлөхийн тулд товшино уу."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Яаралтай дуудлага боломжгүй байж магадгүй"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi-р яаралтай дуудлага хийхийг дэмждэггүй. Дэлгэрэнгүйг харахын тулд товшино уу."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Яаралтай дуудлага хийх боломжгүй"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Wi‑Fi-р яаралтай дуудлага хийх боломжгүй байна"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Сануулга"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Дуудлага шилжүүлэх"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Яаралтай дуудлага хийх горим"</string>
@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"Файл болон документ"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файл, документ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"таны төхөөрөмж дээрх файл болон документод хандах"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Хөгжим &amp; бусад аудио"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"таны төхөөрөмж дээрх аудио файлд хандах"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Зураг &amp; видео"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"таны төхөөрөмж дээрх зураг болон видео файлд хандах"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Хөгжим, аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"төхөөрөмж дээрээ хөгжим болон аудионд хандах"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Зураг, видео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"төхөөрөмж дээрээ зураг болон видеонд хандах"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"дуу хураах"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Дасгал хөдөлгөөн"</string>
@@ -350,7 +350,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"мэдэгдлийг түгжигдсэн төхөөрөмж дээр бүтэн дэлгэцийн үйл ажиллагаа байдлаар үзүүлэх"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Аппад мэдэгдлийг түгжигдсэн төхөөрөмж дээр бүтэн дэлгэцийн үйл ажиллагаа байдлаар үзүүлэхийг зөвшөөрдөг"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"товчлол суулгах"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг нэмж чадна."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Үндсэн нүүрний товчлолыг нэмж чадна."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"товчлолыг устгах"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Аппликейшн нь хэрэглэгчийн оролцоогүйгээр Нүүр дэлгэцний товчлолыг устгаж чадна."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"гарсан дуудлагыг чиглэлийг өөрчлөх"</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Баталгаажуулахад алдаа гарлаа"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Дэлгэцийн түгжээг ашиглах"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Үргэлжлүүлэхийн тулд дэлгэцийн түгжээгээ оруулна уу"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Хэсэгчилсэн хурууны хээ илэрлээ"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Мэдрэгч дээр чанга дарна уу"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Хурууны хээ боловсруулж чадахгүй байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Хурууны хээ мэдрэгчийг цэвэрлээд, дахин оролдоно уу"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Мэдрэгчийг цэвэрлээд, дахин оролдоно уу"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Хурууны хээг таньсангүй"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Мэдрэгч дээр чанга дарна уу"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Хурууны хээг таньсангүй"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Хурууны хээг нотолсон"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Царайг баталгаажууллаа"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Царайг баталгаажууллаа. Баталгаажуулах товчлуурыг дарна уу"</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Тухайн аппaaс батерейны оновчлол алгасах зөвшөөрөл асуухыг зөвшөөрдөг."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"бүх багцыг лавлах"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Аппап бүх суулгасан багцыг харахыг зөвшөөрнө."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"AdServices Topics API-д хандах"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"Аппликэйшнд AdServices Topics API-д хандах зөвшөөрөл олгодог."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"AdServices Attribution API-д хандах"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"Аппликэйшнд AdServices Attribution API-д хандах зөвшөөрөл олгодог."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"AdServices Custom Audiences API-д хандах"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"Аппликэйшнд AdServices Custom Audiences API-д хандах зөвшөөрөл олгодог."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Өсгөх контрол дээр хоёр удаа товшино уу"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Виджет нэмж чадсангүй."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Очих"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ИДЭВХТЭЙ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИДЭВХГҮЙ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>-д таны төхөөрөмжийг бүрэн хянахыг зөвшөөрөх үү?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Хэрэв та <xliff:g id="SERVICE">%1$s</xliff:g>-г асаавал таны төхөөрөмж өгөгдлийн шифрлэлтийг сайжруулахын тулд таны дэлгэцийн түгжээг ашиглахгүй."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Бүрэн хянах нь таны хандалтын үйлчилгээний шаардлагад тусалдаг аппуудад тохиромжтой боловч ихэнх аппад тохиромжгүй байдаг."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Дэлгэцийг харах ба хянах"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Энэ нь дэлгэц дээрх бүх контентыг унших болон контентыг бусад аппад харуулах боломжтой."</string>
@@ -1858,7 +1851,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект, тодорхой онцлогууд болон зарим сүлжээний холболтыг хязгаарлах эсвэл унтраана."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Батарей хэмнэгч нь Бараан загварыг асааж, дэвсгэрийн үйл ажиллагаа, зарим визуал эффект, тодорхой онцлогууд болон зарим сүлжээний холболтыг хязгаарлах эсвэл унтраана."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим апп-н өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь ар талд ажиллаж буй зарим аппын өгөгдлийг илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч тогтмол хандахгүй. Энэ нь жишээлбэл зургийг товших хүртэл харагдахгүй гэсэн үг юм."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Дата хэмнэгчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Асаах"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Нэг минутын турш ({formattedTime} хүртэл)}other{# минутын турш ({formattedTime} хүртэл)}}"</string>
@@ -1939,9 +1932,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"Апп боломжгүй байна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> яг одоо боломжгүй байна."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> боломжгүй байна"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Одоогоор үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g> дээрээс хандах боломжгүй. Оронд нь Android TV төхөөрөмж дээрээ туршиж үзнэ үү."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Одоогоор үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g> дээрээс хандах боломжгүй. Оронд нь таблет дээрээ туршиж үзнэ үү."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Одоогоор үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g> дээрээс хандах боломжгүй. Оронд нь утсан дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Зөвшөөрөл шаардлагатай"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Камер боломжгүй байна"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Утсан дээр үргэлжлүүлэх"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Микрофон боломжгүй байна"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-н тохиргоо боломжгүй байна"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Таблетын тохиргоо боломжгүй байна"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Утасны тохиргоо боломжгүй байна"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g>-с хандах боломжгүй. Оронд нь Android TV төхөөрөмж дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g>-с хандах боломжгүй. Оронд нь таблет дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g>-с хандах боломжгүй. Оронд нь утсан дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Одоогоор үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g> дээрээс хандах боломжгүй. Оронд нь Android TV төхөөрөмж дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Одоогоор үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g> дээрээс хандах боломжгүй. Оронд нь таблет дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Одоогоор үүнд таны <xliff:g id="DEVICE">%1$s</xliff:g> дээрээс хандах боломжгүй. Оронд нь утсан дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Энэ апп нэмэлт аюулгүй байдал хүсэж байна. Оронд нь Android TV төхөөрөмж дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Энэ апп нэмэлт аюулгүй байдал хүсэж байна. Оронд нь таблет дээрээ туршиж үзнэ үү."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Энэ апп нэмэлт аюулгүй байдал хүсэж байна. Оронд нь утсан дээрээ туршиж үзнэ үү."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Энэ аппыг Андройдын хуучин хувилбарт зориулсан бөгөөд буруу ажиллаж болзошгүй. Шинэчлэлтийг шалгаж эсвэл хөгжүүлэгчтэй холбогдоно уу."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Шинэчлэлтийг шалгах"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Танд шинэ мессежүүд байна"</string>
@@ -2032,9 +2038,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ЯМАР Ч ТОХИОЛДОЛД НЭЭХ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Аюултай апп олдсон"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-д төхөөрөмжийн бүх логт хандахыг зөвшөөрөх үү?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Зөвхөн энэ удаа"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Нэг удаагийн хандалтыг зөвшөөрнө үү"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Бүү зөвшөөр"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"Төхөөрөмжийн лог нь таны төхөөрөмж дээр юу болж байгааг бичдэг. Аппууд эдгээр логийг асуудлыг олох болон засахад ашиглах боломжтой.\n\nЗарим лог эмзэг мэдээлэл агуулж байж магадгүй тул та зөвхөн итгэдэг аппууддаа төхөөрөмжийн бүх логт хандахыг зөвшөөрнө үү. \n\nХэрэв та энэ аппад төхөөрөмжийн бүх логт хандахыг зөвшөөрөхгүй бол энэ нь өөрийн логт хандах боломжтой хэвээр байх бөгөөд таны төхөөрөмж үйлдвэрлэгч таны төхөөрөмж дээрх зарим лог эсвэл мэдээлэлд хандах боломжтой хэвээр байж магадгүй. Нэмэлт мэдээлэл авах"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Төхөөрөмжийн лог нь таны төхөөрөмж дээр юу болж байгааг бичдэг. Аппууд эдгээр логийг асуудлыг олох болон засахад ашиглах боломжтой.\n\nЗарим лог эмзэг мэдээлэл агуулж байж магадгүй тул та зөвхөн итгэдэг аппууддаа төхөөрөмжийн бүх логт хандахыг зөвшөөрнө үү. \n\nХэрэв та энэ аппад төхөөрөмжийн бүх логт хандахыг зөвшөөрөхгүй бол энэ нь өөрийн логт хандах боломжтой хэвээр байх болно. Tаны төхөөрөмж үйлдвэрлэгч таны төхөөрөмж дээрх зарим лог эсвэл мэдээлэлд хандах боломжтой хэвээр байж магадгүй. Нэмэлт мэдээлэл авах"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Дахиж бүү харуул"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g>-н хэсгүүдийг (slices) харуулах хүсэлтэй байна"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Засах"</string>
@@ -2046,6 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Илүү ихийг мэдэж, өөрчлөхийн тулд товшино уу."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Бүү саад бол горимыг өөрчилсөн"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Мэдэгдлийн тохиргоог шалгах"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-аас эхлэн таны суулгасан аппууд мэдэгдэл илгээхийн тулд танаас зөвшөөрөл авах шаардлагатай. Одоо байгаа аппуудын уг зөвшөөрлийг өөрчлөхийн тулд товшино уу."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Надад дараа сануул"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Хаах"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Систем"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Тохиргоо"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камер"</string>
@@ -2264,11 +2274,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Орчуулсан."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Мессежийг <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>-с <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> руу орчуулсан."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Дэвсгэрийн үйл ажиллагаа"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Дэвсгэрийн үйл ажиллагаа"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт ажиллаж байгаа бөгөөд батарейг дуусгаж байна. Хянахын тулд товшино уу."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> дэвсгэрт удаан хугацааны турш ажиллаж байна. Хянахын тулд товшино уу."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"Апп батарейг зарцуулж байна"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Апп идэвхтэй хэвээр байна"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> ард ажиллаж байна. Батарей ашиглалтыг удирдахын тулд товшино уу."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> батарейн ажиллах хугацаанд нөлөөлж болзошгүй. Идэвхтэй аппыг хянахын тулд товшино уу."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Идэвхтэй аппуудыг шалгах"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"Энэ төхөөрөмжөөс камер луу нэвтрэх боломжгүй байна"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с утасны камерт хандах боломжгүй"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Таны <xliff:g id="DEVICE">%1$s</xliff:g>-с таблетын камерт хандах боломжгүй"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Системийн өгөгдмөл"</string>
 </resources>

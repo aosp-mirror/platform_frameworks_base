@@ -34,6 +34,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"បង្វិល​អេក្រង់​ស្វ័យ​ប្រវត្តិ"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"អនុញ្ញាត <xliff:g id="APPLICATION">%1$s</xliff:g> ឱ្យចូលប្រើ <xliff:g id="USB_DEVICE">%2$s</xliff:g> មែនទេ?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"អនុញ្ញាតឱ្យ <xliff:g id="APPLICATION">%1$s</xliff:g> ចូលប្រើ <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nកម្មវិធីនេះ​មិនទាន់បាន​ទទួលសិទ្ធិ​ថតសំឡេងនៅឡើយទេ ប៉ុន្តែ​អាចថត​សំឡេង​តាមរយៈ​ឧបករណ៍ USB នេះបាន។"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"អនុញ្ញាតឱ្យ <xliff:g id="APPLICATION">%1$s</xliff:g> ចូលប្រើ <xliff:g id="USB_DEVICE">%2$s</xliff:g> ឬ?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"បើក <xliff:g id="APPLICATION">%1$s</xliff:g> ដើម្បីគ្រប់គ្រង <xliff:g id="USB_DEVICE">%2$s</xliff:g> ឬ?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"កម្មវិធីនេះ​មិនទាន់បាន​ទទួលសិទ្ធិ​ថតសំឡេង​នៅឡើយទេ ប៉ុន្តែអាច​ថតសំឡេង​តាមរយៈ​ឧបករណ៍ USB នេះបាន។ ការប្រើ <xliff:g id="APPLICATION">%1$s</xliff:g> ជាមួយឧបករណ៍នេះអាចនឹងបិទសំឡេងការហៅទូរសព្ទ ការជូនដំណឹង និងម៉ោងរោទ៍។"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"ការប្រើ <xliff:g id="APPLICATION">%1$s</xliff:g> ជាមួយឧបករណ៍នេះអាចនឹងបិទសំឡេងការហៅទូរសព្ទ ការជូនដំណឹង និងម៉ោងរោទ៍។"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"អនុញ្ញាត <xliff:g id="APPLICATION">%1$s</xliff:g> ឱ្យចូលប្រើ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> មែនទេ?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"បើក <xliff:g id="APPLICATION">%1$s</xliff:g> ដើម្បីគ្រប់គ្រង <xliff:g id="USB_DEVICE">%2$s</xliff:g> មែនទេ?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"បើក <xliff:g id="APPLICATION">%1$s</xliff:g> ដើម្បីគ្រប់គ្រង <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nកម្មវិធីនេះ​មិនទាន់បាន​ទទួលសិទ្ធិ​ថតសំឡេង​នៅឡើយទេ ប៉ុន្តែអាច​ថតសំឡេង​តាមរយៈ​ឧបករណ៍ USB នេះ។"</string>
@@ -74,6 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"សាកល្បង​ថតរូបថត​អេក្រង់​ម្តងទៀត"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"មិនអាច​រក្សាទុករូបថត​អេក្រង់បានទេ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ការថតអេក្រង់ត្រូវបានទប់ស្កាត់ដោយអ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យារបស់អ្នក"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"កែ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"កែ​រូបថត​អេក្រង់"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"ចែករំលែករូបថតអេក្រង់"</string>
@@ -131,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"បានបញ្ជាក់"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"ចុច \"បញ្ជាក់\" ដើម្បីបញ្ចប់"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1597899891472340950">"បានដោះសោ​ដោយប្រើ​មុខរបស់អ្នក។ ចុច ដើម្បីបន្ត។"</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"បានដោះសោ​ដោយប្រើមុខ។ សូមចុចរូបដោះសោ ដើម្បីបន្ត។"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"បាន​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"ប្រើកូដ PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"ប្រើ​លំនាំ"</string>
@@ -287,6 +292,15 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ការធ្វើបែបនេះ​នឹងឈប់ទប់ស្កាត់​ការចូលប្រើ​សម្រាប់កម្មវិធី និងសេវាកម្ម​ទាំងអស់ ដែលត្រូវបាន​អនុញ្ញាតឱ្យប្រើ​មីក្រូហ្វូនរបស់អ្នក​។"</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ការធ្វើបែបនេះ​នឹងឈប់ទប់ស្កាត់​ការចូលប្រើ​សម្រាប់កម្មវិធី និងសេវាកម្ម​ទាំងអស់ ដែលត្រូវបាន​អនុញ្ញាតឱ្យប្រើ​កាមេរ៉ារបស់អ្នក​។"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ការធ្វើបែបនេះ​នឹងឈប់ទប់ស្កាត់​ការចូលប្រើ​សម្រាប់កម្មវិធី និងសេវាកម្ម​ទាំងអស់ ដែលត្រូវបាន​អនុញ្ញាតឱ្យប្រើ​កាមេរ៉ា ឬមីក្រូហ្វូនរបស់អ្នក​។"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"មីក្រូហ្វូន​ត្រូវ​បាន​ទប់ស្កាត់"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"កាមេរ៉ា​ត្រូវ​បាន​ទប់ស្កាត់"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"កាមេរ៉ា និងមីក្រូហ្វូន​ត្រូវបានទប់ស្កាត់"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"ដើម្បីឈប់​ទប់ស្កាត់ សូមប្ដូរប៊ូតុងបិទបើក​ឯកជនភាព​នៅលើឧបករណ៍​របស់អ្នក​ទៅទីតាំងបើកមីក្រូហ្វូន ដើម្បីអនុញ្ញាតឱ្យ​ចូលប្រើ​មីក្រូហ្វូន។ សូមមើល​សៀវភៅ​ណែនាំអំពីឧបករណ៍ ដើម្បីរកមើល​ប៊ូតុងបិទបើកឯកជនភាព​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"ដើម្បីឈប់​ទប់ស្កាត់ សូមប្ដូរ​ប៊ូតុងបិទបើកឯកជនភាព​នៅលើ​ឧបករណ៍របស់អ្នក​ទៅទីតាំងបើក​កាមេរ៉ា ដើម្បីអនុញ្ញាតឱ្យ​ចូលប្រើ​កាមេរ៉ា។ សូមមើល​សៀវភៅ​ណែនាំអំពីឧបករណ៍ ដើម្បីរកមើល​ប៊ូតុងបិទបើកឯកជនភាព​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"ដើម្បីឈប់​ទប់ស្កាត់កាមេរ៉ានិងមីក្រូហ្វូន សូមប្ដូរ​ប៊ូតុងបិទបើក​ឯកជនភាព​នៅលើឧបករណ៍​របស់អ្នក​ទៅទីតាំងឈប់ទប់ស្កាត់ ដើម្បីអនុញ្ញាតឱ្យ​ចូលប្រើ។ សូមមើល​សៀវភៅ​ណែនាំអំពីឧបករណ៍ ដើម្បីរកមើល​ប៊ូតុងបិទបើកឯកជនភាព​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
+    <string name="sensor_privacy_mic_unblocked_toast_content" msgid="306555320557065068">"អាចប្រើមីក្រូហ្វូនបាន"</string>
+    <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"អាចប្រើកាមេរ៉ាបាន"</string>
+    <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"អាចប្រើកាមេរ៉ា និងមីក្រូហ្វូនបាន"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"ឧបករណ៍ផ្សេងទៀត"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"បិទ/បើក​ទិដ្ឋភាពរួម"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
@@ -297,7 +311,12 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ប៉ះ​ម្ដង​ទៀត ដើម្បី​បើក"</string>
     <string name="tap_again" msgid="1315420114387908655">"ចុច​ម្ដងទៀត"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"អូសឡើងលើ​ដើម្បីបើក"</string>
-    <string name="keyguard_unlock_press" msgid="8488350566398524740">"ចុច ដើម្បីបើក"</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"ចុចរូបដោះសោ ដើម្បីបើក"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"បានដោះសោ​ដោយប្រើមុខ។ សូមចុចរូបដោះសោ ដើម្បីបើក។"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"អូសឡើងលើ ដើម្បី​ព្យាយាម​ម្ដងទៀត"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ដោះសោ ដើម្បីប្រើ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
@@ -320,7 +339,6 @@
     <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ឧបករណ៍ភ្ជាប់សាកថ្ម • ពេញក្នុងរយៈពេល <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ទៀត"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ប្ដូរ​អ្នក​ប្រើ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"កម្មវិធី និងទិន្នន័យ​ទាំងអស់​ក្នុង​វគ្គ​នេះ​នឹង​ត្រូវ​លុប។"</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"ដកចេញ"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"សូម​ស្វាគមន៍​ការ​ត្រឡប់​មកវិញ, ភ្ញៀវ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"តើ​អ្នក​ចង់​បន្ត​វគ្គ​របស់​អ្នក​ទេ?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"ចាប់ផ្ដើមសាជាថ្មី"</string>
@@ -352,20 +370,20 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ស្ថាប័ន​របស់អ្នក​ជាម្ចាស់​ឧបករណ៍​នេះ ហើយ​អាចនឹង​តាមដាន​ចរាចរណ៍បណ្តាញ"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ជាម្ចាស់​ឧបករណ៍​នេះ ហើយ​អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"ឧបករណ៍នេះត្រូវបានផ្ដល់ដោយ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័នអ្នក និងត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> និងត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក និងត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> និងត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"ឧបករណ៍នេះ​គឺជា​កម្មសិទ្ធិ​របស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័នអ្នក និងត្រូវបានភ្ជាប់ទៅ VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> និងត្រូវបានភ្ជាប់ទៅ VPN"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក និងត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ VPN"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> និងត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ស្ថាប័ន​របស់អ្នក​អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> អាចនឹង​តាមដាន​ចរាចរណ៍​បណ្តាញ​នៅក្នុង​កម្រងព័ត៌មាន​ការងារ​របស់​អ្នក"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​អាចមើលឃើញ​សកម្មភាព​បណ្ដាញ​នៃកម្រងព័ត៌មាន​ការងារ"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"បណ្ដាញ​អាច​ត្រូវ​តាមដាន"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="7213546797022280246">"ឧបករណ៍នេះ​ត្រូវបានភ្ជាប់ទៅ VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="8117568745060010789">"កម្រងព័ត៌មានការងារ​របស់អ្នក​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="5481763430080807797">"កម្រងព័ត៌មាន​ផ្ទាល់ខ្លួន​របស់អ្នក​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="2350838218824492465">"ឧបករណ៍នេះ​ត្រូវបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"ឧបករណ៍​នេះត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ VPN"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"កម្មវិធី​ការងាររបស់អ្នកត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"កម្មវិធី​ផ្ទាល់ខ្លួនរបស់អ្នកត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"ឧបករណ៍​នេះត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"ឧបករណ៍នេះត្រូវបានផ្ដល់ដោយ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"ការ​គ្រប់គ្រង​ឧបករណ៍"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -381,10 +399,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"បាន​ដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រ​នៅលើ​ឧបករណ៍​នេះ។ ចរាចរណ៍​បណ្តាញដែលមានសុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"អ្នក​គ្រប់គ្រង​របស់អ្នក​បាន​បើក​ការ​ធ្វើ​កំណត់ហេតុ​បណ្តាញ​ ដែល​នឹង​តាមដាន​ចរាចរណ៍​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"អ្នកគ្រប់គ្រង​របស់អ្នក​បានបើក​ការធ្វើ​កំណត់ហេតុ​បណ្តាញ ដែល​តាមដាន​ចរាចរណ៍​នៅក្នុងកម្រងព័ត៌មាន​ការងាររបស់អ្នក ប៉ុន្តែមិនតាមដាន​នៅក្នុងកម្រងព័ត៌មានផ្ទាល់ខ្លួន​របស់អ្នកឡើយ។"</string>
-    <string name="monitoring_description_named_vpn" msgid="5749932930634037027">"អ្នកបានភ្ជាប់ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g> ដែលអាចតាមដានសកម្មភាពក្នុងបណ្តាញរបស់អ្នក រួមទាំងអ៊ីមែល កម្មវិធី និងគេហទំព័រផងដែរ។"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="3516830755681229463">"អ្នកបាន​ភ្ជាប់ទៅ <xliff:g id="VPN_APP_0">%1$s</xliff:g> និង <xliff:g id="VPN_APP_1">%2$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g> ដែលអាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំងអ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។"</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"កម្រងព័ត៌មាន​ផ្ទាល់ខ្លួន​របស់អ្នក​ត្រូវបាន​ភ្ជាប់​ទៅ <xliff:g id="VPN_APP">%1$s</xliff:g> ដែល​អាច​តាមដាន​សកម្មភាព​បណ្តាញ​របស់អ្នក រួមទាំង​អ៊ីមែល កម្មវិធី និង​គេហទំព័រ​ផងដែរ។"</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"ឧបករណ៍នេះត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យារបស់អ្នកអាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នក រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ឧបករណ៍នេះត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP_0">%1$s</xliff:g> និង <xliff:g id="VPN_APP_1">%2$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យារបស់អ្នកអាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នក រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"កម្មវិធី​ការងាររបស់អ្នកត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា និងក្រុមហ៊ុន​ផ្តល់សេវា VPN របស់អ្នកអាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នកនៅក្នុងកម្មវិធី​ការងារ រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"កម្មវិធី​ផ្ទាល់ខ្លួនរបស់អ្នកត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>។ ក្រុមហ៊ុន​ផ្តល់សេវា VPN របស់អ្នកអាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នក រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"បើក​ការកំណត់ VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"ឧបករណ៍​នេះ​ស្ថិត​ក្រោម​ការ​គ្រប់គ្រង​របស់មាតាបិតាអ្នក។ មាតាបិតារបស់អ្នកអាចមើល និងគ្រប់គ្រងព័ត៌មាន​ដូចជា កម្មវិធីដែលអ្នកប្រើ ទីតាំងរបស់អ្នក និងរយៈពេលប្រើប្រាស់ឧបករណ៍របស់អ្នកជាដើម។"</string>
@@ -445,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"កាបូប"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ធ្វើការ​រៀបចំ ដើម្បី​ធ្វើការទិញ​កាន់តែលឿន​ជាងមុន សុវត្ថិភាព​ជាងមុន ដោយ​ប្រើ​ទូរសព្ទ​របស់អ្នក"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"បង្ហាញ​ទាំងអស់"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"បញ្ចូល​កាត"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"ចុចដើម្បីបើក"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"កំពុង​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ដោះសោដើម្បីប្រើប្រាស់"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"មានបញ្ហា​ក្នុងការទាញយក​កាត​របស់អ្នក សូម​ព្យាយាមម្ដងទៀត​នៅពេលក្រោយ"</string>
@@ -493,9 +511,10 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនអាចប្រើ​មុខងារ​សន្ទនា​បានទេ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>
+    <string name="notification_unblockable_call_desc" msgid="5907328164696532169">"មិនអាច​កែប្រែ​ការជូនដំណឹងអំពីការហៅទូរសព្ទបានទេ។"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"មិនអាច​កំណត់​រចនាសម្ព័ន្ធ​ក្រុមការជូនដំណឹងនេះ​នៅទីនេះ​បានទេ"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ការជូនដំណឹង​ជា​ប្រូកស៊ី"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"ការជូន​ដំណឹងទាំងអស់​ពី <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"ការជូន​ដំណឹងទាំងអស់​ពី​<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"មើលច្រើនទៀត"</string>
     <string name="feedback_alerted" msgid="5192459808484271208">"ការជូនដំណឹងនេះ​ត្រូវបាន&lt;b&gt;ដំឡើង​ទៅលំនាំដើម&lt;/b&gt;ដោយប្រព័ន្ធ​ដោយស្វ័យប្រវត្តិ។"</string>
     <string name="feedback_silenced" msgid="9116540317466126457">"ការជូនដំណឹងនេះ​ត្រូវបាន&lt;b&gt;បញ្ចុះ​ទៅស្ងាត់&lt;/b&gt;ដោយប្រព័ន្ធដោយស្វ័យប្រវត្តិ។"</string>
@@ -606,7 +625,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ប្រអប់​ឡើងវិញ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"អូសទីនេះដើម្បីយកចេញ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"អ្នក​ត្រូវការ​ប្រអប់​យ៉ាងតិច <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"កែសម្រួល"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"កែ"</string>
     <string name="tuner_time" msgid="2450785840990529997">"ម៉ោង"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"បង្ហាញម៉ោង នាទី និងវិនាទី"</item>
@@ -704,6 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"បើក​នៅពេល​ថ្ម​ទំនងជា​អស់"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"ទេ អរគុណ"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"កំពុង​ប្រើ"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"កម្មវិធី​កំពុងប្រើ <xliff:g id="TYPES_LIST">%s</xliff:g> របស់អ្នក។"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" និង "</string>
@@ -766,6 +786,12 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"បញ្ចូល"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"បាន​ណែនាំដោយ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"បានចាក់សោ​ឧបករណ៍"</string>
+    <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"បង្ហាញ និង​គ្រប់គ្រង​ឧបករណ៍ពី​អេក្រង់ចាក់សោឬ?"</string>
+    <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"អ្នកអាចបញ្ចូល​ការគ្រប់គ្រង​សម្រាប់ឧបករណ៍​ខាងក្រៅ​របស់អ្នក​ទៅក្នុងអេក្រង់​ចាក់សោបាន។\n\nកម្មវិធី​ឧបករណ៍​របស់អ្នក​អាចអនុញ្ញាតឱ្យអ្នក​គ្រប់គ្រង​ឧបករណ៍​មួយចំនួន ដោយមិនចាំបាច់​ដោះសោ​ទូរសព្ទ ឬ​ថេប្លេត​របស់អ្នក។\n\nអ្នកអាចធ្វើការផ្លាស់ប្ដូរ​បានគ្រប់ពេល​នៅក្នុង​ការកំណត់។"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"គ្រប់គ្រង​ឧបករណ៍ពី​អេក្រង់ចាក់សោឬ?"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"អ្នកអាចគ្រប់គ្រង​ឧបករណ៍​មួយចំនួន ដោយមិនចាំបាច់​ដោះសោ​ទូរសព្ទ ឬថេប្លេត​របស់អ្នក។\n\nកម្មវិធី​ឧបករណ៍​របស់អ្នក​កំណត់ឧបករណ៍​ដែលអាចត្រូវបានគ្រប់គ្រង​តាមវិធីនេះ។"</string>
+    <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"ទេ អរគុណ"</string>
+    <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"បាទ/ចាស"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"កូដ PIN មាន​អក្សរ ឬនិមិត្តសញ្ញា"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"ផ្ទៀងផ្ទាត់ <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"កូដ PIN មិន​ត្រឹមត្រូវ​"</string>
@@ -775,8 +801,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"អូសដើម្បី​មើលច្រើនទៀត"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"កំពុងផ្ទុក​ការណែនាំ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"មេឌៀ"</string>
-    <!-- no translation found for controls_media_close_session (4780485355795635052) -->
-    <skip />
+    <string name="controls_media_close_session" msgid="4780485355795635052">"លាក់ផ្ទាំង​គ្រប់គ្រង​មេឌៀនេះសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"មិនអាចលាក់វគ្គមេឌៀបច្ចុប្បន្នបានទេ។"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"លាក់"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"បន្ត"</string>
@@ -787,6 +812,7 @@
     <string name="controls_media_button_pause" msgid="8614887780950376258">"ផ្អាក"</string>
     <string name="controls_media_button_prev" msgid="8126822360056482970">"ចម្រៀងមុន"</string>
     <string name="controls_media_button_next" msgid="6662636627525947610">"ចម្រៀង​បន្ទាប់"</string>
+    <string name="controls_media_button_connecting" msgid="3138354625847598095">"កំពុងភ្ជាប់"</string>
     <string name="controls_media_smartspace_rec_title" msgid="1699818353932537407">"ចាក់"</string>
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"បើក <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"ចាក់ <xliff:g id="SONG_NAME">%1$s</xliff:g> ច្រៀងដោយ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> ពី <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -795,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"រំកិលឱ្យកាន់តែជិត ដើម្បីចាក់នៅលើ <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"រំកិលឱ្យកាន់តែជិត <xliff:g id="DEVICENAME">%1$s</xliff:g> ដើម្បីចាក់នៅទីនេះ"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"កំពុង​ចាក់​​នៅ​លើ <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"កំពុង​ចាក់​​នៅ​លើទូរសព្ទនេះ"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"មានអ្វីមួយខុសប្រក្រតី។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"រកមិន​ឃើញទេ"</string>
@@ -816,6 +841,19 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ដើម្បីភ្ជាប់វគ្គនេះ សូមបើកកម្មវិធី។"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"កម្មវិធី​ដែលមិន​ស្គាល់"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"បញ្ឈប់ការភ្ជាប់"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
+    <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
+    <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"ដើម្បីស្តាប់​ការផ្សាយ​របស់អ្នក មនុស្សនៅជិត​ដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្កេនកូដ QR របស់អ្នក ឬប្រើឈ្មោះ​ការផ្សាយ និងពាក្យសម្ងាត់​របស់អ្នក"</string>
+    <string name="media_output_broadcast_name" msgid="8786127091542624618">"ឈ្មោះការផ្សាយ"</string>
+    <string name="media_output_broadcast_code" msgid="870795639644728542">"ពាក្យសម្ងាត់"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"រក្សាទុក"</string>
+    <string name="media_output_broadcast_starting" msgid="8130153654166235557">"កំពុង​ចាប់ផ្ដើម…"</string>
+    <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"មិនអាចផ្សាយបានទេ"</string>
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"មិនអាច​រក្សាទុក​បានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"មិនអាច​រក្សាទុក​បានទេ។"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"លេខ​កំណែបង្កើត"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"បានចម្លងលេខ​កំណែបង្កើតទៅឃ្លីបបត។"</string>
     <string name="basic_status" msgid="2315371112182658176">"បើកការសន្ទនា"</string>
@@ -884,21 +922,29 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"បញ្ចូល​ប្រអប់"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"កុំ​បញ្ចូល​ប្រអប់"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ជ្រើសរើសអ្នកប្រើប្រាស់"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
-      <item quantity="other">កម្មវិធីសកម្ម <xliff:g id="COUNT_1">%s</xliff:g></item>
-      <item quantity="one">កម្មវិធីសកម្ម <xliff:g id="COUNT_0">%s</xliff:g></item>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
+      <item quantity="other">កម្មវិធី <xliff:g id="COUNT_1">%s</xliff:g> កំពុងដំណើរការ</item>
+      <item quantity="one">កម្មវិធី <xliff:g id="COUNT_0">%s</xliff:g> កំពុងដំណើរការ</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ព័ត៌មានថ្មី"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"កម្មវិធីសកម្ម"</string>
+    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"ទោះបីជាអ្នក​មិនកំពុងប្រើកម្មវិធីទាំងនេះ​ក៏ដោយ ក៏កម្មវិធី​ទាំងនេះនៅតែ​ដំណើរការ​ដដែល ហើយអាចប៉ះពាល់​ដល់កម្រិតថាមពលថ្ម"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ឈប់"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"បានឈប់"</string>
-    <string name="clipboard_edit_text_copy" msgid="770856373439969178">"ចម្លង"</string>
+    <string name="clipboard_edit_text_done" msgid="4551887727694022409">"រួចរាល់"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"បានចម្លង"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"ពី <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"ច្រានចោល UI ចម្លង"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"កែអត្ថបទ​ដែលបានចម្លង"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"កែរូបភាព​ដែលបានចម្លង"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ផ្ញើទៅ​ឧបករណ៍​នៅជិត"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"ចុចដើម្បីមើល"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"បញ្ចូល"</string>
     <string name="manage_users" msgid="1823875311934643849">"គ្រប់គ្រង​អ្នក​ប្រើប្រាស់"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ការជូនដំណឹងនេះមិនអាចឱ្យអូសដើម្បីបំបែកអេក្រង់បានទេ។"</string>

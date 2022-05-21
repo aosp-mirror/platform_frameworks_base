@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ปิดชั่วคราวโดยผู้ให้บริการของซิม <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"เชื่อมต่อเครือข่ายมือถือไม่ได้"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ลองเปลี่ยนเครือข่ายที่ต้องการ แตะเพื่อเปลี่ยน"</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"หมายเลขฉุกเฉินอาจไม่สามารถใช้งานได้"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ไม่รองรับการโทรไปยังหมายเลขฉุกเฉินผ่าน Wi-Fi แตะเพื่อดูรายละเอียด"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"โทรหาหมายเลขฉุกเฉินไม่ได้"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"โทรหาหมายเลขฉุกเฉินผ่าน Wi‑Fi ไม่ได้"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"การแจ้งเตือน"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"การโอนสาย"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"โหมดติดต่อกลับฉุกเฉิน"</string>
@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"เข้าถึงปฏิทิน"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ส่งและดูข้อความ SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ไฟล์และเอกสาร"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ไฟล์และเอกสาร"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"เข้าถึงไฟล์และเอกสารในอุปกรณ์"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"เพลงและเสียงอื่นๆ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"เข้าถึงไฟล์เสียงในอุปกรณ์"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"รูปภาพและวิดีโอ"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"เข้าถึงไฟล์ภาพและวิดีโอในอุปกรณ์"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"เพลงและเสียง"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"เข้าถึงเพลงและเสียงในอุปกรณ์ได้"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"รูปภาพและวิดีโอ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"เข้าถึงรูปภาพและวิดีโอในอุปกรณ์ได้"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"บันทึกเสียง"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"การเคลื่อนไหวร่างกาย"</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"การตรวจสอบข้อผิดพลาด"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ใช้การล็อกหน้าจอ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ป้อนข้อมูลการล็อกหน้าจอเพื่อดำเนินการต่อ"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ตรวจพบลายนิ้วมือบางส่วน"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"กดเซ็นเซอร์ให้แน่น"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ประมวลผลลายนิ้วมือไม่ได้ โปรดลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ทำความสะอาดเซ็นเซอร์ลายนิ้วมือแล้วลองอีกครั้ง"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ทำความสะอาดเซ็นเซอร์แล้วลองอีกครั้ง"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ไม่รู้จักลายนิ้วมือ"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"กดเซ็นเซอร์ให้แน่น"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ไม่รู้จักลายนิ้วมือ"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ตรวจสอบสิทธิ์ลายนิ้วมือแล้ว"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ตรวจสอบสิทธิ์ใบหน้าแล้ว"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ตรวจสอบสิทธิ์ใบหน้าแล้ว โปรดกดยืนยัน"</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"อนุญาตให้แอปขอสิทธิ์เพิกเฉยต่อการเพิ่มประสิทธิภาพแบตเตอรี่สำหรับแอปนั้น"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ค้นหาแพ็กเกจทั้งหมด"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"อนุญาตให้แอปดูแพ็กเกจที่ติดตั้งไว้ทั้งหมด"</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"เข้าถึง AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"อนุญาตให้แอปพลิเคชันเข้าถึง AdServices Topics API"</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"เข้าถึง AdServices Attribution API"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"อนุญาตให้แอปพลิเคชันเข้าถึง AdServices Attribution API"</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"เข้าถึง AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"อนุญาตให้แอปพลิเคชันเข้าถึง AdServices Custom Audiences API"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ไป"</string>
@@ -1685,12 +1679,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"เปิด"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ปิด"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"อนุญาตให้ <xliff:g id="SERVICE">%1$s</xliff:g> ควบคุมอุปกรณ์อย่างเต็มที่ไหม"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"หากคุณเปิด <xliff:g id="SERVICE">%1$s</xliff:g> อุปกรณ์ของคุณจะไม่ใช้ล็อกหน้าจอเพื่อปรับปรุงการเข้ารหัสข้อมูล"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปที่ช่วยคุณในเรื่องความต้องการความช่วยเหลือพิเศษแต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปเกี่ยวกับความช่วยเหลือพิเศษ แต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ดูและควบคุมหน้าจอ"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้อ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้สามารถอ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ดูและดำเนินการ"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"การกระทำนี้ติดตามการโต้ตอบของคุณกับแอปหรือกับเซ็นเซอร์ของฮาร์ดแวร์ และจะโต้ตอบกับแอปต่างๆ แทนคุณ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"การควบคุมนี้สามารถติดตามการโต้ตอบของคุณกับแอปหรือกับเซ็นเซอร์ของฮาร์ดแวร์ และโต้ตอบกับแอปต่างๆ แทนคุณ"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"อนุญาต"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ปฏิเสธ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"แตะฟีเจอร์เพื่อเริ่มใช้"</string>
@@ -1719,7 +1712,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"กำลังเปลี่ยนเป็น <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"กำลังออกจากระบบ <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"เจ้าของ"</string>
-    <string name="guest_name" msgid="8502103277839834324">"ผู้มาเยือน"</string>
+    <string name="guest_name" msgid="8502103277839834324">"ผู้ใช้ชั่วคราว"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ข้อผิดพลาด"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ผู้ดูแลระบบไม่อนุญาตให้ทำการเปลี่ยนแปลงนี้"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ไม่พบแอปพลิเคชันสำหรับการทำงานนี้"</string>
@@ -1858,7 +1851,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ตกลง"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต การประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"เปิด"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ระยะเวลา 1 นาที (จนถึง {formattedTime})}other{ระยะเวลา # นาที (จนถึง {formattedTime})}}"</string>
@@ -1939,9 +1932,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"แอปไม่พร้อมใช้งาน"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่พร้อมใช้งานในขณะนี้"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่พร้อมใช้งาน"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในอุปกรณ์ Android TV แทน"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในแท็บเล็ตแทน"</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"ต้องการสิทธิ์"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"กล้องไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ดำเนินการต่อบนโทรศัพท์"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ไมโครโฟนไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"การตั้งค่า Android TV ไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"การตั้งค่าแท็บเล็ตไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"การตั้งค่าโทรศัพท์ไม่พร้อมใช้งาน"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ โปรดลองเข้าถึงในอุปกรณ์ Android TV แทน"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ โปรดลองเข้าถึงในแท็บเล็ตแทน"</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในอุปกรณ์ Android TV แทน"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในแท็บเล็ตแทน"</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"เข้าถึงแอปนี้ใน <xliff:g id="DEVICE">%1$s</xliff:g> ของคุณไม่ได้ในขณะนี้ โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"แอปนี้มีการขอการรักษาความปลอดภัยเพิ่มเติม โปรดลองเข้าถึงในอุปกรณ์ Android TV แทน"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"แอปนี้มีการขอการรักษาความปลอดภัยเพิ่มเติม โปรดลองเข้าถึงในแท็บเล็ตแทน"</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"แอปนี้มีการขอการรักษาความปลอดภัยเพิ่มเติม โปรดลองเข้าถึงในโทรศัพท์แทน"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"แอปนี้สร้างขึ้นเพื่อ Android เวอร์ชันเก่าและอาจทำงานผิดปกติ โปรดลองตรวจหาการอัปเดตหรือติดต่อนักพัฒนาซอฟต์แวร์"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ตรวจสอบอัปเดต"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"คุณมีข้อความใหม่"</string>
@@ -1952,7 +1958,7 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"เชื่อมต่อ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"แตะเพื่อดูไฟล์"</string>
     <string name="pin_target" msgid="8036028973110156895">"ปักหมุด"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"ตรึง <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"ปักหมุด <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"เลิกปักหมุด"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"เลิกปักหมุด <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"ข้อมูลแอป"</string>
@@ -2032,9 +2038,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"เปิดต่อไป"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ตรวจพบแอปที่เป็นอันตราย"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"อนุญาตให้ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> เข้าถึงบันทึกทั้งหมดของอุปกรณ์ใช่ไหม"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"เฉพาะครั้งนี้"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"อนุญาตสิทธิ์เข้าถึงแบบครั้งเดียว"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ไม่อนุญาต"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"บันทึกของอุปกรณ์เก็บข้อมูลสิ่งที่เกิดขึ้นในอุปกรณ์ แอปสามารถใช้บันทึกนี้เพื่อค้นหาและแก้ไขปัญหา\n\nบันทึกบางรายการอาจมีข้อมูลที่ละเอียดอ่อน ดังนั้นคุณควรอนุญาตเฉพาะแอปที่เชื่อถือได้ให้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ \n\nหากคุณไม่อนุญาตให้แอปนี้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ แอปจะยังเข้าถึงบันทึกของตัวเองได้อยู่ และผู้ผลิตอุปกรณ์อาจยังเข้าถึงบันทึกหรือข้อมูลบางรายการในอุปกรณ์ของคุณได้ ดูข้อมูลเพิ่มเติม"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"บันทึกของอุปกรณ์เก็บข้อมูลสิ่งที่เกิดขึ้นในอุปกรณ์ แอปสามารถใช้บันทึกเหล่านี้เพื่อค้นหาและแก้ไขปัญหา\n\nบันทึกบางรายการอาจมีข้อมูลที่ละเอียดอ่อน คุณจึงควรอนุญาตเฉพาะแอปที่เชื่อถือได้ให้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ \n\nหากคุณไม่อนุญาตให้แอปนี้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ แอปจะยังเข้าถึงบันทึกของตัวเองได้อยู่ ผู้ผลิตอุปกรณ์อาจยังเข้าถึงบันทึกหรือข้อมูลบางรายการในอุปกรณ์ของคุณได้ ดูข้อมูลเพิ่มเติม"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ไม่ต้องแสดงอีก"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ต้องการแสดงส่วนต่างๆ ของ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"แก้ไข"</string>
@@ -2046,6 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"แตะเพื่อดูข้อมูลเพิ่มเติมและเปลี่ยนแปลง"</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"เปลี่ยน \"ห้ามรบกวน\" แล้ว"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"ตรวจสอบการตั้งค่าการแจ้งเตือน"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ตั้งแต่ Android 13 เป็นต้นไป แอปที่คุณติดตั้งจะต้องได้รับสิทธิ์จากคุณเพื่อส่งการแจ้งเตือน แตะเพื่อเปลี่ยนแปลงสิทธิ์นี้สำหรับแอปที่มีอยู่"</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"เตือนภายหลัง"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ปิด"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ระบบ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"การตั้งค่า"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"กล้อง"</string>
@@ -2093,7 +2103,7 @@
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ไฟล์}other{{file_name} + # ไฟล์}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ไม่พบใครที่แนะนำให้แชร์ด้วย"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"รายชื่อแอป"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่จะบันทึกเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่อาจเก็บเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"หน้าแรก"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"กลับ"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"แอปล่าสุด"</string>
@@ -2264,11 +2274,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> แปลแล้ว"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"แปลข้อความจากภาษา<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>เป็นภาษา<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>แล้ว"</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"กิจกรรมในเบื้องหลัง"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"กิจกรรมในเบื้องหลัง"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงานอยู่ในเบื้องหลังและทำให้เปลืองแบตเตอรี่ แตะเพื่อตรวจสอบ"</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ทำงานอยู่ในเบื้องหลังเป็นเวลานาน แตะเพื่อตรวจสอบ"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"แอปทำให้แบตเตอรี่หมดเร็ว"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"แอปยังทำงานอยู่"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> ทำงานอยู่เบื้องหลัง แตะเพื่อจัดการการใช้งานแบตเตอรี่"</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> อาจส่งผลต่ออายุการใช้งานแบตเตอรี่ แตะเพื่อตรวจสอบแอปที่ทำงานอยู่"</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ตรวจสอบแอปที่ใช้งานอยู่"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"เข้าถึงกล้องจากอุปกรณ์นี้ไม่ได้"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"เข้าถึงกล้องของโทรศัพท์จาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"เข้าถึงกล้องของแท็บเล็ตจาก <xliff:g id="DEVICE">%1$s</xliff:g> ไม่ได้"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"ค่าเริ่มต้นของระบบ"</string>
 </resources>

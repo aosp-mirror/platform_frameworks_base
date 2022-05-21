@@ -85,8 +85,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານປິດໄວ້ສຳລັບຊິມ <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ບໍ່ສາມາດຕິດຕໍ່ເຄືອຂ່າຍມືຖືໄດ້"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ໃຫ້ລອງປ່ຽນເຄືອຂ່າຍທີ່ຕ້ອງການ. ແຕະເພື່ອປ່ຽນ."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"ການໂທ​ສຸກ​ເສີນອາດບໍ່ສາມາດໃຊ້ໄດ້"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> ບໍ່ຮອງຮັບການໂທ​ສຸກ​ເສີນຂ້າມ Wi-Fi. ແຕະເພື່ອເບິ່ງລາຍລະອຽດ."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ບໍ່ສາມາດໃຊ້ການໂທສຸກເສີນໄດ້"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ບໍ່ສາມາດໂທສຸກເສີນຜ່ານ Wi‑Fi ໄດ້"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ການເຕືອນ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ການໂອນສາຍ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ໂໝດໂທກັບສຸກເສີນ"</string>
@@ -305,12 +305,12 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ສົ່ງ ແລະ​ເບິ່ງ​ຂໍ້​ຄວາມ SMS"</string>
-    <string name="permgrouplab_storage" msgid="9173334109512154196">"ໄຟລ໌ ແລະ ເອກະສານ"</string>
+    <string name="permgrouplab_storage" msgid="5570124978732352858">"ໄຟລ໌ ແລະ ເອກະສານ"</string>
     <string name="permgroupdesc_storage" msgid="8352226729501080525">"ເຂົ້າເຖິງໄຟລ໌ ແລະ ເອກະສານຢູ່ອຸປະກອນຂອງທ່ານ"</string>
-    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"ເພງ ແລະ ສຽງອື່ນໆ"</string>
-    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"ເຂົ້າເຖິງໄຟລ໌ສຽງຢູ່ອຸປະກອນຂອງທ່ານ"</string>
-    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ຮູບພາບ ແລະ ວິດີໂອ"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"ເຂົ້າເຖິງໄຟລ໌ຮູບ ແລະ ວິດີໂອຢູ່ອຸປະກອນຂອງທ່ານ"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ເພງ ແລະ ສຽງ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ເຂົ້າເຖິງເພງ ແລະ ສຽງຢູ່ອຸປະກອນຂອງທ່ານ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ຮູບພາບ ແລະ ວິດີໂອ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ເຂົ້າເຖິງຮູບພາບ ແລະ ວິດີໂອຢູ່ອຸປະກອນຂອງທ່ານ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ໄມໂຄຣໂຟນ"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ບັນທຶກສຽງ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ກິດຈະກຳທາງກາຍະພາບ"</string>
@@ -585,7 +585,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"ເກີດຄວາມຜິດພາດໃນການພິສູດຢືນຢັນ"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ໃຊ້ການລັອກໜ້າຈໍ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ໃສ່ການລັອກໜ້າຈໍຂອງທ່ານເພື່ອສືບຕໍ່"</string>
-    <string name="fingerprint_acquired_partial" msgid="694598777291084823">"ກວດພົບລາຍນິ້ວມືບາງສ່ວນ"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ກົດຢູ່ເຊັນເຊີໃຫ້ແໜ້ນ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"ບໍ່​ສາ​ມາດ​ດຳ​ເນີນ​ການ​ລາຍ​ນີ້ວ​ມື​ໄດ້. ກະ​ລຸ​ນາ​ລອງ​ໃໝ່​ອີກ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ໃຫ້ອະນາໄມເຊັນ​ເຊີລາຍນິ້ວ​ມືແລ້ວລອງໃໝ່"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ໃຫ້ອະນາໄມເຊັນ​ເຊີແລ້ວລອງໃໝ່"</string>
@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ບໍ່ຮູ້ຈັກລາຍນິ້ວມື"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"ກົດຢູ່ເຊັນເຊີໃຫ້ແໜ້ນ"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ບໍ່ຮູ້ຈັກລາຍນິ້ວມື"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ພິສູດຢືນຢັນລາຍນິ້ວມືແລ້ວ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ພິສູດຢືນຢັນໃບໜ້າແລ້ວ, ກະລຸນາກົດຢືນຢັນ"</string>
@@ -1451,12 +1451,6 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ອະນຸຍາດໃຫ້ແອັບຖາມສິດອະນຸຍາດເພື່ອເພີກເສີຍຕໍ່ການປັບແຕ່ງແບັດເຕີຣີສຳລັບແອັບນັ້ນ."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ຊອກຫາແພັກເກດທັງໝົດ"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"ອະນຸຍາດໃຫ້ແອັບເບິ່ງເຫັນແພັກເກດທີ່ຕິດຕັ້ງແລ້ວທັງໝົດໄດ້."</string>
-    <string name="permlab_accessAdServicesTopics" msgid="6687112022940098945">"ເຂົ້າເຖິງ AdServices Topics API"</string>
-    <string name="permdesc_accessAdServicesTopics" msgid="6011532458156465929">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນເຂົ້າເຖິງ AdServices Topics API."</string>
-    <string name="permlab_accessAdServicesAttribution" msgid="3268942271128309354">"ເຂົ້າເຖິງ AdServices Attribution API"</string>
-    <string name="permdesc_accessAdServicesAttribution" msgid="577482544832578288">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນເຂົ້າເຖິງ AdServices Attribution API."</string>
-    <string name="permlab_accessAdServicesCustomAudiences" msgid="7249286630514600684">"ເຂົ້າເຖິງ AdServices Custom Audiences API"</string>
-    <string name="permdesc_accessAdServicesCustomAudiences" msgid="645526926477180315">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນເຂົ້າເຖິງ AdServices Custom Audiences API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ແຕະສອງເທື່ອເພື່ອຄວບຄຸມການຊູມ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ບໍ່ສາມາດເພີ່ມວິດເຈັດໄດ້."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ໄປ"</string>
@@ -1685,7 +1679,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ເປີດ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ປິດ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ອະນຸຍາດໃຫ້ <xliff:g id="SERVICE">%1$s</xliff:g> ຄວບຄຸມອຸປະກອນທ່ານໄດ້ເຕັມຮູບແບບບໍ?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ຫາກ​ທ່ານ​ເປີດ​ໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ຈະ​ບໍ່​ໃຊ້​ການ​ລັອກ​ໜ້າ​ຈໍ​ຂອງ​ທ່ານ​ເພື່ອ​ເພີ່ມ​ການ​ເຂົ້າ​ລະ​ຫັດ​ຂໍ້​ມູນ."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ການຄວບຄຸມແບບເຕັມຮູບແບບແມ່ນເໝາະສົມສຳລັບແອັບທີ່ຊ່ວຍທ່ານໃນດ້ານການຊ່ວຍເຂົ້າເຖິງ, ແຕ່ບໍ່ເໝາະສຳລັບທຸກແອັບ."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ເບິ່ງ ແລະ ຄວບຄຸມໜ້າຈໍ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ມັນສາມາດອ່ານເນື້ອຫາທັງໝົດຢູ່ໜ້າຈໍ ແລະ ສະແດງເນື້ອຫາບັງແອັບອື່ນໄດ້."</string>
@@ -1939,9 +1932,22 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"ແອັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"ບໍ່ສາມາດໃຊ້ <xliff:g id="ACTIVITY">%1$s</xliff:g> ໄດ້"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງໃຊ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານແທນ."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງຢູ່ແທັບເລັດຂອງທ່ານແທນ."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"ຕ້ອງມີການອະນຸຍາດ"</string>
+    <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"ກ້ອງຖ່າຍຮູບບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"ສືບຕໍ່ຢູ່ໂທລະສັບ"</string>
+    <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"ໄມໂຄຣໂຟນບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"ການຕັ້ງຄ່າ Android TV ບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"ການຕັ້ງຄ່າແທັບເລັດບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"ການຕັ້ງຄ່າໂທລະສັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງໃຊ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງຢູ່ແທັບເລັດຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານ. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງໃຊ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງຢູ່ແທັບເລັດຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"ບໍ່ສາມາດເຂົ້າເຖິງແອັບນີ້ໄດ້ຢູ່ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໃນຕອນນີ້. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"ແອັບນີ້ກຳລັງຮ້ອງຂໍຄວາມປອດໄພເພີ່ມເຕີມ. ກະລຸນາລອງໃຊ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"ແອັບນີ້ກຳລັງຮ້ອງຂໍຄວາມປອດໄພເພີ່ມເຕີມ. ກະລຸນາລອງຢູ່ແທັບເລັດຂອງທ່ານແທນ."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"ແອັບນີ້ກຳລັງຮ້ອງຂໍຄວາມປອດໄພເພີ່ມເຕີມ. ກະລຸນາລອງຢູ່ໂທລະສັບຂອງທ່ານແທນ."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ແອັບນີ້ຖືກສ້າງຂຶ້ນສຳລັບ Android ເວີຊັນທີ່ເກົ່າກວ່າ ແລະ ອາດເຮັດວຽກໄດ້ບໍ່ປົກກະຕິ. ໃຫ້ລອງກວດສອບເບິ່ງອັບເດດ ຫຼື ຕິດຕໍ່ຜູ້ພັດທະນາ."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"ກວດເບິ່ງອັບເດດ"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"ທ່ານມີຂໍ້ຄວາມໃໝ່"</string>
@@ -2032,9 +2038,9 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ຢືນຢັນການເປີດ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ກວດສອບແອັບທີ່ເປັນອັນຕະລາຍ"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"ອະນຸຍາດໃຫ້ <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດບໍ?"</string>
-    <string name="log_access_confirmation_allow" msgid="143157286283302512">"ສະເພາະເທື່ອນີ້"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"ອະນຸຍາດການເຂົ້າເຖິງແບບເທື່ອດຽວ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"ບໍ່ອະນຸຍາດ"</string>
-    <string name="log_access_confirmation_body" msgid="4483075525611652922">"ບັນທຶກອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດແອັບນີ້ໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່ ແລະ ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້. ສຶກສາເພີ່ມເຕີມ"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"ບັນທຶກອຸປະກອນຈະບັນທຶກສິ່ງທີ່ເກີດຂຶ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ແອັບສາມາດໃຊ້ບັນທຶກເຫຼົ່ານີ້ເພື່ອຊອກຫາ ແລະ ແກ້ໄຂບັນຫາໄດ້.\n\nບັນທຶກບາງຢ່າງອາດມີຂໍ້ມູນລະອຽດອ່ອນ, ດັ່ງນັ້ນໃຫ້ອະນຸຍາດສະເພາະແອັບທີ່ທ່ານເຊື່ອຖືໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດເທົ່ານັ້ນ. \n\nຫາກທ່ານບໍ່ອະນຸຍາດແອັບນີ້ໃຫ້ເຂົ້າເຖິງບັນທຶກອຸປະກອນທັງໝົດ, ມັນຈະຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກຂອງຕົວມັນເອງໄດ້ຢູ່. ຜູ້ຜະລິດອຸປະກອນຂອງທ່ານອາດຍັງຄົງສາມາດເຂົ້າເຖິງບັນທຶກ ຫຼື ຂໍ້ມູນບາງຢ່າງຢູ່ອຸປະກອນຂອງທ່ານໄດ້. ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ບໍ່ຕ້ອງສະແດງອີກ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ຕ້ອງການສະແດງ <xliff:g id="APP_2">%2$s</xliff:g> ສະໄລ້"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ແກ້ໄຂ"</string>
@@ -2046,6 +2052,10 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ ແລະ ປ່ຽນແປງ."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ປ່ຽນໂໝດຫ້າມລົບກວນແລ້ວ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ແຕະເພື່ອກວດສອບວ່າມີຫຍັງຖືກບລັອກໄວ້ແດ່."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"ກວດສອບ​ການ​ຕັ້ງ​ຄ່າ​ການ​ແຈ້ງ​ເຕືອນ"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"ເລີ່ມຕົ້ນໃນ Android 13, ແອັບຕ່າງໆທີ່ທ່ານຕິດຕັ້ງຈະຕ້ອງໃຊ້ການອະນຸຍາດຂອງທ່ານເພື່ອສົ່ງການແຈ້ງເຕືອນ. ແຕະເພື່ອປ່ຽນການອະນຸຍາດນີ້ສຳລັບແອັບທີ່ມີຢູ່ກ່ອນແລ້ວ."</string>
+    <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ແຈ້ງເຕືອນຂ້ອຍພາຍຫຼັງ"</string>
+    <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"ປິດໄວ້"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ລະບົບ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ການຕັ້ງຄ່າ"</string>
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"ກ້ອງ"</string>
@@ -2264,11 +2274,12 @@
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"ແປ <xliff:g id="MESSAGE">%1$s</xliff:g> ແລ້ວ."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"ແປຂໍ້ຄວາມຈາກ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ເປັນ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ແລ້ວ."</string>
     <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ການເຄື່ອນໄຫວໃນພື້ນຫຼັງ"</string>
-    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"ການເຄື່ອນໄຫວໃນພື້ນຫຼັງ"</string>
-    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກໃນພື້ນຫຼັງ ແລະ ໃຊ້ແບັດເຕີຣີຫຼາຍ. ແຕະເພື່ອກວດສອບ."</string>
-    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເຮັດວຽກໃນພື້ນຫຼັງເປັນເວລາດົນແລ້ວ. ແຕະເພື່ອກວດສອບ."</string>
+    <string name="notification_title_abusive_bg_apps" msgid="994230770856147656">"ມີແອັບກຳລັງໃຊ້ແບັດເຕີຣີຫຼາຍ"</string>
+    <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"ມີແອັບທີ່ຍັງຄົງນຳໃຊ້ຢູ່"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງເອີ້ນໃຊ້ໃນພື້ນຫຼັງ. ແຕະເພື່ອຈັດການການໃຊ້ແບັດເຕີຣີ."</string>
+    <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"<xliff:g id="APP">%1$s</xliff:g> ອາດສົ່ງຜົນກະທົບຕໍ່ອາຍຸແບັດເຕີຣີ. ແຕະເພື່ອກວດສອບແອັບທີ່ນຳໃຊ້ຢູ່."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ກວດສອບແອັບທີ່ເຄື່ອນໄຫວ"</string>
-    <string name="vdm_camera_access_denied" msgid="6345652513729130490">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຈາກອຸປະກອນນີ້ໄດ້"</string>
-    <!-- no translation found for system_locale_title (3978041860457277638) -->
-    <skip />
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງໂທລະສັບຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
+    <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງແທັບເລັດຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ"</string>
 </resources>

@@ -503,7 +503,6 @@ public class WindowStateTests extends WindowTestsBase {
         win.applyWithNextDraw(t -> handledT[0] = t);
         assertTrue(win.useBLASTSync());
         final SurfaceControl.Transaction drawT = new StubTransaction();
-        win.prepareDrawHandlers();
         assertTrue(win.finishDrawing(drawT, Integer.MAX_VALUE));
         assertEquals(drawT, handledT[0]);
         assertFalse(win.useBLASTSync());
@@ -732,17 +731,6 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCantReceiveTouchDuringRecentsAnimation() {
-        final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-
-        // Mock active recents animation
-        RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
-        when(recentsController.shouldApplyInputConsumer(win0.mActivityRecord)).thenReturn(true);
-        mWm.setRecentsAnimationController(recentsController);
-        assertFalse(win0.canReceiveTouchInput());
-    }
-
-    @Test
     public void testCantReceiveTouchWhenAppTokenHiddenRequested() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
         win0.mActivityRecord.mVisibleRequested = false;
@@ -855,12 +843,13 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(mAtm.mActiveUids.hasNonAppVisibleWindow(uid));
     }
 
-    @UseTestDisplay(addWindows = W_ACTIVITY)
+    @UseTestDisplay(addWindows = {W_ACTIVITY, W_INPUT_METHOD})
     @Test
     public void testNeedsRelativeLayeringToIme_notAttached() {
         WindowState sameTokenWindow = createWindow(null, TYPE_BASE_APPLICATION, mAppWindow.mToken,
                 "SameTokenWindow");
         mDisplayContent.setImeLayeringTarget(mAppWindow);
+        makeWindowVisible(mImeWindow);
         sameTokenWindow.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         assertTrue(sameTokenWindow.needsRelativeLayeringToIme());
         sameTokenWindow.removeImmediately();
@@ -873,6 +862,7 @@ public class WindowStateTests extends WindowTestsBase {
         WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
                 mAppWindow.mToken, "SameTokenWindow");
         mDisplayContent.setImeLayeringTarget(mAppWindow);
+        makeWindowVisible(mImeWindow);
         sameTokenWindow.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }

@@ -23,11 +23,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Pair;
+import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -408,21 +411,6 @@ public abstract class WindowManagerInternal {
     public abstract void getMagnificationRegion(int displayId, @NonNull Region magnificationRegion);
 
     /**
-     * Gets the magnification and translation applied to a window given its token.
-     * Not all windows are magnified and the window manager policy determines which
-     * windows are magnified. The returned result also takes into account the compat
-     * scale if necessary.
-     *
-     * @param windowToken The window's token.
-     *
-     * @return The magnification spec for the window.
-     *
-     * @see #setMagnificationCallbacks(int, MagnificationCallbacks)
-     */
-    public abstract MagnificationSpec getCompatibleMagnificationSpecForWindow(
-            IBinder windowToken);
-
-    /**
      * Sets a callback for observing which windows are touchable for the purposes
      * of accessibility on specified display.
      *
@@ -447,6 +435,14 @@ public abstract class WindowManagerInternal {
     public abstract IBinder getFocusedWindowToken();
 
     /**
+     * Gets the token of the window that has input focus. It is from the focused
+     * {@link WindowState}.
+     *
+     * @return The token.
+     */
+    public abstract IBinder getFocusedWindowTokenFromWindowStates();
+
+    /**
      * @return Whether the keyguard is engaged.
      */
     public abstract boolean isKeyguardLocked();
@@ -463,6 +459,17 @@ public abstract class WindowManagerInternal {
      * @param outBounds The frame to populate.
      */
     public abstract void getWindowFrame(IBinder token, Rect outBounds);
+
+    /**
+     * Get the transformation matrix and MagnificationSpec given its token.
+     *
+     * @param token The token.
+     * @return The pair of the transformation matrix and magnification spec.
+     */
+    // TODO (b/231663133): Long term solution for tracking window when the
+    //                     FLAG_RETRIEVE_INTERACTIVE_WINDOWS is unset.
+    public abstract Pair<Matrix, MagnificationSpec>
+            getWindowTransformationMatrixAndMagnificationSpec(IBinder token);
 
     /**
      * Opens the global actions dialog.
@@ -853,4 +860,26 @@ public abstract class WindowManagerInternal {
      * support handwriting (Scribe) by the IME.
      */
     public abstract SurfaceControl getHandwritingSurfaceForDisplay(int displayId);
+
+    /**
+     * Returns {@code true} if the given point is within the window bounds of the given window.
+     *
+     * @param windowToken the window whose bounds should be used for the hit test.
+     * @param displayX the x coordinate of the test point in the display's coordinate space.
+     * @param displayY the y coordinate of the test point in the display's coordinate space.
+     */
+    public abstract boolean isPointInsideWindow(
+            @NonNull IBinder windowToken, int displayId, float displayX, float displayY);
+
+    /**
+     * Updates the content recording session. If a different session is already in progress, then
+     * the pre-existing session is stopped, and the new incoming session takes over.
+     *
+     * The DisplayContent for the new session will begin recording when
+     * {@link RootWindowContainer#onDisplayChanged} is invoked for the new {@link VirtualDisplay}.
+     * Must be invoked for a valid MediaProjection session.
+     *
+     * @param incomingSession the nullable incoming content recording session
+     */
+    public abstract void setContentRecordingSession(ContentRecordingSession incomingSession);
 }

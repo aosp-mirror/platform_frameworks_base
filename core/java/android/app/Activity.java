@@ -148,7 +148,6 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import android.window.OnBackInvokedDispatcherOwner;
 import android.window.SplashScreen;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -749,8 +748,7 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback,
-        ContentCaptureManager.ContentCaptureClient,
-        OnBackInvokedDispatcherOwner {
+        ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -1663,12 +1661,7 @@ public class Activity extends ContextThemeWrapper
                 .isOnBackInvokedCallbackEnabled(this);
         if (aheadOfTimeBack) {
             // Add onBackPressed as default back behavior.
-            mDefaultBackCallback = new OnBackInvokedCallback() {
-                @Override
-                public void onBackInvoked() {
-                    navigateBack();
-                }
-            };
+            mDefaultBackCallback = this::navigateBack;
             getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
         }
     }
@@ -3932,13 +3925,34 @@ public class Activity extends ContextThemeWrapper
      *         task will be moved to the back of the activity stack instead of being finished.
      *         Other activities will simply be finished.
      *
-     *         <p>If you target version {@link android.os.Build.VERSION_CODES#S} or later and
-     *         override this method, it is strongly recommended to call through to the superclass
+     *      <li><p>If you target version {@link android.os.Build.VERSION_CODES#S} and
+     *         override this method, we strongly recommend to call through to the superclass
      *         implementation after you finish handling navigation within the app.
+     *
+     *      <li><p>If you target version {@link android.os.Build.VERSION_CODES#TIRAMISU} or later,
+     *          you should not use this method but register an {@link OnBackInvokedCallback} on an
+     *          {@link OnBackInvokedDispatcher} that you can retrieve using
+     *          {@link #getOnBackInvokedDispatcher()}. You should also set
+     *          {@code android:enableOnBackInvokedCallback="true"} in the application manifest.
+     *          <p>Alternatively, you can use
+     *          {@code  androidx.activity.ComponentActivity#getOnBackPressedDispatcher()}
+     *          for backward compatibility.
      * </ul>
      *
      * @see #moveTaskToBack(boolean)
+     *
+     * @deprecated Use {@link OnBackInvokedCallback} or
+     * {@code androidx.activity.OnBackPressedCallback} to handle back navigation instead.
+     * <p>
+     * Starting from Android 13 (API level 33), back event handling is
+     * moving to an ahead-of-time model and {@link Activity#onBackPressed()} and
+     * {@link KeyEvent#KEYCODE_BACK} should not be used to handle back events (back gesture or
+     * back button click). Instead, an {@link OnBackInvokedCallback} should be registered using
+     * {@link Activity#getOnBackInvokedDispatcher()}
+     * {@link OnBackInvokedDispatcher#registerOnBackInvokedCallback(int, OnBackInvokedCallback)
+     * .registerOnBackInvokedCallback(priority, callback)}.
      */
+    @Deprecated
     public void onBackPressed() {
         if (mActionBar != null && mActionBar.collapseActionView()) {
             return;
@@ -8994,12 +9008,11 @@ public class Activity extends ContextThemeWrapper
      * @throws IllegalStateException if this Activity is not visual.
      */
     @NonNull
-    @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
         if (mWindow == null) {
             throw new IllegalStateException("OnBackInvokedDispatcher are not available on "
                     + "non-visual activities");
         }
-        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
+        return mWindow.getOnBackInvokedDispatcher();
     }
 }

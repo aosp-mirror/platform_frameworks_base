@@ -18,6 +18,7 @@ package com.android.systemui.power;
 
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 
+import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -54,25 +55,31 @@ import android.view.WindowManager;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.volume.Events;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Objects;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  */
@@ -120,7 +127,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             "PNW.autoSaverNoThanks";
 
     private static final String ACTION_ENABLE_SEVERE_BATTERY_DIALOG = "PNW.enableSevereDialog";
-
+    private static final String EXTRA_SCHEDULED_BY_PERCENTAGE =
+            "extra_scheduled_by_percentage";
     public static final String BATTERY_SAVER_SCHEDULE_SCREEN_INTENT_ACTION =
             "com.android.settings.BATTERY_SAVER_SCHEDULE_SETTINGS";
 
@@ -162,12 +170,17 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private BatteryStateSnapshot mCurrentBatterySnapshot;
     private ActivityStarter mActivityStarter;
     private final BroadcastSender mBroadcastSender;
+    private final UiEventLogger mUiEventLogger;
+
+    private final Lazy<BatteryController> mBatteryControllerLazy;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
 
     /**
      */
     @Inject
     public PowerNotificationWarnings(Context context, ActivityStarter activityStarter,
-            BroadcastSender broadcastSender) {
+            BroadcastSender broadcastSender, Lazy<BatteryController> batteryControllerLazy,
+            DialogLaunchAnimator dialogLaunchAnimator, UiEventLogger uiEventLogger) {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -175,7 +188,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mReceiver.init();
         mActivityStarter = activityStarter;
         mBroadcastSender = broadcastSender;
+        mBatteryControllerLazy = batteryControllerLazy;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
         mUseSevereDialog = mContext.getResources().getBoolean(R.bool.config_severe_battery_dialog);
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -264,6 +280,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (showSevereLowBatteryDialog()) {
             mBroadcastSender.sendBroadcast(new Intent(ACTION_ENABLE_SEVERE_BATTERY_DIALOG)
                     .setPackage(mContext.getPackageName())
+                    .putExtra(EXTRA_SCHEDULED_BY_PERCENTAGE, isScheduledByPercentage())
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND));
             // Reset the state once dialog been enabled
@@ -271,14 +288,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             mPlaySound = false;
             return;
         }
-        if (!showLowBatteryNotification()) {
+        if (isScheduledByPercentage()) {
             return;
         }
 
-        final int warningLevel = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lowBatteryWarningLevel);
         final String percentage = NumberFormat.getPercentInstance()
-                .format((double) warningLevel / 100.0);
+                .format((double) mCurrentBatterySnapshot.getBatteryLevel() / 100.0);
         final String title = mContext.getString(R.string.battery_low_title);
         final String contentText = mContext.getString(
                 R.string.battery_low_description, percentage);
@@ -292,7 +307,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setContentText(contentText)
                         .setContentTitle(title)
                         .setOnlyAlertOnce(true)
-                        .setOngoing(true)
                         .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
@@ -319,34 +333,27 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
+        logEvent(BatteryWarningEvents.LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION);
     }
 
     private boolean showSevereLowBatteryDialog() {
-        final boolean isSevereState = !mCurrentBatterySnapshot.isHybrid() || mBucket < -1;
-        return isSevereState && mUseSevereDialog;
+        return mBucket < -1 && mUseSevereDialog;
     }
 
     /**
-     * Disable low battery warning notification if battery saver schedule mode set as
-     * "Based on percentage".
+     * Checking battery saver schedule mode is set as "Based on percentage" or not.
      *
-     * return {@code false} if scheduled by percentage.
+     * return {@code true} if scheduled by percentage.
      */
-    private boolean showLowBatteryNotification() {
+    private boolean isScheduledByPercentage() {
         final ContentResolver resolver = mContext.getContentResolver();
         final int mode = Settings.Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
                 PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
 
-        // Return true if battery saver schedule mode will not trigger by percentage.
-        if (mode != PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE) {
-            return true;
-        }
-
-        // Return true if battery saver mode trigger percentage is less than 0, which means it is
+        // Return false if battery saver mode trigger percentage is less than 0, which means it is
         // set as "Based on routine" mode, otherwise it will be "Based on percentage" mode.
-        final int threshold =
-                Settings.Global.getInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
-        return threshold <= 0;
+        return mode == PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE
+                && Settings.Global.getInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) > 0;
     }
 
     private void showAutoSaverSuggestionNotification() {
@@ -685,13 +692,32 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         } else {
             d.setTitle(R.string.battery_saver_confirmation_title);
             d.setPositiveButton(R.string.battery_saver_confirmation_ok,
-                    (dialog, which) -> setSaverMode(true, false));
-            d.setNegativeButton(android.R.string.cancel, null);
+                    (dialog, which) -> {
+                        setSaverMode(true, false);
+                        logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_OK);
+                    });
+            d.setNegativeButton(android.R.string.cancel, (dialog, which) ->
+                    logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_CANCEL));
         }
         d.setShowForAllUsers(true);
-        d.setOnDismissListener((dialog) -> mSaverConfirmation = null);
-        d.show();
+        d.setOnDismissListener((dialog) -> {
+            mSaverConfirmation = null;
+            logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_DISMISS);
+        });
+        WeakReference<View> ref = mBatteryControllerLazy.get().getLastPowerSaverStartView();
+        if (ref != null && ref.get() != null && ref.get().isAggregatedVisible()) {
+            mDialogLaunchAnimator.showFromView(d, ref.get());
+        } else {
+            d.show();
+        }
+        logEvent(BatteryWarningEvents.LowBatteryWarningEvent.SAVER_CONFIRM_DIALOG);
         mSaverConfirmation = d;
+        mBatteryControllerLazy.get().clearLastPowerSaverStartView();
+    }
+
+    @VisibleForTesting
+    Dialog getSaverConfirmationDialog() {
+        return mSaverConfirmation;
     }
 
     private boolean isEnglishLocale() {
@@ -776,6 +802,12 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mActivityStarter.startActivity(intent, true /* dismissShade */);
     }
 
+    private void logEvent(BatteryWarningEvents.LowBatteryWarningEvent event) {
+        if (mUiEventLogger != null) {
+            mUiEventLogger.log(event);
+        }
+    }
+
     private final class Receiver extends BroadcastReceiver {
 
         public void init() {
@@ -801,15 +833,21 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             final String action = intent.getAction();
             Slog.i(TAG, "Received " + action);
             if (action.equals(ACTION_SHOW_BATTERY_SAVER_SETTINGS)) {
+                logEvent(BatteryWarningEvents
+                        .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_SETTINGS);
                 dismissLowBatteryNotification();
                 mContext.startActivityAsUser(mOpenBatterySaverSettings, UserHandle.CURRENT);
             } else if (action.equals(ACTION_START_SAVER)) {
+                logEvent(BatteryWarningEvents
+                        .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_TURN_ON);
                 setSaverMode(true, true);
                 dismissLowBatteryNotification();
             } else if (action.equals(ACTION_SHOW_START_SAVER_CONFIRMATION)) {
                 dismissLowBatteryNotification();
                 showStartSaverConfirmation(intent.getExtras());
             } else if (action.equals(ACTION_DISMISSED_WARNING)) {
+                logEvent(BatteryWarningEvents
+                        .LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION_CANCEL);
                 dismissLowBatteryWarning();
             } else if (ACTION_CLICKED_TEMP_WARNING.equals(action)) {
                 dismissHighTemperatureWarningInternal();

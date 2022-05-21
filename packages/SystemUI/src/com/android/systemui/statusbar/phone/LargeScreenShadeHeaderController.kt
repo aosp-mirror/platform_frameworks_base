@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.app.StatusBarManager
 import android.view.View
+import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.settingslib.Utils
 import com.android.systemui.Dumpable
+import com.android.systemui.FontSizeUtils
 import com.android.systemui.R
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
@@ -29,11 +32,12 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
+import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_BATTERY_CONTROLLER
 import com.android.systemui.statusbar.phone.dagger.StatusBarViewModule.LARGE_SCREEN_SHADE_HEADER
-import java.io.FileDescriptor
+import com.android.systemui.statusbar.policy.ConfigurationController
 import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Named
@@ -43,6 +47,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
     @Named(LARGE_SCREEN_SHADE_HEADER) private val header: View,
     private val statusBarIconController: StatusBarIconController,
     private val privacyIconsController: HeaderPrivacyIconsController,
+    private val configurationController: ConfigurationController,
     qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
     featureFlags: FeatureFlags,
     @Named(LARGE_SCREEN_BATTERY_CONTROLLER) batteryMeterViewController: BatteryMeterViewController,
@@ -69,6 +74,12 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val iconContainer: StatusIconContainer
     private val carrierIconSlots: List<String>
     private val qsCarrierGroupController: QSCarrierGroupController
+    private val clock: TextView = header.findViewById(R.id.clock)
+    private val date: TextView = header.findViewById(R.id.date)
+    private val qsCarrierGroup: QSCarrierGroup = header.findViewById(R.id.carrier_group)
+
+    private var qsDisabled = false
+
     private var visible = false
         set(value) {
             if (field == value) {
@@ -145,9 +156,9 @@ class LargeScreenShadeHeaderController @Inject constructor(
                     .load(context, resources.getXml(R.xml.large_screen_shade_header))
             privacyIconsController.chipVisibilityListener = chipVisibilityListener
         }
-    }
 
-    init {
+        bindConfigurationListener()
+
         batteryMeterViewController.init()
         val batteryIcon: BatteryMeterView = header.findViewById(R.id.batteryRemainingIcon)
 
@@ -178,10 +189,29 @@ class LargeScreenShadeHeaderController @Inject constructor(
         updateConstraints()
     }
 
+    fun disable(state1: Int, state2: Int, animate: Boolean) {
+        val disabled = state2 and StatusBarManager.DISABLE2_QUICK_SETTINGS != 0
+        if (disabled == qsDisabled) return
+        qsDisabled = disabled
+        updateVisibility()
+    }
+
     private fun updateScrollY() {
         if (!active && combinedHeaders) {
             header.scrollY = qsScrollY
         }
+    }
+
+    private fun bindConfigurationListener() {
+        val listener = object : ConfigurationController.ConfigurationListener {
+            override fun onDensityOrFontScaleChanged() {
+                val qsStatusStyle = R.style.TextAppearance_QS_Status
+                FontSizeUtils.updateFontSizeFromStyle(clock, qsStatusStyle)
+                FontSizeUtils.updateFontSizeFromStyle(date, qsStatusStyle)
+                qsCarrierGroup.updateTextAppearance(qsStatusStyle)
+            }
+        }
+        configurationController.addCallback(listener)
     }
 
     private fun onShadeExpandedChanged() {
@@ -205,7 +235,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
     }
 
     private fun updateVisibility() {
-        val visibility = if (!active && !combinedHeaders) {
+        val visibility = if (!active && !combinedHeaders || qsDisabled) {
             View.GONE
         } else if (shadeExpanded) {
             View.VISIBLE
@@ -259,7 +289,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("visible: $visible")
         pw.println("shadeExpanded: $shadeExpanded")
         pw.println("shadeExpandedFraction: $shadeExpandedFraction")

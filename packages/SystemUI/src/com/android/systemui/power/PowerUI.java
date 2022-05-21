@@ -49,7 +49,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Optional;
@@ -360,11 +359,7 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
         }
 
         mWarnings.updateSnapshot(mCurrentBatteryStateSnapshot);
-        if (mCurrentBatteryStateSnapshot.isHybrid()) {
-            maybeShowHybridWarning(mCurrentBatteryStateSnapshot, mLastBatteryStateSnapshot);
-        } else {
-            maybeShowBatteryWarning(mCurrentBatteryStateSnapshot, mLastBatteryStateSnapshot);
-        }
+        maybeShowHybridWarning(mCurrentBatteryStateSnapshot, mLastBatteryStateSnapshot);
     }
 
     // updates the time estimate if we don't have one or battery level has changed.
@@ -398,16 +393,12 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
 
         final boolean playSound = currentSnapshot.getBucket() != lastSnapshot.getBucket()
                 || lastSnapshot.getPlugged();
-        final long timeRemainingMillis = currentSnapshot.getTimeRemainingMillis();
 
         if (shouldShowHybridWarning(currentSnapshot)) {
             mWarnings.showLowBatteryWarning(playSound);
             // mark if we've already shown a warning this cycle. This will prevent the notification
             // trigger from spamming users by only showing low/critical warnings once per cycle
-            if ((timeRemainingMillis != NO_ESTIMATE_AVAILABLE
-                    && timeRemainingMillis <= currentSnapshot.getSevereThresholdMillis())
-                    || currentSnapshot.getBatteryLevel()
-                    <= currentSnapshot.getSevereLevelThreshold()) {
+            if (currentSnapshot.getBatteryLevel() <= currentSnapshot.getSevereLevelThreshold()) {
                 mSevereWarningShownThisChargeCycle = true;
                 mLowWarningShownThisChargeCycle = true;
                 if (DEBUG) {
@@ -462,7 +453,8 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
     @VisibleForTesting
     boolean shouldDismissHybridWarning(BatteryStateSnapshot snapshot) {
         return snapshot.getPlugged()
-                || snapshot.getTimeRemainingMillis() > snapshot.getLowThresholdMillis();
+                || snapshot.getBatteryLevel()
+                > snapshot.getLowLevelThreshold();
     }
 
     protected void maybeShowBatteryWarning(
@@ -613,7 +605,7 @@ public class PowerUI extends CoreStartable implements CommandQueue.Callbacks {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.print("mLowBatteryAlertCloseLevel=");
         pw.println(mLowBatteryAlertCloseLevel);
         pw.print("mLowBatteryReminderLevels=");

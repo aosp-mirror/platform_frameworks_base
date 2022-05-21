@@ -37,7 +37,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -64,6 +63,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
+    private boolean mBouncerShowing;
     private boolean mSecure;
     private boolean mOccluded;
 
@@ -151,6 +151,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     @Override
     public boolean isShowing() {
         return mShowing;
+    }
+
+    @Override
+    public boolean isBouncerShowing() {
+        return mBouncerShowing;
     }
 
     @Override
@@ -274,6 +279,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
+    public boolean isAnimatingBetweenKeyguardAndSurfaceBehind() {
+        return mUnlockAnimationControllerLazy.get().isAnimatingBetweenKeyguardAndSurfaceBehind();
+    }
+
+    @Override
     public boolean isBypassFadingAnimation() {
         return mBypassFadingAnimation;
     }
@@ -324,6 +334,16 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
             Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardGoingAway",
                     keyguardGoingAway ? 1 : 0);
             mKeyguardGoingAway = keyguardGoingAway;
+            new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardGoingAwayChanged);
+        }
+    }
+
+    @Override
+    public void notifyBouncerShowing(boolean showing) {
+        if (mBouncerShowing != showing) {
+            mBouncerShowing = showing;
+
+            new ArrayList<>(mCallbacks).forEach(Callback::onBouncerShowingChanged);
         }
     }
 
@@ -366,7 +386,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
      * @param pw Where to dump.
      */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStateController:");
         pw.println("  mSecure: " + mSecure);
         pw.println("  mCanDismissLockScreen: " + mCanDismissLockScreen);

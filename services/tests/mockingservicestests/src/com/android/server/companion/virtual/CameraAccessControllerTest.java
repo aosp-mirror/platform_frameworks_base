@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +35,7 @@ import android.hardware.camera2.CameraInjectionSession;
 import android.hardware.camera2.CameraManager;
 import android.os.Process;
 import android.testing.TestableContext;
+import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -73,10 +75,10 @@ public class CameraAccessControllerTest {
 
     private ApplicationInfo mTestAppInfo = new ApplicationInfo();
     private ApplicationInfo mOtherAppInfo = new ApplicationInfo();
+    private ArraySet<Integer> mRunningUids = new ArraySet<>();
 
     @Captor
     ArgumentCaptor<CameraInjectionSession.InjectionStatusCallback> mInjectionCallbackCaptor;
-
 
     @Before
     public void setUp() throws PackageManager.NameNotFoundException {
@@ -89,6 +91,7 @@ public class CameraAccessControllerTest {
                 mBlockedCallback);
         mTestAppInfo.uid = Process.FIRST_APPLICATION_UID;
         mOtherAppInfo.uid = Process.FIRST_APPLICATION_UID + 1;
+        mRunningUids.add(Process.FIRST_APPLICATION_UID);
         when(mPackageManager.getApplicationInfo(eq(TEST_APP_PACKAGE), anyInt())).thenReturn(
                 mTestAppInfo);
         when(mPackageManager.getApplicationInfo(eq(OTHER_APP_PACKAGE), anyInt())).thenReturn(
@@ -103,7 +106,6 @@ public class CameraAccessControllerTest {
         mController.onCameraOpened(FRONT_CAMERA, TEST_APP_PACKAGE);
         verify(mCameraManager, never()).injectCamera(any(), any(), any(), any(), any());
     }
-
 
     @Test
     public void onCameraOpened_uidRunning_cameraBlocked() throws CameraAccessException {
@@ -127,7 +129,6 @@ public class CameraAccessControllerTest {
         mController.onCameraClosed(FRONT_CAMERA);
         verify(session).close();
     }
-
 
     @Test
     public void onCameraClosed_otherCameraClosed_cameraNotUnblocked() throws CameraAccessException {
@@ -196,5 +197,34 @@ public class CameraAccessControllerTest {
         mInjectionCallbackCaptor.getValue().onInjectionSucceeded(session);
         mInjectionCallbackCaptor.getValue().onInjectionError(ERROR_INJECTION_UNSUPPORTED);
         verify(mBlockedCallback).onCameraAccessBlocked(eq(mTestAppInfo.uid));
+    }
+
+    @Test
+    public void twoCameraAccessesBySameUid_secondOnVirtualDisplay_noCallbackButCameraCanBlocked()
+            throws CameraAccessException {
+        when(mDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(
+                eq(mTestAppInfo.uid))).thenReturn(false);
+        mController.onCameraOpened(FRONT_CAMERA, TEST_APP_PACKAGE);
+        mController.blockCameraAccessIfNeeded(mRunningUids);
+
+        verify(mCameraManager).injectCamera(eq(TEST_APP_PACKAGE), eq(FRONT_CAMERA), anyString(),
+                any(), mInjectionCallbackCaptor.capture());
+        CameraInjectionSession session = mock(CameraInjectionSession.class);
+        mInjectionCallbackCaptor.getValue().onInjectionSucceeded(session);
+        mInjectionCallbackCaptor.getValue().onInjectionError(ERROR_INJECTION_UNSUPPORTED);
+        verify(mBlockedCallback).onCameraAccessBlocked(eq(mTestAppInfo.uid));
+    }
+
+    @Test
+    public void twoCameraAccessesBySameUid_secondOnVirtualDisplay_firstCloseThenOpenCameraUnblock()
+            throws CameraAccessException {
+        when(mDeviceManagerInternal.isAppRunningOnAnyVirtualDevice(
+                eq(mTestAppInfo.uid))).thenReturn(false);
+        mController.onCameraOpened(FRONT_CAMERA, TEST_APP_PACKAGE);
+        mController.blockCameraAccessIfNeeded(mRunningUids);
+        mController.onCameraClosed(FRONT_CAMERA);
+        mController.onCameraOpened(FRONT_CAMERA, TEST_APP_PACKAGE);
+
+        verify(mCameraManager, times(1)).injectCamera(any(), any(), any(), any(), any());
     }
 }

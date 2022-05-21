@@ -48,6 +48,9 @@ import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_PERSONAL;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.PasswordMetrics.computeForPasswordOrPin;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
+import static android.location.LocationManager.FUSED_PROVIDER;
+import static android.location.LocationManager.GPS_PROVIDER;
+import static android.location.LocationManager.NETWORK_PROVIDER;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
@@ -125,6 +128,7 @@ import android.net.wifi.WifiSsid;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -258,6 +262,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     @Before
     public void setUp() throws Exception {
 
+        // Disable caches in this test process. This must happen early, since some of the
+        // following initialization steps invalidate caches.
+        IpcDataCache.disableForTestMode();
+
         mContext = getContext();
         mServiceContext = mContext;
         mServiceContext.binder.callingUid = DpmMockContext.CALLER_UID;
@@ -320,8 +328,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     private void initializeDpms() {
         // Need clearCallingIdentity() to pass permission checks.
         final long ident = mContext.binder.clearCallingIdentity();
-        LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
-        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
         dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
         dpms.systemReady(SystemService.PHASE_LOCK_SETTINGS_READY);
@@ -409,8 +415,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(false);
 
-        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
-        LocalServices.removeServiceForTest(DevicePolicyManagerLiteInternal.class);
         new DevicePolicyManagerServiceTestable(getServices(), mContext);
 
         // If the device has no DPMS feature, it shouldn't register the local service.
@@ -1659,39 +1663,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         ActiveAdmin deviceOwner = getDeviceOwner();
         assertThat(deviceOwner.info.getComponent()).isEqualTo(admin3);
         assertThat(deviceOwner.getUid()).isEqualTo(DpmMockContext.CALLER_SYSTEM_USER_UID);
-    }
-
-    /**
-     * This essentially tests
-     * {@code DevicePolicyManagerService.findOwnerComponentIfNecessaryLocked()}. (which is
-     * private.)
-     *
-     * We didn't use to persist the DO component class name, but now we do, and the above method
-     * finds the right component from a package name upon migration.
-     */
-    @Test
-    public void testDeviceOwnerMigration() throws Exception {
-        checkDeviceOwnerWithMultipleDeviceAdmins();
-
-        // Overwrite the device owner setting and clears the class name.
-        dpms.mOwners.setDeviceOwner(
-                new ComponentName(admin2.getPackageName(), ""),
-                "owner-name", CALLER_USER_HANDLE);
-        dpms.mOwners.writeDeviceOwner();
-
-        // Make sure the DO component name doesn't have a class name.
-        assertThat(dpms.getDeviceOwnerComponent(/* callingUserOnly= */ false).getClassName())
-                .isEmpty();
-
-        // Then create a new DPMS to have it load the settings from files.
-        when(getServices().userManager.getUserRestrictions(any(UserHandle.class)))
-                .thenReturn(new Bundle());
-        initializeDpms();
-
-        // Now the DO component name is a full name.
-        // *BUT* because both admin1 and admin2 belong to the same package, we think admin1 is the
-        // DO.
-        assertThat(dpms.getDeviceOwnerComponent(/* callingUserOnly =*/ false)).isEqualTo(admin1);
     }
 
     @Test
@@ -5021,8 +4992,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(12345 /* some UID in user 0 */);
         // Make personal apps look suspended
         dpms.getUserData(UserHandle.USER_SYSTEM).mAppsSuspended = true;
-
-        clearInvocations(getServices().iwindowManager);
+        // Screen capture
+        dpm.setScreenCaptureDisabled(admin1, true);
 
         dpm.wipeData(0);
         verify(getServices().userManagerInternal).removeUserEvenWhenDisallowed(CALLER_USER_HANDLE);
@@ -5032,6 +5003,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, false, UserHandle.SYSTEM);
         verify(getServices().userManager).setUserRestriction(
                 UserManager.DISALLOW_ADD_USER, false, UserHandle.SYSTEM);
+
+        clearInvocations(getServices().iwindowManager);
 
         // Some device-wide policies are getting cleaned-up after the user is removed.
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
@@ -5049,9 +5022,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_RESET_PROTECTION_POLICY_CHANGED),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
-        // Refresh strong auth timeout and screen capture
+        // Refresh strong auth timeout
         verify(getServices().lockSettingsInternal).refreshStrongAuthTimeout(UserHandle.USER_SYSTEM);
-        verify(getServices().iwindowManager).refreshScreenCaptureDisabled(UserHandle.USER_SYSTEM);
+        // Refresh screen capture
+        verify(getServices().iwindowManager).refreshScreenCaptureDisabled();
         // Unsuspend personal apps
         verify(getServices().packageManagerInternal)
                 .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, UserHandle.USER_SYSTEM);
@@ -7022,22 +6996,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setUserControlDisabledPackages(admin1, testPackages);
 
         verify(getServices().packageManagerInternal)
-                .setDeviceOwnerProtectedPackages(admin1.getPackageName(), testPackages);
+                .setOwnerProtectedPackages(UserHandle.USER_ALL, testPackages);
         assertThat(dpm.getUserControlDisabledPackages(admin1)).isEqualTo(testPackages);
     }
 
     @Test
-    public void testSetUserControlDisabledPackages_failingAsPO() {
+    public void testSetUserControlDisabledPackages_asPO() {
         final List<String> testPackages = new ArrayList<>();
         testPackages.add("package_1");
         testPackages.add("package_2");
         mServiceContext.permissions.add(permission.MANAGE_DEVICE_ADMINS);
         setAsProfileOwner(admin1);
 
-        assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.setUserControlDisabledPackages(admin1, testPackages));
-        assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.getUserControlDisabledPackages(admin1));
+        dpm.setUserControlDisabledPackages(admin1, testPackages);
+
+        verify(getServices().packageManagerInternal)
+                .setOwnerProtectedPackages(CALLER_USER_HANDLE, testPackages);
+        assertThat(dpm.getUserControlDisabledPackages(admin1)).isEqualTo(testPackages);
     }
 
     private void configureProfileOwnerOfOrgOwnedDevice(ComponentName who, int userId) {
@@ -7871,7 +7846,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setUserControlDisabledPackages(admin1, packages);
 
         verify(getServices().packageManagerInternal)
-                .setDeviceOwnerProtectedPackages(eq(admin1.getPackageName()), eq(packages));
+                .setOwnerProtectedPackages(eq(UserHandle.USER_ALL), eq(packages));
     }
 
     @Test
@@ -8462,34 +8437,44 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testSendLostModeLocationUpdate_asDeviceOwner() throws Exception {
-        final String TEST_PROVIDER = "network";
         mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         setDeviceOwner();
-        when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
-        when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(true);
 
         dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
 
         verify(getServices().locationManager, times(1)).getCurrentLocation(
-                eq(TEST_PROVIDER), any(), eq(getServices().executor), any());
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
     }
 
     @Test
     public void testSendLostModeLocationUpdate_asProfileOwnerOfOrgOwnedDevice() throws Exception {
-        final String TEST_PROVIDER = "network";
         final int MANAGED_PROFILE_ADMIN_UID =
                 UserHandle.getUid(CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
         addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
-        when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
-        when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(true);
 
         dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
 
         verify(getServices().locationManager, times(1)).getCurrentLocation(
-                eq(TEST_PROVIDER), any(), eq(getServices().executor), any());
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
+    }
+
+    @Test
+    public void testSendLostModeLocationUpdate_noProviderIsEnabled() throws Exception {
+        mContext.callerPermissions.add(permission.TRIGGER_LOST_MODE);
+        setDeviceOwner();
+        when(getServices().locationManager.isProviderEnabled(FUSED_PROVIDER)).thenReturn(false);
+        when(getServices().locationManager.isProviderEnabled(NETWORK_PROVIDER)).thenReturn(false);
+        when(getServices().locationManager.isProviderEnabled(GPS_PROVIDER)).thenReturn(false);
+
+        dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
+
+        verify(getServices().locationManager, never()).getCurrentLocation(
+                eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
     }
 
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {
@@ -8629,8 +8614,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private File getProfileOwnerPoliciesFile() {
-        File parentDir = dpms.mMockInjector.environmentGetUserSystemDirectory(
-                CALLER_USER_HANDLE);
+        File parentDir = getServices().pathProvider.getUserSystemDirectory(CALLER_USER_HANDLE);
         return getPoliciesFile(parentDir);
     }
 

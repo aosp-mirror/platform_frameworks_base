@@ -24,28 +24,32 @@
     android:layout_gravity="center"
     android:paddingTop="24dp"
     android:paddingBottom="4dp"
-    android:paddingLeft="24dp"
-    android:paddingRight="24dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
     android:visibility="gone" >
 
     <ImageView
         android:id="@+id/vendor_header_image"
-        android:layout_width="31dp"
-        android:layout_height="32dp" />
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/vendor_icon_description" />
 
     <TextView
         android:id="@+id/vendor_header_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/header_image" />
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:textSize="16sp"
+        android:layout_toEndOf="@+id/vendor_header_image"
+        android:textColor="?android:attr/textColorSecondary"/>
 
     <ImageButton
         android:id="@+id/vendor_header_button"
         android:background="@drawable/ic_info"
-        android:layout_width="31dp"
-        android:layout_height="32dp"
-        android:layout_alignParentRight="true" />
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="@string/vendor_header_button_description"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

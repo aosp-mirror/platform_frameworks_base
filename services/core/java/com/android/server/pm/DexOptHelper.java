@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.server.pm.ApexManager.ActiveApexInfo;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.DEBUG_DEXOPT;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -26,10 +27,13 @@ import static com.android.server.pm.PackageManagerService.REASON_CMDLINE;
 import static com.android.server.pm.PackageManagerService.REASON_FIRST_BOOT;
 import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
+import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
 import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_NULL_PKG;
 
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Intent;
@@ -42,6 +46,8 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -55,13 +61,19 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
 
+import dalvik.system.DexFile;
+
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -250,9 +262,71 @@ final class DexOptHelper {
                 numberOfPackagesFailed};
     }
 
+    /**
+     * Checks if system UI package (typically "com.android.systemui") needs to be re-compiled, and
+     * compiles it if needed.
+     */
+    private void checkAndDexOptSystemUi() {
+        Computer snapshot = mPm.snapshotComputer();
+        String sysUiPackageName =
+                mPm.mContext.getString(com.android.internal.R.string.config_systemUi);
+        AndroidPackage pkg = snapshot.getPackage(sysUiPackageName);
+        if (pkg == null) {
+            Log.w(TAG, "System UI package " + sysUiPackageName + " is not found for dexopting");
+            return;
+        }
+
+        // It could also be after mainline update, but we're not introducing a new reason just for
+        // this special case.
+        int reason = REASON_BOOT_AFTER_OTA;
+
+        String defaultCompilerFilter = getCompilerFilterForReason(reason);
+        String targetCompilerFilter =
+                SystemProperties.get("dalvik.vm.systemuicompilerfilter", defaultCompilerFilter);
+        String compilerFilter;
+
+        if (DexFile.isProfileGuidedCompilerFilter(targetCompilerFilter)) {
+            compilerFilter = defaultCompilerFilter;
+            File profileFile = new File(getPrebuildProfilePath(pkg));
+
+            // Copy the profile to the reference profile path if it exists. Installd can only use a
+            // profile at the reference profile path for dexopt.
+            if (profileFile.exists()) {
+                try {
+                    synchronized (mPm.mInstallLock) {
+                        if (mPm.mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
+                                    pkg.getUid(), pkg.getPackageName(),
+                                    ArtManager.getProfileName(null))) {
+                            compilerFilter = targetCompilerFilter;
+                        } else {
+                            Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath());
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to copy profile " + profileFile.getAbsolutePath(), e);
+                }
+            }
+        } else {
+            compilerFilter = targetCompilerFilter;
+        }
+
+        performDexOptTraced(new DexoptOptions(pkg.getPackageName(), REASON_BOOT_AFTER_OTA,
+                compilerFilter, null /* splitName */, 0 /* dexoptFlags */));
+    }
+
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public void performPackageDexOptUpgradeIfNeeded() {
         PackageManagerServiceUtils.enforceSystemOrRoot(
                 "Only the system can request package update");
+
+        // The default is "true".
+        if (!"false".equals(DeviceConfig.getProperty("runtime", "dexopt_system_ui_on_boot"))) {
+            // System UI is important to user experience, so we check it after a mainline update or
+            // an OTA. It may need to be re-compiled in these cases.
+            if (hasBcpApexesChanged() || mPm.isDeviceUpgrading()) {
+                checkAndDexOptSystemUi();
+            }
+        }
 
         // We need to re-extract after an OTA.
         boolean causeUpgrade = mPm.isDeviceUpgrading();
@@ -358,9 +432,7 @@ final class DexOptHelper {
         }
         final long callingId = Binder.clearCallingIdentity();
         try {
-            synchronized (mPm.mInstallLock) {
-                return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
-            }
+            return performDexOptInternalWithDependenciesLI(p, pkgSetting, options);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -429,33 +501,50 @@ final class DexOptHelper {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
 
-        synchronized (mPm.mInstallLock) {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
 
-            // Whoever is calling forceDexOpt wants a compiled package.
-            // Don't use profiles since that may cause compilation to be skipped.
-            final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
-                    new DexoptOptions(packageName,
-                            getDefaultCompilerFilter(),
-                            DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
+        // Whoever is calling forceDexOpt wants a compiled package.
+        // Don't use profiles since that may cause compilation to be skipped.
+        final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
+                new DexoptOptions(packageName, REASON_CMDLINE,
+                        getDefaultCompilerFilter(), null /* splitName */,
+                        DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-            if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
-                throw new IllegalStateException("Failed to dexopt: " + res);
-            }
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
+            throw new IllegalStateException("Failed to dexopt: " + res);
         }
     }
 
-    public boolean performDexOptMode(String packageName,
+    public boolean performDexOptMode(@NonNull Computer snapshot, String packageName,
             boolean checkProfiles, String targetCompilerFilter, boolean force,
             boolean bootComplete, String splitName) {
-        PackageManagerServiceUtils.enforceSystemOrRootOrShell("performDexOptMode");
+        if (!PackageManagerServiceUtils.isSystemOrRootOrShell()
+                && !isCallerInstallerForPackage(snapshot, packageName)) {
+            throw new SecurityException("performDexOptMode");
+        }
 
         int flags = (checkProfiles ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES : 0)
                 | (force ? DexoptOptions.DEXOPT_FORCE : 0)
                 | (bootComplete ? DexoptOptions.DEXOPT_BOOT_COMPLETE : 0);
         return performDexOpt(new DexoptOptions(packageName, REASON_CMDLINE,
                 targetCompilerFilter, splitName, flags));
+    }
+
+    private boolean isCallerInstallerForPackage(@NonNull Computer snapshot, String packageName) {
+        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
+        if (packageState == null) {
+            return false;
+        }
+        final InstallSource installSource = packageState.getInstallSource();
+
+        final PackageStateInternal installerPackageState =
+                snapshot.getPackageStateInternal(installSource.installerPackageName);
+        if (installerPackageState == null) {
+            return false;
+        }
+        final AndroidPackage installerPkg = installerPackageState.getPkg();
+        return installerPkg.getUid() == Binder.getCallingUid();
     }
 
     public boolean performDexOptSecondary(String packageName, String compilerFilter,
@@ -662,5 +751,43 @@ final class DexOptHelper {
 
     /*package*/ void controlDexOptBlocking(boolean block) {
         mPm.mPackageDexOptimizer.controlDexOptBlocking(block);
+    }
+
+    /**
+     * Returns the module names of the APEXes that contribute to bootclasspath.
+     */
+    private static List<String> getBcpApexes() {
+        String bcp = System.getenv("BOOTCLASSPATH");
+        if (TextUtils.isEmpty(bcp)) {
+            Log.e(TAG, "Unable to get BOOTCLASSPATH");
+            return List.of();
+        }
+
+        ArrayList<String> bcpApexes = new ArrayList<>();
+        for (String pathStr : bcp.split(":")) {
+            Path path = Paths.get(pathStr);
+            // Check if the path is in the format of `/apex/<apex-module-name>/...` and extract the
+            // apex module name from the path.
+            if (path.getNameCount() >= 2 && path.getName(0).toString().equals("apex")) {
+                bcpApexes.add(path.getName(1).toString());
+            }
+        }
+
+        return bcpApexes;
+    }
+
+    /**
+     * Returns true of any of the APEXes that contribute to bootclasspath has changed during this
+     * boot.
+     */
+    private static boolean hasBcpApexesChanged() {
+        Set<String> bcpApexes = new HashSet<>(getBcpApexes());
+        ApexManager apexManager = ApexManager.getInstance();
+        for (ActiveApexInfo apexInfo : apexManager.getActiveApexInfos()) {
+            if (bcpApexes.contains(apexInfo.apexModuleName) && apexInfo.activeApexChanged) {
+                return true;
+            }
+        }
+        return false;
     }
 }

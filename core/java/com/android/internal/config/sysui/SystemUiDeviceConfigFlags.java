@@ -514,9 +514,17 @@ public final class SystemUiDeviceConfigFlags {
             "is_nearby_share_first_target_in_ranked_app";
 
     /**
-     * (boolean) Whether to enable the new unbundled "delegate chooser" implementation.
+     * (boolean) Whether to enable the new unbundled sharesheet
+     * (com.android.intentresolver.ChooserActivity).
      */
-    public static final String USE_DELEGATE_CHOOSER = "use_delegate_chooser";
+    public static final String USE_UNBUNDLED_SHARESHEET = "use_unbundled_sharesheet";
+
+    /**
+     * (int) The delay (in ms) before refreshing the Sharesheet UI after a change to the share
+     * target data model. For more info see go/sharesheet-list-view-update-delay.
+     */
+    public static final String SHARESHEET_LIST_VIEW_UPDATE_DELAY =
+            "sharesheet_list_view_update_delay";
 
     /**
      * (string) Name of the default QR code scanner activity. On the eligible devices this activity
@@ -534,6 +542,24 @@ public final class SystemUiDeviceConfigFlags {
      * (boolean) Whether the clipboard overlay is enabled.
      */
     public static final String CLIPBOARD_OVERLAY_ENABLED = "clipboard_overlay_enabled";
+
+    /**
+     * (boolean) Whether widget provider info would be saved to / loaded from system persistence
+     * layer as opposed to individual manifests in respective apps.
+     */
+    public static final String PERSISTS_WIDGET_PROVIDER_INFO = "persists_widget_provider_info";
+
+    /**
+     * (boolean) Whether the clipboard overlay shows an edit button (as opposed to requiring tapping
+     * the preview to send an edit intent).
+     */
+    public static final String CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON =
+            "clipboard_overlay_show_edit_button";
+
+    /**
+     * (boolean) Whether to show smart chips (based on TextClassifier) in the clipboard overlay.
+     */
+    public static final String CLIPBOARD_OVERLAY_SHOW_ACTIONS = "clipboard_overlay_show_actions";
 
     private SystemUiDeviceConfigFlags() {
     }
