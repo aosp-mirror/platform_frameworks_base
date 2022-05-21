@@ -51,6 +51,7 @@ import android.companion.CompanionDeviceManager;
 import android.companion.IAssociationRequestCallback;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.net.MacAddress;
 import android.os.Bundle;
@@ -411,17 +412,19 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final Drawable vendorIcon;
         final CharSequence vendorName;
         final Spanned title;
+        int nightModeFlags = getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
 
         mPermissionTypes = new ArrayList<>();
 
         try {
             vendorIcon = getVendorHeaderIcon(this, packageName, userId);
             vendorName = getVendorHeaderName(this, packageName, userId);
-
             mVendorHeaderImage.setImageDrawable(vendorIcon);
             if (hasVendorIcon(this, packageName, userId)) {
-                mVendorHeaderImage.setColorFilter(getResources().getColor(
-                                android.R.color.system_accent1_600, /* Theme= */null));
+                int color = nightModeFlags == Configuration.UI_MODE_NIGHT_YES
+                        ? android.R.color.system_accent1_200 : android.R.color.system_accent1_600;
+                mVendorHeaderImage.setColorFilter(getResources().getColor(color, /* Theme= */null));
             }
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
@@ -494,17 +497,19 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         final String deviceName = mSelectedDevice.getDisplayName();
-        final Spanned title = getHtmlFromResources(
-                this, R.string.confirmation_title, appLabel, deviceName);
+        final String profileName = getString(R.string.profile_name_watch);
+        final Spanned title;
         final Spanned summary;
         final Drawable profileIcon;
 
         if (deviceProfile == null) {
+            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, deviceName);
             summary = getHtmlFromResources(this, R.string.summary_generic);
             profileIcon = getIcon(this, R.drawable.ic_device_other);
             mSummary.setVisibility(View.GONE);
         } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
-            summary = getHtmlFromResources(this, R.string.summary_watch, appLabel, deviceName);
+            title = getHtmlFromResources(this, R.string.confirmation_title, appLabel, profileName);
+            summary = getHtmlFromResources(this, R.string.summary_watch, deviceName, appLabel);
             profileIcon = getIcon(this, R.drawable.ic_watch);
         } else {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
@@ -532,7 +537,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             mSummary.setVisibility(View.GONE);
         } else if (deviceProfile.equals(DEVICE_PROFILE_WATCH)) {
             profileName = getString(R.string.profile_name_watch);
-            summary = getHtmlFromResources(this, R.string.summary_watch, appLabel);
+            summary = getHtmlFromResources(this, R.string.summary_watch, profileName, appLabel);
             profileIcon = getIcon(this, R.drawable.ic_watch);
         } else {
             throw new RuntimeException("Unsupported profile " + deviceProfile);

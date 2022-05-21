@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Опитайте да направите екранна снимка отново"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Екранната снимка не може да се запази"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Правенето на екранни снимки не е разрешено от приложението или организацията ви"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Правенето на екранни снимки е блокирано от системния ви администратор"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Редактиране"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Редактиране на екранната снимка"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Споделяне на екранната снимка"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Прекарайте пръст нагоре, за да отключите"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Натиснете иконата за отключване, за да отворите"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Отключено с лице. Натиснете иконата за отключване, за да отворите."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Плъзнете бързо нагоре, за да опитате отново"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Отключете, за да използвате NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Това устройство принадлежи на организацията ви"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Портфейл"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Купувайте по-бързо и по-сигурно с телефона си"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показване на всички"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Добавяне на карта"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Докоснете за отваряне"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Актуализира се"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Отключване с цел използване"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"При извличането на картите ви възникна проблем. Моля, опитайте отново по-късно"</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Включване, когато е вероятно батерията да се изтощи"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Не, благодаря"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Използва се"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Някои приложения използват <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" и "</string>
@@ -799,7 +801,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Прекарайте пръст, за да видите повече"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Препоръките се зареждат"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мултимедия"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Да се скрие ли за <xliff:g id="APP_NAME">%1$s</xliff:g> тази контрола за мултимедията?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Скриване за <xliff:g id="APP_NAME">%1$s</xliff:g> на контролата за мултимедия?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Текущата сесия за мултимедия не бе скрита."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скриване"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Възобновяване"</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Преместете се по-близо, за да се възпроизведе на <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Приближете се до <xliff:g id="DEVICENAME">%1$s</xliff:g> за възпроизвеждане на това устройство"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Възпроизвежда се на <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Възпроизвежда се на този телефон"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Нещо се обърка. Опитайте отново."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, проверете прилож."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не е намерено"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"За да предавате тази сесия, моля, отворете приложението."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестно приложение"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Спиране на предаването"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работи предаването"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Предаване"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Хората в близост със съвместими устройства с Bluetooth могат да слушат мултимедията, която предавате"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Запазване"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Стартира се…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Предаването не е възможно"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Не може да се запази. Опитайте отново."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Не може да се запази."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер на компилацията"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номерът на компилацията е копиран в буферната памет."</string>
     <string name="basic_status" msgid="2315371112182658176">"Отворен разговор"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Редактиране на копирания текст"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Редактиране на копираното изображение"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Изпращане до устройство в близост"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Докоснете за преглед"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Добавяне"</string>
     <string name="manage_users" msgid="1823875311934643849">"Управление на потребителите"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Това известие не поддържа плъзгане за разделяне на екрана."</string>

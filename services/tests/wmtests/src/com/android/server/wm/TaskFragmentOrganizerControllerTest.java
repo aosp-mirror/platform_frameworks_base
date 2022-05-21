@@ -511,11 +511,12 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     @Test
     public void testApplyTransaction_reparentActivityToTaskFragment_triggerLifecycleUpdate()
             throws RemoteException {
-        final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(task);
         mOrganizer.applyTransaction(mTransaction);
         mController.registerOrganizer(mIOrganizer);
         mTaskFragment = new TaskFragmentBuilder(mAtm)
-                .setCreateParentTask()
+                .setParentTask(task)
                 .setFragmentToken(mFragmentToken)
                 .build();
         mAtm.mWindowOrganizerController.mLaunchTaskFragments

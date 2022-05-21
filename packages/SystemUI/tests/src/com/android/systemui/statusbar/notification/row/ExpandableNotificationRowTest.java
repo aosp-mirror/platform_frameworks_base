@@ -318,21 +318,23 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetIsNonblockable_oemLocked() throws Exception {
+    public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        row.getEntry().getChannel().setImportanceLockedByOEM(true);
+        row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
+        row.getEntry().getChannel().setBlockable(false);
 
         assertTrue(row.getIsNonblockable());
     }
 
     @Test
-    public void testGetIsNonblockable_criticalDeviceFunction() throws Exception {
+    public void testGetIsNonblockable_criticalDeviceFunction_butBlockable() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
         row.getEntry().getChannel().setImportanceLockedByCriticalDeviceFunction(true);
+        row.getEntry().getChannel().setBlockable(true);
 
-        assertTrue(row.getIsNonblockable());
+        assertFalse(row.getIsNonblockable());
     }
 
     @Test
@@ -344,7 +346,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 .build();
         row.performDismiss(false);
         verify(mNotificationTestHelper.mOnUserInteractionCallback)
-                .onDismiss(any(), anyInt(), any());
+                .registerFutureDismissal(any(), anyInt());
     }
 
     @Test
@@ -356,6 +358,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 .build();
         row.performDismiss(false);
         verify(mNotificationTestHelper.mOnUserInteractionCallback, never())
-                .onDismiss(any(), anyInt(), any());
+                .registerFutureDismissal(any(), anyInt());
     }
 }

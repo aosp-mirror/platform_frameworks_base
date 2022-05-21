@@ -1264,6 +1264,12 @@ static jint convertAudioProfileFromNative(JNIEnv *env, jobject *jAudioProfile,
     size_t numPositionMasks = 0;
     size_t numIndexMasks = 0;
 
+    int audioFormat = audioFormatFromNative(nAudioProfile->format);
+    if (audioFormat == ENCODING_INVALID) {
+        ALOGW("Unknown native audio format for JAVA API: %u", nAudioProfile->format);
+        return AUDIO_JAVA_BAD_VALUE;
+    }
+
     // count up how many masks are positional and indexed
     for (size_t index = 0; index < nAudioProfile->num_channel_masks; index++) {
         const audio_channel_mask_t mask = nAudioProfile->channel_masks[index];
@@ -1306,10 +1312,9 @@ static jint convertAudioProfileFromNative(JNIEnv *env, jobject *jAudioProfile,
         ALOGW("Unknown encapsulation type for JAVA API: %u", nAudioProfile->encapsulation_type);
     }
 
-    *jAudioProfile =
-            env->NewObject(gAudioProfileClass, gAudioProfileCstor,
-                           audioFormatFromNative(nAudioProfile->format), jSamplingRates.get(),
-                           jChannelMasks.get(), jChannelIndexMasks.get(), encapsulationType);
+    *jAudioProfile = env->NewObject(gAudioProfileClass, gAudioProfileCstor, audioFormat,
+                                    jSamplingRates.get(), jChannelMasks.get(),
+                                    jChannelIndexMasks.get(), encapsulationType);
 
     if (*jAudioProfile == nullptr) {
         return AUDIO_JAVA_ERROR;
@@ -1368,6 +1373,10 @@ static jint convertAudioPortFromNative(JNIEnv *env, jobject *jAudioPort,
         jobject jAudioProfile = nullptr;
         jStatus = convertAudioProfileFromNative(env, &jAudioProfile, &nAudioPort->audio_profiles[i],
                                                 useInMask);
+        if (jStatus == AUDIO_JAVA_BAD_VALUE) {
+            // skipping Java layer unsupported audio formats
+            continue;
+        }
         if (jStatus != NO_ERROR) {
             jStatus = (jint)AUDIO_JAVA_ERROR;
             goto exit;
@@ -2406,8 +2415,13 @@ static jint android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject th
         goto exit;
     }
     for (size_t i = 0; i < numSurroundFormats; i++) {
-        jobject surroundFormat = env->NewObject(gIntegerClass, gIntegerCstor,
-                                                audioFormatFromNative(surroundFormats[i]));
+        int audioFormat = audioFormatFromNative(surroundFormats[i]);
+        if (audioFormat == ENCODING_INVALID) {
+            // skipping Java layer unsupported audio formats
+            ALOGW("Unknown surround native audio format for JAVA API: %u", surroundFormats[i]);
+            continue;
+        }
+        jobject surroundFormat = env->NewObject(gIntegerClass, gIntegerCstor, audioFormat);
         jobject enabled = env->NewObject(gBooleanClass, gBooleanCstor, surroundFormatsEnabled[i]);
         env->CallObjectMethod(jSurroundFormats, gMapPut, surroundFormat, enabled);
         env->DeleteLocalRef(surroundFormat);
@@ -2453,8 +2467,13 @@ static jint android_media_AudioSystem_getReportedSurroundFormats(JNIEnv *env, jo
         goto exit;
     }
     for (size_t i = 0; i < numSurroundFormats; i++) {
-        jobject surroundFormat = env->NewObject(gIntegerClass, gIntegerCstor,
-                                                audioFormatFromNative(surroundFormats[i]));
+        int audioFormat = audioFormatFromNative(surroundFormats[i]);
+        if (audioFormat == ENCODING_INVALID) {
+            // skipping Java layer unsupported audio formats
+            ALOGW("Unknown surround native audio format for JAVA API: %u", surroundFormats[i]);
+            continue;
+        }
+        jobject surroundFormat = env->NewObject(gIntegerClass, gIntegerCstor, audioFormat);
         env->CallObjectMethod(jSurroundFormats, gArrayListMethods.add, surroundFormat);
         env->DeleteLocalRef(surroundFormat);
     }
@@ -2919,6 +2938,10 @@ static jint android_media_AudioSystem_getDirectProfilesForAttributes(JNIEnv *env
     for (const auto &audioProfile : audioProfiles) {
         jobject jAudioProfile;
         jStatus = convertAudioProfileFromNative(env, &jAudioProfile, &audioProfile, false);
+        if (jStatus == AUDIO_JAVA_BAD_VALUE) {
+            // skipping Java layer unsupported audio formats
+            continue;
+        }
         if (jStatus != AUDIO_JAVA_SUCCESS) {
             return jStatus;
         }

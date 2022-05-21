@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问平板电脑的摄像头"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"系统语言"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"系统默认设置"</string>
 </resources>

@@ -118,6 +118,7 @@ import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
@@ -2955,16 +2956,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Updates the current content mirroring session.
-     */
-    @Override
-    public void setContentRecordingSession(@Nullable ContentRecordingSession incomingSession) {
-        synchronized (mGlobalLock) {
-            mContentRecordingController.setContentRecordingSessionLocked(incomingSession, this);
-        }
-    }
-
     // TODO(multi-display): remove when no default display use case.
     void prepareAppTransitionNone() {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
@@ -3052,13 +3043,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+
     void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
         if (mRecentsAnimationController != null) {
             final RecentsAnimationController controller = mRecentsAnimationController;
             mRecentsAnimationController = null;
             controller.cleanupAnimation(reorderMode);
-            // TODO(mult-display): currently only default display support recents animation.
-            getDefaultDisplayContentLocked().mAppTransition.updateBooster();
+            // TODO(multi-display): currently only default display support recents animation.
+            final DisplayContent dc = getDefaultDisplayContentLocked();
+            if (dc.mAppTransition.isTransitionSet()) {
+                dc.mSkipAppTransitionAnimation = true;
+            }
+            dc.forAllWindowContainers((wc) -> {
+                if (wc.isAnimating(TRANSITION, ANIMATION_TYPE_APP_TRANSITION)) {
+                    wc.cancelAnimation();
+                }
+            });
         }
     }
 
@@ -5694,25 +5694,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setSandboxDisplayApis(int displayId, boolean sandboxDisplayApis) {
-        if (mContext.checkCallingOrSelfPermission(WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Must hold permission " + WRITE_SECURE_SETTINGS);
-        }
-
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null) {
-                    displayContent.setSandboxDisplayApis(sandboxDisplayApis);
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     /** The global settings only apply to default display. */
     private boolean applyForcedPropertiesForDefaultDisplay() {
         boolean changed = false;
@@ -8249,6 +8230,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 return w.getBounds().contains((int) displayX, (int) displayY);
+            }
+        }
+
+        @Override
+        public void setContentRecordingSession(@Nullable ContentRecordingSession incomingSession) {
+            synchronized (mGlobalLock) {
+                mContentRecordingController.setContentRecordingSessionLocked(incomingSession,
+                        WindowManagerService.this);
             }
         }
     }

@@ -61,6 +61,10 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
     private ImageView mBroadcastCodeEdit;
     private AlertDialog mAlertDialog;
     private TextView mBroadcastErrorMessage;
+    private int mRetryCount = 0;
+    private String mCurrentBroadcastName;
+    private String mCurrentBroadcastCode;
+    private boolean mIsStopbyUpdateBroadcastCode = false;
 
     static final int METADATA_BROADCAST_NAME = 0;
     static final int METADATA_BROADCAST_CODE = 1;
@@ -144,8 +148,6 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
 
         //init UI component
         mBroadcastQrCodeView = getDialogView().requireViewById(R.id.qrcode_view);
-        //Set the QR code view
-        setQrCodeView();
 
         mBroadcastNotify = getDialogView().requireViewById(R.id.broadcast_info);
         mBroadcastNotify.setOnClickListener(v -> {
@@ -171,8 +173,16 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
             launchBroadcastUpdatedDialog(true, mBroadcastCode.getText().toString());
         });
 
-        mBroadcastName.setText(getBroadcastMetadataInfo(METADATA_BROADCAST_NAME));
-        mBroadcastCode.setText(getBroadcastMetadataInfo(METADATA_BROADCAST_CODE));
+        refreshUi();
+    }
+
+    private void refreshUi() {
+        setQrCodeView();
+
+        mCurrentBroadcastName = getBroadcastMetadataInfo(METADATA_BROADCAST_NAME);
+        mCurrentBroadcastCode = getBroadcastMetadataInfo(METADATA_BROADCAST_CODE);
+        mBroadcastName.setText(mCurrentBroadcastName);
+        mBroadcastCode.setText(mCurrentBroadcastCode);
     }
 
     private void inflateBroadcastInfoArea() {
@@ -239,52 +249,99 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         }
 
         if (isBroadcastCode) {
-            handleBroadcastCodeUpdated(updatedString);
+            /* If the user wants to update the Broadcast Code, the Broadcast session should be
+             * stopped then used the new Broadcast code to start the Broadcast.
+             */
+            mIsStopbyUpdateBroadcastCode = true;
+            mMediaOutputController.setBroadcastCode(updatedString);
+            if (!mMediaOutputController.stopBluetoothLeBroadcast()) {
+                handleLeBroadcastStopFailed();
+                return;
+            }
         } else {
-            handleBroadcastNameUpdated(updatedString);
+            /* If the user wants to update the Broadcast Name, we don't need to stop the Broadcast
+             * session. Only use the new Broadcast name to update the broadcast session.
+             */
+            mMediaOutputController.setBroadcastName(updatedString);
+            if (!mMediaOutputController.updateBluetoothLeBroadcast()) {
+                handleLeBroadcastUpdateFailed();
+            }
         }
     }
 
-    private void handleBroadcastNameUpdated(String name) {
-        // TODO(b/230473995) Add the retry mechanism and error handling when update fails
-        String currentName = mMediaOutputController.getBroadcastName();
-        int retryCount = MAX_BROADCAST_INFO_UPDATE;
-        mMediaOutputController.setBroadcastName(name);
-        if (!mMediaOutputController.updateBluetoothLeBroadcast()) {
-            mMediaOutputController.setBroadcastName(currentName);
-            handleLeUpdateBroadcastFailed(retryCount);
+    @Override
+    public void handleLeBroadcastStarted() {
+        mRetryCount = 0;
+        if (mAlertDialog != null) {
+            mAlertDialog.dismiss();
+        }
+        refreshUi();
+    }
+
+    @Override
+    public void handleLeBroadcastStartFailed() {
+        mMediaOutputController.setBroadcastCode(mCurrentBroadcastCode);
+        mRetryCount++;
+
+        handleUpdateFailedUi();
+    }
+
+    @Override
+    public void handleLeBroadcastMetadataChanged() {
+        refreshUi();
+    }
+
+    @Override
+    public void handleLeBroadcastUpdated() {
+        mRetryCount = 0;
+        if (mAlertDialog != null) {
+            mAlertDialog.dismiss();
+        }
+        refreshUi();
+    }
+
+    @Override
+    public void handleLeBroadcastUpdateFailed() {
+        //Change the value in shared preferences back to it original value
+        mMediaOutputController.setBroadcastName(mCurrentBroadcastName);
+        mRetryCount++;
+
+        handleUpdateFailedUi();
+    }
+
+    @Override
+    public void handleLeBroadcastStopped() {
+        if (mIsStopbyUpdateBroadcastCode) {
+            mIsStopbyUpdateBroadcastCode = false;
+            mRetryCount = 0;
+            if (!mMediaOutputController.startBluetoothLeBroadcast()) {
+                handleLeBroadcastStartFailed();
+                return;
+            }
+        } else {
+            dismiss();
         }
     }
 
-    private void handleBroadcastCodeUpdated(String newPassword) {
-        // TODO(b/230473995) Add the retry mechanism and error handling when update fails
-        String currentPassword = mMediaOutputController.getBroadcastCode();
-        int retryCount = MAX_BROADCAST_INFO_UPDATE;
-        if (!mMediaOutputController.stopBluetoothLeBroadcast()) {
-            mMediaOutputController.setBroadcastCode(currentPassword);
-            handleLeUpdateBroadcastFailed(retryCount);
-            return;
-        }
+    @Override
+    public void handleLeBroadcastStopFailed() {
+        //Change the value in shared preferences back to it original value
+        mMediaOutputController.setBroadcastCode(mCurrentBroadcastCode);
+        mRetryCount++;
 
-        mMediaOutputController.setBroadcastCode(newPassword);
-        if (!mMediaOutputController.startBluetoothLeBroadcast()) {
-            mMediaOutputController.setBroadcastCode(currentPassword);
-            handleLeUpdateBroadcastFailed(retryCount);
-            return;
-        }
-
-        mAlertDialog.dismiss();
+        handleUpdateFailedUi();
     }
 
-    private void handleLeUpdateBroadcastFailed(int retryCount) {
+    private void handleUpdateFailedUi() {
         final Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
         mBroadcastErrorMessage.setVisibility(View.VISIBLE);
-        if (retryCount < MAX_BROADCAST_INFO_UPDATE) {
+        if (mRetryCount < MAX_BROADCAST_INFO_UPDATE) {
             if (positiveBtn != null) {
                 positiveBtn.setEnabled(true);
             }
             mBroadcastErrorMessage.setText(R.string.media_output_broadcast_update_error);
         } else {
+            mRetryCount = 0;
             mBroadcastErrorMessage.setText(R.string.media_output_broadcast_last_update_error);
         }
     }

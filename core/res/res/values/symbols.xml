@@ -479,7 +479,7 @@
   <java-symbol type="bool" name="config_useAssistantVolume" />
   <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
   <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
-  <java-symbol type="integer" name="config_preferKeepClearForFocusDelayMillis" />
+  <java-symbol type="bool" name="config_preferKeepClearForFocus" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
   <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
 
@@ -2254,7 +2254,6 @@
   <java-symbol type="bool" name="config_supportTelephonyTimeZoneFallback" />
   <java-symbol type="bool" name="config_autoResetAirplaneMode" />
   <java-symbol type="string" name="config_notificationAccessConfirmationActivity" />
-  <java-symbol type="bool" name="config_killableInputMethods" />
   <java-symbol type="bool" name="config_preventImeStartupUnlessTextEditor" />
   <java-symbol type="array" name="config_nonPreemptibleInputMethods" />
   <java-symbol type="bool" name="config_enhancedConfirmationModeEnabled" />
@@ -3419,6 +3418,9 @@
   <!-- Search Selector -->
   <java-symbol type="string" name="config_defaultSearchSelectorPackageName" />
 
+  <!-- Captive Portal Login -->
+  <java-symbol type="string" name="config_defaultCaptivePortalLoginPackageName" />
+
   <!-- Optional IPsec algorithms -->
   <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
 
@@ -4151,7 +4153,7 @@
   <java-symbol type="bool" name="config_disable_all_cb_messages" />
   <java-symbol type="drawable" name="ic_close" />
 
-  <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
+  <java-symbol type="bool" name="config_hideNavBarForKeyboard" />
 
   <java-symbol type="bool" name="config_showBuiltinWirelessChargingAnim" />
 
@@ -4708,6 +4710,7 @@
 
   <java-symbol type="string" name="config_wearSysUiPackage"/>
   <java-symbol type="string" name="config_wearSysUiMainActivity"/>
+  <java-symbol type="string" name="config_defaultQrCodeComponent"/>
 
   <java-symbol type="dimen" name="secondary_rounded_corner_radius" />
   <java-symbol type="dimen" name="secondary_rounded_corner_radius_top" />
@@ -4753,7 +4756,10 @@
   <!-- For VirtualDeviceManager -->
   <java-symbol type="string" name="vdm_camera_access_denied" />
 
-  <java-symbol type="color" name="camera_privacy_light"/>
+  <java-symbol type="color" name="camera_privacy_light_day"/>
+  <java-symbol type="color" name="camera_privacy_light_night"/>
+  <java-symbol type="integer" name="config_cameraPrivacyLightAlsAveragingIntervalMillis"/>
+  <java-symbol type="integer" name="config_cameraPrivacyLightAlsNightThreshold"/>
 
   <java-symbol type="bool" name="config_bg_current_drain_monitor_enabled" />
   <java-symbol type="array" name="config_bg_current_drain_threshold_to_restricted_bucket" />
@@ -4767,13 +4773,14 @@
   <java-symbol type="array" name="config_bg_current_drain_high_threshold_to_bg_restricted" />
   <java-symbol type="integer" name="config_bg_current_drain_media_playback_min_duration" />
   <java-symbol type="integer" name="config_bg_current_drain_location_min_duration" />
+  <java-symbol type="bool" name="config_bg_current_drain_auto_restrict_abusive_apps" />
   <java-symbol type="bool" name="config_bg_prompt_fgs_with_noti_to_bg_restricted" />
   <java-symbol type="bool" name="config_bg_prompt_abusive_apps_to_bg_restricted" />
   <java-symbol type="integer" name="config_bg_current_drain_exempted_types" />
   <java-symbol type="bool" name="config_bg_current_drain_high_threshold_by_bg_location" />
   <java-symbol type="drawable" name="ic_swap_horiz" />
-  <java-symbol type="bool" name="config_notificationForceUserSetOnUpgrade" />
   <java-symbol type="array" name="config_deviceStatesAvailableForAppRequests" />
+  <java-symbol type="array" name="config_serviceStateLocationAllowedPackages" />
 
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />

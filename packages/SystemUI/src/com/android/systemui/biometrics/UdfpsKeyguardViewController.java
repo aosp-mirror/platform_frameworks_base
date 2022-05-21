@@ -121,7 +121,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                         mView.onDozeAmountChanged(
                                 animation.getAnimatedFraction(),
                                 (float) animation.getAnimatedValue(),
-                                /* animatingBetweenAodAndLockScreen */ false);
+                                UdfpsKeyguardView.ANIMATION_UNLOCKED_SCREEN_OFF);
                     }
                 });
     }
@@ -394,7 +394,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 mUnlockedScreenOffDozeAnimator.start();
             } else {
                 mView.onDozeAmountChanged(linear, eased,
-                    /* animatingBetweenAodAndLockScreen */ true);
+                        UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
             }
 
             mLastDozeAmount = linear;
@@ -404,7 +404,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         @Override
         public void onStateChanged(int statusBarState) {
             mStatusBarState = statusBarState;
-            mView.setStatusBarState(statusBarState);
             updateAlpha();
             updatePauseAuth();
         }

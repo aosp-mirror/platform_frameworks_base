@@ -10155,15 +10155,6 @@ public final class Settings {
         public static final String NOTIFICATION_DISMISS_RTL = "notification_dismiss_rtl";
 
         /**
-         * Whether the app-level notification setting is represented by a manifest permission.
-         *
-         * @hide
-         */
-        @Readable
-        public static final String NOTIFICATION_PERMISSION_ENABLED =
-                "notification_permission_enabled";
-
-        /**
          * Comma separated list of QS tiles that have been auto-added already.
          * @hide
          */

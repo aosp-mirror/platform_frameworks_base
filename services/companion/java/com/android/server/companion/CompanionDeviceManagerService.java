@@ -62,7 +62,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
@@ -79,9 +78,9 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.BidiFormatter;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Log;
@@ -123,8 +122,10 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
     private static final String PREF_KEY_AUTO_REVOKE_GRANTS_DONE = "auto_revoke_grants_done";
+    private static final String SYS_PROP_DEBUG_REMOVAL_TIME_WINDOW =
+            "debug.cdm.cdmservice.removal_time_window";
 
-    private static final long ASSOCIATION_CLEAN_UP_TIME_WINDOW = DAYS.toMillis(3 * 30); // 3 months
+    private static final long ASSOCIATION_REMOVAL_TIME_WINDOW_DEFAULT = DAYS.toMillis(90);
 
     private PersistentDataStore mPersistentStore;
     private final PersistUserStateHandler mUserPersistenceHandler;
@@ -213,8 +214,8 @@ public class CompanionDeviceManagerService extends SystemService {
             mPackageMonitor.register(context, FgThread.get().getLooper(), UserHandle.ALL, true);
             mDevicePresenceMonitor.init(context);
         } else if (phase == PHASE_BOOT_COMPLETED) {
-            // Run the Association CleanUp job service daily.
-            AssociationCleanUpService.schedule(getContext());
+            // Run the Inactive Association Removal job service daily.
+            InactiveAssociationsRemovalService.schedule(getContext());
         }
     }
 
@@ -294,14 +295,13 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private boolean onCompanionApplicationBindingDiedInternal(
             @UserIdInt int userId, @NonNull String packageName) {
-        // Update the current connected devices sets when binderDied, so that application is able
-        // to call notifyDeviceAppeared after re-launch the application.
         for (AssociationInfo ai :
                 mAssociationStore.getAssociationsForPackage(userId, packageName)) {
-            int id = ai.getId();
-            Slog.i(TAG, "Removing association id: " + id + " for package: "
-                    + packageName + " due to binderDied.");
-            mDevicePresenceMonitor.removeDeviceFromMonitoring(id);
+            final int associationId = ai.getId();
+            if (ai.isSelfManaged()
+                    && mDevicePresenceMonitor.isDevicePresent(associationId)) {
+                mDevicePresenceMonitor.onSelfManagedDeviceReporterBinderDied(associationId);
+            }
         }
         // TODO(b/218613015): implement.
         return false;
@@ -413,17 +413,20 @@ public class CompanionDeviceManagerService extends SystemService {
         mCompanionAppController.onPackagesChanged(userId);
     }
 
-    // Revoke associations if the selfManaged companion device does not connect for 3
-    // months for specific profile.
-    private void associationCleanUp(String profile) {
+    // Revoke associations if the selfManaged companion device does not connect for 3 months.
+    void removeInactiveSelfManagedAssociations() {
+        final long currentTime = System.currentTimeMillis();
+        long removalWindow = SystemProperties.getLong(SYS_PROP_DEBUG_REMOVAL_TIME_WINDOW, -1);
+        if (removalWindow <= 0) {
+            // 0 or negative values indicate that the sysprop was never set or should be ignored.
+            removalWindow = ASSOCIATION_REMOVAL_TIME_WINDOW_DEFAULT;
+        }
+
         for (AssociationInfo ai : mAssociationStore.getAssociations()) {
-            if (ai.isSelfManaged()
-                    && profile.equals(ai.getDeviceProfile())
-                    && System.currentTimeMillis() - ai.getLastTimeConnectedMs()
-                    >= ASSOCIATION_CLEAN_UP_TIME_WINDOW) {
-                Slog.i(TAG, "Removing the association for associationId: "
-                        + ai.getId()
-                        + " due to the device does not connect for 3 months.");
+            if (!ai.isSelfManaged()) continue;
+            final boolean isInactive =  currentTime - ai.getLastTimeConnectedMs() >= removalWindow;
+            if (isInactive) {
+                Slog.i(TAG, "Removing inactive self-managed association: " + ai.getId());
                 disassociateInternal(ai.getId());
             }
         }
@@ -538,20 +541,12 @@ public class CompanionDeviceManagerService extends SystemService {
             String callingPackage = component.getPackageName();
             checkCanCallNotificationApi(callingPackage);
             // TODO: check userId.
-            String packageTitle = BidiFormatter.getInstance().unicodeWrap(
-                    getPackageInfo(getContext(), userId, callingPackage)
-                            .applicationInfo
-                            .loadSafeLabel(getContext().getPackageManager(),
-                                    PackageItemInfo.DEFAULT_MAX_LABEL_SIZE_PX,
-                                    PackageItemInfo.SAFE_LABEL_FLAG_TRIM
-                                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE)
-                            .toString());
             final long identity = Binder.clearCallingIdentity();
             try {
                 return PendingIntent.getActivityAsUser(getContext(),
                         0 /* request code */,
                         NotificationAccessConfirmationActivityContract.launcherIntent(
-                                getContext(), userId, component, packageTitle),
+                                getContext(), userId, component),
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_ONE_SHOT
                                 | PendingIntent.FLAG_CANCEL_CURRENT,
                         null /* options */,
@@ -660,6 +655,12 @@ public class CompanionDeviceManagerService extends SystemService {
 
         private void registerDevicePresenceListenerActive(String packageName, String deviceAddress,
                 boolean active) throws RemoteException {
+            if (DEBUG) {
+                Log.i(TAG, "registerDevicePresenceListenerActive()"
+                        + " active=" + active
+                        + " deviceAddress=" + deviceAddress);
+            }
+
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE,
                     "[un]registerDevicePresenceListenerService");
@@ -675,6 +676,12 @@ public class CompanionDeviceManagerService extends SystemService {
                         + " for user " + userId));
             }
 
+            // If already at specified state, then no-op.
+            if (active == association.isNotifyOnDeviceNearby()) {
+                if (DEBUG) Log.d(TAG, "Device presence listener is already at desired state.");
+                return;
+            }
+
             // AssociationInfo class is immutable: create a new AssociationInfo object with updated
             // flag.
             association = AssociationInfo.builder(association)
@@ -685,7 +692,17 @@ public class CompanionDeviceManagerService extends SystemService {
             // an application sets/unsets the mNotifyOnDeviceNearby flag.
             mAssociationStore.updateAssociation(association);
 
-            // TODO(b/218615198): correctly handle the case when the device is currently present.
+            // If device is already present, then trigger callback.
+            if (active && mDevicePresenceMonitor.isDevicePresent(association.getId())) {
+                if (DEBUG) Log.d(TAG, "Device is already present. Triggering callback.");
+                onDeviceAppearedInternal(association.getId());
+            }
+
+            // If last listener is unregistered, then unbind application.
+            if (!active && !shouldBindPackage(userId, packageName)) {
+                if (DEBUG) Log.d(TAG, "Last listener unregistered. Unbinding application.");
+                mCompanionAppController.unbindCompanionApplication(userId, packageName);
+            }
         }
 
         @Override
@@ -1067,10 +1084,10 @@ public class CompanionDeviceManagerService extends SystemService {
         return ArrayUtils.contains(array, a) || ArrayUtils.contains(array, b);
     }
 
-    private class LocalService extends CompanionDeviceManagerServiceInternal {
+    private class LocalService implements CompanionDeviceManagerServiceInternal {
         @Override
-        public void associationCleanUp(String profile) {
-            CompanionDeviceManagerService.this.associationCleanUp(profile);
+        public void removeInactiveSelfManagedAssociations() {
+            CompanionDeviceManagerService.this.removeInactiveSelfManagedAssociations();
         }
     }
 

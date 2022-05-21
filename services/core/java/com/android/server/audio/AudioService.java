@@ -341,8 +341,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISPATCH_AUDIO_MODE = 40;
     private static final int MSG_ROUTING_UPDATED = 41;
     private static final int MSG_INIT_HEADTRACKING_SENSORS = 42;
-    // commented out for now, will be reused for other SA persisting
-    //private static final int MSG_PERSIST_SPATIAL_AUDIO_ENABLED = 43;
+    private static final int MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS = 43;
     private static final int MSG_ADD_ASSISTANT_SERVICE_UID = 44;
     private static final int MSG_REMOVE_ASSISTANT_SERVICE_UID = 45;
     private static final int MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID = 46;
@@ -4146,19 +4145,8 @@ public class AudioService extends IAudioService.Stub
     {
         streamType = mStreamVolumeAlias[streamType];
 
-        if (streamType == AudioSystem.STREAM_MUSIC) {
-            flags = updateFlagsForTvPlatform(flags);
-            synchronized (mHdmiClientLock) {
-                // Don't display volume UI on a TV Playback device when using absolute volume
-                if (mHdmiCecVolumeControlEnabled && mHdmiPlaybackClient != null
-                        && (isAbsoluteVolumeDevice(device)
-                        || isA2dpAbsoluteVolumeDevice(device))) {
-                    flags &= ~AudioManager.FLAG_SHOW_UI;
-                }
-            }
-            if (isFullVolumeDevice(device)) {
-                flags &= ~AudioManager.FLAG_SHOW_UI;
-            }
+        if (streamType == AudioSystem.STREAM_MUSIC && isFullVolumeDevice(device)) {
+            flags &= ~AudioManager.FLAG_SHOW_UI;
         }
         mVolumeController.postVolumeChanged(streamType, flags);
     }
@@ -6648,6 +6636,11 @@ public class AudioService extends IAudioService.Stub
         // verify arguments
         Objects.requireNonNull(device);
         AudioManager.enforceValidVolumeBehavior(deviceVolumeBehavior);
+        sVolumeLogger.log(new AudioEventLogger.StringEvent("setDeviceVolumeBehavior: dev:"
+                + AudioSystem.getOutputDeviceName(device.getInternalType()) + " addr:"
+                + device.getAddress() + " behavior:"
+                + AudioDeviceVolumeManager.volumeBehaviorName(deviceVolumeBehavior)
+                + " pack:" + pkgName).printLog(TAG));
         if (pkgName == null) {
             pkgName = "";
         }
@@ -8128,13 +8121,16 @@ public class AudioService extends IAudioService.Stub
                     break;
 
                 case MSG_INIT_SPATIALIZER:
-                    mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
-                    mSpatializerHelper.setFeatureEnabled(mHasSpatializerEffect);
+                    onInitSpatializer();
                     mAudioEventWakeLock.release();
                     break;
 
                 case MSG_INIT_HEADTRACKING_SENSORS:
                     mSpatializerHelper.onInitSensors();
+                    break;
+
+                case MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS:
+                    onPersistSpatialAudioDeviceSettings();
                     break;
 
                 case MSG_CHECK_MUSIC_ACTIVE:
@@ -8363,7 +8359,7 @@ public class AudioService extends IAudioService.Stub
     private void avrcpSupportsAbsoluteVolume(String address, boolean support) {
         // address is not used for now, but may be used when multiple a2dp devices are supported
         sVolumeLogger.log(new AudioEventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
-                + address + " support=" + support));
+                + address + " support=" + support).printLog(TAG));
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(support);
         setAvrcpAbsoluteVolumeSupported(support);
     }
@@ -9103,6 +9099,45 @@ public class AudioService extends IAudioService.Stub
                 MSG_INIT_HEADTRACKING_SENSORS,
                 SENDMSG_REPLACE,
                 /*arg1*/ 0, /*arg2*/ 0, TAG, /*delay*/ 0);
+    }
+
+    void onInitSpatializer() {
+        final String settings = mSettings.getSecureStringForUser(mContentResolver,
+                Settings.Secure.SPATIAL_AUDIO_ENABLED, UserHandle.USER_CURRENT);
+        if (settings == null) {
+            Log.e(TAG, "error reading spatial audio device settings");
+        } else {
+            Log.v(TAG, "restoring spatial audio device settings: " + settings);
+            mSpatializerHelper.setSADeviceSettings(settings);
+        }
+        mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
+        mSpatializerHelper.setFeatureEnabled(mHasSpatializerEffect);
+    }
+
+    /**
+     * post a message to persist the spatial audio device settings.
+     * Message is delayed by 1s on purpose in case of successive changes in quick succession (at
+     * init time for instance)
+     * Note this method is made public to work around a Mockito bug where it needs to be public
+     * in order to be mocked by a test a the same package
+     * (see https://code.google.com/archive/p/mockito/issues/127)
+     */
+    public void persistSpatialAudioDeviceSettings() {
+        sendMsg(mAudioHandler,
+                MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS,
+                SENDMSG_REPLACE, /*arg1*/ 0, /*arg2*/ 0, TAG,
+                /*delay*/ 1000);
+    }
+
+    void onPersistSpatialAudioDeviceSettings() {
+        final String settings = mSpatializerHelper.getSADeviceSettings();
+        Log.v(TAG, "saving spatial audio device settings: " + settings);
+        boolean res = mSettings.putSecureStringForUser(mContentResolver,
+                Settings.Secure.SPATIAL_AUDIO_ENABLED,
+                settings, UserHandle.USER_CURRENT);
+        if (!res) {
+            Log.e(TAG, "error saving spatial audio device settings: " + settings);
+        }
     }
 
     //==========================================================================================

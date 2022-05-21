@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmbild igen"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Det gick inte att spara skärmbilden"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmbilder"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Möjligheten att ta skärmbilder blockeras av IT-administratören"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Redigera"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Redigera skärmbild"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Dela skärmbild"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Öppna genom att svepa uppåt"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Tryck på ikonen lås upp för att öppna"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Upplåst med ansiktslås. Tryck på ikonen lås upp för att öppna."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Svep uppåt om du vill försöka igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås upp om du vill använda NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Den här enheten tillhör organisationen"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Lägg till en betalningsmetod för att betala snabbare och säkrare med telefonen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Visa alla"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Lägg till ett kort"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tryck för att öppna"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Uppdaterar"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås upp för att använda"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Det gick inte att hämta dina kort. Försök igen senare."</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktivera när batteriet håller på att ta slut"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nej tack"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI-heap"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Används"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"<xliff:g id="TYPES_LIST">%s</xliff:g> används av appar."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" och "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Flytta närmare för att spela upp på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Flytta dig närmare <xliff:g id="DEVICENAME">%1$s</xliff:g> om du vill spela här"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Spelas upp på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Spelas upp på denna telefon"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Något gick fel. Försök igen."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv, kolla appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hittades inte"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Öppna appen om du vill casta den här sessionen."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Okänd app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Sluta casta"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Så fungerar utsändning"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Utsändning"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personer i närheten med kompatibla Bluetooth-enheter kan lyssna på medieinnehåll som du sänder ut"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Spara"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Startar …"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Det gick inte att sända ut"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Det gick inte att spara. Försök igen."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Det gick inte att spara."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versionsnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versionsnumret har kopierats till urklipp."</string>
     <string name="basic_status" msgid="2315371112182658176">"Öppen konversation"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Redigera kopierad text"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Redigera kopierad bild"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Skicka till enhet i närheten"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Tryck för att visa"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Lägg till"</string>
     <string name="manage_users" msgid="1823875311934643849">"Hantera användare"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Det går inte att dra den här aviseringen till delad skärm."</string>

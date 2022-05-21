@@ -157,15 +157,16 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /** Clears all registered callbacks on the instance. */
     public void clear() {
+        if (mImeDispatcher != null) {
+            mImeDispatcher.clear();
+            mImeDispatcher = null;
+        }
         if (!mAllCallbacks.isEmpty()) {
             // Clear binder references in WM.
             setTopOnBackInvokedCallback(null);
         }
         mAllCallbacks.clear();
         mOnBackInvokedCallbacks.clear();
-        if (mImeDispatcher != null) {
-            mImeDispatcher = null;
-        }
     }
 
     private void setTopOnBackInvokedCallback(@Nullable OnBackInvokedCallback callback) {

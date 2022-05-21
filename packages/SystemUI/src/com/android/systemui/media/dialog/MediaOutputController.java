@@ -573,6 +573,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     boolean addDeviceToPlayMedia(MediaDevice device) {
+        mMetricLogger.logInteractionExpansion(device);
         return mLocalMediaManager.addDeviceToPlayMedia(device);
     }
 
@@ -613,6 +614,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void releaseSession() {
+        mMetricLogger.logInteractionStopCasting();
         mLocalMediaManager.releaseSession();
     }
 
@@ -627,6 +629,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void adjustVolume(MediaDevice device, int volume) {
+        mMetricLogger.logInteractionAdjustVolume(device);
         ThreadUtils.postOnBackgroundThread(() -> {
             device.requestSetVolume(volume);
         });

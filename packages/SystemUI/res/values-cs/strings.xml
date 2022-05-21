@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Zkuste snímek pořídit znovu"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Snímek obrazovky se nepodařilo uložit"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Aplikace nebo organizace zakazuje pořizování snímků obrazovky"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Pořizování snímků obrazovky je blokováno administrátorem IT"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Upravit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Upravit snímek obrazovky"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Sdílet snímek obrazovky"</string>
@@ -282,8 +281,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Do svítání"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Zapnout v <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Zapnout při večerce"</string>
-    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Dokud neskončí večerka"</string>
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Zapnout během nočního klidu"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Dokud neskončí noční klid"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC je vypnuto"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC je zapnuto"</string>
@@ -318,6 +317,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otevřete přejetím prstem nahoru"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Otevřete klepnutím na ikonu odemknutí"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Odemknuto obličejem. Klepněte na ikonu odemknutí."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Přejetím nahoru to zkusíte znovu"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC vyžaduje odemknutou obrazovku"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zařízení patří vaší organizaci"</string>
@@ -466,7 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Peněženka"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavte si rychlejší a bezpečnější platby pomocí telefonu"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Zobrazit vše"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Přidat kartu"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Klepnutím otevřete"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Aktualizace"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Odemknout a použít"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Při načítání karet došlo k problému, zkuste to později"</string>
@@ -730,8 +733,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Zapnout, když bude pravděpodobné, že se vybije baterie"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ne, díky"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Výpis haldy SysUI"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Používá se"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikace využívají tato oprávnění: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" a "</string>
@@ -831,7 +833,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Pokud chcete přehrávat na zařízení <xliff:g id="DEVICENAME">%1$s</xliff:g>, přibližte se k němu"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Pokud zde chcete přehrávat média, přibližte se k zařízení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Přehrávání v zařízení <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Přehrávání v tomto telefonu"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Došlo k chybě. Zkuste to znovu."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivní, zkontrolujte aplikaci"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nenalezeno"</string>
@@ -852,6 +853,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Pokud chcete odesílat relaci, otevřete aplikaci."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznámá aplikace"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zastavit odesílání"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jak vysílání funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysílání"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Lidé ve vašem okolí s kompatibilními zařízeními Bluetooth mohou poslouchat média, která vysíláte"</string>
@@ -861,10 +864,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Uložit"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Spouštění…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Vysílání se nezdařilo"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Uložení se nezdařilo. Zkuste to znovu."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Uložení se nezdařilo."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Číslo sestavení"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Číslo sestavení bylo zkopírováno do schránky."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otevřít konverzaci"</string>
@@ -951,6 +952,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Upravit zkopírovaný text"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Upravit zkopírovaný obrázek"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Odeslat do zařízení v okolí"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Zobrazíte klepnutím"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Přidat"</string>
     <string name="manage_users" msgid="1823875311934643849">"Správa uživatelů"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Toto oznámení nepodporuje přetažení na rozdělenou obrazovku."</string>

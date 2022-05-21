@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Angalia programu zinazotumika"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Haiwezi kufikia kamera ya simu kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Haiwezi kufikia kamera ya kompyuta kibao kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Lugha ya mfumo"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Chaguomsingi la mfumo"</string>
 </resources>
