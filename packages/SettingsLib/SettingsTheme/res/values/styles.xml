@@ -26,4 +26,11 @@
     <style name="TextAppearance.CategoryTitle.SettingsLib"
            parent="@android:style/TextAppearance.DeviceDefault.Medium">
     </style>
+
+    <style name="TextAppearance.TopIntroText"
+        parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
 </resources>

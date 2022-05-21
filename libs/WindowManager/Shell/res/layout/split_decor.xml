@@ -20,8 +20,8 @@
     android:layout_width="match_parent">
 
     <ImageView android:id="@+id/split_resizing_icon"
-               android:layout_height="@*android:dimen/starting_surface_icon_size"
-               android:layout_width="@*android:dimen/starting_surface_icon_size"
+               android:layout_height="@dimen/split_icon_size"
+               android:layout_width="@dimen/split_icon_size"
                android:layout_gravity="center"
                android:scaleType="fitCenter"
                android:padding="0dp"

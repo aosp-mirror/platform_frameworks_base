@@ -49,7 +49,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     @Mock private lateinit var lockscreenShadeTransitionController: LockscreenShadeTransitionController
     @Mock private lateinit var stackLayout: NotificationStackScrollLayout
 
-    private val testableResources = mContext.getOrCreateTestableResources()
+    private val testableResources = mContext.orCreateTestableResources
 
     private lateinit var sizeCalculator: NotificationStackSizeCalculator
 
@@ -121,17 +121,16 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     }
 
     @Test
-    fun computeHeight_returnsAtMostSpaceAvailable_withGapBeforeShelf() {
+    fun computeHeight_gapBeforeShelf_returnsSpaceUsed() {
+        // Each row in separate section.
         setGapHeight(gapHeight)
-        val shelfHeight = shelfHeight
-        val availableSpace =
+        val spaceUsed =
             listOf(
-                    rowHeight + dividerHeight,
-                    gapHeight + rowHeight + dividerHeight,
-                    gapHeight + dividerHeight + shelfHeight)
+                    dividerHeight + rowHeight,
+                    dividerHeight + gapHeight + rowHeight,
+                    dividerHeight + gapHeight + shelfHeight)
                 .sum()
-
-        // All rows in separate sections (default setup).
+        val availableSpace = spaceUsed + 1;
         val rows =
             listOf(createMockRow(rowHeight), createMockRow(rowHeight), createMockRow(rowHeight))
 
@@ -139,23 +138,29 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
         assertThat(maxNotifications).isEqualTo(2)
 
         val height = sizeCalculator.computeHeight(stackLayout, maxNotifications, this.shelfHeight)
-        assertThat(height).isAtMost(availableSpace)
+        assertThat(height).isEqualTo(spaceUsed)
     }
 
     @Test
-    fun computeHeight_noGapBeforeShelf_returnsAtMostSpaceAvailable() {
+    fun computeHeight_noGapBeforeShelf_returnsSpaceUsed() {
         // Both rows are in the same section.
         setGapHeight(0f)
+
         val rowHeight = rowHeight
         val shelfHeight = shelfHeight
-        val availableSpace = listOf(rowHeight + dividerHeight, dividerHeight + shelfHeight).sum()
+        val spaceUsed =
+            listOf(
+                dividerHeight + rowHeight,
+                dividerHeight + shelfHeight)
+                .sum()
+        val availableSpace = spaceUsed + 1
         val rows = listOf(createMockRow(rowHeight), createMockRow(rowHeight))
 
         val maxNotifications = computeMaxKeyguardNotifications(rows, availableSpace, shelfHeight)
         assertThat(maxNotifications).isEqualTo(1)
 
         val height = sizeCalculator.computeHeight(stackLayout, maxNotifications, this.shelfHeight)
-        assertThat(height).isAtMost(availableSpace)
+        assertThat(height).isEqualTo(spaceUsed)
     }
 
     @Test
@@ -190,7 +195,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
         val space = sizeCalculator.spaceNeeded(expandableView, visibleIndex = 0,
                 previousView = null, stack = stackLayout, onLockscreen = true)
-        assertThat(space).isEqualTo(5)
+        assertThat(space).isEqualTo(5 + dividerHeight)
     }
 
     @Test
@@ -204,7 +209,7 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
         val space = sizeCalculator.spaceNeeded(expandableView, visibleIndex = 0,
                 previousView = null, stack = stackLayout, onLockscreen = false)
-        assertThat(space).isEqualTo(10)
+        assertThat(space).isEqualTo(10 + dividerHeight)
     }
 
     private fun computeMaxKeyguardNotifications(

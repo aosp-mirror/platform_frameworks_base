@@ -589,7 +589,7 @@ class ResolverRankerServiceResolverComparator extends AbstractResolverComparator
                 MetricsLogger metricsLogger = new MetricsLogger();
                 LogMaker log = new LogMaker(MetricsEvent.ACTION_TARGET_SELECTED);
                 log.setComponentName(mRankerServiceName);
-                log.addTaggedData(MetricsEvent.FIELD_IS_CATEGORY_USED, mAnnotationsUsed);
+                log.addTaggedData(MetricsEvent.FIELD_IS_CATEGORY_USED, mAnnotationsUsed ? 1 : 0);
                 log.addTaggedData(MetricsEvent.FIELD_RANKED_POSITION, selectedPos);
                 metricsLogger.write(log);
             }

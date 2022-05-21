@@ -15,6 +15,7 @@ package com.android.systemui.shared.plugins;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,65 +28,62 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class PluginManagerTest extends SysuiTestCase {
-
     private static final String PRIVILEGED_PACKAGE = "com.android.systemui";
 
-    private PluginActionManager.Factory mMockFactory;
-    private PluginActionManager<TestPlugin> mMockPluginInstance;
-    private PluginManagerImpl mPluginManager;
-    private PluginListener<TestPlugin> mMockListener;
-    private PackageManager mMockPackageManager;
-    private PluginEnabler mPluginEnabler;
-    private PluginPrefs mPluginPrefs;
+    @Mock PluginActionManager.Factory mMockFactory;
+    @Mock PluginActionManager<TestPlugin> mMockPluginInstance;
+    @Mock PluginListener<TestPlugin> mMockListener;
+    @Mock PackageManager mMockPackageManager;
+    @Mock PluginEnabler mMockPluginEnabler;
+    @Mock PluginPrefs mMockPluginPrefs;
+    @Mock UncaughtExceptionPreHandlerManager mMockExPreHandlerManager;
 
-    private UncaughtExceptionHandler mRealExceptionHandler;
-    private UncaughtExceptionHandler mMockExceptionHandler;
+    @Captor ArgumentCaptor<UncaughtExceptionHandler> mExPreHandlerCaptor;
+
+    private PluginManagerImpl mPluginManager;
     private UncaughtExceptionHandler mPluginExceptionHandler;
 
     @Before
     public void setup() throws Exception {
-        mRealExceptionHandler = Thread.getUncaughtExceptionPreHandler();
-        mMockExceptionHandler = mock(UncaughtExceptionHandler.class);
-        mMockFactory = mock(PluginActionManager.Factory.class);
-        mMockPluginInstance = mock(PluginActionManager.class);
-        mPluginEnabler = mock(PluginEnabler.class);
-        mPluginPrefs = mock(PluginPrefs.class);
+        MockitoAnnotations.initMocks(this);
         when(mMockFactory.create(any(), any(), eq(TestPlugin.class), anyBoolean(), anyBoolean()))
                 .thenReturn(mMockPluginInstance);
 
-        mMockPackageManager = mock(PackageManager.class);
         mPluginManager = new PluginManagerImpl(
                 getContext(), mMockFactory, true,
-                Optional.of(mMockExceptionHandler), mPluginEnabler,
-                mPluginPrefs, new ArrayList<>());
-
-        resetExceptionHandler();
-        mMockListener = mock(PluginListener.class);
+                mMockExPreHandlerManager, mMockPluginEnabler,
+                mMockPluginPrefs, new ArrayList<>());
+        captureExceptionHandler();
     }
 
     @Test
@@ -108,9 +106,9 @@ public class PluginManagerTest extends SysuiTestCase {
     public void testNonDebuggable_nonPrivileged() {
         mPluginManager = new PluginManagerImpl(
                 getContext(), mMockFactory, false,
-                Optional.of(mMockExceptionHandler), mPluginEnabler,
-                mPluginPrefs, new ArrayList<>());
-        resetExceptionHandler();
+                mMockExPreHandlerManager, mMockPluginEnabler,
+                mMockPluginPrefs, new ArrayList<>());
+        captureExceptionHandler();
 
         String sourceDir = "myPlugin";
         ApplicationInfo applicationInfo = new ApplicationInfo();
@@ -127,9 +125,9 @@ public class PluginManagerTest extends SysuiTestCase {
     public void testNonDebuggable_privilegedPackage() {
         mPluginManager = new PluginManagerImpl(
                 getContext(), mMockFactory, false,
-                Optional.of(mMockExceptionHandler), mPluginEnabler,
-                mPluginPrefs, Collections.singletonList(PRIVILEGED_PACKAGE));
-        resetExceptionHandler();
+                mMockExPreHandlerManager, mMockPluginEnabler,
+                mMockPluginPrefs, Collections.singletonList(PRIVILEGED_PACKAGE));
+        captureExceptionHandler();
 
         String sourceDir = "myPlugin";
         ApplicationInfo privilegedApplicationInfo = new ApplicationInfo();
@@ -154,9 +152,6 @@ public class PluginManagerTest extends SysuiTestCase {
         verify(mMockPluginInstance, Mockito.atLeastOnce()).checkAndDisable(
                 ArgumentCaptor.forClass(String.class).capture());
         verify(mMockPluginInstance, Mockito.never()).disableAll();
-        verify(mMockExceptionHandler).uncaughtException(
-                ArgumentCaptor.forClass(Thread.class).capture(),
-                ArgumentCaptor.forClass(Throwable.class).capture());
     }
 
     @Test
@@ -169,9 +164,6 @@ public class PluginManagerTest extends SysuiTestCase {
         verify(mMockPluginInstance, Mockito.atLeastOnce()).checkAndDisable(
                 ArgumentCaptor.forClass(String.class).capture());
         verify(mMockPluginInstance).disableAll();
-        verify(mMockExceptionHandler).uncaughtException(
-                ArgumentCaptor.forClass(Thread.class).capture(),
-                ArgumentCaptor.forClass(Throwable.class).capture());
     }
 
     @Test
@@ -186,13 +178,15 @@ public class PluginManagerTest extends SysuiTestCase {
         intent.setData(Uri.parse("package://" + testComponent.flattenToString()));
         mPluginManager.onReceive(mContext, intent);
         verify(nm).cancel(eq(testComponent.getClassName()), eq(SystemMessage.NOTE_PLUGIN));
-        verify(mPluginEnabler).setDisabled(testComponent, PluginEnabler.DISABLED_INVALID_VERSION);
+        verify(mMockPluginEnabler).setDisabled(testComponent,
+                PluginEnabler.DISABLED_INVALID_VERSION);
     }
 
-    private void resetExceptionHandler() {
-        mPluginExceptionHandler = Thread.getUncaughtExceptionPreHandler();
-        // Set back the real exception handler so the test can crash if it wants to.
-        Thread.setUncaughtExceptionPreHandler(mRealExceptionHandler);
+    private void captureExceptionHandler() {
+        verify(mMockExPreHandlerManager, atLeastOnce()).registerHandler(
+                mExPreHandlerCaptor.capture());
+        List<UncaughtExceptionHandler> allValues = mExPreHandlerCaptor.getAllValues();
+        mPluginExceptionHandler = allValues.get(allValues.size() - 1);
     }
 
     @ProvidesInterface(action = TestPlugin.ACTION, version = TestPlugin.VERSION)

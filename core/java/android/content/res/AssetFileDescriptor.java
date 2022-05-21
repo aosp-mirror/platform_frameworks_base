@@ -21,8 +21,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.system.ErrnoException;
-import android.system.Os;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
@@ -54,11 +52,11 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
     /**
      * Create a new AssetFileDescriptor from the given values.
      *
-     * @param fd          The underlying file descriptor.
+     * @param fd The underlying file descriptor.
      * @param startOffset The location within the file that the asset starts.
-     *                    This must be 0 if length is UNKNOWN_LENGTH.
-     * @param length      The number of bytes of the asset, or
-     *                    {@link #UNKNOWN_LENGTH} if it extends to the end of the file.
+     *            This must be 0 if length is UNKNOWN_LENGTH.
+     * @param length The number of bytes of the asset, or
+     *            {@link #UNKNOWN_LENGTH} if it extends to the end of the file.
      */
     public AssetFileDescriptor(ParcelFileDescriptor fd, long startOffset,
             long length) {
@@ -68,13 +66,13 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
     /**
      * Create a new AssetFileDescriptor from the given values.
      *
-     * @param fd          The underlying file descriptor.
+     * @param fd The underlying file descriptor.
      * @param startOffset The location within the file that the asset starts.
-     *                    This must be 0 if length is UNKNOWN_LENGTH.
-     * @param length      The number of bytes of the asset, or
-     *                    {@link #UNKNOWN_LENGTH} if it extends to the end of the file.
-     * @param extras      additional details that can be used to interpret the
-     *                    underlying file descriptor. May be null.
+     *            This must be 0 if length is UNKNOWN_LENGTH.
+     * @param length The number of bytes of the asset, or
+     *            {@link #UNKNOWN_LENGTH} if it extends to the end of the file.
+     * @param extras additional details that can be used to interpret the
+     *            underlying file descriptor. May be null.
      */
     public AssetFileDescriptor(ParcelFileDescriptor fd, long startOffset,
             long length, Bundle extras) {
@@ -205,24 +203,19 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
      */
     public static class AutoCloseInputStream
             extends ParcelFileDescriptor.AutoCloseInputStream {
-        private final long mSizeFromStartOffset;
-        private final long mStartOffset;
-        private long mPosFromStartOffset;
+        private long mRemaining;
 
         public AutoCloseInputStream(AssetFileDescriptor fd) throws IOException {
             super(fd.getParcelFileDescriptor());
-            // this skip is necessary if getChannel() is called
             super.skip(fd.getStartOffset());
-            mSizeFromStartOffset = fd.getLength();
-            mStartOffset = fd.getStartOffset();
+            mRemaining = (int) fd.getLength();
         }
 
         @Override
         public int available() throws IOException {
-            long available = mSizeFromStartOffset - mPosFromStartOffset;
-            return available >= 0
-                    ? (available < 0x7fffffff ? (int) available : 0x7fffffff)
-                    : 0;
+            return mRemaining >= 0
+                    ? (mRemaining < 0x7fffffff ? (int) mRemaining : 0x7fffffff)
+                    : super.available();
         }
 
         @Override
@@ -234,24 +227,15 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
 
         @Override
         public int read(byte[] buffer, int offset, int count) throws IOException {
-            int available = available();
-
-            if (available <= 0) {
-                return -1;
-            } else {
-                if (count > available) count = available;
-                try {
-                    int res = Os.pread(getFD(), buffer, offset, count,
-                            mStartOffset + mPosFromStartOffset);
-                    // pread returns 0 at end of file, while java's InputStream interface
-                    // requires -1
-                    if (res == 0) res = -1;
-                    if (res >= 0) mPosFromStartOffset += res;
-                    return res;
-                } catch (ErrnoException e) {
-                    throw new IOException(e);
-                }
+            if (mRemaining >= 0) {
+                if (mRemaining == 0) return -1;
+                if (count > mRemaining) count = (int) mRemaining;
+                int res = super.read(buffer, offset, count);
+                if (res >= 0) mRemaining -= res;
+                return res;
             }
+
+            return super.read(buffer, offset, count);
         }
 
         @Override
@@ -261,31 +245,41 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
 
         @Override
         public long skip(long count) throws IOException {
-            int available = available();
-            if (available <= 0) {
-                return -1;
-            } else {
-                if (count > available) count = available;
-                mPosFromStartOffset += count;
-                return count;
+            if (mRemaining >= 0) {
+                if (mRemaining == 0) return -1;
+                if (count > mRemaining) count = mRemaining;
+                long res = super.skip(count);
+                if (res >= 0) mRemaining -= res;
+                return res;
             }
+
+            return super.skip(count);
         }
 
         @Override
         public void mark(int readlimit) {
-            // Not supported.
-            return;
+            if (mRemaining >= 0) {
+                // Not supported.
+                return;
+            }
+            super.mark(readlimit);
         }
 
         @Override
         public boolean markSupported() {
-            return false;
+            if (mRemaining >= 0) {
+                return false;
+            }
+            return super.markSupported();
         }
 
         @Override
         public synchronized void reset() throws IOException {
-            // Not supported.
-            return;
+            if (mRemaining >= 0) {
+                // Not supported.
+                return;
+            }
+            super.reset();
         }
     }
 
@@ -381,7 +375,6 @@ public class AssetFileDescriptor implements Parcelable, Closeable {
         public AssetFileDescriptor createFromParcel(Parcel in) {
             return new AssetFileDescriptor(in);
         }
-
         public AssetFileDescriptor[] newArray(int size) {
             return new AssetFileDescriptor[size];
         }

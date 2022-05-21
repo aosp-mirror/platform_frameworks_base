@@ -16,48 +16,48 @@
 
 package com.android.server.tare;
 
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_START_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_START_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_START_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_HARD_CONSUMPTION_LIMIT;
-import static android.app.tare.EconomyManager.DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT;
-import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE;
-import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED;
-import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX;
-import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_HIGH_START_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_LOW_START_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MAX_START_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_MIN_START_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_HARD_CONSUMPTION_LIMIT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX_CAKES;
+import static android.app.tare.EconomyManager.DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING_CAKES;
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE;
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_DEFAULT_RUNNING_CTP;
 import static android.app.tare.EconomyManager.KEY_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE;
@@ -106,12 +106,12 @@ import static com.android.server.tare.Modifier.COST_MODIFIER_CHARGING;
 import static com.android.server.tare.Modifier.COST_MODIFIER_DEVICE_IDLE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_POWER_SAVE_MODE;
 import static com.android.server.tare.Modifier.COST_MODIFIER_PROCESS_STATE;
-import static com.android.server.tare.TareUtils.arcToCake;
 import static com.android.server.tare.TareUtils.cakeToString;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
@@ -159,14 +159,15 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     JobSchedulerEconomicPolicy(InternalResourceService irs) {
         super(irs);
         mInternalResourceService = irs;
-        loadConstants("");
+        loadConstants("", null);
     }
 
     @Override
-    void setup() {
-        super.setup();
+    void setup(@NonNull DeviceConfig.Properties properties) {
+        super.setup(properties);
         ContentResolver resolver = mInternalResourceService.getContext().getContentResolver();
-        loadConstants(Settings.Global.getString(resolver, TARE_JOB_SCHEDULER_CONSTANTS));
+        loadConstants(Settings.Global.getString(resolver, TARE_JOB_SCHEDULER_CONSTANTS),
+                properties);
     }
 
     @Override
@@ -211,7 +212,8 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         return mRewards.get(rewardId);
     }
 
-    private void loadConstants(String policyValuesString) {
+    private void loadConstants(String policyValuesString,
+            @Nullable DeviceConfig.Properties properties) {
         mActions.clear();
         mRewards.clear();
 
@@ -221,118 +223,153 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
             Slog.e(TAG, "Global setting key incorrect: ", e);
         }
 
-        mMinSatiatedBalanceExempted = arcToCake(
-                mParser.getInt(KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED,
-                        DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED));
-        mMinSatiatedBalanceOther = arcToCake(
-                mParser.getInt(KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP,
-                        DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP));
-        mMaxSatiatedBalance = arcToCake(mParser.getInt(KEY_JS_MAX_SATIATED_BALANCE,
-                DEFAULT_JS_MAX_SATIATED_BALANCE));
-        mInitialSatiatedConsumptionLimit = arcToCake(mParser.getInt(
-                KEY_JS_INITIAL_CONSUMPTION_LIMIT, DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT));
+        mMinSatiatedBalanceExempted = getConstantAsCake(mParser, properties,
+                KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED,
+                DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES);
+        mMinSatiatedBalanceOther = getConstantAsCake(mParser, properties,
+                KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP,
+                DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP_CAKES);
+        mMaxSatiatedBalance = getConstantAsCake(mParser, properties,
+                KEY_JS_MAX_SATIATED_BALANCE,
+                DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES);
+        mInitialSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+                KEY_JS_INITIAL_CONSUMPTION_LIMIT,
+                DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES);
         mHardSatiatedConsumptionLimit = Math.max(mInitialSatiatedConsumptionLimit,
-                arcToCake(mParser.getInt(
-                        KEY_JS_HARD_CONSUMPTION_LIMIT, DEFAULT_JS_HARD_CONSUMPTION_LIMIT)));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_HARD_CONSUMPTION_LIMIT,
+                        DEFAULT_JS_HARD_CONSUMPTION_LIMIT_CAKES));
 
         mActions.put(ACTION_JOB_MAX_START, new Action(ACTION_JOB_MAX_START,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_MAX_START_CTP,
-                        DEFAULT_JS_ACTION_JOB_MAX_START_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_MAX_START_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_MAX_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_MAX_START_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_MAX_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_MAX_RUNNING, new Action(ACTION_JOB_MAX_RUNNING,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_MAX_RUNNING_CTP,
-                        DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_MAX_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_HIGH_START, new Action(ACTION_JOB_HIGH_START,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_HIGH_START_CTP,
-                        DEFAULT_JS_ACTION_JOB_HIGH_START_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_HIGH_START_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_HIGH_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_HIGH_START_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_HIGH_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_HIGH_RUNNING, new Action(ACTION_JOB_HIGH_RUNNING,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_HIGH_RUNNING_CTP,
-                        DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_HIGH_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_DEFAULT_START, new Action(ACTION_JOB_DEFAULT_START,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_DEFAULT_START_CTP,
-                        DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_DEFAULT_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_DEFAULT_RUNNING, new Action(ACTION_JOB_DEFAULT_RUNNING,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_DEFAULT_RUNNING_CTP,
-                        DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_DEFAULT_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_LOW_START, new Action(ACTION_JOB_LOW_START,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_LOW_START_CTP,
-                        DEFAULT_JS_ACTION_JOB_LOW_START_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_LOW_START_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_LOW_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_LOW_START_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_LOW_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_LOW_RUNNING, new Action(ACTION_JOB_LOW_RUNNING,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_LOW_RUNNING_CTP,
-                        DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_LOW_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_MIN_START, new Action(ACTION_JOB_MIN_START,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_MIN_START_CTP,
-                        DEFAULT_JS_ACTION_JOB_MIN_START_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_MIN_START_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_MIN_START_CTP,
+                        DEFAULT_JS_ACTION_JOB_MIN_START_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_MIN_START_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_MIN_RUNNING, new Action(ACTION_JOB_MIN_RUNNING,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_MIN_RUNNING_CTP,
-                        DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_MIN_RUNNING_CTP,
+                        DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_TIMEOUT, new Action(ACTION_JOB_TIMEOUT,
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP,
-                        DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP)),
-                arcToCake(mParser.getInt(KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE,
-                        DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP,
+                        DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE,
+                        DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE_CAKES)));
 
         mRewards.put(REWARD_TOP_ACTIVITY, new Reward(REWARD_TOP_ACTIVITY,
-                arcToCake(mParser.getInt(KEY_JS_REWARD_TOP_ACTIVITY_INSTANT,
-                        DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT)),
-                (long) (arcToCake(1) * mParser.getFloat(KEY_JS_REWARD_TOP_ACTIVITY_ONGOING,
-                        DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING)),
-                arcToCake(mParser.getInt(KEY_JS_REWARD_TOP_ACTIVITY_MAX,
-                        DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_TOP_ACTIVITY_INSTANT,
+                        DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_TOP_ACTIVITY_ONGOING,
+                        DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_TOP_ACTIVITY_MAX,
+                        DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX_CAKES)));
         mRewards.put(REWARD_NOTIFICATION_SEEN, new Reward(REWARD_NOTIFICATION_SEEN,
-                arcToCake(mParser.getInt(KEY_JS_REWARD_NOTIFICATION_SEEN_INSTANT,
-                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT)),
-                arcToCake(mParser.getInt(KEY_JS_REWARD_NOTIFICATION_SEEN_ONGOING,
-                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING)),
-                arcToCake(mParser.getInt(KEY_JS_REWARD_NOTIFICATION_SEEN_MAX,
-                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_NOTIFICATION_SEEN_INSTANT,
+                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_NOTIFICATION_SEEN_ONGOING,
+                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_NOTIFICATION_SEEN_MAX,
+                        DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX_CAKES)));
         mRewards.put(REWARD_NOTIFICATION_INTERACTION,
                 new Reward(REWARD_NOTIFICATION_INTERACTION,
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
                                 KEY_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT,
-                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING,
-                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_JS_REWARD_NOTIFICATION_INTERACTION_MAX,
-                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX))));
+                                DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_WIDGET_INTERACTION, new Reward(REWARD_WIDGET_INTERACTION,
-                arcToCake(mParser.getInt(KEY_JS_REWARD_WIDGET_INTERACTION_INSTANT,
-                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT)),
-                arcToCake(mParser.getInt(KEY_JS_REWARD_WIDGET_INTERACTION_ONGOING,
-                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING)),
-                arcToCake(mParser.getInt(KEY_JS_REWARD_WIDGET_INTERACTION_MAX,
-                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX))));
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_WIDGET_INTERACTION_INSTANT,
+                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_WIDGET_INTERACTION_ONGOING,
+                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING_CAKES),
+                getConstantAsCake(mParser, properties,
+                        KEY_JS_REWARD_WIDGET_INTERACTION_MAX,
+                        DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_OTHER_USER_INTERACTION,
                 new Reward(REWARD_OTHER_USER_INTERACTION,
-                        arcToCake(mParser.getInt(KEY_JS_REWARD_OTHER_USER_INTERACTION_INSTANT,
-                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT)),
-                        arcToCake(mParser.getInt(
+                        getConstantAsCake(mParser, properties,
+                                KEY_JS_REWARD_OTHER_USER_INTERACTION_INSTANT,
+                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_JS_REWARD_OTHER_USER_INTERACTION_ONGOING,
-                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING)),
-                        arcToCake(mParser.getInt(
+                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES),
+                        getConstantAsCake(mParser, properties,
                                 KEY_JS_REWARD_OTHER_USER_INTERACTION_MAX,
-                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX))));
+                                DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX_CAKES)));
     }
 
     @Override

@@ -121,6 +121,7 @@ public class InternalResourceService extends SystemService {
     private IDeviceIdleController mDeviceIdleController;
 
     private final Agent mAgent;
+    private final Analyst mAnalyst;
     private final ConfigObserver mConfigObserver;
     private final EconomyManagerStub mEconomyManagerStub;
     private final Scribe mScribe;
@@ -254,9 +255,10 @@ public class InternalResourceService extends SystemService {
         mPackageManager = context.getPackageManager();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mEconomyManagerStub = new EconomyManagerStub();
-        mScribe = new Scribe(this);
+        mAnalyst = new Analyst();
+        mScribe = new Scribe(this, mAnalyst);
         mCompleteEconomicPolicy = new CompleteEconomicPolicy(this);
-        mAgent = new Agent(this, mScribe);
+        mAgent = new Agent(this, mScribe, mAnalyst);
 
         mConfigObserver = new ConfigObserver(mHandler, context);
 
@@ -375,11 +377,12 @@ public class InternalResourceService extends SystemService {
     void onBatteryLevelChanged() {
         synchronized (mLock) {
             final int newBatteryLevel = getCurrentBatteryLevel();
+            mAnalyst.noteBatteryLevelChange(newBatteryLevel);
             final boolean increased = newBatteryLevel > mCurrentBatteryLevel;
             if (increased) {
                 mAgent.distributeBasicIncomeLocked(newBatteryLevel);
             } else if (newBatteryLevel == mCurrentBatteryLevel) {
-                Slog.wtf(TAG, "Battery level stayed the same");
+                // The broadcast is also sent when the plug type changes...
                 return;
             }
             mCurrentBatteryLevel = newBatteryLevel;
@@ -731,7 +734,7 @@ public class InternalResourceService extends SystemService {
             registerListeners();
             mCurrentBatteryLevel = getCurrentBatteryLevel();
             mHandler.post(this::setupHeavyWork);
-            mCompleteEconomicPolicy.setup();
+            mCompleteEconomicPolicy.setup(mConfigObserver.getAllDeviceConfigProperties());
         }
     }
 
@@ -741,6 +744,7 @@ public class InternalResourceService extends SystemService {
         }
         synchronized (mLock) {
             mAgent.tearDownLocked();
+            mAnalyst.tearDown();
             mCompleteEconomicPolicy.tearDown();
             mExemptedApps.clear();
             mExemptListLoaded = false;
@@ -1014,8 +1018,15 @@ public class InternalResourceService extends SystemService {
                     Settings.Global.getUriFor(TARE_ALARM_MANAGER_CONSTANTS), false, this);
             mContentResolver.registerContentObserver(
                     Settings.Global.getUriFor(TARE_JOB_SCHEDULER_CONSTANTS), false, this);
-            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_TARE));
+            onPropertiesChanged(getAllDeviceConfigProperties());
             updateEnabledStatus();
+        }
+
+        @NonNull
+        DeviceConfig.Properties getAllDeviceConfigProperties() {
+            // Don't want to cache the Properties object locally in case it ends up being large,
+            // especially since it'll only be used once/infrequently (during setup or on a change).
+            return DeviceConfig.getProperties(DeviceConfig.NAMESPACE_TARE);
         }
 
         @Override
@@ -1030,6 +1041,7 @@ public class InternalResourceService extends SystemService {
 
         @Override
         public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            boolean economicPolicyUpdated = false;
             synchronized (mLock) {
                 for (String name : properties.getKeyset()) {
                     if (name == null) {
@@ -1039,6 +1051,12 @@ public class InternalResourceService extends SystemService {
                         case KEY_DC_ENABLE_TARE:
                             updateEnabledStatus();
                             break;
+                        default:
+                            if (!economicPolicyUpdated
+                                    && (name.startsWith("am") || name.startsWith("js"))) {
+                                updateEconomicPolicy();
+                                economicPolicyUpdated = true;
+                            }
                     }
                 }
             }
@@ -1072,7 +1090,7 @@ public class InternalResourceService extends SystemService {
                 mCompleteEconomicPolicy.tearDown();
                 mCompleteEconomicPolicy = new CompleteEconomicPolicy(InternalResourceService.this);
                 if (mIsEnabled && mBootPhase >= PHASE_SYSTEM_SERVICES_READY) {
-                    mCompleteEconomicPolicy.setup();
+                    mCompleteEconomicPolicy.setup(getAllDeviceConfigProperties());
                     if (initialLimit != mCompleteEconomicPolicy.getInitialSatiatedConsumptionLimit()
                             || hardLimit
                             != mCompleteEconomicPolicy.getHardSatiatedConsumptionLimit()) {
@@ -1131,6 +1149,9 @@ public class InternalResourceService extends SystemService {
 
             pw.println();
             mAgent.dumpLocked(pw);
+
+            pw.println();
+            mAnalyst.dump(pw);
         }
     }
 }

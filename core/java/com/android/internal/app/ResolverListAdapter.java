@@ -38,6 +38,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
@@ -188,6 +189,7 @@ public class ResolverListAdapter extends BaseAdapter {
      * Otherwise the callback is only queued once, with {@code rebuildCompleted} true.
      */
     protected boolean rebuildList(boolean doPostProcessing) {
+        Trace.beginSection("ResolverListAdapter#rebuildList");
         mDisplayList.clear();
         mIsTabLoaded = false;
         mLastChosenPosition = -1;
@@ -233,10 +235,18 @@ public class ResolverListAdapter extends BaseAdapter {
         // copied the original unfiltered items to a separate List instance and can now filter
         // the remainder in-place without any further bookkeeping.
         boolean needsCopyOfUnfiltered = (mUnfilteredResolveList == currentResolveList);
-        mUnfilteredResolveList = performSecondaryResolveListFiltering(
+        List<ResolvedComponentInfo> originalList = performSecondaryResolveListFiltering(
                 currentResolveList, needsCopyOfUnfiltered);
+        if (originalList != null) {
+            // Only need the originalList value if there was a modification (otherwise it's null
+            // and shouldn't overwrite mUnfilteredResolveList).
+            mUnfilteredResolveList = originalList;
+        }
 
-        return finishRebuildingListWithFilteredResults(currentResolveList, doPostProcessing);
+        boolean result =
+                finishRebuildingListWithFilteredResults(currentResolveList, doPostProcessing);
+        Trace.endSection();
+        return result;
     }
 
     /**
@@ -293,7 +303,7 @@ public class ResolverListAdapter extends BaseAdapter {
      * appearing in the rebuilt-list results, while still considering those items for the "other
      * profile" special-treatment described in {@code rebuildList()}.
      *
-     * @return the same (possibly null) List reference as {@code currentResolveList}, if the list is
+     * @return the same (possibly null) List reference as {@code currentResolveList} if the list is
      * unmodified as a result of filtering; or, if some item(s) were removed, then either a copy of
      * the original {@code currentResolveList} (if {@code returnCopyOfOriginalListIfModified} is
      * true), or null (otherwise).
@@ -396,8 +406,9 @@ public class ResolverListAdapter extends BaseAdapter {
 
     protected void processSortedList(List<ResolvedComponentInfo> sortedComponents,
             boolean doPostProcessing) {
-        int n;
-        if (sortedComponents != null && (n = sortedComponents.size()) != 0) {
+        final int n = sortedComponents != null ? sortedComponents.size() : 0;
+        Trace.beginSection("ResolverListAdapter#processSortedList:" + n);
+        if (n != 0) {
             // First put the initial items at the top.
             if (mInitialIntents != null) {
                 for (int i = 0; i < mInitialIntents.length; i++) {
@@ -445,6 +456,7 @@ public class ResolverListAdapter extends BaseAdapter {
         mResolverListCommunicator.sendVoiceChoicesIfNeeded();
         postListReadyRunnable(doPostProcessing, /* rebuildCompleted */ true);
         mIsTabLoaded = true;
+        Trace.endSection();
     }
 
     /**

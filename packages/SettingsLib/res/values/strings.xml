@@ -1589,13 +1589,6 @@
     <!-- Description for a setting which controls whether an app can turn the screen on [CHAR LIMIT=NONE] -->
     <string name="allow_turn_screen_on_description">Allow an app to turn the screen on. If granted, the app may turn on the screen at any time without your explicit intent.</string>
 
-    <!-- [CHAR LIMIT=NONE] Le audio QR code scanner title -->
-    <string name="bt_le_audio_scan_qr_code">Scan QR code</string>
-    <!-- [CHAR LIMIT=NONE] Le audio QR code scanner sub-title -->
-    <string name="bt_le_audio_scan_qr_code_scanner">To start listening, center the QR code below</string>
-    <!-- [CHAR LIMIT=NONE] Hint for QR code process failure -->
-    <string name="bt_le_audio_qr_code_is_not_valid_format">QR code isn\u0027t a valid format</string>
-
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, title -->
     <string name="bt_le_audio_broadcast_dialog_title">Stop broadcasting <xliff:g id="app_name" example="App Name 1">%1$s</xliff:g>?</string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, sub-title -->
@@ -1604,4 +1597,11 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app">Broadcast <xliff:g id="switchApp" example="App Name 2">%1$s</xliff:g></string>
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, different output. -->
     <string name="bt_le_audio_broadcast_dialog_different_output">Change output</string>
+
+    <!-- Developer setting: enable animations when a back gesture is executed [CHAR LIMIT=50] -->
+    <string name="back_navigation_animation">Predictive back animations</string>
+    <!-- Developer setting: enable animations when a back gesture is executed [CHAR LIMIT=150] -->
+    <string name="back_navigation_animation_summary">Enable system animations for predictive back.</string>
+    <!-- Developer setting: enable animations when a back gesture is executed, full explanation[CHAR LIMIT=NONE] -->
+    <string name="back_navigation_animation_dialog">This setting enables system animations for predictive gesture animation. It requires setting per-app "enableOnBackInvokedCallback" to true in the manifest file.</string>
 </resources>
