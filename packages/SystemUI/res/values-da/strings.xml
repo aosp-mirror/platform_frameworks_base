@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Prøv at tage et screenshot igen"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Dit screenshot kunne ikke gemmes."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller din organisation tillader ikke, at du tager screenshots"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Din it-administrator har blokeret screenshot-funktionen"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Rediger"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Rediger screenshot"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Del screenshottet"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Stryg opad for at åbne"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Tryk på oplåsningsikonet for at åbne"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Låst op vha. ansigt. Tryk på oplåsningsikonet for at åbne."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Stryg opad for at prøve igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås op for at bruge NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Denne enhed tilhører din organisation"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Bliv klar til at foretage hurtigere og mere sikre køb med din telefon"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Vis alle"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Tilføj et kort"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Tryk for at åbne"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Opdaterer"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås op for at bruge"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Dine kort kunne ikke hentes. Prøv igen senere."</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktivér, når det ser ud til, at batteriet løber tør"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nej tak"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Gem SysUI-heap"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"I brug"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Apps anvender enhedens <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" og "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Flyt enheden tættere på for at afspille på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Ryk tættere på <xliff:g id="DEVICENAME">%1$s</xliff:g> for at afspille her"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Afspilles på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Afspilles på denne telefon"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Noget gik galt. Prøv igen."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Tjek appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ikke fundet"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Åbn appen for at caste denne session."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ukendt app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop med at caste"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Sådan fungerer udsendelser"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Udsendelse"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personer i nærheden, som har kompatible Bluetooth-enheder, kan lytte til det medie, du udsender"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Gem"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Starter…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Der kan ikke udsendes en fællesbesked"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Der kan ikke gemmes. Prøv igen."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Der kan ikke gemmes."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildnummeret blev kopieret til udklipsholderen."</string>
     <string name="basic_status" msgid="2315371112182658176">"Åben samtale"</string>
@@ -903,7 +904,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Forbundet"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Der oprettes ikke automatisk mobildataforbindelse"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Ingen automatisk mobildataforbindelse"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Der er ingen forbindelse"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Der er ingen andre tilgængelige netværk"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Der er ingen tilgængelige netværk"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Rediger kopieret tekst"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Rediger kopieret billede"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Send til enhed i nærheden"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Tryk for at se"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Tilføj"</string>
     <string name="manage_users" msgid="1823875311934643849">"Administrer brugere"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Denne notifikation kan ikke trækkes til en opdelt skærm."</string>

@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"অ্যাক্টিভ অ্যাপ চেক করুন"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ফোনের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপনার <xliff:g id="DEVICE">%1$s</xliff:g> থেকে ট্যাবলেটের ক্যামেরা অ্যাক্সেস করা যাচ্ছে না"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"সিস্টেমের ভাষা"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"সিস্টেম ডিফল্ট"</string>
 </resources>

@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vaadake aktiivseid rakendusi"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse telefoni kaamerale juurde"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Teie seadmest <xliff:g id="DEVICE">%1$s</xliff:g> ei pääse tahvelarvuti kaamerale juurde"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Süsteemi keel"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Süsteemi vaikeseade"</string>
 </resources>

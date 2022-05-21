@@ -873,6 +873,7 @@ public final class ActivityThread extends ClientTransactionHandler
         String processName;
         @UnsupportedAppUsage
         ApplicationInfo appInfo;
+        String sdkSandboxClientAppVolumeUuid;
         String sdkSandboxClientAppPackage;
         @UnsupportedAppUsage
         List<ProviderInfo> providers;
@@ -1119,9 +1120,10 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public final void bindApplication(String processName, ApplicationInfo appInfo,
-                String sdkSandboxClientAppPackage, ProviderInfoList providerList,
-                ComponentName instrumentationName, ProfilerInfo profilerInfo,
-                Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
+                String sdkSandboxClientAppVolumeUuid, String sdkSandboxClientAppPackage,
+                ProviderInfoList providerList, ComponentName instrumentationName,
+                ProfilerInfo profilerInfo, Bundle instrumentationArgs,
+                IInstrumentationWatcher instrumentationWatcher,
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
@@ -1161,6 +1163,7 @@ public final class ActivityThread extends ClientTransactionHandler
             AppBindData data = new AppBindData();
             data.processName = processName;
             data.appInfo = appInfo;
+            data.sdkSandboxClientAppVolumeUuid = sdkSandboxClientAppVolumeUuid;
             data.sdkSandboxClientAppPackage = sdkSandboxClientAppPackage;
             data.providers = providerList.getList();
             data.instrumentationName = instrumentationName;
@@ -2561,6 +2564,11 @@ public final class ActivityThread extends ClientTransactionHandler
         return getPackageInfo(ai, compatInfo, null, false, true, false);
     }
 
+    private LoadedApk getPackageInfoNoCheck(ApplicationInfo ai, CompatibilityInfo compatInfo,
+            boolean isSdkSandbox) {
+        return getPackageInfo(ai, compatInfo, null, false, true, false, isSdkSandbox);
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
         synchronized (mResourcesManager) {
@@ -2577,11 +2585,18 @@ public final class ActivityThread extends ClientTransactionHandler
     private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
             ClassLoader baseLoader, boolean securityViolation, boolean includeCode,
             boolean registerPackage) {
+        return getPackageInfo(aInfo, compatInfo, baseLoader, securityViolation, includeCode,
+                registerPackage, /*isSdkSandbox=*/false);
+    }
+
+    private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
+            ClassLoader baseLoader, boolean securityViolation, boolean includeCode,
+            boolean registerPackage, boolean isSdkSandbox) {
         final boolean differentUser = (UserHandle.myUserId() != UserHandle.getUserId(aInfo.uid));
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
-            if (differentUser) {
-                // Caching not supported across users
+            if (differentUser || isSdkSandbox) {
+                // Caching not supported across users and for sdk sandboxes
                 ref = null;
             } else if (includeCode) {
                 ref = mPackages.get(aInfo.packageName);
@@ -2628,8 +2643,8 @@ public final class ActivityThread extends ClientTransactionHandler
                         getSystemContext().mPackageInfo.getClassLoader());
             }
 
-            if (differentUser) {
-                // Caching not supported across users
+            if (differentUser || isSdkSandbox) {
+                // Caching not supported across users and for sdk sandboxes
             } else if (includeCode) {
                 mPackages.put(aInfo.packageName,
                         new WeakReference<LoadedApk>(packageInfo));
@@ -6575,9 +6590,11 @@ public final class ActivityThread extends ClientTransactionHandler
             mConfigurationController.applyCompatConfiguration();
         }
 
-        data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
-        if (data.sdkSandboxClientAppPackage != null) {
-            data.info.setSdkSandboxStorage(data.sdkSandboxClientAppPackage);
+        final boolean isSdkSandbox = data.sdkSandboxClientAppPackage != null;
+        data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo, isSdkSandbox);
+        if (isSdkSandbox) {
+            data.info.setSdkSandboxStorage(data.sdkSandboxClientAppVolumeUuid,
+                    data.sdkSandboxClientAppPackage);
         }
 
         if (agent != null) {

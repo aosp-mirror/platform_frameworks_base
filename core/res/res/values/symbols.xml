@@ -479,7 +479,7 @@
   <java-symbol type="bool" name="config_useAssistantVolume" />
   <java-symbol type="integer" name="config_smartSelectionInitializedTimeoutMillis" />
   <java-symbol type="integer" name="config_smartSelectionInitializingTimeoutMillis" />
-  <java-symbol type="integer" name="config_preferKeepClearForFocusDelayMillis" />
+  <java-symbol type="bool" name="config_preferKeepClearForFocus" />
   <java-symbol type="bool" name="config_hibernationDeletesOatArtifactsEnabled"/>
   <java-symbol type="integer" name="config_defaultAnalogClockSecondsHandFps"/>
 
@@ -2254,7 +2254,6 @@
   <java-symbol type="bool" name="config_supportTelephonyTimeZoneFallback" />
   <java-symbol type="bool" name="config_autoResetAirplaneMode" />
   <java-symbol type="string" name="config_notificationAccessConfirmationActivity" />
-  <java-symbol type="bool" name="config_killableInputMethods" />
   <java-symbol type="bool" name="config_preventImeStartupUnlessTextEditor" />
   <java-symbol type="array" name="config_nonPreemptibleInputMethods" />
   <java-symbol type="bool" name="config_enhancedConfirmationModeEnabled" />

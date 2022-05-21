@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Спробуйте зробити знімок екрана ще раз"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Не вдалося зберегти знімок екрана"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Додаток або адміністратор вашої організації не дозволяють робити знімки екрана"</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Системний адміністратор заблокував можливість робити знімки екрана"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Редагувати"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Редагувати знімок екрана"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Поділитися знімком екрана"</string>
@@ -318,6 +317,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Проведіть пальцем угору, щоб відкрити"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Щоб відкрити, натисніть значок розблокування."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Розблоковано (фейсконтроль). Натисніть значок розблокування."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Проведіть пальцем угору, щоб повторити спробу"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Розблокуйте екран, щоб скористатись NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Цей пристрій належить вашій організації"</string>
@@ -466,7 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Гаманець"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Швидше й безпечніше сплачуйте за покупки за допомогою телефона"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показати все"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Додати картку"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Натисніть, щоб відкрити"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Оновлення"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Розблокувати, щоб використовувати"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не вдалось отримати ваші картки. Повторіть спробу пізніше."</string>
@@ -526,7 +529,7 @@
     <string name="feedback_prompt" msgid="3656728972307896379">"Надішліть розробнику свій відгук. Усе правильно?"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Елементи керування сповіщеннями для додатка <xliff:g id="APP_NAME">%1$s</xliff:g> відкрито"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Елементи керування сповіщеннями для додатка <xliff:g id="APP_NAME">%1$s</xliff:g> закрито"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"Більше налаштувань"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"Інші налаштування"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Налаштувати"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Показувати як спливаюче сповіщення"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Вимкнути спливаючі чати"</string>
@@ -730,8 +733,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Вмикати, коли заряд акумулятора закінчується"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Ні, дякую"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Використовується"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Додатки використовують <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" і "</string>
@@ -811,7 +813,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Гортайте, щоб переглянути інші"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Завантаження рекомендацій"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медіа"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Приховати цей елемент керування медіасеансом для <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Приховати цей елемент керування для <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Поточний медіасеанс не можна приховати."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Приховати"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Відновити"</string>
@@ -831,7 +833,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Щоб відтворити контент на пристрої <xliff:g id="DEVICENAME">%1$s</xliff:g>, наблизьтеся до нього"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Наблизьтеся до пристрою <xliff:g id="DEVICENAME">%1$s</xliff:g>, щоб відтворити медіафайли на ньому"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Відтворюється на пристрої <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Відтворюється на цьому телефоні"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Сталася помилка. Повторіть спробу."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, перейдіть у додаток"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знайдено"</string>
@@ -852,6 +853,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Щоб транслювати цей сеанс, відкрийте додаток."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Невідомий додаток"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Припинити трансляцію"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як працює трансляція"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляція"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Люди поблизу, які мають сумісні пристрої з Bluetooth, можуть слухати медіаконтент, який ви транслюєте."</string>
@@ -861,10 +864,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Зберегти"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Запуск…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Неможливо транслювати"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Не вдалося зберегти. Повторіть спробу."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Не вдалося зберегти."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер складання"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер складання скопійовано в буфер обміну."</string>
     <string name="basic_status" msgid="2315371112182658176">"Відкрита розмова"</string>
@@ -951,6 +952,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Редагувати скопійований текст"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Редагувати скопійоване зображення"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Надіслати на пристрій поблизу"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Натисніть, щоб переглянути"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Додати"</string>
     <string name="manage_users" msgid="1823875311934643849">"Керувати користувачами"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Це сповіщення не підтримує режим розділеного екрана."</string>

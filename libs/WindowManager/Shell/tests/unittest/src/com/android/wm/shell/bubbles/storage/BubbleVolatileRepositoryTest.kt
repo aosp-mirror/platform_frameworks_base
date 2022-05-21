@@ -269,6 +269,12 @@ class BubbleVolatileRepositoryTest : ShellTestCase() {
         assertThat(repository.getEntities(user11.identifier).toList())
                 .isEqualTo(listOf(bubble11, bubble12))
     }
+
+    @Test
+    fun testRemoveBubbleForUser_invalidInputDoesntCrash() {
+        repository.removeBubblesForUser(-1, 0)
+        repository.removeBubblesForUser(-1, -1)
+    }
 }
 
 private const val PKG_MESSENGER = "com.example.messenger"

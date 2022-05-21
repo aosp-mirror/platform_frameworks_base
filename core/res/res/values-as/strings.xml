@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"সক্ৰিয় এপ্‌সমূহ পৰীক্ষা কৰক"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা ফ’নটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"আপোনাৰ <xliff:g id="DEVICE">%1$s</xliff:g>ৰ পৰা টেবলেটটোৰ কেমেৰা এক্সেছ কৰিব নোৱাৰি"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"ছিষ্টেমৰ ভাষা"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"ছিষ্টেম ডিফ’ল্ট"</string>
 </resources>

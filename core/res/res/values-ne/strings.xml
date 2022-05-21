@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत फोनको क्यामेरा प्रयोग गर्न मिल्दैन"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"तपाईंको <xliff:g id="DEVICE">%1$s</xliff:g> मार्फत ट्याब्लेटको क्यामेरा प्रयोग गर्न मिल्दैन"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"सिस्टमको भाषा"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"सिस्टम डिफल्ट"</string>
 </resources>
