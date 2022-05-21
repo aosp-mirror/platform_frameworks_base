@@ -166,6 +166,9 @@ public final class DeviceStateManagerFoldingFeatureProducer
     }
 
     private void notifyFoldingFeatureChange(String displayFeaturesString) {
+        if (!isCurrentStateValid()) {
+            return;
+        }
         if (TextUtils.isEmpty(displayFeaturesString)) {
             notifyDataChanged(new ArrayList<>());
         } else {

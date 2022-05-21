@@ -583,9 +583,8 @@ final class VerificationParams extends HandlerParams {
     }
 
     private boolean packageExists(String packageName) {
-        synchronized (mPm.mLock) {
-            return mPm.mSettings.getPackageLPr(packageName) != null;
-        }
+        Computer snapshot = mPm.snapshotComputer();
+        return snapshot.getPackageStateInternal(packageName) != null;
     }
 
     private boolean isAdbVerificationEnabled(PackageInfoLite pkgInfoLite, int userId,

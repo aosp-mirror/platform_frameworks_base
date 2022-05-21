@@ -469,15 +469,13 @@ final class DexOptHelper {
                     options.getSplitName(),
                     options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
             for (SharedLibraryInfo info : deps) {
-                AndroidPackage depPackage = null;
-                PackageSetting depPackageSetting = null;
-                synchronized (mPm.mLock) {
-                    depPackage = mPm.mPackages.get(info.getPackageName());
-                    depPackageSetting = mPm.mSettings.getPackageLPr(info.getPackageName());
-                }
-                if (depPackage != null && depPackageSetting != null) {
+                Computer snapshot = mPm.snapshotComputer();
+                AndroidPackage depPackage = snapshot.getPackage(info.getPackageName());
+                PackageStateInternal depPackageStateInternal =
+                        snapshot.getPackageStateInternal(info.getPackageName());
+                if (depPackage != null && depPackageStateInternal != null) {
                     // TODO: Analyze and investigate if we (should) profile libraries.
-                    pdo.performDexOpt(depPackage, depPackageSetting, instructionSets,
+                    pdo.performDexOpt(depPackage, depPackageStateInternal, instructionSets,
                             mPm.getOrCreateCompilerPackageStats(depPackage),
                             mPm.getDexManager().getPackageUseInfoOrDefault(
                                     depPackage.getPackageName()), libraryOptions);

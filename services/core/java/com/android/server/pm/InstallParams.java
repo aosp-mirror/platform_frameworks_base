@@ -158,15 +158,13 @@ final class InstallParams extends HandlerParams {
             return InstallLocationUtils.getInstallationErrorCode(recommendedInstallLocation);
         }
         // Override with defaults if needed.
-        synchronized (mPm.mLock) {
-            // reader
-            AndroidPackage installedPkg = mPm.mPackages.get(packageName);
-            if (installedPkg != null) {
-                // Currently installed package which the new package is attempting to replace
-                recommendedInstallLocation = InstallLocationUtils.installLocationPolicy(
-                        installLocation, recommendedInstallLocation, mInstallFlags,
-                        installedPkg.isSystem(), installedPkg.isExternalStorage());
-            }
+        Computer snapshot = mPm.snapshotComputer();
+        AndroidPackage installedPkg = snapshot.getPackage(packageName);
+        if (installedPkg != null) {
+            // Currently installed package which the new package is attempting to replace
+            recommendedInstallLocation = InstallLocationUtils.installLocationPolicy(
+                    installLocation, recommendedInstallLocation, mInstallFlags,
+                    installedPkg.isSystem(), installedPkg.isExternalStorage());
         }
 
         final boolean onInt = (mInstallFlags & PackageManager.INSTALL_INTERNAL) != 0;

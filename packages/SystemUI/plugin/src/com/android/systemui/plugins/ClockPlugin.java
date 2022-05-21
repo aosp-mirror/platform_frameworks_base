@@ -23,7 +23,9 @@ import java.util.TimeZone;
 
 /**
  * Plugin used to replace main clock in keyguard.
+ * @deprecated Migrating to ClockProviderPlugin
  */
+@Deprecated
 @ProvidesInterface(action = ClockPlugin.ACTION, version = ClockPlugin.VERSION)
 public interface ClockPlugin extends Plugin {
 

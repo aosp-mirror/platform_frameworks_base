@@ -39,6 +39,8 @@ import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.dagger.PowerModule;
+import com.android.systemui.privacy.MediaProjectionPrivacyItemMonitor;
+import com.android.systemui.privacy.PrivacyItemMonitor;
 import com.android.systemui.qs.dagger.QSModule;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
@@ -78,6 +80,7 @@ import javax.inject.Named;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.IntoSet;
 
 /**
  * A dagger module for injecting default implementations of components of System UI that may be
@@ -214,4 +217,12 @@ public abstract class TvSystemUIModule {
             NotificationListener notificationListener) {
         return new TvNotificationHandler(context, notificationListener);
     }
+
+    /**
+     * Binds {@link MediaProjectionPrivacyItemMonitor} into the set of {@link PrivacyItemMonitor}.
+     */
+    @Binds
+    @IntoSet
+    abstract PrivacyItemMonitor bindMediaProjectionPrivacyItemMonitor(
+            MediaProjectionPrivacyItemMonitor mediaProjectionPrivacyItemMonitor);
 }
