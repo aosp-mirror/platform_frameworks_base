@@ -863,6 +863,30 @@ public class ApplicationsState {
             }
         }
 
+        /**
+         *  Activate session to enable a class that implements Callbacks to receive the callback.
+         */
+        public void activateSession() {
+            synchronized (mEntriesMap) {
+                if (!mResumed) {
+                    mResumed = true;
+                    mSessionsChanged = true;
+                }
+            }
+        }
+
+        /**
+         *  Deactivate session to disable a class that implements Callbacks to get the callback.
+         */
+        public void deactivateSession() {
+            synchronized (mEntriesMap) {
+                if (mResumed) {
+                    mResumed = false;
+                    mSessionsChanged = true;
+                }
+            }
+        }
+
         public ArrayList<AppEntry> getAllApps() {
             synchronized (mEntriesMap) {
                 return new ArrayList<>(mAppEntries);

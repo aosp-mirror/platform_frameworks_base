@@ -128,6 +128,7 @@ public final class Icon implements Parcelable {
     // TYPE_RESOURCE: Resources
     // TYPE_DATA: DataBytes
     private Object          mObj1;
+    private boolean mCachedAshmem = false;
 
     // TYPE_RESOURCE: package name
     // TYPE_URI: uri string
@@ -156,6 +157,8 @@ public final class Icon implements Parcelable {
     /**
      * @return The {@link android.graphics.Bitmap} held by this {@link #TYPE_BITMAP} or
      * {@link #TYPE_ADAPTIVE_BITMAP} Icon.
+     *
+     * Note that this will always return an immutable Bitmap.
      * @hide
      */
     @UnsupportedAppUsage
@@ -166,8 +169,20 @@ public final class Icon implements Parcelable {
         return (Bitmap) mObj1;
     }
 
+    /**
+     * Sets the Icon's contents to a particular Bitmap. Note that this may make a copy of the Bitmap
+     * if the supplied Bitmap is mutable. In that case, the value returned by getBitmap() may not
+     * equal the Bitmap passed to setBitmap().
+     *
+     * @hide
+     */
     private void setBitmap(Bitmap b) {
-        mObj1 = b;
+        if (b.isMutable()) {
+            mObj1 = b.copy(b.getConfig(), false);
+        } else {
+            mObj1 = b;
+        }
+        mCachedAshmem = false;
     }
 
     /**
@@ -488,6 +503,7 @@ public final class Icon implements Parcelable {
             getBitmap().getAllocationByteCount() >= MIN_ASHMEM_ICON_SIZE) {
             setBitmap(getBitmap().asShared());
         }
+        mCachedAshmem = true;
     }
 
     /**
@@ -913,7 +929,10 @@ public final class Icon implements Parcelable {
         switch (mType) {
             case TYPE_BITMAP:
             case TYPE_ADAPTIVE_BITMAP:
-                final Bitmap bits = getBitmap();
+                if (!mCachedAshmem) {
+                    mObj1 = ((Bitmap) mObj1).asShared();
+                    mCachedAshmem = true;
+                }
                 getBitmap().writeToParcel(dest, flags);
                 break;
             case TYPE_RESOURCE:

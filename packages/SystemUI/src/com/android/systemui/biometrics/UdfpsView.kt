@@ -63,8 +63,11 @@ class UdfpsView(
     /** View controller (can be different for enrollment, BiometricPrompt, Keyguard, etc.). */
     var animationViewController: UdfpsAnimationViewController<*>? = null
 
-    /** Parameters that affect the position and size of the overlay. Visible for testing. */
+    /** Parameters that affect the position and size of the overlay. */
     var overlayParams = UdfpsOverlayParams()
+
+    /** Whether the HAL is responsible for enabling and disabling of LHBM. */
+    var halControlsIllumination: Boolean = true
 
     /** Debug message. */
     var debugMessage: String? = null
@@ -154,11 +157,17 @@ class UdfpsView(
     }
 
     private fun doIlluminate(onIlluminatedRunnable: Runnable?) {
-        hbmProvider?.enableHbm() {
+        // TODO(b/231335067): enableHbm with halControlsIllumination=true shouldn't make sense.
+        // This only makes sense now because vendor code may rely on the side effects of enableHbm.
+        hbmProvider?.enableHbm(halControlsIllumination) {
             if (onIlluminatedRunnable != null) {
-                // No framework API can reliably tell when a frame reaches the panel. A timeout
-                // is the safest solution.
-                postDelayed(onIlluminatedRunnable, onIlluminatedDelayMs)
+                if (halControlsIllumination) {
+                    onIlluminatedRunnable.run()
+                } else {
+                    // No framework API can reliably tell when a frame reaches the panel. A timeout
+                    // is the safest solution.
+                    postDelayed(onIlluminatedRunnable, onIlluminatedDelayMs)
+                }
             } else {
                 Log.w(TAG, "doIlluminate | onIlluminatedRunnable is null")
             }

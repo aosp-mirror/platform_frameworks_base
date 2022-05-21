@@ -55,7 +55,8 @@ public class LockIconView extends FrameLayout implements Dumpable {
 
     @NonNull private final RectF mSensorRect;
     @NonNull private PointF mLockIconCenter = new PointF(0f, 0f);
-    private int mRadius;
+    private float mRadius;
+    private int mLockIconPadding;
 
     private ImageView mLockIcon;
     private ImageView mBgView;
@@ -125,9 +126,13 @@ public class LockIconView extends FrameLayout implements Dumpable {
      * Set the location of the lock icon.
      */
     @VisibleForTesting
-    public void setCenterLocation(@NonNull PointF center, int radius) {
+    public void setCenterLocation(@NonNull PointF center, float radius, int drawablePadding) {
         mLockIconCenter = center;
         mRadius = radius;
+        mLockIconPadding = drawablePadding;
+
+        mLockIcon.setPadding(mLockIconPadding, mLockIconPadding, mLockIconPadding,
+                mLockIconPadding);
 
         // mSensorProps coordinates assume portrait mode which is OK b/c the keyguard is always in
         // portrait.
@@ -221,6 +226,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
         pw.println("    Center in px (x, y)= ("
                 + mLockIconCenter.x + ", " + mLockIconCenter.y + ")");
         pw.println("    Radius in pixels: " + mRadius);
+        pw.println("    Drawable padding: " + mLockIconPadding);
         pw.println("    mIconType=" + typeToString(mIconType));
         pw.println("    mAod=" + mAod);
         pw.println("Lock Icon View actual measurements:");

@@ -1058,7 +1058,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * must select one unique size from this metadata to use (e.g., preview and recording streams
      * must have the same size). Otherwise, the high speed capture session creation will fail.</p>
      * <p>The min and max fps will be multiple times of 30fps.</p>
-     * <p>High speed video streaming extends significant performance pressue to camera hardware,
+     * <p>High speed video streaming extends significant performance pressure to camera hardware,
      * to achieve efficient high speed streaming, the camera device may have to aggregate
      * multiple frames together and send to camera device for processing where the request
      * controls are same for all the frames in this batch. Max batch size indicates
@@ -1143,7 +1143,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Range of boosts for {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} supported
      * by this camera device.</p>
      * <p>Devices support post RAW sensitivity boost  will advertise
-     * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} key for controling
+     * {@link CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST android.control.postRawSensitivityBoost} key for controlling
      * post RAW sensitivity boost.</p>
      * <p>This key will be <code>null</code> for devices that do not support any RAW format
      * outputs. For devices that do support RAW format outputs, this key will always
@@ -1323,7 +1323,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Maximum flashlight brightness level.</p>
      * <p>If this value is greater than 1, then the device supports controlling the
      * flashlight brightness level via
-     * {android.hardware.camera2.CameraManager#turnOnTorchWithStrengthLevel}.
+     * {@link android.hardware.camera2.CameraManager#turnOnTorchWithStrengthLevel }.
      * If this value is equal to 1, flashlight brightness control is not supported.
      * The value for this key will be null for devices with no flash unit.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
@@ -1335,7 +1335,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
     /**
      * <p>Default flashlight brightness level to be set via
-     * {android.hardware.camera2.CameraManager#turnOnTorchWithStrengthLevel}.</p>
+     * {@link android.hardware.camera2.CameraManager#turnOnTorchWithStrengthLevel }.</p>
      * <p>If flash unit is available this will be greater than or equal to 1 and less
      * or equal to <code>{@link CameraCharacteristics#FLASH_INFO_STRENGTH_MAXIMUM_LEVEL android.flash.info.strengthMaximumLevel}</code>.</p>
      * <p>Setting flashlight brightness above the default level
@@ -1376,7 +1376,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * camera device.</p>
      * <p>This list will include at least one non-zero resolution, plus <code>(0,0)</code> for indicating no
      * thumbnail should be generated.</p>
-     * <p>Below condiditions will be satisfied for this size list:</p>
+     * <p>Below conditions will be satisfied for this size list:</p>
      * <ul>
      * <li>The sizes will be sorted by increasing pixel area (width x height).
      * If several resolutions have the same area, they will be sorted by increasing width.</li>
@@ -1982,7 +1982,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the camera device. Using more streams simultaneously may require more hardware and
      * CPU resources that will consume more power. The image format for an output stream can
      * be any supported format provided by android.scaler.availableStreamConfigurations.
-     * The formats defined in android.scaler.availableStreamConfigurations can be catergorized
+     * The formats defined in android.scaler.availableStreamConfigurations can be categorized
      * into the 3 stream types as below:</p>
      * <ul>
      * <li>Processed (but stalling): any non-RAW format with a stallDurations &gt; 0.
@@ -2324,7 +2324,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * but clients should be aware and expect delays during their application.
      * An example usage scenario could look like this:</p>
      * <ul>
-     * <li>The camera client starts by quering the session parameter key list via
+     * <li>The camera client starts by querying the session parameter key list via
      *   {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.</li>
      * <li>Before triggering the capture session create sequence, a capture request
      *   must be built via
@@ -2379,7 +2379,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link android.hardware.camera2.CameraCharacteristics#getKeys } that require camera clients
      * to acquire the {@link android.Manifest.permission#CAMERA } permission before calling
      * {@link android.hardware.camera2.CameraManager#getCameraCharacteristics }. If the
-     * permission is not held by the camera client, then the values of the repsective properties
+     * permission is not held by the camera client, then the values of the respective properties
      * will not be present in {@link android.hardware.camera2.CameraCharacteristics }.</p>
      * <p>This key is available on all devices.</p>
      * @hide
@@ -2759,7 +2759,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </table>
      * <p>For applications targeting SDK version 31 or newer, if the mobile device declares to be
      * media performance class 12 or higher by setting
-     * {@link android.os.Build.VERSION_CDOES.MEDIA_PERFORMANCE_CLASS } to be 31 or larger,
+     * {@link android.os.Build.VERSION_CODES.MEDIA_PERFORMANCE_CLASS } to be 31 or larger,
      * the primary camera devices (first rear/front camera in the camera ID list) will not
      * support JPEG sizes smaller than 1080p. If the application configures a JPEG stream
      * smaller than 1080p, the camera device will round up the JPEG image size to at least
@@ -2833,7 +2833,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </table>
      * <p>For applications targeting SDK version 31 or newer, if the mobile device doesn't declare
      * to be media performance class 12 or better by setting
-     * {@link android.os.Build.VERSION_CDOES.MEDIA_PERFORMANCE_CLASS } to be 31 or larger,
+     * {@link android.os.Build.VERSION_CODES.MEDIA_PERFORMANCE_CLASS } to be 31 or larger,
      * or if the camera device isn't a primary rear/front camera, the minimum required output
      * stream configurations are the same as for applications targeting SDK version older than
      * 31.</p>
@@ -3485,14 +3485,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * to output different resolution images depending on the current active physical camera or
      * pixel mode. With multi-resolution input streams, the camera device can reprocess images
      * of different resolutions from different physical cameras or sensor pixel modes.</p>
-     * <p>When set to TRUE:
-     * * For a logical multi-camera, the camera framework derives
+     * <p>When set to TRUE:</p>
+     * <ul>
+     * <li>For a logical multi-camera, the camera framework derives
      * {@link CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP android.scaler.multiResolutionStreamConfigurationMap} by combining the
      * android.scaler.physicalCameraMultiResolutionStreamConfigurations from its physical
-     * cameras.
-     * * For an ultra-high resolution sensor camera, the camera framework directly copies
+     * cameras.</li>
+     * <li>For an ultra-high resolution sensor camera, the camera framework directly copies
      * the value of android.scaler.physicalCameraMultiResolutionStreamConfigurations to
-     * {@link CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP android.scaler.multiResolutionStreamConfigurationMap}.</p>
+     * {@link CameraCharacteristics#SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP android.scaler.multiResolutionStreamConfigurationMap}.</li>
+     * </ul>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
@@ -3513,7 +3515,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * capture, video record for encoding the camera output for the purpose of future playback,
      * and video call for live realtime video conferencing.</p>
      * <p>With this flag, the camera device can optimize the image processing pipeline
-     * parameters, such as tuning, sensor mode, and ISP settings, indepedent of
+     * parameters, such as tuning, sensor mode, and ISP settings, independent of
      * the properties of the immediate camera output surface. For example, if the output
      * surface is a SurfaceTexture, the stream use case flag can be used to indicate whether
      * the camera frames eventually go to display, video encoder,
@@ -3535,7 +3537,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE }
      * capability is documented in the camera device
      * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline}. The
-     * application is strongly recommended to use one of the guaranteed stream combintations.
+     * application is strongly recommended to use one of the guaranteed stream combinations.
      * If the application creates a session with a stream combination not in the guaranteed
      * list, or with mixed DEFAULT and non-DEFAULT use cases within the same session,
      * the camera device may ignore some stream use cases due to hardware constraints
@@ -5209,7 +5211,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * EXTERIOR_* value.</p>
      * <p>If a camera has INTERIOR_OTHER or EXTERIOR_OTHER, or more than one camera is at the
      * same location and facing the same direction, their static metadata will list the
-     * following entries, so that applications can determain their lenses' exact facing
+     * following entries, so that applications can determine their lenses' exact facing
      * directions:</p>
      * <ul>
      * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference}</li>

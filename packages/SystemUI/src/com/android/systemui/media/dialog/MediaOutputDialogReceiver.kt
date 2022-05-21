@@ -31,7 +31,8 @@ private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
  * BroadcastReceiver for handling media output intent
  */
 class MediaOutputDialogReceiver @Inject constructor(
-    private val mediaOutputDialogFactory: MediaOutputDialogFactory
+    private val mediaOutputDialogFactory: MediaOutputDialogFactory,
+    private val mediaOutputBroadcastDialogFactory: MediaOutputBroadcastDialogFactory
 ) : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (TextUtils.equals(MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_DIALOG,
@@ -42,6 +43,16 @@ class MediaOutputDialogReceiver @Inject constructor(
                 mediaOutputDialogFactory.create(packageName!!, false)
             } else if (DEBUG) {
                 Log.e(TAG, "Unable to launch media output dialog. Package name is empty.")
+            }
+        } else if (TextUtils.equals(
+                    MediaOutputConstants.ACTION_LAUNCH_MEDIA_OUTPUT_BROADCAST_DIALOG,
+                    intent.action)) {
+            val packageName: String? =
+                    intent.getStringExtra(MediaOutputConstants.EXTRA_PACKAGE_NAME)
+            if (!TextUtils.isEmpty(packageName)) {
+                mediaOutputBroadcastDialogFactory.create(packageName!!, false)
+            } else if (DEBUG) {
+                Log.e(TAG, "Unable to launch media output broadcast dialog. Package name is empty.")
             }
         }
     }

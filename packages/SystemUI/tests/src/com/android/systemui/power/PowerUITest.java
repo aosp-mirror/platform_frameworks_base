@@ -498,8 +498,8 @@ public class PowerUITest extends SysuiTestCase {
 
         // We should dismiss if the device is plugged in
         state.mPlugged = true;
-        state.mTimeRemainingMillis = Duration.ofHours(1).toMillis();
-        state.mLowThresholdMillis = Duration.ofHours(2).toMillis();
+        state.mBatteryLevel = 19;
+        state.mLowLevelThreshold = 20;
         boolean shouldDismiss = mPowerUI.shouldDismissHybridWarning(state.get());
         assertThat(shouldDismiss).isTrue();
 
@@ -509,7 +509,7 @@ public class PowerUITest extends SysuiTestCase {
         assertThat(shouldDismiss).isFalse();
 
         // If we go over the low warning threshold we should dismiss
-        state.mTimeRemainingMillis = Duration.ofHours(3).toMillis();
+        state.mBatteryLevel = 21;
         shouldDismiss = mPowerUI.shouldDismissHybridWarning(state.get());
         assertThat(shouldDismiss).isTrue();
     }

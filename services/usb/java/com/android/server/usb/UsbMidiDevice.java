@@ -71,40 +71,38 @@ public final class UsbMidiDevice implements Closeable {
 
     private final Object mLock = new Object();
     private boolean mIsOpen;
+    private boolean mServerAvailable;
 
     // pipe file descriptor for signalling input thread to exit
     // only accessed from JNI code
     private int mPipeFD = -1;
 
     private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
-
         @Override
         public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status) {
             MidiDeviceInfo deviceInfo = status.getDeviceInfo();
-            int inputPorts = deviceInfo.getInputPortCount();
-            int outputPorts = deviceInfo.getOutputPortCount();
-            boolean hasOpenPorts = false;
+            int numInputPorts = deviceInfo.getInputPortCount();
+            int numOutputPorts = deviceInfo.getOutputPortCount();
+            int numOpenPorts = 0;
 
-            for (int i = 0; i < inputPorts; i++) {
+            for (int i = 0; i < numInputPorts; i++) {
                 if (status.isInputPortOpen(i)) {
-                    hasOpenPorts = true;
-                    break;
+                    numOpenPorts++;
                 }
             }
 
-            if (!hasOpenPorts) {
-                for (int i = 0; i < outputPorts; i++) {
-                    if (status.getOutputPortOpenCount(i) > 0) {
-                        hasOpenPorts = true;
-                        break;
-                    }
+            for (int i = 0; i < numOutputPorts; i++) {
+                if (status.getOutputPortOpenCount(i) > 0) {
+                    numOpenPorts += status.getOutputPortOpenCount(i);
                 }
             }
 
             synchronized (mLock) {
-                if (hasOpenPorts && !mIsOpen) {
+                Log.d(TAG, "numOpenPorts: " + numOpenPorts + " isOpen: " + mIsOpen
+                        + " mServerAvailable: " + mServerAvailable);
+                if ((numOpenPorts > 0) && !mIsOpen && mServerAvailable) {
                     openLocked();
-                } else if (!hasOpenPorts && mIsOpen) {
+                } else if ((numOpenPorts == 0) && mIsOpen) {
                     closeLocked();
                 }
             }
@@ -298,10 +296,11 @@ public final class UsbMidiDevice implements Closeable {
     private boolean register(Context context, Bundle properties) {
         MidiManager midiManager = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
         if (midiManager == null) {
-            Log.e(TAG, "No MidiManager in UsbMidiDevice.create()");
+            Log.e(TAG, "No MidiManager in UsbMidiDevice.register()");
             return false;
         }
 
+        mServerAvailable = true;
         mServer = midiManager.createDeviceServer(mMidiInputPortReceivers, mNumInputs,
                 null, null, properties, MidiDeviceInfo.TYPE_USB,
                 MidiDeviceInfo.PROTOCOL_UNKNOWN, mCallback);
@@ -318,6 +317,7 @@ public final class UsbMidiDevice implements Closeable {
             if (mIsOpen) {
                 closeLocked();
             }
+            mServerAvailable = false;
         }
 
         if (mServer != null) {

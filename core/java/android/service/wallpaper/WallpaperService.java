@@ -888,7 +888,6 @@ public abstract class WallpaperService extends Service {
             if (mShouldDimByDefault != mShouldDim && mWallpaperDimAmount == 0f) {
                 mShouldDim = mShouldDimByDefault;
                 updateSurfaceDimming();
-                updateSurface(false, false, true);
             }
         }
 
@@ -898,13 +897,16 @@ public abstract class WallpaperService extends Service {
          * @param dimAmount Float amount between [0.0, 1.0] to dim the wallpaper.
          */
         private void updateWallpaperDimming(float dimAmount) {
+            if (dimAmount == mWallpaperDimAmount) {
+                return;
+            }
+
             // Custom dim amount cannot be less than the default dim amount.
             mWallpaperDimAmount = Math.max(mDefaultDimAmount, dimAmount);
             // If dim amount is 0f (additional dimming is removed), then the wallpaper should dim
             // based on its default wallpaper color hints.
             mShouldDim = dimAmount != 0f || mShouldDimByDefault;
             updateSurfaceDimming();
-            updateSurface(false, false, true);
         }
 
         private void updateSurfaceDimming() {
@@ -941,6 +943,7 @@ public abstract class WallpaperService extends Service {
             } else {
                 Log.v(TAG, "Setting wallpaper dimming: " + 0);
                 surfaceControlTransaction.setAlpha(mBbqSurfaceControl, 1.0f).apply();
+                updateSurface(false, false, true);
             }
 
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
@@ -1195,7 +1198,6 @@ public abstract class WallpaperService extends Service {
                                     .setParent(mSurfaceControl)
                                     .setCallsite("Wallpaper#relayout")
                                     .build();
-                            updateSurfaceDimming();
                         }
                         // Propagate transform hint from WM, so we can use the right hint for the
                         // first frame.
@@ -1366,7 +1368,6 @@ public abstract class WallpaperService extends Service {
                             mSession.finishDrawing(mWindow, null /* postDrawTransaction */,
                                                    Integer.MAX_VALUE);
                             processLocalColors(mPendingXOffset, mPendingXOffsetStep);
-                            notifyColorsChanged();
                         }
                         reposition();
                         reportEngineShown(shouldWaitForEngineShown());

@@ -23,7 +23,7 @@ import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.systemui.statusbar.phone.CentralSurfaces.ONLY_CORE_APPS;
+import static com.android.systemui.statusbar.phone.CentralSurfacesImpl.ONLY_CORE_APPS;
 
 import android.annotation.Nullable;
 import android.app.ITransientNotificationCallback;
