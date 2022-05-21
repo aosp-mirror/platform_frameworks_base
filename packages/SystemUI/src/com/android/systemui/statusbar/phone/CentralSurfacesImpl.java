@@ -3907,7 +3907,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mScrimController.transitionTo(ScrimState.AOD);
         } else if (mKeyguardStateController.isShowing() && !isOccluded() && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
-        } else if (mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()) {
+        } else if (mKeyguardStateController.isShowing() && mKeyguardUpdateMonitor.isDreaming()
+                && !unlocking) {
             mScrimController.transitionTo(ScrimState.DREAMING);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
