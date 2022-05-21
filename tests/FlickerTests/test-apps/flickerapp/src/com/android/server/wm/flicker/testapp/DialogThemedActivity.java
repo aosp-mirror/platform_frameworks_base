@@ -17,11 +17,16 @@
 package com.android.server.wm.flicker.testapp;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.WindowManager;
@@ -33,9 +38,12 @@ public class DialogThemedActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_simple);
+        getWindow().addFlags(FLAG_NOT_FOCUSABLE);
         getWindow().getDecorView().setBackgroundColor(Color.TRANSPARENT);
         TextView textView = new TextView(this);
-        textView.setText("This is a test dialog");
+        // Print SystemBars' insets visibility on this window for demonstrating during the test.
+        textView.setId(android.R.id.text1);
+        textView.setText("Insets visibility\n\n");
         textView.setTextColor(Color.BLACK);
         LinearLayout layout = new LinearLayout(this);
         layout.setBackgroundColor(Color.GREEN);
@@ -51,7 +59,17 @@ public class DialogThemedActivity extends Activity {
         attrs.flags = FLAG_DIM_BEHIND | FLAG_ALT_FOCUSABLE_IM;
         dialog.getWindow().getDecorView().setLayoutParams(attrs);
         dialog.setCanceledOnTouchOutside(true);
+        dialog.setOnShowListener(d -> textView.setText(textView.getText()
+                + "IME: " + isInsetsVisible(dialog, ime()) + "\n"
+                + "StatusBar: " + isInsetsVisible(dialog, statusBars()) + "\n"
+                + "NavBar: " + isInsetsVisible(dialog, navigationBars()) + "\n")
+        );
         dialog.show();
         dialog.setOnDismissListener((d) -> finish());
+    }
+
+    private String isInsetsVisible(Dialog d, int type) {
+        return d.getWindow().getDecorView().getRootWindowInsets().isVisible(type) ? "VISIBLE"
+                : "INVISIBLE";
     }
 }

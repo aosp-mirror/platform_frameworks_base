@@ -22,11 +22,14 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.collection.EntryUtilKt.modifyEntry;
 import static com.android.systemui.util.mockito.KotlinMockitoHelpersKt.argThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -55,6 +58,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -90,7 +94,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private HighPriorityProvider mHighPriorityProvider;
-    @Mock private StatusBarStateController mStatusBarStateController;
+    @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     private final FakeSettings mFakeSettings = new FakeSettings();
 
@@ -178,7 +182,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
-        callback.onStateChanged(0);
+        callback.onUpcomingStateChanged(0);
 
         verify(listener).accept(anyString());
     }
@@ -199,7 +203,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
         callback.onReceive(mContext, new Intent(Intent.ACTION_USER_SWITCHED));
 
         verify(listener).accept(anyString());
@@ -207,7 +211,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notifyListeners_onSettingChange_lockScreenShowNotifs() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
@@ -218,7 +222,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notifyListeners_onSettingChange_lockScreenAllowPrivateNotifs() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
@@ -228,8 +232,43 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     }
 
     @Test
+    public void hideSilentNotificationsPerUserSettingWithHighPriorityParent() {
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
+        GroupEntry parent = new GroupEntryBuilder()
+                .setKey("parent")
+                .addChild(mEntry)
+                .setSummary(new NotificationEntryBuilder()
+                        .setUser(new UserHandle(NOTIF_USER_ID))
+                        .setImportance(IMPORTANCE_LOW)
+                        .build())
+                .build();
+        mEntry = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID))
+                .setImportance(IMPORTANCE_LOW)
+                .setParent(parent)
+                .build();
+        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void hideSilentNotificationsPerUserSetting() {
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true);
+        mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
+        mEntry = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID))
+                .setImportance(IMPORTANCE_LOW)
+                .build();
+        when(mHighPriorityProvider.isHighPriority(any())).thenReturn(false);
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
     public void notifyListeners_onSettingChange_zenMode() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
@@ -240,7 +279,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
     @Test
     public void notifyListeners_onSettingChange_lockScreenShowSilentNotifs() {
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
         Consumer<String> listener = mock(Consumer.class);
         mKeyguardNotificationVisibilityProvider.addOnStateChangedListener(listener);
 
@@ -262,7 +301,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
     public void keyguardNotShowing() {
         // GIVEN the lockscreen isn't showing
         setupUnfilteredState(mEntry);
-        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(SHADE);
 
         // THEN don't filter out the entry
         assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
@@ -384,8 +423,8 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
         mFakeSettings.putBool(Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, false);
         when(mHighPriorityProvider.isHighPriority(parent)).thenReturn(true);
 
-        // THEN don't filter out the entry
-        assertFalse(
+        // THEN filter out the entry regardless of parent
+        assertTrue(
                 mKeyguardNotificationVisibilityProvider.shouldHideNotification(entryWithParent));
 
         // WHEN its parent doesn't exceed threshold to show on lockscreen
@@ -404,7 +443,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
      */
     private void setupUnfilteredState(NotificationEntry entry) {
         // keyguard is showing
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mStatusBarStateController.getCurrentOrUpcomingState()).thenReturn(KEYGUARD);
 
         // show notifications on the lockscreen
         when(mLockscreenUserManager.shouldShowLockscreenNotifications()).thenReturn(true);
@@ -452,7 +491,7 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
                     @BindsInstance NotificationLockscreenUserManager lockscreenUserManager,
                     @BindsInstance KeyguardUpdateMonitor keyguardUpdateMonitor,
                     @BindsInstance HighPriorityProvider highPriorityProvider,
-                    @BindsInstance StatusBarStateController statusBarStateController,
+                    @BindsInstance SysuiStatusBarStateController statusBarStateController,
                     @BindsInstance BroadcastDispatcher broadcastDispatcher,
                     @BindsInstance SecureSettings secureSettings,
                     @BindsInstance GlobalSettings globalSettings

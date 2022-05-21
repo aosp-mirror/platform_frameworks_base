@@ -948,19 +948,15 @@ public final class ColorDisplayService extends SystemService {
         if (!isColorModeAvailable(colorMode)) {
             final int[] mappedColorModes = getContext().getResources().getIntArray(
                     R.array.config_mappedColorModes);
-            if (colorMode == COLOR_MODE_BOOSTED && mappedColorModes.length > COLOR_MODE_NATURAL
-                    && isColorModeAvailable(mappedColorModes[COLOR_MODE_NATURAL])) {
-                colorMode = COLOR_MODE_NATURAL;
-            } else if (colorMode == COLOR_MODE_SATURATED
-                    && mappedColorModes.length > COLOR_MODE_AUTOMATIC
-                    && isColorModeAvailable(mappedColorModes[COLOR_MODE_AUTOMATIC])) {
-                colorMode = COLOR_MODE_AUTOMATIC;
-            } else if (colorMode == COLOR_MODE_AUTOMATIC
-                    && mappedColorModes.length > COLOR_MODE_SATURATED
-                    && isColorModeAvailable(mappedColorModes[COLOR_MODE_SATURATED])) {
-                colorMode = COLOR_MODE_SATURATED;
+            if (colorMode != -1 && mappedColorModes.length > colorMode
+                    && isColorModeAvailable(mappedColorModes[colorMode])) {
+                colorMode = mappedColorModes[colorMode];
             } else {
-                colorMode = -1;
+                final int[] availableColorModes = getContext().getResources().getIntArray(
+                        R.array.config_availableColorModes);
+                if (availableColorModes.length > 0) {
+                    colorMode = availableColorModes[0];
+                }
             }
         }
 

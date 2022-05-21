@@ -1811,10 +1811,6 @@ public class DevicePolicyManager {
      * #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
      * #PROVISIONING_MODE_MANAGED_PROFILE} and {@link #PROVISIONING_MODE_FULLY_MANAGED_DEVICE}.
      *
-     * <p>Also, if this flag is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
-     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
-     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
-     *
      * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_PERSONALLY_OWNED}. In
      * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have
      * the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra contain {@link
@@ -1833,6 +1829,10 @@ public class DevicePolicyManager {
      * <p>Using this flag will cause the admin app's {@link #ACTION_GET_PROVISIONING_MODE}
      * activity to have the {@link #EXTRA_PROVISIONING_ALLOWED_PROVISIONING_MODES} array extra
      * contain only {@link #PROVISIONING_MODE_MANAGED_PROFILE}.
+     *
+     * <p>Also, if this flag is set, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity
+     * will not receive the {@link #EXTRA_PROVISIONING_IMEI} and {@link
+     * #EXTRA_PROVISIONING_SERIAL_NUMBER} extras.
      *
      * <p>This flag can be combined with {@link #FLAG_SUPPORTED_MODES_ORGANIZATION_OWNED}. In
      * that case, the admin app's {@link #ACTION_GET_PROVISIONING_MODE} activity will have the
@@ -2515,7 +2515,8 @@ public class DevicePolicyManager {
      * If another app already had delegated network logging access,
      * it will lose the delegation when a new app is delegated.
      *
-     * <p> Can only be granted by Device Owner or Profile Owner of a managed profile.
+     * <p> Device Owner can grant this access since Android 10. Profile Owner of a managed profile
+     * can grant this access since Android 12.
      */
     public static final String DELEGATION_NETWORK_LOGGING = "delegation-network-logging";
 
@@ -3373,6 +3374,55 @@ public class DevicePolicyManager {
     @SystemApi
     public static final int
             RESULT_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER_PROVISIONING_DISABLED = 3;
+
+    /**
+     * An {@code int} extra that specifies one of {@link
+     * #ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FAIL_PROVISIONING} or {@link
+     * #ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FALLBACK_TO_PLATFORM_PROVISIONING}.
+     *
+     * <p>The failure strategy specifies how the platform should handle a failed device policy
+     * management role holder update via {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} when {@link
+     * #EXTRA_PROVISIONING_ALLOW_OFFLINE} is not set or set to {@code false}.
+     *
+     * <p>This extra may be supplied as part of the {@link
+     * #ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER} result intent.
+     *
+     * <p>Default value is {@link #ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FAIL_PROVISIONING}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_ROLE_HOLDER_UPDATE_FAILURE_STRATEGY =
+            "android.app.extra.ROLE_HOLDER_UPDATE_FAILURE_STRATEGY";
+
+    /**
+     * Possible values for {@link #EXTRA_ROLE_HOLDER_UPDATE_FAILURE_STRATEGY}.
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_" }, value = {
+            ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FAIL_PROVISIONING,
+            ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FALLBACK_TO_PLATFORM_PROVISIONING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RoleHolderUpdateFailureStrategy {}
+
+    /**
+     * A value for {@link #EXTRA_ROLE_HOLDER_UPDATE_FAILURE_STRATEGY} indicating that upon
+     * failure to update the role holder, provisioning should fail.
+     *
+     * @hide
+     */
+    public static final int ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FAIL_PROVISIONING = 1;
+
+    /**
+     * A value for {@link #EXTRA_ROLE_HOLDER_UPDATE_FAILURE_STRATEGY} indicating that upon
+     * failure to update the role holder, provisioning should fallback to be platform-driven.
+     *
+     * @hide
+     */
+    public static final int ROLE_HOLDER_UPDATE_FAILURE_STRATEGY_FALLBACK_TO_PLATFORM_PROVISIONING =
+            2;
 
     /**
      * An {@code int} extra which contains the result code of the last attempt to update
@@ -11161,7 +11211,9 @@ public class DevicePolicyManager {
      * for enterprise use.
      *
      * An example of a supported preferential network service is the Enterprise
-     * slice on 5G networks.
+     * slice on 5G networks. For devices on 4G networks, the profile owner needs to additionally
+     * configure enterprise APN to set up data call for the preferential network service.
+     * These APNs can be added using {@link #addOverrideApn}.
      *
      * By default, preferential network service is disabled on the work profile and
      * fully managed devices, on supported carriers and devices.
@@ -11211,7 +11263,9 @@ public class DevicePolicyManager {
      * {@see PreferentialNetworkServiceConfig}
      *
      * An example of a supported preferential network service is the Enterprise
-     * slice on 5G networks.
+     * slice on 5G networks. For devices on 4G networks, the profile owner needs to additionally
+     * configure enterprise APN to set up data call for the preferential network service.
+     * These APNs can be added using {@link #addOverrideApn}.
      *
      * By default, preferential network service is disabled on the work profile and fully managed
      * devices, on supported carriers and devices. Admins can explicitly enable it with this API.
@@ -11360,7 +11414,9 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device owner or a profile owner of an organization-owned managed profile to
-     * control whether the user can change networks configured by the admin.
+     * control whether the user can change networks configured by the admin. When this lockdown is
+     * enabled, the user can still configure and connect to other Wi-Fi networks, or use other Wi-Fi
+     * capabilities such as tethering.
      * <p>
      * WiFi network configuration lockdown is controlled by a global settings
      * {@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN} and calling
@@ -13200,8 +13256,11 @@ public class DevicePolicyManager {
      * Called by a device owner, profile owner of a managed profile or delegated app with
      * {@link #DELEGATION_NETWORK_LOGGING} to control the network logging feature.
      *
-     * <p> When network logging is enabled by a profile owner, the network logs will only include
-     * work profile network activity, not activity on the personal profile.
+     * <p> Supported for a device owner from Android 8 and a delegated app granted by a device
+     * owner from Android 10. Supported for a profile owner of a managed profile and a delegated
+     * app granted by a profile owner from Android 12. When network logging is enabled by a
+     * profile owner, the network logs will only include work profile network activity, not
+     * activity on the personal profile.
      *
      * <p> Network logs contain DNS lookup and connect() library call events. The following library
      *     functions are recorded while network logging is active:
@@ -13732,18 +13791,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner to add an override APN.
+     * Called by device owner or managed profile owner to add an override APN.
      *
      * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
      * override APN. Update the existing conflicted APN with
      * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
      * <p>Two override APNs are considered to conflict when all the following APIs return
      * the same values on both override APNs:
-     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
-     * Only device owners can add APNs.
-     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
-     * Device and profile owners can add enterprise APNs
-     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can add other type of APNs.
      * <ul>
      *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
      *   <li>{@link ApnSetting#getApnName()}</li>
@@ -13757,6 +13811,15 @@ public class DevicePolicyManager {
      *   <li>{@link ApnSetting#getProtocol()}</li>
      *   <li>{@link ApnSetting#getRoamingProtocol()}</li>
      * </ul>
+     *
+     * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Only device owners can add APNs.
+     * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
+     * Both device owners and managed profile owners can add enterprise APNs
+     * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can add other type of APNs.
+     * Enterprise APNs are specific to the managed profile and do not override any user-configured
+     * VPNs. They are prerequisites for enabling preferential network service on the managed
+     * profile on 4G networks ({@link #setPreferentialNetworkServiceConfigs}).
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnSetting the override APN to insert
@@ -13780,7 +13843,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner to update an override APN.
+     * Called by device owner or managed profile owner to update an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
@@ -13790,7 +13853,7 @@ public class DevicePolicyManager {
      * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
      * Only device owners can update APNs.
      * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
-     * Device and profile owners can update enterprise APNs
+     * Both device owners and managed profile owners can update enterprise APNs
      * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can update other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
@@ -13817,14 +13880,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner to remove an override APN.
+     * Called by device owner or managed profile owner to remove an override APN.
      *
      * <p>This method may returns {@code false} if there is no override APN with the given
      * {@code apnId}.
      * <p> Before Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
      * Only device owners can remove APNs.
      * <p> Starting from Android version {@link android.os.Build.VERSION_CODES#TIRAMISU}:
-     * Device and profile owners can remove enterprise APNs
+     * Both device owners and managed profile owners can remove enterprise APNs
      * ({@link ApnSetting#TYPE_ENTERPRISE}), while only device owners can remove other type of APNs.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
@@ -13849,7 +13912,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to get all override APNs inserted by device owner.
+     * Called by device owner or managed profile owner to get all override APNs inserted by
+     * device owner or managed profile owner previously using {@link #addOverrideApn}.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @return A list of override APNs inserted by device owner.
@@ -13874,6 +13938,9 @@ public class DevicePolicyManager {
      * <p> Override APNs are separated from other APNs on the device, and can only be inserted or
      * modified by the device owner. When enabled, only override APNs are in use, any other APNs
      * are ignored.
+     * <p>Note: Enterprise APNs added by managed profile owners do not need to be enabled by
+     * this API. They are part of the preferential network service config and is controlled by
+     * {@link #setPreferentialNetworkServiceConfigs}.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param enabled {@code true} if override APNs should be enabled, {@code false} otherwise
@@ -14519,12 +14586,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by Device owner to disable user control over apps. User will not be able to clear
-     * app data or force-stop packages.
+     * Called by a device owner or a profile owner to disable user control over apps. User will not
+     * be able to clear app data or force-stop packages. When called by a device owner, applies to
+     * all users on the device.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param packages The package names for the apps.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner or a profile owner.
      */
     public void setUserControlDisabledPackages(@NonNull ComponentName admin,
             @NonNull List<String> packages) {
@@ -14539,12 +14607,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the list of packages over which user control is disabled by the device owner.
+     * Returns the list of packages over which user control is disabled by a device or profile
+     * owner.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public @NonNull List<String> getUserControlDisabledPackages(@NonNull ComponentName admin) {
+    @NonNull
+    public List<String> getUserControlDisabledPackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getUserControlDisabledPackages");
         if (mService != null) {
             try {

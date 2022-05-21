@@ -69,23 +69,6 @@ class MediaViewHolder constructor(itemView: View) {
 
     val actionsTopBarrier = itemView.requireViewById<Barrier>(R.id.media_action_barrier_top)
 
-    init {
-        (player.background as IlluminationDrawable).let {
-            it.registerLightSource(seamless)
-            it.registerLightSource(gutsViewHolder.cancel)
-            it.registerLightSource(gutsViewHolder.dismiss)
-            it.registerLightSource(gutsViewHolder.settings)
-            it.registerLightSource(actionPlayPause)
-            it.registerLightSource(actionNext)
-            it.registerLightSource(actionPrev)
-            it.registerLightSource(action0)
-            it.registerLightSource(action1)
-            it.registerLightSource(action2)
-            it.registerLightSource(action3)
-            it.registerLightSource(action4)
-        }
-    }
-
     fun getAction(id: Int): ImageButton {
         return when (id) {
             R.id.actionPlayPause -> actionPlayPause
@@ -160,7 +143,6 @@ class MediaViewHolder constructor(itemView: View) {
                 R.id.media_scrubbing_elapsed_time,
                 R.id.media_scrubbing_total_time
         )
-
 
         // Buttons used for notification-based actions
         val genericButtonIds = setOf(

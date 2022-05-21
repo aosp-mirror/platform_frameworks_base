@@ -42,14 +42,16 @@ class ActivityRecordInputSink {
 
     private InputWindowHandleWrapper mInputWindowHandleWrapper;
     private SurfaceControl mSurfaceControl;
-    private boolean mDisabled = false;
 
-    ActivityRecordInputSink(ActivityRecord activityRecord) {
+    ActivityRecordInputSink(ActivityRecord activityRecord, ActivityRecord sourceRecord) {
         mActivityRecord = activityRecord;
         mIsCompatEnabled = CompatChanges.isChangeEnabled(ENABLE_TOUCH_OPAQUE_ACTIVITIES,
                 mActivityRecord.getUid());
         mName = Integer.toHexString(System.identityHashCode(this)) + " ActivityRecordInputSink "
                 + mActivityRecord.mActivityComponent.flattenToShortString();
+        if (sourceRecord != null) {
+            sourceRecord.mAllowedTouchUid = mActivityRecord.getUid();
+        }
     }
 
     public void applyChangesToSurfaceIfChanged(SurfaceControl.Transaction transaction) {
@@ -77,8 +79,15 @@ class ActivityRecordInputSink {
         if (mInputWindowHandleWrapper == null) {
             mInputWindowHandleWrapper = new InputWindowHandleWrapper(createInputWindowHandle());
         }
-        if (mDisabled || !mIsCompatEnabled || mActivityRecord.isInTransition()) {
-            // TODO(b/208662670): Investigate if we can have feature active during animations.
+        // Don't block touches from passing through to an activity below us in the same task, if
+        // that activity is either from the same uid or if that activity has launched an activity
+        // in our uid.
+        final ActivityRecord activityBelowInTask =
+                mActivityRecord.getTask().getActivityBelow(mActivityRecord);
+        final boolean allowPassthrough = activityBelowInTask != null && (
+                activityBelowInTask.mAllowedTouchUid == mActivityRecord.getUid()
+                        || activityBelowInTask.isUid(mActivityRecord.getUid()));
+        if (allowPassthrough || !mIsCompatEnabled || mActivityRecord.isInTransition()) {
             mInputWindowHandleWrapper.setInputConfigMasked(InputConfig.NOT_TOUCHABLE,
                     InputConfig.NOT_TOUCHABLE);
         } else {
