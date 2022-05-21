@@ -198,9 +198,8 @@ public class RestrictedPreferenceHelper {
         if (mDisabledByAdmin != disabled) {
             mDisabledByAdmin = disabled;
             changed = true;
+            updateDisabledState();
         }
-
-        updateDisabledState();
 
         return changed;
     }
@@ -210,9 +209,8 @@ public class RestrictedPreferenceHelper {
         if (mDisabledByAppOps != disabled) {
             mDisabledByAppOps = disabled;
             changed = true;
+            updateDisabledState();
         }
-
-        updateDisabledState();
 
         return changed;
     }
@@ -233,6 +231,11 @@ public class RestrictedPreferenceHelper {
     private void updateDisabledState() {
         if (!(mPreference instanceof RestrictedTopLevelPreference)) {
             mPreference.setEnabled(!(mDisabledByAdmin || mDisabledByAppOps));
+        }
+
+        if (mPreference instanceof PrimarySwitchPreference) {
+            ((PrimarySwitchPreference) mPreference)
+                    .setSwitchEnabled(!(mDisabledByAdmin || mDisabledByAppOps));
         }
     }
 }

@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
@@ -87,7 +88,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * This module provides instances needed to construct {@link CentralSurfaces}. These are moved to
+ * This module provides instances needed to construct {@link CentralSurfacesImpl}. These are moved to
  * this separate from {@link CentralSurfacesModule} module so that components that wish to build
  * their own version of CentralSurfaces can include just dependencies, without injecting
  * CentralSurfaces itself.

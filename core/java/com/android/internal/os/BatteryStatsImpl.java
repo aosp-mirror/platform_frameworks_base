@@ -167,7 +167,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 207;
+    static final int VERSION = 208;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -472,9 +472,9 @@ public class BatteryStatsImpl extends BatteryStats {
         mNumSingleUidCpuTimeReads++;
 
         LongArrayMultiStateCounter onBatteryCounter =
-                u.getProcStateTimeCounter().getCounter();
+                u.getProcStateTimeCounter(timestampMs).getCounter();
         LongArrayMultiStateCounter onBatteryScreenOffCounter =
-                u.getProcStateScreenOffTimeCounter().getCounter();
+                u.getProcStateScreenOffTimeCounter(timestampMs).getCounter();
 
         mKernelSingleUidTimeReader.addDelta(uid, onBatteryCounter, timestampMs);
         mKernelSingleUidTimeReader.addDelta(uid, onBatteryScreenOffCounter, timestampMs);
@@ -543,9 +543,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 final long timestampMs = mClock.elapsedRealtime();
                 final LongArrayMultiStateCounter onBatteryCounter =
-                        u.getProcStateTimeCounter().getCounter();
+                        u.getProcStateTimeCounter(timestampMs).getCounter();
                 final LongArrayMultiStateCounter onBatteryScreenOffCounter =
-                        u.getProcStateScreenOffTimeCounter().getCounter();
+                        u.getProcStateScreenOffTimeCounter(timestampMs).getCounter();
 
                 if (uid == parentUid || Process.isSdkSandboxUid(uid)) {
                     mKernelSingleUidTimeReader.addDelta(parentUid, onBatteryCounter, timestampMs);
@@ -644,7 +644,7 @@ public class BatteryStatsImpl extends BatteryStats {
         /** Schedule removal of UIDs corresponding to a removed user */
         Future<?> scheduleCleanupDueToRemovedUser(int userId);
         /** Schedule a sync because of a process state change */
-        Future<?> scheduleSyncDueToProcessStateChange(long delayMillis);
+        void scheduleSyncDueToProcessStateChange(int flags, long delayMillis);
     }
 
     public Handler mHandler;
@@ -3981,8 +3981,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (idxObj != null) {
             idx = idxObj;
             if ((idx & TAG_FIRST_OCCURRENCE_FLAG) != 0) {
-                idx &= ~TAG_FIRST_OCCURRENCE_FLAG;
-                mHistoryTagPool.put(tag, idx);
+                mHistoryTagPool.put(tag, idx & ~TAG_FIRST_OCCURRENCE_FLAG);
             }
             return idx;
         } else if (mNextHistoryTagIdx < HISTORY_TAG_INDEX_LIMIT) {
@@ -6216,9 +6215,7 @@ public class BatteryStatsImpl extends BatteryStats {
             long elapsedRealtimeMs, long uptimeMs) {
         if (mMobileRadioPowerState != powerState) {
             long realElapsedRealtimeMs;
-            final boolean active =
-                    powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
-                            || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
+            final boolean active = isActiveRadioPowerState(powerState);
             if (active) {
                 if (uid > 0) {
                     noteMobileRadioApWakeupLocked(elapsedRealtimeMs, uptimeMs, uid);
@@ -6258,6 +6255,11 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
         return false;
+    }
+
+    private static boolean isActiveRadioPowerState(int powerState) {
+        return powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_MEDIUM
+                || powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH;
     }
 
     @GuardedBy("this")
@@ -8935,8 +8937,8 @@ public class BatteryStatsImpl extends BatteryStats {
         @VisibleForTesting
         public void setProcessStateForTest(int procState, long elapsedTimeMs) {
             mProcessState = procState;
-            getProcStateTimeCounter().setState(procState, elapsedTimeMs);
-            getProcStateScreenOffTimeCounter().setState(procState, elapsedTimeMs);
+            getProcStateTimeCounter(elapsedTimeMs).setState(procState, elapsedTimeMs);
+            getProcStateScreenOffTimeCounter(elapsedTimeMs).setState(procState, elapsedTimeMs);
             final int batteryConsumerProcessState =
                     mapUidProcessStateToBatteryConsumerProcessState(procState);
             getCpuActiveTimeCounter().setState(batteryConsumerProcessState, elapsedTimeMs);
@@ -9095,12 +9097,11 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @GuardedBy("mBsi")
-        private void ensureMultiStateCounters() {
+        private void ensureMultiStateCounters(long timestampMs) {
             if (mProcStateTimeMs != null) {
                 return;
             }
 
-            final long timestampMs = mBsi.mClock.elapsedRealtime();
             mProcStateTimeMs =
                     new TimeInFreqMultiStateCounter(mBsi.mOnBatteryTimeBase,
                             PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
@@ -9112,14 +9113,14 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @GuardedBy("mBsi")
-        private TimeInFreqMultiStateCounter getProcStateTimeCounter() {
-            ensureMultiStateCounters();
+        private TimeInFreqMultiStateCounter getProcStateTimeCounter(long timestampMs) {
+            ensureMultiStateCounters(timestampMs);
             return mProcStateTimeMs;
         }
 
         @GuardedBy("mBsi")
-        private TimeInFreqMultiStateCounter getProcStateScreenOffTimeCounter() {
-            ensureMultiStateCounters();
+        private TimeInFreqMultiStateCounter getProcStateScreenOffTimeCounter(long timestampMs) {
+            ensureMultiStateCounters(timestampMs);
             return mProcStateScreenOffTimeMs;
         }
 
@@ -11972,9 +11973,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     mBsi.updateProcStateCpuTimesLocked(mUid, elapsedRealtimeMs);
 
                     LongArrayMultiStateCounter onBatteryCounter =
-                            getProcStateTimeCounter().getCounter();
+                            getProcStateTimeCounter(elapsedRealtimeMs).getCounter();
                     LongArrayMultiStateCounter onBatteryScreenOffCounter =
-                            getProcStateScreenOffTimeCounter().getCounter();
+                            getProcStateScreenOffTimeCounter(elapsedRealtimeMs).getCounter();
 
                     onBatteryCounter.setState(uidRunningState, elapsedRealtimeMs);
                     onBatteryScreenOffCounter.setState(uidRunningState, elapsedRealtimeMs);
@@ -12044,7 +12045,13 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
-            mBsi.mExternalSync.scheduleSyncDueToProcessStateChange(
+            int flags = ExternalStatsSync.UPDATE_ON_PROC_STATE_CHANGE;
+            // Skip querying for inactive radio, where power usage is probably negligible.
+            if (!BatteryStatsImpl.isActiveRadioPowerState(mBsi.mMobileRadioPowerState)) {
+                flags &= ~ExternalStatsSync.UPDATE_RADIO;
+            }
+
+            mBsi.mExternalSync.scheduleSyncDueToProcessStateChange(flags,
                     mBsi.mConstants.PROC_STATE_CHANGE_COLLECTION_DELAY_MS);
         }
 

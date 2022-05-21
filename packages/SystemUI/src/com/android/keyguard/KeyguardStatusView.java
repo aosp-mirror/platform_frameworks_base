@@ -47,7 +47,6 @@ public class KeyguardStatusView extends GridLayout {
 
     private float mDarkAmount = 0;
     private int mTextColor;
-    private float mChildrenAlphaExcludingSmartSpace = 1f;
 
     public KeyguardStatusView(Context context) {
         this(context, null, 0);
@@ -95,23 +94,6 @@ public class KeyguardStatusView extends GridLayout {
         mClockView.setTextColor(blendedTextColor);
     }
 
-    public void setChildrenAlphaExcludingClockView(float alpha) {
-        setChildrenAlphaExcluding(alpha, Set.of(mClockView));
-    }
-
-    /** Sets an alpha value on every view except for the views in the provided set. */
-    public void setChildrenAlphaExcluding(float alpha, Set<View> excludedViews) {
-        mChildrenAlphaExcludingSmartSpace = alpha;
-
-        for (int i = 0; i < mStatusViewContainer.getChildCount(); i++) {
-            final View child = mStatusViewContainer.getChildAt(i);
-
-            if (!excludedViews.contains(child)) {
-                child.setAlpha(alpha);
-            }
-        }
-    }
-
     /** Sets a translationY value on every child view except for the media view. */
     public void setChildrenTranslationYExcludingMediaView(float translationY) {
         setChildrenTranslationYExcluding(translationY, Set.of(mMediaHostContainer));
@@ -126,10 +108,6 @@ public class KeyguardStatusView extends GridLayout {
                 child.setTranslationY(translationY);
             }
         }
-    }
-
-    public float getChildrenAlphaExcludingSmartSpace() {
-        return mChildrenAlphaExcludingSmartSpace;
     }
 
     public void dump(PrintWriter pw, String[] args) {

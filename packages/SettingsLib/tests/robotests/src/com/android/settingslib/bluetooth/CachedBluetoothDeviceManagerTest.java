@@ -40,7 +40,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
@@ -503,8 +502,8 @@ public class CachedBluetoothDeviceManagerTest {
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         CachedBluetoothDevice cachedDevice3 = mCachedDeviceManager.addDevice(mDevice3);
-        cachedDevice1.setMemberDevice(cachedDevice2);
-        cachedDevice1.setMemberDevice(cachedDevice3);
+        cachedDevice1.addMemberDevice(cachedDevice2);
+        cachedDevice1.addMemberDevice(cachedDevice3);
 
         assertThat(cachedDevice1.getMemberDevice()).contains(cachedDevice2);
         assertThat(cachedDevice1.getMemberDevice()).contains(cachedDevice3);
@@ -524,7 +523,7 @@ public class CachedBluetoothDeviceManagerTest {
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         cachedDevice1.setGroupId(1);
         cachedDevice2.setGroupId(1);
-        cachedDevice1.setMemberDevice(cachedDevice2);
+        cachedDevice1.addMemberDevice(cachedDevice2);
 
         // Call onDeviceUnpaired for the one in mCachedDevices.
         mCachedDeviceManager.onDeviceUnpaired(cachedDevice1);
@@ -541,7 +540,7 @@ public class CachedBluetoothDeviceManagerTest {
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         cachedDevice1.setGroupId(1);
         cachedDevice2.setGroupId(1);
-        cachedDevice1.setMemberDevice(cachedDevice2);
+        cachedDevice1.addMemberDevice(cachedDevice2);
 
         // Call onDeviceUnpaired for the one in mCachedDevices.
         mCachedDeviceManager.onDeviceUnpaired(cachedDevice2);

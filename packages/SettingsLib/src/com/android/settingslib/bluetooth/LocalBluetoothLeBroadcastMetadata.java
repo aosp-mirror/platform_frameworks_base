@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothLeBroadcastMetadata;
 import android.bluetooth.BluetoothLeBroadcastSubgroup;
 import android.util.Log;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -95,6 +96,7 @@ public class LocalBluetoothLeBroadcastMetadata {
     }
 
     public String convertToQrCodeString() {
+        String subgroupString = convertSubgroupToString(mSubgroupList);
         return new StringBuilder()
                 .append(BluetoothBroadcastUtils.SCHEME_BT_BROADCAST_METADATA)
                 .append(BluetoothBroadcastUtils.PREFIX_BT_ADDRESS_TYPE)
@@ -122,9 +124,81 @@ public class LocalBluetoothLeBroadcastMetadata {
                 .append(METADATA_START).append(mPresentationDelayMicros).append(METADATA_END)
                 .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
                 .append(BluetoothBroadcastUtils.PREFIX_BT_SUBGROUPS)
-                .append(METADATA_START).append(mSubgroupList).append(METADATA_END)
+                .append(METADATA_START).append(subgroupString).append(METADATA_END)
                 .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
                 .toString();
+    }
+
+    private String convertSubgroupToString(List<BluetoothLeBroadcastSubgroup> subgroupList) {
+        StringBuilder subgroupListBuilder = new StringBuilder();
+        String subgroupString = "";
+        for (BluetoothLeBroadcastSubgroup subgroup: subgroupList) {
+            String audioCodec = convertAudioCodecConfigToString(subgroup.getCodecSpecificConfig());
+            String audioContent = convertAudioContentToString(subgroup.getContentMetadata());
+            String channels = convertChannelToString(subgroup.getChannels());
+            subgroupString = new StringBuilder()
+                    .append(BluetoothBroadcastUtils.PREFIX_BTSG_CODEC_ID)
+                    .append(METADATA_START).append(subgroup.getCodecId()).append(METADATA_END)
+                    .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+                    .append(BluetoothBroadcastUtils.PREFIX_BTSG_CODEC_CONFIG)
+                    .append(METADATA_START).append(audioCodec).append(METADATA_END)
+                    .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+                    .append(BluetoothBroadcastUtils.PREFIX_BTSG_AUDIO_CONTENT)
+                    .append(METADATA_START).append(audioContent).append(METADATA_END)
+                    .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+                    .append(BluetoothBroadcastUtils.PREFIX_BTSG_BROADCAST_CHANNEL)
+                    .append(METADATA_START).append(channels).append(METADATA_END)
+                    .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+                    .toString();
+            subgroupListBuilder.append(subgroupString);
+        }
+        return subgroupListBuilder.toString();
+    }
+
+    private String convertAudioCodecConfigToString(BluetoothLeAudioCodecConfigMetadata config) {
+        String audioLocation = String.valueOf(config.getAudioLocation());
+        String rawMetadata = new String(config.getRawMetadata(), StandardCharsets.UTF_8);
+        return new StringBuilder()
+            .append(BluetoothBroadcastUtils.PREFIX_BTCC_AUDIO_LOCATION)
+            .append(METADATA_START).append(audioLocation).append(METADATA_END)
+            .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+            .append(BluetoothBroadcastUtils.PREFIX_BTCC_RAW_METADATA)
+            .append(METADATA_START).append(rawMetadata).append(METADATA_END)
+            .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+            .toString();
+    }
+
+    private String convertAudioContentToString(BluetoothLeAudioContentMetadata audioContent) {
+        String rawMetadata = new String(audioContent.getRawMetadata(), StandardCharsets.UTF_8);
+        return new StringBuilder()
+            .append(BluetoothBroadcastUtils.PREFIX_BTAC_PROGRAM_INFO)
+            .append(METADATA_START).append(audioContent.getProgramInfo()).append(METADATA_END)
+            .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+            .append(BluetoothBroadcastUtils.PREFIX_BTAC_LANGUAGE)
+            .append(METADATA_START).append(audioContent.getLanguage()).append(METADATA_END)
+            .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+            .append(BluetoothBroadcastUtils.PREFIX_BTAC_RAW_METADATA)
+            .append(METADATA_START).append(rawMetadata).append(METADATA_END)
+            .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+            .toString();
+    }
+
+    private String convertChannelToString(List<BluetoothLeBroadcastChannel> channelList) {
+        StringBuilder channelListBuilder = new StringBuilder();
+        String channelString = "";
+        for (BluetoothLeBroadcastChannel channel: channelList) {
+            String channelAudioCodec = convertAudioCodecConfigToString(channel.getCodecMetadata());
+            channelString = new StringBuilder()
+                .append(BluetoothBroadcastUtils.PREFIX_BTBC_CHANNEL_INDEX)
+                .append(METADATA_START).append(channel.getChannelIndex()).append(METADATA_END)
+                .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+                .append(BluetoothBroadcastUtils.PREFIX_BTBC_CODEC_CONFIG)
+                .append(METADATA_START).append(channelAudioCodec).append(METADATA_END)
+                .append(BluetoothBroadcastUtils.DELIMITER_QR_CODE)
+                .toString();
+            channelListBuilder.append(channelString);
+        }
+        return channelListBuilder.toString();
     }
 
     /**

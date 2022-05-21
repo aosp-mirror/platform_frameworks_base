@@ -19,6 +19,7 @@ package com.android.server.pm;
 import android.os.Process;
 import android.util.Log;
 
+import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.WatchedArrayList;
 import com.android.server.utils.WatchedSparseArray;
 import com.android.server.utils.Watcher;
@@ -34,9 +35,27 @@ final class AppIdSettingMap {
      * index to the corresponding SettingBase object is (appId - FIRST_APPLICATION_ID). If an app ID
      * doesn't exist (i.e., app is not installed), we fill the corresponding entry with null.
      */
-    private WatchedArrayList<SettingBase> mNonSystemSettings = new WatchedArrayList<>();
-    private WatchedSparseArray<SettingBase> mSystemSettings = new WatchedSparseArray<>();
+    private final WatchedArrayList<SettingBase> mNonSystemSettings;
+    private final SnapshotCache<WatchedArrayList<SettingBase>> mNonSystemSettingsSnapshot;
+    private final WatchedSparseArray<SettingBase> mSystemSettings;
+    private final SnapshotCache<WatchedSparseArray<SettingBase>> mSystemSettingsSnapshot;
     private int mFirstAvailableAppId = Process.FIRST_APPLICATION_UID;
+
+    AppIdSettingMap() {
+        mNonSystemSettings = new WatchedArrayList<>();
+        mNonSystemSettingsSnapshot = new SnapshotCache.Auto<>(
+                mNonSystemSettings, mNonSystemSettings, "AppIdSettingMap.mNonSystemSettings");
+        mSystemSettings = new WatchedSparseArray<>();
+        mSystemSettingsSnapshot = new SnapshotCache.Auto<>(
+                mSystemSettings, mSystemSettings, "AppIdSettingMap.mSystemSettings");
+    }
+
+    AppIdSettingMap(AppIdSettingMap orig) {
+        mNonSystemSettings = orig.mNonSystemSettingsSnapshot.snapshot();
+        mNonSystemSettingsSnapshot = new SnapshotCache.Sealed<>();
+        mSystemSettings = orig.mSystemSettingsSnapshot.snapshot();
+        mSystemSettingsSnapshot = new SnapshotCache.Sealed<>();
+    }
 
     /** Returns true if the requested AppID was valid and not already registered. */
     public boolean registerExistingAppId(int appId, SettingBase setting, Object name) {
@@ -134,10 +153,7 @@ final class AppIdSettingMap {
     }
 
     public AppIdSettingMap snapshot() {
-        AppIdSettingMap l = new AppIdSettingMap();
-        mNonSystemSettings.snapshot(l.mNonSystemSettings, mNonSystemSettings);
-        mSystemSettings.snapshot(l.mSystemSettings, mSystemSettings);
-        return l;
+        return new AppIdSettingMap(this);
     }
 
     public void registerObserver(Watcher observer) {

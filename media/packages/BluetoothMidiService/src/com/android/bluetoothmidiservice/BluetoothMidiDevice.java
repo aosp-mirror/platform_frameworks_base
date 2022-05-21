@@ -152,8 +152,12 @@ public final class BluetoothMidiDevice {
                 BluetoothGattCharacteristic characteristic,
                 byte[] value,
                 int status) {
-            Log.d(TAG, "onCharacteristicRead " + status);
+            Log.d(TAG, "onCharacteristicRead status:" + status);
 
+            StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+            for (StackTraceElement element : elements) {
+                Log.i(TAG, "  " + element);
+            }
             // switch to receiving notifications after initial characteristic read
             mBluetoothGatt.setCharacteristicNotification(characteristic, true);
 

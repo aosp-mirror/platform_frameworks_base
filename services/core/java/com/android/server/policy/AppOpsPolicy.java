@@ -87,8 +87,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     private final VoiceInteractionManagerInternal mVoiceInteractionManagerInternal;
 
     /**
-     * Whether this device allows only the HotwordDetectionService to use OP_RECORD_AUDIO_HOTWORD
-     * which doesn't incur the privacy indicator.
+     * Whether this device allows only the HotwordDetectionService to use
+     * OP_RECORD_AUDIO_HOTWORD which doesn't incur the privacy indicator.
      */
     private final boolean mIsHotwordDetectionServiceRequired;
 
@@ -428,8 +428,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
             if (!mIsHotwordDetectionServiceRequired) {
                 return code;
             }
-            // Only the HotwordDetectionService can use the HOTWORD op which doesn't incur the
-            // privacy indicator. Downgrade to standard RECORD_AUDIO for other processes.
+            // Only the HotwordDetectionService can use the RECORD_AUDIO_HOTWORD op which doesn't
+            // incur the privacy indicator. Downgrade to standard RECORD_AUDIO for other processes.
             final HotwordDetectionServiceIdentity hotwordDetectionServiceIdentity =
                     mVoiceInteractionManagerInternal.getHotwordDetectionServiceIdentity();
             if (hotwordDetectionServiceIdentity != null
