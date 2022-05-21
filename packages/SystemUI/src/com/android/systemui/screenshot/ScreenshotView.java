@@ -18,6 +18,7 @@ package com.android.systemui.screenshot;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_TAKE_SCREENSHOT;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
@@ -83,6 +84,7 @@ import android.widget.LinearLayout;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
@@ -149,7 +151,6 @@ public class ScreenshotView extends FrameLayout implements
     private ImageView mActionsContainerBackground;
     private HorizontalScrollView mActionsContainer;
     private LinearLayout mActionsView;
-    private ImageView mBackgroundProtection;
     private FrameLayout mDismissButton;
     private OverlayActionChip mShareChip;
     private OverlayActionChip mEditChip;
@@ -166,6 +167,9 @@ public class ScreenshotView extends FrameLayout implements
 
     private final ArrayList<OverlayActionChip> mSmartChips = new ArrayList<>();
     private PendingInteraction mPendingInteraction;
+
+    private final InteractionJankMonitor mInteractionJankMonitor;
+    private long mDefaultTimeoutOfTimeoutHandler;
 
     private enum PendingInteraction {
         PREVIEW,
@@ -190,6 +194,7 @@ public class ScreenshotView extends FrameLayout implements
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mResources = mContext.getResources();
+        mInteractionJankMonitor = getInteractionJankMonitorInstance();
 
         mFixedSize = mResources.getDimensionPixelSize(R.dimen.overlay_x_scale);
 
@@ -228,6 +233,14 @@ public class ScreenshotView extends FrameLayout implements
                 stopInputListening();
             }
         });
+    }
+
+    private InteractionJankMonitor getInteractionJankMonitorInstance() {
+        return InteractionJankMonitor.getInstance();
+    }
+
+    void setDefaultTimeoutMillis(long timeout) {
+        mDefaultTimeoutOfTimeoutHandler = timeout;
     }
 
     public void hideScrollChip() {
@@ -345,8 +358,6 @@ public class ScreenshotView extends FrameLayout implements
                 R.id.actions_container_background));
         mActionsContainer = requireNonNull(findViewById(R.id.actions_container));
         mActionsView = requireNonNull(findViewById(R.id.screenshot_actions));
-        mBackgroundProtection = requireNonNull(
-                findViewById(R.id.screenshot_actions_background));
         mDismissButton = requireNonNull(findViewById(R.id.screenshot_dismiss_button));
         mScrollablePreview = requireNonNull(findViewById(R.id.screenshot_scrollable_preview));
         mScreenshotFlash = requireNonNull(findViewById(R.id.screenshot_flash));
@@ -394,18 +405,13 @@ public class ScreenshotView extends FrameLayout implements
                 }
                 mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SWIPE_DISMISSED, 0,
                         mPackageName);
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        mBackgroundProtection.animate()
-                                .alpha(0).setDuration(animation.getDuration()).start();
-                    }
-                });
             }
 
             @Override
             public void onDismissComplete() {
+                if (mInteractionJankMonitor.isInstrumenting(CUJ_TAKE_SCREENSHOT)) {
+                    mInteractionJankMonitor.end(CUJ_TAKE_SCREENSHOT);
+                }
                 mCallbacks.onDismiss();
             }
         });
@@ -606,6 +612,20 @@ public class ScreenshotView extends FrameLayout implements
 
         dropInAnimation.addListener(new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationCancel(Animator animation) {
+                mInteractionJankMonitor.cancel(CUJ_TAKE_SCREENSHOT);
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitor.Configuration.Builder builder =
+                        InteractionJankMonitor.Configuration.Builder.withView(
+                                        CUJ_TAKE_SCREENSHOT, mScreenshotPreview)
+                                .setTag("DropIn");
+                mInteractionJankMonitor.begin(builder);
+            }
+
+            @Override
             public void onAnimationEnd(Animator animation) {
                 if (DEBUG_ANIM) {
                     Log.d(TAG, "drop-in animation ended");
@@ -631,7 +651,7 @@ public class ScreenshotView extends FrameLayout implements
                 mScreenshotPreview.setX(finalPos.x - mScreenshotPreview.getWidth() / 2f);
                 mScreenshotPreview.setY(finalPos.y - mScreenshotPreview.getHeight() / 2f);
                 requestLayout();
-
+                mInteractionJankMonitor.end(CUJ_TAKE_SCREENSHOT);
                 createScreenshotActionsShadeAnimation().start();
             }
         });
@@ -661,8 +681,10 @@ public class ScreenshotView extends FrameLayout implements
         });
         chips.add(mShareChip);
 
-        mEditChip.setContentDescription(mContext.getString(R.string.screenshot_edit_description));
-        mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
+        mEditChip.setContentDescription(
+                mContext.getString(R.string.screenshot_edit_description));
+        mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit),
+                true);
         mEditChip.setOnClickListener(v -> {
             mEditChip.setIsPending(true);
             mShareChip.setIsPending(false);
@@ -702,9 +724,30 @@ public class ScreenshotView extends FrameLayout implements
         mActionsContainer.setVisibility(View.VISIBLE);
         mActionsContainerBackground.setVisibility(View.VISIBLE);
 
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mInteractionJankMonitor.cancel(CUJ_TAKE_SCREENSHOT);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mInteractionJankMonitor.end(CUJ_TAKE_SCREENSHOT);
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitor.Configuration.Builder builder =
+                        InteractionJankMonitor.Configuration.Builder.withView(
+                                        CUJ_TAKE_SCREENSHOT, mScreenshotStatic)
+                                .setTag("Actions")
+                                .setTimeout(mDefaultTimeoutOfTimeoutHandler);
+                mInteractionJankMonitor.begin(builder);
+            }
+        });
+
         animator.addUpdateListener(animation -> {
             float t = animation.getAnimatedFraction();
-            mBackgroundProtection.setAlpha(t);
             float containerAlpha = t < alphaFraction ? t / alphaFraction : 1;
             mActionsContainer.setAlpha(containerAlpha);
             mActionsContainerBackground.setAlpha(containerAlpha);
@@ -779,7 +822,7 @@ public class ScreenshotView extends FrameLayout implements
                             animateDismissal();
                         });
                 actionChip.setAlpha(1);
-                mActionsView.addView(actionChip);
+                mActionsView.addView(actionChip, mActionsView.getChildCount() - 1);
                 mSmartChips.add(actionChip);
             }
         }
@@ -910,7 +953,6 @@ public class ScreenshotView extends FrameLayout implements
         }
         mDismissButton.setVisibility(View.GONE);
         mActionsContainer.setVisibility(View.GONE);
-        mBackgroundProtection.setVisibility(View.GONE);
         // set these invisible, but not gone, so that the views are laid out correctly
         mActionsContainerBackground.setVisibility(View.INVISIBLE);
         mScreenshotPreviewBorder.setVisibility(View.INVISIBLE);
@@ -932,7 +974,6 @@ public class ScreenshotView extends FrameLayout implements
             mDismissButton.setVisibility(View.VISIBLE);
         }
         mActionsContainer.setVisibility(View.VISIBLE);
-        mBackgroundProtection.setVisibility(View.VISIBLE);
         mActionsContainerBackground.setVisibility(View.VISIBLE);
         mScreenshotPreviewBorder.setVisibility(View.VISIBLE);
         mScreenshotPreview.setVisibility(View.VISIBLE);
@@ -969,7 +1010,6 @@ public class ScreenshotView extends FrameLayout implements
         mPendingSharedTransition = false;
         mActionsContainerBackground.setVisibility(View.GONE);
         mActionsContainer.setVisibility(View.GONE);
-        mBackgroundProtection.setAlpha(0f);
         mDismissButton.setVisibility(View.GONE);
         mScrollingScrim.setVisibility(View.GONE);
         mScrollablePreview.setVisibility(View.GONE);
@@ -1016,7 +1056,6 @@ public class ScreenshotView extends FrameLayout implements
             mDismissButton.setAlpha(alpha);
             mActionsContainerBackground.setAlpha(alpha);
             mActionsContainer.setAlpha(alpha);
-            mBackgroundProtection.setAlpha(alpha);
             mScreenshotPreviewBorder.setAlpha(alpha);
         });
         alphaAnim.setDuration(600);

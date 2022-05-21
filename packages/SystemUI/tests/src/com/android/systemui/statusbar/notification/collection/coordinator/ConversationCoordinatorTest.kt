@@ -21,17 +21,22 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.notification.collection.GroupEntry
+import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
+import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.render.NodeController
+import com.android.systemui.statusbar.notification.icon.ConversationIconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
@@ -52,8 +57,10 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     private lateinit var promoter: NotifPromoter
     private lateinit var peopleSectioner: NotifSectioner
     private lateinit var peopleComparator: NotifComparator
+    private lateinit var beforeRenderListListener: OnBeforeRenderListListener
 
     @Mock private lateinit var pipeline: NotifPipeline
+    @Mock private lateinit var conversationIconManager: ConversationIconManager
     @Mock private lateinit var peopleNotificationIdentifier: PeopleNotificationIdentifier
     @Mock private lateinit var channel: NotificationChannel
     @Mock private lateinit var headerController: NodeController
@@ -66,7 +73,11 @@ class ConversationCoordinatorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        coordinator = ConversationCoordinator(peopleNotificationIdentifier, headerController)
+        coordinator = ConversationCoordinator(
+            peopleNotificationIdentifier,
+            conversationIconManager,
+            headerController
+        )
         whenever(channel.isImportantConversation).thenReturn(true)
 
         coordinator.attach(pipeline)
@@ -74,6 +85,9 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         // capture arguments:
         promoter = withArgCaptor {
             verify(pipeline).addPromoter(capture())
+        }
+        beforeRenderListListener = withArgCaptor {
+            verify(pipeline).addOnBeforeRenderListListener(capture())
         }
 
         peopleSectioner = coordinator.sectioner
@@ -93,6 +107,25 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         // only promote important conversations
         assertTrue(promoter.shouldPromoteToTopLevel(entry))
         assertFalse(promoter.shouldPromoteToTopLevel(NotificationEntryBuilder().build()))
+    }
+
+    @Test
+    fun testPromotedImportantConversationsMakesSummaryUnimportant() {
+        val altChildA = NotificationEntryBuilder().setTag("A").build()
+        val altChildB = NotificationEntryBuilder().setTag("B").build()
+        val summary = NotificationEntryBuilder().setId(2).setChannel(channel).build()
+        val groupEntry = GroupEntryBuilder()
+            .setParent(GroupEntry.ROOT_ENTRY)
+            .setSummary(summary)
+            .setChildren(listOf(entry, altChildA, altChildB))
+            .build()
+        assertTrue(promoter.shouldPromoteToTopLevel(entry))
+        assertFalse(promoter.shouldPromoteToTopLevel(altChildA))
+        assertFalse(promoter.shouldPromoteToTopLevel(altChildB))
+        NotificationEntryBuilder.setNewParent(entry, GroupEntry.ROOT_ENTRY)
+        GroupEntryBuilder.getRawChildren(groupEntry).remove(entry)
+        beforeRenderListListener.onBeforeRenderList(listOf(entry, groupEntry))
+        verify(conversationIconManager).setUnimportantConversations(eq(listOf(summary.key)))
     }
 
     @Test

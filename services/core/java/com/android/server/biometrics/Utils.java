@@ -39,6 +39,7 @@ import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -543,5 +544,38 @@ public class Utils {
             default:
                 throw new IllegalArgumentException("Unknown strength: " + strength);
         }
+    }
+
+    /**
+     * Checks if a client package is running in the background.
+     *
+     * @param clientPackage The name of the package to be checked.
+     * @return Whether the client package is running in background
+     */
+    public static boolean isBackground(String clientPackage) {
+        Slog.v(TAG, "Checking if the authenticating is in background,"
+                + " clientPackage:" + clientPackage);
+        final List<ActivityManager.RunningTaskInfo> tasks =
+                ActivityTaskManager.getInstance().getTasks(Integer.MAX_VALUE);
+
+        if (tasks == null || tasks.isEmpty()) {
+            Slog.d(TAG, "No running tasks reported");
+            return true;
+        }
+
+        for (ActivityManager.RunningTaskInfo taskInfo : tasks) {
+            final ComponentName topActivity = taskInfo.topActivity;
+            if (topActivity != null) {
+                final String topPackage = topActivity.getPackageName();
+                if (topPackage.contentEquals(clientPackage) && taskInfo.isVisible()) {
+                    return false;
+                } else {
+                    Slog.i(TAG, "Running task, top: " + topPackage
+                            + ", isVisible: " + taskInfo.isVisible());
+                }
+            }
+        }
+
+        return true;
     }
 }

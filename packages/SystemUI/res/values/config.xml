@@ -711,4 +711,10 @@
         <item>@*android:string/status_bar_alarm_clock</item>
         <item>@*android:string/status_bar_call_strength</item>
     </string-array>
+
+    <!-- Packages of SystemUI -->
+    <string-array name="system_ui_packages" translatable="false">
+        <item>com.android.keyguard</item>
+        <item>com.android.systemui</item>
+    </string-array>
 </resources>

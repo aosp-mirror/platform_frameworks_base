@@ -28,7 +28,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
@@ -56,6 +55,7 @@ import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
@@ -148,7 +148,6 @@ import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.PictureInPictureParams;
-import android.app.RemoteAction;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -217,7 +216,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -1721,13 +1719,6 @@ class Task extends TaskFragment {
                 && (topTask == null || topTask.supportsSplitScreenWindowingModeInner(tda));
     }
 
-    /** Returns {@code true} if this task is currently in split-screen. */
-    boolean inSplitScreen() {
-        return getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
-                && getRootTask() != null
-                && getRootTask().getAdjacentTaskFragment() != null;
-    }
-
     private boolean supportsSplitScreenWindowingModeInner(@Nullable TaskDisplayArea tda) {
         return super.supportsSplitScreenWindowingMode()
                 && mAtmService.mSupportsSplitScreenMultiWindow
@@ -3079,11 +3070,22 @@ class Task extends TaskFragment {
         });
     }
 
+    /**
+     * Return the top visible requested activity. The activity has been requested to be visible,
+     * but it's possible that the activity has just been created, so no window is yet attached to
+     * this activity.
+     */
     ActivityRecord getTopVisibleActivity() {
-        return getActivity((r) -> {
-            // skip hidden (or about to hide) apps
-            return !r.mIsExiting && r.isClientVisible() && r.mVisibleRequested;
-        });
+        return getActivity((r) -> !r.mIsExiting && r.isClientVisible() && r.mVisibleRequested);
+    }
+
+    /**
+     * Return the top visible activity. The activity has a window on which contents are drawn.
+     * However it's possible that the activity has already been requested to be invisible, but the
+     * visibility is not yet committed.
+     */
+    ActivityRecord getTopRealVisibleActivity() {
+        return getActivity((r) -> !r.mIsExiting && r.isClientVisible() && r.isVisible());
     }
 
     ActivityRecord getTopWaitSplashScreenActivity() {
@@ -3525,10 +3527,13 @@ class Task extends TaskFragment {
             mAtmService.mKeyguardController.isDisplayOccluded(DEFAULT_DISPLAY);
 
         info.startingWindowTypeParameter = activity.mStartingData.mTypeParams;
-        final WindowState mainWindow = activity.findMainWindow();
-        if (mainWindow != null) {
-            info.mainWindowLayoutParams = mainWindow.getAttrs();
-            info.requestedVisibilities.set(mainWindow.getRequestedVisibilities());
+        if ((info.startingWindowTypeParameter
+                & StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED) != 0) {
+            final WindowState topMainWin = getWindow(w -> w.mAttrs.type == TYPE_BASE_APPLICATION);
+            if (topMainWin != null) {
+                info.mainWindowLayoutParams = topMainWin.getAttrs();
+                info.requestedVisibilities.set(topMainWin.getRequestedVisibilities());
+            }
         }
         // If the developer has persist a different configuration, we need to override it to the
         // starting window because persisted configuration does not effect to Task.
@@ -6003,6 +6008,9 @@ class Task extends TaskFragment {
 
         if (canBeLaunchedOnDisplay(newParent.getDisplayId())) {
             reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
+            if (isLeafTask()) {
+                newParent.onLeafTaskMoved(this, onTop);
+            }
         } else {
             Slog.w(TAG, "Task=" + this + " can't reparent to " + newParent);
         }
@@ -6070,58 +6078,6 @@ class Task extends TaskFragment {
         if (!isLeafTask()) {
             Slog.w(TAG, func + " on non-leaf task " + this);
         }
-    }
-
-    /**
-     * Sets the current picture-in-picture aspect ratios.
-     */
-    void setPictureInPictureAspectRatio(float aspectRatio, float expandedAspectRatio) {
-        if (!mWmService.mAtmService.mSupportsPictureInPicture) {
-            return;
-        }
-
-        final DisplayContent displayContent = getDisplayContent();
-        if (displayContent == null) {
-            return;
-        }
-
-        if (!inPinnedWindowingMode()) {
-            return;
-        }
-
-        final PinnedTaskController pinnedTaskController =
-                getDisplayContent().getPinnedTaskController();
-
-        // Notify the pinned stack controller about aspect ratio change.
-        // This would result a callback delivered from SystemUI to WM to start animation,
-        // if the bounds are ought to be altered due to aspect ratio change.
-        if (Float.compare(aspectRatio, pinnedTaskController.getAspectRatio()) != 0) {
-            pinnedTaskController.setAspectRatio(
-                    pinnedTaskController.isValidPictureInPictureAspectRatio(aspectRatio)
-                            ? aspectRatio : -1f);
-        }
-
-        if (mWmService.mAtmService.mSupportsExpandedPictureInPicture && Float.compare(
-                expandedAspectRatio, pinnedTaskController.getExpandedAspectRatio()) != 0) {
-            pinnedTaskController.setExpandedAspectRatio(pinnedTaskController
-                    .isValidExpandedPictureInPictureAspectRatio(expandedAspectRatio)
-                    ? expandedAspectRatio : 0f);
-        }
-    }
-
-    /**
-     * Sets the current picture-in-picture actions.
-     */
-    void setPictureInPictureActions(List<RemoteAction> actions, RemoteAction closeAction) {
-        if (!mWmService.mAtmService.mSupportsPictureInPicture) {
-            return;
-        }
-
-        if (!inPinnedWindowingMode()) {
-            return;
-        }
-
-        getDisplayContent().getPinnedTaskController().setActions(actions, closeAction);
     }
 
     public DisplayInfo getDisplayInfo() {

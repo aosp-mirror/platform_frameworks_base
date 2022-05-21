@@ -142,17 +142,12 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     return; // Keyguard is always allowed
                 }
 
-                final List<ActivityManager.RunningTaskInfo> runningTasks =
-                        mActivityTaskManager.getTasks(1);
-                if (!runningTasks.isEmpty()) {
-                    final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                    if (!topPackage.contentEquals(client.getOwnerString())
-                            && !client.isAlreadyDone()) {
-                        Slog.e(TAG, "Stopping background authentication, top: "
-                                + topPackage + " currentClient: " + client);
-                        mScheduler.cancelAuthenticationOrDetection(
-                                client.getToken(), client.getRequestId());
-                    }
+                if (Utils.isBackground(client.getOwnerString())
+                        && !client.isAlreadyDone()) {
+                    Slog.e(TAG, "Stopping background authentication,"
+                            + " currentClient: " + client);
+                    mScheduler.cancelAuthenticationOrDetection(
+                            client.getToken(), client.getRequestId());
                 }
             });
         }
@@ -794,32 +789,35 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @Override
     public void onPointerDown(long requestId, int sensorId, int x, int y,
             float minor, float major) {
-        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.w(TAG, "onFingerDown received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onPointerDown(x, y, minor, major);
+        mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.w(TAG, "onFingerDown received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onPointerDown(x, y, minor, major);
+        });
     }
 
     @Override
     public void onPointerUp(long requestId, int sensorId) {
-        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.w(TAG, "onFingerDown received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onPointerUp();
+        mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.w(TAG, "onFingerDown received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onPointerUp();
+        });
     }
 
     @Override
     public void onUiReady(long requestId, int sensorId) {
-        final BaseClientMonitor client = mScheduler.getCurrentClientIfMatches(requestId);
-        if (!(client instanceof Udfps)) {
-            Slog.w(TAG, "onUiReady received during client: " + client);
-            return;
-        }
-        ((Udfps) client).onUiReady();
+        mScheduler.getCurrentClientIfMatches(requestId, (client) -> {
+            if (!(client instanceof Udfps)) {
+                Slog.w(TAG, "onUiReady received during client: " + client);
+                return;
+            }
+            ((Udfps) client).onUiReady();
+        });
     }
 
     @Override

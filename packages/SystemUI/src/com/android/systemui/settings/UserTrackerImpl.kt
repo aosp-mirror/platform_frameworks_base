@@ -127,6 +127,12 @@ class UserTrackerImpl internal constructor(
         }
     }
 
+    override fun createCurrentUserContext(context: Context): Context {
+        synchronized(mutex) {
+            return context.createContextAsUser(userHandle, 0)
+        }
+    }
+
     private fun setUserIdInternal(user: Int): Pair<Context, List<UserInfo>> {
         val profiles = userManager.getProfiles(user)
         val handle = UserHandle(user)
