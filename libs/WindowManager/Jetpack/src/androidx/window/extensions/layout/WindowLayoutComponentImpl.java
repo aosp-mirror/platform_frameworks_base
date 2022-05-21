@@ -79,6 +79,11 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      */
     public void addWindowLayoutInfoListener(@NonNull Activity activity,
             @NonNull Consumer<WindowLayoutInfo> consumer) {
+        mFoldingFeatureProducer.getData((features) -> {
+            // Get the WindowLayoutInfo from the activity and pass the value to the layoutConsumer.
+            WindowLayoutInfo newWindowLayout = getWindowLayoutInfo(activity, features);
+            consumer.accept(newWindowLayout);
+        });
         mWindowLayoutChangeListeners.put(activity, consumer);
     }
 
