@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Попробуйте сделать скриншот снова."</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Не удалось сохранить скриншот."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Не удалось сделать скриншот: нет разрешения от приложения или организации."</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Системный администратор запретил делать скриншоты."</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Изменить"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Изменить скриншот"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Поделиться скриншотом"</string>
@@ -318,6 +317,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Проведите вверх, чтобы открыть"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Нажмите на значок разблокировки."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Сканирование выполнено. Нажмите на значок разблокировки."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Чтобы повторить попытку, проведите вверх"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Чтобы использовать NFC, разблокируйте устройство."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Это устройство принадлежит вашей организации"</string>
@@ -466,7 +469,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Кошелек"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Расплачивайтесь через телефон быстро и безопасно."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показать все"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Добавьте карту"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Нажмите, чтобы открыть"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Обновление…"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Разблокировать для использования"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Не удалось получить информацию о картах. Повторите попытку позже."</string>
@@ -600,8 +603,8 @@
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Гарнитура подключена"</string>
     <string name="data_saver" msgid="3484013368530820763">"Экономия трафика"</string>
     <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Режим экономии трафика включен"</string>
-    <string name="switch_bar_on" msgid="1770868129120096114">"Включено"</string>
-    <string name="switch_bar_off" msgid="5669805115416379556">"Отключено"</string>
+    <string name="switch_bar_on" msgid="1770868129120096114">"Вкл."</string>
+    <string name="switch_bar_off" msgid="5669805115416379556">"Откл."</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Недоступно"</string>
     <string name="tile_disabled" msgid="373212051546573069">"Отключено"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Панель навигации"</string>
@@ -730,8 +733,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Включать, если высока вероятность, что батарея скоро разрядится"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Нет, спасибо"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Передача SysUI"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Используется"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"В приложениях используется <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" и "</string>
@@ -811,7 +813,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Проведите по экрану, чтобы увидеть больше"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загрузка рекомендаций…"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Скрыть этот элемент управления в приложении \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Скрыть этот элемент в приложении \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Этот мультимедийный сеанс невозможно скрыть."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скрыть"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Возобновить"</string>
@@ -831,7 +833,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Чтобы начать трансляцию на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\", подойдите к нему ближе."</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Для воспроизведения на этом устройстве подойдите ближе к другому (<xliff:g id="DEVICENAME">%1$s</xliff:g>)."</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Воспроизводится на устройстве \"<xliff:g id="DEVICENAME">%1$s</xliff:g>\"."</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Воспроизводится на этом телефоне."</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Произошла ошибка. Повторите попытку."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Нет ответа. Проверьте приложение."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
@@ -852,6 +853,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Чтобы начать трансляцию сеанса, откройте приложение"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестное приложение"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Остановить трансляцию"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работают трансляции"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляция"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Находящиеся рядом с вами люди с совместимыми устройствами Bluetooth могут слушать медиафайлы, которые вы транслируете."</string>
@@ -861,10 +864,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Сохранить"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Запуск…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Не удалось запустить трансляцию"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Не удалось сохранить. Повторите попытку."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Не удалось сохранить."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер сборки"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер сборки скопирован в буфер обмена."</string>
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
@@ -934,10 +935,10 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Не добавлять"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Выберите профиль"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> приложение активно</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> приложения активно</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> приложений активно</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> приложения активно</item>
+      <item quantity="one">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложение</item>
+      <item quantity="few">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложения</item>
+      <item quantity="many">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложений</item>
+      <item quantity="other">Активно <xliff:g id="COUNT_1">%s</xliff:g> приложения</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Новая информация"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Активные приложения"</string>
@@ -951,6 +952,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Изменить скопированный текст"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Изменить скопированное изображение"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Отправить на устройство поблизости"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Нажмите, чтобы посмотреть"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Добавить"</string>
     <string name="manage_users" msgid="1823875311934643849">"Управление пользователями"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Это уведомление нельзя перетаскивать между частями разделенного экрана."</string>

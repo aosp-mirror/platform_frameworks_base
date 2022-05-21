@@ -32,6 +32,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_N
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
+import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_CLOSED;
 import static com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManagerKt.STATE_OPEN;
@@ -2315,8 +2316,9 @@ public class NotificationPanelViewController extends PanelViewController {
     void setQsExpansion(float height) {
         height = Math.min(Math.max(height, mQsMinExpansionHeight), mQsMaxExpansionHeight);
         mQsFullyExpanded = height == mQsMaxExpansionHeight && mQsMaxExpansionHeight != 0;
+        boolean qsAnimatingAway = !mQsAnimatorExpand && mAnimatingQS;
         if (height > mQsMinExpansionHeight && !mQsExpanded && !mStackScrollerOverscrolling
-                && !mDozing) {
+                && !mDozing && !qsAnimatingAway) {
             setQsExpanded(true);
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
             setQsExpanded(false);
@@ -2570,6 +2572,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mQsClipTop = (int) (top - currentTranslation - mQsFrame.getTop());
             mQsClipBottom = (int) (bottom - currentTranslation - mQsFrame.getTop());
             mQsVisible = qsVisible;
+            mQs.setQsVisible(mQsVisible);
             mQs.setFancyClipping(
                     mQsClipTop,
                     mQsClipBottom,
@@ -3037,15 +3040,20 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updatePanelExpanded() {
         boolean isExpanded = !isFullyCollapsed() || mExpectingSynthesizedDown;
         if (mPanelExpanded != isExpanded) {
+            mPanelExpanded = isExpanded;
+
             mHeadsUpManager.setIsPanelExpanded(isExpanded);
             mStatusBarTouchableRegionManager.setPanelExpanded(isExpanded);
             mCentralSurfaces.setPanelExpanded(isExpanded);
-            mPanelExpanded = isExpanded;
 
             if (!isExpanded && mQs != null && mQs.isCustomizing()) {
                 mQs.closeCustomizer();
             }
         }
+    }
+
+    boolean isPanelExpanded() {
+        return mPanelExpanded;
     }
 
     private int calculatePanelHeightShade() {
@@ -3943,6 +3951,10 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    public boolean hasActiveClearableNotifications() {
+        return mNotificationStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL);
+    }
+
     public RemoteInputController.Delegate createRemoteInputDelegate() {
         return mNotificationStackScrollLayoutController.createDelegate();
     }
@@ -4700,6 +4712,11 @@ public class NotificationPanelViewController extends PanelViewController {
                     duration = StackStateAnimator.ANIMATION_DURATION_STANDARD;
                 }
                 mKeyguardStatusBarViewController.animateKeyguardStatusBarOut(startDelay, duration);
+                if (mSplitShadeEnabled) {
+                    // temporary workaround for QS height not being updated during lockscreen to
+                    // shade transition
+                    setQsExpanded(true);
+                }
                 updateQSMinHeight();
             } else if (oldState == StatusBarState.SHADE_LOCKED
                     && statusBarState == KEYGUARD) {

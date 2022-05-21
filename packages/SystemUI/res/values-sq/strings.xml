@@ -78,8 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Provo ta nxjerrësh përsëri pamjen e ekranit"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Pamja e ekranit nuk mund të ruhet"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Nxjerrja e pamjeve të ekranit nuk lejohet nga aplikacioni ose organizata jote."</string>
-    <!-- no translation found for screenshot_blocked_by_admin (5486757604822795797) -->
-    <skip />
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"Shkrepja e pamjeve të ekranit është bllokuar nga administratori i teknologjisë së informacionit"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Modifiko"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Modifiko pamjen e ekranit"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ndaj pamjen e ekranit"</string>
@@ -314,6 +313,10 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Rrëshqit lart për ta hapur"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Shtyp ikonën e shkyçjes për ta hapur"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"U shkyç me fytyrë. Shtyp ikonën e shkyçjes për ta hapur."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
     <string name="keyguard_retry" msgid="886802522584053523">"Rrëshqit lart për të provuar përsëri"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Shkyçe për të përdorur NFC-në"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Kjo pajisje i përket organizatës sate"</string>
@@ -460,7 +463,7 @@
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguro për të kryer pagesa më të shpejta dhe më të sigurta përmes telefonit"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Shto një kartë"</string>
+    <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Trokit për ta hapur"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Po përditësohet"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Shkyçe për ta përdorur"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Pati një problem me marrjen e kartave të tua. Provo përsëri më vonë"</string>
@@ -720,8 +723,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"Aktivizoje kur bateria mund të mbarojë"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Jo"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Hidh grumbullin SysUI"</string>
-    <!-- no translation found for ongoing_privacy_dialog_a11y_title (2205794093673327974) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_a11y_title" msgid="2205794093673327974">"Në përdorim"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacionet po përdorin <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" dhe "</string>
@@ -819,7 +821,6 @@
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Afrohu për të luajtur në <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Afrohu te <xliff:g id="DEVICENAME">%1$s</xliff:g> për ta luajtur këtu"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Po luhet në <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Po luhet në këtë telefon"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Ndodhi një gabim. Provo përsëri."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Joaktive, kontrollo aplikacionin"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nuk u gjet"</string>
@@ -840,6 +841,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Hap aplikacionin për të transmetuar këtë seancë."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplikacion i panjohur"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ndalo transmetimin"</string>
+    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Si funksionon transmetimi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmetimi"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personat në afërsi me ty me pajisje të përputhshme me Bluetooth mund të dëgjojnë median që ti po transmeton"</string>
@@ -849,10 +852,8 @@
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Ruaj"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"Po fillon…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nuk mund të transmetohet"</string>
-    <!-- no translation found for media_output_broadcast_update_error (1420868236079122521) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_last_update_error (5484328807296895491) -->
-    <skip />
+    <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Nuk mund të ruhet. Provo përsëri."</string>
+    <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Nuk mund të ruhet."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numri i ndërtimit"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numri i ndërtimit u kopjua te kujtesa e fragmenteve"</string>
     <string name="basic_status" msgid="2315371112182658176">"Hap bisedën"</string>
@@ -937,6 +938,13 @@
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Modifiko tekstin e kopjuar"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Modifiko imazhin e kopjuar"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Dërgo te pajisja në afërsi"</string>
+    <string name="clipboard_text_hidden" msgid="7926899867471812305">"Trokit për të parë"</string>
+    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
+    <skip />
+    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
+    <skip />
+    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Shto"</string>
     <string name="manage_users" msgid="1823875311934643849">"Menaxho përdoruesit"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Ky njoftim nuk mbështet zvarritjen në \"Ekranin e ndarë\"."</string>

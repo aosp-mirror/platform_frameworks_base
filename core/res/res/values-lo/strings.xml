@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ກວດສອບແອັບທີ່ເຄື່ອນໄຫວ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງໂທລະສັບຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ບໍ່ສາມາດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບຂອງແທັບເລັດຈາກ <xliff:g id="DEVICE">%1$s</xliff:g> ຂອງທ່ານໄດ້"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"ພາສາລະບົບ"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"ຄ່າເລີ່ມຕົ້ນຂອງລະບົບ"</string>
 </resources>
