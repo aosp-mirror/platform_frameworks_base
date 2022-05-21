@@ -37,6 +37,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
+import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
@@ -194,7 +195,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_START_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
                 final IBinder startInputToken = (IBinder) args.arg1;
-                final IInputContext inputContext = (IInputContext) args.arg2;
+                final IInputContext inputContext = (IInputContext) ((SomeArgs) args.arg2).arg1;
+                final ImeOnBackInvokedDispatcher imeDispatcher =
+                        (ImeOnBackInvokedDispatcher) ((SomeArgs) args.arg2).arg2;
                 final EditorInfo info = (EditorInfo) args.arg3;
                 final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
                 final boolean restarting = args.argi5 == 1;
@@ -205,7 +208,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                         : null;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken,
-                        navButtonFlags);
+                        navButtonFlags, imeDispatcher);
                 args.recycle();
                 return;
             }
@@ -348,13 +351,17 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @Override
     public void startInput(IBinder startInputToken, IInputContext inputContext,
             EditorInfo attribute, boolean restarting,
-            @InputMethodNavButtonFlags int navButtonFlags) {
+            @InputMethodNavButtonFlags int navButtonFlags,
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         if (mCancellationGroup == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = inputContext;
+        args.arg2 = imeDispatcher;
         mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOII(DO_START_INPUT, startInputToken,
-                inputContext, attribute, mCancellationGroup, restarting ? 1 : 0, navButtonFlags));
+                args, attribute, mCancellationGroup, restarting ? 1 : 0, navButtonFlags));
     }
 
     @BinderThread

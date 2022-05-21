@@ -16,15 +16,25 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
+import android.content.res.Configuration;
+import android.graphics.Point;
+import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
+import android.window.TaskFragmentInfo;
+import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
@@ -34,6 +44,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
 
 /**
  * Test class for {@link JetpackTaskFragmentOrganizer}.
@@ -48,7 +60,13 @@ public class JetpackTaskFragmentOrganizerTest {
     private static final int TASK_ID = 10;
 
     @Mock
+    private WindowContainerTransaction mTransaction;
+    @Mock
     private JetpackTaskFragmentOrganizer.TaskFragmentCallback mCallback;
+    @Mock
+    private SplitController mSplitController;
+    @Mock
+    private Handler mHandler;
     private JetpackTaskFragmentOrganizer mOrganizer;
 
     @Before
@@ -57,6 +75,7 @@ public class JetpackTaskFragmentOrganizerTest {
         mOrganizer = new JetpackTaskFragmentOrganizer(Runnable::run, mCallback);
         mOrganizer.registerOrganizer();
         spyOn(mOrganizer);
+        doReturn(mHandler).when(mSplitController).getHandler();
     }
 
     @Test
@@ -90,5 +109,27 @@ public class JetpackTaskFragmentOrganizerTest {
         mOrganizer.stopOverrideSplitAnimation(TASK_ID);
 
         verify(mOrganizer).unregisterRemoteAnimations(TASK_ID);
+    }
+
+    @Test
+    public void testExpandTaskFragment() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                taskContainer, mSplitController);
+        final TaskFragmentInfo info = createMockInfo(container);
+        mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
+        container.setInfo(info);
+
+        mOrganizer.expandTaskFragment(mTransaction, container.getTaskFragmentToken());
+
+        verify(mTransaction).setWindowingMode(container.getInfo().getToken(),
+                WINDOWING_MODE_UNDEFINED);
+    }
+
+    private TaskFragmentInfo createMockInfo(TaskFragmentContainer container) {
+        return new TaskFragmentInfo(container.getTaskFragmentToken(),
+                mock(WindowContainerToken.class), new Configuration(), 0 /* runningActivityCount */,
+                false /* isVisible */, new ArrayList<>(), new Point(),
+                false /* isTaskClearedForReuse */, false /* isTaskFragmentClearedForPip */);
     }
 }

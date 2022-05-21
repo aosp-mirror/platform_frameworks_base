@@ -28,7 +28,9 @@ import com.android.systemui.log.LogLevel.WTF
 import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.statusbar.notification.collection.NotifCollection
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason
+import com.android.systemui.statusbar.notification.collection.NotifCollection.FutureDismissal
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 fun cancellationReasonDebugString(@CancellationReason reason: Int) =
@@ -36,6 +38,7 @@ fun cancellationReasonDebugString(@CancellationReason reason: Int) =
         -1 -> "REASON_NOT_CANCELED" // NotifCollection.REASON_NOT_CANCELED
         NotifCollection.REASON_UNKNOWN -> "REASON_UNKNOWN"
         NotificationListenerService.REASON_CLICK -> "REASON_CLICK"
+        NotificationListenerService.REASON_CANCEL -> "REASON_CANCEL"
         NotificationListenerService.REASON_CANCEL_ALL -> "REASON_CANCEL_ALL"
         NotificationListenerService.REASON_ERROR -> "REASON_ERROR"
         NotificationListenerService.REASON_PACKAGE_CHANGED -> "REASON_PACKAGE_CHANGED"
@@ -53,6 +56,9 @@ fun cancellationReasonDebugString(@CancellationReason reason: Int) =
         NotificationListenerService.REASON_CHANNEL_BANNED -> "REASON_CHANNEL_BANNED"
         NotificationListenerService.REASON_SNOOZED -> "REASON_SNOOZED"
         NotificationListenerService.REASON_TIMEOUT -> "REASON_TIMEOUT"
+        NotificationListenerService.REASON_CHANNEL_REMOVED -> "REASON_CHANNEL_REMOVED"
+        NotificationListenerService.REASON_CLEAR_DATA -> "REASON_CLEAR_DATA"
+        NotificationListenerService.REASON_ASSISTANT_CANCEL -> "REASON_ASSISTANT_CANCEL"
         else -> "unknown"
     }
 
@@ -239,6 +245,81 @@ class NotifCollectionLogger @Inject constructor(
             str1 = message
         }, {
             "ERROR suppressed due to initialization forgiveness: $str1"
+        })
+    }
+
+    fun logFutureDismissalReused(dismissal: FutureDismissal) {
+        buffer.log(TAG, INFO, {
+            str1 = dismissal.label
+        }, {
+            "Reusing existing registration: $str1"
+        })
+    }
+
+    fun logFutureDismissalRegistered(dismissal: FutureDismissal) {
+        buffer.log(TAG, DEBUG, {
+            str1 = dismissal.label
+        }, {
+            "Registered: $str1"
+        })
+    }
+
+    fun logFutureDismissalDoubleCancelledByServer(dismissal: FutureDismissal) {
+        buffer.log(TAG, WARNING, {
+            str1 = dismissal.label
+        }, {
+            "System server double cancelled: $str1"
+        })
+    }
+
+    fun logFutureDismissalDoubleRun(dismissal: FutureDismissal) {
+        buffer.log(TAG, WARNING, {
+            str1 = dismissal.label
+        }, {
+            "Double run: $str1"
+        })
+    }
+
+    fun logFutureDismissalAlreadyCancelledByServer(dismissal: FutureDismissal) {
+        buffer.log(TAG, DEBUG, {
+            str1 = dismissal.label
+        }, {
+            "Ignoring: entry already cancelled by server: $str1"
+        })
+    }
+
+    fun logFutureDismissalGotSystemServerCancel(
+        dismissal: FutureDismissal,
+        @CancellationReason cancellationReason: Int
+    ) {
+        buffer.log(TAG, DEBUG, {
+            str1 = dismissal.label
+            int1 = cancellationReason
+        }, {
+            "SystemServer cancelled: $str1 reason=${cancellationReasonDebugString(int1)}"
+        })
+    }
+
+    fun logFutureDismissalDismissing(dismissal: FutureDismissal, type: String) {
+        buffer.log(TAG, DEBUG, {
+            str1 = dismissal.label
+            str2 = type
+        }, {
+            "Dismissing $str2 for: $str1"
+        })
+    }
+
+    fun logFutureDismissalMismatchedEntry(
+        dismissal: FutureDismissal,
+        type: String,
+        latestEntry: NotificationEntry?
+    ) {
+        buffer.log(TAG, WARNING, {
+            str1 = dismissal.label
+            str2 = type
+            str3 = latestEntry.logKey
+        }, {
+            "Mismatch: current $str2 is $str3 for: $str1"
         })
     }
 }

@@ -19,10 +19,8 @@ package com.android.server.biometrics.sensors;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
@@ -42,7 +40,6 @@ import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -202,25 +199,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         if (!mAllowBackgroundAuthentication && authenticated
                 && !Utils.isKeyguard(getContext(), getOwnerString())
                 && !Utils.isSystem(getContext(), getOwnerString())) {
-            final List<ActivityManager.RunningTaskInfo> tasks =
-                    mActivityTaskManager.getTasks(1);
-            if (tasks == null || tasks.isEmpty()) {
-                Slog.e(TAG, "No running tasks reported");
-                isBackgroundAuth = true;
-            } else {
-                final ComponentName topActivity = tasks.get(0).topActivity;
-                if (topActivity == null) {
-                    Slog.e(TAG, "Unable to get top activity");
-                    isBackgroundAuth = true;
-                } else {
-                    final String topPackage = topActivity.getPackageName();
-                    if (!topPackage.contentEquals(getOwnerString())) {
-                        Slog.e(TAG, "Background authentication detected, top: " + topPackage
-                                + ", client: " + getOwnerString());
-                        isBackgroundAuth = true;
-                    }
-                }
-            }
+            isBackgroundAuth = Utils.isBackground(getOwnerString());
         }
 
         // Fail authentication if we can't confirm the client activity is on top.
@@ -465,7 +444,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Override
     public void cancel() {
         super.cancel();
-
         if (mTaskStackListener != null) {
             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         }
