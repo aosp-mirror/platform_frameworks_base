@@ -22,6 +22,8 @@ import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.wm.shell.TaskView
 import org.junit.Before
 import org.junit.Test
@@ -45,6 +47,10 @@ class DetailDialogTest : SysuiTestCase() {
     private lateinit var controlViewHolder: ControlViewHolder
     @Mock
     private lateinit var pendingIntent: PendingIntent
+    @Mock
+    private lateinit var keyguardStateController: KeyguardStateController
+    @Mock
+    private lateinit var activityStarter: ActivityStarter
 
     @Before
     fun setUp() {
@@ -69,7 +75,9 @@ class DetailDialogTest : SysuiTestCase() {
             broadcastSender,
             taskView,
             pendingIntent,
-            controlViewHolder
+            controlViewHolder,
+            keyguardStateController,
+            activityStarter
         )
     }
 }

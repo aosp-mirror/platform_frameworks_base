@@ -1,9 +1,15 @@
 package com.android.systemui.qs.tiles.dialog;
 
 import static android.provider.Settings.Global.AIRPLANE_MODE_ON;
+import static android.telephony.SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
+import static android.telephony.SignalStrength.SIGNAL_STRENGTH_GREAT;
+import static android.telephony.SignalStrength.SIGNAL_STRENGTH_POOR;
 
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_HORIZONTAL_WEIGHT;
 import static com.android.systemui.qs.tiles.dialog.InternetDialogController.TOAST_PARAMS_VERTICAL_WEIGHT;
+import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX;
+import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN;
+import static com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_UNREACHABLE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -17,6 +23,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +35,7 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -140,6 +148,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
     private View mDialogLaunchView;
     @Mock
     private WifiStateWorker mWifiStateWorker;
+    @Mock
+    private SignalStrength mSignalStrength;
 
     private TestableResources mTestableResources;
     private InternetDialogController mInternetDialogController;
@@ -152,6 +162,8 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mTestableResources = mContext.getOrCreateTestableResources();
         doReturn(mTelephonyManager).when(mTelephonyManager).createForSubscriptionId(anyInt());
+        when(mTelephonyManager.getSignalStrength()).thenReturn(mSignalStrength);
+        when(mSignalStrength.getLevel()).thenReturn(SIGNAL_STRENGTH_GREAT);
         when(mKeyguardStateController.isUnlocked()).thenReturn(true);
         when(mConnectedEntry.isDefaultNetwork()).thenReturn(true);
         when(mConnectedEntry.hasInternetAccess()).thenReturn(true);
@@ -380,7 +392,7 @@ public class InternetDialogControllerTest extends SysuiTestCase {
 
     @Test
     public void getInternetWifiDrawable_withWifiLevelUnreachable_returnNull() {
-        when(mConnectedEntry.getLevel()).thenReturn(WifiEntry.WIFI_LEVEL_UNREACHABLE);
+        when(mConnectedEntry.getLevel()).thenReturn(WIFI_LEVEL_UNREACHABLE);
 
         Drawable drawable = mInternetDialogController.getInternetWifiDrawable(mConnectedEntry);
 
@@ -636,6 +648,57 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         when(mWifiManager.isScanAlwaysAvailable()).thenReturn(true);
 
         assertThat(mInternetDialogController.isWifiScanEnabled()).isTrue();
+    }
+
+    @Test
+    public void getSignalStrengthDrawableWithLevel_carrierNetworkIsNotActive_useMobileDataLevel() {
+        // Fake mobile data level as SIGNAL_STRENGTH_POOR(1)
+        when(mSignalStrength.getLevel()).thenReturn(SIGNAL_STRENGTH_POOR);
+        // Fake carrier network level as WIFI_LEVEL_MAX(4)
+        when(mInternetDialogController.getCarrierNetworkLevel()).thenReturn(WIFI_LEVEL_MAX);
+
+        InternetDialogController spyController = spy(mInternetDialogController);
+        spyController.getSignalStrengthDrawableWithLevel(false /* isCarrierNetworkActive */);
+
+        verify(spyController).getSignalStrengthIcon(any(), eq(SIGNAL_STRENGTH_POOR),
+                eq(NUM_SIGNAL_STRENGTH_BINS), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void getSignalStrengthDrawableWithLevel_carrierNetworkIsActive_useCarrierNetworkLevel() {
+        // Fake mobile data level as SIGNAL_STRENGTH_POOR(1)
+        when(mSignalStrength.getLevel()).thenReturn(SIGNAL_STRENGTH_POOR);
+        // Fake carrier network level as WIFI_LEVEL_MAX(4)
+        when(mInternetDialogController.getCarrierNetworkLevel()).thenReturn(WIFI_LEVEL_MAX);
+
+        InternetDialogController spyController = spy(mInternetDialogController);
+        spyController.getSignalStrengthDrawableWithLevel(true /* isCarrierNetworkActive */);
+
+        verify(spyController).getSignalStrengthIcon(any(), eq(WIFI_LEVEL_MAX),
+                eq(WIFI_LEVEL_MAX + 1), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void getCarrierNetworkLevel_mergedCarrierEntryIsNull_returnMinLevel() {
+        when(mAccessPointController.getMergedCarrierEntry()).thenReturn(null);
+
+        assertThat(mInternetDialogController.getCarrierNetworkLevel()).isEqualTo(WIFI_LEVEL_MIN);
+    }
+
+    @Test
+    public void getCarrierNetworkLevel_getUnreachableLevel_returnMinLevel() {
+        when(mMergedCarrierEntry.getLevel()).thenReturn(WIFI_LEVEL_UNREACHABLE);
+
+        assertThat(mInternetDialogController.getCarrierNetworkLevel()).isEqualTo(WIFI_LEVEL_MIN);
+    }
+
+    @Test
+    public void getCarrierNetworkLevel_getAvailableLevel_returnSameLevel() {
+        for (int level = WIFI_LEVEL_MIN; level <= WIFI_LEVEL_MAX; level++) {
+            when(mMergedCarrierEntry.getLevel()).thenReturn(level);
+
+            assertThat(mInternetDialogController.getCarrierNetworkLevel()).isEqualTo(level);
+        }
     }
 
     private String getResourcesString(String name) {
