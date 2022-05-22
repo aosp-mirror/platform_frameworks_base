@@ -70,6 +70,7 @@ interface IAppWidgetService {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean bindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent,
             IApplicationThread caller, IBinder token, IServiceConnection connection, int flags);
+    void notifyProviderInheritance(in ComponentName[] componentNames);
 
     @UnsupportedAppUsage
     int[] getAppWidgetIds(in ComponentName providerComponent);

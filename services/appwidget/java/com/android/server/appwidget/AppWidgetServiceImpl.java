@@ -25,6 +25,7 @@ import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -1441,6 +1442,40 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         updateAppWidgetIds(callingPackage, appWidgetIds, views, true);
+    }
+
+    @Override
+    public void notifyProviderInheritance(@Nullable final ComponentName[] componentNames) {
+        final int userId = UserHandle.getCallingUserId();
+        if (DEBUG) {
+            Slog.i(TAG, "notifyProviderInheritance() " + userId);
+        }
+
+        if (componentNames == null) {
+            return;
+        }
+
+        for (ComponentName componentName : componentNames) {
+            if (componentName == null) {
+                return;
+            }
+            mSecurityPolicy.enforceCallFromPackage(componentName.getPackageName());
+        }
+        synchronized (mLock) {
+            ensureGroupStateLoadedLocked(userId);
+
+            for (ComponentName componentName : componentNames) {
+                final ProviderId providerId = new ProviderId(Binder.getCallingUid(), componentName);
+                final Provider provider = lookupProviderLocked(providerId);
+
+                if (provider == null || provider.info == null) {
+                    return;
+                }
+
+                provider.info.isExtendedFromAppWidgetProvider = true;
+            }
+            saveGroupStateAsync(userId);
+        }
     }
 
     @Override
