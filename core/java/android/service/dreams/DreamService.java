@@ -36,6 +36,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1272,7 +1273,7 @@ public class DreamService extends Service implements Window.Callback {
             Intent i = new Intent(this, DreamActivity.class);
             i.setPackage(getApplicationContext().getPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.putExtra(DreamActivity.EXTRA_CALLBACK, mDreamServiceWrapper);
+            i.putExtra(DreamActivity.EXTRA_CALLBACK, new DreamActivityCallback(mDreamToken));
             final ServiceInfo serviceInfo = fetchServiceInfo(this,
                     new ComponentName(this, getClass()));
             i.putExtra(DreamActivity.EXTRA_DREAM_TITLE, fetchDreamLabel(this, serviceInfo));
@@ -1452,11 +1453,36 @@ public class DreamService extends Service implements Window.Callback {
         public void wakeUp() {
             mHandler.post(() -> DreamService.this.wakeUp(true /*fromSystem*/));
         }
+    }
 
-        /** @hide */
-        void onActivityCreated(DreamActivity a) {
-            mActivity = a;
-            onWindowCreated(a.getWindow());
+    /** @hide */
+    final class DreamActivityCallback extends Binder {
+        private final IBinder mActivityDreamToken;
+
+        DreamActivityCallback(IBinder token) {
+            mActivityDreamToken = token;
+        }
+
+        void onActivityCreated(DreamActivity activity) {
+            if (mActivityDreamToken != mDreamToken || mFinished) {
+                Slog.d(TAG, "DreamActivity was created after the dream was finished or "
+                        + "a new dream started, finishing DreamActivity");
+                if (!activity.isFinishing()) {
+                    activity.finishAndRemoveTask();
+                }
+                return;
+            }
+            if (mActivity != null) {
+                Slog.w(TAG, "A DreamActivity has already been started, "
+                        + "finishing latest DreamActivity");
+                if (!activity.isFinishing()) {
+                    activity.finishAndRemoveTask();
+                }
+                return;
+            }
+
+            mActivity = activity;
+            onWindowCreated(activity.getWindow());
         }
     }
 
