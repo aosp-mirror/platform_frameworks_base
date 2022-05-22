@@ -200,6 +200,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_SETTINGS_SLIDER = 53;
     public static final int CUJ_TAKE_SCREENSHOT = 54;
     public static final int CUJ_VOLUME_CONTROL = 55;
+    public static final int CUJ_BIOMETRIC_PROMPT_TRANSITION = 56;
     public static final int CUJ_SETTINGS_TOGGLE = 57;
 
     private static final int NO_STATSD_LOGGING = -1;
@@ -343,6 +344,7 @@ public class InteractionJankMonitor {
             CUJ_SETTINGS_SLIDER,
             CUJ_TAKE_SCREENSHOT,
             CUJ_VOLUME_CONTROL,
+            CUJ_BIOMETRIC_PROMPT_TRANSITION,
             CUJ_SETTINGS_TOGGLE,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -774,6 +776,8 @@ public class InteractionJankMonitor {
                 return "TAKE_SCREENSHOT";
             case CUJ_VOLUME_CONTROL:
                 return "VOLUME_CONTROL";
+            case CUJ_BIOMETRIC_PROMPT_TRANSITION:
+                return "BIOMETRIC_PROMPT_TRANSITION";
             case CUJ_SETTINGS_TOGGLE:
                 return "SETTINGS_TOGGLE";
         }
