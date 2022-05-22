@@ -159,6 +159,8 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     @VisibleForTesting
     protected DisplayDecorationSupport mHwcScreenDecorationSupport;
     private Display.Mode mDisplayMode;
+    @VisibleForTesting
+    protected DisplayInfo mDisplayInfo = new DisplayInfo();
 
     private CameraAvailabilityListener.CameraTransitionCallback mCameraTransitionCallback =
             new CameraAvailabilityListener.CameraTransitionCallback() {
@@ -325,9 +327,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     private void startOnScreenDecorationsThread() {
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
-        mRotation = mContext.getDisplay().getRotation();
-        mDisplayMode = mContext.getDisplay().getMode();
-        mDisplayUniqueId = mContext.getDisplay().getUniqueId();
+        mContext.getDisplay().getDisplayInfo(mDisplayInfo);
+        mRotation = mDisplayInfo.rotation;
+        mDisplayMode = mDisplayInfo.getMode();
+        mDisplayUniqueId = mDisplayInfo.uniqueId;
         mRoundedCornerResDelegate = new RoundedCornerResDelegate(mContext.getResources(),
                 mDisplayUniqueId);
         mRoundedCornerResDelegate.setPhysicalPixelDisplaySizeRatio(
@@ -351,8 +354,9 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
 
             @Override
             public void onDisplayChanged(int displayId) {
-                final int newRotation = mContext.getDisplay().getRotation();
-                final Display.Mode newDisplayMode = mContext.getDisplay().getMode();
+                mContext.getDisplay().getDisplayInfo(mDisplayInfo);
+                final int newRotation = mDisplayInfo.rotation;
+                final Display.Mode newDisplayMode = mDisplayInfo.getMode();
                 if ((mOverlays != null || mScreenDecorHwcWindow != null)
                         && (mRotation != newRotation
                         || displayModeChanged(mDisplayMode, newDisplayMode))) {
@@ -398,7 +402,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                     }
                 }
 
-                final String newUniqueId = mContext.getDisplay().getUniqueId();
+                final String newUniqueId = mDisplayInfo.uniqueId;
                 if (!Objects.equals(newUniqueId, mDisplayUniqueId)) {
                     mDisplayUniqueId = newUniqueId;
                     final DisplayDecorationSupport newScreenDecorationSupport =
@@ -923,11 +927,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     @VisibleForTesting
     float getPhysicalPixelDisplaySizeRatio() {
         final Point stableDisplaySize = mDisplayManager.getStableDisplaySize();
-        final DisplayInfo displayInfo = new DisplayInfo();
-        mContext.getDisplay().getDisplayInfo(displayInfo);
+        mContext.getDisplay().getDisplayInfo(mDisplayInfo);
         return DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                stableDisplaySize.x, stableDisplaySize.y, displayInfo.getNaturalWidth(),
-                displayInfo.getNaturalHeight());
+                stableDisplaySize.x, stableDisplaySize.y, mDisplayInfo.getNaturalWidth(),
+                mDisplayInfo.getNaturalHeight());
     }
 
     @Override
@@ -1004,11 +1007,12 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                 "must call on " + mHandler.getLooper().getThread()
                         + ", but was " + Thread.currentThread());
 
-        int newRotation = mContext.getDisplay().getRotation();
+        mContext.getDisplay().getDisplayInfo(mDisplayInfo);
+        final int newRotation = mDisplayInfo.rotation;
         if (mRotation != newRotation) {
             mDotViewController.setNewRotation(newRotation);
         }
-        final Display.Mode newMod = mContext.getDisplay().getMode();
+        final Display.Mode newMod = mDisplayInfo.getMode();
 
         if (!mPendingConfigChange
                 && (newRotation != mRotation || displayModeChanged(mDisplayMode, newMod))) {
@@ -1220,7 +1224,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
         @Override
         public void updateRotation(int rotation) {
             mRotation = rotation;
-            updateCutout();
+            super.updateRotation(rotation);
         }
 
         @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -1431,9 +1435,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
 
         @Override
         public boolean onPreDraw() {
-            final int displayRotation = mContext.getDisplay().getRotation();
-            final Display.Mode displayMode = mContext.getDisplay().getMode();
-            if (displayRotation != mRotation && displayModeChanged(mDisplayMode, displayMode)
+            mContext.getDisplay().getDisplayInfo(mDisplayInfo);
+            final int displayRotation = mDisplayInfo.rotation;
+            final Display.Mode displayMode = mDisplayInfo.getMode();
+            if ((displayRotation != mRotation || displayModeChanged(mDisplayMode, displayMode))
                     && !mPendingConfigChange) {
                 if (DEBUG) {
                     if (displayRotation != mRotation) {
