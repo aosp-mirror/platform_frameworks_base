@@ -839,6 +839,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
 
     @Override
     void dumpAsProto(ProtoOutputStream proto, int uid) {
+        // Force an update.
+        updateBatteryUsageStatsIfNecessary(mInjector.currentTimeMillis(), true);
         synchronized (mLock) {
             final SparseArray<ImmutableBatteryUsage> uidConsumers = mUidBatteryUsageInWindow;
             if (uid != android.os.Process.INVALID_UID) {
