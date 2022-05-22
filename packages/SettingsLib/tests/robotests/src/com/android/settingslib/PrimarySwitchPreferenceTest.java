@@ -30,14 +30,17 @@ import androidx.preference.Preference.OnPreferenceChangeListener;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+import com.android.settingslib.testutils.shadow.ShadowInteractionJankMonitor;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowInteractionJankMonitor.class})
 public class PrimarySwitchPreferenceTest {
 
     private Context mContext;
