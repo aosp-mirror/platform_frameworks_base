@@ -906,9 +906,19 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
         if (mQsExpansion > 0) {
             behindAlpha = MathUtils.lerp(behindAlpha, mDefaultScrimAlpha, mQsExpansion);
+            float tintProgress = mQsExpansion;
+            if (mStatusBarKeyguardViewManager.isBouncerInTransit()) {
+                // this is case of - on lockscreen - going from expanded QS to bouncer.
+                // Because mQsExpansion is already interpolated and transition between tints
+                // is too slow, we want to speed it up and make it more aligned to bouncer
+                // showing up progress. This issue is visible on large screens, both portrait and
+                // split shade because then transition is between very different tints
+                tintProgress = BouncerPanelExpansionCalculator
+                        .showBouncerProgress(mPanelExpansionFraction);
+            }
             int stateTint = mClipsQsScrim ? ScrimState.SHADE_LOCKED.getNotifTint()
                     : ScrimState.SHADE_LOCKED.getBehindTint();
-            behindTint = ColorUtils.blendARGB(behindTint, stateTint, mQsExpansion);
+            behindTint = ColorUtils.blendARGB(behindTint, stateTint, tintProgress);
         }
 
         // If the keyguard is going away, we should not be opaque.
