@@ -328,11 +328,13 @@ public class AppIdleHistory {
             appUsageHistory.lastUsedScreenTime = getScreenOnTime(nowElapsedRealtimeMs);
         }
 
-        if (appUsageHistory.currentBucket > newBucket) {
-            appUsageHistory.currentBucket = newBucket;
-            logAppStandbyBucketChanged(packageName, userId, newBucket, bucketingReason);
+        if (appUsageHistory.currentBucket >= newBucket) {
+            if (appUsageHistory.currentBucket > newBucket) {
+                appUsageHistory.currentBucket = newBucket;
+                logAppStandbyBucketChanged(packageName, userId, newBucket, bucketingReason);
+            }
+            appUsageHistory.bucketingReason = bucketingReason;
         }
-        appUsageHistory.bucketingReason = bucketingReason;
 
         return appUsageHistory;
     }
