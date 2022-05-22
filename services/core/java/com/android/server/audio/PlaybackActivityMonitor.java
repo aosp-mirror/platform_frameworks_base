@@ -494,7 +494,7 @@ public final class PlaybackActivityMonitor
             }
             pw.println("\n");
             // muted players:
-            pw.print("\n  muted players (piids) awaiting device connection: BL3 ####");
+            pw.print("\n  muted players (piids) awaiting device connection:");
             for (int piid : mMutedPlayersAwaitingConnection) {
                 pw.print(" " + piid);
             }
@@ -1235,9 +1235,7 @@ public final class PlaybackActivityMonitor
 
     @GuardedBy("mPlayerLock")
     private void unmutePlayersExpectingDevice() {
-        if (mMutedPlayersAwaitingConnection.isEmpty()) {
-            return;
-        }
+        mMutedUsagesAwaitingConnection = null;
         for (int piid : mMutedPlayersAwaitingConnection) {
             final AudioPlaybackConfiguration apc = mPlayers.get(piid);
             if (apc == null) {
@@ -1254,7 +1252,6 @@ public final class PlaybackActivityMonitor
             }
         }
         mMutedPlayersAwaitingConnection.clear();
-        mMutedUsagesAwaitingConnection = null;
     }
 
     //=================================================================
@@ -1278,8 +1275,8 @@ public final class PlaybackActivityMonitor
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION:
-                        Log.i(TAG, "Timeout for muting waiting for "
-                                + (AudioDeviceAttributes) msg.obj + ", unmuting");
+                        sEventLogger.loglogi("Timeout for muting waiting for "
+                                + (AudioDeviceAttributes) msg.obj + ", unmuting", TAG);
                         synchronized (mPlayerLock) {
                             unmutePlayersExpectingDevice();
                         }
