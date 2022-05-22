@@ -1138,6 +1138,8 @@
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
     <dimen name="media_output_dialog_app_tier_icon_size">20dp</dimen>
+    <dimen name="media_output_dialog_background_radius">16dp</dimen>
+    <dimen name="media_output_dialog_active_background_radius">28dp</dimen>
 
     <!-- Distance that the full shade transition takes in order to complete by tapping on a button
          like "expand". -->

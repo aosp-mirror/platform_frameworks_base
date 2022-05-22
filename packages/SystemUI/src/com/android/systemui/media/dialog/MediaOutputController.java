@@ -79,6 +79,8 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -106,11 +108,15 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final DialogLaunchAnimator mDialogLaunchAnimator;
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final CommonNotifCollection mNotifCollection;
+    private final Object mMediaDevicesLock = new Object();
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
+    final List<MediaDevice> mCachedMediaDevices = new CopyOnWriteArrayList<>();
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager;
     private final Map<String, Integer> mNearbyDeviceInfoMap = new ConcurrentHashMap<>();
 
+    private boolean mIsRefreshing = false;
+    private boolean mNeedRefresh = false;
     private MediaController mMediaController;
     @VisibleForTesting
     Callback mCallback;
@@ -119,11 +125,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     private MediaOutputMetricLogger mMetricLogger;
 
-    private int mColorActiveItem;
-    private int mColorInactiveItem;
+    private int mColorItemContent;
     private int mColorSeekbarProgress;
     private int mColorButtonBackground;
     private int mColorItemBackground;
+    private int mColorConnectedItemBackground;
+    private int mColorPositiveButtonText;
+    private float mInactiveRadius;
+    private float mActiveRadius;
 
     public enum BroadcastNotifyDialog {
         ACTION_FIRST_LAUNCH,
@@ -148,20 +157,29 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mNearbyMediaDevicesManager = nearbyMediaDevicesManagerOptional.orElse(null);
-        mColorActiveItem = Utils.getColorStateListDefaultColor(mContext,
-                R.color.media_dialog_active_item_main_content);
-        mColorInactiveItem = Utils.getColorStateListDefaultColor(mContext,
-                R.color.media_dialog_inactive_item_main_content);
+        mColorItemContent = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_item_main_content);
         mColorSeekbarProgress = Utils.getColorStateListDefaultColor(mContext,
-                android.R.color.system_accent1_200);
+                R.color.media_dialog_seekbar_progress);
         mColorButtonBackground = Utils.getColorStateListDefaultColor(mContext,
-                R.color.media_dialog_item_background);
+                R.color.media_dialog_button_background);
         mColorItemBackground = Utils.getColorStateListDefaultColor(mContext,
-                android.R.color.system_accent2_50);
+                R.color.media_dialog_item_background);
+        mColorConnectedItemBackground = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_connected_item_background);
+        mColorPositiveButtonText = Utils.getColorStateListDefaultColor(mContext,
+                R.color.media_dialog_solid_button_text);
+        mInactiveRadius = mContext.getResources().getDimension(
+                R.dimen.media_output_dialog_background_radius);
+        mActiveRadius = mContext.getResources().getDimension(
+                R.dimen.media_output_dialog_active_background_radius);
     }
 
     void start(@NonNull Callback cb) {
-        mMediaDevices.clear();
+        synchronized (mMediaDevicesLock) {
+            mCachedMediaDevices.clear();
+            mMediaDevices.clear();
+        }
         mNearbyDeviceInfoMap.clear();
         if (mNearbyMediaDevicesManager != null) {
             mNearbyMediaDevicesManager.registerNearbyDevicesCallback(this);
@@ -199,6 +217,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return false;
     }
 
+    void setRefreshing(boolean refreshing) {
+        mIsRefreshing = refreshing;
+    }
+
+    boolean isRefreshing() {
+        return mIsRefreshing;
+    }
+
     void stop() {
         if (mMediaController != null) {
             mMediaController.unregisterCallback(mCb);
@@ -207,7 +233,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             mLocalMediaManager.unregisterCallback(this);
             mLocalMediaManager.stopScan();
         }
-        mMediaDevices.clear();
+        synchronized (mMediaDevicesLock) {
+            mCachedMediaDevices.clear();
+            mMediaDevices.clear();
+        }
         if (mNearbyMediaDevicesManager != null) {
             mNearbyMediaDevicesManager.unregisterNearbyDevicesCallback(this);
         }
@@ -216,15 +245,23 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     @Override
     public void onDeviceListUpdate(List<MediaDevice> devices) {
-        buildMediaDevices(devices);
-        mCallback.onDeviceListChanged();
+        if (mMediaDevices.isEmpty() || !mIsRefreshing) {
+            buildMediaDevices(devices);
+            mCallback.onDeviceListChanged();
+        } else {
+            synchronized (mMediaDevicesLock) {
+                mNeedRefresh = true;
+                mCachedMediaDevices.clear();
+                mCachedMediaDevices.addAll(devices);
+            }
+        }
     }
 
     @Override
     public void onSelectedDeviceStateChanged(MediaDevice device,
             @LocalMediaManager.MediaDeviceState int state) {
         mCallback.onRouteChanged();
-        mMetricLogger.logOutputSuccess(device.toString(), mMediaDevices);
+        mMetricLogger.logOutputSuccess(device.toString(), new ArrayList<>(mMediaDevices));
     }
 
     @Override
@@ -235,7 +272,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     @Override
     public void onRequestFailed(int reason) {
         mCallback.onRouteChanged();
-        mMetricLogger.logOutputFailure(mMediaDevices, reason);
+        mMetricLogger.logOutputFailure(new ArrayList<>(mMediaDevices), reason);
     }
 
     Drawable getAppSourceIcon() {
@@ -336,8 +373,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void setColorFilter(Drawable drawable, boolean isActive) {
-        drawable.setColorFilter(new PorterDuffColorFilter(isActive
-                ? mColorActiveItem : mColorInactiveItem,
+        drawable.setColorFilter(new PorterDuffColorFilter(mColorItemContent,
                 PorterDuff.Mode.SRC_IN));
     }
 
@@ -372,26 +408,40 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         ColorScheme mCurrentColorScheme = new ColorScheme(wallpaperColors,
                 isDarkTheme);
         if (isDarkTheme) {
-            mColorActiveItem = mCurrentColorScheme.getNeutral1().get(10);
-            mColorInactiveItem = mCurrentColorScheme.getNeutral1().get(10);
-            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(2);
-            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(2);
-            mColorItemBackground = mCurrentColorScheme.getAccent2().get(0);
+            mColorItemContent = mCurrentColorScheme.getAccent1().get(2); // A1-100
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent2().get(7); // A2-600
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(4); // A1-300
+            mColorItemBackground = mCurrentColorScheme.getNeutral2().get(9); // N2-800
+            mColorConnectedItemBackground = mCurrentColorScheme.getAccent2().get(9); // A2-800
+            mColorPositiveButtonText = mCurrentColorScheme.getAccent2().get(9); // A2-800
         } else {
-            mColorActiveItem = mCurrentColorScheme.getNeutral1().get(10);
-            mColorInactiveItem = mCurrentColorScheme.getAccent1().get(7);
-            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(3);
-            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(3);
-            mColorItemBackground = mCurrentColorScheme.getAccent2().get(0);
+            mColorItemContent = mCurrentColorScheme.getAccent1().get(9); // A1-800
+            mColorSeekbarProgress = mCurrentColorScheme.getAccent1().get(4); // A1-300
+            mColorButtonBackground = mCurrentColorScheme.getAccent1().get(7); // A1-600
+            mColorItemBackground = mCurrentColorScheme.getAccent2().get(1); // A2-50
+            mColorConnectedItemBackground = mCurrentColorScheme.getAccent1().get(2); // A1-100
+            mColorPositiveButtonText = mCurrentColorScheme.getNeutral1().get(1); // N1-50
         }
     }
 
-    public int getColorActiveItem() {
-        return mColorActiveItem;
+    void refreshDataSetIfNeeded() {
+        if (mNeedRefresh) {
+            buildMediaDevices(mCachedMediaDevices);
+            mCallback.onDeviceListChanged();
+            mNeedRefresh = false;
+        }
     }
 
-    public int getColorInactiveItem() {
-        return mColorInactiveItem;
+    public int getColorConnectedItemBackground() {
+        return mColorConnectedItemBackground;
+    }
+
+    public int getColorPositiveButtonText() {
+        return mColorPositiveButtonText;
+    }
+
+    public int getColorItemContent() {
+        return mColorItemContent;
     }
 
     public int getColorSeekbarProgress() {
@@ -406,51 +456,64 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mColorItemBackground;
     }
 
-    private void buildMediaDevices(List<MediaDevice> devices) {
-        // For the first time building list, to make sure the top device is the connected device.
-        if (mMediaDevices.isEmpty()) {
-            final MediaDevice connectedMediaDevice = getCurrentConnectedMediaDevice();
-            if (connectedMediaDevice == null) {
-                if (DEBUG) {
-                    Log.d(TAG, "No connected media device.");
-                }
-                mMediaDevices.addAll(devices);
-                return;
-            }
-            for (MediaDevice device : devices) {
-                if (TextUtils.equals(device.getId(), connectedMediaDevice.getId())) {
-                    mMediaDevices.add(0, device);
-                } else {
-                    mMediaDevices.add(device);
-                }
-            }
-            return;
-        }
-        // To keep the same list order
-        final Collection<MediaDevice> targetMediaDevices = new ArrayList<>();
-        for (MediaDevice originalDevice : mMediaDevices) {
-            for (MediaDevice newDevice : devices) {
-                if (TextUtils.equals(originalDevice.getId(), newDevice.getId())) {
-                    targetMediaDevices.add(newDevice);
-                    break;
-                }
-            }
-        }
-        if (targetMediaDevices.size() != devices.size()) {
-            devices.removeAll(targetMediaDevices);
-            targetMediaDevices.addAll(devices);
-        }
-        mMediaDevices.clear();
-        mMediaDevices.addAll(targetMediaDevices);
-        attachRangeInfo();
+    public float getInactiveRadius() {
+        return mInactiveRadius;
     }
 
-    private void attachRangeInfo() {
-        for (MediaDevice mediaDevice : mMediaDevices) {
+    public float getActiveRadius() {
+        return mActiveRadius;
+    }
+
+    private void buildMediaDevices(List<MediaDevice> devices) {
+        synchronized (mMediaDevicesLock) {
+            attachRangeInfo(devices);
+            Collections.sort(devices, Comparator.naturalOrder());
+            // For the first time building list, to make sure the top device is the connected
+            // device.
+            if (mMediaDevices.isEmpty()) {
+                final MediaDevice connectedMediaDevice = getCurrentConnectedMediaDevice();
+                if (connectedMediaDevice == null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "No connected media device.");
+                    }
+                    mMediaDevices.addAll(devices);
+                    return;
+                }
+                for (MediaDevice device : devices) {
+                    if (TextUtils.equals(device.getId(), connectedMediaDevice.getId())) {
+                        mMediaDevices.add(0, device);
+                    } else {
+                        mMediaDevices.add(device);
+                    }
+                }
+                return;
+            }
+            // To keep the same list order
+            final List<MediaDevice> targetMediaDevices = new ArrayList<>();
+            for (MediaDevice originalDevice : mMediaDevices) {
+                for (MediaDevice newDevice : devices) {
+                    if (TextUtils.equals(originalDevice.getId(), newDevice.getId())) {
+                        targetMediaDevices.add(newDevice);
+                        break;
+                    }
+                }
+            }
+            if (targetMediaDevices.size() != devices.size()) {
+                devices.removeAll(targetMediaDevices);
+                targetMediaDevices.addAll(devices);
+            }
+            mMediaDevices.clear();
+            mMediaDevices.addAll(targetMediaDevices);
+        }
+    }
+
+    private void attachRangeInfo(List<MediaDevice> devices) {
+        for (MediaDevice mediaDevice : devices) {
             if (mNearbyDeviceInfoMap.containsKey(mediaDevice.getId())) {
                 mediaDevice.setRangeZone(mNearbyDeviceInfoMap.get(mediaDevice.getId()));
             }
         }
+
     }
 
     List<MediaDevice> getGroupMediaDevices() {
@@ -510,6 +573,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     boolean addDeviceToPlayMedia(MediaDevice device) {
+        mMetricLogger.logInteractionExpansion(device);
         return mLocalMediaManager.addDeviceToPlayMedia(device);
     }
 
@@ -550,6 +614,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void releaseSession() {
+        mMetricLogger.logInteractionStopCasting();
         mLocalMediaManager.releaseSession();
     }
 
@@ -564,6 +629,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void adjustVolume(MediaDevice device, int volume) {
+        mMetricLogger.logInteractionAdjustVolume(device);
         ThreadUtils.postOnBackgroundThread(() -> {
             device.requestSetVolume(volume);
         });
@@ -584,26 +650,30 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     boolean isTransferring() {
-        for (MediaDevice device : mMediaDevices) {
-            if (device.getState() == LocalMediaManager.MediaDeviceState.STATE_CONNECTING) {
-                return true;
+        synchronized (mMediaDevicesLock) {
+            for (MediaDevice device : mMediaDevices) {
+                if (device.getState() == LocalMediaManager.MediaDeviceState.STATE_CONNECTING) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
     boolean isZeroMode() {
-        if (mMediaDevices.size() == 1) {
-            final MediaDevice device = mMediaDevices.iterator().next();
-            // Add "pair new" only when local output device exists
-            final int type = device.getDeviceType();
-            if (type == MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE
-                    || type == MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE
-                    || type == MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE) {
-                return true;
+        synchronized (mMediaDevicesLock) {
+            if (mMediaDevices.size() == 1) {
+                final MediaDevice device = mMediaDevices.iterator().next();
+                // Add "pair new" only when local output device exists
+                final int type = device.getDeviceType();
+                if (type == MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE
+                        || type == MediaDevice.MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE
+                        || type == MediaDevice.MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     void launchBluetoothPairing(View view) {
