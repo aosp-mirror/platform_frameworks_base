@@ -1777,10 +1777,7 @@ public class JobInfo implements Parcelable {
          * {@link Build.VERSION_CODES#S}, but starting from Android version
          * {@link Build.VERSION_CODES#TIRAMISU}, expedited jobs for the foreground app are
          * guaranteed to be started before {@link JobScheduler#schedule(JobInfo)} returns (assuming
-         * all requested constraints are satisfied), similar to foreground services. However, this
-         * start guarantee means there is a higher chance of overlapping executions, as noted in
-         * {@link JobService}, so be sure to handle that properly if you intend to reschedule the
-         * job while it's actively running.
+         * all requested constraints are satisfied), similar to foreground services.
          *
          * @see JobInfo#isExpedited()
          */
