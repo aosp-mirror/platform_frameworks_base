@@ -180,10 +180,12 @@
 
     <!-- media output dialog-->
     <color name="media_dialog_background" android:lstar="98">@color/material_dynamic_neutral90</color>
-    <color name="media_dialog_active_item_main_content">@color/material_dynamic_primary10</color>
-    <color name="media_dialog_inactive_item_main_content">@color/material_dynamic_primary40</color>
-    <color name="media_dialog_item_status">@color/material_dynamic_primary10</color>
+    <color name="media_dialog_item_main_content">@color/material_dynamic_primary20</color>
     <color name="media_dialog_item_background">@color/material_dynamic_secondary95</color>
+    <color name="media_dialog_connected_item_background">@color/material_dynamic_primary90</color>
+    <color name="media_dialog_seekbar_progress">@color/material_dynamic_secondary40</color>
+    <color name="media_dialog_button_background">@color/material_dynamic_primary40</color>
+    <color name="media_dialog_solid_button_text">@color/material_dynamic_neutral95</color>
 
     <!-- controls -->
     <color name="control_primary_text">#E6FFFFFF</color>
