@@ -34,6 +34,7 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.ScrollView
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -71,6 +72,8 @@ class AuthContainerViewTest : SysuiTestCase() {
     lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock
     lateinit var windowToken: IBinder
+    @Mock
+    lateinit var interactionJankMonitor: InteractionJankMonitor
 
     private var authContainer: TestAuthContainerView? = null
 
@@ -356,6 +359,7 @@ class AuthContainerViewTest : SysuiTestCase() {
         wakefulnessLifecycle,
         userManager,
         lockPatternUtils,
+        interactionJankMonitor,
         Handler(TestableLooper.get(this).looper),
         FakeExecutor(FakeSystemClock())
     ) {
