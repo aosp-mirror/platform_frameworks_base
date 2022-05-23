@@ -578,6 +578,11 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String CLIPBOARD_OVERLAY_SHOW_ACTIONS = "clipboard_overlay_show_actions";
 
+    /**
+     * (boolean) Whether to combine the broadcasts APPWIDGET_ENABLED and APPWIDGET_UPDATE
+     */
+    public static final String COMBINED_BROADCAST_ENABLED = "combined_broadcast_enabled";
+
     private SystemUiDeviceConfigFlags() {
     }
 }
