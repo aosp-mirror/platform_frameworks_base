@@ -2754,17 +2754,15 @@ class ActivityStarter {
                 mTargetRootTask = getOrCreateRootTask(mStartActivity, mLaunchFlags, intentTask,
                         mOptions);
             }
-        } else {
-            // If a launch target indicated, and the matching task is already in the adjacent task
-            // of the launch target. Adjust to use the adjacent task as its launch target. So the
-            // existing task will be launched into the closer one and won't be reparent redundantly.
-            // TODO(b/231541706): Migrate the logic to wm-shell after having proper APIs to help
-            //  resolve target task without actually starting the activity.
-            final Task adjacentTargetTask = mTargetRootTask.getAdjacentTaskFragment() != null
-                    ? mTargetRootTask.getAdjacentTaskFragment().asTask() : null;
-            if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)) {
-                mTargetRootTask = adjacentTargetTask;
-            }
+        }
+
+        // If the matching task is already in the adjacent task of the launch target. Adjust to use
+        // the adjacent task as its launch target. So the existing task will be launched into the
+        // closer one and won't be reparent redundantly.
+        final Task adjacentTargetTask = mTargetRootTask.getAdjacentTaskFragment() != null
+                ? mTargetRootTask.getAdjacentTaskFragment().asTask() : null;
+        if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)) {
+            mTargetRootTask = adjacentTargetTask;
         }
 
         // If the target task is not in the front, then we need to bring it to the front...
