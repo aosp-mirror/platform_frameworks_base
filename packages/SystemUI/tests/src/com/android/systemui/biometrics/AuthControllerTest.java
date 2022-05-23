@@ -77,6 +77,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -150,6 +151,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private LockPatternUtils mLockPatternUtils;
     @Mock
     private StatusBarStateController mStatusBarStateController;
+    @Mock
+    private InteractionJankMonitor mInteractionJankMonitor;
     @Captor
     ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
     @Captor
@@ -788,8 +791,8 @@ public class AuthControllerTest extends SysuiTestCase {
             super(context, execution, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle,
-                    mUserManager, mLockPatternUtils, statusBarStateController, mHandler,
-                    mBackgroundExecutor);
+                    mUserManager, mLockPatternUtils, statusBarStateController,
+                    mInteractionJankMonitor, mHandler, mBackgroundExecutor);
         }
 
         @Override
