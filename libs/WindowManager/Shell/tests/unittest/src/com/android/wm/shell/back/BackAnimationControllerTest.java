@@ -20,6 +20,7 @@ import static android.window.BackNavigationInfo.KEY_TRIGGER_BACK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -128,7 +129,7 @@ public class BackAnimationControllerTest {
                 new RemoteCallback((bundle) -> {}),
                 onBackInvokedCallback);
         try {
-            doReturn(navigationInfo).when(mActivityTaskManager).startBackNavigation();
+            doReturn(navigationInfo).when(mActivityTaskManager).startBackNavigation(anyBoolean());
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
@@ -136,7 +137,7 @@ public class BackAnimationControllerTest {
 
     private void createNavigationInfo(BackNavigationInfo.Builder builder) {
         try {
-            doReturn(builder.build()).when(mActivityTaskManager).startBackNavigation();
+            doReturn(builder.build()).when(mActivityTaskManager).startBackNavigation(anyBoolean());
         } catch (RemoteException ex) {
             ex.rethrowFromSystemServer();
         }
