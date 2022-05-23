@@ -138,7 +138,7 @@ public class ClipboardOverlayController {
     private final View mClipboardPreview;
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
-    private final TextView mHiddenTextPreview;
+    private final TextView mHiddenPreview;
     private final View mPreviewBorder;
     private final OverlayActionChip mEditChip;
     private final OverlayActionChip mShareChip;
@@ -203,7 +203,7 @@ public class ClipboardOverlayController {
         mClipboardPreview = requireNonNull(mView.findViewById(R.id.clipboard_preview));
         mImagePreview = requireNonNull(mView.findViewById(R.id.image_preview));
         mTextPreview = requireNonNull(mView.findViewById(R.id.text_preview));
-        mHiddenTextPreview = requireNonNull(mView.findViewById(R.id.hidden_text_preview));
+        mHiddenPreview = requireNonNull(mView.findViewById(R.id.hidden_preview));
         mPreviewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
         mEditChip = requireNonNull(mView.findViewById(R.id.edit_chip));
         mShareChip = requireNonNull(mView.findViewById(R.id.share_chip));
@@ -328,7 +328,7 @@ public class ClipboardOverlayController {
             }
             if (isSensitive) {
                 showEditableText(
-                        mContext.getResources().getString(R.string.clipboard_text_hidden), true);
+                        mContext.getResources().getString(R.string.clipboard_asterisks), true);
             } else {
                 showEditableText(item.getText(), false);
             }
@@ -500,7 +500,7 @@ public class ClipboardOverlayController {
     private void showSinglePreview(View v) {
         mTextPreview.setVisibility(View.GONE);
         mImagePreview.setVisibility(View.GONE);
-        mHiddenTextPreview.setVisibility(View.GONE);
+        mHiddenPreview.setVisibility(View.GONE);
         v.setVisibility(View.VISIBLE);
     }
 
@@ -511,7 +511,7 @@ public class ClipboardOverlayController {
     }
 
     private void showEditableText(CharSequence text, boolean hidden) {
-        TextView textView = hidden ? mHiddenTextPreview : mTextPreview;
+        TextView textView = hidden ? mHiddenPreview : mTextPreview;
         showTextPreview(text, textView);
         View.OnClickListener listener = v -> editText();
         if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -532,9 +532,10 @@ public class ClipboardOverlayController {
         String mimeType = resolver.getType(uri);
         boolean isEditableImage = mimeType != null && mimeType.startsWith("image");
         if (isSensitive) {
-            showSinglePreview(mHiddenTextPreview);
+            mHiddenPreview.setText(mContext.getString(R.string.clipboard_text_hidden));
+            showSinglePreview(mHiddenPreview);
             if (isEditableImage) {
-                mHiddenTextPreview.setOnClickListener(listener);
+                mHiddenPreview.setOnClickListener(listener);
             }
         } else if (isEditableImage) { // if the MIMEtype is image, try to load
             try {
