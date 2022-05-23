@@ -313,10 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Բացելու համար սահեցրեք վերև"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Բացեք՝ սեղմելով ապակողպման պատկերակը"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ապակողպվել է դեմքով։ Բացեք՝ սեղմելով ապակողպման պատկերակը։"</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Տեղափոխել ձախ"</item>
+    <item msgid="5558598599408514296">"Տեղափոխել ներքև"</item>
+    <item msgid="4844142668312841831">"Տեղափոխել աջ"</item>
+    <item msgid="5640521437931460125">"Տեղափոխել վերև"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Սահեցրեք վերև՝ նորից փորձելու համար"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ապակողպեք՝ NFC-ն օգտագործելու համար"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
@@ -841,8 +843,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Այս աշխատաշրջանը հեռարձակելու համար բացեք հավելվածը"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Անհայտ հավելված"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Կանգնեցնել հեռարձակումը"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Հասանելի սարքեր ձայնի արտածման համար։"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ինչպես է աշխատում հեռարձակումը"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Հեռարձակում"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ձեր մոտակայքում գտնվող՝ համատեղելի Bluetooth սարքերով մարդիկ կարող են լսել մեդիա ֆայլերը, որոնք դուք հեռարձակում եք։"</string>
@@ -939,12 +940,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Փոփոխել պատճենված պատկերը"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Ուղարկել մոտակա սարքի"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Հպեք դիտելու համար"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Տեքստը պատճենվեց"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Պատկերը պատճենվեց"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Բովանդակությունը պատճենվեց"</string>
     <string name="add" msgid="81036585205287996">"Ավելացնել"</string>
     <string name="manage_users" msgid="1823875311934643849">"Օգտատերերի կառավարում"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Այս ծանուցումը հնարավոր չէ քաշել տրոհված էկրանի մեկ հատվածից մյուսը։"</string>
