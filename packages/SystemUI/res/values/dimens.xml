@@ -295,7 +295,8 @@
     <dimen name="overlay_border_width_neg">-4dp</dimen>
 
     <dimen name="clipboard_preview_size">@dimen/overlay_x_scale</dimen>
-
+    <dimen name="clipboard_overlay_min_font">10sp</dimen>
+    <dimen name="clipboard_overlay_max_font">50sp</dimen>
 
     <!-- The width of the view containing navigation buttons -->
     <dimen name="navigation_key_width">70dp</dimen>
