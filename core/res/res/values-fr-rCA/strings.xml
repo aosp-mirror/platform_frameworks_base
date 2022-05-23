@@ -1371,7 +1371,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Un accessoire audio analogique a été détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Touchez ici en savoir plus."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Débogage USB activé"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Touchez ici pour désactiver le débogage USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Touchez pour désactiver le débogage USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Sélectionnez cette option pour désactiver le débogage USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Débogage sans fil connecté"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Touchez l\'écran pour désactiver le débogage sans fil"</string>
@@ -1698,13 +1698,13 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ne pas activer"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVÉ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DÉSACTIVÉ"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permettre à <xliff:g id="SERVICE">%1$s</xliff:g> de commander complètement votre appareil?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permettre à <xliff:g id="SERVICE">%1$s</xliff:g> de contrôler complètement votre appareil?"</string>
     <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si vous activez <xliff:g id="SERVICE">%1$s</xliff:g>, votre appareil n\'utilisera pas le verrouillage de l\'écran pour améliorer le chiffrement des données."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des applications."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et commander l\'écran"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et contrôler l\'écran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Cette fonctionnalité peut lire tout le contenu à l\'écran et afficher du contenu par-dessus d\'autres applications."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Afficher et effectuer des actions"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut faire le suivi de vos interactions avec une application ou un capteur matériel, et interagir avec des applications en votre nom."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut faire le suivi de vos interactions avec une application ou un capteur matériel et interagir avec des applications en votre nom."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Autoriser"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuser"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toucher une fonctionnalité pour commencer à l\'utiliser :"</string>

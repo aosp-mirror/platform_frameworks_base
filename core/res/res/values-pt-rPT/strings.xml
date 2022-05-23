@@ -1721,7 +1721,7 @@
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mais escuro"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas do volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Prima sem soltar as teclas de volume durante três segundos para utilizar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"prima sem soltar as teclas de volume durante três segundos para usar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Escolha uma funcionalidade para utilizar quando tocar no botão Acessibilidade:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Escolha a funcionalidade a utilizar com o gesto de acessibilidade (deslize rapidamente com dois dedos para cima a partir da parte inferior do ecrã):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Escolha a funcionalidade a utilizar com o gesto de acessibilidade (deslize rapidamente com três dedos para cima a partir da parte inferior do ecrã):"</string>
