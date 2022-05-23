@@ -248,6 +248,20 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
+    fun logEntryBeingExtendedNotInCollection(
+        entry: NotificationEntry,
+        extender: NotifLifetimeExtender,
+        collectionEntryIs: String
+    ) {
+        buffer.log(TAG, WARNING, {
+            str1 = entry.logKey
+            str2 = extender.name
+            str3 = collectionEntryIs
+        }, {
+            "While ending lifetime extension by $str2 of $str1, entry in collection is $str3"
+        })
+    }
+
     fun logFutureDismissalReused(dismissal: FutureDismissal) {
         buffer.log(TAG, INFO, {
             str1 = dismissal.label
