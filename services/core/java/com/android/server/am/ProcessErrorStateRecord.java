@@ -51,7 +51,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.MemoryPressureUtil;
+import com.android.server.ResourcePressureUtil;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.wm.WindowProcessController;
 
@@ -402,7 +402,7 @@ class ProcessErrorStateRecord {
         }
 
         StringBuilder report = new StringBuilder();
-        report.append(MemoryPressureUtil.currentPsiState());
+        report.append(ResourcePressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
         // don't dump native PIDs for background ANRs unless it is the process of interest
