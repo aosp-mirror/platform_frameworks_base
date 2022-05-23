@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"เข้าถึงปฏิทิน"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ส่งและดูข้อความ SMS"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ไฟล์"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"เข้าถึงไฟล์ในอุปกรณ์"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"เพลงและเสียง"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"เข้าถึงเพลงและเสียงในอุปกรณ์ได้"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"รูปภาพและวิดีโอ"</string>
@@ -1686,7 +1684,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"เปิด"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ปิด"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"อนุญาตให้ <xliff:g id="SERVICE">%1$s</xliff:g> ควบคุมอุปกรณ์อย่างเต็มที่ไหม"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปเกี่ยวกับความช่วยเหลือพิเศษ แต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปเกี่ยวกับความช่วยเหลือพิเศษ แต่ไม่เหมาะสำหรับ​แอปส่วนใหญ่"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ดูและควบคุมหน้าจอ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้สามารถอ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ดูและดำเนินการ"</string>
