@@ -855,7 +855,7 @@ public class NotificationChildrenContainer extends ViewGroup
         for (int childIdx = 0; childIdx < count; childIdx++) {
             ExpandableNotificationRow slidingChild = mAttachedChildren.get(childIdx);
             float childTop = slidingChild.getTranslationY();
-            float top = childTop + slidingChild.getClipTopAmount();
+            float top = childTop + Math.max(0, slidingChild.getClipTopAmount());
             float bottom = childTop + slidingChild.getActualHeight();
             if (y >= top && y <= bottom) {
                 return slidingChild;
