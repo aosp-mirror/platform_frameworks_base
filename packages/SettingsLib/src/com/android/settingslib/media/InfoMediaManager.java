@@ -73,7 +73,6 @@ public class InfoMediaManager extends MediaManager {
     MediaRouter2Manager mRouterManager;
     @VisibleForTesting
     String mPackageName;
-    private final boolean mVolumeAdjustmentForRemoteGroupSessions;
 
     private MediaDevice mCurrentConnectedDevice;
     private LocalBluetoothManager mBluetoothManager;
@@ -87,9 +86,6 @@ public class InfoMediaManager extends MediaManager {
         if (!TextUtils.isEmpty(packageName)) {
             mPackageName = packageName;
         }
-
-        mVolumeAdjustmentForRemoteGroupSessions = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
     }
 
     @Override
@@ -166,28 +162,18 @@ public class InfoMediaManager extends MediaManager {
     }
 
     boolean isRoutingSessionAvailableForVolumeControl() {
-        if (mVolumeAdjustmentForRemoteGroupSessions) {
-            return true;
-        }
         List<RoutingSessionInfo> sessions =
                 mRouterManager.getRoutingSessions(mPackageName);
-        boolean foundNonSystemSession = false;
-        boolean isGroup = false;
+
         for (RoutingSessionInfo session : sessions) {
-            if (!session.isSystemSession()) {
-                foundNonSystemSession = true;
-                int selectedRouteCount = session.getSelectedRoutes().size();
-                if (selectedRouteCount > 1) {
-                    isGroup = true;
-                    break;
-                }
+            if (!session.isSystemSession()
+                    && session.getVolumeHandling() != MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
+                return true;
             }
         }
-        if (!foundNonSystemSession) {
-            Log.d(TAG, "No routing session for " + mPackageName);
-            return false;
-        }
-        return !isGroup;
+
+        Log.d(TAG, "No routing session for " + mPackageName);
+        return false;
     }
 
     /**
@@ -418,8 +404,7 @@ public class InfoMediaManager extends MediaManager {
     @TargetApi(Build.VERSION_CODES.R)
     boolean shouldEnableVolumeSeekBar(RoutingSessionInfo sessionInfo) {
         return sessionInfo.isSystemSession() // System sessions are not remote
-                || mVolumeAdjustmentForRemoteGroupSessions
-                || sessionInfo.getSelectedRoutes().size() <= 1;
+                || sessionInfo.getVolumeHandling() != MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
     }
 
     private void refreshDevices() {

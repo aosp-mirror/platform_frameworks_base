@@ -19,10 +19,12 @@ package com.android.mediaroutertest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import android.content.res.Resources;
+import android.media.MediaRoute2Info;
 import android.media.RoutingSessionInfo;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -93,5 +95,25 @@ public class RoutingSessionInfoTest {
                 sessionInfoWithProviderId.getDeselectableRoutes());
         assertEquals(sessionInfoWithProviderId2.getTransferableRoutes(),
                 sessionInfoWithProviderId.getTransferableRoutes());
+    }
+
+    @Test
+    public void testGetVolumeHandlingGroupSession() {
+        RoutingSessionInfo sessionInfo = new RoutingSessionInfo.Builder(
+                TEST_ID, TEST_CLIENT_PACKAGE_NAME)
+                .setName(TEST_NAME)
+                .addSelectedRoute(TEST_ROUTE_ID_0)
+                .addSelectedRoute(TEST_ROUTE_ID_2)
+                .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
+                .build();
+
+        boolean volumeAdjustmentForRemoteGroupSessions = Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
+
+        int expectedResult = volumeAdjustmentForRemoteGroupSessions
+                ? MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE :
+                MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+
+        assertEquals(sessionInfo.getVolumeHandling(), expectedResult);
     }
 }

@@ -35,6 +35,7 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IVolumeController;
+import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
 import android.media.VolumePolicy;
@@ -1222,23 +1223,16 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             String packageName = ctr.getPackageName();
             List<RoutingSessionInfo> sessions =
                     mRouter2Manager.getRoutingSessions(packageName);
-            boolean foundNonSystemSession = false;
-            boolean isGroup = false;
+
             for (RoutingSessionInfo session : sessions) {
-                if (!session.isSystemSession()) {
-                    foundNonSystemSession = true;
-                    int selectedRouteCount = session.getSelectedRoutes().size();
-                    if (selectedRouteCount > 1) {
-                        isGroup = true;
-                        break;
-                    }
+                if (!session.isSystemSession()
+                        && session.getVolumeHandling() != MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
+                    return true;
                 }
             }
-            if (!foundNonSystemSession) {
-                Log.d(TAG, "No routing session for " + packageName);
-                return false;
-            }
-            return !isGroup;
+
+            Log.d(TAG, "No routing session for " + packageName);
+            return false;
         }
 
         private Token findToken(int stream) {
