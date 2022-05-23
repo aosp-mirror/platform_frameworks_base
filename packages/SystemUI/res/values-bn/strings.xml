@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ফেসের সাহায্যে আনলক করা হয়েছে। খোলার জন্য প্রেস করুন।"</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ফেস শনাক্ত করা হয়েছে। খোলার জন্য প্রেস করুন।"</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ফেস শনাক্ত করা হয়েছে। খোলার জন্য আনলক আইকন প্রেস করুন।"</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"বাঁদিকে সরান"</item>
+    <item msgid="5558598599408514296">"নিচে নামান"</item>
+    <item msgid="4844142668312841831">"ডানদিকে সরান"</item>
+    <item msgid="5640521437931460125">"উপরে তুলুন"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"আবার চেষ্টা করতে উপরের দিকে সোয়াইপ করুন"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ব্যবহার করতে আনলক করুন"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"এই ডিভাইসটি আপনার প্রতিষ্ঠানের"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"সতর্কতা"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"ব্যাটারি"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"স্ক্রীনশটস"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"সেট-আপ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"স্টোরেজ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"হিন্ট"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
@@ -854,8 +854,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"এই সেশন কাস্ট করার জন্য, অ্যাপ খুলুন।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"অজানা অ্যাপ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাস্ট করা বন্ধ করুন"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিও আউটপুটের জন্য উপলভ্য ডিভাইস।"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ব্রডকাস্ট কীভাবে কাজ করে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্রচার করুন"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"আশপাশে লোকজন যাদের মানানসই ব্লুটুথ ডিভাইস আছে, তারা আপনার ব্রডকাস্ট করা মিডিয়া শুনতে পারবেন"</string>
@@ -952,12 +951,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"কপি করা ছবি এডিট করুন"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"আশেপাশের ডিভাইসে পাঠান"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"দেখতে ট্যাপ করুন"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"টেক্সট কপি করা হয়েছে"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"ছবি কপি করা হয়েছে"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"কন্টেন্ট কপি করা হয়েছে"</string>
     <string name="add" msgid="81036585205287996">"যোগ করুন"</string>
     <string name="manage_users" msgid="1823875311934643849">"ব্যবহারকারীদের ম্যানেজ করুন"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"স্প্লিটস্ক্রিন মোডে এই বিজ্ঞপ্তি টেনে আনা যাবে না।"</string>
@@ -966,12 +962,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"অ্যালার্ম সেট করা হয়েছে"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ক্যামেরা ও মাইক্রোফোন বন্ধ আছে"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{#টি বিজ্ঞপ্তি}one{#টি বিজ্ঞপ্তি}other{#টি বিজ্ঞপ্তি}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ব্রডকাস্ট করা হচ্ছে"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> সম্প্রচার বন্ধ করবেন?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"আপনি <xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্রচার করলে বা আউটপুট পরিবর্তন করলে, আপনার বর্তমান সম্প্রচার বন্ধ হয়ে যাবে"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> সম্প্রচার করুন"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"আউটপুট পরিবর্তন করুন"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"অজানা"</string>
 </resources>
