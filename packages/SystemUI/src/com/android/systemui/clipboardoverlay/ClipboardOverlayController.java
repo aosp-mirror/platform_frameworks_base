@@ -570,12 +570,13 @@ public class ClipboardOverlayController {
     }
 
     private Intent getRemoteCopyIntent(ClipData clipData) {
-        String remoteCopyPackage = mContext.getString(R.string.config_remoteCopyPackage);
-        if (TextUtils.isEmpty(remoteCopyPackage)) {
-            return null;
-        }
         Intent nearbyIntent = new Intent(REMOTE_COPY_ACTION);
-        nearbyIntent.setComponent(ComponentName.unflattenFromString(remoteCopyPackage));
+
+        String remoteCopyPackage = mContext.getString(R.string.config_remoteCopyPackage);
+        if (!TextUtils.isEmpty(remoteCopyPackage)) {
+            nearbyIntent.setComponent(ComponentName.unflattenFromString(remoteCopyPackage));
+        }
+
         nearbyIntent.setClipData(clipData);
         nearbyIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         nearbyIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
