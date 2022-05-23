@@ -204,7 +204,8 @@ public class PackageInfoUtils {
                 info.instrumentation = new InstrumentationInfo[N];
                 for (int i = 0; i < N; i++) {
                     info.instrumentation[i] = generateInstrumentationInfo(
-                            pkg.getInstrumentations().get(i), pkg, flags, userId, pkgSetting);
+                            pkg.getInstrumentations().get(i), pkg, flags, state,
+                            userId, pkgSetting);
                 }
             }
         }
@@ -363,9 +364,12 @@ public class PackageInfoUtils {
      */
     @Nullable
     public static InstrumentationInfo generateInstrumentationInfo(ParsedInstrumentation i,
-            AndroidPackage pkg, @PackageManager.ComponentInfoFlagsBits long flags, int userId,
-            @Nullable PackageStateInternal pkgSetting) {
+            AndroidPackage pkg, @PackageManager.ComponentInfoFlagsBits long flags,
+            PackageUserStateInternal state, int userId, @Nullable PackageStateInternal pkgSetting) {
         if (i == null) return null;
+        if (!checkUseInstalledOrHidden(pkg, pkgSetting, state, flags)) {
+            return null;
+        }
 
         InstrumentationInfo info =
                 PackageInfoWithoutStateUtils.generateInstrumentationInfo(i, pkg, flags, userId,

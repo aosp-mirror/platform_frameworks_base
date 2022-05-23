@@ -788,7 +788,9 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         final List<InstrumentationInfo> list =
-                mInterface.queryInstrumentation(targetPackage, 0 /*flags*/).getList();
+                mInterface.queryInstrumentationAsUser(
+                        targetPackage, PackageManager.MATCH_KNOWN_PACKAGES, UserHandle.USER_SYSTEM)
+                        .getList();
 
         // sort by target package
         Collections.sort(list, new Comparator<InstrumentationInfo>() {

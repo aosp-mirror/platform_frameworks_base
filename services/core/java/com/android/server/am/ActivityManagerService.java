@@ -14528,6 +14528,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (arguments != null && arguments.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Bundle");
         }
+        final IPackageManager pm = AppGlobals.getPackageManager();
 
         synchronized(this) {
             InstrumentationInfo ii = null;
@@ -14536,11 +14537,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean noRestart = (flags & INSTR_FLAG_NO_RESTART) != 0;
 
             try {
-                ii = mContext.getPackageManager().getInstrumentationInfo(
-                        className, STOCK_PM_FLAGS);
-                ai = AppGlobals.getPackageManager().getApplicationInfo(
-                        ii.targetPackage, STOCK_PM_FLAGS, userId);
-            } catch (PackageManager.NameNotFoundException e) {
+                ii = pm.getInstrumentationInfoAsUser(className, STOCK_PM_FLAGS, userId);
+                ai = pm.getApplicationInfo(ii.targetPackage, STOCK_PM_FLAGS, userId);
             } catch (RemoteException e) {
             }
             if (ii == null) {
@@ -14568,8 +14566,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             int match = SIGNATURE_NO_MATCH;
             try {
-                match = AppGlobals.getPackageManager().checkSignatures(
-                        ii.targetPackage, ii.packageName, userId);
+                match = pm.checkSignatures(ii.targetPackage, ii.packageName, userId);
             } catch (RemoteException e) {
             }
             if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {

@@ -452,11 +452,12 @@ public interface Computer extends PackageDataSnapshot {
             @PackageManager.ComponentInfoFlagsBits long flags, @Nullable String metaDataKey);
 
     @Nullable
-    InstrumentationInfo getInstrumentationInfo(@NonNull ComponentName component, int flags);
+    InstrumentationInfo getInstrumentationInfoAsUser(@NonNull ComponentName component, int flags,
+            int userId);
 
     @NonNull
-    ParceledListSlice<InstrumentationInfo> queryInstrumentation(
-            @NonNull String targetPackage, int flags);
+    ParceledListSlice<InstrumentationInfo> queryInstrumentationAsUser(
+            @NonNull String targetPackage, int flags, int userId);
 
     @NonNull
     List<PackageStateInternal> findSharedNonSystemLibraries(
