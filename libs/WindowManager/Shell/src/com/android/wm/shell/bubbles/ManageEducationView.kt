@@ -109,8 +109,15 @@ class ManageEducationView constructor(context: Context, positioner: BubblePositi
         visibility = View.VISIBLE
         expandedView.getManageButtonBoundsOnScreen(realManageButtonRect)
         val isRTL = mContext.resources.configuration.layoutDirection == LAYOUT_DIRECTION_RTL
-        manageView.setPadding(realManageButtonRect.left - expandedView.manageButtonMargin,
-                manageView.paddingTop, manageView.paddingRight, manageView.paddingBottom)
+        if (isRTL) {
+            val rightPadding = positioner.screenRect.right - realManageButtonRect.right -
+                    expandedView.manageButtonMargin
+            manageView.setPadding(manageView.paddingLeft, manageView.paddingTop,
+                    rightPadding, manageView.paddingBottom)
+        } else {
+            manageView.setPadding(realManageButtonRect.left - expandedView.manageButtonMargin,
+            manageView.paddingTop, manageView.paddingRight, manageView.paddingBottom)
+        }
         post {
             manageButton
                 .setOnClickListener {
