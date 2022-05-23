@@ -28,14 +28,15 @@ import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
+import com.android.systemui.util.Compile
 import com.android.systemui.util.children
 import javax.inject.Inject
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.properties.Delegates.notNull
 
-private const val TAG = "NotificationStackSizeCalculator"
-private const val DEBUG = false
+private const val TAG = "NotifStackSizeCalc"
+private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)
 
 /** Calculates number of notifications to display and the height of the notification stack. */
 @SysUISingleton
@@ -229,7 +230,7 @@ constructor(
         return true
     }
 
-    private fun log(s: () -> String) {
+    private inline fun log(s: () -> String) {
         if (DEBUG) {
             Log.d(TAG, s())
         }
