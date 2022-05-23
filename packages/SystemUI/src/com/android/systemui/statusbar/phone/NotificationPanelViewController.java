@@ -3049,7 +3049,9 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private int calculatePanelHeightShade() {
-        final int maxHeight = mNotificationStackScrollLayoutController.getHeight();
+        int emptyBottomMargin = mNotificationStackScrollLayoutController.getEmptyBottomMargin();
+        int maxHeight = mNotificationStackScrollLayoutController.getHeight() - emptyBottomMargin;
+
         if (mBarState == KEYGUARD) {
             int minKeyguardPanelBottom = mClockPositionAlgorithm.getLockscreenStatusViewHeight()
                     + mNotificationStackScrollLayoutController.getIntrinsicContentHeight();
