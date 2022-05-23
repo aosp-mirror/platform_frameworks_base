@@ -228,7 +228,8 @@ public final class SuspendPackageHelper {
                 continue;
             }
             final PackageStateInternal packageState =
-                    snapshot.getPackageStateFiltered(packageNames[i], callingUid, userId);
+                    snapshot.getPackageStateForInstalledAndFiltered(
+                            packageNames[i], callingUid, userId);
             if (packageState == null) {
                 Slog.w(TAG, "Could not find package setting for package: " + packageNames[i]);
                 unactionablePackages.add(packageNames[i]);

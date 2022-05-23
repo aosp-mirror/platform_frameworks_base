@@ -16,6 +16,8 @@
 
 package com.android.server.pm.test.appenumeration;
 
+import static android.Manifest.permission.CLEAR_APP_USER_DATA;
+
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -25,10 +27,12 @@ import static org.junit.Assert.assertThrows;
 import android.app.AppGlobals;
 import android.app.Instrumentation;
 import android.content.Context;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.KeySet;
 import android.content.pm.PackageManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -37,6 +41,7 @@ import com.android.bedstead.harrier.BedsteadJUnit4;
 import com.android.bedstead.harrier.DeviceState;
 import com.android.bedstead.harrier.annotations.EnsureHasSecondaryUser;
 import com.android.bedstead.nene.users.UserReference;
+import com.android.compatibility.common.util.TestUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,6 +51,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Verify that app without holding the {@link android.Manifest.permission.INTERACT_ACROSS_USERS}
@@ -64,6 +70,8 @@ public class CrossUserPackageVisibilityTests {
             new File(TEST_DATA_DIR, "AppEnumerationCrossUserPackageVisibilityTestApp.apk");
     private static final File SHARED_USER_TEST_APK_FILE =
             new File(TEST_DATA_DIR, "AppEnumerationSharedUserTestApp.apk");
+
+    private static final long DEFAULT_TIMEOUT_MS = 5000;
 
     @ClassRule
     @Rule
@@ -99,6 +107,7 @@ public class CrossUserPackageVisibilityTests {
     public void tearDown() {
         uninstallPackage(CROSS_USER_TEST_PACKAGE_NAME);
         uninstallPackage(SHARED_USER_TEST_PACKAGE_NAME);
+        mInstrumentation.getUiAutomation().dropShellPermissionIdentity();
     }
 
     @Test
@@ -182,6 +191,34 @@ public class CrossUserPackageVisibilityTests {
 
         assertThat(mIPackageManager.getUidForSharedUser(SHARED_USER_TEST_PACKAGE_NAME))
                 .isEqualTo(Process.INVALID_UID);
+    }
+
+    @Test
+    public void testClearApplicationUserData_cannotDetectStubPkg() throws Exception {
+        mInstrumentation.getUiAutomation().adoptShellPermissionIdentity(CLEAR_APP_USER_DATA);
+        assertThat(clearApplicationUserData(CROSS_USER_TEST_PACKAGE_NAME)).isFalse();
+
+        installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+        assertThat(clearApplicationUserData(CROSS_USER_TEST_PACKAGE_NAME)).isFalse();
+    }
+
+    private boolean clearApplicationUserData(String packageName) throws Exception {
+        final AtomicInteger result = new AtomicInteger(-1);
+        final IPackageDataObserver localObserver = new IPackageDataObserver.Stub() {
+            @Override
+            public void onRemoveCompleted(String removedPkgName, boolean succeeded)
+                    throws RemoteException {
+                if (removedPkgName.equals(packageName)) {
+                    result.set(succeeded ? 1 : 0);
+                    result.notifyAll();
+                }
+            }
+        };
+        mIPackageManager.clearApplicationUserData(packageName, localObserver, mCurrentUser.id());
+        TestUtils.waitOn(result, () -> result.get() != -1, DEFAULT_TIMEOUT_MS,
+                "clearApplicationUserData: " + packageName);
+        return result.get() == 1;
     }
 
     private static void installPackage(File apk) {
