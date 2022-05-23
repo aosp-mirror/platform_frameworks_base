@@ -3716,15 +3716,7 @@ public class ApplicationPackageManager extends PackageManager {
             throws NameNotFoundException {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(propertyName);
-        try {
-            final Property property = mPM.getProperty(propertyName, packageName, null);
-            if (property == null) {
-                throw new NameNotFoundException();
-            }
-            return property;
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
+        return getPropertyAsUser(propertyName, packageName, null /* className */, getUserId());
     }
 
     @Override
@@ -3732,9 +3724,18 @@ public class ApplicationPackageManager extends PackageManager {
             throws NameNotFoundException {
         Objects.requireNonNull(component);
         Objects.requireNonNull(propertyName);
+        return getPropertyAsUser(propertyName,
+                component.getPackageName(), component.getClassName(), getUserId());
+    }
+
+    @Override
+    public Property getPropertyAsUser(@NonNull String propertyName, @NonNull String packageName,
+            @Nullable String className, int userId) throws NameNotFoundException {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(propertyName);
         try {
-            final Property property = mPM.getProperty(
-                    propertyName, component.getPackageName(), component.getClassName());
+            final Property property = mPM.getPropertyAsUser(propertyName,
+                    packageName, className, userId);
             if (property == null) {
                 throw new NameNotFoundException();
             }

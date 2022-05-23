@@ -89,8 +89,8 @@ interface IPackageManager {
 
     ActivityInfo getActivityInfo(in ComponentName className, long flags, int userId);
 
-    boolean activitySupportsIntent(in ComponentName className, in Intent intent,
-            String resolvedType);
+    boolean activitySupportsIntentAsUser(in ComponentName className, in Intent intent,
+            String resolvedType, int userId);
 
     ActivityInfo getReceiverInfo(in ComponentName className, long flags, int userId);
 
@@ -795,7 +795,8 @@ interface IPackageManager {
 
     void holdLock(in IBinder token, in int durationMs);
 
-    PackageManager.Property getProperty(String propertyName, String packageName, String className);
+    PackageManager.Property getPropertyAsUser(String propertyName, String packageName,
+            String className, int userId);
     ParceledListSlice queryProperty(String propertyName, int componentType);
 
     void setKeepUninstalledPackages(in List<String> packageList);

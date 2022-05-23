@@ -110,7 +110,7 @@ final class PackageUtils {
 
             final ComponentName componentName = service.getComponentName();
 
-            if (isPrimaryCompanionDeviceService(pm, componentName)) {
+            if (isPrimaryCompanionDeviceService(pm, componentName, userId)) {
                 // "Primary" service should be at the head of the list.
                 services.add(0, componentName);
             } else {
@@ -122,9 +122,10 @@ final class PackageUtils {
     }
 
     private static boolean isPrimaryCompanionDeviceService(@NonNull PackageManager pm,
-            @NonNull ComponentName componentName) {
+            @NonNull ComponentName componentName, @UserIdInt int userId) {
         try {
-            return pm.getProperty(PROPERTY_PRIMARY_TAG, componentName).getBoolean();
+            return pm.getPropertyAsUser(PROPERTY_PRIMARY_TAG, componentName.getPackageName(),
+                    componentName.getClassName(), userId).getBoolean();
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }

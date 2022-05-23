@@ -261,12 +261,12 @@ public class ActivityStarterTests extends WindowTestsBase {
                     PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION)) {
                 doAnswer((inv) -> {
                     throw new RemoteException();
-                }).when(packageManager).activitySupportsIntent(
-                        eq(source.mActivityComponent), eq(intent), any());
+                }).when(packageManager).activitySupportsIntentAsUser(
+                        eq(source.mActivityComponent), eq(intent), any(), anyInt());
             } else {
                 doReturn(!containsConditions(preconditions, PRECONDITION_NO_VOICE_SESSION_SUPPORT))
-                        .when(packageManager).activitySupportsIntent(eq(source.mActivityComponent),
-                        eq(intent), any());
+                        .when(packageManager).activitySupportsIntentAsUser(
+                                eq(source.mActivityComponent), eq(intent), any(), anyInt());
             }
         } catch (RemoteException e) {
         }

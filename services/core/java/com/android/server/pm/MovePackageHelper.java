@@ -80,10 +80,9 @@ public final class MovePackageHelper {
         final PackageManager pm = mPm.mContext.getPackageManager();
 
         Computer snapshot = mPm.snapshotComputer();
-        final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
-        if (packageState == null
-                || packageState.getPkg() == null
-                || snapshot.shouldFilterApplication(packageState, callingUid, user.getIdentifier())) {
+        final PackageStateInternal packageState = snapshot.getPackageStateForInstalledAndFiltered(
+                packageName, callingUid, user.getIdentifier());
+        if (packageState == null || packageState.getPkg() == null) {
             throw new PackageManagerException(MOVE_FAILED_DOESNT_EXIST, "Missing package");
         }
         final AndroidPackage pkg = packageState.getPkg();
