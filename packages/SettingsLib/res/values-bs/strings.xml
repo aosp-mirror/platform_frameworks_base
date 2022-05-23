@@ -117,7 +117,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Prenošenje fajla"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Ulazni uređaj"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Pristup internetu"</string>
-    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Dijeljenje kontakta"</string>
+    <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"Dijeljenje kontakata"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"Koristi za dijeljenje kontakta"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Dijeljenje internet veze"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"SMS-ovi"</string>
@@ -610,7 +610,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Napusti način rada za gosta"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Poništi sesiju gosta"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izlazak iz sesije gosta"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sva aktivnost će biti izbrisana kada napustite sesiju"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sva aktivnost će se izbrisati pri napuštanju"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Možete sačuvati ili izbrisati svoju aktivnost pri izlasku"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Poništite da odmah izbrišete aktivnost iz sesije ili je možete sačuvati ili izbrisati pri izlasku"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Snimite fotografiju"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Uključivanje ekrana"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Dozvolite uključivanje ekrana"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Dozvolite aplikaciji da uključi ekran. Ako se odobri, aplikacija može uključiti ekran bilo kada bez vaše izričite namjere."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skenirajte QR kôd"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Da pokrenete slušanje, centrirajte QR kôd ispod"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Format QR koda nije važeći"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, trenutno emitiranje će se zaustaviti"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiraj aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

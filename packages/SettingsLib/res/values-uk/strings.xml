@@ -610,7 +610,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Вийти з режиму гостя"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Скинути сеанс у режимі гостя"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Вийти з режиму гостя"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Під час виходу буде видалено всі дії"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Під час виходу буде видалено історію всіх дій"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Під час виходу можна зберегти або видалити ваші дії"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Можна скинути історію сеансу просто зараз або видалити чи зберегти її під час виходу."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Зробити фотографію"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Увімкнення екрана"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Дозволити ввімкнення екрана"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Дозвольте додатку вмикати екран. Якщо ви надасте цей дозвіл, додаток зможе будь-коли вмикати екран пристрою навіть без вашого явного наміру."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Сканування QR-коду"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Щоб почати слухати аудіо, наведіть камеру на QR-код нижче"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Недійсний формат QR-коду"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Зупинити трансляцію з додатка <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Якщо ви зміните додаток (<xliff:g id="SWITCHAPP">%1$s</xliff:g>) або аудіовихід, поточну трансляцію буде припинено"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Змінити додаток для трансляції на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

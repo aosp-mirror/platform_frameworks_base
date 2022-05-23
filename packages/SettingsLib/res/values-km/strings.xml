@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"បើក​អេក្រង់"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"អនុញ្ញាតឱ្យ​បើកអេក្រង់"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"អនុញ្ញាតឱ្យ​កម្មវិធី​បើកអេក្រង់។ ប្រសិនបើ​អនុញ្ញាត កម្មវិធី​អាចបើកអេក្រង់​បានគ្រប់ពេល ទោះបីជា​អ្នកគ្មានបំណង​ធ្វើអន្តរកម្មក៏ដោយ។"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"ស្កេន​កូដ QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ដើម្បីចាប់ផ្ដើមស្ដាប់ សូមដាក់កូដ QR ខាងក្រោមឱ្យ​នៅចំកណ្ដាល"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"កូដ QR មិនមែនជា​ទម្រង់​ដែលត្រឹមត្រូវ​ទេ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"បញ្ឈប់ការផ្សាយ <xliff:g id="APP_NAME">%1$s</xliff:g> ឬ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ប្រសិនបើអ្នក​ផ្សាយ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ឬប្ដូរឧបករណ៍បញ្ចេញសំឡេង ការផ្សាយបច្ចុប្បន្នរបស់អ្នកនឹង​បញ្ឈប់"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"ការផ្សាយ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
