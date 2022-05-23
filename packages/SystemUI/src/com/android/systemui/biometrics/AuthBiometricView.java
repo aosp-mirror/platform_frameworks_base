@@ -166,6 +166,8 @@ public abstract class AuthBiometricView extends LinearLayout {
     private final Runnable mResetErrorRunnable;
     private final Runnable mResetHelpRunnable;
 
+    private Animator.AnimatorListener mJankListener;
+
     private final OnClickListener mBackgroundClickListener = (view) -> {
         if (mState == STATE_AUTHENTICATED) {
             Log.w(TAG, "Ignoring background click after authenticated");
@@ -282,6 +284,10 @@ public abstract class AuthBiometricView extends LinearLayout {
         mRequireConfirmation = requireConfirmation && supportsRequireConfirmation();
     }
 
+    void setJankListener(Animator.AnimatorListener jankListener) {
+        mJankListener = jankListener;
+    }
+
     @VisibleForTesting
     final void updateSize(@AuthDialog.DialogSize int newSize) {
         Log.v(TAG, "Current size: " + mSize + " New size: " + newSize);
@@ -372,6 +378,9 @@ public abstract class AuthBiometricView extends LinearLayout {
                 }
             });
 
+            if (mJankListener != null) {
+                as.addListener(mJankListener);
+            }
             as.play(iconAnimator).with(opacityAnimator);
             as.start();
             // Animate the panel
@@ -427,6 +436,9 @@ public abstract class AuthBiometricView extends LinearLayout {
             animators.add(translationAnimator);
             animators.add(opacityAnimator);
 
+            if (mJankListener != null) {
+                as.addListener(mJankListener);
+            }
             as.playTogether(animators);
             as.setDuration(mAnimationDurationLong * 2 / 3);
             as.start();
