@@ -25,6 +25,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SERVICE;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER;
 
 import android.annotation.MainThread;
 import android.app.Service;
@@ -83,6 +84,7 @@ public class TakeScreenshotService extends Service {
                     Log.d(TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
                 }
                 if (!mScreenshot.isPendingSharedTransition()) {
+                    mUiEventLogger.log(SCREENSHOT_DISMISSED_OTHER);
                     mScreenshot.dismissScreenshot(false);
                 }
             }
