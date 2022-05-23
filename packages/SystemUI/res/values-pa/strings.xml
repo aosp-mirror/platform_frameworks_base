@@ -313,10 +313,12 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"ਖੋਲ੍ਹਣ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"ਖੋਲ੍ਹਣ ਲਈ \'ਅਣਲਾਕ ਕਰੋ\' ਪ੍ਰਤੀਕ ਨੂੰ ਦਬਾਓ"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ਚਿਹਰੇ ਰਾਹੀਂ ਅਣਲਾਕ ਕੀਤਾ ਗਿਆ। ਖੋਲ੍ਹਣ ਲਈ \'ਅਣਲਾਕ ਕਰੋ\' ਪ੍ਰਤੀਕ ਨੂੰ ਦਬਾਓ।"</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"ਖੱਬੇ ਲਿਜਾਓ"</item>
+    <item msgid="5558598599408514296">"ਹੇਠਾਂ ਲਿਜਾਓ"</item>
+    <item msgid="4844142668312841831">"ਸੱਜੇ ਲਿਜਾਓ"</item>
+    <item msgid="5640521437931460125">"ਉੱਪਰ ਲਿਜਾਓ"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਉੱਤੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ਵਰਤਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ਇਹ ਡੀਵਾਈਸ ਤੁਹਾਡੀ ਸੰਸਥਾ ਨਾਲ ਸੰਬੰਧਿਤ ਹੈ"</string>
@@ -841,8 +843,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ਇਸ ਸੈਸ਼ਨ ਨੂੰ ਕਾਸਟ ਕਰਨ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਐਪ ਖੋਲ੍ਹੋ।"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ਅਗਿਆਤ ਐਪ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ਕਾਸਟ ਕਰਨਾ ਬੰਦ ਕਰੋ"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ਆਡੀਓ ਆਊਟਪੁੱਟ ਲਈ ਉਪਲਬਧ ਡੀਵਾਈਸ।"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ਪ੍ਰਸਾਰਨ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ਪ੍ਰਸਾਰਨ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ਅਨੁਰੂਪ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਨਾਲ ਨਜ਼ਦੀਕੀ ਲੋਕ ਤੁਹਾਡੇ ਵੱਲੋਂ ਪ੍ਰਸਾਰਨ ਕੀਤੇ ਜਾ ਰਹੇ ਮੀਡੀਆ ਨੂੰ ਸੁਣ ਸਕਦੇ ਹਨ"</string>
@@ -939,12 +940,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ਕਾਪੀ ਕੀਤੇ ਗਏ ਚਿੱਤਰ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ਨਜ਼ਦੀਕੀ ਡੀਵਾਈਸ \'ਤੇ ਭੇਜੋ"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"ਲਿਖਤ ਕਾਪੀ ਕੀਤੀ ਗਈ"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"ਚਿੱਤਰ ਕਾਪੀ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"ਸਮੱਗਰੀ ਕਾਪੀ ਕੀਤੀ ਗਈ"</string>
     <string name="add" msgid="81036585205287996">"ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ਵਰਤੋਂਕਾਰਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ਇਹ ਸੂਚਨਾ ਸਪਲਿਟ ਸਕ੍ਰੀਨ \'ਤੇ ਘਸੀਟਣ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ ਹੈ।"</string>
