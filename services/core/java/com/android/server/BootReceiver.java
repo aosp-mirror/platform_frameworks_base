@@ -46,6 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
+import com.android.server.am.DropboxRateLimiter;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -310,18 +311,30 @@ public class BootReceiver extends BroadcastReceiver {
         writeTimestamps(timestamps);
     }
 
+    private static final DropboxRateLimiter sDropboxRateLimiter = new DropboxRateLimiter();
+
     /**
      * Add a tombstone to the DropBox.
      *
      * @param ctx Context
      * @param tombstone path to the tombstone
+     * @param proto whether the tombstone is stored as proto
+     * @param processName the name of the process corresponding to the tombstone
      */
-    public static void addTombstoneToDropBox(Context ctx, File tombstone, boolean proto) {
+    public static void addTombstoneToDropBox(
+                Context ctx, File tombstone, boolean proto, String processName) {
         final DropBoxManager db = ctx.getSystemService(DropBoxManager.class);
         if (db == null) {
             Slog.e(TAG, "Can't log tombstone: DropBoxManager not available");
             return;
         }
+
+        // Check if we should rate limit and abort early if needed. Do this for both proto and
+        // non-proto tombstones, even though proto tombstones do not support including the counter
+        // of events dropped since rate limiting activated yet.
+        DropboxRateLimiter.RateLimitResult rateLimitResult =
+                sDropboxRateLimiter.shouldRateLimit(TAG_TOMBSTONE, processName);
+        if (rateLimitResult.shouldRateLimit()) return;
 
         HashMap<String, Long> timestamps = readTimestamps();
         try {
@@ -330,7 +343,9 @@ public class BootReceiver extends BroadcastReceiver {
                     db.addFile(TAG_TOMBSTONE_PROTO, tombstone, 0);
                 }
             } else {
-                final String headers = getBootHeadersToLogAndUpdate();
+                // Add the header indicating how many events have been dropped due to rate limiting.
+                final String headers = getBootHeadersToLogAndUpdate()
+                        + rateLimitResult.createHeader();
                 addFileToDropBox(db, timestamps, headers, tombstone.getPath(), LOG_SIZE,
                                  TAG_TOMBSTONE);
             }
