@@ -17,7 +17,7 @@
 package com.android.server.companion;
 
 import static android.content.Context.BIND_ALMOST_PERCEPTIBLE;
-import static android.content.Context.BIND_IMPORTANT;
+import static android.content.Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE;
 import static android.os.Process.THREAD_PRIORITY_DEFAULT;
 
 import android.annotation.NonNull;
@@ -61,21 +61,22 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
     /**
      * Create a CompanionDeviceServiceConnector instance.
      *
-     * When bindImportant is false, the binding flag will be BIND_ALMOST_PERCEPTIBLE
+     * For self-managed apps, the binding flag will be BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE
+     * (oom_score_adj = VISIBLE_APP_ADJ = 100).
+     *
+     * For non self-managed apps, the binding flag will be BIND_ALMOST_PERCEPTIBLE
      * (oom_score_adj = PERCEPTIBLE_MEDIUM_APP = 225). The target service will be treated
      * as important as a perceptible app (IMPORTANCE_VISIBLE = 200), and will be unbound when
      * the app is removed from task manager.
-     * When bindImportant is true, the binding flag will be BIND_IMPORTANT
-     * (oom_score_adj = PERCEPTIBLE_MEDIUM_APP = -700). The target service will
-     * have the highest priority to avoid being killed (IMPORTANCE_FOREGROUND = 100).
      *
      * One time permission's importance level to keep session alive is
      * IMPORTANCE_FOREGROUND_SERVICE = 125. In order to kill the one time permission session, the
      * service importance level should be higher than 125.
      */
     static CompanionDeviceServiceConnector newInstance(@NonNull Context context,
-            @UserIdInt int userId, @NonNull ComponentName componentName, boolean bindImportant) {
-        final int bindingFlags = bindImportant ? BIND_IMPORTANT : BIND_ALMOST_PERCEPTIBLE;
+            @UserIdInt int userId, @NonNull ComponentName componentName, boolean isSelfManaged) {
+        final int bindingFlags = isSelfManaged ? BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE
+                : BIND_ALMOST_PERCEPTIBLE;
         return new CompanionDeviceServiceConnector(context, userId, componentName, bindingFlags);
     }
 
