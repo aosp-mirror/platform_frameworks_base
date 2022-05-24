@@ -949,7 +949,8 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Готово"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Скопировано."</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Из приложения \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Закрыть меню копирования"</string>
+    <!-- no translation found for clipboard_dismiss_description (3335990369850165486) -->
+    <skip />
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Изменить скопированный текст"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Изменить скопированное изображение"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Отправить на устройство поблизости"</string>
