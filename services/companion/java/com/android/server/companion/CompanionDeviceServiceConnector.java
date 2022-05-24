@@ -118,13 +118,23 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         }
     }
 
+    // This method is only called when app is force-closed via settings,
+    // but does not handle crashes. Binder death should be handled in #binderDied()
     @Override
     public void onBindingDied(@NonNull ComponentName name) {
-        // IMPORTANT: call super!
+        // IMPORTANT: call super! this will also invoke binderDied()
         super.onBindingDied(name);
 
         if (DEBUG) Log.d(TAG, "onBindingDied() " + mComponentName.toShortString());
+    }
 
+    @Override
+    public void binderDied() {
+        super.binderDied();
+
+        if (DEBUG) Log.d(TAG, "binderDied() " + mComponentName.toShortString());
+
+        // Handle primary process being killed
         if (mListener != null) {
             mListener.onBindingDied(mUserId, mComponentName.getPackageName());
         }
