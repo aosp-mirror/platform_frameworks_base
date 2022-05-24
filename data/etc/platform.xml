@@ -120,6 +120,10 @@
         <group gid="reserved_disk" />
     </permission>
 
+    <permission name="android.permission.WRITE_SECURITY_LOG">
+        <group gid="security_log" />
+    </permission>
+
     <!-- These are permissions that were mapped to gids but we need
          to keep them here until an upgrade from L to the current
          version is to be supported. These permissions are built-in
