@@ -607,7 +607,6 @@ public final class ProcessStats implements Parcelable {
                     }
                 } else {
                     ps.makeDead();
-                    mUidStates.get(uids.keyAt(iu)).removeProcess(ps, now);
                     uids.removeAt(iu);
                 }
             }
