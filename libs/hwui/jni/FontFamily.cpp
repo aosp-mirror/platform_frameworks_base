@@ -46,9 +46,12 @@ namespace android {
 
 struct NativeFamilyBuilder {
     NativeFamilyBuilder(uint32_t langId, int variant)
-        : langId(langId), variant(static_cast<minikin::FamilyVariant>(variant)) {}
+            : langId(langId)
+            , variant(static_cast<minikin::FamilyVariant>(variant))
+            , allowUnsupportedFont(false) {}
     uint32_t langId;
     minikin::FamilyVariant variant;
+    bool allowUnsupportedFont;
     std::vector<std::shared_ptr<minikin::Font>> fonts;
     std::vector<minikin::FontVariation> axes;
 };
@@ -87,10 +90,18 @@ static jlong FontFamily_create(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr) {
     std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
             builder->langId, builder->variant, std::move(builder->fonts),
             true /* isCustomFallback */);
-    if (family->getCoverage().length() == 0) {
+    if (family->getCoverage().length() == 0 && !builder->allowUnsupportedFont) {
         return 0;
     }
     return toJLong(new FontFamilyWrapper(std::move(family)));
+}
+
+static void FontFamily_allowUnsupportedFont(jlong builderPtr) {
+    if (builderPtr == 0) {
+        return;
+    }
+    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
+    builder->allowUnsupportedFont = true;
 }
 
 static void releaseBuilder(jlong builderPtr) {
@@ -218,14 +229,15 @@ static void FontFamily_addAxisValue(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr, 
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontFamilyMethods[] = {
-    { "nInitBuilder",           "(Ljava/lang/String;I)J", (void*)FontFamily_initBuilder },
-    { "nCreateFamily",          "(J)J", (void*)FontFamily_create },
-    { "nGetBuilderReleaseFunc", "()J", (void*)FontFamily_getBuilderReleaseFunc },
-    { "nGetFamilyReleaseFunc",  "()J", (void*)FontFamily_getFamilyReleaseFunc },
-    { "nAddFont",               "(JLjava/nio/ByteBuffer;III)Z", (void*)FontFamily_addFont },
-    { "nAddFontWeightStyle",    "(JLjava/nio/ByteBuffer;III)Z",
-            (void*)FontFamily_addFontWeightStyle },
-    { "nAddAxisValue",         "(JIF)V", (void*)FontFamily_addAxisValue },
+        {"nInitBuilder", "(Ljava/lang/String;I)J", (void*)FontFamily_initBuilder},
+        {"nCreateFamily", "(J)J", (void*)FontFamily_create},
+        {"nAllowUnsupportedFont", "(J)V", (void*)FontFamily_allowUnsupportedFont},
+        {"nGetBuilderReleaseFunc", "()J", (void*)FontFamily_getBuilderReleaseFunc},
+        {"nGetFamilyReleaseFunc", "()J", (void*)FontFamily_getFamilyReleaseFunc},
+        {"nAddFont", "(JLjava/nio/ByteBuffer;III)Z", (void*)FontFamily_addFont},
+        {"nAddFontWeightStyle", "(JLjava/nio/ByteBuffer;III)Z",
+         (void*)FontFamily_addFontWeightStyle},
+        {"nAddAxisValue", "(JIF)V", (void*)FontFamily_addAxisValue},
 };
 
 int register_android_graphics_FontFamily(JNIEnv* env)
