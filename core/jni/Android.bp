@@ -402,6 +402,7 @@ cc_library_shared {
           "android_database_SQLiteDebug.cpp",
           "android_util_Log.cpp",
           "com_android_internal_util_VirtualRefBasePtr.cpp",
+          "android_view_Surface.cpp",
           "RobolectricNativeRuntime.cpp",
         ],
         static_libs: [
@@ -412,6 +413,7 @@ cc_library_shared {
           "libutils",
           "liblog",
           "libcutils",
+          "libhostgraphics",
           "libhwui",
           "libpng",
           "libjpeg",
@@ -429,6 +431,11 @@ cc_library_shared {
           "libicuuc_stubdata",
           "libminikin",
           "libharfbuzz_ng",
+          "libui-types",
+        ],
+        include_dirs: [
+          "frameworks/native/libs/nativebase/include",
+          "frameworks/native/libs/nativewindow/include",
         ],
         stl: "libc++_static",
         ldflags: ["-static-libgcc"],

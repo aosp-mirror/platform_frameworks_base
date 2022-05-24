@@ -12,6 +12,7 @@ namespace android {
 
 extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
+extern int register_android_view_Surface(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv* env);
 
 #define REG_JNI(name) \
@@ -23,6 +24,10 @@ struct RegJNIRec {
 static const RegJNIRec sqliteJNI[] = {
         REG_JNI(register_android_database_CursorWindow),
         REG_JNI(register_android_database_SQLiteConnection),
+};
+
+static const RegJNIRec graphicsJNI[] = {
+        REG_JNI(register_android_view_Surface),
         REG_JNI(register_com_android_internal_util_VirtualRefBasePtr),
 };
 
@@ -79,6 +84,9 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     if (apiLevel >= 26) {
         init_android_graphics();
         if (register_android_graphics_classes(env) < 0) {
+            return JNI_ERR;
+        }
+        if (register_jni_procs(graphicsJNI, NELEM(sqliteJNI), env) < 0) {
             return JNI_ERR;
         }
     }

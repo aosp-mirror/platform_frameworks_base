@@ -55,6 +55,7 @@ extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_jar_StrictJarFile(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
+extern int register_android_view_Surface(JNIEnv* env);
 
 #define REG_JNI(name)      { name }
 struct RegJNIRec {
