@@ -346,6 +346,14 @@ public class InputMethodService extends AbstractInputMethodService {
     private static final int MAX_EVENTS_BUFFER = 500;
 
     /**
+     * When IME doesn't receive stylus input for these many milliseconds, Handwriting session
+     * will be finished by calling {@link #finishStylusHandwriting()}.
+     * @see #onStartStylusHandwriting()
+     * @see #onFinishStylusHandwriting()
+     */
+    private static final int STYLUS_HANDWRITING_IDLE_TIMEOUT_MS = 10000;
+
+    /**
      * A circular buffer of size MAX_EVENTS_BUFFER in case IME is taking too long to add ink view.
      **/
     private RingBuffer<MotionEvent> mPendingEvents;
@@ -353,6 +361,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private Boolean mBackCallbackRegistered = false;
     private final OnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
     private Runnable mImeSurfaceRemoverRunnable;
+    private Runnable mFinishHwRunnable;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -992,8 +1001,10 @@ public class InputMethodService extends AbstractInputMethodService {
                             return false;
                         }
                         onStylusHandwritingMotionEvent((MotionEvent) event);
+                        scheduleHandwritingSessionTimeout();
                         return true;
                     });
+            scheduleHandwritingSessionTimeout();
         }
 
         /**
@@ -2471,6 +2482,10 @@ public class InputMethodService extends AbstractInputMethodService {
         if (!mHandwritingRequestId.isPresent()) {
             return;
         }
+        if (mHandler != null && mFinishHwRunnable != null) {
+            mHandler.removeCallbacks(mFinishHwRunnable);
+        }
+        mFinishHwRunnable = null;
 
         final int requestId = mHandwritingRequestId.getAsInt();
         mHandwritingRequestId = OptionalInt.empty();
@@ -2482,6 +2497,30 @@ public class InputMethodService extends AbstractInputMethodService {
         mPrivOps.resetStylusHandwriting(requestId);
         mOnPreparedStylusHwCalled = false;
         onFinishStylusHandwriting();
+    }
+
+    private Runnable getFinishHandwritingRunnable() {
+        if (mFinishHwRunnable != null) {
+            return mFinishHwRunnable;
+        }
+        return mFinishHwRunnable = () -> {
+            if (mHandler != null) {
+                mHandler.removeCallbacks(mFinishHwRunnable);
+            }
+            Log.d(TAG, "Stylus handwriting idle timed-out. calling finishStylusHandwriting()");
+            mFinishHwRunnable = null;
+            finishStylusHandwriting();
+        };
+    }
+
+    private void scheduleHandwritingSessionTimeout() {
+        if (mHandler == null) {
+            mHandler = new Handler(getMainLooper());
+        }
+        if (mFinishHwRunnable != null) {
+            mHandler.removeCallbacks(mFinishHwRunnable);
+        }
+        mHandler.postDelayed(getFinishHandwritingRunnable(), STYLUS_HANDWRITING_IDLE_TIMEOUT_MS);
     }
 
     /**
