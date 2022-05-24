@@ -9332,6 +9332,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
                            r.getSbn().getId(), r.getSbn().getTag(), r, false))
                 .isFalse();
+
+        // telecom manager is not ready - blocked
+        mService.setTelecomManager(mTelecomManager);
+        when(mTelecomManager.isInCall()).thenThrow(new IllegalStateException("not ready"));
+        assertThat(mService.checkDisqualifyingFeatures(r.getUserId(), r.getUid(),
+                r.getSbn().getId(), r.getSbn().getTag(), r, false))
+                .isFalse();
     }
 
     @Test
@@ -9424,6 +9431,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(false);
         reset(mUsageStats);
         mService.setTelecomManager(null);
+
+        mService.addEnqueuedNotification(r);
+        runnable.run();
+        waitForIdle();
+
+        verify(mUsageStats).registerBlocked(any());
+        verify(mUsageStats, never()).registerPostedByApp(any());
+
+        // telecom is not ready - notifications should be blocked but no crashes
+        mService.setTelecomManager(mTelecomManager);
+        when(mTelecomManager.isInCall()).thenThrow(new IllegalStateException("not ready"));
+        reset(mUsageStats);
 
         mService.addEnqueuedNotification(r);
         runnable.run();
