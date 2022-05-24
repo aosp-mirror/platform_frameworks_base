@@ -4526,29 +4526,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mClearAllInProgress = clearAllInProgress;
         mAmbientState.setClearAllInProgress(clearAllInProgress);
         mController.getNoticationRoundessManager().setClearAllInProgress(clearAllInProgress);
-        handleClearAllClipping();
     }
 
     boolean getClearAllInProgress() {
         return mClearAllInProgress;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    private void handleClearAllClipping() {
-        final int count = getChildCount();
-        boolean previousChildWillBeDismissed = false;
-        for (int i = 0; i < count; i++) {
-            ExpandableView child = (ExpandableView) getChildAt(i);
-            if (child.getVisibility() == GONE) {
-                continue;
-            }
-            if (mClearAllInProgress && previousChildWillBeDismissed) {
-                child.setMinClipTopAmount(child.getClipTopAmount());
-            } else {
-                child.setMinClipTopAmount(0);
-            }
-            previousChildWillBeDismissed = canChildBeCleared(child);
-        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

@@ -2075,6 +2075,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void applyLaunchAnimationParams(LaunchAnimationParameters params) {
         if (params == null) {
+            // `null` params indicates the animation is over, which means we can't access
+            // params.getParentStartClipTopAmount() which has the value we want to restore.
+            // Fortunately, only NotificationShelf actually uses these values for anything other
+            // than this launch animation, so we can restore the value to 0 and it's right for now.
+            if (mNotificationParent != null) {
+                mNotificationParent.setClipTopAmount(0);
+            }
             return;
         }
 
