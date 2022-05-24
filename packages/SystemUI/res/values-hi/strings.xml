@@ -319,10 +319,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"चेहरे से अनलॉक किया गया. डिवाइस खोलने के लिए टैप करें."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"चेहरे की पहचान हो गई. डिवाइस खोलने के लिए टैप करें."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"चेहरे की पहचान हो गई. डिवाइस खोलने के लिए अनलॉक आइकॉन को टैप करें."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"बाईं ओर ले जाएं"</item>
+    <item msgid="5558598599408514296">"नीचे ले जाएं"</item>
+    <item msgid="4844142668312841831">"दाईं ओर ले जाएं"</item>
+    <item msgid="5640521437931460125">"ऊपर ले जाएं"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"फिर से कोशिश करने के लिए ऊपर की ओर स्वाइप करें"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"एनएफ़सी इस्तेमाल करने के लिए स्क्रीन को अनलॉक करें"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
@@ -847,8 +849,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"इस सेशन को कास्ट करने के लिए, कृपया ऐप्लिकेशन खोलें."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अनजान ऐप्लिकेशन"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्टिंग करना रोकें"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ऑडियो आउटपुट के लिए उपलब्ध डिवाइस."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्ट करने की सुविधा कैसे काम करती है"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करें"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"आपके आस-पास मौजूद लोग, ब्रॉडकास्ट किए जा रहे मीडिया को सुन सकते हैं. हालांकि, इसके लिए उनके पास ऐसे ब्लूटूथ डिवाइस होने चाहिए जिन पर मीडिया चलाया जा सके"</string>
@@ -945,12 +946,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"कॉपी की गई इमेज में बदलाव करें"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"कॉन्टेंट को आस-पास मौजूद डिवाइस पर भेजें"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"देखने के लिए टैप करें"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"टेक्स्ट कॉपी किया गया"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"इमेज कॉपी की गई"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"कॉन्टेंट कॉपी किया गया"</string>
     <string name="add" msgid="81036585205287996">"जोड़ें"</string>
     <string name="manage_users" msgid="1823875311934643849">"उपयोगकर्ताओं को मैनेज करें"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"इस सूचना को स्प्लिट स्क्रीन मोड में, खींचा और छोड़ा नहीं जा सकता."</string>

@@ -39,7 +39,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -926,11 +925,15 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
 
     @VisibleForTesting
     float getPhysicalPixelDisplaySizeRatio() {
-        final Point stableDisplaySize = mDisplayManager.getStableDisplaySize();
         mContext.getDisplay().getDisplayInfo(mDisplayInfo);
+        final Display.Mode maxDisplayMode =
+                DisplayUtils.getMaximumResolutionDisplayMode(mDisplayInfo.supportedModes);
+        if (maxDisplayMode == null) {
+            return 1f;
+        }
         return DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                stableDisplaySize.x, stableDisplaySize.y, mDisplayInfo.getNaturalWidth(),
-                mDisplayInfo.getNaturalHeight());
+                maxDisplayMode.getPhysicalWidth(), maxDisplayMode.getPhysicalHeight(),
+                mDisplayInfo.getNaturalWidth(), mDisplayInfo.getNaturalHeight());
     }
 
     @Override
