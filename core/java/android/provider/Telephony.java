@@ -931,9 +931,10 @@ public final class Telephony {
              * Set as a "result" extra in the {@link #SMS_REJECTED_ACTION} intent to indicate an sms
              * was received while the phone was in encrypted state.
              * <p>
-             * This result is never used on devices that launched with Android 10 (API level 29) or
-             * higher, since Android's storage encryption implementation has changed and it no
-             * longer can cause the rejection of incoming SMS messages.
+             * This result code is only used on devices that use Full Disk Encryption.  Support for
+             * Full Disk Encryption was entirely removed in API level 33, having been replaced by
+             * File Based Encryption.  Devices that use File Based Encryption never reject incoming
+             * SMS messages due to the encryption state.
              */
             public static final int RESULT_SMS_RECEIVED_WHILE_ENCRYPTED = 9;
 
