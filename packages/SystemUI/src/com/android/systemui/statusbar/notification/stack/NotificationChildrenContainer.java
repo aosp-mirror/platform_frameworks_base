@@ -24,6 +24,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.NotificationHeaderView;
@@ -57,6 +58,8 @@ import java.util.List;
  */
 public class NotificationChildrenContainer extends ViewGroup
         implements NotificationFadeAware {
+
+    private static final String TAG = "NotificationChildrenContainer";
 
     @VisibleForTesting
     static final int NUMBER_OF_CHILDREN_WHEN_COLLAPSED = 2;
@@ -1144,6 +1147,10 @@ public class NotificationChildrenContainer extends ViewGroup
     private int getMinHeight(int maxAllowedVisibleChildren, boolean likeHighPriority,
             int headerTranslation) {
         if (!likeHighPriority && showingAsLowPriority()) {
+            if (mNotificationHeaderLowPriority == null) {
+                Log.e(TAG, "getMinHeight: low priority header is null", new Exception());
+                return 0;
+            }
             return mNotificationHeaderLowPriority.getHeight();
         }
         int minExpandHeight = mNotificationHeaderMargin + headerTranslation;
@@ -1160,7 +1167,13 @@ public class NotificationChildrenContainer extends ViewGroup
                 firstChild = false;
             }
             ExpandableNotificationRow child = mAttachedChildren.get(i);
-            minExpandHeight += child.getSingleLineView().getHeight();
+            View singleLineView = child.getSingleLineView();
+            if (singleLineView != null) {
+                minExpandHeight += singleLineView.getHeight();
+            } else {
+                Log.e(TAG, "getMinHeight: child " + child + " single line view is null",
+                        new Exception());
+            }
             visibleChildren++;
         }
         minExpandHeight += mCollapsedBottomPadding;
