@@ -323,10 +323,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Odklenjeno z obrazom. Pritisnite za odpiranje."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Obraz je prepoznan. Pritisnite za odpiranje."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Obraz je prepoznan. Za odpiranje pritisnite ikono za odklepanje."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Premik levo"</item>
+    <item msgid="5558598599408514296">"Premik navzdol"</item>
+    <item msgid="4844142668312841831">"Premik desno"</item>
+    <item msgid="5640521437931460125">"Premik navzgor"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Povlecite navzgor za vnovičen poskus"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Odklenite napravo, če želite uporabljati NFC."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ta naprava pripada vaši organizaciji"</string>
@@ -859,8 +861,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Če želite predvajati to sejo, odprite aplikacijo."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznana aplikacija"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ustavi predvajanje"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Razpoložljive naprave za zvočni izhod"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako deluje oddajanje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Oddajanje"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osebe v bližini z združljivo napravo Bluetooth lahko poslušajo predstavnost, ki jo oddajate."</string>
@@ -959,12 +960,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Uredi kopirano sliko"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Pošlji v napravo v bližini"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Dotaknite se za ogled"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Besedilo je kopirano"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Slika je kopirana"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Vsebina je kopirana"</string>
     <string name="add" msgid="81036585205287996">"Dodaj"</string>
     <string name="manage_users" msgid="1823875311934643849">"Upravljanje uporabnikov"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"To obvestilo ne podpira vlečenja v razdeljen zaslon."</string>
