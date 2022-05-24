@@ -1143,6 +1143,19 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         assertThat(mNotificationPanelViewController.isQsTracking()).isFalse();
     }
 
+    @Test
+    public void testOnAttachRefreshStatusBarState() {
+        mStatusBarStateController.setState(KEYGUARD);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(false);
+        for (View.OnAttachStateChangeListener listener : mOnAttachStateChangeListeners) {
+            listener.onViewAttachedToWindow(mView);
+        }
+        verify(mKeyguardStatusViewController).setKeyguardStatusViewVisibility(
+                KEYGUARD/*statusBarState*/,
+                false/*keyguardFadingAway*/,
+                false/*goingToFullShade*/, SHADE/*oldStatusBarState*/);
+    }
+
     private static MotionEvent createMotionEvent(int x, int y, int action) {
         return MotionEvent.obtain(
                 /* downTime= */ 0, /* eventTime= */ 0, action, x, y, /* metaState= */ 0);
