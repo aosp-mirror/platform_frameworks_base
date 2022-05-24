@@ -4842,6 +4842,7 @@ public class NotificationPanelViewController extends PanelViewController {
             mFragmentService.getFragmentHostManager(mView)
                             .addTagListener(QS.TAG, mFragmentListener);
             mStatusBarStateController.addCallback(mStatusBarStateListener);
+            mStatusBarStateListener.onStateChanged(mStatusBarStateController.getState());
             mConfigurationController.addCallback(mConfigurationListener);
             // Theme might have changed between inflating this view and attaching it to the
             // window, so

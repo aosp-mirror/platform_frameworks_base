@@ -88,6 +88,9 @@ public class BubblePositioner {
     private int mMaxBubbles;
     private int mBubbleSize;
     private int mSpacingBetweenBubbles;
+    private int mBubblePaddingTop;
+    private int mBubbleOffscreenAmount;
+    private int mStackOffset;
 
     private int mExpandedViewMinHeight;
     private int mExpandedViewLargeScreenWidth;
@@ -187,6 +190,10 @@ public class BubblePositioner {
         mSpacingBetweenBubbles = res.getDimensionPixelSize(R.dimen.bubble_spacing);
         mDefaultMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mBubbleOffscreenAmount = res.getDimensionPixelSize(R.dimen.bubble_stack_offscreen);
+        mStackOffset = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+
         if (mIsSmallTablet) {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
@@ -327,6 +334,21 @@ public class BubblePositioner {
         return (mShowingInTaskbar && mTaskbarIconSize > 0)
                 ? mTaskbarIconSize
                 : mBubbleSize;
+    }
+
+    /** The amount of padding at the top of the screen that the bubbles avoid when being placed. */
+    public int getBubblePaddingTop() {
+        return mBubblePaddingTop;
+    }
+
+    /** The amount the stack hang off of the screen when collapsed. */
+    public int getStackOffScreenAmount() {
+        return mBubbleOffscreenAmount;
+    }
+
+    /** Offset of bubbles in the stack (i.e. how much they overlap). */
+    public int getStackOffset() {
+        return mStackOffset;
     }
 
     /** Size of the visible (non-overlapping) part of the pointer. */
@@ -678,7 +700,28 @@ public class BubblePositioner {
         return new BubbleStackView.RelativeStackPosition(
                 startOnLeft,
                 startingVerticalOffset / mPositionRect.height())
-                .getAbsolutePositionInRegion(new RectF(mPositionRect));
+                .getAbsolutePositionInRegion(getAllowableStackPositionRegion(
+                        1 /* default starts with 1 bubble */));
+    }
+
+
+    /**
+     * Returns the region that the stack position must stay within. This goes slightly off the left
+     * and right sides of the screen, below the status bar/cutout and above the navigation bar.
+     * While the stack position is not allowed to rest outside of these bounds, it can temporarily
+     * be animated or dragged beyond them.
+     */
+    public RectF getAllowableStackPositionRegion(int bubbleCount) {
+        final RectF allowableRegion = new RectF(getAvailableRect());
+        final int imeHeight = getImeHeight();
+        final float bottomPadding = bubbleCount > 1
+                ? mBubblePaddingTop + mStackOffset
+                : mBubblePaddingTop;
+        allowableRegion.left -= mBubbleOffscreenAmount;
+        allowableRegion.top += mBubblePaddingTop;
+        allowableRegion.right += mBubbleOffscreenAmount - mBubbleSize;
+        allowableRegion.bottom -= imeHeight + bottomPadding + mBubbleSize;
+        return allowableRegion;
     }
 
     /**
