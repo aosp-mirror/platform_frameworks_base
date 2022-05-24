@@ -1151,7 +1151,21 @@ public class StaticLayout extends Layout {
         // TODO: could move TAB to share same column as HYPHEN, simplifying this code and gaining
         // one bit for start field
         lines[off + TAB] |= hasTab ? TAB_MASK : 0;
-        lines[off + HYPHEN] = hyphenEdit;
+        if (mEllipsized) {
+            if (ellipsize == TextUtils.TruncateAt.START) {
+                lines[off + HYPHEN] = packHyphenEdit(Paint.START_HYPHEN_EDIT_NO_EDIT,
+                        unpackEndHyphenEdit(hyphenEdit));
+            } else if (ellipsize == TextUtils.TruncateAt.END) {
+                lines[off + HYPHEN] = packHyphenEdit(unpackStartHyphenEdit(hyphenEdit),
+                        Paint.END_HYPHEN_EDIT_NO_EDIT);
+            } else {  // Middle and marquee ellipsize should show text at the start/end edge.
+                lines[off + HYPHEN] = packHyphenEdit(
+                        Paint.START_HYPHEN_EDIT_NO_EDIT, Paint.END_HYPHEN_EDIT_NO_EDIT);
+            }
+        } else {
+            lines[off + HYPHEN] = hyphenEdit;
+        }
+
         lines[off + DIR] |= dir << DIR_SHIFT;
         mLineDirections[j] = measured.getDirections(start - widthStart, end - widthStart);
 
