@@ -163,13 +163,6 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.SMART_REPLIES_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
-                Global.Wearable.RETAIL_MODE,
-                new DiscreteValueValidator(
-                        new String[] {
-                            String.valueOf(Global.Wearable.RETAIL_MODE_CONSUMER),
-                            String.valueOf(Global.Wearable.RETAIL_MODE_RETAIL)
-                        }));
-        VALIDATORS.put(
                 Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
                 new DiscreteValueValidator(
                         new String[] {
