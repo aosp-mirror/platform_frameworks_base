@@ -653,7 +653,8 @@ namespace PaintGlue {
         }
     }
 
-    static SkScalar getMetricsInternal(jlong paintHandle, SkFontMetrics *metrics) {
+    static SkScalar getMetricsInternal(jlong paintHandle, jlong typefaceHandle,
+                                       SkFontMetrics* metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
         const int kElegantAscent = 1900;
@@ -661,7 +662,7 @@ namespace PaintGlue {
         const int kElegantLeading = 0;
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         SkFont* font = &paint->getSkFont();
-        const Typeface* typeface = paint->getAndroidTypeface();
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
         typeface = Typeface::resolveDefault(typeface);
         minikin::FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
         float saveSkewX = font->getSkewX();
@@ -683,6 +684,12 @@ namespace PaintGlue {
             spacing = metrics->fDescent - metrics->fAscent + metrics->fLeading;
         }
         return spacing;
+    }
+
+    static SkScalar getMetricsInternal(jlong paintHandle, SkFontMetrics* metrics) {
+        return getMetricsInternal(
+                paintHandle, (jlong) reinterpret_cast<Paint*>(paintHandle)->getAndroidTypeface(),
+                metrics);
     }
 
     static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
@@ -1014,9 +1021,25 @@ namespace PaintGlue {
         return SkScalarToFloat(metrics.fAscent);
     }
 
+    // Required for O and O_MR1
+    static jfloat ascent_typeface(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle,
+                                  jlong typefaceHandle) {
+        SkFontMetrics metrics;
+        getMetricsInternal(paintHandle, typefaceHandle, &metrics);
+        return SkScalarToFloat(metrics.fAscent);
+    }
+
     static jfloat descent(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
+        return SkScalarToFloat(metrics.fDescent);
+    }
+
+    // Required for O and O_MR1
+    static jfloat descent_typeface(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle,
+                                   jlong typefaceHandle) {
+        SkFontMetrics metrics;
+        getMetricsInternal(paintHandle, typefaceHandle, &metrics);
         return SkScalarToFloat(metrics.fDescent);
     }
 
@@ -1067,6 +1090,19 @@ namespace PaintGlue {
         else {
             SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
             paint->setLooper(BlurDrawLooper::Make(color, cs.get(), sigma, {dx, dy}));
+        }
+    }
+
+    // Required for API O and O_MR1
+    static void setShadowLayerInt(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jfloat radius,
+                                  jfloat dx, jfloat dy, jint color) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        if (radius <= 0) {
+            paint->setLooper(NULL);
+        } else {
+            SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
+            paint->setLooper(BlurDrawLooper::Make(SkColor4f::FromColor((SkColor)color),
+                                                  SkColorSpace::MakeSRGB().get(), sigma, {dx, dy}));
         }
     }
 
@@ -1192,12 +1228,15 @@ static const JNINativeMethod methods[] = {
         {"nSetStartHyphenEdit", "(JI)V", (void*)PaintGlue::setStartHyphenEdit},
         {"nSetEndHyphenEdit", "(JI)V", (void*)PaintGlue::setEndHyphenEdit},
         {"nAscent", "(J)F", (void*)PaintGlue::ascent},
+        {"nAscent", "(JJ)F", (void*)PaintGlue::ascent_typeface},
         {"nDescent", "(J)F", (void*)PaintGlue::descent},
+        {"nDescent", "(JJ)F", (void*)PaintGlue::descent_typeface},
         {"nGetUnderlinePosition", "(J)F", (void*)PaintGlue::getUnderlinePosition},
         {"nGetUnderlineThickness", "(J)F", (void*)PaintGlue::getUnderlineThickness},
         {"nGetStrikeThruPosition", "(J)F", (void*)PaintGlue::getStrikeThruPosition},
         {"nGetStrikeThruThickness", "(J)F", (void*)PaintGlue::getStrikeThruThickness},
         {"nSetShadowLayer", "(JFFFJJ)V", (void*)PaintGlue::setShadowLayer},
+        {"nSetShadowLayer", "(JFFFI)V", (void*)PaintGlue::setShadowLayerInt},
         {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
         {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
 };
