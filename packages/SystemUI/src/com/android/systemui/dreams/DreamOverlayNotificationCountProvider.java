@@ -37,7 +37,7 @@ import javax.inject.Inject;
 
 /***
  * {@link DreamOverlayNotificationCountProvider} provides the current notification count to
- * registered callbacks.
+ * registered callbacks. Ongoing notifications are not included in the count.
  */
 @SysUISingleton
 public class DreamOverlayNotificationCountProvider
@@ -49,6 +49,10 @@ public class DreamOverlayNotificationCountProvider
         @Override
         public void onNotificationPosted(
                 StatusBarNotification sbn, NotificationListenerService.RankingMap rankingMap) {
+            if (sbn.isOngoing()) {
+                // Don't count ongoing notifications.
+                return;
+            }
             mNotificationKeys.add(sbn.getKey());
             reportNotificationCountChanged();
         }

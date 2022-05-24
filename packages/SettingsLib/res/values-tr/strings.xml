@@ -569,7 +569,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Kullanıcı"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Kısıtlı profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Yeni kullanıcı eklensin mi?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ek kullanıcılar oluşturarak bu cihazı başkalarıyla paylaşabilirsiniz. Her kullanıcının uygulamalarla, duvar kağıdıyla ve başka ayarlarla özelleştirebileceği kendi alanı olur. Kullanıcılar ayrıca kablosuz ağ gibi herkesi etkileyen cihaz ayarlarını değiştirebilirler.\n\nYeni bir kullanıcı eklediğinizde, ilgili kişinin kendi alanını ayarlaması gerekir.\n\nHer kullanıcı diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ek kullanıcılar oluşturarak bu cihazı başkalarıyla paylaşabilirsiniz. Her kullanıcının uygulamalarla, duvar kağıdıyla ve başka ayarlarla özelleştirebileceği kendi alanı olur. Kullanıcılar ayrıca kablosuz ağ gibi herkesi etkileyen cihaz ayarlarını değiştirebilirler.\n\nYeni bir kullanıcı eklediğinizde, ilgili kişinin kendi alanını ayarlaması gerekir.\n\nHer kullanıcı diğer tüm kullanıcılar için uygulamaları güncelleyebilir. Erişilebilirlik ayarları ve hizmetleri yeni kullanıcıya aktarılamayabilir."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Yeni bir kullanıcı eklediğinizde, bu kişinin kendi alanını ayarlaması gerekir.\n\nHerhangi bir kullanıcı, diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Kullanıcı şimdi ayarlansın mı?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"İlgili kişinin cihazı almak ve kendi alanını ayarlamak için müsait olduğundan emin olun"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Ekranı aç"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Ekranı açmaya izin ver"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Bir uygulamanın ekranı açmasına izin verin. İzin verildiğinde, uygulama sizin belirgin niyetiniz olmadan istediği zaman ekranı açabilir."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR kodunu tara"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Dinlemeye başlamak için aşağıdaki QR kodunu ortalayın"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodu geçerli bir biçim değil"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulamasında anons durdurulsun mu?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapar veya çıkışı değiştirirseniz mevcut anonsunuz duraklatılır"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapın"</string>

@@ -16,10 +16,11 @@
 
 package com.android.server.app;
 
-import android.Manifest;
+import static android.Manifest.permission.MANAGE_GAME_ACTIVITY;
+
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
@@ -181,10 +182,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameServiceController mGameServiceController =
             new IGameServiceController.Stub() {
                 @Override
-                @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void createGameSession(int taskId) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "createGameSession()");
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.createGameSession(taskId);
                     });
@@ -194,11 +193,9 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameSessionController mGameSessionController =
             new IGameSessionController.Stub() {
                 @Override
-                @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void takeScreenshot(int taskId,
                         @NonNull AndroidFuture gameScreenshotResultFuture) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "takeScreenshot()");
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.takeScreenshot(taskId,
                                 gameScreenshotResultFuture);
@@ -206,10 +203,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 }
 
                 @Override
-                @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
+                @EnforcePermission(MANAGE_GAME_ACTIVITY)
                 public void restartGame(int taskId) {
-                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
-                            "restartGame()");
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.restartGame(taskId);
                     });

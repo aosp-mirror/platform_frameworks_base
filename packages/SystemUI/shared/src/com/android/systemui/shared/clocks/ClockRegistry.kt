@@ -11,17 +11,11 @@
  * KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.android.keyguard.clock
+package com.android.systemui.shared.clocks
 
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.plugins.Clock
-import com.android.systemui.plugins.ClockId
-import com.android.systemui.plugins.ClockMetadata
-import com.android.systemui.plugins.ClockProvider
-import com.android.systemui.plugins.ClockProviderPlugin
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.shared.plugins.PluginManager
 import javax.inject.Inject
@@ -32,8 +26,6 @@ private const val DEFAULT_CLOCK_ID = "DEFAULT"
 typealias ClockChangeListener = () -> Unit
 
 /** ClockRegistry aggregates providers and plugins */
-// TODO: Is this the right place for this?
-@SysUISingleton
 class ClockRegistry @Inject constructor(
     val context: Context,
     val pluginManager: PluginManager

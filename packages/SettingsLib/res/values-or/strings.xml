@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରିବା ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"ସ୍କ୍ରିନକୁ ଚାଲୁ କରିବା ପାଇଁ ଏକ ଆପକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଯଦି ଅନୁମତି ଦିଆଯାଏ, ତେବେ ଆପଟି ଆପଣଙ୍କ ସ୍ପଷ୍ଟ ଇଣ୍ଟେଣ୍ଟ ବିନା ଯେ କୌଣସି ସମୟରେ ସ୍କ୍ରିନକୁ ଚାଲୁ କରିପାରେ।"</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR କୋଡ ସ୍କାନ କରନ୍ତୁ"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"ଶୁଣିବା ଆରମ୍ଭ କରିବା ପାଇଁ, ନିମ୍ନରେ ଥିବା QR କୋଡକୁ କେନ୍ଦ୍ରରେ ରଖନ୍ତୁ"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR କୋଡ ଏକ ବୈଧ ଫର୍ମାଟ ନୁହେଁ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରିବା ବନ୍ଦ କରିବେ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ଯଦି ଆପଣ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରନ୍ତି କିମ୍ବା ଆଉଟପୁଟ ବଦଳାନ୍ତି, ତେବେ ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ବ୍ରଡକାଷ୍ଟ ବନ୍ଦ ହୋଇଯିବ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> ବ୍ରଡକାଷ୍ଟ କରନ୍ତୁ"</string>

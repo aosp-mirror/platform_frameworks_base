@@ -610,7 +610,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Quitter le mode Invité"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Réinitialiser la session Invité"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Quitter le mode Invité"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toute l\'activité sera supprimée une fois la session quittée"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toute l\'activité sera supprimée à la fin de la session"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Vous pouvez enregistrer ou supprimer l\'activité en quittant"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Réinitialisez la session pour supprimer immédiatement l\'activité. Vous pourrez aussi l\'enregistrer ou la supprimer en quittant la session."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Prendre une photo"</string>
@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Activer l\'écran"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Autoriser l\'activation de l\'écran"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Autoriser une appli à activer l\'écran. Si l\'autorisation est accordée, l\'appli peut activer l\'écran à tout moment sans votre intention explicite."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scanner un code QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pour commencer à écouter, centrez le code QR ci-dessous"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Le format de code QR n\'est pas valide"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou que vous modifiez le résultat, votre annonce actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

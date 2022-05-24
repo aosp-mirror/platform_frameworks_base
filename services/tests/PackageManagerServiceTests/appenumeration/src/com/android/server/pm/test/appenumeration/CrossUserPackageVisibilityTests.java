@@ -16,6 +16,12 @@
 
 package com.android.server.pm.test.appenumeration;
 
+import static android.Manifest.permission.CLEAR_APP_USER_DATA;
+import static android.Manifest.permission.DELETE_PACKAGES;
+import static android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS;
+import static android.Manifest.permission.MOVE_PACKAGE;
+import static android.content.pm.PackageManager.MOVE_FAILED_DOESNT_EXIST;
+
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,11 +30,15 @@ import static org.junit.Assert.assertThrows;
 
 import android.app.AppGlobals;
 import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.KeySet;
 import android.content.pm.PackageManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -37,6 +47,8 @@ import com.android.bedstead.harrier.BedsteadJUnit4;
 import com.android.bedstead.harrier.DeviceState;
 import com.android.bedstead.harrier.annotations.EnsureHasSecondaryUser;
 import com.android.bedstead.nene.users.UserReference;
+import com.android.compatibility.common.util.PollingCheck;
+import com.android.compatibility.common.util.TestUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,6 +58,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Verify that app without holding the {@link android.Manifest.permission.INTERACT_ACROSS_USERS}
@@ -64,6 +77,13 @@ public class CrossUserPackageVisibilityTests {
             new File(TEST_DATA_DIR, "AppEnumerationCrossUserPackageVisibilityTestApp.apk");
     private static final File SHARED_USER_TEST_APK_FILE =
             new File(TEST_DATA_DIR, "AppEnumerationSharedUserTestApp.apk");
+
+    private static final String ACTION_CROSS_USER_TEST =
+            "com.android.appenumeration.action.CROSS_USER_TEST";
+    private static final ComponentName TEST_ACTIVITY_COMPONENT_NAME = new ComponentName(
+            CROSS_USER_TEST_PACKAGE_NAME, "com.android.appenumeration.testapp.DummyActivity");
+
+    private static final long DEFAULT_TIMEOUT_MS = 5000;
 
     @ClassRule
     @Rule
@@ -99,6 +119,7 @@ public class CrossUserPackageVisibilityTests {
     public void tearDown() {
         uninstallPackage(CROSS_USER_TEST_PACKAGE_NAME);
         uninstallPackage(SHARED_USER_TEST_PACKAGE_NAME);
+        mInstrumentation.getUiAutomation().dropShellPermissionIdentity();
     }
 
     @Test
@@ -182,6 +203,92 @@ public class CrossUserPackageVisibilityTests {
 
         assertThat(mIPackageManager.getUidForSharedUser(SHARED_USER_TEST_PACKAGE_NAME))
                 .isEqualTo(Process.INVALID_UID);
+    }
+
+    @Test
+    public void testClearApplicationUserData_cannotDetectStubPkg() throws Exception {
+        mInstrumentation.getUiAutomation().adoptShellPermissionIdentity(CLEAR_APP_USER_DATA);
+        assertThat(clearApplicationUserData(CROSS_USER_TEST_PACKAGE_NAME)).isFalse();
+
+        installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+        assertThat(clearApplicationUserData(CROSS_USER_TEST_PACKAGE_NAME)).isFalse();
+    }
+
+    @Test
+    public void testGetBlockUninstallForUser_cannotDetectStubPkg() throws Exception {
+        mInstrumentation.getUiAutomation().adoptShellPermissionIdentity(DELETE_PACKAGES);
+        assertThat(mIPackageManager.setBlockUninstallForUser(
+                CROSS_USER_TEST_PACKAGE_NAME, true, mCurrentUser.id())).isTrue();
+        try {
+            assertThat(mIPackageManager.getBlockUninstallForUser(
+                    CROSS_USER_TEST_PACKAGE_NAME, mCurrentUser.id())).isFalse();
+
+            installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+            assertThat(mIPackageManager.getBlockUninstallForUser(
+                    CROSS_USER_TEST_PACKAGE_NAME, mCurrentUser.id())).isFalse();
+        } finally {
+            assertThat(mIPackageManager.setBlockUninstallForUser(
+                    CROSS_USER_TEST_PACKAGE_NAME, false, mCurrentUser.id())).isTrue();
+        }
+    }
+
+    @Test
+    public void testMovePackage_cannotDetectStubPkg() throws Exception {
+        mInstrumentation.getUiAutomation().adoptShellPermissionIdentity(
+                MOVE_PACKAGE, MOUNT_UNMOUNT_FILESYSTEMS);
+        assertThat(movePackage(CROSS_USER_TEST_PACKAGE_NAME, null /* volumeUuid */))
+                .isEqualTo(MOVE_FAILED_DOESNT_EXIST);
+
+        installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+        assertThat(movePackage(CROSS_USER_TEST_PACKAGE_NAME, null /* volumeUuid */))
+                .isEqualTo(MOVE_FAILED_DOESNT_EXIST);
+    }
+
+    @Test
+    public void testActivitySupportsIntentAsUser_cannotDetectStubPkg() throws Exception {
+        assertThat(mIPackageManager.activitySupportsIntentAsUser(
+                TEST_ACTIVITY_COMPONENT_NAME,
+                new Intent(ACTION_CROSS_USER_TEST),
+                null,
+                mCurrentUser.id())).isFalse();
+
+        installPackageForUser(CROSS_USER_TEST_APK_FILE, mOtherUser);
+
+        assertThat(mIPackageManager.activitySupportsIntentAsUser(
+                TEST_ACTIVITY_COMPONENT_NAME,
+                new Intent(ACTION_CROSS_USER_TEST),
+                null,
+                mCurrentUser.id())).isFalse();
+    }
+
+    private boolean clearApplicationUserData(String packageName) throws Exception {
+        final AtomicInteger result = new AtomicInteger(-1);
+        final IPackageDataObserver localObserver = new IPackageDataObserver.Stub() {
+            @Override
+            public void onRemoveCompleted(String removedPkgName, boolean succeeded)
+                    throws RemoteException {
+                if (removedPkgName.equals(packageName)) {
+                    result.set(succeeded ? 1 : 0);
+                    result.notifyAll();
+                }
+            }
+        };
+        mIPackageManager.clearApplicationUserData(packageName, localObserver, mCurrentUser.id());
+        TestUtils.waitOn(result, () -> result.get() != -1, DEFAULT_TIMEOUT_MS,
+                "clearApplicationUserData: " + packageName);
+        return result.get() == 1;
+    }
+
+    private int movePackage(String packageName, String volumeUuid) throws Exception {
+        final int moveId = mIPackageManager.movePackage(packageName, volumeUuid);
+        PollingCheck.check(
+                "Waiting for the package " + packageName + " moving timeout",
+                DEFAULT_TIMEOUT_MS,
+                () -> PackageManager.isMoveStatusFinished(mIPackageManager.getMoveStatus(moveId)));
+        return mIPackageManager.getMoveStatus(moveId);
     }
 
     private static void installPackage(File apk) {

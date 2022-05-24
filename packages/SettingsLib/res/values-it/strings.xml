@@ -667,9 +667,6 @@
     <string name="turn_screen_on_title" msgid="3266937298097573424">"Attiva lo schermo"</string>
     <string name="allow_turn_screen_on" msgid="6194845766392742639">"Consenti l\'attivazione dello schermo"</string>
     <string name="allow_turn_screen_on_description" msgid="43834403291575164">"Consenti a un\'app di attivare lo schermo. Se la autorizzi, l\'app può attivare lo schermo in qualsiasi momento senza la tua autorizzazione esplicita."</string>
-    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scansiona codice QR"</string>
-    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Per iniziare ad ascoltare, centra il codice QR qui sotto"</string>
-    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Il formato del codice QR non è valido"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vuoi interrompere la trasmissione dell\'app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se trasmetti l\'app <xliff:g id="SWITCHAPP">%1$s</xliff:g> o cambi l\'uscita, la trasmissione attuale viene interrotta"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Trasmetti l\'app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>

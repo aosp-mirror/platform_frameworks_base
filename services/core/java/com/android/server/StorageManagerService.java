@@ -3728,7 +3728,8 @@ class StorageManagerService extends IStorageManager.Stub
 
         try {
             final PackageManager.Property noAppStorageProp = mContext.getPackageManager()
-                    .getProperty(PackageManager.PROPERTY_NO_APP_DATA_STORAGE, callingPkg);
+                    .getPropertyAsUser(PackageManager.PROPERTY_NO_APP_DATA_STORAGE, callingPkg,
+                            null /* className */, userId);
             if (noAppStorageProp != null && noAppStorageProp.getBoolean()) {
                 throw new SecurityException(callingPkg + " should not have " + appPath);
             }

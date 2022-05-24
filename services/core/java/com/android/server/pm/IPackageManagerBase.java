@@ -148,10 +148,10 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final boolean activitySupportsIntent(ComponentName component, Intent intent,
-            String resolvedType) {
-        return snapshot().activitySupportsIntent(mResolveComponentName, component, intent,
-                resolvedType);
+    public final boolean activitySupportsIntentAsUser(ComponentName component, Intent intent,
+            String resolvedType, int userId) {
+        return snapshot().activitySupportsIntentAsUser(mResolveComponentName, component, intent,
+                resolvedType, userId);
     }
 
     @Override
@@ -711,12 +711,17 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
 
     @Override
     @Deprecated
-    public final PackageManager.Property getProperty(String propertyName, String packageName,
-            String className) {
+    public final PackageManager.Property getPropertyAsUser(String propertyName, String packageName,
+            String className, int userId) {
         Objects.requireNonNull(propertyName);
         Objects.requireNonNull(packageName);
-        PackageStateInternal packageState = snapshot().getPackageStateFiltered(packageName,
-                Binder.getCallingUid(), UserHandle.getCallingUserId());
+        final int callingUid = Binder.getCallingUid();
+        final Computer snapshot = snapshot();
+        snapshot.enforceCrossUserOrProfilePermission(callingUid, userId,
+                /* requireFullPermission */ false,
+                /* checkShell */ false, "getPropertyAsUser");
+        PackageStateInternal packageState = snapshot.getPackageStateForInstalledAndFiltered(
+                packageName, callingUid, userId);
         if (packageState == null) {
             return null;
         }
