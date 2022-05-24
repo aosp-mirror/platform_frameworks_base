@@ -180,6 +180,14 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
     @Override
     public void createAnimation(final View view, long delay, long duration, float translationY,
             boolean appearing, Interpolator interpolator, final Runnable endRunnable) {
+        createAnimation(
+                view, delay, duration, translationY, appearing, interpolator, endRunnable, null);
+    }
+
+    @Override
+    public void createAnimation(final View view, long delay,
+            long duration, float translationY, boolean appearing, Interpolator interpolator,
+            final Runnable endRunnable, final AnimatorListenerAdapter animatorListener) {
         if (view != null) {
             float targetAlpha = appearing ? 1f : 0f;
             float targetTranslationY = appearing ? 0 : translationY;
@@ -224,7 +232,7 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
             });
             alphaAnim.start();
             startTranslationYAnimation(view, delay, duration, appearing ? 0 : translationY,
-                    interpolator);
+                    interpolator, animatorListener);
         }
     }
 
@@ -240,7 +248,7 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
      * A static method to start translation y animation
      */
     public static void startTranslationYAnimation(View view, long delay, long duration,
-            float endTranslationY, Interpolator interpolator, Animator.AnimatorListener listener) {
+            float endTranslationY, Interpolator interpolator, AnimatorListenerAdapter listener) {
         Animator translationAnim;
         if (view.isHardwareAccelerated()) {
             RenderNodeAnimator translationAnimRt = new RenderNodeAnimator(
