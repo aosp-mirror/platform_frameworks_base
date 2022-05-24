@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"اپنے کیلنڈر تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"فائلز اور دستاویزات"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"آپ کے آلے پر فائلز اور دستاویزات تک رسائی حاصل کریں"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"فائلیں"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"آپ کے آلے پر موجود فائلز تک رسائل حاصل کریں"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"موسیقی اور آڈیو"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"اپنے آلے پر موسیقی اور آڈیو تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"تصاویر اور ویڈیوز"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"فعال ایپس چیک کریں"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے فون کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"آپ کے <xliff:g id="DEVICE">%1$s</xliff:g> سے ٹیبلیٹ کے کیمرا تک رسائی حاصل نہیں کی جا سکتی"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"سسٹم کی زبان"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"سسٹم ڈیفالٹ"</string>
 </resources>

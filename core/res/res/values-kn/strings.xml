@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಮತ್ತು ನಿರ್ವಹಿಸಲು"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ಫೈಲ್‌ಗಳು ಮತ್ತು ಡಾಕ್ಯುಮೆಂಟ್‌ಗಳು"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೈಲ್‌ಗಳು ಮತ್ತು ಡಾಕ್ಯುಮೆಂಟ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ಫೈಲ್‌ಗಳು"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿರುವ ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ಸಂಗೀತ ಮತ್ತು ಆಡಿಯೋ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಸಂಗೀತ ಮತ್ತು ಆಡಿಯೊವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳು"</string>
@@ -1246,7 +1246,7 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ಸೆಟಪ್ ಮುಂದುವರಿಸಬೇಕೆ?"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ಸೆಟ್ ಮಾಡುವುದನ್ನು ಮುಂದುವರಿಸಬೇಕೇ?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ನೀವು ಪವರ್ ಬಟನ್ ಒತ್ತಿದ್ದೀರಿ — ಇದು ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.\n\nನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಹೊಂದಿಸುವಾಗ ಲಘುವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"ಸ್ಕ್ರೀನ್ ಆಫ್ ಮಾಡಿ"</string>
     <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ಸೆಟಪ್ ಮುಂದುವರಿಸಿ"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಫೋನ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ನಿಮ್ಮ <xliff:g id="DEVICE">%1$s</xliff:g> ಮೂಲಕ ಟ್ಯಾಬ್ಲೆಟ್‌ನ ಕ್ಯಾಮರಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"ಸಿಸ್ಟಂ ಭಾಷೆ"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"ಸಿಸ್ಟಂ ಡೀಫಾಲ್ಟ್"</string>
 </resources>

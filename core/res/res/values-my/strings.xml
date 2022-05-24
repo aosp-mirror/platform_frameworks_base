@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ဖိုင်နှင့် မှတ်တမ်းများ"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"သင့်စက်ရှိ ဖိုင်နှင့် မှတ်တမ်းများ သုံးခွင့်"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ဖိုင်များ"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"သင့်စက်တွင် ဖိုင်များသုံးနိုင်သည်"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"တေးဂီတနှင့် အသံ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"သင့်စက်တွင် တေးဂီတနှင့် အသံများ ဖွင့်နိုင်သည်"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ဓာတ်ပုံနှင့် ဗီဒီယိုများ"</string>
@@ -1225,7 +1225,7 @@
     <string name="screen_compat_mode_scale" msgid="8627359598437527726">"စကေး"</string>
     <string name="screen_compat_mode_show" msgid="5080361367584709857">"အမြဲပြသရန်"</string>
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"ဒါကို စနစ် ဆက်တင်များထဲ ပြန်ဖွင့်ပေးရန် &gt; Apps &gt; ဒေါင်းလုဒ် လုပ်ပြီး။"</string>
-    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် လက်ရှိ မျက်နှာပြင်အရွယ်အစားကို ပံ့ပိုးထားခြင်း မရှိပါ။ မမျှော်လင့်နိုင်သည့် ချွတ်ယွင်းချက်များ ဖြစ်ပေါ်နိုင်ပါသည်။"</string>
+    <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် လက်ရှိ ပြကွက်အရွယ်ကို ပံ့ပိုးထားခြင်း မရှိပါ။ မမျှော်လင့်နိုင်သည့် ချွတ်ယွင်းချက်များ ဖြစ်ပေါ်နိုင်ပါသည်။"</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"အမြဲပြပါ"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"ကိုက်ညီမှုမရှိသည့် Android OS ဗားရှင်းအတွက် <xliff:g id="APP_NAME">%1$s</xliff:g> ကို ပြုလုပ်ထားခြင်းဖြစ်ပြီး ပုံမှန်အလုပ်မလုပ်နိုင်ပါ။ ဤအက်ပ်အတွက် အပ်ဒိတ်လုပ်ထားသည့် ဗားရှင်း ရနိုင်ပါမည်။"</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"အမြဲပြရန်"</string>
@@ -1688,7 +1688,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ဖန်သားပြင်ကို ကြည့်ရှုထိန်းချုပ်ခြင်း"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"၎င်းသည် မျက်နှာပြင်ပေါ်ရှိ အကြောင်းအရာအားလုံးကို ဖတ်နိုင်ပြီး အခြားအက်ပ်များအပေါ်တွင် အကြောင်းအရာကို ဖော်ပြနိုင်သည်။"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"လုပ်ဆောင်ချက်များကို ကြည့်ရှုဆောင်ရွက်ခြင်း"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"၎င်းသည် အက်ပ်တစ်ခု သို့မဟုတ် အာရုံခံကိရိယာကို အသုံးပြု၍ သင့်ပြန်လှန်တုံ့ပြန်မှုများကို မှတ်သားနိုင်ပြီး သင့်ကိုယ်စား အက်ပ်များနှင့် ပြန်လှန်တုံ့ပြန်နိုင်သည်။"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"၎င်းသည် သင်နှင့် အက်ပ်တစ်ခု (သို့) အာရုံခံကိရိယာအကြား ပြန်လှန်တုံ့ပြန်မှုများကို မှတ်သားနိုင်ပြီး သင့်ကိုယ်စား အက်ပ်များနှင့် ပြန်လှန်တုံ့ပြန်နိုင်သည်။"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ခွင့်ပြုရန်"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ပယ်ရန်"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ဝန်ဆောင်မှုကို စတင်အသုံးပြုရန် တို့ပါ−"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ပွင့်နေသည့်အက်ပ်များ စစ်ဆေးရန်"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ ဖုန်းကင်မရာကို သုံး၍မရပါ"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"သင်၏ <xliff:g id="DEVICE">%1$s</xliff:g> မှ တက်ဘလက်ကင်မရာကို သုံး၍မရပါ"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"စနစ်၏ ဘာသာစကား"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"စနစ်မူရင်း"</string>
 </resources>

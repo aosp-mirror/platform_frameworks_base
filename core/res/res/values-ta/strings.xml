@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"கேலெண்டரை அணுகலாம்"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ஃபைல்களும் ஆவணங்களும்"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"சாதனத்திலுள்ள ஃபைல்களையும் ஆவணங்களையும் அணுகும்"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ஃபைல்கள்"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"உங்கள் சாதனத்திலுள்ள ஃபைல்களை அணுகும்"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"இசையும் ஆடியோவும்"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"உங்கள் சாதனத்திலுள்ள இசையையும் ஆடியோவையும் அணுகும்"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"படங்களும் வீடியோக்களும்"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"செயலிலுள்ள ஆப்ஸைப் பாருங்கள்"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து மொபைலின் கேமராவை அணுக முடியாது"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"உங்கள் <xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்திலிருந்து டேப்லெட்டின் கேமராவை அணுக முடியாது"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"சிஸ்டம் மொழி"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"சிஸ்டத்தின் இயல்பு"</string>
 </resources>

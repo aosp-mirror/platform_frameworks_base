@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"takviminize erişme"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS mesajları gönderme ve görüntüleme"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Dosyalar ve dokümanlar"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"cihazınızdaki dosyalara ve dokümanlara erişme"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Dosyalar"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"cihazınızdaki dosyalara erişme"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Müzik ve ses"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"cihazınızdaki müziklere ve seslere erişme"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotoğraflar ve videolar"</string>
@@ -2072,11 +2072,11 @@
     <string name="notification_feedback_indicator_promoted" msgid="9030204303764698640">"Bu bildirimin önem derecesi yükseltildi. Geri bildirimde bulunmak için dokunun."</string>
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Bu bildirimin önem derecesi düşürüldü. Geri bildirimde bulunmak için dokunun."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Gelişmiş bildirimler"</string>
-    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Önerilen işlemler ve yanıtlar artık gelişmiş bildirimler tarafından sağlanıyor. Android Uyarlamalı Bildirimler artık desteklenmiyor."</string>
+    <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Önerilen işlemler ve yanıtlar artık gelişmiş bildirimler tarafından sağlanıyor. Android Uyarlanabilir Bildirimler artık desteklenmiyor."</string>
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Tamam"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Kapat"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Daha fazla bilgi"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Gelişmiş bildirimler, Android 12\'de Android Uyarlamalı Bildirimler\'in yerini aldı. Bu özellik, önerilen işlem ve yanıtları gösterir ve bildirimlerinizi organize eder.\n\nGelişmiş bildirimler, kişiler ve mesajlar gibi kişisel bilgiler dahil olmak üzere tüm bildirim içeriklerine erişebilir. Bu özellik ayrıca bildirimleri kapatabilir veya telefon aramalarını yanıtlamak ve Rahatsız Etmeyin modunu kontrol etmek gibi işlemlerle bildirimlere yanıt verebilir."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Gelişmiş bildirimler, Android 12\'de Android Uyarlanabilir Bildirimler\'in yerini aldı. Bu özellik, önerilen işlem ve yanıtları gösterir ve bildirimlerinizi organize eder.\n\nGelişmiş bildirimler, kişiler ve mesajlar gibi kişisel bilgiler dahil olmak üzere tüm bildirim içeriklerine erişebilir. Bu özellik ayrıca bildirimleri kapatabilir veya telefon aramalarını yanıtlamak ve Rahatsız Etmeyin modunu kontrol etmek gibi işlemlerle bildirimlere yanıt verebilir."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutin Modu bilgi bildirimi"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pil normal şarjdan önce bitebilir"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Pilin ömrünü uzatmak için Pil Tasarrufu etkinleştirildi"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Etkin uygulamaları kontrol edin"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan telefonun kamerasına erişilemiyor"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazınızdan tabletin kamerasına erişilemiyor"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Sistem dili"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Sistem varsayılanı"</string>
 </resources>
