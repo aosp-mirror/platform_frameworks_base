@@ -363,13 +363,26 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * @param activity      the activity that is newly added to the Task.
      * @param isOnReparent  whether the activity is reparented to the Task instead of new launched.
      *                      We only support to split as primary for reparented activity for now.
-     * @return {@code true} if the activity was placed in TaskFragment container.
+     * @return {@code true} if the activity has been handled, such as placed in a TaskFragment, or
+     *         in a state that the caller shouldn't handle.
      */
     @VisibleForTesting
     boolean resolveActivityToContainer(@NonNull Activity activity, boolean isOnReparent) {
         if (isInPictureInPicture(activity) || activity.isFinishing()) {
             // We don't embed activity when it is in PIP, or finishing. Return true since we don't
             // want any extra handling.
+            return true;
+        }
+
+        if (!isOnReparent && getContainerWithActivity(activity) == null
+                && getInitialTaskFragmentToken(activity) != null) {
+            // We can't find the new launched activity in any recorded container, but it is
+            // currently placed in an embedded TaskFragment. This can happen in two cases:
+            // 1. the activity is embedded in another app.
+            // 2. the organizer has already requested to remove the TaskFragment.
+            // In either case, return true since we don't want any extra handling.
+            Log.d(TAG, "Activity is in a TaskFragment that is not recorded by the organizer. r="
+                    + activity);
             return true;
         }
 
@@ -1286,6 +1299,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /**
+     * Gets the token of the initial TaskFragment that embedded this activity. Do not rely on it
+     * after creation because the activity could be reparented.
+     */
+    @VisibleForTesting
+    @Nullable
+    IBinder getInitialTaskFragmentToken(@NonNull Activity activity) {
+        final ActivityThread.ActivityClientRecord record = ActivityThread.currentActivityThread()
+                .getActivityClient(activity.getActivityToken());
+        return record != null ? record.mInitialTaskFragmentToken : null;
+    }
+
+    /**
      * Returns {@code true} if an Activity with the provided component name should always be
      * expanded to occupy full task bounds. Such activity must not be put in a split.
      */
@@ -1358,8 +1383,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         @Override
         public void onActivityPreCreated(Activity activity, Bundle savedInstanceState) {
             final IBinder activityToken = activity.getActivityToken();
-            final IBinder initialTaskFragmentToken = ActivityThread.currentActivityThread()
-                    .getActivityClient(activityToken).mInitialTaskFragmentToken;
+            final IBinder initialTaskFragmentToken = getInitialTaskFragmentToken(activity);
             // If the activity is not embedded, then it will not have an initial task fragment token
             // so no further action is needed.
             if (initialTaskFragmentToken == null) {
