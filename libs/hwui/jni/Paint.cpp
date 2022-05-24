@@ -1154,6 +1154,7 @@ static const JNINativeMethod methods[] = {
         {"nGetColor", "(J)I", (void*)PaintGlue::getColor},
         {"nSetColor", "(JI)V", (void*)PaintGlue::setColor},
         {"nSetColor", "(JJJ)V", (void*)PaintGlue::setColorLong},
+        {"nGetAlpha", "(J)I", (void*)PaintGlue::getAlpha},
         {"nSetAlpha", "(JI)V", (void*)PaintGlue::setAlpha},
         {"nGetStrokeWidth", "(J)F", (void*)PaintGlue::getStrokeWidth},
         {"nSetStrokeWidth", "(JF)V", (void*)PaintGlue::setStrokeWidth},
