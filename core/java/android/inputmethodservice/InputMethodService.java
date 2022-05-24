@@ -352,6 +352,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private ImeOnBackInvokedDispatcher mImeDispatcher;
     private Boolean mBackCallbackRegistered = false;
     private final OnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
+    private Runnable mImeSurfaceRemoverRunnable;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -598,7 +599,6 @@ public class InputMethodService extends AbstractInputMethodService {
     private @NonNull OptionalInt mHandwritingRequestId = OptionalInt.empty();
     private InputEventReceiver mHandwritingEventReceiver;
     private Handler mHandler;
-    private boolean mImeSurfaceScheduledForRemoval;
     private ImsConfigurationTracker mConfigTracker = new ImsConfigurationTracker();
     private boolean mDestroyed;
     private boolean mOnPreparedStylusHwCalled;
@@ -1075,7 +1075,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private void scheduleImeSurfaceRemoval() {
         if (mShowInputRequested || mWindowVisible || mWindow == null
-                || mImeSurfaceScheduledForRemoval) {
+                || mImeSurfaceRemoverRunnable != null) {
             return;
         }
         if (mHandler == null) {
@@ -1089,24 +1089,26 @@ public class InputMethodService extends AbstractInputMethodService {
             //  view issues is resolved in RecyclerView.
             removeImeSurface();
         } else {
-            mImeSurfaceScheduledForRemoval = true;
-            mHandler.postDelayed(() -> removeImeSurface(), TIMEOUT_SURFACE_REMOVAL_MILLIS);
+            mImeSurfaceRemoverRunnable = () -> {
+                removeImeSurface();
+            };
+            mHandler.postDelayed(mImeSurfaceRemoverRunnable, TIMEOUT_SURFACE_REMOVAL_MILLIS);
         }
     }
 
     private void removeImeSurface() {
+        cancelImeSurfaceRemoval();
         // hiding a window removes its surface.
         if (mWindow != null) {
             mWindow.hide();
         }
-        mImeSurfaceScheduledForRemoval = false;
     }
 
     private void cancelImeSurfaceRemoval() {
-        if (mHandler != null && mImeSurfaceScheduledForRemoval) {
-            mHandler.removeCallbacksAndMessages(null /* token */);
-            mImeSurfaceScheduledForRemoval = false;
+        if (mHandler != null && mImeSurfaceRemoverRunnable != null) {
+            mHandler.removeCallbacks(mImeSurfaceRemoverRunnable);
         }
+        mImeSurfaceRemoverRunnable = null;
     }
 
     private void setImeWindowStatus(int visibilityFlags, int backDisposition) {
