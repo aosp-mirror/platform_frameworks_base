@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"ປົດລັອກດ້ວຍໜ້າແລ້ວ. ກົດເພື່ອເປີດ."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດເພື່ອເປີດ."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ຈຳແນກໜ້າໄດ້ແລ້ວ. ກົດໄອຄອນປົດລັອກເພື່ອເປີດ."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"ຍ້າຍໄປຊ້າຍ"</item>
+    <item msgid="5558598599408514296">"ຍ້າຍລົງ"</item>
+    <item msgid="4844142668312841831">"ຍ້າຍໄປຂວາ"</item>
+    <item msgid="5640521437931460125">"ຍ້າຍຂຶ້ນ"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"ປັດຂຶ້ນເພື່ອລອງໃໝ່"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ປົດລັອກເພື່ອໃຊ້ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ອຸປະກອນນີ້ເປັນຂອງອົງການທ່ານ"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"ການແຈ້ງເຕືອນ"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"ແບັດເຕີຣີ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ຮູບຖ່າຍໜ້າຈໍ"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"ອິນສະແຕນແອັບ"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"ຕັ້ງຄ່າ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"ບ່ອນເກັບຂໍ້ມູນ"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"ຄຳໃບ້"</string>
     <string name="instant_apps" msgid="8337185853050247304">"ອິນສະແຕນແອັບ"</string>
@@ -949,12 +949,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ແກ້ໄຂຮູບທີ່ສຳເນົາແລ້ວ"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ສົ່ງໄປຫາອຸປະກອນທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"ແຕະເພື່ອເບິ່ງ"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"ສຳເນົາຂໍ້ຄວາມແລ້ວ"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"ສຳເນົາຮູບແລ້ວ"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"ສຳເນົາເນື້ອຫາແລ້ວ"</string>
     <string name="add" msgid="81036585205287996">"ເພີ່ມ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ຈັດການຜູ້ໃຊ້"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ການແຈ້ງເຕືອນນີ້ບໍ່ຮອງຮັບການລາກໄປໃສ່ Splitscreen."</string>
@@ -963,12 +960,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ຕັ້ງໂມງປຸກແລ້ວ"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ປິດກ້ອງຖ່າຍຮູບ ແລະ ໄມແລ້ວ"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ການແຈ້ງເຕືອນ}other{# ການແຈ້ງເຕືອນ}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"ກຳລັງອອກອາກາດ"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"ຢຸດການອອກອາກາດ <xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"ຫາກທ່ານອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g> ຫຼື ປ່ຽນເອົ້າພຸດ, ການອອກອາກາດປັດຈຸບັນຂອງທ່ານຈະຢຸດ"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"ອອກອາກາດ <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"ປ່ຽນເອົ້າພຸດ"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"ບໍ່ຮູ້ຈັກ"</string>
 </resources>

@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Déverrouillé avec le visage. Appuyez pour ouvrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Visage reconnu. Appuyez pour ouvrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Visage reconnu. Appuyez sur Déverrouiller pour ouvrir."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Déplacer vers la gauche"</item>
+    <item msgid="5558598599408514296">"Déplacer vers le bas"</item>
+    <item msgid="4844142668312841831">"Déplacer vers la droite"</item>
+    <item msgid="5640521437931460125">"Déplacer vers le haut"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour utiliser la CCP"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Cet appareil appartient à votre organisation"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Alertes"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Pile"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Saisies d\'écran"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Applications instantanées"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"Configuration"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Stockage"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Conseils"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Applications instantanées"</string>
@@ -931,7 +931,7 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"L\'application <xliff:g id="APPNAME">%1$s</xliff:g> veut ajouter la tuile suivante au menu Paramètres rapides"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ajouter la tuile"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne pas ajouter de tuile"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir utilisateur"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir l\'utilisateur"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
       <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> application est active</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> applications sont actives</item>
@@ -949,12 +949,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Modifier l\'image copiée"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Envoyer à un appareil à proximité"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Touchez pour afficher"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Texte copié"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Image copiée"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Contenu copié"</string>
     <string name="add" msgid="81036585205287996">"Ajouter"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gérer les utilisateurs"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Cette notification ne prend pas en charge le partage d\'écran par glissement."</string>
@@ -963,12 +960,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"L\'alarme a été réglée"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"L\'appareil photo et le micro sont désactivés"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notification}one{# notification}other{# notifications}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Diffusion en cours…"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou changez la sortie, votre diffusion actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Changer la sortie"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Inconnue"</string>
 </resources>
