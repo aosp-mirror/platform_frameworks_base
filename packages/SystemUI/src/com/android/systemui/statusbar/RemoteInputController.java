@@ -114,14 +114,17 @@ public class RemoteInputController {
     public void addRemoteInput(NotificationEntry entry, Object token) {
         Objects.requireNonNull(entry);
         Objects.requireNonNull(token);
-
+        boolean isActive = isRemoteInputActive(entry);
         boolean found = pruneWeakThenRemoveAndContains(
                 entry /* contains */, null /* remove */, token /* removeToken */);
         if (!found) {
             mOpen.add(new Pair<>(new WeakReference<>(entry), token));
         }
-
-        apply(entry);
+        // If the remote input focus is being transferred between different notification layouts
+        // (ex: Expanded->Contracted), then we don't want to re-apply.
+        if (!isActive) {
+            apply(entry);
+        }
     }
 
     /**
