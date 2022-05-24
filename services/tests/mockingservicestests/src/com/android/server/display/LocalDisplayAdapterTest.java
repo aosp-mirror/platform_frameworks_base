@@ -35,8 +35,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Point;
-import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal.RefreshRateRange;
 import android.os.Binder;
 import android.os.Handler;
@@ -95,11 +93,6 @@ public class LocalDisplayAdapterTest {
     @Mock
     private LogicalLight mMockedBacklight;
 
-    @Mock
-    private DisplayManager mMockDisplayManager;
-    @Mock
-    private Point mMockDisplayStableSize;
-
     private Handler mHandler;
 
     private TestListener mListener = new TestListener();
@@ -130,8 +123,6 @@ public class LocalDisplayAdapterTest {
                 mListener, mInjector);
         spyOn(mAdapter);
         doReturn(mMockedContext).when(mAdapter).getOverlayContext();
-        doReturn(mMockDisplayManager).when(mMockedContext).getSystemService(DisplayManager.class);
-        doReturn(mMockDisplayStableSize).when(mMockDisplayManager).getStableDisplaySize();
 
         TypedArray mockNitsRange = createFloatTypedArray(DISPLAY_RANGE_NITS);
         when(mMockedResources.obtainTypedArray(R.array.config_screenBrightnessNits))

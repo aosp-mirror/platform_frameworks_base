@@ -203,8 +203,8 @@ public class CutoutSpecification {
     public static class Parser {
         private final boolean mIsShortEdgeOnTop;
         private final float mStableDensity;
-        private final int mStableDisplayWidth;
-        private final int mStableDisplayHeight;
+        private final int mPhysicalDisplayWidth;
+        private final int mPhysicalDisplayHeight;
         private final float mPhysicalPixelDisplaySizeRatio;
         private final Matrix mMatrix;
         private Insets mInsets;
@@ -238,25 +238,26 @@ public class CutoutSpecification {
         private boolean mIsCloserToStartSide;
 
         @VisibleForTesting(visibility = PACKAGE)
-        public Parser(float stableDensity, int stableDisplayWidth, int stableDisplayHeight) {
-            this(stableDensity, stableDisplayWidth, stableDisplayHeight, 1f);
+        public Parser(float stableDensity, int physicalDisplayWidth,
+                int physicalDisplayHeight) {
+            this(stableDensity, physicalDisplayWidth, physicalDisplayHeight, 1f);
         }
 
         /**
          * The constructor of the CutoutSpecification parser to parse the specification of cutout.
          * @param stableDensity the display density.
-         * @param stableDisplayWidth the display width.
-         * @param stableDisplayHeight the display height.
+         * @param physicalDisplayWidth the display width.
+         * @param physicalDisplayHeight the display height.
          * @param physicalPixelDisplaySizeRatio the display size ratio based on stable display size.
          */
-        Parser(float stableDensity, int stableDisplayWidth, int stableDisplayHeight,
+        Parser(float stableDensity, int physicalDisplayWidth, int physicalDisplayHeight,
                 float physicalPixelDisplaySizeRatio) {
             mStableDensity = stableDensity;
-            mStableDisplayWidth = stableDisplayWidth;
-            mStableDisplayHeight = stableDisplayHeight;
+            mPhysicalDisplayWidth = physicalDisplayWidth;
+            mPhysicalDisplayHeight = physicalDisplayHeight;
             mPhysicalPixelDisplaySizeRatio = physicalPixelDisplaySizeRatio;
             mMatrix = new Matrix();
-            mIsShortEdgeOnTop = mStableDisplayWidth < mStableDisplayHeight;
+            mIsShortEdgeOnTop = mPhysicalDisplayWidth < mPhysicalDisplayHeight;
         }
 
         private void computeBoundsRectAndAddToRegion(Path p, Region inoutRegion, Rect inoutRect) {
@@ -281,18 +282,18 @@ public class CutoutSpecification {
         private void translateMatrix() {
             final float offsetX;
             if (mPositionFromRight) {
-                offsetX = mStableDisplayWidth;
+                offsetX = mPhysicalDisplayWidth;
             } else if (mPositionFromLeft) {
                 offsetX = 0;
             } else {
-                offsetX = mStableDisplayWidth / 2f;
+                offsetX = mPhysicalDisplayWidth / 2f;
             }
 
             final float offsetY;
             if (mPositionFromBottom) {
-                offsetY = mStableDisplayHeight;
+                offsetY = mPhysicalDisplayHeight;
             } else if (mPositionFromCenterVertical) {
-                offsetY = mStableDisplayHeight / 2f;
+                offsetY = mPhysicalDisplayHeight / 2f;
             } else {
                 offsetY = 0;
             }
@@ -305,14 +306,14 @@ public class CutoutSpecification {
         }
 
         private int computeSafeInsets(int gravity, Rect rect) {
-            if (gravity == LEFT && rect.right > 0 && rect.right < mStableDisplayWidth) {
+            if (gravity == LEFT && rect.right > 0 && rect.right < mPhysicalDisplayWidth) {
                 return rect.right;
-            } else if (gravity == TOP && rect.bottom > 0 && rect.bottom < mStableDisplayHeight) {
+            } else if (gravity == TOP && rect.bottom > 0 && rect.bottom < mPhysicalDisplayHeight) {
                 return rect.bottom;
-            } else if (gravity == RIGHT && rect.left > 0 && rect.left < mStableDisplayWidth) {
-                return mStableDisplayWidth - rect.left;
-            } else if (gravity == BOTTOM && rect.top > 0 && rect.top < mStableDisplayHeight) {
-                return mStableDisplayHeight - rect.top;
+            } else if (gravity == RIGHT && rect.left > 0 && rect.left < mPhysicalDisplayWidth) {
+                return mPhysicalDisplayWidth - rect.left;
+            } else if (gravity == BOTTOM && rect.top > 0 && rect.top < mPhysicalDisplayHeight) {
+                return mPhysicalDisplayHeight - rect.top;
             }
             return 0;
         }
@@ -415,12 +416,12 @@ public class CutoutSpecification {
 
             if (mIsShortEdgeOnTop) {
                 mIsTouchShortEdgeStart = mTmpRect.top <= 0;
-                mIsTouchShortEdgeEnd = mTmpRect.bottom >= mStableDisplayHeight;
-                mIsCloserToStartSide = mTmpRect.centerY() < mStableDisplayHeight / 2;
+                mIsTouchShortEdgeEnd = mTmpRect.bottom >= mPhysicalDisplayHeight;
+                mIsCloserToStartSide = mTmpRect.centerY() < mPhysicalDisplayHeight / 2;
             } else {
                 mIsTouchShortEdgeStart = mTmpRect.left <= 0;
-                mIsTouchShortEdgeEnd = mTmpRect.right >= mStableDisplayWidth;
-                mIsCloserToStartSide = mTmpRect.centerX() < mStableDisplayWidth / 2;
+                mIsTouchShortEdgeEnd = mTmpRect.right >= mPhysicalDisplayWidth;
+                mIsCloserToStartSide = mTmpRect.centerX() < mPhysicalDisplayWidth / 2;
             }
 
             setEdgeCutout(newPath);
