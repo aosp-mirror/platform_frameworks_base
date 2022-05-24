@@ -144,8 +144,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         // Legacy animation doesn't need to wait for the start transaction.
         if (mTransitionOp == OP_LEGACY) {
             mIsStartTransactionCommitted = true;
-        } else if (displayContent.mTransitionController.useShellTransitionsRotation()
-                || displayContent.mTransitionController.isCollecting(displayContent)) {
+        } else if (displayContent.mTransitionController.isCollecting(displayContent)) {
             keepAppearanceInPreviousRotation();
         }
     }
@@ -214,10 +213,10 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     private void finishOp(WindowToken windowToken) {
         final Operation op = mTargetWindowTokens.remove(windowToken);
         if (op == null) return;
-        if (op.mCapturedDrawTransaction != null) {
+        if (op.mDrawTransaction != null) {
             // Unblock the window to show its latest content.
-            mDisplayContent.getPendingTransaction().merge(op.mCapturedDrawTransaction);
-            op.mCapturedDrawTransaction = null;
+            mDisplayContent.getPendingTransaction().merge(op.mDrawTransaction);
+            op.mDrawTransaction = null;
             if (DEBUG) Slog.d(TAG, "finishOp merge transaction " + windowToken.getTopChild());
         }
         if (op.mAction == Operation.ACTION_FADE) {
@@ -351,12 +350,32 @@ class AsyncRotationController extends FadeAnimationController implements Consume
     }
 
     /**
-     * Whether the insets animation leash should use previous position when running fade out
-     * animation in rotated display.
+     * Whether the insets animation leash should use previous position when running fade animation
+     * or seamless transformation in a rotated display.
      */
     boolean shouldFreezeInsetsPosition(WindowState w) {
         return mTransitionOp == OP_APP_SWITCH && w.mTransitionController.inTransition()
                 && isTargetToken(w.mToken);
+    }
+
+    /**
+     * Returns the transaction which will be applied after the window redraws in new rotation.
+     * This is used to update the position of insets animation leash synchronously.
+     */
+    SurfaceControl.Transaction getDrawTransaction(WindowToken token) {
+        if (mTransitionOp == OP_LEGACY) {
+            // Legacy transition uses startSeamlessRotation and finishSeamlessRotation of
+            // InsetsSourceProvider.
+            return null;
+        }
+        final Operation op = mTargetWindowTokens.get(token);
+        if (op != null) {
+            if (op.mDrawTransaction == null) {
+                op.mDrawTransaction = new SurfaceControl.Transaction();
+            }
+            return op.mDrawTransaction;
+        }
+        return null;
     }
 
     void setOnShowRunnable(Runnable onShowRunnable) {
@@ -463,10 +482,10 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         final boolean keepUntilStartTransaction =
                 !mIsStartTransactionCommitted && op.mAction == Operation.ACTION_SEAMLESS;
         if (!keepUntilTransitionFinish && !keepUntilStartTransaction) return false;
-        if (op.mCapturedDrawTransaction == null) {
-            op.mCapturedDrawTransaction = postDrawTransaction;
+        if (op.mDrawTransaction == null) {
+            op.mDrawTransaction = postDrawTransaction;
         } else {
-            op.mCapturedDrawTransaction.merge(postDrawTransaction);
+            op.mDrawTransaction.merge(postDrawTransaction);
         }
         if (DEBUG) Slog.d(TAG, "Capture draw transaction " + w);
         return true;
@@ -512,7 +531,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
          * the start transaction of transition, so there won't be a flickering such as the window
          * has redrawn during fading out.
          */
-        SurfaceControl.Transaction mCapturedDrawTransaction;
+        SurfaceControl.Transaction mDrawTransaction;
 
         Operation(@Action int action) {
             mAction = action;
