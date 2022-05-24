@@ -1678,7 +1678,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"ଚାଲୁ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ଚାଲୁ ଅଛି"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ବନ୍ଦ ଅଛି"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>କୁ ଆପଣଙ୍କ ଡିଭାଇସର ସମ୍ପୂର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣର ଅନୁମତି ଦେବେ?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ଆପଣଙ୍କ ଡିଭାଇସର ସମ୍ପୂର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ କରିବାକୁ <xliff:g id="SERVICE">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ଯେଉଁ ଆପ୍ସ ଆପଣଙ୍କୁ ଆକ୍ସେସିବିଲିଟୀ ଆବଶ୍ୟକତାରେ ସହାୟତା କରେ, ସେହି ଆପ୍ସ ପାଇଁ ସମ୍ପୂର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ ଉପଯୁକ୍ତ ଅଟେ, କିନ୍ତୁ ଅଧିକାଂଶ ଆପ୍ସ ପାଇଁ ଉପଯୁକ୍ତ ନୁହେଁ।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ଭ୍ୟୁ ଏବଂ ସ୍କ୍ରିନ୍‍ ନିୟନ୍ତ୍ରଣ"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ଏହା ସ୍କ୍ରିନ୍‍ର ସମସ୍ତ ବିଷୟବସ୍ତୁ ପଢ଼ିପାରେ ଏବଂ ଅନ୍ୟ ଆପ୍ସରେ ବିଷୟବସ୍ତୁ ପ୍ରଦର୍ଶନ କରିପାରେ।"</string>
