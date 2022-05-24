@@ -3527,6 +3527,9 @@
          appended after the path string to interpret coordinates in dp instead of px units.
          Note that a physical cutout should be configured in pixels for the best results.
 
+         If the display supports multiple resolutions, please define the path config based on the
+         highest resolution so that it can be scaled correctly in each resolution.
+
          Example for a 10px x 10px square top-center cutout:
                 <string ...>M -5,0 L -5,10 L 5,10 L 5,0 Z</string>
          Example for a 10dp x 10dp square top-center cutout:
