@@ -207,11 +207,35 @@ class TransitionController {
     }
 
     /**
+     * @return {@code true} if transition is actively collecting changes and `wc` is one of them
+     *                      or a descendant of one of them. {@code false} once playing.
+     */
+    boolean inCollectingTransition(@NonNull WindowContainer wc) {
+        if (!isCollecting()) return false;
+        for (WindowContainer p = wc; p != null; p = p.getParent()) {
+            if (mCollectingTransition.mParticipants.contains(p)) return true;
+        }
+        return false;
+    }
+
+    /**
      * @return {@code true} if transition is actively playing. This is not necessarily {@code true}
      * during collection.
      */
     boolean isPlaying() {
         return !mPlayingTransitions.isEmpty();
+    }
+
+    /**
+     * @return {@code true} if one of the playing transitions contains `wc`.
+     */
+    boolean inPlayingTransition(@NonNull WindowContainer wc) {
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            for (WindowContainer p = wc; p != null; p = p.getParent()) {
+                if (mPlayingTransitions.get(i).mParticipants.contains(p)) return true;
+            }
+        }
+        return false;
     }
 
     /** @return {@code true} if a transition is running */
@@ -222,19 +246,7 @@ class TransitionController {
 
     /** @return {@code true} if a transition is running in a participant subtree of wc */
     boolean inTransition(@NonNull WindowContainer wc) {
-        if (isCollecting()) {
-            for (WindowContainer p = wc; p != null; p = p.getParent()) {
-                if (isCollecting(p)) return true;
-            }
-        }
-        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
-            for (WindowContainer p = wc; p != null; p = p.getParent()) {
-                if (mPlayingTransitions.get(i).mParticipants.contains(p)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return inCollectingTransition(wc) || inPlayingTransition(wc);
     }
 
     boolean inRecentsTransition(@NonNull WindowContainer wc) {
