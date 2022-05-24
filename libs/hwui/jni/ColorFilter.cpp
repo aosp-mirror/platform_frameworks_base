@@ -56,7 +56,8 @@ public:
 };
 
 static const JNINativeMethod colorfilter_methods[] = {
-    {"nativeGetFinalizer", "()J", (void*) SkColorFilterGlue::GetNativeFinalizer }
+        {"nativeGetFinalizer", "()J", (void*)SkColorFilterGlue::GetNativeFinalizer},
+        {"nSafeUnref", "(J)V", (void*)SkColorFilterGlue::SafeUnref},
 };
 
 static const JNINativeMethod blendmode_methods[] = {
@@ -82,7 +83,7 @@ int register_android_graphics_ColorFilter(JNIEnv* env) {
                                   NELEM(lighting_methods));
     android::RegisterMethodsOrDie(env, "android/graphics/ColorMatrixColorFilter",
                                   colormatrix_methods, NELEM(colormatrix_methods));
-    
+
     return 0;
 }
 
