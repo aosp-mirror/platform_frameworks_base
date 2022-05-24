@@ -304,6 +304,7 @@ public class AuthContainerView extends LinearLayout
                                 R.layout.auth_biometric_fingerprint_and_face_view, null, false);
                 fingerprintAndFaceView.setSensorProperties(fpProperties);
                 fingerprintAndFaceView.setScaleFactorProvider(config.mScaleProvider);
+                fingerprintAndFaceView.updateOverrideIconLayoutParamsSize();
                 mBiometricView = fingerprintAndFaceView;
             } else if (fpProperties != null) {
                 final AuthBiometricFingerprintView fpView =
@@ -311,6 +312,7 @@ public class AuthContainerView extends LinearLayout
                                 R.layout.auth_biometric_fingerprint_view, null, false);
                 fpView.setSensorProperties(fpProperties);
                 fpView.setScaleFactorProvider(config.mScaleProvider);
+                fpView.updateOverrideIconLayoutParamsSize();
                 mBiometricView = fpView;
             } else if (faceProperties != null) {
                 mBiometricView = (AuthBiometricFaceView) layoutInflater.inflate(
