@@ -4450,14 +4450,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /**
      * @return Whether we are allowed to show non-starting windows at the moment. We disallow
-     *         showing windows during transitions in case we have windows that have wide-color-gamut
-     *         color mode set to avoid jank in the middle of the transition.
+     *         showing windows while the transition animation is playing in case we have windows
+     *         that have wide-color-gamut color mode set to avoid jank in the middle of the
+     *         animation.
      */
     boolean canShowWindows() {
         final boolean drawn = mTransitionController.isShellTransitionsEnabled()
                 ? mSyncState != SYNC_STATE_WAITING_FOR_DRAW : allDrawn;
         final boolean animating = mTransitionController.isShellTransitionsEnabled()
-                ? mTransitionController.inTransition(this)
+                ? mTransitionController.inPlayingTransition(this)
                 : isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION);
         return drawn && !(animating && hasNonDefaultColorWindow());
     }
