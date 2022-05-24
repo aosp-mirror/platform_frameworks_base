@@ -139,6 +139,12 @@ class WindowSurfaceController {
                 "Destroying surface %s called by %s", this, Debug.getCallers(8));
         try {
             if (mSurfaceControl != null) {
+                if (mAnimator.mIsWallpaper && !mAnimator.mWin.mWindowRemovalAllowed
+                        && !mAnimator.mWin.mRemoveOnExit) {
+                    // The wallpaper surface should have the same lifetime as its window.
+                    Slog.e(TAG, "Unexpected removing wallpaper surface of " + mAnimator.mWin
+                            + " by " + Debug.getCallers(8));
+                }
                 t.remove(mSurfaceControl);
             }
         } catch (RuntimeException e) {
