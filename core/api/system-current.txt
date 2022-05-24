@@ -2744,6 +2744,7 @@ package android.apphibernation {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public java.util.Map<java.lang.String,android.apphibernation.HibernationStats> getHibernationStatsForUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingForUser(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isHibernatingGlobally(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public boolean isOatArtifactDeletionEnabled();
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingForUser(@NonNull String, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void setHibernatingGlobally(@NonNull String, boolean);
   }
