@@ -62,18 +62,24 @@
         android:layout_marginEnd="24dp"
         android:background="@drawable/autofill_dataset_picker_background"/>
 
-    <ListView
-        android:id="@+id/autofill_dialog_list"
-        android:layout_weight="1"
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:drawSelectorOnTop="true"
-        android:clickable="true"
-        android:divider="?android:attr/listDivider"
+        android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
-        android:background="@drawable/autofill_dataset_picker_background"
-        android:visibility="gone"/>
+        android:theme="@style/Theme.DeviceDefault.AutofillHalfScreenDialogList"
+        android:orientation="vertical">
+        <ListView
+            android:id="@+id/autofill_dialog_list"
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:drawSelectorOnTop="true"
+            android:clickable="true"
+            android:divider="@drawable/list_divider_material"
+            android:background="@drawable/autofill_dataset_picker_background"
+            android:visibility="gone"/>
+    </LinearLayout>
 
     <com.android.internal.widget.ButtonBarLayout
         android:layout_width="match_parent"

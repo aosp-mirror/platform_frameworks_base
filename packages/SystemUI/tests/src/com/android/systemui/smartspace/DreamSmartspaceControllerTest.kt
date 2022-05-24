@@ -153,6 +153,8 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
         override fun setMediaTarget(target: SmartspaceTarget?) {}
 
         override fun getSelectedPage(): Int { return 0; }
+
+        override fun getCurrentCardTopPadding(): Int { return 0; }
     }
 
     /**

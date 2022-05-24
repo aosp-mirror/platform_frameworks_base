@@ -24,6 +24,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
+import android.content.res.Configuration
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import com.android.internal.R
 import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
@@ -124,7 +126,6 @@ class ColorSchemeTransition internal constructor(
         val accentColorList = ColorStateList.valueOf(accentPrimary)
         mediaViewHolder.actionPlayPause.backgroundTintList = accentColorList
         mediaViewHolder.gutsViewHolder.setAccentPrimaryColor(accentPrimary)
-        mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
     }
 
     val accentSecondary = animatingColorTransitionFactory(
@@ -137,6 +138,19 @@ class ColorSchemeTransition internal constructor(
             it.effectColor = colorList
         }
     }
+
+    val colorSeamless = animatingColorTransitionFactory(
+        loadDefaultColor(R.attr.textColorPrimary),
+        { colorScheme: ColorScheme ->
+            // A1-100 dark in dark theme, A1-200 in light theme
+            if (context.resources.configuration.uiMode and
+                    Configuration.UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES)
+                        colorScheme.accent1[2]
+                        else colorScheme.accent1[3]
+        }, { seamlessColor: Int ->
+            val accentColorList = ColorStateList.valueOf(seamlessColor)
+            mediaViewHolder.seamlessButton.backgroundTintList = accentColorList
+    })
 
     val textPrimary = animatingColorTransitionFactory(
         loadDefaultColor(R.attr.textColorPrimary),
@@ -185,6 +199,7 @@ class ColorSchemeTransition internal constructor(
 
     val colorTransitions = arrayOf(
         surfaceColor,
+        colorSeamless,
         accentPrimary,
         accentSecondary,
         textPrimary,

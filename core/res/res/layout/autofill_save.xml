@@ -23,45 +23,38 @@
     android:orientation="vertical">
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/autofill_save"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/autofill_save_outer_top_margin"
-        android:paddingTop="@dimen/autofill_save_outer_top_padding"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:elevation="@dimen/autofill_elevation"
         android:background="?android:attr/colorSurface"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="@dimen/autofill_save_inner_padding"
-            android:paddingEnd="@dimen/autofill_save_inner_padding"
             android:orientation="vertical">
 
-            <LinearLayout
+            <ImageView
+                android:id="@+id/autofill_save_icon"
+                android:scaleType="fitStart"
+                android:layout_gravity="center"
+                android:layout_width="@dimen/autofill_save_icon_size"
+                android:layout_height="@dimen/autofill_save_icon_size"/>
+
+            <TextView
+                android:id="@+id/autofill_save_title"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/autofill_save_icon"
-                    android:scaleType="fitStart"
-                    android:layout_width="@dimen/autofill_save_icon_size"
-                    android:layout_height="@dimen/autofill_save_icon_size"/>
-
-                <TextView
-                    android:id="@+id/autofill_save_title"
-                    android:paddingStart="@dimen/autofill_save_title_start_padding"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/autofill_save_title"
-                    android:textAppearance="@style/TextAppearance.DeviceDefault.Subhead"
-                    android:layout_weight="1">
-                </TextView>
-
-            </LinearLayout>
+                android:text="@string/autofill_save_title"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textAppearance="@style/AutofillSaveUiTitle">
+            </TextView>
 
             <com.android.server.autofill.ui.CustomScrollView
                 android:id="@+id/autofill_save_custom_subtitle"
@@ -79,8 +72,6 @@
             android:clipToPadding="false"
             android:layout_marginTop="32dp"
             android:layout_marginBottom="18dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
             android:theme="@style/Theme.DeviceDefault.AutofillHalfScreenDialogButton"
             android:orientation="horizontal">
 

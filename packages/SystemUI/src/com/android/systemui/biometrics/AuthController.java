@@ -62,6 +62,7 @@ import android.view.WindowManager;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
@@ -143,6 +144,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     private boolean mAllFingerprintAuthenticatorsRegistered;
     @NonNull private final UserManager mUserManager;
     @NonNull private final LockPatternUtils mLockPatternUtils;
+    @NonNull private final InteractionJankMonitor mInteractionJankMonitor;
     private final @Background DelayableExecutor mBackgroundExecutor;
 
     @VisibleForTesting
@@ -549,6 +551,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
             @NonNull StatusBarStateController statusBarStateController,
+            @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
             @Background DelayableExecutor bgExecutor) {
         super(context);
@@ -566,6 +569,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mDisplayManager = displayManager;
         mWindowManager = windowManager;
+        mInteractionJankMonitor = jankMonitor;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
 
         mOrientationListener = new BiometricDisplayListener(
@@ -1041,7 +1045,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     return getScaleFactor();
                 })
                 .build(bgExecutor, sensorIds, mFpProps, mFaceProps, wakefulnessLifecycle,
-                        userManager, lockPatternUtils);
+                        userManager, lockPatternUtils, mInteractionJankMonitor);
     }
 
     /**
