@@ -397,9 +397,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
-    // Used to indicate that if there is already a transition set, it should be preserved when
-    // trying to apply a new one.
-    private static final boolean ALWAYS_KEEP_CURRENT = true;
+    static final int MY_PID = myPid();
+    static final int MY_UID = myUid();
 
     static final int LOGTAG_INPUT_FOCUS = 62001;
 
@@ -1205,8 +1204,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_hasPermanentDpad);
         mInTouchMode = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_defaultInTouchMode);
-        inputManager.setInTouchMode(
-                mInTouchMode, myPid(), myUid(), /* hasPermission = */ true);
+        inputManager.setInTouchMode(mInTouchMode, MY_PID, MY_UID, true /* hasPermission */);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
         mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
@@ -2700,7 +2698,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean checkCallingPermission(String permission, String func, boolean printLog) {
-        if (Binder.getCallingPid() == myPid()) {
+        if (Binder.getCallingPid() == MY_PID) {
             return true;
         }
 
@@ -2860,7 +2858,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // registration in DisplayContent#onParentChanged at DisplayContent initialization.
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc == null) {
-                    if (Binder.getCallingPid() != myPid()) {
+                    if (Binder.getCallingPid() != MY_PID) {
                         throw new WindowManager.InvalidDisplayException("attachToDisplayContent: "
                                 + "trying to attach to a non-existing display:" + displayId);
                     }
@@ -8769,7 +8767,7 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean getWindowInsets(WindowManager.LayoutParams attrs, int displayId,
             InsetsState outInsetsState) {
-        final boolean fromLocal = Binder.getCallingPid() == myPid();
+        final boolean fromLocal = Binder.getCallingPid() == MY_PID;
         final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
