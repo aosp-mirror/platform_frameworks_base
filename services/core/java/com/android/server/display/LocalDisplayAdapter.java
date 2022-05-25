@@ -22,8 +22,6 @@ import static android.view.Display.Mode.INVALID_MODE_ID;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Point;
-import android.hardware.display.DisplayManager;
 import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
@@ -32,6 +30,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.DisplayUtils;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -680,15 +679,17 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT;
                 }
 
-                final Point stableDisplaySize = getOverlayContext()
-                        .getSystemService(DisplayManager.class).getStableDisplaySize();
+                final Display.Mode maxDisplayMode =
+                        DisplayUtils.getMaximumResolutionDisplayMode(mInfo.supportedModes);
+                final int maxWidth =
+                        maxDisplayMode == null ? mInfo.width : maxDisplayMode.getPhysicalWidth();
+                final int maxHeight =
+                        maxDisplayMode == null ? mInfo.height : maxDisplayMode.getPhysicalHeight();
                 mInfo.displayCutout = DisplayCutout.fromResourcesRectApproximation(res,
-                        mInfo.uniqueId, stableDisplaySize.x, stableDisplaySize.y, mInfo.width,
-                        mInfo.height);
+                        mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
 
                 mInfo.roundedCorners = RoundedCorners.fromResources(
-                        res, mInfo.uniqueId, stableDisplaySize.x, stableDisplaySize.y, mInfo.width,
-                        mInfo.height);
+                        res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
                 mInfo.installOrientation = mStaticDisplayInfo.installOrientation;
 
                 if (mStaticDisplayInfo.isInternal) {

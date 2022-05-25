@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Avati näoga. Avamiseks vajutage."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Nägu tuvastati. Avamiseks vajutage."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Nägu tuvastati. Avamiseks vajutage avamise ikooni."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Teisalda vasakule"</item>
+    <item msgid="5558598599408514296">"Teisalda alla"</item>
+    <item msgid="4844142668312841831">"Teisalda paremale"</item>
+    <item msgid="5640521437931460125">"Teisalda üles"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Uuesti proovimiseks pühkige üles"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC kasutamiseks avage."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"See seade kuulub teie organisatsioonile"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Hoiatused"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Aku"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Ekraanipildid"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Installimata avatavad rakendused"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"Seadistamine"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Salvestusruum"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Vihjed"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Installimata avatavad rakendused"</string>
@@ -854,8 +854,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Selle seansi ülekandmiseks avage rakendus."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Tundmatu rakendus"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Lõpeta ülekanne"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Saadaolevad seadmed heli esitamiseks."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kuidas ülekandmine toimib?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Ülekanne"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Teie läheduses olevad inimesed, kellel on ühilduvad Bluetooth-seadmed, saavad kuulata teie ülekantavat meediat"</string>
@@ -952,12 +951,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Muuda kopeeritud pilti"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Saada läheduses olevasse seadmesse"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Puudutage kuvamiseks"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Tekst kopeeriti"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Pilt kopeeriti"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Sisu kopeeriti"</string>
     <string name="add" msgid="81036585205287996">"Lisa"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kasutajate haldamine"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"See märguanne ei toeta jagatud ekraanikuvale lohistamist."</string>
@@ -966,12 +962,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarm on määratud"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kaamera ja mikrofon on välja lülitatud"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# märguanne}other{# märguannet}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Edastamine"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Kas peatada rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> ülekandmine?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Kui kannate rakendust <xliff:g id="SWITCHAPP">%1$s</xliff:g> üle või muudate väljundit, peatatakse teie praegune ülekanne"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Rakenduse <xliff:g id="SWITCHAPP">%1$s</xliff:g> ülekandmine"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Väljundi muutmine"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Tundmatu"</string>
 </resources>

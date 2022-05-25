@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Usouse o desbloqueo facial. Preme para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Recoñeceuse a cara. Preme para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Recoñeceuse a cara. Preme a icona de desbloquear para abrir."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Mover cara á esquerda"</item>
+    <item msgid="5558598599408514296">"Mover cara abaixo"</item>
+    <item msgid="4844142668312841831">"Mover cara á dereita"</item>
+    <item msgid="5640521437931460125">"Mover cara arriba"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Pasa o dedo cara arriba para tentalo de novo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquea o dispositivo para utilizar a NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence á túa organización."</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Alertas"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batería"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Capturas de pantalla"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Aplicacións Instantáneas"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"Configurar"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Almacenamento"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Consellos"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Aplicacións Instantáneas"</string>
@@ -854,8 +854,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para emitir esta sesión, abre a aplicación."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplicación descoñecida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Deter emisión"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos dispoñibles para a saída de audio."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funcionan as difusións?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Difusión"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As persoas que estean preto de ti e que dispoñan de dispositivos Bluetooth compatibles poden escoitar o contido multimedia que difundas"</string>
@@ -936,8 +935,8 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Non engadir atallo"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Seleccionar usuario"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other">Hai <xliff:g id="COUNT_1">%s</xliff:g> aplicacións activas</item>
-      <item quantity="one">Hai <xliff:g id="COUNT_0">%s</xliff:g> aplicación activa</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplicacións activas</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplicación activa</item>
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nova información"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicacións activas"</string>
@@ -952,12 +951,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editar imaxe copiada"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Enviar a dispositivo próximo"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Toca para ver o contido"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Texto copiado"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Imaxe copiada"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Contido copiado"</string>
     <string name="add" msgid="81036585205287996">"Engadir"</string>
     <string name="manage_users" msgid="1823875311934643849">"Xestionar usuarios"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Esta notificación non pode arrastrarse á pantalla dividida."</string>
@@ -966,12 +962,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarma definida"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"A cámara e o micrófono están desactivados"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificación}other{# notificacións}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Difusión"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Queres deixar de emitir contido a través de <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Se emites contido a través de <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou cambias de saída, a emisión en curso deterase"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Emitir contido a través de <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Cambiar de saída"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Descoñecida"</string>
 </resources>
