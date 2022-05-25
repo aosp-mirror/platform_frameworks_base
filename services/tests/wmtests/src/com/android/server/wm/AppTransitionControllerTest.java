@@ -593,7 +593,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
                 .setCreatedByOrganizer(true);
         final Task splitRoot1 = builder.build();
         final Task splitRoot2 = builder.build();
-        splitRoot1.setAdjacentTaskFragment(splitRoot2, false /* moveTogether */);
+        splitRoot1.setAdjacentTaskFragment(splitRoot2);
         final ActivityRecord activity1 = createActivityRecordWithParentTask(splitRoot1);
         activity1.setVisible(false);
         activity1.mVisibleRequested = true;

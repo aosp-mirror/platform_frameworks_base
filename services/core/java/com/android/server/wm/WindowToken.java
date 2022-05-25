@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
@@ -364,11 +363,7 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @Override
     void assignLayer(SurfaceControl.Transaction t, int layer) {
-        if (windowType == TYPE_DOCK_DIVIDER) {
-            // See {@link DisplayContent#mSplitScreenDividerAnchor}
-            super.assignRelativeLayer(t,
-                    mDisplayContent.getDefaultTaskDisplayArea().getSplitScreenDividerAnchor(), 1);
-        } else if (mRoundedCornerOverlay) {
+        if (mRoundedCornerOverlay) {
             super.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
         } else {
             super.assignLayer(t, layer);
