@@ -192,6 +192,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.util.Compile;
 import com.android.systemui.util.LargeScreenUtils;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.Utils;
@@ -216,7 +217,8 @@ import javax.inject.Provider;
 @CentralSurfacesComponent.CentralSurfacesScope
 public class NotificationPanelViewController extends PanelViewController {
 
-    private static final boolean DEBUG_LOGCAT = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean SPEW_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private static final boolean DEBUG_DRAWABLE = false;
 
     /**
@@ -1294,6 +1296,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private void updateMaxDisplayedNotifications(boolean recompute) {
         if (recompute) {
             mMaxAllowedKeyguardNotifications = Math.max(computeMaxKeyguardNotifications(), 1);
+        } else {
+            if (SPEW_LOGCAT) Log.d(TAG, "Skipping computeMaxKeyguardNotifications() by request");
         }
 
         if (mKeyguardShowing && !mKeyguardBypassController.getBypassEnabled()) {
@@ -1546,6 +1550,19 @@ public class NotificationPanelViewController extends PanelViewController {
                 mNotificationStackScrollLayoutController.getHeight()
                         - staticTopPadding
                         - bottomPadding;
+
+        if (SPEW_LOGCAT) {
+            Log.d(TAG, "getSpaceForLockscreenNotifications()"
+                    + " availableSpace=" + availableSpace
+                    + " NSSL.height=" + mNotificationStackScrollLayoutController.getHeight()
+                    + " NSSL.top=" + mNotificationStackScrollLayoutController.getTop()
+                    + " staticTopPadding=" + staticTopPadding
+                    + " bottomPadding=" + bottomPadding
+                    + " lockIconPadding=" + lockIconPadding
+                    + " mIndicationBottomPadding=" + mIndicationBottomPadding
+                    + " mAmbientIndicationBottomPadding=" + mAmbientIndicationBottomPadding
+            );
+        }
         return availableSpace;
     }
 
@@ -1554,7 +1571,12 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     @VisibleForTesting
     int computeMaxKeyguardNotifications() {
-        if (mAmbientState.getFractionToShade() > 0 || mAmbientState.getDozeAmount() > 0) {
+        if (mAmbientState.getFractionToShade() > 0) {
+            if (SPEW_LOGCAT) {
+                Log.v(TAG, "Internally skipping computeMaxKeyguardNotifications()"
+                        + " fractionToShade=" + mAmbientState.getFractionToShade()
+                );
+            }
             return mMaxAllowedKeyguardNotifications;
         }
 
