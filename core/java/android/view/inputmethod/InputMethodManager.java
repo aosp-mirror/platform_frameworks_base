@@ -3608,7 +3608,7 @@ public final class InputMethodManager {
         p.println("  mServedConnecting=" + mServedConnecting);
         if (mCurrentTextBoxAttribute != null) {
             p.println("  mCurrentTextBoxAttribute:");
-            mCurrentTextBoxAttribute.dump(p, "    ");
+            mCurrentTextBoxAttribute.dump(p, "    ", false /* dumpExtras */);
         } else {
             p.println("  mCurrentTextBoxAttribute: null");
         }
