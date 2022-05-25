@@ -656,7 +656,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou que vous modifiez le résultat, votre annonce actuelle s\'arrêtera"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Modifier le résultat"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Animations pour prévisualiser le geste de retour"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animations pour prévisualiser le retour en arrière"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activer les animations système pour la prévisualisation du geste de retour."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ce paramètre active les animations système pour la prévisualisation du geste de retour. Pour cela, enableOnBackInvokedCallback doit être défini sur \"True\" dans le fichier manifeste de chaque appli."</string>
 </resources>
