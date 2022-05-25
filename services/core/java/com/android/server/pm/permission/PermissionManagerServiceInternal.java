@@ -102,6 +102,14 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
             @UserIdInt int userId);
 
     /**
+     * Reset the runtime permission state changes for all packages in a user.
+     *
+     * @param userId the user ID
+     */
+    //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    void resetRuntimePermissionsForUser(@UserIdInt int userId);
+
+    /**
      * Read legacy permission state from package settings.
      *
      * TODO(zhanghai): This is a temporary method because we should not expose

@@ -780,6 +780,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         public void resetRuntimePermissions(@NonNull AndroidPackage pkg, @UserIdInt int userId) {
             mPermissionManagerServiceImpl.resetRuntimePermissions(pkg, userId);
         }
+        @Override
+        public void resetRuntimePermissionsForUser(@UserIdInt int userId) {
+            mPermissionManagerServiceImpl.resetRuntimePermissionsForUser(userId);
+        }
 
         @Override
         public Permission getPermissionTEMP(String permName) {
