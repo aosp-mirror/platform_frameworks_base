@@ -421,7 +421,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
             outRect.top += getTop() + getTranslationY();
         }
         outRect.bottom = outRect.top + getActualHeight();
-        outRect.top += getClipTopAmount();
+        outRect.top += Math.max(0, getClipTopAmount());
     }
 
     public boolean isSummaryWithChildren() {
