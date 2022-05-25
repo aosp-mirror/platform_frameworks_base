@@ -1134,6 +1134,8 @@
     <string name="battery_info_status_charging_slow">Charging slowly</string>
     <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when charging wirelessly.  -->
     <string name="battery_info_status_charging_wireless">Charging wirelessly</string>
+    <!-- [CHAR_LIMIT=20] Battery use screen.  Battery status shown in chart label when the device is dock charging.  -->
+    <string name="battery_info_status_charging_dock">Charging Dock</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item. A state which device is connected with any charger(e.g. USB, Adapter or Wireless) but not charging yet. Used for diagnostic info screens, precise translation isn't needed -->
