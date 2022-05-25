@@ -217,21 +217,15 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
             }
             alphaAnim.addListener(new AnimatorListenerAdapter() {
                 @Override
-                public void onAnimationCancel(Animator animation) {
-                    // If Animation is canceled, we want to ensure UI is reset.
-                    view.setAlpha(targetAlpha);
-                    view.setTranslationY(targetTranslationY);
-                }
-
-                @Override
                 public void onAnimationEnd(Animator animation) {
+                    view.setAlpha(targetAlpha);
                     if (endRunnable != null) {
                         endRunnable.run();
                     }
                 }
             });
             alphaAnim.start();
-            startTranslationYAnimation(view, delay, duration, appearing ? 0 : translationY,
+            startTranslationYAnimation(view, delay, duration, targetTranslationY,
                     interpolator, animatorListener);
         }
     }
@@ -265,6 +259,12 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
         if (listener != null) {
             translationAnim.addListener(listener);
         }
+        translationAnim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setTranslationY(endTranslationY);
+            }
+        });
         translationAnim.start();
     }
 
