@@ -261,7 +261,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                         updatedView = mInflater.inflate(
                                 R.layout.app_language_picker_current_locale_item,
                                 parent, false);
-                        addStateDescriptionIntoCurrentLocaleItem(convertView);
+                        addStateDescriptionIntoCurrentLocaleItem(updatedView);
                     }
                 } else {
                     shouldReuseView = convertView instanceof TextView
@@ -278,7 +278,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 if (!shouldReuseView) {
                     updatedView = mInflater.inflate(
                             R.layout.app_language_picker_current_locale_item, parent, false);
-                    addStateDescriptionIntoCurrentLocaleItem(convertView);
+                    addStateDescriptionIntoCurrentLocaleItem(updatedView);
                 }
                 break;
             default:
