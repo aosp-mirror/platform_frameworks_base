@@ -10,6 +10,7 @@ const val GENERATED_END = "// End of generated code"
 const val INDENT_SINGLE = "    "
 
 val PRIMITIVE_TYPES = listOf("byte", "short", "int", "long", "char", "float", "double", "boolean")
+val PRIMITIVE_ARRAY_TYPES = listOf("byte[]", "short[]", "int[]", "long[]", "char[]", "float[]", "double[]", "boolean[]")
 val BOXED_PRIMITIVE_TYPES = PRIMITIVE_TYPES.map { it.capitalize() } - "Int" + "Integer" - "Char" + "Character"
 
 val BUILTIN_SPECIAL_PARCELLINGS = listOf("Pattern")
