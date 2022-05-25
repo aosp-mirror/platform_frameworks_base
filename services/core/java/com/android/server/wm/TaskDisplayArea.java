@@ -29,7 +29,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.view.WindowManagerPolicyConstants.SPLIT_DIVIDER_LAYER;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -90,20 +89,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * currently all task animation backgrounds are the same color.
      */
     private int mColorLayerCounter = 0;
-
-    /**
-     * Given that the split-screen divider does not have an AppWindowToken, it
-     * will have to live inside of a "NonAppWindowContainer". However, in visual Z order
-     * it will need to be interleaved with some of our children, appearing on top of
-     * both docked root tasks but underneath any assistant root tasks.
-     *
-     * To solve this problem we have this anchor control, which will always exist so
-     * we can always assign it the correct value in our {@link #assignChildLayers}.
-     * Likewise since it always exists, we can always
-     * assign the divider a layer relative to it. This way we prevent linking lifecycle
-     * events between tasks and the divider window.
-     */
-    private SurfaceControl mSplitScreenDividerAnchor;
 
     // Cached reference to some special tasks we tend to get a lot so we don't need to loop
     // through the list to find them.
@@ -730,12 +715,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // Place root home tasks to the bottom.
         layer = adjustRootTaskLayer(t, mTmpHomeChildren, layer);
         layer = adjustRootTaskLayer(t, mTmpNormalChildren, layer);
-        // TODO(b/207185041): Remove this divider workaround after we full remove leagacy split and
-        //                    make app pair split only have single root then we can just attach the
-        //                    divider to the single root task in shell.
-        layer = Math.max(layer, SPLIT_DIVIDER_LAYER + 1);
         adjustRootTaskLayer(t, mTmpAlwaysOnTopChildren, layer);
-        t.setLayer(mSplitScreenDividerAnchor, SPLIT_DIVIDER_LAYER);
     }
 
     /**
@@ -763,19 +743,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 continue;
             }
 
-            final Task childTask = child.asTask();
-            final boolean inAdjacentTask = childTask != null
-                    && child.inMultiWindowMode()
-                    && childTask.getRootTask().getAdjacentTaskFragment() != null;
-
-            if (inAdjacentTask) {
-                hasAdjacentTask = true;
-            } else if (hasAdjacentTask && startLayer < SPLIT_DIVIDER_LAYER) {
-                // Task on top of adjacent tasks should be higher than split divider layer so
-                // set it as start.
-                startLayer = SPLIT_DIVIDER_LAYER + 1;
-            }
-
             child.assignLayer(t, startLayer++);
         }
 
@@ -800,31 +767,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             RemoteAnimationController.RemoteAnimationRecord record) {
         final ActivityRecord activity = getTopMostActivity();
         return activity != null ? activity.createRemoteAnimationTarget(record) : null;
-    }
-
-    SurfaceControl getSplitScreenDividerAnchor() {
-        return mSplitScreenDividerAnchor;
-    }
-
-    @Override
-    void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
-        if (getParent() != null) {
-            super.onParentChanged(newParent, oldParent, () -> {
-                mSplitScreenDividerAnchor = makeChildSurface(null)
-                        .setName("splitScreenDividerAnchor")
-                        .setCallsite("TaskDisplayArea.onParentChanged")
-                        .build();
-
-                getSyncTransaction()
-                        .show(mSplitScreenDividerAnchor);
-            });
-        } else {
-            super.onParentChanged(newParent, oldParent);
-            mWmService.mTransactionFactory.get()
-                    .remove(mSplitScreenDividerAnchor)
-                    .apply();
-            mSplitScreenDividerAnchor = null;
-        }
     }
 
     void setBackgroundColor(@ColorInt int colorInt) {
@@ -872,12 +814,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             setBackgroundColor(mBackgroundColor, true /* restore */);
         }
 
-        if (mSplitScreenDividerAnchor == null) {
-            return;
-        }
-
-        // As TaskDisplayArea is getting a new surface, reparent and reorder the child surfaces.
-        t.reparent(mSplitScreenDividerAnchor, mSurfaceControl);
         reassignLayer(t);
         scheduleAnimation();
     }

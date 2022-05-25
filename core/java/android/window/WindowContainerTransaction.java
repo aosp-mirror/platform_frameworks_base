@@ -384,12 +384,10 @@ public final class WindowContainerTransaction implements Parcelable {
      */
     @NonNull
     public WindowContainerTransaction setAdjacentRoots(
-            @NonNull WindowContainerToken root1, @NonNull WindowContainerToken root2,
-            boolean moveTogether) {
+            @NonNull WindowContainerToken root1, @NonNull WindowContainerToken root2) {
         mHierarchyOps.add(HierarchyOp.createForAdjacentRoots(
                 root1.asBinder(),
-                root2.asBinder(),
-                moveTogether));
+                root2.asBinder()));
         return this;
     }
 
@@ -1106,9 +1104,6 @@ public final class WindowContainerTransaction implements Parcelable {
 
         private boolean mReparentTopOnly;
 
-        // TODO(b/207185041): Remove this once having a single-top root for split screen.
-        private boolean mMoveAdjacentTogether;
-
         @Nullable
         private int[]  mWindowingModes;
 
@@ -1171,12 +1166,10 @@ public final class WindowContainerTransaction implements Parcelable {
         }
 
         /** Create a hierarchy op for setting adjacent root tasks. */
-        public static HierarchyOp createForAdjacentRoots(IBinder root1, IBinder root2,
-                boolean moveTogether) {
+        public static HierarchyOp createForAdjacentRoots(IBinder root1, IBinder root2) {
             return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS)
                     .setContainer(root1)
                     .setReparentContainer(root2)
-                    .setMoveAdjacentTogether(moveTogether)
                     .build();
         }
 
@@ -1223,7 +1216,6 @@ public final class WindowContainerTransaction implements Parcelable {
             mInsetsProviderFrame = copy.mInsetsProviderFrame;
             mToTop = copy.mToTop;
             mReparentTopOnly = copy.mReparentTopOnly;
-            mMoveAdjacentTogether = copy.mMoveAdjacentTogether;
             mWindowingModes = copy.mWindowingModes;
             mActivityTypes = copy.mActivityTypes;
             mLaunchOptions = copy.mLaunchOptions;
@@ -1245,7 +1237,6 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             mToTop = in.readBoolean();
             mReparentTopOnly = in.readBoolean();
-            mMoveAdjacentTogether = in.readBoolean();
             mWindowingModes = in.createIntArray();
             mActivityTypes = in.createIntArray();
             mLaunchOptions = in.readBundle();
@@ -1300,10 +1291,6 @@ public final class WindowContainerTransaction implements Parcelable {
             return mReparentTopOnly;
         }
 
-        public boolean getMoveAdjacentTogether() {
-            return mMoveAdjacentTogether;
-        }
-
         public int[] getWindowingModes() {
             return mWindowingModes;
         }
@@ -1356,8 +1343,7 @@ public final class WindowContainerTransaction implements Parcelable {
                     return "{reorder: " + mContainer + " to " + (mToTop ? "top" : "bottom") + "}";
                 case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
                     return "{SetAdjacentRoot: container=" + mContainer
-                            + " adjacentRoot=" + mReparent + " mMoveAdjacentTogether="
-                            + mMoveAdjacentTogether + "}";
+                            + " adjacentRoot=" + mReparent + "}";
                 case HIERARCHY_OP_TYPE_LAUNCH_TASK:
                     return "{LaunchTask: " + mLaunchOptions + "}";
                 case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT:
@@ -1413,7 +1399,6 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             dest.writeBoolean(mToTop);
             dest.writeBoolean(mReparentTopOnly);
-            dest.writeBoolean(mMoveAdjacentTogether);
             dest.writeIntArray(mWindowingModes);
             dest.writeIntArray(mActivityTypes);
             dest.writeBundle(mLaunchOptions);
@@ -1457,8 +1442,6 @@ public final class WindowContainerTransaction implements Parcelable {
             private boolean mToTop;
 
             private boolean mReparentTopOnly;
-
-            private boolean mMoveAdjacentTogether;
 
             @Nullable
             private int[]  mWindowingModes;
@@ -1515,11 +1498,6 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
-            Builder setMoveAdjacentTogether(boolean moveAdjacentTogether) {
-                mMoveAdjacentTogether = moveAdjacentTogether;
-                return this;
-            }
-
             Builder setWindowingModes(@Nullable int[] windowingModes) {
                 mWindowingModes = windowingModes;
                 return this;
@@ -1570,7 +1548,6 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mInsetsProviderFrame = mInsetsProviderFrame;
                 hierarchyOp.mToTop = mToTop;
                 hierarchyOp.mReparentTopOnly = mReparentTopOnly;
-                hierarchyOp.mMoveAdjacentTogether = mMoveAdjacentTogether;
                 hierarchyOp.mLaunchOptions = mLaunchOptions;
                 hierarchyOp.mActivityIntent = mActivityIntent;
                 hierarchyOp.mPendingIntent = mPendingIntent;

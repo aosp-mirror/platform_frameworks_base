@@ -4567,22 +4567,12 @@ class Task extends TaskFragment {
         moveToFront(reason, null);
     }
 
-    void moveToFront(String reason, Task task) {
-        if (mMoveAdjacentTogether && getAdjacentTaskFragment() != null) {
-            final Task adjacentTask = getAdjacentTaskFragment().asTask();
-            if (adjacentTask != null) {
-                adjacentTask.moveToFrontInner(reason + " adjacentTaskToTop", null /* task */);
-            }
-        }
-        moveToFrontInner(reason, task);
-    }
-
     /**
      * @param reason The reason for moving the root task to the front.
      * @param task If non-null, the task will be moved to the top of the root task.
      */
     @VisibleForTesting
-    void moveToFrontInner(String reason, Task task) {
+    void moveToFront(String reason, Task task) {
         if (!isAttached()) {
             return;
         }
