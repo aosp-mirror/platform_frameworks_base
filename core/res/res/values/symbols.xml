@@ -2266,6 +2266,7 @@
   <java-symbol type="integer" name="config_screenshotChordKeyTimeout" />
   <java-symbol type="integer" name="config_maxResolverActivityColumns" />
   <java-symbol type="array" name="config_notificationSignalExtractors" />
+  <java-symbol type="bool" name="config_notificationReviewPermissions" />
 
   <java-symbol type="layout" name="notification_material_action" />
   <java-symbol type="layout" name="notification_material_action_list" />
