@@ -1069,11 +1069,20 @@ public final class MediaFormat {
 
     /**
      * A key describing the desired profile to be used by an encoder.
+     * <p>
      * The associated value is an integer.
      * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
      * This key is used as a hint, and is only supported for codecs
-     * that specify a profile. Note: Codecs are free to use all the available
-     * coding tools at the specified profile.
+     * that specify a profile. When configuring profile, encoder configuration
+     * may fail if other parameters are not compatible with the desired
+     * profile or if the desired profile is not supported, but it may also
+     * fail silently (where the encoder ends up using a different, compatible profile.)
+     * <p class="note">
+     * <strong>Note:</strong> Codecs are free to use all the available
+     * coding tools at the specified profile, but may ultimately choose to not do so.
+     * <p class="note">
+     * <strong>Note:</strong> When configuring video encoders, profile must be
+     * set together with {@link #KEY_LEVEL level}.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */
@@ -1081,12 +1090,22 @@ public final class MediaFormat {
 
     /**
      * A key describing the desired profile to be used by an encoder.
+     * <p>
      * The associated value is an integer.
      * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
      * This key is used as a further hint when specifying a desired profile,
      * and is only supported for codecs that specify a level.
      * <p>
      * This key is ignored if the {@link #KEY_PROFILE profile} is not specified.
+     * Otherwise, the value should be a level compatible with the configured encoding
+     * parameters.
+     * <p class="note">
+     * <strong>Note:</strong> This key cannot be used to constrain the encoder's
+     * output to a maximum encoding level. Encoders are free to target a different
+     * level if the configured encoding parameters dictate it. Nevertheless,
+     * encoders shall use (and encode) a level sufficient to decode the generated
+     * bitstream, though they may exceed the (Video) Buffering Verifier limits for
+     * that encoded level.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */
