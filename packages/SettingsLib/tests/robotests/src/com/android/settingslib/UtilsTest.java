@@ -365,6 +365,17 @@ public class UtilsTest {
     }
 
     @Test
+    public void getBatteryStatus_chargingDock_returnDockChargingString() {
+        final Intent intent = new Intent();
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_DOCK);
+        final Resources resources = mContext.getResources();
+
+        assertThat(Utils.getBatteryStatus(mContext, intent, /* compactStatus= */ false)).isEqualTo(
+                resources.getString(R.string.battery_info_status_charging_dock));
+    }
+
+    @Test
     public void getBatteryStatus_chargingWireless_returnWirelessChargingString() {
         final Intent intent = new Intent();
         intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
