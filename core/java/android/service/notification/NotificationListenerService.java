@@ -258,7 +258,10 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_CLEAR_DATA = 21;
     /** Notification was canceled due to an assistant adjustment update. */
     public static final int REASON_ASSISTANT_CANCEL = 22;
-    /** Notification was canceled when lockdown mode is enabled. */
+    /**
+     * Notification was canceled when entering lockdown mode, which turns off
+     * Smart Lock, fingerprint unlocking, and notifications on the lock screen.
+     */
     public static final int REASON_LOCKDOWN = 23;
 
     /**
