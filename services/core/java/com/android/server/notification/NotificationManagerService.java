@@ -6949,9 +6949,14 @@ public class NotificationManagerService extends SystemService {
         try {
             if (mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)
                     && mTelecomManager != null) {
-                return mTelecomManager.isInManagedCall()
-                        || mTelecomManager.isInSelfManagedCall(
-                                pkg, UserHandle.getUserHandleForUid(uid));
+                try {
+                    return mTelecomManager.isInManagedCall()
+                            || mTelecomManager.isInSelfManagedCall(
+                            pkg, UserHandle.getUserHandleForUid(uid));
+                } catch (IllegalStateException ise) {
+                    // Telecom is not ready (this is likely early boot), so there are no calls.
+                    return false;
+                }
             }
             return false;
         } finally {
