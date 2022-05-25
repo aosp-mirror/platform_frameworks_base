@@ -190,6 +190,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
+import android.util.DisplayUtils;
 import android.util.IntArray;
 import android.util.RotationUtils;
 import android.util.Size;
@@ -359,7 +360,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     float mInitialPhysicalXDpi = 0.0f;
     float mInitialPhysicalYDpi = 0.0f;
 
-    private Point mStableDisplaySize;
+    private Point mPhysicalDisplaySize;
 
     DisplayCutout mInitialDisplayCutout;
     private final RotationCache<DisplayCutout, WmDisplayCutout> mDisplayCutoutCache
@@ -2731,7 +2732,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInitialRoundedCorners = mDisplayInfo.roundedCorners;
         mCurrentPrivacyIndicatorBounds = new PrivacyIndicatorBounds(new Rect[4],
                 mDisplayInfo.rotation);
-        mStableDisplaySize = mWmService.mDisplayManager.getStableDisplaySize();
+        final Display.Mode maxDisplayMode =
+                DisplayUtils.getMaximumResolutionDisplayMode(mDisplayInfo.supportedModes);
+        mPhysicalDisplaySize = new Point(
+                maxDisplayMode == null ? mInitialDisplayWidth : maxDisplayMode.getPhysicalWidth(),
+                maxDisplayMode == null ? mInitialDisplayHeight : maxDisplayMode.getPhysicalHeight()
+        );
     }
 
     /**
@@ -2927,7 +2933,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         return DisplayCutout.fromResourcesRectApproximation(
                 mDisplayPolicy.getSystemUiContext().getResources(), mDisplayInfo.uniqueId,
-                mStableDisplaySize.x, mStableDisplaySize.y, displayWidth, displayHeight);
+                mPhysicalDisplaySize.x, mPhysicalDisplaySize.y, displayWidth, displayHeight);
     }
 
     RoundedCorners loadRoundedCorners(int displayWidth, int displayHeight) {
@@ -2936,7 +2942,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         return RoundedCorners.fromResources(
                 mDisplayPolicy.getSystemUiContext().getResources(),  mDisplayInfo.uniqueId,
-                mStableDisplaySize.x, mStableDisplaySize.y, displayWidth, displayHeight);
+                mPhysicalDisplaySize.x, mPhysicalDisplaySize.y, displayWidth, displayHeight);
     }
 
     @Override
