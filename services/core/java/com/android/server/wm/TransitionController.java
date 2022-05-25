@@ -75,6 +75,7 @@ class TransitionController {
 
     private ITransitionPlayer mTransitionPlayer;
     final TransitionMetricsReporter mTransitionMetricsReporter = new TransitionMetricsReporter();
+    final TransitionTracer mTransitionTracer;
 
     private IApplicationThread mTransitionPlayerThread;
     final ActivityTaskManagerService mAtm;
@@ -100,10 +101,12 @@ class TransitionController {
     final StatusBarManagerInternal mStatusBar;
 
     TransitionController(ActivityTaskManagerService atm,
-            TaskSnapshotController taskSnapshotController) {
+            TaskSnapshotController taskSnapshotController,
+            TransitionTracer transitionTracer) {
         mAtm = atm;
         mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
         mTaskSnapshotController = taskSnapshotController;
+        mTransitionTracer = transitionTracer;
         mTransitionPlayerDeath = () -> {
             synchronized (mAtm.mGlobalLock) {
                 // Clean-up/finish any playing transitions.
@@ -514,6 +517,7 @@ class TransitionController {
             setAnimationRunning(true /* running */);
         }
         mPlayingTransitions.add(transition);
+        mTransitionTracer.logState(transition);
     }
 
     private void setAnimationRunning(boolean running) {
@@ -532,6 +536,7 @@ class TransitionController {
         }
         transition.abort();
         mCollectingTransition = null;
+        mTransitionTracer.logState(transition);
     }
 
     /**
