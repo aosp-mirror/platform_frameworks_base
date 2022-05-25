@@ -230,7 +230,7 @@ interface IActivityTaskManager {
             in IBinder activityToken, int flags);
     boolean isAssistDataAllowedOnCurrentActivity();
     boolean requestAssistDataForTask(in IAssistDataReceiver receiver, int taskId,
-            in String callingPackageName);
+            in String callingPackageName, String callingAttributionTag);
 
     /**
      * Notify the system that the keyguard is going away.

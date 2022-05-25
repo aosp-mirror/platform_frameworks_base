@@ -2962,7 +2962,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public boolean requestAssistDataForTask(IAssistDataReceiver receiver, int taskId,
-            String callingPackageName) {
+            String callingPackageName, @Nullable String callingAttributionTag) {
         mAmInternal.enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "requestAssistDataForTask()");
         final long callingId = Binder.clearCallingIdentity();
@@ -2989,7 +2989,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         requester.requestAssistData(topActivityToken, true /* fetchData */,
                 false /* fetchScreenshot */, false /* fetchStructure */, true /* allowFetchData */,
                 false /* allowFetchScreenshot*/, true /* ignoreFocusCheck */,
-                Binder.getCallingUid(), callingPackageName);
+                Binder.getCallingUid(), callingPackageName, callingAttributionTag);
 
         return true;
     }

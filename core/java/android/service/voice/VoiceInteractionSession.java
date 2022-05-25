@@ -1384,7 +1384,8 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             throw new IllegalStateException("Can't call before onCreate()");
         }
         try {
-            mSystemService.showSessionFromSession(mToken, args, flags);
+            mSystemService.showSessionFromSession(mToken, args, flags,
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
         }
     }

@@ -244,8 +244,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 /* direct= */ true);
     }
 
-    public boolean showSessionLocked(Bundle args, int flags,
-            IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
+    public boolean showSessionLocked(@NonNull Bundle args, int flags,
+            @Nullable String attributionTag,
+            @Nullable IVoiceInteractionSessionShowCallback showCallback,
+            @Nullable IBinder activityToken) {
         if (mActiveSession == null) {
             mActiveSession = new VoiceInteractionSessionConnection(mServiceStub,
                     mSessionComponentName, mUser, mContext, this,
@@ -269,8 +271,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         } else {
             visibleActivities = allVisibleActivities;
         }
-        return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback,
-                visibleActivities);
+        return mActiveSession.showLocked(args, flags, attributionTag, mDisabledShowContext,
+                showCallback, visibleActivities);
     }
 
     public void getActiveServiceSupportedActions(List<String> commands,

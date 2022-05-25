@@ -223,12 +223,13 @@ public class VoiceInteractionManagerService extends SystemService {
 
     class LocalService extends VoiceInteractionManagerInternal {
         @Override
-        public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
+        public void startLocalVoiceInteraction(@NonNull IBinder callingActivity,
+                @Nullable String attributionTag, @NonNull Bundle options) {
             if (DEBUG) {
                 Slog.i(TAG, "startLocalVoiceInteraction " + callingActivity);
             }
             VoiceInteractionManagerService.this.mServiceStub.startLocalVoiceInteraction(
-                    callingActivity, options);
+                    callingActivity, attributionTag, options);
         }
 
         @Override
@@ -383,14 +384,15 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         // TODO: VI Make sure the caller is the current user or profile
-        void startLocalVoiceInteraction(final IBinder token, Bundle options) {
+        void startLocalVoiceInteraction(@NonNull final IBinder token,
+                @Nullable String attributionTag, @NonNull Bundle options) {
             if (mImpl == null) return;
 
             final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
                 mImpl.showSessionLocked(options,
-                        VoiceInteractionSession.SHOW_SOURCE_ACTIVITY,
+                        VoiceInteractionSession.SHOW_SOURCE_ACTIVITY, attributionTag,
                         new IVoiceInteractionSessionShowCallback.Stub() {
                             @Override
                             public void onFailed() {
@@ -898,13 +900,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void showSession(Bundle args, int flags) {
+        public void showSession(@NonNull Bundle args, int flags, @Nullable String attributionTag) {
             synchronized (this) {
                 enforceIsCurrentVoiceInteractionService();
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.showSessionLocked(args, flags, null, null);
+                    mImpl.showSessionLocked(args, flags, attributionTag, null, null);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -929,7 +931,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public boolean showSessionFromSession(IBinder token, Bundle sessionArgs, int flags) {
+        public boolean showSessionFromSession(@NonNull IBinder token, @NonNull Bundle sessionArgs,
+                int flags, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "showSessionFromSession without running voice interaction service");
@@ -937,7 +940,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.showSessionLocked(sessionArgs, flags, null, null);
+                    return mImpl.showSessionLocked(sessionArgs, flags, attributionTag, null, null);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -961,8 +964,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startVoiceActivity(IBinder token, Intent intent, String resolvedType,
-                String callingFeatureId) {
+        public int startVoiceActivity(@NonNull IBinder token, @NonNull Intent intent,
+                @Nullable String resolvedType, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startVoiceActivity without running voice interaction service");
@@ -980,8 +983,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     } else {
                         Slog.w(TAG, "Cannot find ActivityInfo in startVoiceActivity.");
                     }
-                    return mImpl.startVoiceActivityLocked(
-                            callingFeatureId, callingPid, callingUid, token, intent, resolvedType);
+                    return mImpl.startVoiceActivityLocked(attributionTag, callingPid, callingUid,
+                            token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -989,8 +992,8 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public int startAssistantActivity(IBinder token, Intent intent, String resolvedType,
-                String callingFeatureId) {
+        public int startAssistantActivity(@NonNull IBinder token, @NonNull Intent intent,
+                @Nullable String resolvedType, @Nullable String attributionTag) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startAssistantActivity without running voice interaction service");
@@ -1000,7 +1003,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startAssistantActivityLocked(callingFeatureId, callingPid,
+                    return mImpl.startAssistantActivityLocked(attributionTag, callingPid,
                             callingUid, token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
@@ -1669,8 +1672,10 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_VOICE_INTERACTION_SERVICE)
         @Override
-        public boolean showSessionForActiveService(Bundle args, int sourceFlags,
-                IVoiceInteractionSessionShowCallback showCallback, IBinder activityToken) {
+        public boolean showSessionForActiveService(@NonNull Bundle args, int sourceFlags,
+                @Nullable String attributionTag,
+                @Nullable IVoiceInteractionSessionShowCallback showCallback,
+                @Nullable IBinder activityToken) {
             if (DEBUG_USER) Slog.d(TAG, "showSessionForActiveService()");
 
             synchronized (this) {
@@ -1691,7 +1696,7 @@ public class VoiceInteractionManagerService extends SystemService {
                             sourceFlags
                                     | VoiceInteractionSession.SHOW_WITH_ASSIST
                                     | VoiceInteractionSession.SHOW_WITH_SCREENSHOT,
-                            showCallback, activityToken);
+                            attributionTag, showCallback, activityToken);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

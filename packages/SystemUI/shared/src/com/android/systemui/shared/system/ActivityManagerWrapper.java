@@ -19,7 +19,6 @@ package com.android.systemui.shared.system;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityTaskManager.getService;
 
 import android.annotation.NonNull;
@@ -27,7 +26,6 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -337,7 +335,8 @@ public class ActivityManagerWrapper {
      * Shows a voice session identified by {@code token}
      * @return true if the session was shown, false otherwise
      */
-    public boolean showVoiceSession(IBinder token, Bundle args, int flags) {
+    public boolean showVoiceSession(@NonNull IBinder token, @NonNull Bundle args, int flags,
+            @Nullable String attributionTag) {
         IVoiceInteractionManagerService service = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
         if (service == null) {
@@ -346,7 +345,7 @@ public class ActivityManagerWrapper {
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
 
         try {
-            return service.showSessionFromSession(token, args, flags);
+            return service.showSessionFromSession(token, args, flags, attributionTag);
         } catch (RemoteException e) {
             return false;
         }
