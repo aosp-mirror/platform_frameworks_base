@@ -2816,9 +2816,12 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         }
     }
 
-    public void onWakeAndUnlocking() {
-        Trace.beginSection("KeyguardViewMediator#onWakeAndUnlocking");
-        mWakeAndUnlocking = true;
+    /**
+     * Receive a wake event from outside this class (most likely bio auth).
+     */
+    public void onWake(boolean withUnlock) {
+        Trace.beginSection("KeyguardViewMediator#onWake");
+        mWakeAndUnlocking = withUnlock;
 
         keyguardDone();
         Trace.endSection();
