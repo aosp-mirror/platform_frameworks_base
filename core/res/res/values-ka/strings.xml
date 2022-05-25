@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"თქვენს კალენდარზე წვდომა"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS შეტყობინებების გაგზავნა და ნახვა"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ფაილები და დოკუმენტები"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"თქვენს მოწყობილობაზე ფაილებსა და დოკუმენტებზე წვდომა"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ფაილები"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ფაილებზე წვდომა თქვენს მოწყობილობაში"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"მუსიკა და აუდიო"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"იქონიეთ წვდომა მუსიკასა და აუდიოზე თქვენს მოწყობილობაზე"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ფოტოები და ვიდეოები"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"აქტიური აპების შემოწმება"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"ტელეფონის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"ტაბლეტის კამერაზე წვდომა ვერ მოხერხდა თქვენი <xliff:g id="DEVICE">%1$s</xliff:g>-დან"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"სისტემის ენა"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"სისტემის ნაგულისხმევი"</string>
 </resources>

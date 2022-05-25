@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"قفلْ با چهره باز شد. برای باز کردن، فشار دهید."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"چهره شناسایی شد. برای باز کردن، فشار دهید."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"چهره شناسایی شد. برای باز کردن، نماد قفل‌گشایی را فشار دهید."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"انتقال به‌چپ"</item>
+    <item msgid="5558598599408514296">"انتقال به‌پایین"</item>
+    <item msgid="4844142668312841831">"انتقال به‌راست"</item>
+    <item msgid="5640521437931460125">"انتقال به‌بالا"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"برای امتحان مجدد، انگشتتان را تند به‌بالا بکشید"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"‏برای استفاده از NFC، قفل را باز کنید"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"این دستگاه به سازمان شما تعلق دارد"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"هشدارها"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"باتری"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"نماگرفت‌ها"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"برنامه‌های فوری"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"راه‌اندازی"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"فضای ذخیره‌سازی"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"نکات"</string>
     <string name="instant_apps" msgid="8337185853050247304">"برنامه‌های فوری"</string>

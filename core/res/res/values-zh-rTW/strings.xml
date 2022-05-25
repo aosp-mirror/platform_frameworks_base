@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取你的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"簡訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送及查看簡訊"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"檔案和文件"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"存取裝置上的檔案與文件"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"檔案"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"存取裝置上的檔案"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音樂和音訊"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"存取裝置上的音樂和音訊"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"相片和影片"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的應用程式"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取手機的相機"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"無法從 <xliff:g id="DEVICE">%1$s</xliff:g> 存取平板電腦的相機"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"系統語言"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"系統預設"</string>
 </resources>

@@ -734,6 +734,15 @@ public class SplitControllerTest {
     }
 
     @Test
+    public void testResolveActivityToContainer_inUnknownTaskFragment() {
+        doReturn(new Binder()).when(mSplitController).getInitialTaskFragmentToken(mActivity);
+
+        // No need to handle when the new launched activity is in an unknown TaskFragment.
+        assertTrue(mSplitController.resolveActivityToContainer(mActivity,
+                false /* isOnReparent */));
+    }
+
+    @Test
     public void testGetPlaceholderOptions() {
         doReturn(true).when(mActivity).isResumed();
 

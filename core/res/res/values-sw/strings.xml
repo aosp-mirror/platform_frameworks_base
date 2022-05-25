@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ifikie kalenda yako"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"itume na iangalie SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Faili na hati"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"fikia faili na hati kwenye kifaa chako"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Faili"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"fikia faili kwenye kifaa chako"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muziki na sauti"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"fikia muziki na sauti kwenye kifaa chako"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Picha na video"</string>
@@ -323,7 +323,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"kusoma na kuandika kumbukumbu za simu"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Simu"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"piga na udhibiti simu"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Vitambua shughuli za mwili"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Vitambuzi vya shughuli za mwili"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"fikia data ya kitambuzi kuhusu alama zako muhimu"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Arifa"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"kuonyesha arifa"</string>
@@ -1686,9 +1686,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Ungependa kuruhusu <xliff:g id="SERVICE">%1$s</xliff:g> idhibiti kifaa chako kikamilifu?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Udhibiti kamili unafaa kwa programu zinazokusaidia kwa mahitaji ya ufikivu, ila si kwa programu nyingi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Kuangalia na kudhibiti skrini"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Kinaweza kusoma maudhui yote kwenye skrini na kuonyesha maudhui kwenye programu zingine."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Inaweza kusoma maudhui yote kwenye skrini na kuonyesha maudhui kwenye programu zingine."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Kuangalia na kutekeleza vitendo"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Kinaweza kufuatilia mawasiliano yako na programu au kitambuzi cha maunzi na kuwasiliana na programu zingine kwa niaba yako."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Inaweza kufuatilia mawasiliano yako na programu au kitambuzi cha maunzi na kuwasiliana na programu zingine kwa niaba yako."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ruhusu"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Kataa"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Gusa kipengele ili uanze kukitumia:"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Angalia programu zinazotumika"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Haiwezi kufikia kamera ya simu kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Haiwezi kufikia kamera ya kompyuta kibao kutoka kwenye <xliff:g id="DEVICE">%1$s</xliff:g> yako"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Lugha ya mfumo"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Chaguomsingi la mfumo"</string>
 </resources>

@@ -163,13 +163,6 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.SMART_REPLIES_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
-                Global.Wearable.RETAIL_MODE,
-                new DiscreteValueValidator(
-                        new String[] {
-                            String.valueOf(Global.Wearable.RETAIL_MODE_CONSUMER),
-                            String.valueOf(Global.Wearable.RETAIL_MODE_RETAIL)
-                        }));
-        VALIDATORS.put(
                 Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
                 new DiscreteValueValidator(
                         new String[] {
@@ -323,6 +316,9 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.BEDTIME_MODE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MAX_RESET_COUNT,
+                NON_NEGATIVE_INTEGER_VALIDATOR);
     }
 }
 

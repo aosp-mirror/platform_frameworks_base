@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"访问您的日历"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短信"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"发送和查看短信"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"文件和文档"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"访问您设备上的文件和文档"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"文件"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"访问您设备上的文件"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音乐和音频"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"访问您设备上的音乐和音频"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"照片和视频"</string>
@@ -1683,7 +1683,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不开启"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"已开启"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"已关闭"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许<xliff:g id="SERVICE">%1$s</xliff:g>完全控制您的设备吗？"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许“<xliff:g id="SERVICE">%1$s</xliff:g>”完全控制您的设备吗？"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"对于能满足您的无障碍功能需求的应用，可授予其完全控制权限；但对大部分应用来说，都不适合授予此权限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制屏幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"此功能可以读出屏幕上的所有内容，并在其他应用上层显示内容。"</string>
@@ -1962,7 +1962,7 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"点按即可解锁工作资料"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"已连接到<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"点按即可查看文件"</string>
-    <string name="pin_target" msgid="8036028973110156895">"固定"</string>
+    <string name="pin_target" msgid="8036028973110156895">"置顶"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"将<xliff:g id="LABEL">%1$s</xliff:g>置顶"</string>
     <string name="unpin_target" msgid="3963318576590204447">"取消固定"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"取消置顶<xliff:g id="LABEL">%1$s</xliff:g>"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"查看使用中的应用"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问手机的摄像头"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"无法从<xliff:g id="DEVICE">%1$s</xliff:g>上访问平板电脑的摄像头"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"系统语言"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"系统默认设置"</string>
 </resources>

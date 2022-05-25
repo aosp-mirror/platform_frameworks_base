@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файлдар жана документтер"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"түзмөгүңүздөгү файлдары жана документтерди колдонуу"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Файлдар"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"түзмөгүңүздөгү файлдар жеткиликтүү болот"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музыка жана аудио"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"түзмөгүңүздөгү музыка менен аудиолорго мүмкүнчүлүк алуу"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Сүрөттөр жана видеолор"</string>
@@ -1684,7 +1684,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"КҮЙҮК"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ӨЧҮК"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматына түзмөгүңүздү толугу менен көзөмөлдөөгө уруксат бересизби?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Толук көзөмөл атайын мүмкүнчүлүктөрдү пайдаланууга керек, бирок калган көпчүлүк колдонмолорго кереги жок."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Толук көзөмөл атайын мүмкүнчүлүктөрдү иштеткен колдонмолорго керек болуп, калган көптөгөн колдонмолорго кереги деле жок."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Экранды көрүп, көзөмөлдөө"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Кызмат экрандагы нерселерди окуп, аларды башка колдонмолордун үстүнөн көрсөтөт."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Аракеттерди көрүп, аткаруу"</string>
@@ -2286,5 +2286,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Жигердүү колдонмолорду карап чыгуу"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн телефондун камерасына мүмкүнчүлүк жок"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн планшетиңиздин камерасына мүмкүнчүлүк жок"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Тутумдун тили"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Системанын демейки параметрлери"</string>
 </resources>

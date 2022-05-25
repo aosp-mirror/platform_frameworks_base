@@ -103,7 +103,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -1758,7 +1757,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final Task task = isAddingActivity ? getTask() : null;
 
         // If this task had any activity before we added this one.
-        boolean taskHadActivity = task != null && task.getActivity(Objects::nonNull) != null;
+        boolean taskHadActivity = task != null && task.getTopMostActivity() != null;
         // getActivityType() looks at the top child, so we need to read the type before adding
         // a new child in case the new child is on top and UNDEFINED.
         final int activityType = task != null ? task.getActivityType() : ACTIVITY_TYPE_UNDEFINED;
@@ -2172,7 +2171,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (applicationType != ACTIVITY_TYPE_UNDEFINED || !hasChild()) {
             return applicationType;
         }
-        final ActivityRecord activity = getTopNonFinishingActivity();
+        final ActivityRecord activity = getTopMostActivity();
         return activity != null ? activity.getActivityType() : getTopChild().getActivityType();
     }
 

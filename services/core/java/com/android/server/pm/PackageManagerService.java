@@ -3913,6 +3913,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     void sendPackageChangedBroadcast(@NonNull Computer snapshot, String packageName,
             boolean dontKillApp, ArrayList<String> componentNames, int packageUid, String reason) {
+        PackageStateInternal setting = snapshot.getPackageStateInternal(packageName,
+                Process.SYSTEM_UID);
+        if (setting == null) {
+            return;
+        }
         final int userId = UserHandle.getUserId(packageUid);
         final boolean isInstantApp =
                 snapshot.isInstantAppInternal(packageName, userId, Process.SYSTEM_UID);

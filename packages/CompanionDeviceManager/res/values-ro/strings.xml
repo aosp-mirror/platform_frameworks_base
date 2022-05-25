@@ -43,8 +43,6 @@
     <string name="consent_back" msgid="2560683030046918882">"Înapoi"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Oferiți aplicațiilor de pe &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; aceleași permisiuni ca pe &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="4866838188678457084">"&lt;p&gt;Aici pot fi incluse accesul la microfon, la camera foto, la locație și alte permisiuni de accesare a informațiilor sensibile de pe &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt; &lt;p&gt;Puteți modifica oricând aceste permisiuni din Setările de pe &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;.&lt;/p&gt;"</string>
-    <!-- no translation found for vendor_icon_description (4445875290032225965) -->
-    <skip />
-    <!-- no translation found for vendor_header_button_description (6566660389500630608) -->
-    <skip />
+    <string name="vendor_icon_description" msgid="4445875290032225965">"Pictograma aplicației"</string>
+    <string name="vendor_header_button_description" msgid="6566660389500630608">"Butonul Mai multe informații"</string>
 </resources>

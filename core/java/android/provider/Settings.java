@@ -17154,18 +17154,6 @@ public final class Settings {
                     "obtain_paired_device_location";
 
             /**
-             * Whether the device is in retail mode.
-             * @hide
-             */
-            public static final String RETAIL_MODE = "retail_mode";
-
-            // Possible retail mode states
-            /** @hide */
-            public static final int RETAIL_MODE_CONSUMER = 0;
-            /** @hide */
-            public static final int RETAIL_MODE_RETAIL = 1;
-
-            /**
              * The play store availability on companion phone.
              * @hide
              */
@@ -17578,6 +17566,14 @@ public final class Settings {
              */
             public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER =
                     "wear_activity_auto_resume_timeout_set_by_user";
+
+            /**
+             * The maximum times that we are allowed to reset the activity auto-resume timeout
+             * timer.
+             * @hide
+             */
+            public static final String WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MAX_RESET_COUNT =
+                    "wear_activity_auto_resume_timeout_max_reset_count";
 
             /**
              * If burn in protection is enabled.

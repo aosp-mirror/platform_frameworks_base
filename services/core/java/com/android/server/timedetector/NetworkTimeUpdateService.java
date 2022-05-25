@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -71,7 +71,7 @@ public class NetworkTimeUpdateService extends Binder {
     private static final int EVENT_NETWORK_CHANGED = 3;
 
     private static final String ACTION_POLL =
-            "com.android.server.NetworkTimeUpdateService.action.POLL";
+            "com.android.server.timedetector.NetworkTimeUpdateService.action.POLL";
 
     private static final int POLL_REQUEST = 0;
 
