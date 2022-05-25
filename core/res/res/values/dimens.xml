@@ -962,6 +962,7 @@
     <dimen name="resolver_title_padding_bottom">0dp</dimen>
     <dimen name="resolver_empty_state_container_padding_top">48dp</dimen>
     <dimen name="resolver_empty_state_container_padding_bottom">8dp</dimen>
+    <dimen name="resolver_profile_tab_margin">4dp</dimen>
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>
 
