@@ -3054,7 +3054,8 @@ public class UsageStatsService extends SystemService implements
                     if (userStats == null) {
                         return; // user was stopped or removed
                     }
-                    userStats.applyRestoredPayload(key, payload);
+                    final Set<String> restoredApps = userStats.applyRestoredPayload(key, payload);
+                    mAppStandby.restoreAppsToRare(restoredApps, user);
                 }
             }
         }
