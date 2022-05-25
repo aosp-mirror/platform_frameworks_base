@@ -207,7 +207,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.MemInfoDumpProto;
 
@@ -1404,7 +1403,6 @@ public final class ActivityThread extends ClientTransactionHandler
                     ContextImpl.class,
                     Activity.class,
                     WebView.class,
-                    OpenSSLSocketImpl.class,
                     View.class,
                     ViewRootImpl.class
             };
@@ -1412,9 +1410,8 @@ public final class ActivityThread extends ClientTransactionHandler
             long appContextInstanceCount = instanceCounts[0];
             long activityInstanceCount = instanceCounts[1];
             long webviewInstanceCount = instanceCounts[2];
-            long openSslSocketCount = instanceCounts[3];
-            long viewInstanceCount = instanceCounts[4];
-            long viewRootInstanceCount = instanceCounts[5];
+            long viewInstanceCount = instanceCounts[3];
+            long viewRootInstanceCount = instanceCounts[4];
 
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
@@ -1447,7 +1444,6 @@ public final class ActivityThread extends ClientTransactionHandler
                 pw.print(binderProxyObjectCount); pw.print(',');
 
                 pw.print(binderDeathObjectCount); pw.print(',');
-                pw.print(openSslSocketCount); pw.print(',');
 
                 // SQL
                 pw.print(stats.memoryUsed / 1024); pw.print(',');
@@ -1484,8 +1480,7 @@ public final class ActivityThread extends ClientTransactionHandler
             printRow(pw, TWO_COUNT_COLUMNS, "Parcel memory:", parcelSize/1024,
                     "Parcel count:", parcelCount);
             printRow(pw, TWO_COUNT_COLUMNS, "Death Recipients:", binderDeathObjectCount,
-                    "OpenSSL Sockets:", openSslSocketCount);
-            printRow(pw, ONE_COUNT_COLUMN, "WebViews:", webviewInstanceCount);
+                    "WebViews:", webviewInstanceCount);
 
             // SQLite mem info
             pw.println(" ");
@@ -1558,7 +1553,6 @@ public final class ActivityThread extends ClientTransactionHandler
                     ContextImpl.class,
                     Activity.class,
                     WebView.class,
-                    OpenSSLSocketImpl.class,
                     View.class,
                     ViewRootImpl.class
             };
@@ -1566,9 +1560,8 @@ public final class ActivityThread extends ClientTransactionHandler
             long appContextInstanceCount = instanceCounts[0];
             long activityInstanceCount = instanceCounts[1];
             long webviewInstanceCount = instanceCounts[2];
-            long openSslSocketCount = instanceCounts[3];
-            long viewInstanceCount = instanceCounts[4];
-            long viewRootInstanceCount = instanceCounts[5];
+            long viewInstanceCount = instanceCounts[3];
+            long viewRootInstanceCount = instanceCounts[4];
 
             int globalAssetCount = AssetManager.getGlobalAssetCount();
             int globalAssetManagerCount = AssetManager.getGlobalAssetManagerCount();
@@ -1610,8 +1603,6 @@ public final class ActivityThread extends ClientTransactionHandler
             proto.write(MemInfoDumpProto.AppData.ObjectStats.PARCEL_COUNT, parcelCount);
             proto.write(MemInfoDumpProto.AppData.ObjectStats.BINDER_OBJECT_DEATH_COUNT,
                     binderDeathObjectCount);
-            proto.write(MemInfoDumpProto.AppData.ObjectStats.OPEN_SSL_SOCKET_COUNT,
-                    openSslSocketCount);
             proto.write(MemInfoDumpProto.AppData.ObjectStats.WEBVIEW_INSTANCE_COUNT,
                     webviewInstanceCount);
             proto.end(oToken);
