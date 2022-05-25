@@ -312,7 +312,7 @@
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳು"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ಮೈಕ್ರೋಫೋನ್‌"</string>
-    <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ಆಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ದೈಹಿಕ ಚಟುವಟಿಕೆ"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ನಿಮ್ಮ ದೈಹಿಕ ಚಟುವಟಿಕೆಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"ಕ್ಯಾಮರಾ"</string>
@@ -445,12 +445,12 @@
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ಈ ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ನಿಮ್ಮ ಅಂದಾಜು ಸ್ಥಳವನ್ನು, ಸ್ಥಳ ಸೇವೆಗಳಿಂದ ಪಡೆಯಬಹುದು. ಆ್ಯಪ್ ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪಡೆಯಲು ನಿಮ್ಮ ಸಾಧನಕ್ಕಾಗಿ ಸ್ಥಳ ಸೇವೆಗಳನ್ನು ಆನ್ ಮಾಡಬೇಕು."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"ಈ ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿಲ್ಲದಿರುವಾಗಲೂ ಸಹ ಸ್ಥಳವನ್ನು ಯಾವುದೇ ಸಮಯದಲ್ಲಾದರೂ ಪ್ರವೇಶಿಸಬಹುದು."</string>
-    <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ನಿಮ್ಮ ಆಡಿಯೊ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿ"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ವಾಲ್ಯೂಮ್ ರೀತಿಯ ಮತ್ತು ಔಟ್‍‍ಪುಟ್‍‍ಗಾಗಿ ಯಾವ ಸ್ಪೀಕರ್ ಬಳಸಬೇಕು ಎಂಬ ರೀತಿಯ ಜಾಗತಿಕ ಆಡಿಯೊ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
-    <string name="permlab_recordAudio" msgid="1208457423054219147">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ನಿಮ್ಮ ಆಡಿಯೋ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿ"</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ವಾಲ್ಯೂಮ್ ರೀತಿಯ ಮತ್ತು ಔಟ್‍‍ಪುಟ್‍‍ಗಾಗಿ ಯಾವ ಸ್ಪೀಕರ್ ಬಳಸಬೇಕು ಎಂಬ ರೀತಿಯ ಜಾಗತಿಕ ಆಡಿಯೋ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permlab_recordAudio" msgid="1208457423054219147">"ಆಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ಈ ಆ್ಯಪ್ ಮೈಕ್ರೊಫೋನ್ ಬಳಸಿ ಆಡಿಯೊವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಆಡಿಯೊವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
-    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ಈ ಆ್ಯಪ್ ಮೈಕ್ರೋಫೋನ್ ಬಳಸುವ ಮೂಲಕ ಯಾವುದೇ ಸಮಯದಲ್ಲಾದರೂ ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು."</string>
+    <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"ಈ ಆ್ಯಪ್ ಮೈಕ್ರೋಫೋನ್ ಬಳಸುವ ಮೂಲಕ ಯಾವುದೇ ಸಮಯದಲ್ಲಾದರೂ ಆಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"ಸಿಮ್‌ಗೆ ಆಜ್ಞೆಗಳನ್ನು ಕಳುಹಿಸಿ"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"ಸಿಮ್‌ ಗೆ ಆದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ತುಂಬಾ ಅಪಾಯಕಾರಿ."</string>
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"ದೈಹಿಕ ಚಟುವಟಿಕೆಯನ್ನು ಗುರುತಿಸಿ"</string>
@@ -1609,7 +1609,7 @@
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ಹೆಡ್‌ಫೋನ್‌ಗಳು"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"ಸಿಸ್ಟಂ"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೊ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"ಬ್ಲೂಟೂತ್‌ ಆಡಿಯೋ"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ವಯರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"ಪಾತ್ರ"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ಸಾಧನಕ್ಕೆ ಸಂಪರ್ಕಿಸಿ"</string>
