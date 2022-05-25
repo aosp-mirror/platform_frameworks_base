@@ -27,15 +27,23 @@
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/Log.h>
+#ifdef __ANDROID__ // host does not support hardware buffer
 #include <private/android/AHardwareBufferHelpers.h>
+#endif
 
 #include "android_os_Parcel.h"
+#ifdef __ANDROID__ // host does not support Parcel
 #include <binder/Parcel.h>
+#endif
 
+#ifdef __ANDROID__ // host does not support BufferQueue
 #include <gui/BLASTBufferQueue.h>
+#endif
 #include <gui/Surface.h>
+#ifdef __ANDROID__ // host does not support SurfaceControl
 #include <gui/SurfaceControl.h>
 #include <gui/view/Surface.h>
+#endif
 
 #include <ui/GraphicBuffer.h>
 #include <ui/Rect.h>
@@ -51,7 +59,10 @@
 namespace android {
 
 static const char* const IllegalArgumentException = "java/lang/IllegalArgumentException";
+
+#ifdef __ANDROID__
 static const char* const OutOfResourcesException = "android/view/Surface$OutOfResourcesException";
+#endif
 
 static struct {
     jclass clazz;
@@ -67,6 +78,7 @@ static struct {
     jfieldID bottom;
 } gRectClassInfo;
 
+#ifdef __ANDROID__ // host does not support Dataspace HAL
 class JNamedColorSpace {
 public:
     // ColorSpace.Named.SRGB.ordinal() = 0;
@@ -84,6 +96,7 @@ constexpr ui::Dataspace fromNamedColorSpaceValueToDataspace(const jint colorSpac
             return ui::Dataspace::V0_SRGB;
     }
 }
+#endif
 
 // ----------------------------------------------------------------------------
 
@@ -146,6 +159,7 @@ static inline bool isSurfaceValid(const sp<Surface>& sur) {
 
 static jlong nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         jobject surfaceTextureObj) {
+#ifdef __ANDROID__ // host does not support SurfaceTexture
     sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surfaceTextureObj));
     if (producer == NULL) {
         jniThrowException(env, IllegalArgumentException,
@@ -161,6 +175,9 @@ static jlong nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
 
     surface->incStrong(&sRefBaseOwner);
     return jlong(surface.get());
+#else
+    return 0;
+#endif
 }
 
 static void nativeRelease(JNIEnv* env, jclass clazz, jlong nativeObject) {
@@ -187,6 +204,7 @@ static jboolean nativeIsConsumerRunningBehind(JNIEnv* env, jclass clazz, jlong n
 
 static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject canvasObj, jobject dirtyRectObj) {
+#ifdef __ANDROID__ // host does not support locking Canvas
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
@@ -238,10 +256,14 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
     sp<Surface> lockedSurface(surface);
     lockedSurface->incStrong(&sRefBaseOwner);
     return (jlong) lockedSurface.get();
+#else
+    return (jlong)nativeObject;
+#endif
 }
 
 static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject canvasObj) {
+#ifdef __ANDROID__ // host does not support locking Canvas
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
     if (!isSurfaceValid(surface)) {
         return;
@@ -256,6 +278,7 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     if (err < 0) {
         jniThrowException(env, IllegalArgumentException, NULL);
     }
+#endif
 }
 
 static void nativeAllocateBuffers(JNIEnv* /* env */ , jclass /* clazz */,
@@ -272,17 +295,22 @@ static void nativeAllocateBuffers(JNIEnv* /* env */ , jclass /* clazz */,
 
 static jlong nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
         jlong surfaceControlNativeObj) {
+#ifdef __ANDROID__ // hoost does not support Parcel
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
     sp<Surface> surface(ctrl->createSurface());
     if (surface != NULL) {
         surface->incStrong(&sRefBaseOwner);
     }
     return reinterpret_cast<jlong>(surface.get());
+#else
+    return 0;
+#endif
 }
 
 static jlong nativeGetFromSurfaceControl(JNIEnv* env, jclass clazz,
         jlong nativeObject,
         jlong surfaceControlNativeObj) {
+#ifdef __ANDROID__ // host does not support Parcel
     Surface* self(reinterpret_cast<Surface *>(nativeObject));
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
 
@@ -299,10 +327,14 @@ static jlong nativeGetFromSurfaceControl(JNIEnv* env, jclass clazz,
     }
 
     return reinterpret_cast<jlong>(surface.get());
+#else
+    return 0;
+#endif
 }
 
 static jlong nativeGetFromBlastBufferQueue(JNIEnv* env, jclass clazz, jlong nativeObject,
                                            jlong blastBufferQueueNativeObj) {
+#ifdef __ANDROID__ // host does not support BufferQueue
     Surface* self(reinterpret_cast<Surface*>(nativeObject));
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(blastBufferQueueNativeObj);
     const sp<IGraphicBufferProducer>& bufferProducer = queue->getIGraphicBufferProducer();
@@ -319,10 +351,14 @@ static jlong nativeGetFromBlastBufferQueue(JNIEnv* env, jclass clazz, jlong nati
     }
 
     return reinterpret_cast<jlong>(surface.get());
+#else
+    return 0;
+#endif
 }
 
 static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject parcelObj) {
+#ifdef __ANDROID__ // host does not support Parcel
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -361,10 +397,14 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
     }
 
     return jlong(sur.get());
+#else
+    return 0;
+#endif
 }
 
 static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject parcelObj) {
+#ifdef __ANDROID__ // host does not support Parcel
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
     if (parcel == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -379,6 +419,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     // Calling code in Surface.java has already written the name of the Surface
     // to the Parcel
     surfaceShim.writeToParcel(parcel, /*nameAlreadyWritten*/true);
+#endif
 }
 
 static jint nativeGetWidth(JNIEnv* env, jclass clazz, jlong nativeObject) {
@@ -414,6 +455,7 @@ static jint nativeForceScopedDisconnect(JNIEnv *env, jclass clazz, jlong nativeO
 
 static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv* env, jclass clazz, jlong nativeObject,
                                                      jobject hardwareBuffer, jint colorSpaceId) {
+#ifdef __ANDROID__ // host does not need this (no shadows)
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
     AHardwareBuffer* ahb =
             android_hardware_HardwareBuffer_getNativeHardwareBuffer(env, hardwareBuffer);
@@ -421,6 +463,9 @@ static jint nativeAttachAndQueueBufferWithColorSpace(JNIEnv* env, jclass clazz, 
     int err = Surface::attachAndQueueBufferWithDataspace(surface, gb,
             fromNamedColorSpaceValueToDataspace(colorSpaceId));
     return err;
+#else
+    return -1;
+#endif
 }
 
 static jint nativeSetSharedBufferModeEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
