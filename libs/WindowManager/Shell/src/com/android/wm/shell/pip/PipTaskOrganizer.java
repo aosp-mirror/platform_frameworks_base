@@ -795,11 +795,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     "%s: Unrecognized token: %s", TAG, token);
             return;
         }
-        onExitPipFinished(info);
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mPipTransitionController.forceFinishTransition();
-        }
         final PipAnimationController.PipTransitionAnimator<?> animator =
                 mPipAnimationController.getCurrentAnimator();
         if (animator != null) {
@@ -809,6 +805,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             animator.removeAllUpdateListeners();
             animator.removeAllListeners();
             animator.cancel();
+        }
+
+        onExitPipFinished(info);
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.forceFinishTransition();
         }
     }
 
