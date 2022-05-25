@@ -4132,6 +4132,20 @@ public class Vpn {
             @NonNull List<String> excludedApps) {
         enforceNotRestrictedUser();
         if (!storeAppExclusionList(packageName, excludedApps)) return false;
+
+        updateAppExclusionList(excludedApps);
+
+        return true;
+    }
+
+    /**
+     * Triggers an update of the VPN network's excluded UIDs if a VPN is running.
+     */
+    public synchronized void refreshPlatformVpnAppExclusionList() {
+        updateAppExclusionList(getAppExclusionList(mPackage));
+    }
+
+    private synchronized void updateAppExclusionList(@NonNull List<String> excludedApps) {
         // Re-build and update NetworkCapabilities via NetworkAgent.
         if (mNetworkAgent != null) {
             // Only update the platform VPN
@@ -4144,8 +4158,6 @@ public class Vpn {
                 mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
             }
         }
-
-        return true;
     }
 
     /**
