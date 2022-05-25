@@ -6490,8 +6490,10 @@ public class DevicePolicyManager {
      * Result code for {@link #getStorageEncryptionStatus}: indicating that encryption is not
      * currently active, but is currently being activated.
      * <p>
-     * This result code has never actually been used.
+     * @deprecated This result code has never actually been used, so there is no reason for apps to
+     * check for it.
      */
+    @Deprecated
     public static final int ENCRYPTION_STATUS_ACTIVATING = 2;
 
     /**
