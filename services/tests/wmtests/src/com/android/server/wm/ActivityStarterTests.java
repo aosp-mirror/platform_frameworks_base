@@ -1120,28 +1120,27 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     @Test
-    public void testTargetStackInSplitScreen() {
+    public void testTargetTaskInSplitScreen() {
         final ActivityStarter starter =
                 prepareStarter(FLAG_ACTIVITY_LAUNCH_ADJACENT, false /* mockGetRootTask */);
         final ActivityRecord top = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityOptions options = ActivityOptions.makeBasic();
         final ActivityRecord[] outActivity = new ActivityRecord[1];
 
-        // Activity must not land on split-screen stack if currently not in split-screen mode.
+        // Activity must not land on split-screen task if currently not in split-screen mode.
         starter.setActivityOptions(options.toBundle())
-                .setReason("testWindowingModeOptionsLaunchAdjacent")
+                .setReason("testTargetTaskInSplitScreen")
                 .setOutActivity(outActivity).execute();
         assertThat(outActivity[0].inMultiWindowMode()).isFalse();
 
-        // Move activity to split-screen-primary stack and make sure it has the focus.
+        // Move activity to split-screen-primary task and make sure it has the focus.
         TestSplitOrganizer splitOrg = new TestSplitOrganizer(mAtm, top.getDisplayContent());
         top.getRootTask().reparent(splitOrg.mPrimary, POSITION_BOTTOM);
-        top.getRootTask().moveToFront("testWindowingModeOptionsLaunchAdjacent");
+        top.getRootTask().moveToFront("testTargetTaskInSplitScreen");
 
-        // Activity must landed on split-screen-secondary when launch adjacent.
-        starter.setActivityOptions(options.toBundle())
-                .setReason("testWindowingModeOptionsLaunchAdjacent")
-                .setOutActivity(outActivity).execute();
+        // Activity must land on split-screen-secondary when launch adjacent.
+        startActivityInner(starter, outActivity[0], top, options, null /* inTask */,
+                null /* taskFragment*/);
         assertThat(outActivity[0].inMultiWindowMode()).isTrue();
     }
 

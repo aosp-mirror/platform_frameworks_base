@@ -74,6 +74,7 @@ static struct {
     WeakRefHandleField touchableRegionSurfaceControl;
     jfieldID transform;
     jfieldID windowToken;
+    jfieldID isClone;
 } gInputWindowHandleClassInfo;
 
 static struct {
@@ -317,6 +318,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken,
                         javaObjectForIBinder(env, windowInfo.windowToken));
 
+    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.isClone,
+                         windowInfo.isClone);
     return inputWindowHandle;
 }
 
@@ -432,6 +435,8 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.windowToken, clazz, "windowToken",
                  "Landroid/os/IBinder;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.isClone, clazz, "isClone", "Z");
 
     jclass weakRefClazz;
     FIND_CLASS(weakRefClazz, "java/lang/ref/Reference");

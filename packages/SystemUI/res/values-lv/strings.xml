@@ -322,10 +322,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Ierīce atbloķēta ar seju. Nospiediet, lai atvērtu."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Seja atpazīta. Nospiediet, lai atvērtu."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Seja atpazīta. Lai atvērtu, nospiediet atbloķēšanas ikonu."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Pārvietojiet pirkstu pa kreisi"</item>
+    <item msgid="5558598599408514296">"Pārvietojiet pirkstu lejup"</item>
+    <item msgid="4844142668312841831">"Pārvietojiet pirkstu pa labi"</item>
+    <item msgid="5640521437931460125">"Pārvietojiet pirkstu augšup"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Velciet augšup, lai mēģinātu vēlreiz"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Atbloķējiet ierīci, lai izmantotu NFC."</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Šī ierīce pieder jūsu organizācijai."</string>
@@ -704,10 +706,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Brīdinājumi"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Akumulators"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Ekrānuzņēmumi"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Tūlītējās lietotnes"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"Iestatīšana"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Krātuve"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Padomi"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Tūlītējās lietotnes"</string>
@@ -860,8 +860,7 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Lai apraidītu šo sesiju, lūdzu, atveriet lietotni."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nezināma lietotne"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Apturēt apraidi"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Audio izvadei pieejamās ierīces."</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kā darbojas apraide"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Apraide"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Tuvumā esošās personas ar saderīgām Bluetooth ierīcēm var klausīties jūsu apraidīto multivides saturu."</string>
@@ -959,12 +958,9 @@
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Rediģēt nokopēto attēlu"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Sūtīt uz tuvumā esošu ierīci"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Pieskarieties, lai skatītu"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Teksts ir nokopēts"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Attēls ir nokopēts"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Saturs ir nokopēts"</string>
     <string name="add" msgid="81036585205287996">"Pievienot"</string>
     <string name="manage_users" msgid="1823875311934643849">"Pārvaldīt lietotājus"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Šis paziņojums neatbalsta vilkšanu uz dalīto ekrānu."</string>
@@ -973,12 +969,10 @@
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Signāls ir iestatīts"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera un mikrofons ir izslēgti"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# paziņojums}zero{# paziņojumu}one{# paziņojums}other{# paziņojumi}}"</string>
-    <!-- no translation found for broadcasting_description_is_broadcasting (765627502786404290) -->
-    <skip />
+    <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Notiek apraidīšana"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Vai apturēt lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> apraidīšanu?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Ja sāksiet lietotnes <xliff:g id="SWITCHAPP">%1$s</xliff:g> apraidīšanu vai mainīsiet izvadi, pašreizējā apraide tiks apturēta"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Lietotnes <xliff:g id="SWITCHAPP">%1$s</xliff:g> apraide"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Izvades maiņa"</string>
-    <!-- no translation found for bt_le_audio_broadcast_dialog_unknown_name (3791472237793443044) -->
-    <skip />
+    <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Nezināms"</string>
 </resources>
