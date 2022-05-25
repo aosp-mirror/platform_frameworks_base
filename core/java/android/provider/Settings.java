@@ -10375,8 +10375,17 @@ public final class Settings {
         /**
          * How often to check for location access.
          * @hide
+         *
+         * @deprecated This has been moved to DeviceConfig property
+         * {@link LocationAccessCheck#PROPERTY_LOCATION_ACCESS_PERIODIC_INTERVAL_MILLIS} in a T
+         * module update
+         *
+         * Before Android T set this property to control the interval for the check
+         * On Android T set this and the DeviceConfig property
+         * After Android T set the DeviceConfig property
          */
         @SystemApi
+        @Deprecated
         @Readable
         public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS =
                 "location_access_check_interval_millis";
@@ -10384,8 +10393,17 @@ public final class Settings {
         /**
          * Delay between granting location access and checking it.
          * @hide
+         *
+         * @deprecated This has been moved to DeviceConfig property
+         * {@link LocationAccessCheck#PROPERTY_LOCATION_ACCESS_CHECK_DELAY_MILLIS} in a T module
+         * update
+         *
+         * Before Android T set this property to control the delay for the check
+         * On Android T set this and the DeviceConfig property
+         * After Android T set the DeviceConfig property
          */
         @SystemApi
+        @Deprecated
         @Readable
         public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS =
                 "location_access_check_delay_millis";
