@@ -37,6 +37,7 @@ import kotlin.properties.Delegates.notNull
 
 private const val TAG = "NotifStackSizeCalc"
 private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)
+private val SPEW = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE)
 
 /** Calculates number of notifications to display and the height of the notification stack. */
 @SysUISingleton
@@ -87,9 +88,10 @@ constructor(
         // Could be < 0 if the space available is less than the shelf size. Returns 0 in this case.
         maxNotifications = max(0, maxNotifications)
         log {
+            val sequence = if (SPEW) " stackHeightSequence=${stackHeightSequence.toList()}" else ""
             "computeMaxKeyguardNotifications(" +
                 "availableSpace=$totalAvailableSpace" +
-                " shelfHeight=$shelfIntrinsicHeight) -> $maxNotifications"
+                " shelfHeight=$shelfIntrinsicHeight) -> $maxNotifications$sequence"
         }
         return maxNotifications
     }
