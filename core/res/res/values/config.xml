@@ -3004,6 +3004,10 @@
 
     </string-array>
 
+    <!-- Whether to show a notification informing users about notification permission settings
+         upon upgrade to T from a pre-T version -->
+    <bool name="config_notificationReviewPermissions">false</bool>
+
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
 
