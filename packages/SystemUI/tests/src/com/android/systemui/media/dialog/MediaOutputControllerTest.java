@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.media.AudioManager;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
 import android.media.NearbyDevice;
@@ -95,6 +96,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     private MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
     private RoutingSessionInfo mRemoteSessionInfo = mock(RoutingSessionInfo.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
+    private AudioManager mAudioManager = mock(AudioManager.class);
     private CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
@@ -123,7 +125,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mSpyContext, TEST_PACKAGE_NAME,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager));
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
@@ -175,7 +177,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager));
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager);
 
         mMediaOutputController.start(mCb);
 
@@ -204,7 +206,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager));
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager);
 
         mMediaOutputController.start(mCb);
 
@@ -509,7 +511,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mSpyContext, null,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager));
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager);
 
         assertThat(mMediaOutputController.getNotificationIcon()).isNull();
     }

@@ -439,7 +439,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * Check if it is muting expected device
      * @return {@code true} if it is muting expected device, otherwise return {@code false}
      */
-    protected boolean isMutingExpectedDevice() {
+    public boolean isMutingExpectedDevice() {
         return false;
     }
 

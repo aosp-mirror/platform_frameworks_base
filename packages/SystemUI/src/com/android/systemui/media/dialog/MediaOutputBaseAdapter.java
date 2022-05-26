@@ -309,6 +309,17 @@ public abstract class MediaOutputBaseAdapter extends
             });
         }
 
+        void initMutingExpectedDevice() {
+            disableSeekBar();
+            final Drawable backgroundDrawable = mContext.getDrawable(
+                                    R.drawable.media_output_item_background_active)
+                            .mutate();
+            backgroundDrawable.setColorFilter(
+                    new PorterDuffColorFilter(mController.getColorConnectedItemBackground(),
+                            PorterDuff.Mode.SRC_IN));
+            mItemLayout.setBackground(backgroundDrawable);
+        }
+
         void initSessionSeekbar() {
             disableSeekBar();
             mSeekBar.setMax(mController.getSessionVolumeMax());
