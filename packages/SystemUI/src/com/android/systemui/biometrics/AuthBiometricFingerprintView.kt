@@ -88,6 +88,13 @@ open class AuthBiometricFingerprintView(
     override fun createIconController(): AuthIconController =
         AuthBiometricFingerprintIconController(mContext, mIconView)
 
+    fun updateOverrideIconLayoutParamsSize() {
+        udfpsAdapter?.let {
+            (mIconController as? AuthBiometricFingerprintIconController)?.iconLayoutParamsSize =
+                    it.getSensorDiameter(scaleFactorProvider?.provide() ?: 1.0f)
+        }
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         showTouchSensorString()
