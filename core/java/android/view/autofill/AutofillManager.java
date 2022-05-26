@@ -521,6 +521,14 @@ public final class AutofillManager {
     public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_HINTS =
             "autofill_dialog_hints";
 
+    /**
+     * Sets a value of delay time to show up the inline tooltip view.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY =
+            "autofill_inline_tooltip_first_show_delay";
+
     private static final String DIALOG_HINTS_DELIMITER = ":";
 
     /** @hide */

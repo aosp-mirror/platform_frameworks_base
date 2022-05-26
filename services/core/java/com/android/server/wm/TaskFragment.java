@@ -96,6 +96,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.am.HostingRecord;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
@@ -171,14 +172,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /** The TaskFragment that is adjacent to this one. */
     @Nullable
     private TaskFragment mAdjacentTaskFragment;
-
-    /**
-     * Whether to move adjacent task fragment together when re-positioning.
-     *
-     * @see #mAdjacentTaskFragment
-     */
-    // TODO(b/207185041): Remove this once having a single-top root for split screen.
-    boolean mMoveAdjacentTogether;
 
     /**
      * Prevents duplicate calls to onTaskAppeared.
@@ -332,15 +325,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         return service.mWindowOrganizerController.getTaskFragment(token);
     }
 
-    void setAdjacentTaskFragment(@Nullable TaskFragment taskFragment, boolean moveTogether) {
+    void setAdjacentTaskFragment(@Nullable TaskFragment taskFragment) {
         if (mAdjacentTaskFragment == taskFragment) {
             return;
         }
         resetAdjacentTaskFragment();
         if (taskFragment != null) {
             mAdjacentTaskFragment = taskFragment;
-            mMoveAdjacentTogether = moveTogether;
-            taskFragment.setAdjacentTaskFragment(this, moveTogether);
+            taskFragment.setAdjacentTaskFragment(this);
         }
     }
 
@@ -349,11 +341,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (mAdjacentTaskFragment != null && mAdjacentTaskFragment.mAdjacentTaskFragment == this) {
             mAdjacentTaskFragment.mAdjacentTaskFragment = null;
             mAdjacentTaskFragment.mDelayLastActivityRemoval = false;
-            mAdjacentTaskFragment.mMoveAdjacentTogether = false;
         }
         mAdjacentTaskFragment = null;
         mDelayLastActivityRemoval = false;
-        mMoveAdjacentTogether = false;
     }
 
     void setTaskFragmentOrganizer(@NonNull TaskFragmentOrganizerToken organizer, int uid,
@@ -1147,7 +1137,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // for the current activity to be paused.
                 final boolean isTop = this == taskDisplayArea.getFocusedRootTask();
                 mAtmService.startProcessAsync(next, false /* knownToBeDead */, isTop,
-                        isTop ? "pre-top-activity" : "pre-activity");
+                        isTop ? HostingRecord.HOSTING_TYPE_NEXT_TOP_ACTIVITY
+                                : HostingRecord.HOSTING_TYPE_NEXT_ACTIVITY);
             }
             if (lastResumed != null) {
                 lastResumed.setWillCloseOrEnterPip(true);
