@@ -59,7 +59,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
@@ -1414,25 +1413,6 @@ public class TaskTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityRecord(untrustedDisplay);
         activity.setOccludesParent(false);
         assertNotNull(activity.getTask().getDimmer());
-    }
-
-    @Test
-    public void testMoveToFront_moveAdjacentTask() {
-        final Task task1 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        final Task task2 =
-                createTask(mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        spyOn(task2);
-
-        task1.setAdjacentTaskFragment(task2, false /* moveTogether */);
-        task1.moveToFront("" /* reason */);
-        verify(task2, never()).moveToFrontInner(anyString(), isNull());
-
-        // Reset adjacent tasks to move together.
-        task1.setAdjacentTaskFragment(null, false /* moveTogether */);
-        task1.setAdjacentTaskFragment(task2, true /* moveTogether */);
-        task1.moveToFront("" /* reason */);
-        verify(task2).moveToFrontInner(anyString(), isNull());
     }
 
     @Test

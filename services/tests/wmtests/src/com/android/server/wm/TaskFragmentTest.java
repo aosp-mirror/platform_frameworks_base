@@ -202,7 +202,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         doReturn(true).when(primaryActivity).supportsPictureInPicture();
         doReturn(false).when(secondaryActivity).supportsPictureInPicture();
 
-        primaryTf.setAdjacentTaskFragment(secondaryTf, false /* moveAdjacentTogether */);
+        primaryTf.setAdjacentTaskFragment(secondaryTf);
         primaryActivity.setState(RESUMED, "test");
         secondaryActivity.setState(RESUMED, "test");
 
@@ -448,7 +448,7 @@ public class TaskFragmentTest extends WindowTestsBase {
                 .setOrganizer(mOrganizer)
                 .setFragmentToken(new Binder())
                 .build();
-        tf0.setAdjacentTaskFragment(tf1, false /* moveAdjacentTogether */);
+        tf0.setAdjacentTaskFragment(tf1);
         tf0.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         tf1.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         task.setBounds(0, 0, 1200, 1000);
