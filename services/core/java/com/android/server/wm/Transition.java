@@ -131,27 +131,18 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      */
     private static final int STATE_ABORT = 3;
 
-    /**
-     * This transition has finished playing successfully.
-     */
-    private static final int STATE_FINISHED = 4;
-
     @IntDef(prefix = { "STATE_" }, value = {
             STATE_PENDING,
             STATE_COLLECTING,
             STATE_STARTED,
             STATE_PLAYING,
-            STATE_ABORT,
-            STATE_FINISHED
+            STATE_ABORT
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionState {}
 
     final @TransitionType int mType;
     private int mSyncId = -1;
-    // Used for tracking a Transition throughout a lifecycle (i.e. from STATE_COLLECTING to
-    // STATE_FINISHED or STATE_ABORT), and should only be used for testing and debugging.
-    private int mDebugId = -1;
     private @TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
@@ -211,8 +202,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mFlags = flags;
         mController = controller;
         mSyncEngine = syncEngine;
-
-        controller.mTransitionTracer.logState(this);
     }
 
     void addFlag(int flag) {
@@ -253,19 +242,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         info.mFlags = info.mFlags | ChangeInfo.FLAG_SEAMLESS_ROTATION;
     }
 
-    @TransitionState
-    int getState() {
-        return mState;
-    }
-
     @VisibleForTesting
     int getSyncId() {
         return mSyncId;
-    }
-
-    @VisibleForTesting
-    int getDebugId() {
-        return mDebugId;
     }
 
     @TransitionFlags
@@ -280,9 +259,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         mState = STATE_COLLECTING;
         mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG);
-        mDebugId = mSyncId;
-
-        mController.mTransitionTracer.logState(this);
     }
 
     /**
@@ -300,8 +276,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Starting Transition %d",
                 mSyncId);
         applyReady();
-
-        mController.mTransitionTracer.logState(this);
     }
 
     /**
@@ -670,9 +644,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             dc.removeImeSurfaceImmediately();
             dc.handleCompleteDeferredRemoval();
         }
-
-        mState = STATE_FINISHED;
-        mController.mTransitionTracer.logState(this);
     }
 
     void abort() {
@@ -702,7 +673,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             Slog.e(TAG, "Unexpected Sync ID " + syncId + ". Expected " + mSyncId);
             return;
         }
-
         if (mTargetDisplays.isEmpty()) {
             mTargetDisplays.add(mController.mAtm.mRootWindowContainer.getDefaultDisplay());
         }
@@ -814,7 +784,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
         mStartTransaction = transaction;
         mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
-
         buildFinishTransaction(mFinishTransaction, info.getRootLeash());
         if (mController.getTransitionPlayer() != null) {
             mController.dispatchLegacyAppTransitionStarting(info);
