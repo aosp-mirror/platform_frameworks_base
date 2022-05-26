@@ -530,11 +530,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         if (container == splitContainer.getPrimaryContainer()) {
             // The new launched can be in the primary container when it is starting a new activity
-            // onCreate, thus the secondary may still be empty.
+            // onCreate.
             final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
+            final Intent secondaryIntent = secondaryContainer.getPendingAppearedIntent();
+            if (secondaryIntent != null) {
+                // Check with the pending Intent before it is started on the server side.
+                // This can happen if the launched Activity start a new Intent to secondary during
+                // #onCreated().
+                return getSplitRule(launchedActivity, secondaryIntent) != null;
+            }
             final Activity secondaryActivity = secondaryContainer.getTopNonFinishingActivity();
-            return secondaryActivity == null
-                    || getSplitRule(launchedActivity, secondaryActivity) != null;
+            return secondaryActivity != null
+                    && getSplitRule(launchedActivity, secondaryActivity) != null;
         }
 
         // Check if the new launched activity is a placeholder.
@@ -573,7 +580,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         Activity activityBelow = null;
         final TaskFragmentContainer container = getContainerWithActivity(activity);
         if (container != null) {
-            final List<Activity> containerActivities = container.collectActivities();
+            final List<Activity> containerActivities = container.collectNonFinishingActivities();
             final int index = containerActivities.indexOf(activity);
             if (index > 0) {
                 activityBelow = containerActivities.get(index - 1);
@@ -691,7 +698,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // 1. Whether the new activity intent should always expand.
         if (shouldExpand(null /* activity */, intent)) {
-            return createEmptyExpandedContainer(wct, taskId, launchingActivity);
+            return createEmptyExpandedContainer(wct, intent, taskId, launchingActivity);
         }
 
         // 2. Whether the launching activity (if set) should be split with the new activity intent.
@@ -742,7 +749,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      */
     @Nullable
     private TaskFragmentContainer createEmptyExpandedContainer(
-            @NonNull WindowContainerTransaction wct, int taskId,
+            @NonNull WindowContainerTransaction wct, @NonNull Intent intent, int taskId,
             @Nullable Activity launchingActivity) {
         // We need an activity in the organizer process in the same Task to use as the owner
         // activity, as well as to get the Task window info.
@@ -759,8 +766,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Can't find any activity in the Task that we can use as the owner activity.
             return null;
         }
-        final TaskFragmentContainer expandedContainer = newContainer(null /* activity */,
-                activityInTask, taskId);
+        final TaskFragmentContainer expandedContainer = newContainer(intent, activityInTask,
+                taskId);
         mPresenter.createTaskFragment(wct, expandedContainer.getTaskFragmentToken(),
                 activityInTask.getActivityToken(), new Rect(), WINDOWING_MODE_UNDEFINED);
         return expandedContainer;
@@ -789,7 +796,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             return splitContainer.getSecondaryContainer();
         }
         // Create a new TaskFragment to split with the primary activity for the new activity.
-        return mPresenter.createNewSplitWithEmptySideContainer(wct, primaryActivity, splitRule);
+        return mPresenter.createNewSplitWithEmptySideContainer(wct, primaryActivity, intent,
+                splitRule);
     }
 
     /**
@@ -813,21 +821,34 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return null;
     }
 
-    TaskFragmentContainer newContainer(@NonNull Activity activity, int taskId) {
-        return newContainer(activity, activity, taskId);
+    TaskFragmentContainer newContainer(@NonNull Activity pendingAppearedActivity, int taskId) {
+        return newContainer(pendingAppearedActivity, pendingAppearedActivity, taskId);
+    }
+
+    TaskFragmentContainer newContainer(@NonNull Activity pendingAppearedActivity,
+            @NonNull Activity activityInTask, int taskId) {
+        return newContainer(pendingAppearedActivity, null /* pendingAppearedIntent */,
+                activityInTask, taskId);
+    }
+
+    TaskFragmentContainer newContainer(@NonNull Intent pendingAppearedIntent,
+            @NonNull Activity activityInTask, int taskId) {
+        return newContainer(null /* pendingAppearedActivity */, pendingAppearedIntent,
+                activityInTask, taskId);
     }
 
     /**
      * Creates and registers a new organized container with an optional activity that will be
      * re-parented to it in a WCT.
      *
-     * @param activity          the activity that will be reparented to the TaskFragment.
-     * @param activityInTask    activity in the same Task so that we can get the Task bounds if
-     *                          needed.
-     * @param taskId            parent Task of the new TaskFragment.
+     * @param pendingAppearedActivity   the activity that will be reparented to the TaskFragment.
+     * @param pendingAppearedIntent     the Intent that will be started in the TaskFragment.
+     * @param activityInTask            activity in the same Task so that we can get the Task bounds
+     *                                  if needed.
+     * @param taskId                    parent Task of the new TaskFragment.
      */
-    TaskFragmentContainer newContainer(@Nullable Activity activity,
-            @NonNull Activity activityInTask, int taskId) {
+    TaskFragmentContainer newContainer(@Nullable Activity pendingAppearedActivity,
+            @Nullable Intent pendingAppearedIntent, @NonNull Activity activityInTask, int taskId) {
         if (activityInTask == null) {
             throw new IllegalArgumentException("activityInTask must not be null,");
         }
@@ -835,8 +856,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             mTaskContainers.put(taskId, new TaskContainer(taskId));
         }
         final TaskContainer taskContainer = mTaskContainers.get(taskId);
-        final TaskFragmentContainer container = new TaskFragmentContainer(activity, taskContainer,
-                this);
+        final TaskFragmentContainer container = new TaskFragmentContainer(pendingAppearedActivity,
+                pendingAppearedIntent, taskContainer, this);
         if (!taskContainer.isTaskBoundsInitialized()) {
             // Get the initial bounds before the TaskFragment has appeared.
             final Rect taskBounds = SplitPresenter.getTaskBoundsFromActivity(activityInTask);

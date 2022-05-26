@@ -36,12 +36,20 @@ open class AuthBiometricFingerprintIconController(
     iconView: ImageView
 ) : AuthIconController(context, iconView) {
 
+    var iconLayoutParamsSize = 0
+        set(value) {
+            if (field == value) {
+                return
+            }
+            iconView.layoutParams.width = value
+            iconView.layoutParams.height = value
+            field = value
+        }
+
     init {
-        val size = context.resources.getDimensionPixelSize(
+        iconLayoutParamsSize = context.resources.getDimensionPixelSize(
             R.dimen.biometric_dialog_fingerprint_icon_size
         )
-        iconView.layoutParams.width = size
-        iconView.layoutParams.height = size
     }
 
     override fun updateIcon(@BiometricState lastState: Int, @BiometricState newState: Int) {
