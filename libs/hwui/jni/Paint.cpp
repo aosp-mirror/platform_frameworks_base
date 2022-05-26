@@ -441,6 +441,17 @@ namespace PaintGlue {
         env->ReleaseStringChars(text, textArray);
     }
 
+    // Required for Android O (26) - Android O_MR1 (27).
+    static void getStringBoundsTypeface(JNIEnv* env, jobject, jlong paintHandle,
+                                        jlong typefaceHandle, jstring text, jint start, jint end,
+                                        jint bidiFlags, jobject bounds) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+        const jchar* textArray = env->GetStringChars(text, nullptr);
+        doTextBounds(env, textArray + start, end - start, bounds, *paint, typeface, bidiFlags);
+        env->ReleaseStringChars(text, textArray);
+    }
+
     static void getCharArrayBounds(JNIEnv* env, jobject, jlong paintHandle, jcharArray text,
             jint index, jint count, jint bidiFlags, jobject bounds) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
@@ -449,6 +460,17 @@ namespace PaintGlue {
         doTextBounds(env, textArray + index, count, bounds, *paint, typeface, bidiFlags);
         env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
                                       JNI_ABORT);
+    }
+
+    // Required for Android O (26) - Android O_MR1 (27).
+    static void getCharArrayBoundsTypeface(JNIEnv* env, jobject, jlong paintHandle,
+                                           jlong typefaceHandle, jcharArray text, jint index,
+                                           jint count, jint bidiFlags, jobject bounds) {
+        const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        const Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+        const jchar* textArray = env->GetCharArrayElements(text, nullptr);
+        doTextBounds(env, textArray + index, count, bounds, *paint, typeface, bidiFlags);
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
     }
 
     // Returns true if the given string is exact one pair of regional indicators.
@@ -1152,8 +1174,12 @@ static const JNINativeMethod methods[] = {
         {"nGetTextPath", "(JILjava/lang/String;IIFFJ)V", (void*)PaintGlue::getTextPath__String},
         {"nGetStringBounds", "(JLjava/lang/String;IIILandroid/graphics/Rect;)V",
          (void*)PaintGlue::getStringBounds},
+        {"nGetStringBounds", "(JJLjava/lang/String;IIILandroid/graphics/Rect;)V",
+         (void*)PaintGlue::getStringBoundsTypeface},
         {"nGetCharArrayBounds", "(J[CIIILandroid/graphics/Rect;)V",
          (void*)PaintGlue::getCharArrayBounds},
+        {"nGetCharArrayBounds", "(JJ[CIIILandroid/graphics/Rect;)V",
+         (void*)PaintGlue::getCharArrayBoundsTypeface},
         {"nHasGlyph", "(JILjava/lang/String;)Z", (void*)PaintGlue::hasGlyph},
         {"nGetRunAdvance", "(J[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___CIIIIZI_F},
         {"nGetRunAdvance", "(JJ[CIIIIZI)F", (void*)PaintGlue::getRunAdvance___JCIIIIZI_F},
