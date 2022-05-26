@@ -1491,6 +1491,53 @@ public class NotificationManagerService extends SystemService {
         return out;
     }
 
+    protected class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+
+        SparseBooleanArray mUserInLockDownMode = new SparseBooleanArray();
+        boolean mIsInLockDownMode = false;
+
+        StrongAuthTracker(Context context) {
+            super(context);
+        }
+
+        private boolean containsFlag(int haystack, int needle) {
+            return (haystack & needle) != 0;
+        }
+
+        public boolean isInLockDownMode() {
+            return mIsInLockDownMode;
+        }
+
+        @Override
+        public synchronized void onStrongAuthRequiredChanged(int userId) {
+            boolean userInLockDownModeNext = containsFlag(getStrongAuthForUser(userId),
+                    STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+            mUserInLockDownMode.put(userId, userInLockDownModeNext);
+            boolean isInLockDownModeNext = mUserInLockDownMode.indexOfValue(true) != -1;
+
+            if (mIsInLockDownMode == isInLockDownModeNext) {
+                return;
+            }
+
+            if (isInLockDownModeNext) {
+                cancelNotificationsWhenEnterLockDownMode();
+            }
+
+            // When the mIsInLockDownMode is true, both notifyPostedLocked and
+            // notifyRemovedLocked will be dismissed. So we shall call
+            // cancelNotificationsWhenEnterLockDownMode before we set mIsInLockDownMode
+            // as true and call postNotificationsWhenExitLockDownMode after we set
+            // mIsInLockDownMode as false.
+            mIsInLockDownMode = isInLockDownModeNext;
+
+            if (!isInLockDownModeNext) {
+                postNotificationsWhenExitLockDownMode();
+            }
+        }
+    }
+
+    private StrongAuthTracker mStrongAuthTracker;
+
     public NotificationManagerService(Context context) {
         super(context);
         Notification.processWhitelistToken = WHITELIST_TOKEN;
@@ -1672,6 +1719,7 @@ public class NotificationManagerService extends SystemService {
 
         mHandler = new WorkerHandler(looper);
         mRankingThread.start();
+        mStrongAuthTracker = new StrongAuthTracker(getContext());
         String[] extractorNames;
         try {
             extractorNames = resources.getStringArray(R.array.config_notificationSignalExtractors);
@@ -1957,6 +2005,7 @@ public class NotificationManagerService extends SystemService {
             mRoleObserver = new RoleObserver(getContext().getSystemService(RoleManager.class),
                     mPackageManager, getContext().getMainExecutor());
             mRoleObserver.init();
+            new LockPatternUtils(getContext()).registerStrongAuthTracker(mStrongAuthTracker);
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
             // bind to listener services.
