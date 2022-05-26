@@ -17,6 +17,8 @@
 #ifndef RENDERTHREAD_H_
 #define RENDERTHREAD_H_
 
+#ifdef __ANDROID__  // Layoutlib does not have a separate RenderThread
+
 #include <surface_control_private.h>
 #include <GrDirectContext.h>
 #include <SkBitmap.h>
@@ -248,4 +250,108 @@ private:
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */
+
+#else
+
+#include <SkBitmap.h>
+#include <gui/Surface.h>
+#include "renderthread/TimeLord.h"
+
+namespace android {
+namespace uirenderer {
+namespace renderthread {
+
+// Mimics android.view.Choreographer.FrameCallback
+class IFrameCallback {
+public:
+    virtual void doFrame() = 0;
+
+protected:
+    virtual ~IFrameCallback() {}
+};
+
+typedef void (*JVMAttachHook)(const char* name);
+
+enum class CopyResult {
+    Success = 0,
+    UnknownError = 1,
+    Timeout = 2,
+    SourceEmpty = 3,
+    SourceInvalid = 4,
+    DestinationInvalid = 5,
+};
+
+class RenderThread {
+    PREVENT_COPY_AND_ASSIGN(RenderThread);
+
+public:
+    static void setOnStartHook(JVMAttachHook onStartHook) {}
+
+    void postFrameCallback(IFrameCallback* callback) {}
+    bool removeFrameCallback(IFrameCallback* callback) { return false; }
+    // If the callback is currently registered, it will be pushed back until
+    // the next vsync. If it is not currently registered this does nothing.
+    void pushBackFrameCallback(IFrameCallback* callback) {}
+
+    TimeLord& timeLord() { return mTimeLord; }
+
+    RenderThread& queue() { return *this; }
+
+    RenderThread& readback() { return *this; }
+
+    RenderThread& cacheManager() { return *this; }
+
+    template <class F>
+    void post(F&& func) {
+        func();
+    }
+
+    template <class F>
+    void postAt(nsecs_t time, F&& func) {
+        func();
+    }
+
+    template <class F>
+    auto runSync(F&& func) -> decltype(func()) {
+        return func();
+    };
+
+    CopyResult copySurfaceInto(ANativeWindow* window, const Rect& srcRect, SkBitmap* bitmap) {
+        return CopyResult::Success;
+    }
+
+    void trimStaleResources() {}
+
+    int getTid() { return 0; }
+
+    void dumpGraphicsMemory(int fd, bool includeProfileData) {}
+
+    void getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {}
+
+private:
+    RenderThread() {}
+    virtual ~RenderThread() {}
+
+    static bool hasInstance() { return true; }
+
+    static RenderThread& getInstance() {
+        // This is a pointer because otherwise __cxa_finalize
+        // will try to delete it like a Good Citizen but that causes us to crash
+        // because we don't want to delete the RenderThread normally.
+        static RenderThread* sInstance = new RenderThread();
+        return *sInstance;
+    }
+
+    friend class DispatchFrameCallbacks;
+    friend class RenderProxy;
+
+    TimeLord mTimeLord;
+};
+
+} /* namespace renderthread */
+} /* namespace uirenderer */
+} /* namespace android */
+
+#endif
+
 #endif /* RENDERTHREAD_H_ */

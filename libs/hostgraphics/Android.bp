@@ -12,16 +12,20 @@ cc_library_host_static {
 
     cflags: [
         "-Wno-unused-parameter",
+        "-D__INTRODUCED_IN(n)=",
     ],
 
     static_libs: [
         "libbase",
         "libmath",
         "libutils",
+        "libui-types",
     ],
 
     srcs: [
+        ":framework_native_aidl",
         ":libui_host_common",
+        "ANativeWindow.cpp",
         "Fence.cpp",
         "HostBufferQueue.cpp",
         "PublicFormat.cpp",

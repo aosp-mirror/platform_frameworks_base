@@ -16,12 +16,15 @@
 
 #include <gui/BufferQueue.h>
 
+#include <system/window.h>
+
 namespace android {
 
 class HostBufferQueue : public IGraphicBufferProducer, public IGraphicBufferConsumer {
 public:
     HostBufferQueue() : mWidth(0), mHeight(0) { }
 
+// Consumer
     virtual status_t setConsumerIsProtected(bool isProtected) { return OK; }
 
     virtual status_t detachBuffer(int slot) { return OK; }
@@ -51,6 +54,27 @@ public:
     virtual status_t setMaxAcquiredBufferCount(int maxAcquiredBuffers) { return OK; }
 
     virtual status_t setConsumerUsageBits(uint64_t usage) { return OK; }
+
+// Producer
+    virtual int query(int what, int* value) {
+        switch(what) {
+            case NATIVE_WINDOW_WIDTH:
+                *value = mWidth;
+                break;
+            case NATIVE_WINDOW_HEIGHT:
+                *value = mHeight;
+                break;
+            default:
+                *value = 0;
+                break;
+        }
+        return OK;
+    }
+
+    virtual status_t requestBuffer(int slot, sp<GraphicBuffer>* buf) {
+        *buf = mBuffer;
+        return OK;
+    }
 private:
     sp<GraphicBuffer> mBuffer;
     uint32_t mWidth;

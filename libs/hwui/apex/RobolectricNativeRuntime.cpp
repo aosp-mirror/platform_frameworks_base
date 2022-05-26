@@ -59,6 +59,7 @@ int register_android_graphics_text_MeasuredText(JNIEnv* env);
 int register_android_util_PathParser(JNIEnv* env);
 int register_android_view_DisplayListCanvas(JNIEnv* env);
 int register_android_view_RenderNode(JNIEnv* env);
+int register_android_view_ThreadedRenderer(JNIEnv* env);
 
 #define REG_JNI(name) \
     { name }
@@ -97,6 +98,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_util_PathParser),
         REG_JNI(register_android_view_DisplayListCanvas),
         REG_JNI(register_android_view_RenderNode),
+        REG_JNI(register_android_view_ThreadedRenderer),
 };
 
 static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env) {

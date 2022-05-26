@@ -19,7 +19,10 @@
 
 #include <utils/RefBase.h>
 
+#include <ui/Fence.h>
 #include <ui/GraphicBuffer.h>
+
+#include <utils/Timers.h>
 
 namespace android {
 
@@ -31,6 +34,10 @@ public:
         // Disconnect any API originally connected from the process calling disconnect.
         AllLocal
     };
+
+    virtual int query(int what, int* value) = 0;
+
+    virtual status_t requestBuffer(int slot, sp<GraphicBuffer>* buf) = 0;
 };
 
 } // namespace android

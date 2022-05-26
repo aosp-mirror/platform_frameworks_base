@@ -46,6 +46,12 @@
 #include <utility>
 #include <vector>
 
+#ifndef __ANDROID__  // Layoutlib does not support surface control
+typedef void* ASurfaceControl;
+typedef void* ASurfaceTransaction;
+typedef void* ASurfaceControlStats;
+#endif
+
 namespace android {
 namespace uirenderer {
 
@@ -103,11 +109,13 @@ public:
 
     static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
 
+#ifdef __ANDROID__  // Layoutlib does not support Gr
     /*
      * If Properties::isSkiaEnabled() is true then this will return the Skia
      * grContext associated with the current RenderPipeline.
      */
     GrDirectContext* getGrContext() const { return mRenderThread.getGrContext(); }
+#endif
 
     ASurfaceControl* getSurfaceControl() const { return mSurfaceControl; }
     int32_t getSurfaceControlGenerationId() const { return mSurfaceControlGenerationId; }
@@ -147,8 +155,9 @@ public:
     void stopDrawing();
     void notifyFramePending();
 
+#ifdef __ANDROID__  // Layoutlib does not support Profiling
     FrameInfoVisualizer& profiler() { return mProfiler; }
-
+#endif
     void dumpFrames(int fd);
     void resetFrameStats();
 
@@ -159,6 +168,7 @@ public:
 
     void setContentDrawBounds(const Rect& bounds) { mContentDrawBounds = bounds; }
 
+#ifdef __ANDROID__  // Layoutlib does not support FrameMetrics
     void addFrameMetricsObserver(FrameMetricsObserver* observer) {
         std::scoped_lock lock(mFrameMetricsReporterMutex);
         if (mFrameMetricsReporter.get() == nullptr) {
@@ -177,6 +187,7 @@ public:
             }
         }
     }
+#endif
 
     // Used to queue up work that needs to be completed before this frame completes
     void enqueueFrameWork(std::function<void()>&& func);
@@ -306,11 +317,13 @@ private:
     std::mutex mLast4FrameInfosMutex;
 
     std::string mName;
+#ifdef __ANDROID__  // Layoutlib does not support Metrics
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
     std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter
             GUARDED_BY(mFrameMetricsReporterMutex);
     std::mutex mFrameMetricsReporterMutex;
+#endif
 
     std::set<RenderNode*> mPrefetchedLayers;
 

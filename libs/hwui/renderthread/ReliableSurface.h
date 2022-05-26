@@ -63,9 +63,13 @@ private:
 
     uint64_t mUsage = AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER;
     AHardwareBuffer_Format mFormat = AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM;
+#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
     UniqueAHardwareBuffer mScratchBuffer;
+#endif
     ANativeWindowBuffer* mReservedBuffer = nullptr;
+#ifdef __ANDROID__  // Layoutlib does not support UniqueFd
     base::unique_fd mReservedFenceFd;
+#endif
     bool mHasDequeuedBuffer = false;
     int mBufferQueueState = OK;
     size_t mExpectedBufferCount = 0;

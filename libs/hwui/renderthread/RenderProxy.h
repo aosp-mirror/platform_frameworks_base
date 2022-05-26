@@ -20,7 +20,14 @@
 #include <SkBitmap.h>
 #include <android/native_window.h>
 #include <cutils/compiler.h>
+#ifdef __ANDROID__  // Layoutlib does not support surface control
 #include <android/surface_control.h>
+#else
+// To avoid ifdefs around overlay implementation all over the place we typedef these to void *. They
+// won't be used.
+typedef void* ASurfaceControl;
+typedef void* ASurfaceTransaction;
+#endif
 #include <utils/Functor.h>
 
 #include "../FrameMetricsObserver.h"

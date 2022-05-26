@@ -17,7 +17,9 @@
 #include "ReliableSurface.h"
 
 #include <log/log_main.h>
+#ifdef __ANDROID__  // Layoutlib does not Hardware
 #include <private/android/AHardwareBufferHelpers.h>
+#endif
 // TODO: this should be including apex instead.
 #include <system/window.h>
 #include <vndk/window.h>
@@ -104,7 +106,9 @@ int ReliableSurface::reserveNext() {
         std::lock_guard _lock{mMutex};
         LOG_ALWAYS_FATAL_IF(mReservedBuffer, "race condition in reserveNext");
         mReservedBuffer = buffer;
+#ifdef __ANDROID__  // Layoutlib no UniqueFd
         mReservedFenceFd.reset(fenceFd);
+#endif
     }
 
     return result;
@@ -118,10 +122,14 @@ void ReliableSurface::clearReservedBuffer() {
         if (mReservedBuffer) {
             ALOGW("Reserved buffer %p was never used", mReservedBuffer);
             buffer = mReservedBuffer;
+#ifdef __ANDROID__  // Layoutlib no UniqueFd
             releaseFd = mReservedFenceFd.release();
+#endif
         }
         mReservedBuffer = nullptr;
+#ifdef __ANDROID__  // Layoutlib no UniqueFd
         mReservedFenceFd.reset();
+#endif
         mHasDequeuedBuffer = false;
     }
     if (buffer) {
@@ -133,15 +141,20 @@ void ReliableSurface::clearReservedBuffer() {
 }
 
 bool ReliableSurface::isFallbackBuffer(const ANativeWindowBuffer* windowBuffer) const {
+#ifdef __ANDROID__  // Layoutlib does not support Fallback Buffer
     if (!mScratchBuffer || !windowBuffer) {
         return false;
     }
     ANativeWindowBuffer* scratchBuffer =
             AHardwareBuffer_to_ANativeWindowBuffer(mScratchBuffer.get());
     return windowBuffer == scratchBuffer;
+#else
+    return false;
+#endif
 }
 
 ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer(int error) {
+#ifdef __ANDROID__  // Layoutlib does not support Fallback Buffer
     std::lock_guard _lock{mMutex};
     mBufferQueueState = error;
 
@@ -170,6 +183,9 @@ ANativeWindowBuffer* ReliableSurface::acquireFallbackBuffer(int error) {
 
     mScratchBuffer.reset(newBuffer);
     return AHardwareBuffer_to_ANativeWindowBuffer(newBuffer);
+#else
+    return nullptr;
+#endif
 }
 
 int ReliableSurface::hook_dequeueBuffer(ANativeWindow* window,
@@ -180,7 +196,9 @@ int ReliableSurface::hook_dequeueBuffer(ANativeWindow* window,
         std::lock_guard _lock{rs->mMutex};
         if (rs->mReservedBuffer) {
             *buffer = rs->mReservedBuffer;
+#ifdef __ANDROID__  // Layoutlib no UniqueFd
             *fenceFd = rs->mReservedFenceFd.release();
+#endif
             rs->mReservedBuffer = nullptr;
             return OK;
         }
