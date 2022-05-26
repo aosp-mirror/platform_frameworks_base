@@ -96,7 +96,7 @@ static jlong FontFamily_create(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr) {
     return toJLong(new FontFamilyWrapper(std::move(family)));
 }
 
-static void FontFamily_allowUnsupportedFont(jlong builderPtr) {
+static void FontFamily_allowUnsupportedFont(CRITICAL_JNI_PARAMS_COMMA jlong builderPtr) {
     if (builderPtr == 0) {
         return;
     }
