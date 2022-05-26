@@ -123,7 +123,7 @@ public class SplitControllerTest {
         final TaskContainer taskContainer = new TaskContainer(TASK_ID);
         // tf1 has no running activity so is not active.
         final TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */,
-                taskContainer, mSplitController);
+                new Intent(), taskContainer, mSplitController);
         // tf2 has running activity so is active.
         final TaskFragmentContainer tf2 = mock(TaskFragmentContainer.class);
         doReturn(1).when(tf2).getRunningActivityCount();
@@ -205,7 +205,8 @@ public class SplitControllerTest {
         assertThrows(IllegalArgumentException.class, () ->
                 mSplitController.newContainer(mActivity, null /* launchingActivity */, TASK_ID));
 
-        final TaskFragmentContainer tf = mSplitController.newContainer(null, mActivity, TASK_ID);
+        final TaskFragmentContainer tf = mSplitController.newContainer(mActivity, mActivity,
+                TASK_ID);
         final TaskContainer taskContainer = mSplitController.getTaskContainer(TASK_ID);
 
         assertNotNull(tf);
@@ -307,7 +308,7 @@ public class SplitControllerTest {
     @Test
     public void testOnActivityReparentToTask_diffProcess() {
         // Create an empty TaskFragment to initialize for the Task.
-        mSplitController.newContainer(null, mActivity, TASK_ID);
+        mSplitController.newContainer(new Intent(), mActivity, TASK_ID);
         final IBinder activityToken = new Binder();
         final Intent intent = new Intent();
 
@@ -417,7 +418,7 @@ public class SplitControllerTest {
 
         verify(mSplitPresenter, never()).applyTransaction(any());
 
-        mSplitController.newContainer(null /* activity */, mActivity, TASK_ID);
+        mSplitController.newContainer(new Intent(), mActivity, TASK_ID);
         mSplitController.placeActivityInTopContainer(mActivity);
 
         verify(mSplitPresenter).applyTransaction(any());
@@ -436,7 +437,7 @@ public class SplitControllerTest {
                 false /* isOnReparent */);
 
         assertFalse(result);
-        verify(mSplitController, never()).newContainer(any(), any(), anyInt());
+        verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt());
     }
 
     @Test
@@ -577,7 +578,7 @@ public class SplitControllerTest {
         final TaskFragmentContainer primaryContainer = mSplitController.newContainer(mActivity,
                 TASK_ID);
         final TaskFragmentContainer secondaryContainer = mSplitController.newContainer(
-                null /* activity */, mActivity, TASK_ID);
+                secondaryIntent, mActivity, TASK_ID);
         mSplitController.registerSplit(
                 mTransaction,
                 primaryContainer,
@@ -589,8 +590,33 @@ public class SplitControllerTest {
                 false /* isOnReparent */);
 
         assertTrue(result);
-        verify(mSplitController, never()).newContainer(any(), any(), anyInt());
+        verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testResolveActivityToContainer_splitRule_inPrimarySplitWithNoRuleMatched() {
+        final Intent secondaryIntent = new Intent();
+        setupSplitRule(mActivity, secondaryIntent);
+        final SplitPairRule splitRule = (SplitPairRule) mSplitController.getSplitRules().get(0);
+
+        // The new launched activity is in primary split, but there is no rule for it to split with
+        // the secondary, so return false.
+        final TaskFragmentContainer primaryContainer = mSplitController.newContainer(mActivity,
+                TASK_ID);
+        final TaskFragmentContainer secondaryContainer = mSplitController.newContainer(
+                secondaryIntent, mActivity, TASK_ID);
+        mSplitController.registerSplit(
+                mTransaction,
+                primaryContainer,
+                mActivity,
+                secondaryContainer,
+                splitRule);
+        final Activity launchedActivity = createMockActivity();
+        primaryContainer.addPendingAppearedActivity(launchedActivity);
+
+        assertFalse(mSplitController.resolveActivityToContainer(launchedActivity,
+                false /* isOnReparent */));
     }
 
     @Test
@@ -605,7 +631,7 @@ public class SplitControllerTest {
                 false /* isOnReparent */);
 
         assertTrue(result);
-        verify(mSplitController, never()).newContainer(any(), any(), anyInt());
+        verify(mSplitController, never()).newContainer(any(), any(), any(), anyInt());
         verify(mSplitController, never()).registerSplit(any(), any(), any(), any(), any());
     }
 
