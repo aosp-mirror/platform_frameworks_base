@@ -300,6 +300,8 @@ public class ChooserActivity extends ResolverActivity implements
 
     @VisibleForTesting
     protected ChooserMultiProfilePagerAdapter mChooserMultiProfilePagerAdapter;
+    private final EnterTransitionAnimationDelegate mEnterTransitionAnimationDelegate =
+            new EnterTransitionAnimationDelegate();
 
     private boolean mRemoveSharedElements = false;
 
@@ -383,7 +385,7 @@ public class ChooserActivity extends ResolverActivity implements
                         // transition animation.
                         getWindow().setWindowAnimations(0);
                     }
-                    startPostponedEnterTransition();
+                    mEnterTransitionAnimationDelegate.markImagePreviewReady();
                     return true;
                 }
             });
@@ -431,7 +433,7 @@ public class ChooserActivity extends ResolverActivity implements
                     mHideParentOnFail = false;
                 }
                 mRemoveSharedElements = true;
-                startPostponedEnterTransition();
+                mEnterTransitionAnimationDelegate.markImagePreviewReady();
             }
         }
 
@@ -724,7 +726,7 @@ public class ChooserActivity extends ResolverActivity implements
                 mRemoveSharedElements = false;
             }
         });
-        postponeEnterTransition();
+        mEnterTransitionAnimationDelegate.postponeTransition();
     }
 
     @Override
@@ -1241,6 +1243,9 @@ public class ChooserActivity extends ResolverActivity implements
 
         if (layout != null) {
             adjustPreviewWidth(getResources().getConfiguration().orientation, layout);
+        }
+        if (previewType != CONTENT_PREVIEW_IMAGE) {
+            mEnterTransitionAnimationDelegate.markImagePreviewReady();
         }
 
         return layout;
@@ -2514,88 +2519,94 @@ public class ChooserActivity extends ResolverActivity implements
                 if (mResolverDrawerLayout == null || gridAdapter == null) {
                     return;
                 }
-
-                final int bottomInset = mSystemWindowInsets != null
-                                            ? mSystemWindowInsets.bottom : 0;
-                int offset = bottomInset;
-                int rowsToShow = gridAdapter.getSystemRowCount()
-                        + gridAdapter.getProfileRowCount()
-                        + gridAdapter.getServiceTargetRowCount()
-                        + gridAdapter.getCallerAndRankedTargetRowCount();
-
-                // then this is most likely not a SEND_* action, so check
-                // the app target count
-                if (rowsToShow == 0) {
-                    rowsToShow = gridAdapter.getRowCount();
-                }
-
-                // still zero? then use a default height and leave, which
-                // can happen when there are no targets to show
-                if (rowsToShow == 0 && !shouldShowStickyContentPreview()) {
-                    offset += getResources().getDimensionPixelSize(
-                            R.dimen.chooser_max_collapsed_height);
-                    mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
-                    return;
-                }
-
-                View stickyContentPreview = findViewById(R.id.content_preview_container);
-                if (shouldShowStickyContentPreview() && isStickyContentPreviewShowing()) {
-                    offset += stickyContentPreview.getHeight();
-                }
-
-                if (shouldShowTabs()) {
-                    offset += findViewById(R.id.tabs).getHeight();
-                }
-
-                if (recyclerView.getVisibility() == View.VISIBLE) {
-                    int directShareHeight = 0;
-                    rowsToShow = Math.min(4, rowsToShow);
-                    boolean shouldShowExtraRow = shouldShowExtraRow(rowsToShow);
-                    mLastNumberOfChildren = recyclerView.getChildCount();
-                    for (int i = 0, childCount = recyclerView.getChildCount();
-                            i < childCount && rowsToShow > 0; i++) {
-                        View child = recyclerView.getChildAt(i);
-                        if (((GridLayoutManager.LayoutParams)
-                                child.getLayoutParams()).getSpanIndex() != 0) {
-                            continue;
-                        }
-                        int height = child.getHeight();
-                        offset += height;
-                        if (shouldShowExtraRow) {
-                            offset += height;
-                        }
-
-                        if (gridAdapter.getTargetType(
-                                recyclerView.getChildAdapterPosition(child))
-                                == ChooserListAdapter.TARGET_SERVICE) {
-                            directShareHeight = height;
-                        }
-                        rowsToShow--;
-                    }
-
-                    boolean isExpandable = getResources().getConfiguration().orientation
-                            == Configuration.ORIENTATION_PORTRAIT && !isInMultiWindowMode();
-                    if (directShareHeight != 0 && isSendAction(getTargetIntent())
-                            && isExpandable) {
-                        // make sure to leave room for direct share 4->8 expansion
-                        int requiredExpansionHeight =
-                                (int) (directShareHeight / DIRECT_SHARE_EXPANSION_RATE);
-                        int topInset = mSystemWindowInsets != null ? mSystemWindowInsets.top : 0;
-                        int minHeight = bottom - top - mResolverDrawerLayout.getAlwaysShowHeight()
-                                - requiredExpansionHeight - topInset - bottomInset;
-
-                        offset = Math.min(offset, minHeight);
-                    }
-                } else {
-                    ViewGroup currentEmptyStateView = getActiveEmptyStateView();
-                    if (currentEmptyStateView.getVisibility() == View.VISIBLE) {
-                        offset += currentEmptyStateView.getHeight();
-                    }
-                }
-
-                mResolverDrawerLayout.setCollapsibleHeightReserved(Math.min(offset, bottom - top));
+                int offset = calculateDrawerOffset(top, bottom, recyclerView, gridAdapter);
+                mResolverDrawerLayout.setCollapsibleHeightReserved(offset);
+                mEnterTransitionAnimationDelegate.markOffsetCalculated();
             });
         }
+    }
+
+    private int calculateDrawerOffset(
+            int top, int bottom, RecyclerView recyclerView, ChooserGridAdapter gridAdapter) {
+
+        final int bottomInset = mSystemWindowInsets != null
+                ? mSystemWindowInsets.bottom : 0;
+        int offset = bottomInset;
+        int rowsToShow = gridAdapter.getSystemRowCount()
+                + gridAdapter.getProfileRowCount()
+                + gridAdapter.getServiceTargetRowCount()
+                + gridAdapter.getCallerAndRankedTargetRowCount();
+
+        // then this is most likely not a SEND_* action, so check
+        // the app target count
+        if (rowsToShow == 0) {
+            rowsToShow = gridAdapter.getRowCount();
+        }
+
+        // still zero? then use a default height and leave, which
+        // can happen when there are no targets to show
+        if (rowsToShow == 0 && !shouldShowStickyContentPreview()) {
+            offset += getResources().getDimensionPixelSize(
+                    R.dimen.chooser_max_collapsed_height);
+            return offset;
+        }
+
+        View stickyContentPreview = findViewById(R.id.content_preview_container);
+        if (shouldShowStickyContentPreview() && isStickyContentPreviewShowing()) {
+            offset += stickyContentPreview.getHeight();
+        }
+
+        if (shouldShowTabs()) {
+            offset += findViewById(R.id.tabs).getHeight();
+        }
+
+        if (recyclerView.getVisibility() == View.VISIBLE) {
+            int directShareHeight = 0;
+            rowsToShow = Math.min(4, rowsToShow);
+            boolean shouldShowExtraRow = shouldShowExtraRow(rowsToShow);
+            mLastNumberOfChildren = recyclerView.getChildCount();
+            for (int i = 0, childCount = recyclerView.getChildCount();
+                    i < childCount && rowsToShow > 0; i++) {
+                View child = recyclerView.getChildAt(i);
+                if (((GridLayoutManager.LayoutParams)
+                        child.getLayoutParams()).getSpanIndex() != 0) {
+                    continue;
+                }
+                int height = child.getHeight();
+                offset += height;
+                if (shouldShowExtraRow) {
+                    offset += height;
+                }
+
+                if (gridAdapter.getTargetType(
+                        recyclerView.getChildAdapterPosition(child))
+                        == ChooserListAdapter.TARGET_SERVICE) {
+                    directShareHeight = height;
+                }
+                rowsToShow--;
+            }
+
+            boolean isExpandable = getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_PORTRAIT && !isInMultiWindowMode();
+            if (directShareHeight != 0 && isSendAction(getTargetIntent())
+                    && isExpandable) {
+                // make sure to leave room for direct share 4->8 expansion
+                int requiredExpansionHeight =
+                        (int) (directShareHeight / DIRECT_SHARE_EXPANSION_RATE);
+                int topInset = mSystemWindowInsets != null ? mSystemWindowInsets.top : 0;
+                int minHeight = bottom - top - mResolverDrawerLayout.getAlwaysShowHeight()
+                        - requiredExpansionHeight - topInset - bottomInset;
+
+                offset = Math.min(offset, minHeight);
+            }
+        } else {
+            ViewGroup currentEmptyStateView = getActiveEmptyStateView();
+            if (currentEmptyStateView.getVisibility() == View.VISIBLE) {
+                offset += currentEmptyStateView.getHeight();
+            }
+        }
+
+        return Math.min(offset, bottom - top);
     }
 
     /**
@@ -3927,6 +3938,51 @@ public class ChooserActivity extends ResolverActivity implements
             }
 
             canvas.drawRoundRect(x, y, width, height, mRadius, mRadius, mRoundRectPaint);
+        }
+    }
+
+    /**
+     * A helper class to track app's readiness for the scene transition animation.
+     * The app is ready when both the image is laid out and the drawer offset is calculated.
+     */
+    private class EnterTransitionAnimationDelegate implements View.OnLayoutChangeListener {
+        private boolean mPreviewReady = false;
+        private boolean mOffsetCalculated = false;
+
+        void postponeTransition() {
+            postponeEnterTransition();
+        }
+
+        void markImagePreviewReady() {
+            if (!mPreviewReady) {
+                mPreviewReady = true;
+                maybeStartListenForLayout();
+            }
+        }
+
+        void markOffsetCalculated() {
+            if (!mOffsetCalculated) {
+                mOffsetCalculated = true;
+                maybeStartListenForLayout();
+            }
+        }
+
+        private void maybeStartListenForLayout() {
+            if (mPreviewReady && mOffsetCalculated && mResolverDrawerLayout != null) {
+                if (mResolverDrawerLayout.isInLayout()) {
+                    startPostponedEnterTransition();
+                } else {
+                    mResolverDrawerLayout.addOnLayoutChangeListener(this);
+                    mResolverDrawerLayout.requestLayout();
+                }
+            }
+        }
+
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
+                int oldTop, int oldRight, int oldBottom) {
+            v.removeOnLayoutChangeListener(this);
+            startPostponedEnterTransition();
         }
     }
 
