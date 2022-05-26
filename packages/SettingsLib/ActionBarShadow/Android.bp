@@ -23,5 +23,6 @@ android_library {
     apex_available: [
         "//apex_available:platform",
         "com.android.permission",
+        "com.android.adservices",
     ],
 }
