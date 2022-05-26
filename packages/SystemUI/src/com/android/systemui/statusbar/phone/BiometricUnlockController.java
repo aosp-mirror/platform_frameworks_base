@@ -500,12 +500,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     mUpdateMonitor.awakenFromDream();
                 }
                 mNotificationShadeWindowController.setNotificationShadeFocusable(false);
-                mKeyguardViewMediator.onWake(true /* withUnlock */);
+                mKeyguardViewMediator.onWakeAndUnlocking();
                 Trace.endSection();
                 break;
             case MODE_ONLY_WAKE:
-                mKeyguardViewMediator.onWake(false /* withUnlock */);
-                break;
             case MODE_NONE:
                 break;
         }
