@@ -3393,7 +3393,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction reparentTasks(@Nullable android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, @Nullable int[], @Nullable int[], boolean);
     method @NonNull public android.window.WindowContainerTransaction scheduleFinishEnterPip(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setActivityWindowingMode(@NonNull android.window.WindowContainerToken, int);
-    method @NonNull public android.window.WindowContainerTransaction setAdjacentRoots(@NonNull android.window.WindowContainerToken, @NonNull android.window.WindowContainerToken, boolean);
+    method @NonNull public android.window.WindowContainerTransaction setAdjacentRoots(@NonNull android.window.WindowContainerToken, @NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction setAdjacentTaskFragments(@NonNull android.os.IBinder, @Nullable android.os.IBinder, @Nullable android.window.WindowContainerTransaction.TaskFragmentAdjacentParams);
     method @NonNull public android.window.WindowContainerTransaction setAppBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);

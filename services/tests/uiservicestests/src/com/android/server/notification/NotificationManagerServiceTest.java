@@ -19,7 +19,6 @@ package com.android.server.notification;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
-import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_CAN_COLORIZE;
@@ -9572,7 +9571,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testMaybeShowReviewPermissionsNotification_flagOff() {
+        mService.setShowReviewPermissionsNotification(false);
+        reset(mMockNm);
+
+        // If state is SHOULD_SHOW, it would show, but not if the flag is off!
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
+                NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW);
+        mService.maybeShowInitialReviewPermissionsNotification();
+        verify(mMockNm, never()).notify(anyString(), anyInt(), any(Notification.class));
+    }
+
+    @Test
     public void testMaybeShowReviewPermissionsNotification_unknown() {
+        mService.setShowReviewPermissionsNotification(true);
         reset(mMockNm);
 
         // Set up various possible states of the settings int and confirm whether or not the
@@ -9588,6 +9601,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testMaybeShowReviewPermissionsNotification_shouldShow() {
+        mService.setShowReviewPermissionsNotification(true);
         reset(mMockNm);
 
         // If state is SHOULD_SHOW, it ... should show
@@ -9602,6 +9616,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testMaybeShowReviewPermissionsNotification_alreadyShown() {
+        mService.setShowReviewPermissionsNotification(true);
         reset(mMockNm);
 
         // If state is either USER_INTERACTED or DISMISSED, we should not show this on boot
@@ -9620,6 +9635,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testMaybeShowReviewPermissionsNotification_reshown() {
+        mService.setShowReviewPermissionsNotification(true);
         reset(mMockNm);
 
         // If we have re-shown the notification and the user did not subsequently interacted with
@@ -9635,6 +9651,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testRescheduledReviewPermissionsNotification() {
+        mService.setShowReviewPermissionsNotification(true);
         reset(mMockNm);
 
         // when rescheduled, the notification goes through the NotificationManagerInternal service
@@ -9652,5 +9669,15 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                         NotificationManagerService.REVIEW_NOTIF_STATE_UNKNOWN));
+    }
+
+    @Test
+    public void testRescheduledReviewPermissionsNotification_flagOff() {
+        mService.setShowReviewPermissionsNotification(false);
+        reset(mMockNm);
+
+        // no notification should be sent if the flag is off
+        mInternalService.sendReviewPermissionsNotification();
+        verify(mMockNm, never()).notify(anyString(), anyInt(), any(Notification.class));
     }
 }
