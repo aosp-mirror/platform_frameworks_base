@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static com.android.server.pm.PackageManagerService.TAG;
 
-import android.apex.ApexInfo;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
@@ -45,9 +44,6 @@ final class PackageInstalledInfo {
     // In some error cases we want to convey more info back to the observer
     String mOrigPackage;
     String mOrigPermission;
-
-    // The ApexInfo returned by ApexManager#installPackage, used by rebootless APEX install
-    ApexInfo mApexInfo;
 
     PackageInstalledInfo(int currentStatus) {
         mReturnCode = currentStatus;

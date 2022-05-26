@@ -27,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.ArrayMap;
 import android.util.PrintWriterPrinter;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -270,11 +271,11 @@ class ApexPackageInfo {
             }
         }
         ipw.println("Active APEX packages:");
-        dumpPackages(getActivePackages(), packageName, ipw);
+        dumpFromPackagesCache(getActivePackages(), packageName, ipw);
         ipw.println("Inactive APEX packages:");
-        dumpPackages(getInactivePackages(), packageName, ipw);
+        dumpFromPackagesCache(getInactivePackages(), packageName, ipw);
         ipw.println("Factory APEX packages:");
-        dumpPackages(getFactoryPackages(), packageName, ipw);
+        dumpFromPackagesCache(getFactoryPackages(), packageName, ipw);
     }
 
     @GuardedBy("mLock")
@@ -369,7 +370,7 @@ class ApexPackageInfo {
      *                    only information about that specific package will be dumped.
      * @param ipw the {@link IndentingPrintWriter} object to send information to.
      */
-    static void dumpPackages(List<PackageInfo> packagesCache,
+    private static void dumpFromPackagesCache(List<PackageInfo> packagesCache,
             @Nullable String packageName, IndentingPrintWriter ipw) {
         ipw.println();
         ipw.increaseIndent();
