@@ -41,6 +41,7 @@ import android.util.IndentingPrintWriter;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.timezonedetector.TestCallerIdentityInjector;
 import com.android.server.timezonedetector.TestHandler;
 
 import org.junit.After;
@@ -54,12 +55,16 @@ import java.io.StringWriter;
 @RunWith(AndroidJUnit4.class)
 public class TimeDetectorServiceTest {
 
+    private static final int ARBITRARY_USER_ID = 9999;
+
     private Context mMockContext;
-    private StubbedTimeDetectorStrategy mStubbedTimeDetectorStrategy;
 
     private TimeDetectorService mTimeDetectorService;
     private HandlerThread mHandlerThread;
     private TestHandler mTestHandler;
+    private TestCallerIdentityInjector mTestCallerIdentityInjector;
+    private FakeServiceConfigAccessor mFakeServiceConfigAccessor;
+    private StubbedTimeDetectorStrategy mStubbedTimeDetectorStrategy;
 
 
     @Before
@@ -71,16 +76,52 @@ public class TimeDetectorServiceTest {
         mHandlerThread.start();
         mTestHandler = new TestHandler(mHandlerThread.getLooper());
 
+        mTestCallerIdentityInjector = new TestCallerIdentityInjector();
+        mTestCallerIdentityInjector.initializeCallingUserId(ARBITRARY_USER_ID);
+
         mStubbedTimeDetectorStrategy = new StubbedTimeDetectorStrategy();
+        mFakeServiceConfigAccessor = new FakeServiceConfigAccessor();
 
         mTimeDetectorService = new TimeDetectorService(
-                mMockContext, mTestHandler, mStubbedTimeDetectorStrategy);
+                mMockContext, mTestHandler, mFakeServiceConfigAccessor,
+                mStubbedTimeDetectorStrategy, mTestCallerIdentityInjector);
     }
 
     @After
     public void tearDown() throws Exception {
         mHandlerThread.quit();
         mHandlerThread.join();
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testGetCapabilitiesAndConfig_withoutPermission() {
+        doThrow(new SecurityException("Mock"))
+                .when(mMockContext).enforceCallingPermission(anyString(), any());
+
+        try {
+            mTimeDetectorService.getCapabilitiesAndConfig();
+            fail("Expected SecurityException");
+        } finally {
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
+                    anyString());
+        }
+    }
+
+    @Test
+    public void testGetCapabilitiesAndConfig() {
+        doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+
+        ConfigurationInternal configuration =
+                createConfigurationInternal(true /* autoDetectionEnabled*/);
+        mFakeServiceConfigAccessor.initializeConfiguration(configuration);
+
+        assertEquals(configuration.capabilitiesAndConfig(),
+                mTimeDetectorService.getCapabilitiesAndConfig());
+
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
+                anyString());
     }
 
     @Test(expected = SecurityException.class)
@@ -248,6 +289,14 @@ public class TimeDetectorServiceTest {
         mStubbedTimeDetectorStrategy.verifyDumpCalled();
     }
 
+    private static ConfigurationInternal createConfigurationInternal(boolean autoDetectionEnabled) {
+        return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
+                .setUserConfigAllowed(true)
+                .setAutoDetectionSupported(true)
+                .setAutoDetectionEnabledSetting(autoDetectionEnabled)
+                .build();
+    }
+
     private static TelephonyTimeSuggestion createTelephonyTimeSuggestion() {
         int slotIndex = 1234;
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
@@ -291,7 +340,7 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
-        public boolean suggestManualTime(ManualTimeSuggestion timeSuggestion) {
+        public boolean suggestManualTime(int userId, ManualTimeSuggestion timeSuggestion) {
             mLastManualSuggestion = timeSuggestion;
             return true;
         }
@@ -309,11 +358,6 @@ public class TimeDetectorServiceTest {
         @Override
         public void suggestExternalTime(ExternalTimeSuggestion timeSuggestion) {
             mLastExternalSuggestion = timeSuggestion;
-        }
-
-        @Override
-        public ConfigurationInternal getConfigurationInternal(int userId) {
-            throw new UnsupportedOperationException();
         }
 
         @Override

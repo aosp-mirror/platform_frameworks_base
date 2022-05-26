@@ -16,6 +16,8 @@
 package com.android.server.timedetector;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
+import android.app.time.TimeConfiguration;
 
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
@@ -33,12 +35,23 @@ public interface ServiceConfigAccessor {
     /**
      * Adds a listener that will be invoked when {@link ConfigurationInternal} may have changed.
      * The listener is invoked on the main thread.
-     *
-     *
-     * <p>Note: Only for use by long-lived objects. There is deliberately no associated remove
-     * method.
      */
-    void addListener(@NonNull ConfigurationChangeListener listener);
+    void addConfigurationInternalChangeListener(@NonNull ConfigurationChangeListener listener);
+
+    /**
+     * Removes a listener previously added via {@link
+     * #addConfigurationInternalChangeListener(ConfigurationChangeListener)}.
+     */
+    void removeConfigurationInternalChangeListener(@NonNull ConfigurationChangeListener listener);
+
+    /**
+     * Returns a snapshot of the {@link ConfigurationInternal} for the current user. This is only a
+     * snapshot so callers must use {@link
+     * #addConfigurationInternalChangeListener(ConfigurationChangeListener)} to be notified when it
+     * changes.
+     */
+    @NonNull
+    ConfigurationInternal getCurrentUserConfigurationInternal();
 
     /**
      * Returns the absolute threshold below which the system clock need not be updated. i.e. if
@@ -62,4 +75,20 @@ public interface ServiceConfigAccessor {
      */
     @NonNull
     @Origin int[] getOriginPriorities();
+
+    /**
+     * Updates the configuration properties that control a device's time behavior.
+     *
+     * <p>This method returns {@code true} if the configuration was changed,
+     * {@code false} otherwise.
+     */
+    boolean updateConfiguration(
+            @UserIdInt int userId, @NonNull TimeConfiguration requestedConfiguration);
+
+    /**
+     * Returns a snapshot of the configuration that controls time zone detector behavior for the
+     * specified user.
+     */
+    @NonNull
+    ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
 }
