@@ -456,17 +456,27 @@ public final class MediaFormat {
 
     /**
      * A key describing the frame rate of a video format in frames/sec.
+     * <p>
      * The associated value is normally an integer when the value is used by the platform,
      * but video codecs also accept float configuration values.
      * Specifically, {@link MediaExtractor#getTrackFormat MediaExtractor} provides an integer
      * value corresponding to the frame rate information of the track if specified and non-zero.
      * Otherwise, this key is not present. {@link MediaCodec#configure MediaCodec} accepts both
-     * float and integer values. This represents the desired operating frame rate if the
+     * float and integer values.
+     * <p>
+     * This represents the desired operating frame rate if the
      * {@link #KEY_OPERATING_RATE} is not present and {@link #KEY_PRIORITY} is {@code 0}
-     * (realtime). For video encoders this value corresponds to the intended frame rate,
-     * although encoders are expected
-     * to support variable frame rate based on {@link MediaCodec.BufferInfo#presentationTimeUs
-     * buffer timestamp}. This key is not used in the {@code MediaCodec}
+     * (realtime). Otherwise, this is just informational.
+     * <p>
+     * For video encoders this value corresponds to the intended frame rate (the rate at which
+     * the application intends to send frames to the encoder, as calculated by the buffer
+     * timestamps, and not from the actual real-time rate that the frames are sent to
+     * the encoder). Encoders use this hint for rate control, specifically for the initial
+     * frames, as encoders are expected to support variable frame rate (for rate control) based
+     * on the actual {@link MediaCodec.BufferInfo#presentationTimeUs buffer timestamps} of
+     * subsequent frames.
+     * <p>
+     * This key is not used in the {@code MediaCodec}
      * {@link MediaCodec#getInputFormat input}/{@link MediaCodec#getOutputFormat output} formats,
      * nor by {@link MediaMuxer#addTrack MediaMuxer}.
      */
