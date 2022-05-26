@@ -2897,7 +2897,6 @@ public class InputMethodService extends AbstractInputMethodService {
         // Back callback is typically unregistered in {@link #hideWindow()}, but it's possible
         // for {@link #doFinishInput()} to be called without {@link #hideWindow()} so we also
         // unregister here.
-        // TODO(b/232341407): Add CTS to verify back behavior after screen on / off.
         unregisterCompatOnBackInvokedCallback();
     }
 
