@@ -54,6 +54,22 @@ public interface ServiceConfigAccessor {
     ConfigurationInternal getCurrentUserConfigurationInternal();
 
     /**
+     * Updates the configuration properties that control a device's time behavior.
+     *
+     * <p>This method returns {@code true} if the configuration was changed,
+     * {@code false} otherwise.
+     */
+    boolean updateConfiguration(
+            @UserIdInt int userId, @NonNull TimeConfiguration requestedConfiguration);
+
+    /**
+     * Returns a snapshot of the configuration that controls time zone detector behavior for the
+     * specified user.
+     */
+    @NonNull
+    ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
+
+    /**
      * Returns the absolute threshold below which the system clock need not be updated. i.e. if
      * setting the system clock would adjust it by less than this (either backwards or forwards)
      * then it need not be set.
@@ -75,20 +91,4 @@ public interface ServiceConfigAccessor {
      */
     @NonNull
     @Origin int[] getOriginPriorities();
-
-    /**
-     * Updates the configuration properties that control a device's time behavior.
-     *
-     * <p>This method returns {@code true} if the configuration was changed,
-     * {@code false} otherwise.
-     */
-    boolean updateConfiguration(
-            @UserIdInt int userId, @NonNull TimeConfiguration requestedConfiguration);
-
-    /**
-     * Returns a snapshot of the configuration that controls time zone detector behavior for the
-     * specified user.
-     */
-    @NonNull
-    ConfigurationInternal getConfigurationInternal(@UserIdInt int userId);
 }
