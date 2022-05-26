@@ -2699,6 +2699,11 @@ public final class Settings implements Watchable, Snappable {
                     }
                     continue;
                 }
+                if (pkg.getPkg().isApex()) {
+                    // Don't persist APEX which doesn't have a valid app id and will cause parsing
+                    // error in libpackagelistparser
+                    continue;
+                }
 
                 final boolean isDebug = pkg.getPkg().isDebuggable();
                 final IntArray gids = new IntArray();
