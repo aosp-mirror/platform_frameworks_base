@@ -171,7 +171,7 @@ public class CrossProfileAppsServiceImplRoboTest {
 
     private void mockCrossProfileAppRequestsInteractAcrossProfiles() throws Exception {
         final String permissionName = Manifest.permission.INTERACT_ACROSS_PROFILES;
-        when(mIPackageManager.getAppOpPermissionPackages(permissionName))
+        when(mIPackageManager.getAppOpPermissionPackages(eq(permissionName), anyInt()))
                 .thenReturn(new String[] {CROSS_PROFILE_APP_PACKAGE_NAME});
     }
 
@@ -488,7 +488,7 @@ public class CrossProfileAppsServiceImplRoboTest {
 
     private void mockCrossProfileAppDoesNotRequestInteractAcrossProfiles() throws Exception {
         final String permissionName = Manifest.permission.INTERACT_ACROSS_PROFILES;
-        when(mIPackageManager.getAppOpPermissionPackages(permissionName))
+        when(mIPackageManager.getAppOpPermissionPackages(eq(permissionName), anyInt()))
                 .thenReturn(new String[] {});
     }
 

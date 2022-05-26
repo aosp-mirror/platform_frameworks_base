@@ -73,13 +73,20 @@ public class CrossUserPackageVisibilityTests {
             "com.android.appenumeration.crossuserpackagevisibility";
     private static final String SHARED_USER_TEST_PACKAGE_NAME =
             "com.android.appenumeration.shareduid";
+    private static final String HAS_APPOP_PERMISSION_PACKAGE_NAME =
+            "com.android.appenumeration.hasappoppermission";
+
     private static final File CROSS_USER_TEST_APK_FILE =
             new File(TEST_DATA_DIR, "AppEnumerationCrossUserPackageVisibilityTestApp.apk");
     private static final File SHARED_USER_TEST_APK_FILE =
             new File(TEST_DATA_DIR, "AppEnumerationSharedUserTestApp.apk");
+    private static final File HAS_APPOP_PERMISSION_APK_FILE =
+            new File(TEST_DATA_DIR, "AppEnumerationHasAppOpPermissionTestApp.apk");
 
     private static final String ACTION_CROSS_USER_TEST =
             "com.android.appenumeration.action.CROSS_USER_TEST";
+    private static final String PERMISSION_REQUEST_INSTALL_PACKAGES =
+            "android.permission.REQUEST_INSTALL_PACKAGES";
     private static final ComponentName TEST_ACTIVITY_COMPONENT_NAME = new ComponentName(
             CROSS_USER_TEST_PACKAGE_NAME, "com.android.appenumeration.testapp.DummyActivity");
 
@@ -262,6 +269,20 @@ public class CrossUserPackageVisibilityTests {
                 new Intent(ACTION_CROSS_USER_TEST),
                 null,
                 mCurrentUser.id())).isFalse();
+    }
+
+    @Test
+    public void testGetAppOpPermissionPackages_cannotDetectPkg() throws Exception {
+        final int userId = mCurrentUser.id();
+        assertThat(mIPackageManager
+                .getAppOpPermissionPackages(PERMISSION_REQUEST_INSTALL_PACKAGES, userId))
+                .asList().doesNotContain(HAS_APPOP_PERMISSION_PACKAGE_NAME);
+
+        installPackageForUser(HAS_APPOP_PERMISSION_APK_FILE, mOtherUser, true /* forceQueryable */);
+
+        assertThat(mIPackageManager
+                .getAppOpPermissionPackages(PERMISSION_REQUEST_INSTALL_PACKAGES, userId))
+                .asList().doesNotContain(HAS_APPOP_PERMISSION_PACKAGE_NAME);
     }
 
     private boolean clearApplicationUserData(String packageName) throws Exception {
