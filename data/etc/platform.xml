@@ -121,7 +121,7 @@
     </permission>
 
     <permission name="android.permission.WRITE_SECURITY_LOG">
-        <group gid="security_log" />
+        <group gid="security_log_writer" />
     </permission>
 
     <!-- These are permissions that were mapped to gids but we need
