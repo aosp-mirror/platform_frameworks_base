@@ -161,6 +161,9 @@
     <!-- ChooserActivityTest permissions-->
     <uses-permission android:name="android.permission.SET_CLIP_SOURCE" />
 
+    <!-- AccessibilityShortcutChooserActivityTest permissions -->
+    <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
+
     <application
         android:theme="@style/Theme"
         android:supportsRtl="true"
@@ -1414,6 +1417,7 @@
         <activity android:name="com.android.internal.app.ChooserWrapperActivity"/>
         <activity android:name="com.android.internal.app.ResolverWrapperActivity"/>
         <activity android:name="com.android.internal.app.IntentForwarderActivityTest$IntentForwarderWrapperActivity"/>
+        <activity android:name="com.android.internal.accessibility.AccessibilityShortcutChooserActivityTest$TestAccessibilityShortcutChooserActivity"/>
 
         <receiver android:name="android.app.activity.AbortReceiver"
             android:exported="true">
