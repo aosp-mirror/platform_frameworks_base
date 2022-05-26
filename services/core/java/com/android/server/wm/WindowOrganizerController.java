@@ -147,7 +147,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     void setWindowManager(WindowManagerService wms) {
-        mTransitionController = new TransitionController(mService, wms.mTaskSnapshotController);
+        mTransitionController = new TransitionController(mService, wms.mTaskSnapshotController,
+                wms.mTransitionTracer);
         mTransitionController.registerLegacyListener(wms.mActivityManagerAppTransitionNotifier);
     }
 
@@ -820,7 +821,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
-                tf1.setAdjacentTaskFragment(tf2, false /* moveAdjacentTogether */);
+                tf1.setAdjacentTaskFragment(tf2);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
 
                 final Bundle bundle = hop.getLaunchOptions();
@@ -1209,7 +1210,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             Slog.e(TAG, "Attempt to set adjacent TaskFragment in PIP Task");
             return 0;
         }
-        root1.setAdjacentTaskFragment(root2, hop.getMoveAdjacentTogether());
+        root1.setAdjacentTaskFragment(root2);
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
 
