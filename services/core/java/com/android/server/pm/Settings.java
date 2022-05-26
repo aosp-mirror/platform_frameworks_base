@@ -2468,10 +2468,18 @@ public final class Settings implements Watchable, Snappable {
             serializer.endTag(null, "permissions");
 
             for (final PackageSetting pkg : mPackages.values()) {
+                if (pkg.getPkg() != null && pkg.getPkg().isApex()) {
+                    // Don't persist APEX which doesn't have a valid app id and will fail to load
+                    continue;
+                }
                 writePackageLPr(serializer, pkg);
             }
 
             for (final PackageSetting pkg : mDisabledSysPackages.values()) {
+                if (pkg.getPkg() != null && pkg.getPkg().isApex()) {
+                    // Don't persist APEX which doesn't have a valid app id and will fail to load
+                    continue;
+                }
                 writeDisabledSysPackageLPr(serializer, pkg);
             }
 
@@ -4968,6 +4976,10 @@ public final class Settings implements Watchable, Snappable {
                     && !packageName.equals(ps.getPackageName())) {
                 continue;
             }
+            if (ps.getPkg() != null && ps.getPkg().isApex()) {
+                // Filter APEX packages which will be dumped in the APEX section
+                continue;
+            }
             final LegacyPermissionState permissionsState =
                     mPermissionDataProvider.getLegacyPermissionState(ps.getAppId());
             if (permissionNames != null
@@ -5018,6 +5030,10 @@ public final class Settings implements Watchable, Snappable {
             for (final PackageSetting ps : mDisabledSysPackages.values()) {
                 if (packageName != null && !packageName.equals(ps.getRealName())
                         && !packageName.equals(ps.getPackageName())) {
+                    continue;
+                }
+                if (ps.getPkg() != null && ps.getPkg().isApex()) {
+                    // Filter APEX packages which will be dumped in the APEX section
                     continue;
                 }
                 if (!checkin && !printedSomething) {
