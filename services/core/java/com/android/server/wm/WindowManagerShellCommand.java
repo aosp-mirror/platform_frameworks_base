@@ -145,8 +145,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runReset(pw);
                 case "disable-blur":
                     return runSetBlurDisabled(pw);
-                case "shell":
-                    return runWmShellCommand(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -1064,47 +1062,6 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("    Wallpaper dark scrim alpha: "
                     + mLetterboxConfiguration.getLetterboxBackgroundWallpaperDarkScrimAlpha());
         }
-        return 0;
-    }
-
-    private int runWmShellCommand(PrintWriter pw) {
-        String arg = getNextArg();
-
-        switch (arg) {
-            case "tracing":
-                return runWmShellTracing(pw);
-            case "help":
-            default:
-                return runHelp(pw);
-        }
-    }
-
-    private int runHelp(PrintWriter pw) {
-        pw.println("Window Manager Shell commands:");
-        pw.println("  help");
-        pw.println("    Print this help text.");
-        pw.println("  tracing <start/stop>");
-        pw.println("    Start/stop shell transition tracing.");
-
-        return 0;
-    }
-
-    private int runWmShellTracing(PrintWriter pw) {
-        String arg = getNextArg();
-
-        switch (arg) {
-            case "start":
-                mInternal.mTransitionTracer.startTrace(pw);
-                break;
-            case "stop":
-                mInternal.mTransitionTracer.stopTrace(pw);
-                break;
-            default:
-                getErrPrintWriter()
-                        .println("Error: expected 'start' or 'stop', but got '" + arg + "'");
-                return -1;
-        }
-
         return 0;
     }
 
