@@ -24,10 +24,15 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.common.Rect
+import com.android.wm.shell.flicker.layerBecomesVisible
+import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
+import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
+import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -71,6 +76,11 @@ class EnterSplitScreenByDragFromAllApps(
                         .getAppIcon(secondaryApp.appName)
                         .dragToSplitscreen(secondaryApp.component.packageName,
                                 primaryApp.component.packageName)
+
+                endDisplayBounds = wmHelper.currentState.layerState
+                        .displays.firstOrNull { !it.isVirtual }
+                        ?.layerStackSpace
+                        ?: error("Display not found")
             }
         }
 
@@ -80,12 +90,38 @@ class EnterSplitScreenByDragFromAllApps(
 
     @Presubmit
     @Test
+    fun primaryAppLayerIsVisibleAtEnd() = testSpec.layerIsVisibleAtEnd(primaryApp.component)
+
+    @Presubmit
+    @Test
+    fun secondaryAppLayerBecomesVisible() = testSpec.layerBecomesVisible(secondaryApp.component)
+
+    @Presubmit
+    @Test
+    fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
+            testSpec.endRotation, primaryApp.component, isAppLeftTop(true))
+
+    @Presubmit
+    @Test
+    fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
+            testSpec.endRotation, secondaryApp.component, isAppLeftTop(false))
+
+    @Presubmit
+    @Test
     fun primaryAppWindowIsVisibleAtEnd() = testSpec.appWindowIsVisibleAtEnd(primaryApp.component)
 
     @Presubmit
     @Test
     fun secondaryAppWindowBecomesVisible() =
             testSpec.appWindowBecomesVisible(secondaryApp.component)
+
+    private fun isAppLeftTop(primary: Boolean): Boolean {
+        return if (endDisplayBounds.width > endDisplayBounds.height) {
+            !primary
+        } else {
+            primary
+        }
+    }
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
@@ -97,5 +133,7 @@ class EnterSplitScreenByDragFromAllApps(
                     supportedNavigationModes =
                         listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
         }
+
+        private lateinit var endDisplayBounds: Rect
     }
 }
