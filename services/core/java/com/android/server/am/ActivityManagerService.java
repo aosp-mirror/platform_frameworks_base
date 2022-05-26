@@ -4361,7 +4361,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Clean-up disabled services.
         mServices.bringDownDisabledPackageServicesLocked(
-                packageName, disabledClasses, userId, false /* evenPersistent */, true /* doIt */);
+                packageName, disabledClasses, userId, false /* evenPersistent */,
+                false /* fullStop */, true /* doIt */);
 
         // Clean-up disabled providers.
         ArrayList<ContentProviderRecord> providers = new ArrayList<>();
@@ -4436,7 +4437,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             mServices.bringDownDisabledPackageServicesLocked(
-                    packageName, null, userId, false, true);
+                    packageName, null, userId, false, true, true);
 
             if (mBooted) {
                 mAtmInternal.resumeTopActivities(true);
@@ -4489,7 +4490,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (mServices.bringDownDisabledPackageServicesLocked(
-                packageName, null /* filterByClasses */, userId, evenPersistent, doit)) {
+                packageName, null /* filterByClasses */, userId, evenPersistent, true, doit)) {
             if (!doit) {
                 return true;
             }

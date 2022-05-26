@@ -5184,7 +5184,7 @@ public final class ActiveServices {
     }
 
     boolean bringDownDisabledPackageServicesLocked(String packageName, Set<String> filterByClasses,
-            int userId, boolean evenPersistent, boolean doit) {
+            int userId, boolean evenPersistent, boolean fullStop, boolean doit) {
         boolean didSomething = false;
 
         if (mTmpCollectionResults != null) {
@@ -5221,6 +5221,18 @@ public final class ActiveServices {
             }
             if (size > 0) {
                 mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+            }
+            if (fullStop && !mTmpCollectionResults.isEmpty()) {
+                // if we're tearing down the app's entire service state, account for possible
+                // races around FGS notifications by explicitly tidying up in a separate
+                // pass post-shutdown
+                final ArrayList<ServiceRecord> allServices =
+                        (ArrayList<ServiceRecord>) mTmpCollectionResults.clone();
+                mAm.mHandler.postDelayed(() -> {
+                    for (int i = 0; i < allServices.size(); i++) {
+                        allServices.get(i).cancelNotification();
+                    }
+                }, 250L);
             }
             mTmpCollectionResults.clear();
         }
