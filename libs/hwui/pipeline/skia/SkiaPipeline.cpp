@@ -59,6 +59,7 @@ void SkiaPipeline::onDestroyHardwareResources() {
 }
 
 bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
+#ifdef __ANDROID__  // Layoutlib does not support Gr
     if (!mRenderThread.getGrContext()) {
         ALOGD("Trying to pin an image with an invalid GrContext");
         return false;
@@ -70,14 +71,17 @@ bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
             return false;
         }
     }
+#endif
     return true;
 }
 
 void SkiaPipeline::unpinImages() {
+#ifdef __ANDROID__  // Layoutlib does not support Gr
     for (auto& image : mPinnedImages) {
         SkImage_unpinAsTexture(image.get(), mRenderThread.getGrContext());
     }
     mPinnedImages.clear();
+#endif
 }
 
 void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
@@ -86,11 +90,15 @@ void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
     LightingInfo::updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
     renderLayersImpl(*layerUpdateQueue, opaque);
+#ifdef __ANDROID__  // Layoutlib does not support Layers
     layerUpdateQueue->clear();
+#endif
 }
 
 void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
+#ifdef __ANDROID__  // Layoutlib does not support Gr
     sk_sp<GrDirectContext> cachedContext;
+#endif
 
     // Render all layers that need to be updated, in order.
     for (size_t i = 0; i < layers.entries().size(); i++) {
@@ -143,7 +151,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
         layerCanvas->restoreToCount(saveCount);
 
         LightingInfo::setLightCenterRaw(savedLightCenter);
-
+#ifdef __ANDROID__  // Layoutlib does not support Gr
         // cache the current context so that we can defer flushing it until
         // either all the layers have been rendered or the context changes
         GrDirectContext* currentContext =
@@ -155,16 +163,19 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
             }
             cachedContext.reset(SkSafeRef(currentContext));
         }
+#endif
     }
-
+#ifdef __ANDROID__  // Layoutlib dose not support Layers
     if (cachedContext.get()) {
         ATRACE_NAME("flush layers");
         cachedContext->flushAndSubmit();
     }
+#endif
 }
 
 bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                                        ErrorHandler* errorHandler) {
+#ifdef __ANDROID__  // Layoutlib dose not support Layers
     // compute the size of the surface (i.e. texture) to be allocated for this layer
     const int surfaceWidth = ceilf(node->getWidth() / float(LAYER_SIZE)) * LAYER_SIZE;
     const int surfaceHeight = ceilf(node->getHeight() / float(LAYER_SIZE)) * LAYER_SIZE;
@@ -202,10 +213,12 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
         }
         return true;
     }
+#endif
     return false;
 }
 
 void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
+#ifdef __ANDROID__  // Layoutlib does not support Gr
     GrDirectContext* context = thread.getGrContext();
     if (context && !bitmap->isHardware()) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
@@ -219,9 +232,11 @@ void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
             context->flushAndSubmit();
         }
     }
+#endif
 }
 
 static void savePictureAsync(const sk_sp<SkData>& data, const std::string& filename) {
+#ifdef __ANDROID__  // Layoutlib does not support CommonPool
     CommonPool::post([data, filename] {
         if (0 == access(filename.c_str(), F_OK)) {
             return;
@@ -235,6 +250,7 @@ static void savePictureAsync(const sk_sp<SkData>& data, const std::string& filen
                      filename.c_str());
         }
     });
+#endif
 }
 
 // Note multiple SkiaPipeline instances may be loaded if more than one app is visible.
@@ -266,6 +282,7 @@ bool SkiaPipeline::shouldStartNewFileCapture() {
     return false;
 }
 
+#ifdef __ANDROID__  // Layoutlib does not support multiframe capture
 // performs the first-frame work of a multi frame SKP capture. Returns true if successful.
 bool SkiaPipeline::setupMultiFrameCapture() {
     ALOGD("Set up multi-frame capture, frames = %d", mCaptureSequence);
@@ -296,7 +313,9 @@ bool SkiaPipeline::setupMultiFrameCapture() {
         return false;
     }
 }
+#endif
 
+#ifdef __ANDROID__  // Layoutlib does not support Layers
 // recurse through the rendernode's children, add any nodes which are layers to the queue.
 static void collectLayers(RenderNode* node, LayerUpdateQueue* layers) {
     SkiaDisplayList* dl = node->getDisplayList().asSkiaDl();
@@ -339,12 +358,14 @@ static void recordLayers(const LayerUpdateQueue& layers,
     }
     LightingInfo::setLightCenterRaw(savedLightCenter);
 }
+#endif
 
 SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface, RenderNode* root,
     const LayerUpdateQueue& dirtyLayers) {
     if (CC_LIKELY(!Properties::skpCaptureEnabled)) {
         return surface->getCanvas(); // Bail out early when capture is not turned on.
     }
+#ifdef __ANDROID__  // Layoutlib does not support multiframe capture
     // Note that shouldStartNewFileCapture tells us if this is the *first* frame of a capture.
     bool firstFrameOfAnim = false;
     if (shouldStartNewFileCapture() && mCaptureMode == CaptureMode::MultiFrameSKP) {
@@ -355,6 +376,7 @@ SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface, RenderNode* root,
             return surface->getCanvas();
         }
     }
+#endif
 
     // Create a canvas pointer, fill it depending on what kind of capture is requested (if any)
     SkCanvas* pictureCanvas = nullptr;
@@ -380,6 +402,7 @@ SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface, RenderNode* root,
     mNwayCanvas->addCanvas(surface->getCanvas());
     mNwayCanvas->addCanvas(pictureCanvas);
 
+#ifdef __ANDROID__  // Layoutlib does not support Layers
     if (firstFrameOfAnim) {
         // On the first frame of any mskp capture we want to record any layers that are needed in
         // frame but may have been rendered offscreen before recording began.
@@ -392,6 +415,7 @@ SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface, RenderNode* root,
         // on non-first frames, we record any normal layer draws (dirty regions)
         recordLayers(dirtyLayers, mNwayCanvas.get());
     }
+#endif
 
     return mNwayCanvas.get();
 }
@@ -400,6 +424,7 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
     if (CC_LIKELY(mCaptureMode == CaptureMode::None)) { return; }
     mNwayCanvas.reset();
     ATRACE_CALL();
+#ifdef __ANDROID__  // Layoutlib does not support multiframe capture
     if (mCaptureSequence > 0 && mCaptureMode == CaptureMode::MultiFrameSKP) {
         mMultiPic->endPage();
         mCaptureSequence--;
@@ -418,6 +443,9 @@ void SkiaPipeline::endCapture(SkSurface* surface) {
             });
         }
     } else {
+#else
+    {
+#endif
         sk_sp<SkPicture> picture = mRecorder->finishRecordingAsPicture();
         if (picture->approximateOpCount() > 0) {
             if (mPictureCapturedCallback) {
@@ -581,6 +609,7 @@ void SkiaPipeline::renderFrameImpl(const SkRect& clip,
 }
 
 void SkiaPipeline::dumpResourceCacheUsage() const {
+#ifdef __ANDROID__  // Layoutlib does not support resource cache
     int resources;
     size_t bytes;
     mRenderThread.getGrContext()->getResourceCacheUsage(&resources, &bytes);
@@ -592,6 +621,7 @@ void SkiaPipeline::dumpResourceCacheUsage() const {
                 bytes * (1.0f / (1024.0f * 1024.0f)), maxBytes * (1.0f / (1024.0f * 1024.0f)));
 
     ALOGD("%s", log.c_str());
+#endif
 }
 
 void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
@@ -602,8 +632,10 @@ void SkiaPipeline::setSurfaceColorProperties(ColorMode colorMode) {
             mSurfaceColorSpace = SkColorSpace::MakeSRGB();
             break;
         case ColorMode::WideColorGamut:
+#ifdef __ANDROID__  // Layoutlib does not support DeviceInfo
             mSurfaceColorType = DeviceInfo::get()->getWideColorType();
             mSurfaceColorSpace = DeviceInfo::get()->getWideColorSpace();
+#endif
             break;
         case ColorMode::Hdr:
             mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;

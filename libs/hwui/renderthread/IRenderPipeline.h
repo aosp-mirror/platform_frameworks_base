@@ -27,7 +27,9 @@
 #include <SkRect.h>
 #include <utils/RefBase.h>
 
+#ifdef __ANDROID__  // Layoutlib does not support Gr
 class GrDirectContext;
+#endif
 
 struct ANativeWindow;
 
@@ -74,7 +76,9 @@ public:
     virtual void setSurfaceColorProperties(ColorMode colorMode) = 0;
     virtual SkColorType getSurfaceColorType() const = 0;
     virtual sk_sp<SkColorSpace> getSurfaceColorSpace() = 0;
+#ifdef __ANDROID__  // Layoutlib does not support Gr
     virtual GrSurfaceOrigin getSurfaceOrigin() = 0;
+#endif
     virtual void setPictureCapturedCallback(
             const std::function<void(sk_sp<SkPicture>&&)>& callback) = 0;
 

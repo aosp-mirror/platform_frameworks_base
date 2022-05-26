@@ -25,14 +25,20 @@
 #include <RootRenderNode.h>
 #include <SkImagePriv.h>
 #include <SkSerialProcs.h>
+#ifdef __ANDROID__
 #include <dlfcn.h>
+#endif
 #include <gui/TraceUtils.h>
 #include <inttypes.h>
+#ifdef __ANDROID__  // Layoutlib does not support hardware
 #include <media/NdkImage.h>
 #include <media/NdkImageReader.h>
+#endif
 #include <nativehelper/JNIPlatformHelp.h>
+#ifdef __ANDROID__  // Layoutlib does not support shader cache
 #include <pipeline/skia/ShaderCache.h>
 #include <private/EGL/cache.h>
+#endif
 #include <renderthread/CanvasContext.h>
 #include <renderthread/RenderProxy.h>
 #include <renderthread/RenderTask.h>
@@ -48,7 +54,9 @@
 #include <atomic>
 #include <vector>
 
+#ifdef __ANDROID__  // Layoutlib does not support Frame Metrics and shaders
 #include "android_graphics_HardwareRendererObserver.h"
+#endif
 
 namespace android {
 
@@ -83,6 +91,30 @@ static JNIEnv* getenv(JavaVM* vm) {
     }
     return env;
 }
+
+#ifndef __ANDROID__
+static struct {
+    jclass clazz;
+    jfieldID mNativeObject;
+    jfieldID mLock;
+    jmethodID ctor;
+} gSurfaceClassInfo;
+
+ANativeWindow* layoutlibFromSurface(JNIEnv* env, jobject surfaceObj) {
+    sp<ANativeWindow> win;
+    jobject lock = env->GetObjectField(surfaceObj, gSurfaceClassInfo.mLock);
+    if (env->MonitorEnter(lock) == JNI_OK) {
+        win = reinterpret_cast<Surface*>(
+                env->GetLongField(surfaceObj, gSurfaceClassInfo.mNativeObject));
+        env->MonitorExit(lock);
+    }
+    env->DeleteLocalRef(lock);
+    if (win != NULL) {
+        win->incStrong((void*)layoutlibFromSurface);
+    }
+    return win.get();
+}
+#endif
 
 typedef ANativeWindow* (*ANW_fromSurface)(JNIEnv* env, jobject surface);
 ANW_fromSurface fromSurface;
@@ -158,9 +190,13 @@ static jlong android_view_ThreadedRenderer_createRootRenderNode(JNIEnv* env, job
 static jlong android_view_ThreadedRenderer_createProxy(JNIEnv* env, jobject clazz,
         jboolean translucent, jlong rootRenderNodePtr) {
     RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootRenderNodePtr);
+#ifdef __ANDROID__  // Layoutlib does not support Animation
     ContextFactoryImpl factory(rootRenderNode);
     RenderProxy* proxy = new RenderProxy(translucent, rootRenderNode, &factory);
     return (jlong) proxy;
+#else
+    return (jlong) new RenderProxy(translucent, rootRenderNode, nullptr);
+#endif
 }
 
 static void android_view_ThreadedRenderer_deleteProxy(JNIEnv* env, jobject clazz,
@@ -661,15 +697,18 @@ static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
     return result;
 }
 
+#ifdef __ANDROID__  // Layoutlib does not support Animation
 class ContextFactory : public IContextFactory {
 public:
     virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
         return new AnimationContext(clock);
     }
 };
+#endif
 
 static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(JNIEnv* env,
         jobject clazz, jlong renderNodePtr, jint jwidth, jint jheight) {
+#ifdef __ANDROID__  // Layoutlib does not support hardware
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     if (jwidth <= 0 || jheight <= 0) {
         ALOGW("Invalid width %d or height %d", jwidth, jheight);
@@ -753,6 +792,9 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, cs);
     return bitmap::createBitmap(env, bitmap.release(),
             android::bitmap::kBitmapCreateFlag_Premultiplied);
+#else
+    return 0;
+#endif
 }
 
 static void android_view_ThreadedRenderer_disableVsync(JNIEnv*, jclass) {
@@ -799,9 +841,11 @@ static void android_view_ThreadedRenderer_preload(JNIEnv*, jclass) {
 
 // Plumbs the display density down to DeviceInfo.
 static void android_view_ThreadedRenderer_setDisplayDensityDpi(JNIEnv*, jclass, jint densityDpi) {
+#ifdef __ANDROID__  // host does not support native display
     // Convert from dpi to density-independent pixels.
     const float density = densityDpi / 160.0;
     DeviceInfo::setDensity(density);
+#endif
 }
 
 static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv*, jclass, jint physicalWidth,
@@ -809,12 +853,14 @@ static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv*, jclass, jint 
                                                           jint wideColorDataspace,
                                                           jlong appVsyncOffsetNanos,
                                                           jlong presentationDeadlineNanos) {
+#ifdef __ANDROID__  // host does not support native display
     DeviceInfo::setWidth(physicalWidth);
     DeviceInfo::setHeight(physicalHeight);
     DeviceInfo::setRefreshRate(refreshRate);
     DeviceInfo::setWideColorDataspace(static_cast<ADataSpace>(wideColorDataspace));
     DeviceInfo::setAppVsyncOffsetNanos(appVsyncOffsetNanos);
     DeviceInfo::setPresentationDeadlineNanos(presentationDeadlineNanos);
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -823,20 +869,24 @@ static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv*, jclass, jint 
 
 static void android_view_ThreadedRenderer_addObserver(JNIEnv* env, jclass clazz,
         jlong proxyPtr, jlong observerPtr) {
+#ifdef __ANDROID__  // Layoutlib does not support frame metrics
     HardwareRendererObserver* observer = reinterpret_cast<HardwareRendererObserver*>(observerPtr);
     renderthread::RenderProxy* renderProxy =
             reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
 
     renderProxy->addFrameMetricsObserver(observer);
+#endif
 }
 
 static void android_view_ThreadedRenderer_removeObserver(JNIEnv* env, jclass clazz,
         jlong proxyPtr, jlong observerPtr) {
+#ifdef __ANDROID__  // Layoutlib does not support frame metrics
     HardwareRendererObserver* observer = reinterpret_cast<HardwareRendererObserver*>(observerPtr);
     renderthread::RenderProxy* renderProxy =
             reinterpret_cast<renderthread::RenderProxy*>(proxyPtr);
 
     renderProxy->removeFrameMetricsObserver(observer);
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -845,6 +895,7 @@ static void android_view_ThreadedRenderer_removeObserver(JNIEnv* env, jclass cla
 
 static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, jobject clazz,
         jstring diskCachePath, jstring skiaDiskCachePath) {
+#ifdef __ANDROID__  // Layoutlib does not support EGL
     const char* cacheArray = env->GetStringUTFChars(diskCachePath, NULL);
     android::egl_set_cache_filename(cacheArray);
     env->ReleaseStringUTFChars(diskCachePath, cacheArray);
@@ -852,6 +903,7 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
     const char* skiaCacheArray = env->GetStringUTFChars(skiaDiskCachePath, NULL);
     uirenderer::skiapipeline::ShaderCache::get().setFilename(skiaCacheArray);
     env->ReleaseStringUTFChars(skiaDiskCachePath, skiaCacheArray);
+#endif
 }
 
 static jboolean android_view_ThreadedRenderer_isWebViewOverlaysEnabled(JNIEnv* env, jobject clazz) {
@@ -970,7 +1022,17 @@ static void attachRenderThreadToJvm(const char* name) {
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
     env->GetJavaVM(&mJvm);
+#ifdef __ANDROID__  // Layoutlib does not use a separate renderthread
     RenderThread::setOnStartHook(&attachRenderThreadToJvm);
+#endif
+
+    int robolectricApiLevel = GetRobolectricApiLevel(env);
+    if (robolectricApiLevel < 29) {
+        // Skip HardwareRenderer registration for SDK < 29. HardwareRenderer doesn't
+        // exist, and this JNI registration references static methods on
+        // HardwareRenderer.
+        return JNI_OK;
+    }
 
     jclass hardwareRenderer = FindClassOrDie(env,
             "android/graphics/HardwareRenderer");
@@ -979,15 +1041,17 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
             "invokePictureCapturedCallback",
             "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V");
 
-    jclass aSurfaceTransactionCallbackClass =
-            FindClassOrDie(env, "android/graphics/HardwareRenderer$ASurfaceTransactionCallback");
-    gASurfaceTransactionCallback.onMergeTransaction =
-            GetMethodIDOrDie(env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)Z");
+    if (robolectricApiLevel >= 31) {
+        jclass aSurfaceTransactionCallbackClass = FindClassOrDie(
+                env, "android/graphics/HardwareRenderer$ASurfaceTransactionCallback");
+        gASurfaceTransactionCallback.onMergeTransaction = GetMethodIDOrDie(
+                env, aSurfaceTransactionCallbackClass, "onMergeTransaction", "(JJJ)Z");
 
-    jclass prepareSurfaceControlForWebviewCallbackClass = FindClassOrDie(
-            env, "android/graphics/HardwareRenderer$PrepareSurfaceControlForWebviewCallback");
-    gPrepareSurfaceControlForWebviewCallback.prepare =
-            GetMethodIDOrDie(env, prepareSurfaceControlForWebviewCallbackClass, "prepare", "()V");
+        jclass prepareSurfaceControlForWebviewCallbackClass = FindClassOrDie(
+                env, "android/graphics/HardwareRenderer$PrepareSurfaceControlForWebviewCallback");
+        gPrepareSurfaceControlForWebviewCallback.prepare = GetMethodIDOrDie(
+                env, prepareSurfaceControlForWebviewCallbackClass, "prepare", "()V");
+    }
 
     jclass frameCallbackClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameDrawingCallback");
@@ -996,13 +1060,30 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
 
     jclass frameCompleteClass = FindClassOrDie(env,
             "android/graphics/HardwareRenderer$FrameCompleteCallback");
-    gFrameCompleteCallback.onFrameComplete = GetMethodIDOrDie(env, frameCompleteClass,
-            "onFrameComplete", "(J)V");
+    if (robolectricApiLevel < 32) {
+        gFrameCompleteCallback.onFrameComplete =
+                GetMethodIDOrDie(env, frameCompleteClass, "onFrameComplete", "(J)V");
+    } else {
+        gFrameCompleteCallback.onFrameComplete =
+                GetMethodIDOrDie(env, frameCompleteClass, "onFrameComplete", "()V");
+    }
 
+#ifdef __ANDROID__
     void* handle_ = dlopen("libandroid.so", RTLD_NOW | RTLD_NODELETE);
     fromSurface = (ANW_fromSurface)dlsym(handle_, "ANativeWindow_fromSurface");
     LOG_ALWAYS_FATAL_IF(fromSurface == nullptr,
                         "Failed to find required symbol ANativeWindow_fromSurface!");
+#else
+    jclass clazz = FindClassOrDie(env, "android/view/Surface");
+    gSurfaceClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
+    gSurfaceClassInfo.mNativeObject =
+            GetFieldIDOrDie(env, gSurfaceClassInfo.clazz, "mNativeObject", "J");
+    gSurfaceClassInfo.mLock =
+            GetFieldIDOrDie(env, gSurfaceClassInfo.clazz, "mLock", "Ljava/lang/Object;");
+    gSurfaceClassInfo.ctor = GetMethodIDOrDie(env, gSurfaceClassInfo.clazz, "<init>", "(J)V");
+
+    fromSurface = layoutlibFromSurface;
+#endif
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }

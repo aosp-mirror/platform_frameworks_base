@@ -22,14 +22,16 @@
 
 #include <vector>
 
+#include <ui/ANativeObjectBase.h>
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
-
 #include <utils/RefBase.h>
+
+#include <nativebase/nativebase.h>
 
 namespace android {
 
-class GraphicBuffer : virtual public RefBase {
+class GraphicBuffer : public ANativeObjectBase<ANativeWindowBuffer, GraphicBuffer, RefBase> {
 public:
     GraphicBuffer(uint32_t w, uint32_t h):width(w),height(h) {
         data.resize(w*h);

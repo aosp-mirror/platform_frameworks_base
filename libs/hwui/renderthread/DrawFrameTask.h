@@ -19,7 +19,9 @@
 #include <optional>
 #include <vector>
 
+#ifdef __ANDROID__  // Layoutlib does not support performance hints
 #include <performance_hint_private.h>
+#endif
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 #include <utils/StrongPointer.h>
@@ -95,15 +97,19 @@ private:
         void reportActualWorkDuration(long actualDurationNanos);
 
     private:
+#ifdef __ANDROID__  // Layoutlib does not support performance hints
         APerformanceHintSession* mHintSession = nullptr;
+#endif
     };
 
     void postAndWait();
     bool syncFrameState(TreeInfo& info);
     void unblockUiThread();
 
+#ifdef __ANDROID__  // Layoutlib is singlethreaded
     Mutex mLock;
     Condition mSignal;
+#endif
 
     RenderThread* mRenderThread;
     CanvasContext* mContext;
@@ -115,7 +121,9 @@ private:
     /*********************************************
      *  Single frame data
      *********************************************/
+#ifdef __ANDROID__  // Layoutlib does not support Layers
     std::vector<sp<DeferredLayerUpdater> > mLayers;
+#endif
 
     int mSyncResult;
     int64_t mSyncQueued;

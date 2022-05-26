@@ -21,9 +21,7 @@
 #include <DamageAccumulator.h>
 #include <Matrix.h>
 #include <RenderNode.h>
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext
 #include <renderthread/CanvasContext.h>
-#endif
 #include <TreeInfo.h>
 #include <effects/StretchEffect.h>
 #include <gui/TraceUtils.h>

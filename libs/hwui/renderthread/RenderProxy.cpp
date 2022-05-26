@@ -17,10 +17,14 @@
 #include "RenderProxy.h"
 
 #include <gui/TraceUtils.h>
+#ifdef __ANDROID__  // Layoutlib does not support Layers
 #include "DeferredLayerUpdater.h"
+#endif
 #include "DisplayList.h"
 #include "Properties.h"
+#ifdef __ANDROID__  // Layoutlib does not support GPU
 #include "Readback.h"
+#endif
 #include "Rect.h"
 #include "WebViewFunctorManager.h"
 #include "renderthread/CanvasContext.h"
@@ -41,8 +45,12 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
     mContext = mRenderThread.queue().runSync([&]() -> CanvasContext* {
         return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory);
     });
+#ifdef __ANDROID__
     mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode,
                               pthread_gettid_np(pthread_self()), getRenderThreadTid());
+#else
+    mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode, 0, 0);
+#endif
 }
 
 RenderProxy::~RenderProxy() {
@@ -64,6 +72,7 @@ void RenderProxy::setSwapBehavior(SwapBehavior swapBehavior) {
 }
 
 bool RenderProxy::loadSystemProperties() {
+#ifdef __ANDROID__  // Layoutlib does not support Profiling
     return mRenderThread.queue().runSync([this]() -> bool {
         bool needsRedraw = Properties::load();
         if (mContext->profiler().consumeProperties()) {
@@ -71,6 +80,9 @@ bool RenderProxy::loadSystemProperties() {
         }
         return needsRedraw;
     });
+#else
+    return true;
+#endif
 }
 
 void RenderProxy::setName(const char* name) {
@@ -88,6 +100,7 @@ void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
 }
 
 void RenderProxy::setSurfaceControl(ASurfaceControl* surfaceControl) {
+#ifdef __ANDROID__  // Layoutlib does not support surface control
     auto funcs = mRenderThread.getASurfaceControlFunctions();
     if (surfaceControl) {
         funcs.acquireFunc(surfaceControl);
@@ -98,6 +111,7 @@ void RenderProxy::setSurfaceControl(ASurfaceControl* surfaceControl) {
             funcs.releaseFunc(control);
         }
     });
+#endif
 }
 
 void RenderProxy::allocateBuffers() {
@@ -145,9 +159,11 @@ void RenderProxy::destroy() {
 }
 
 void RenderProxy::destroyFunctor(int functor) {
+#ifdef __ANDROID__  // Layoutlib does not support GPU
     ATRACE_CALL();
     RenderThread& thread = RenderThread::getInstance();
     thread.queue().post([=]() { WebViewFunctorManager::instance().destroyFunctor(functor); });
+#endif
 }
 
 DeferredLayerUpdater* RenderProxy::createTextureLayer() {
@@ -161,11 +177,15 @@ void RenderProxy::buildLayer(RenderNode* node) {
 }
 
 bool RenderProxy::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap) {
+#ifdef __ANDROID__  // Layoutlib does not support GPU
     ATRACE_NAME("TextureView#getBitmap");
     auto& thread = RenderThread::getInstance();
     return thread.queue().runSync([&]() -> bool {
         return thread.readback().copyLayerInto(layer, &bitmap) == CopyResult::Success;
     });
+#else
+    return false;
+#endif
 }
 
 void RenderProxy::pushLayerUpdate(DeferredLayerUpdater* layer) {
@@ -177,7 +197,9 @@ void RenderProxy::cancelLayerUpdate(DeferredLayerUpdater* layer) {
 }
 
 void RenderProxy::detachSurfaceTexture(DeferredLayerUpdater* layer) {
+#ifdef __ANDROID__  // Layoutlib does not support GPU
     return mRenderThread.queue().runSync([&]() { layer->detachSurfaceTexture(); });
+#endif
 }
 
 void RenderProxy::destroyHardwareResources() {
@@ -193,6 +215,7 @@ void RenderProxy::trimMemory(int level) {
 }
 
 void RenderProxy::purgeCaches() {
+#ifdef __ANDROID__  // Layoutlib does not support GrContext
     if (RenderThread::hasInstance()) {
         RenderThread& thread = RenderThread::getInstance();
         thread.queue().post([&thread]() {
@@ -201,6 +224,7 @@ void RenderProxy::purgeCaches() {
             }
         });
     }
+#endif
 }
 
 void RenderProxy::overrideProperty(const char* name, const char* value) {
@@ -214,9 +238,13 @@ void RenderProxy::fence() {
 }
 
 int RenderProxy::maxTextureSize() {
+#ifdef __ANDROID__  // Layoutlib does not support DeviceInfo
     static int maxTextureSize = RenderThread::getInstance().queue().runSync(
             []() { return DeviceInfo::get()->maxTextureSize(); });
     return maxTextureSize;
+#else
+    return 4096;
+#endif
 }
 
 void RenderProxy::stopDrawing() {
@@ -228,6 +256,7 @@ void RenderProxy::notifyFramePending() {
 }
 
 void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {
+#ifdef __ANDROID__  // Layoutlib does not support Profiling
     mRenderThread.queue().runSync([&]() {
         std::lock_guard lock(mRenderThread.getJankDataMutex());
         mContext->profiler().dumpData(fd);
@@ -241,20 +270,27 @@ void RenderProxy::dumpProfileInfo(int fd, int dumpFlags) {
             mContext->resetFrameStats();
         }
     });
+#endif
 }
 
 void RenderProxy::resetProfileInfo() {
+#ifdef __ANDROID__  // Layoutlib does not support Profiling
     mRenderThread.queue().runSync([=]() {
         std::lock_guard lock(mRenderThread.getJankDataMutex());
         mContext->resetFrameStats();
     });
+#endif
 }
 
 uint32_t RenderProxy::frameTimePercentile(int percentile) {
+#ifdef __ANDROID__  // Layoutlib does not support Profiling
     return mRenderThread.queue().runSync([&]() -> auto {
         std::lock_guard lock(mRenderThread.globalProfileData().getDataMutex());
         return mRenderThread.globalProfileData()->findPercentile(percentile);
     });
+#else
+    return 0;
+#endif
 }
 
 void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData) {
@@ -272,16 +308,20 @@ void RenderProxy::getMemoryUsage(size_t* cpuUsage, size_t* gpuUsage) {
 }
 
 void RenderProxy::setProcessStatsBuffer(int fd) {
+#ifdef __ANDROID__  // Layoutlib does not support Profiling
     auto& rt = RenderThread::getInstance();
     rt.queue().post([&rt, fd = dup(fd)]() {
         rt.globalProfileData().switchStorageToAshmem(fd);
         close(fd);
     });
+#endif
 }
 
 void RenderProxy::rotateProcessStatsBuffer() {
+#ifdef __ANDROID__  // Layoutlib does not support Profiling
     auto& rt = RenderThread::getInstance();
     rt.queue().post([&rt]() { rt.globalProfileData().rotateStorage(); });
+#endif
 }
 
 int RenderProxy::getRenderThreadTid() {
@@ -331,15 +371,19 @@ void RenderProxy::setFrameCompleteCallback(std::function<void(int64_t)>&& callba
 }
 
 void RenderProxy::addFrameMetricsObserver(FrameMetricsObserver* observerPtr) {
+#ifdef __ANDROID__  // Layoutlib does not support Metrics
     mRenderThread.queue().post([this, observer = sp{observerPtr}]() {
         mContext->addFrameMetricsObserver(observer.get());
     });
+#endif
 }
 
 void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observerPtr) {
+#ifdef __ANDROID__  // Layoutlib does not support Metrics
     mRenderThread.queue().post([this, observer = sp{observerPtr}]() {
         mContext->removeFrameMetricsObserver(observer.get());
     });
+#endif
 }
 
 void RenderProxy::setForceDark(bool enable) {
@@ -382,6 +426,7 @@ void RenderProxy::prepareToDraw(Bitmap& bitmap) {
 }
 
 int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
+#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
     ATRACE_NAME("HardwareBitmap readback");
     RenderThread& thread = RenderThread::getInstance();
     if (gettid() == thread.getTid()) {
@@ -391,9 +436,13 @@ int RenderProxy::copyHWBitmapInto(Bitmap* hwBitmap, SkBitmap* bitmap) {
         return thread.queue().runSync(
                 [&]() -> int { return (int)thread.readback().copyHWBitmapInto(hwBitmap, bitmap); });
     }
+#else
+    return 0;
+#endif
 }
 
 int RenderProxy::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
+#ifdef __ANDROID__  // Layoutlib does not support hardware acceleration
     RenderThread& thread = RenderThread::getInstance();
     if (gettid() == thread.getTid()) {
         // TODO: fix everything that hits this. We should never be triggering a readback ourselves.
@@ -402,6 +451,9 @@ int RenderProxy::copyImageInto(const sk_sp<SkImage>& image, SkBitmap* bitmap) {
         return thread.queue().runSync(
                 [&]() -> int { return (int)thread.readback().copyImageInto(image, bitmap); });
     }
+#else
+    return 0;
+#endif
 }
 
 void RenderProxy::disableVsync() {
@@ -409,9 +461,11 @@ void RenderProxy::disableVsync() {
 }
 
 void RenderProxy::preload() {
+#ifdef __ANDROID__  // Layoutlib does not support preload?
     // Create RenderThread object and start the thread. Then preload Vulkan/EGL driver.
     auto& thread = RenderThread::getInstance();
     thread.queue().post([&thread]() { thread.preload(); });
+#endif
 }
 
 } /* namespace renderthread */
