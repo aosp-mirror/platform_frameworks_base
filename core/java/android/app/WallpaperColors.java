@@ -36,7 +36,6 @@ import com.android.internal.graphics.cam.Cam;
 import com.android.internal.graphics.palette.CelebiQuantizer;
 import com.android.internal.graphics.palette.Palette;
 import com.android.internal.graphics.palette.VariationalKMeansQuantizer;
-import com.android.internal.util.ContrastColorUtil;
 
 import java.io.FileOutputStream;
 import java.lang.annotation.Retention;
@@ -94,18 +93,10 @@ public final class WallpaperColors implements Parcelable {
     // using the area instead. This way our comparisons are aspect ratio independent.
     private static final int MAX_WALLPAPER_EXTRACTION_AREA = MAX_BITMAP_SIZE * MAX_BITMAP_SIZE;
 
-    // When extracting the main colors, only consider colors
-    // present in at least MIN_COLOR_OCCURRENCE of the image
-    private static final float MIN_COLOR_OCCURRENCE = 0.05f;
-
-    // Decides when dark theme is optimal for this wallpaper
-    private static final float DARK_THEME_MEAN_LUMINANCE = 0.3f;
-    // Minimum mean luminosity that an image needs to have to support dark text
-    private static final float BRIGHT_IMAGE_MEAN_LUMINANCE = 0.7f;
-    // We also check if the image has dark pixels in it,
-    // to avoid bright images with some dark spots.
-    private static final float DARK_PIXEL_CONTRAST = 5.5f;
-    private static final float MAX_DARK_AREA = 0.05f;
+    // Decides when dark theme is optimal for this wallpaper.
+    // The midpoint of perceptual luminance, 50, is 18.42 in relative luminance.
+    // ColorUtils.calculateLuminance returns relative luminance on a scale from 0 to 1.
+    private static final float DARK_THEME_MEAN_LUMINANCE = 0.1842f;
 
     private final List<Color> mMainColors;
     private final Map<Integer, Integer> mAllColors;
@@ -253,12 +244,9 @@ public final class WallpaperColors implements Parcelable {
         this(primaryColor, secondaryColor, tertiaryColor, 0);
 
         // Calculate dark theme support based on primary color.
-        final float[] tmpHsl = new float[3];
-        ColorUtils.colorToHSL(primaryColor.toArgb(), tmpHsl);
-        final float luminance = tmpHsl[2];
-        if (luminance < DARK_THEME_MEAN_LUMINANCE) {
-            mColorHints |= HINT_SUPPORTS_DARK_THEME;
-        }
+        final double relativeLuminance = ColorUtils.calculateLuminance(primaryColor.toArgb());
+        final boolean wallpaperIsDark = relativeLuminance < DARK_THEME_MEAN_LUMINANCE;
+        mColorHints |= wallpaperIsDark ? HINT_SUPPORTS_DARK_THEME : HINT_SUPPORTS_DARK_TEXT;
     }
 
     /**
@@ -536,9 +524,6 @@ public final class WallpaperColors implements Parcelable {
 
         dimAmount = MathUtils.saturate(dimAmount);
         int[] pixels = new int[source.getWidth() * source.getHeight()];
-        double totalLuminance = 0;
-        final int maxDarkPixels = (int) (pixels.length * MAX_DARK_AREA);
-        int darkPixels = 0;
         source.getPixels(pixels, 0 /* offset */, source.getWidth(), 0 /* x */, 0 /* y */,
                 source.getWidth(), source.getHeight());
 
@@ -547,42 +532,70 @@ public final class WallpaperColors implements Parcelable {
         int dimmingLayerAlpha = (int) (255 * dimAmount);
         int blackTransparent = ColorUtils.setAlphaComponent(Color.BLACK, dimmingLayerAlpha);
 
-        // This bitmap was already resized to fit the maximum allowed area.
-        // Let's just loop through the pixels, no sweat!
-        float[] tmpHsl = new float[3];
+        // The median luminance in the wallpaper will be used to decide if it is light or dark.
+        //
+        // Calculating the luminances, adding them to a data structure, then selecting
+        // the middle element would be expensive, the sort would be O(n), where n is the number
+        // of pixels.
+        //
+        // Instead, we create an integer array with 101 elements initialized to zero.
+        // Why 101? 0 through 100, inclusive, matching the range of luminance.
+        // Then, for each pixel, the luminance is calculated, and the integer at the array index
+        // equal to the rounded luminance is incremented.
+        //
+        // After processing the pixels, the median luminance is determined by iterating over the
+        // array containing the count for each luminance. Starting from 0, we adding the count at
+        // each index until pixels.length/2 is exceeded. When that occurs, it means the current
+        // array index contains the pixel of median luminance, thus the current array index is the
+        // median luminance.
+        int[] luminanceCounts = new int[101];
         for (int i = 0; i < pixels.length; i++) {
             int pixelColor = pixels[i];
-            ColorUtils.colorToHSL(pixelColor, tmpHsl);
             final int alpha = Color.alpha(pixelColor);
-
-            // Apply composite colors where the foreground is a black layer with an alpha value of
-            // the dim amount and the background is the wallpaper pixel color.
-            int compositeColors = ColorUtils.compositeColors(blackTransparent, pixelColor);
-
-            // Calculate the adjusted luminance of the dimmed wallpaper pixel color.
-            double adjustedLuminance = ColorUtils.calculateLuminance(compositeColors);
-
-            // Make sure we don't have a dark pixel mass that will
-            // make text illegible.
-            final boolean satisfiesTextContrast = ContrastColorUtil
-                    .calculateContrast(pixelColor, Color.BLACK) > DARK_PIXEL_CONTRAST;
-            if (!satisfiesTextContrast && alpha != 0) {
-                darkPixels++;
-                if (DEBUG_DARK_PIXELS) {
-                    pixels[i] = Color.RED;
-                }
+            if (alpha == 0) {
+                continue;
             }
-            totalLuminance += adjustedLuminance;
+
+            // If the wallpaper is dimmed, apply dimming before calculating luminance.
+            int compositeColor = dimAmount <= 0 ? pixelColor :
+                    ColorUtils.compositeColors(blackTransparent, pixelColor);
+
+            // calculateLuminance will return relative luminance on a scale from 0 to 1. Intent
+            // is normalize to 0 to 100, and that is done by defensively normalizing to
+            // luminanceCounts.length, then flooring the result to defensively avoid any imprecision
+            // in the result of calculateLuminance that could cause it to exceed 1 and thus the
+            // array bounds.
+            float relativeLuminance = (float) ColorUtils.calculateLuminance(compositeColor)
+                    * luminanceCounts.length - 1;
+            int intRelativeLuminance = (int) Math.floor(relativeLuminance);
+            int clampedRelativeLuminance = (intRelativeLuminance < 0) ? 0 :
+                    (intRelativeLuminance > luminanceCounts.length - 1) ? luminanceCounts.length - 1
+                            : intRelativeLuminance;
+            luminanceCounts[clampedRelativeLuminance] += 1;
         }
 
+        int criticalRelativeLuminance = 0;
+        int luminancesProcessed = 0;
+        int criticalLuminanceIndex = (int) Math.floor(pixels.length * 0.5);
+        for (int i = 0; i < 100; i++) {
+            luminancesProcessed += luminanceCounts[i];
+            if (luminancesProcessed > criticalLuminanceIndex) {
+                criticalRelativeLuminance = i;
+                break;
+            }
+        }
+
+        // Wallpaper is dark if the median pixel is less than mid-gray.
+        //
+        // Relative luminance places mid-gray at 18.42, 19 is used since luminances were rounded to
+        // ints to be stored in the array.
+        //
+        // Why not use perceptual luminance? It would require one more conversion step at each
+        // pixel, or adding a function to convert relative luminance to perceptual luminance just
+        // for this line.
+        boolean wallpaperIsDark = criticalRelativeLuminance < 19;
         int hints = 0;
-        double meanLuminance = totalLuminance / pixels.length;
-        if (meanLuminance > BRIGHT_IMAGE_MEAN_LUMINANCE && darkPixels < maxDarkPixels) {
-            hints |= HINT_SUPPORTS_DARK_TEXT;
-        }
-        if (meanLuminance < DARK_THEME_MEAN_LUMINANCE) {
-            hints |= HINT_SUPPORTS_DARK_THEME;
-        }
+        hints |= wallpaperIsDark ? HINT_SUPPORTS_DARK_THEME : HINT_SUPPORTS_DARK_TEXT;
 
         if (DEBUG_DARK_PIXELS) {
             try (FileOutputStream out = new FileOutputStream("/data/pixels.png")) {
@@ -592,8 +605,8 @@ public final class WallpaperColors implements Parcelable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Log.d("WallpaperColors", "l: " + meanLuminance + ", d: " + darkPixels +
-                    " maxD: " + maxDarkPixels + " numPixels: " + pixels.length);
+            Log.d("WallpaperColors", "median relative L: " + criticalRelativeLuminance
+                    + ", numPixels: " + pixels.length);
         }
 
         return hints;
