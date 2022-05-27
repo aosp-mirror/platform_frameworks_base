@@ -8082,7 +8082,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         resolvedBounds.set(containingBounds);
 
         final float letterboxAspectRatioOverride =
-                mLetterboxUiController.getFixedOrientationLetterboxAspectRatio(newParentConfig);
+                mWmService.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
         final float desiredAspectRatio =
                 letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
                         ? letterboxAspectRatioOverride : computeAspectRatio(parentBounds);
@@ -8645,7 +8645,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // if an app sets orientation to portrait dynamically because of aspect ratio
                     // restriction applied here.
                     && getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
-                ? mWmService.mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps()
+                ? mLetterboxUiController.getDefaultMinAspectRatioForUnresizableApps()
                 : infoAspectRatio;
     }
 
