@@ -949,6 +949,30 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetLetterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled(PrintWriter pw)
+            throws RemoteException {
+        String arg = getNextArg();
+        final boolean enabled;
+        switch (arg) {
+            case "true":
+            case "1":
+                enabled = true;
+                break;
+            case "false":
+            case "0":
+                enabled = false;
+                break;
+            default:
+                getErrPrintWriter().println("Error: expected true, 1, false, 0, but got " + arg);
+                return -1;
+        }
+
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setIsSplitScreenAspectRatioForUnresizableAppsEnabled(enabled);
+        }
+        return 0;
+    }
+
     private int runSetLetterboxStyle(PrintWriter pw) throws RemoteException {
         if (peekNextArg() == null) {
             getErrPrintWriter().println("Error: No arguments provided.");
@@ -1000,6 +1024,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     break;
                 case "--isEducationEnabled":
                     runSetLetterboxIsEducationEnabled(pw);
+                    break;
+                case "--isSplitScreenAspectRatioForUnresizableAppsEnabled":
+                    runSetLetterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled(pw);
                     break;
                 default:
                     getErrPrintWriter().println(
@@ -1059,6 +1086,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                         break;
                     case "isEducationEnabled":
                         mLetterboxConfiguration.getIsEducationEnabled();
+                        break;
+                    case "isSplitScreenAspectRatioForUnresizableAppsEnabled":
+                        mLetterboxConfiguration
+                                .getIsSplitScreenAspectRatioForUnresizableAppsEnabled();
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -1159,6 +1190,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetDefaultPositionForHorizontalReachability();
             mLetterboxConfiguration.resetDefaultPositionForVerticalReachability();
             mLetterboxConfiguration.resetIsEducationEnabled();
+            mLetterboxConfiguration.resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
         }
     }
 
@@ -1186,6 +1218,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     mLetterboxConfiguration.getDefaultPositionForVerticalReachability()));
             pw.println("Is education enabled: "
                     + mLetterboxConfiguration.getIsEducationEnabled());
+            pw.println("Is using split screen aspect ratio as aspect ratio for unresizable apps: "
+                    + mLetterboxConfiguration
+                            .getIsSplitScreenAspectRatioForUnresizableAppsEnabled());
 
             pw.println("Background type: "
                     + LetterboxConfiguration.letterboxBackgroundTypeToString(
@@ -1343,6 +1378,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        enabled.");
         pw.println("      --isEducationEnabled [true|1|false|0]");
         pw.println("        Whether education is allowed for letterboxed fullscreen apps.");
+        pw.println("      --isSplitScreenAspectRatioForUnresizableAppsEnabled [true|1|false|0]");
+        pw.println("        Whether using split screen aspect ratio as a default aspect ratio for");
+        pw.println("        unresizable apps.");
         pw.println("  reset-letterbox-style [aspectRatio|cornerRadius|backgroundType");
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|verticalPositionMultiplier");
