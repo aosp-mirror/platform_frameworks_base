@@ -935,7 +935,8 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"പൂർത്തിയായി"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"പകർത്തി"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> എന്നതിൽ നിന്ന്"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"പകർപ്പ് UI ഡിസ്‌മിസ് ചെയ്യുക"</string>
+    <!-- no translation found for clipboard_dismiss_description (3335990369850165486) -->
+    <skip />
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"പകർത്തിയ ടെക്സ്റ്റ് എഡിറ്റ് ചെയ്യുക"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"പകർത്തിയ ചിത്രം എഡിറ്റ് ചെയ്യുക"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"സമീപത്തുള്ള ഉപകരണത്തിലേക്ക് അയയ്ക്കുക"</string>

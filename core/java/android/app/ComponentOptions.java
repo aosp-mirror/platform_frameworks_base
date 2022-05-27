@@ -38,7 +38,15 @@ public class ComponentOptions {
     public static final String KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED =
             "android.pendingIntent.backgroundActivityAllowed";
 
+    /**
+     * PendingIntent caller allows activity to be started if caller has BAL permission.
+     * @hide
+     */
+    public static final String KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION =
+            "android.pendingIntent.backgroundActivityAllowedByPermission";
+
     private boolean mPendingIntentBalAllowed = PENDING_INTENT_BAL_ALLOWED_DEFAULT;
+    private boolean mPendingIntentBalAllowedByPermission = false;
 
     ComponentOptions() {
     }
@@ -50,6 +58,9 @@ public class ComponentOptions {
         setPendingIntentBackgroundActivityLaunchAllowed(
                 opts.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED,
                         PENDING_INTENT_BAL_ALLOWED_DEFAULT));
+        setPendingIntentBackgroundActivityLaunchAllowedByPermission(
+                opts.getBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION,
+                        false));
     }
 
     /**
@@ -68,9 +79,28 @@ public class ComponentOptions {
         return mPendingIntentBalAllowed;
     }
 
+    /**
+     * Set PendingIntent activity can be launched from background if caller has BAL permission.
+     * @hide
+     */
+    public void setPendingIntentBackgroundActivityLaunchAllowedByPermission(boolean allowed) {
+        mPendingIntentBalAllowedByPermission = allowed;
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller
+     * has BAL permission.
+     * @hide
+     */
+    public boolean isPendingIntentBackgroundActivityLaunchAllowedByPermission() {
+        return mPendingIntentBalAllowedByPermission;
+    }
+
     public Bundle toBundle() {
         Bundle b = new Bundle();
         b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, mPendingIntentBalAllowed);
+        b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION,
+                mPendingIntentBalAllowedByPermission);
         return b;
     }
 }

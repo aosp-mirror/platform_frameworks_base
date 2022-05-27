@@ -1498,7 +1498,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"డ్రైవింగ్ యాప్ నుండి నిష్క్రమించడం కోసం నొక్కండి."</string>
     <string name="back_button_label" msgid="4078224038025043387">"వెనుకకు"</string>
     <string name="next_button_label" msgid="6040209156399907780">"తర్వాత"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"దాటవేయి"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"స్కిప్ చేయండి"</string>
     <string name="no_matches" msgid="6472699895759164599">"సరిపోలికలు లేవు"</string>
     <string name="find_on_page" msgid="5400537367077438198">"పేజీలో కనుగొనండి"</string>
     <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# మ్యాచ్}other{#లో {total}}}"</string>
