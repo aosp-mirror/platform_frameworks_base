@@ -194,6 +194,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
+        if (!canAlertHeadsUpCommon(entry)) {
+            return false;
+        }
+
         if (!canAlertAwakeCommon(entry)) {
             return false;
         }
@@ -267,6 +271,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
+        if (!canAlertHeadsUpCommon(entry)) {
+            mLogger.logNoPulsingNoAlert(sbn);
+            return false;
+        }
+
         if (entry.shouldSuppressAmbient()) {
             mLogger.logNoPulsingNoAmbientEffect(sbn);
             return false;
@@ -294,12 +303,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        // Don't alert notifications that are suppressed due to group alert behavior
-        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
-            mLogger.logNoAlertingGroupAlertBehavior(sbn);
-            return false;
-        }
-
         for (int i = 0; i < mSuppressors.size(); i++) {
             if (mSuppressors.get(i).suppressInterruptions(entry)) {
                 mLogger.logNoAlertingSuppressedBy(sbn, mSuppressors.get(i), /* awake */ false);
@@ -307,13 +310,31 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             }
         }
 
-        if (entry.hasJustLaunchedFullScreenIntent()) {
-            mLogger.logNoAlertingRecentFullscreen(sbn);
+        if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
+            mLogger.keyguardHideNotification(entry.getKey());
             return false;
         }
 
-        if (mKeyguardNotificationVisibilityProvider.shouldHideNotification(entry)) {
-            mLogger.keyguardHideNotification(entry.getKey());
+        return true;
+    }
+
+    /**
+     * Common checks for heads up notifications on regular and AOD displays.
+     *
+     * @param entry the entry to check
+     * @return true if these checks pass, false if the notification should not alert
+     */
+    private boolean canAlertHeadsUpCommon(NotificationEntry entry) {
+        StatusBarNotification sbn = entry.getSbn();
+
+        // Don't alert notifications that are suppressed due to group alert behavior
+        if (sbn.isGroup() && sbn.getNotification().suppressAlertingDueToGrouping()) {
+            mLogger.logNoAlertingGroupAlertBehavior(sbn);
+            return false;
+        }
+
+        if (entry.hasJustLaunchedFullScreenIntent()) {
+            mLogger.logNoAlertingRecentFullscreen(sbn);
             return false;
         }
 
