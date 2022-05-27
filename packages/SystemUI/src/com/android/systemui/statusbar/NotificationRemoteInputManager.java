@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
+import com.android.systemui.util.ListenerSet;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -75,6 +76,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import dagger.Lazy;
 
@@ -118,6 +120,8 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected Callback mCallback;
 
     private final List<RemoteInputController.Callback> mControllerCallbacks = new ArrayList<>();
+    private final ListenerSet<Consumer<NotificationEntry>> mActionPressListeners =
+            new ListenerSet<>();
 
     private final InteractionHandler mInteractionHandler = new InteractionHandler() {
 
@@ -401,6 +405,14 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
     }
 
+    public void addActionPressListener(Consumer<NotificationEntry> listener) {
+        mActionPressListeners.addIfAbsent(listener);
+    }
+
+    public void removeActionPressListener(Consumer<NotificationEntry> listener) {
+        mActionPressListeners.remove(listener);
+    }
+
     /**
      * Activates a given {@link RemoteInput}
      *
@@ -633,6 +645,9 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
         if (mRemoteInputListener != null) {
             mRemoteInputListener.releaseNotificationIfKeptForRemoteInputHistory(entry);
+        }
+        for (Consumer<NotificationEntry> listener : mActionPressListeners) {
+            listener.accept(entry);
         }
     }
 
