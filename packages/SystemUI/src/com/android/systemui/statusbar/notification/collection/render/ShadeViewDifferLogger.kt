@@ -43,12 +43,13 @@ class ShadeViewDifferLogger @Inject constructor(
         })
     }
 
-    fun logAttachingChild(key: String, parent: String) {
+    fun logAttachingChild(key: String, parent: String, atIndex: Int) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
             str2 = parent
+            int1 = atIndex
         }, {
-            "Attaching view $str1 to $str2"
+            "Attaching view $str1 to $str2 at index $int1"
         })
     }
 
