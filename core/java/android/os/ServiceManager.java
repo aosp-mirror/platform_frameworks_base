@@ -276,6 +276,8 @@ public final class ServiceManager {
      * @return {@code null} only if there are permission problems or fatal errors.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @Nullable
     public static IBinder waitForService(@NonNull String name) {
         return Binder.allowBlocking(waitForServiceNative(name));
     }
