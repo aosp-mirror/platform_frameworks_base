@@ -25,6 +25,7 @@ import android.animation.Animator;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Rect;
@@ -192,6 +193,15 @@ public class PipAnimationController {
         animator.setFloatValues(FRACTION_START, FRACTION_END);
         animator.setAnimationHandler(mSfAnimationHandlerThreadLocal.get());
         return animator;
+    }
+
+    /**
+     * Quietly cancel the animator by removing the listeners first.
+     */
+    static void quietCancel(@NonNull ValueAnimator animator) {
+        animator.removeAllUpdateListeners();
+        animator.removeAllListeners();
+        animator.cancel();
     }
 
     /**
