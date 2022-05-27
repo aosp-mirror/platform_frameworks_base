@@ -52,7 +52,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BatteryUsageStatsProvider;
 
 import com.google.android.collect.Lists;
 
@@ -4536,7 +4535,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
 
-        final BatteryUsageStats stats = getBatteryUsageStats(context);
+        final BatteryUsageStats stats = getBatteryUsageStats(context, true /* detailed */);
         dumpLine(pw, 0 /* uid */, category, POWER_USE_SUMMARY_DATA,
                 formatCharge(stats.getBatteryCapacity()),
                 formatCharge(stats.getConsumedPower()),
@@ -5725,14 +5724,8 @@ public abstract class BatteryStats implements Parcelable {
         pw.println(getDischargeAmountScreenDozeSinceCharge());
         pw.println();
 
-        final BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, this);
-        final BatteryUsageStats stats = provider.getBatteryUsageStats(
-                new BatteryUsageStatsQuery.Builder()
-                        .setMaxStatsAgeMs(0)
-                        .includePowerModels()
-                        .includeProcessStateData()
-                        .includeVirtualUids()
-                        .build());
+
+        BatteryUsageStats stats = getBatteryUsageStats(context, true /* detailed */);
         stats.dump(pw, prefix);
 
         List<UidMobileRadioStats> uidMobileRadioStats =
@@ -7730,7 +7723,7 @@ public abstract class BatteryStats implements Parcelable {
         proto.write(BatteryStatsProto.END_PLATFORM_VERSION, getEndPlatformVersion());
 
         if ((flags & DUMP_DAILY_ONLY) == 0) {
-            final BatteryUsageStats stats = getBatteryUsageStats(context);
+            final BatteryUsageStats stats = getBatteryUsageStats(context, false /* detailed */);
             ProportionalAttributionCalculator proportionalAttributionCalculator =
                     new ProportionalAttributionCalculator(context, stats);
             dumpProtoAppsLocked(proto, stats, apps, proportionalAttributionCalculator);
@@ -8679,12 +8672,7 @@ public abstract class BatteryStats implements Parcelable {
         return !tm.isDataCapable();
     }
 
-    private BatteryUsageStats getBatteryUsageStats(Context context) {
-        final BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, this);
-        final BatteryUsageStatsQuery query =
-                new BatteryUsageStatsQuery.Builder().setMaxStatsAgeMs(0).build();
-        return provider.getBatteryUsageStats(query);
-    }
+    protected abstract BatteryUsageStats getBatteryUsageStats(Context context, boolean detailed);
 
     private boolean shouldHidePowerComponent(int powerComponent) {
         return powerComponent == BatteryConsumer.POWER_COMPONENT_IDLE

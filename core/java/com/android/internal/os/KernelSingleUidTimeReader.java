@@ -68,7 +68,7 @@ public class KernelSingleUidTimeReader {
 
     private static final native boolean canReadBpfTimes();
 
-    KernelSingleUidTimeReader(int cpuFreqsCount) {
+    public KernelSingleUidTimeReader(int cpuFreqsCount) {
         this(cpuFreqsCount, new Injector());
     }
 

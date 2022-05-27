@@ -16,8 +16,6 @@
 
 package com.android.internal.app;
 
-import com.android.internal.os.BatteryStatsImpl;
-
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;

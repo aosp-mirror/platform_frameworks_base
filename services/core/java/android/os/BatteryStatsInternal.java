@@ -17,7 +17,7 @@
 package android.os;
 
 import com.android.internal.os.BinderCallsStats;
-import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
+import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
 import java.util.Collection;
 import java.util.List;
