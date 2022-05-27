@@ -24,6 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:layout_marginStart="4dp"
+        android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintStart_toStartOf="@id/done_button"
         app:layout_constraintTop_toBottomOf="@id/done_button" />
 
