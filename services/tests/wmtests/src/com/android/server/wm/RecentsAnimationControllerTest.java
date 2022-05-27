@@ -36,6 +36,7 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_P
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -595,6 +596,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(true));
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         assertFalse(mController.isNavigationBarAttachedToApp());
+        assertTrue(navToken.isAnimating(ANIMATION_TYPE_TOKEN_TRANSFORM));
     }
 
     @Test
@@ -622,6 +624,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         assertFalse(mController.isNavigationBarAttachedToApp());
+        assertFalse(navToken.isAnimating(ANIMATION_TYPE_TOKEN_TRANSFORM));
     }
 
     @Test
@@ -649,6 +652,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 eq(mDefaultDisplay.mDisplayId), eq(true));
         verify(transaction).setLayer(navToken.getSurfaceControl(), 0);
         assertFalse(mController.isNavigationBarAttachedToApp());
+        assertTrue(navToken.isAnimating(ANIMATION_TYPE_TOKEN_TRANSFORM));
     }
 
     @Test
