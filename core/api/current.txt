@@ -30074,6 +30074,7 @@ package android.os {
 
   public static interface IBinder.DeathRecipient {
     method public void binderDied();
+    method public default void binderDied(@NonNull android.os.IBinder);
   }
 
   public interface IInterface {

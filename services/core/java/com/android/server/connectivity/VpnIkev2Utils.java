@@ -68,6 +68,7 @@ import android.net.ipsec.ike.IkeRfc822AddrIdentification;
 import android.net.ipsec.ike.IkeSaProposal;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionConfiguration;
+import android.net.ipsec.ike.IkeSessionConnectionInfo;
 import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.IkeTrafficSelector;
 import android.net.ipsec.ike.TunnelModeChildSessionParams;
@@ -88,7 +89,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 /**
  * Utility class to build and convert IKEv2/IPsec parameters.
@@ -107,6 +108,7 @@ public class VpnIkev2Utils {
                 new IkeSessionParams.Builder(context)
                         .setServerHostname(profile.getServerAddr())
                         .setNetwork(network)
+                        .addIkeOption(IkeSessionParams.IKE_OPTION_MOBIKE)
                         .setLocalIdentification(localId)
                         .setRemoteIdentification(remoteId);
         setIkeAuth(profile, ikeOptionsBuilder);
@@ -309,7 +311,7 @@ public class VpnIkev2Utils {
         @Override
         public void onOpened(@NonNull IkeSessionConfiguration ikeSessionConfig) {
             Log.d(mTag, "IkeOpened for token " + mToken);
-            // Nothing to do here.
+            mCallback.onIkeOpened(mToken, ikeSessionConfig);
         }
 
         @Override
@@ -328,6 +330,13 @@ public class VpnIkev2Utils {
         public void onError(@NonNull IkeProtocolException exception) {
             Log.d(mTag, "IkeError for token " + mToken, exception);
             // Non-fatal, log and continue.
+        }
+
+        @Override
+        public void onIkeSessionConnectionInfoChanged(
+                @NonNull IkeSessionConnectionInfo connectionInfo) {
+            Log.d(mTag, "onIkeSessionConnectionInfoChanged for token " + mToken);
+            mCallback.onIkeConnectionInfoChanged(mToken, connectionInfo);
         }
     }
 
@@ -373,15 +382,23 @@ public class VpnIkev2Utils {
             // IKE library.
             Log.d(mTag, "ChildTransformDeleted; Direction: " + direction + "; for token " + mToken);
         }
+
+        @Override
+        public void onIpSecTransformsMigrated(
+                @NonNull IpSecTransform inIpSecTransform,
+                @NonNull IpSecTransform outIpSecTransform) {
+            Log.d(mTag, "ChildTransformsMigrated; token " + mToken);
+            mCallback.onChildMigrated(mToken, inIpSecTransform, outIpSecTransform);
+        }
     }
 
     static class Ikev2VpnNetworkCallback extends NetworkCallback {
         private final String mTag;
         private final Vpn.IkeV2VpnRunnerCallback mCallback;
-        private final ExecutorService mExecutor;
+        private final Executor mExecutor;
 
         Ikev2VpnNetworkCallback(String tag, Vpn.IkeV2VpnRunnerCallback callback,
-                ExecutorService executor) {
+                Executor executor) {
             mTag = tag;
             mCallback = callback;
             mExecutor = executor;
@@ -389,7 +406,7 @@ public class VpnIkev2Utils {
 
         @Override
         public void onAvailable(@NonNull Network network) {
-            Log.d(mTag, "Starting IKEv2/IPsec session on new network: " + network);
+            Log.d(mTag, "onAvailable called for network: " + network);
             mExecutor.execute(() -> mCallback.onDefaultNetworkChanged(network));
         }
 
