@@ -557,7 +557,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             mParams.getBlockedActivities(),
                             mParams.getDefaultActivityPolicy(),
                             createListenerAdapter(displayId),
-                            activityInfo -> onActivityBlocked(displayId, activityInfo));
+                            activityInfo -> onActivityBlocked(displayId, activityInfo),
+                            mAssociationInfo.getDeviceProfile());
             gwpc.registerRunningAppsChangedListener(/* listener= */ this);
             mWindowPolicyControllers.put(displayId, gwpc);
             return gwpc;
