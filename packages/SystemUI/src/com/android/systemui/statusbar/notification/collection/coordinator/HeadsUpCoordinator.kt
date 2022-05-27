@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.app.Notification
 import android.app.Notification.GROUP_ALERT_SUMMARY
 import android.util.ArrayMap
-import android.util.ArraySet
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
@@ -41,6 +40,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
+import java.util.function.Consumer
 import javax.inject.Inject
 
 /**
@@ -85,6 +85,7 @@ class HeadsUpCoordinator @Inject constructor(
         pipeline.addOnBeforeFinalizeFilterListener(::onBeforeFinalizeFilter)
         pipeline.addPromoter(mNotifPromoter)
         pipeline.addNotificationLifetimeExtender(mLifetimeExtender)
+        mRemoteInputManager.addActionPressListener(mActionPressListener)
     }
 
     private fun onHeadsUpViewBound(entry: NotificationEntry) {
@@ -446,6 +447,14 @@ class HeadsUpCoordinator @Inject constructor(
     private fun shouldHunAgain(entry: NotificationEntry): Boolean {
         return (!entry.hasInterrupted() ||
                 (entry.sbn.notification.flags and Notification.FLAG_ONLY_ALERT_ONCE) == 0)
+    }
+
+    /** When an action is pressed on a notification, end HeadsUp lifetime extension. */
+    private val mActionPressListener = Consumer<NotificationEntry> { entry ->
+        if (mNotifsExtendingLifetime.contains(entry)) {
+            val removeInMillis = mHeadsUpManager.getEarliestRemovalTime(entry.key)
+            mExecutor.executeDelayed({ endNotifLifetimeExtensionIfExtended(entry) }, removeInMillis)
+        }
     }
 
     private val mLifetimeExtender = object : NotifLifetimeExtender {
