@@ -187,6 +187,9 @@ final class LetterboxConfiguration {
     // Whether education is allowed for letterboxed fullscreen apps.
     private boolean mIsEducationEnabled;
 
+    // Whether using split screen aspect ratio as a default aspect ratio for unresizable apps.
+    private boolean mIsSplitScreenAspectRatioForUnresizableAppsEnabled;
+
     LetterboxConfiguration(Context systemUiContext) {
         mContext = systemUiContext;
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
@@ -216,6 +219,8 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsEducationEnabled);
         setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
                 R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
+        mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
     }
 
     /**
@@ -795,6 +800,30 @@ final class LetterboxConfiguration {
     void resetIsEducationEnabled() {
         mIsEducationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsEducationEnabled);
+    }
+
+    /**
+     * Whether using split screen aspect ratio as a default aspect ratio for unresizable apps.
+     */
+    boolean getIsSplitScreenAspectRatioForUnresizableAppsEnabled() {
+        return mIsSplitScreenAspectRatioForUnresizableAppsEnabled;
+    }
+
+    /**
+     * Overrides whether using split screen aspect ratio as a default aspect ratio for unresizable
+     * apps.
+     */
+    void setIsSplitScreenAspectRatioForUnresizableAppsEnabled(boolean enabled) {
+        mIsSplitScreenAspectRatioForUnresizableAppsEnabled = enabled;
+    }
+
+    /**
+     * Resets whether using split screen aspect ratio as a default aspect ratio for unresizable
+     * apps {@link R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled}.
+     */
+    void resetIsSplitScreenAspectRatioForUnresizableAppsEnabled() {
+        mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
     }
 
 }

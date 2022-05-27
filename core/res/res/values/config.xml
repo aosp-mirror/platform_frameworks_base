@@ -5186,6 +5186,9 @@
          An exception will be thrown if the given aspect ratio < 4:3.  -->
     <item name="config_letterboxDefaultMinAspectRatioForUnresizableApps" format="float" type="dimen">1.5</item>
 
+    <!-- Whether using split screen aspect ratio as a default aspect ratio for unresizable apps. -->
+    <bool name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled">false</bool>
+
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
     <bool name="config_isCameraCompatControlForStretchedIssuesEnabled">false</bool>
