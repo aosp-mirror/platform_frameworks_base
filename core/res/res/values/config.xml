@@ -1872,7 +1872,7 @@
     <!-- The package name of the default captive portal login app. Must be granted the
          POST_NOTIFICATIONS permission.
     -->
-    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false"></string>
+    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false">com.android.captiveportallogin</string>
 
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
