@@ -629,6 +629,26 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetDefaultMinAspectRatioForUnresizableApps(PrintWriter pw)
+            throws RemoteException {
+        final float aspectRatio;
+        try {
+            String arg = getNextArgRequired();
+            aspectRatio = Float.parseFloat(arg);
+        } catch (NumberFormatException  e) {
+            getErrPrintWriter().println("Error: bad aspect ratio format " + e);
+            return -1;
+        } catch (IllegalArgumentException  e) {
+            getErrPrintWriter().println(
+                    "Error: aspect ratio should be provided as an argument " + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setDefaultMinAspectRatioForUnresizableApps(aspectRatio);
+        }
+        return 0;
+    }
+
     private int runSetLetterboxActivityCornersRadius(PrintWriter pw) throws RemoteException {
         final int cornersRadius;
         try {
@@ -939,6 +959,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                 case "--aspectRatio":
                     runSetFixedOrientationLetterboxAspectRatio(pw);
                     break;
+                case "--minAspectRatioForUnresizable":
+                    runSetDefaultMinAspectRatioForUnresizableApps(pw);
+                    break;
                 case "--cornerRadius":
                     runSetLetterboxActivityCornersRadius(pw);
                     break;
@@ -997,6 +1020,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                 switch (arg) {
                     case "aspectRatio":
                         mLetterboxConfiguration.resetFixedOrientationLetterboxAspectRatio();
+                        break;
+                    case "minAspectRatioForUnresizable":
+                        mLetterboxConfiguration.resetDefaultMinAspectRatioForUnresizableApps();
                         break;
                     case "cornerRadius":
                         mLetterboxConfiguration.resetLetterboxActivityCornersRadius();
@@ -1121,6 +1147,7 @@ public class WindowManagerShellCommand extends ShellCommand {
     private void resetLetterboxStyle() {
         synchronized (mInternal.mGlobalLock) {
             mLetterboxConfiguration.resetFixedOrientationLetterboxAspectRatio();
+            mLetterboxConfiguration.resetDefaultMinAspectRatioForUnresizableApps();
             mLetterboxConfiguration.resetLetterboxActivityCornersRadius();
             mLetterboxConfiguration.resetLetterboxBackgroundType();
             mLetterboxConfiguration.resetLetterboxBackgroundColor();
@@ -1145,6 +1172,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     + mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier());
             pw.println("Aspect ratio: "
                     + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
+            pw.println("Default min aspect ratio for unresizable apps: "
+                    + mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps());
             pw.println("Is horizontal reachability enabled: "
                     + mLetterboxConfiguration.getIsHorizontalReachabilityEnabled());
             pw.println("Is vertical reachability enabled: "
@@ -1261,6 +1290,11 @@ public class WindowManagerShellCommand extends ShellCommand {
                 + LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO);
         pw.println("        both it and R.dimen.config_fixedOrientationLetterboxAspectRatio will");
         pw.println("        be ignored and framework implementation will determine aspect ratio.");
+        pw.println("      --minAspectRatioForUnresizable aspectRatio");
+        pw.println("        Default min aspect ratio for unresizable apps which is used when an");
+        pw.println("        app doesn't specify android:minAspectRatio. An exception will be");
+        pw.println("        thrown if aspectRatio < "
+                + LetterboxConfiguration.MIN_UNRESIZABLE_ASPECT_RATIO);
         pw.println("      --cornerRadius radius");
         pw.println("        Corners radius for activities in the letterbox mode. If radius < 0,");
         pw.println("        both it and R.integer.config_letterboxActivityCornersRadius will be");
