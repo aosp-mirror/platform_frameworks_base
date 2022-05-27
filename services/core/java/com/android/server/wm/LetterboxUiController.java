@@ -540,6 +540,8 @@ final class LetterboxUiController {
         pw.println(prefix + "  fixedOrientationLetterboxAspectRatio="
                 + getFixedOrientationLetterboxAspectRatio(
                         mActivityRecord.getParent().getConfiguration()));
+        pw.println(prefix + "  defaultMinAspectRatioForUnresizableApps="
+                + mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps());
     }
 
     /**
@@ -555,6 +557,9 @@ final class LetterboxUiController {
         }
         if (mainWin.isLetterboxedForDisplayCutout()) {
             return "DISPLAY_CUTOUT";
+        }
+        if (mActivityRecord.isAspectRatioApplied()) {
+            return "ASPECT_RATIO";
         }
         return "UNKNOWN_REASON";
     }

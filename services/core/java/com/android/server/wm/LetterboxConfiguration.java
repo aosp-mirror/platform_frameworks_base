@@ -37,6 +37,11 @@ final class LetterboxConfiguration {
      */
     static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
 
+    // Min allowed aspect ratio for unresizable apps which is used when an app doesn't specify
+    // android:minAspectRatio in accordance with the CDD 7.1.1.2 requirement:
+    // https://source.android.com/compatibility/12/android-12-cdd#7112_screen_aspect_ratio
+    static final float MIN_UNRESIZABLE_ASPECT_RATIO = 4 / 3f;
+
     /** Enum for Letterbox background type. */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({LETTERBOX_BACKGROUND_SOLID_COLOR, LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
@@ -103,6 +108,11 @@ final class LetterboxConfiguration {
     // Aspect ratio of letterbox for fixed orientation, values <=
     // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
     private float mFixedOrientationLetterboxAspectRatio;
+
+    // Default min aspect ratio for unresizable apps which is used when an app doesn't specify
+    // android:minAspectRatio in accordance with the CDD 7.1.1.2 requirement:
+    // https://source.android.com/compatibility/12/android-12-cdd#7112_screen_aspect_ratio
+    private float mDefaultMinAspectRatioForUnresizableApps;
 
     // Corners radius for activities presented in the letterbox mode, values < 0 will be ignored.
     private int mLetterboxActivityCornersRadius;
@@ -204,6 +214,8 @@ final class LetterboxConfiguration {
         mLetterboxPositionForVerticalReachability = mDefaultPositionForVerticalReachability;
         mIsEducationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsEducationEnabled);
+        setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
+                R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
     }
 
     /**
@@ -230,6 +242,43 @@ final class LetterboxConfiguration {
      */
     float getFixedOrientationLetterboxAspectRatio() {
         return mFixedOrientationLetterboxAspectRatio;
+    }
+
+    /**
+     * Resets the min aspect ratio for unresizable apps which is used when an app doesn't specify
+     * {@code android:minAspectRatio} to {@link
+     * R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps}.
+     *
+     * @throws AssertionError if {@link
+     * R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps} is < {@link
+     * #MIN_UNRESIZABLE_ASPECT_RATIO}.
+     */
+    void resetDefaultMinAspectRatioForUnresizableApps() {
+        setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
+                R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
+    }
+
+    /**
+     * Gets the min aspect ratio for unresizable apps which is used when an app doesn't specify
+     * {@code android:minAspectRatio}.
+     */
+    float getDefaultMinAspectRatioForUnresizableApps() {
+        return mDefaultMinAspectRatioForUnresizableApps;
+    }
+
+    /**
+     * Overrides the min aspect ratio for unresizable apps which is used when an app doesn't
+     * specify {@code android:minAspectRatio}.
+     *
+     * @throws AssertionError if given value is < {@link #MIN_UNRESIZABLE_ASPECT_RATIO}.
+     */
+    void setDefaultMinAspectRatioForUnresizableApps(float aspectRatio) {
+        if (aspectRatio < MIN_UNRESIZABLE_ASPECT_RATIO) {
+            throw new AssertionError(
+                    "Unexpected min aspect ratio for unresizable apps, it should be <= "
+                            + MIN_UNRESIZABLE_ASPECT_RATIO + " but was " + aspectRatio);
+        }
+        mDefaultMinAspectRatioForUnresizableApps = aspectRatio;
     }
 
     /**
