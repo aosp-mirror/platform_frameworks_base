@@ -769,7 +769,7 @@ public class EuiccManager {
     public static final int ERROR_INSTALL_PROFILE = 10009;
 
     /**
-     * Failed to load profile onto eUICC due to Profile Poicly Rules.
+     * Failed to load profile onto eUICC due to Profile Policy Rules.
      * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_DISALLOWED_BY_PPR = 10010;
