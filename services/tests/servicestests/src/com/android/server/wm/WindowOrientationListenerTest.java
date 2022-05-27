@@ -185,7 +185,7 @@ public class WindowOrientationListenerTest {
         }
 
         @Override
-        public boolean isKeyguardLocked() {
+        public boolean isKeyguardShowingAndNotOccluded() {
             return mIsScreenLocked;
         }
 
