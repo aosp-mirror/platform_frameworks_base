@@ -76,6 +76,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private PhonePipMenuController mMockPhonePipMenuController;
     @Mock private PipAppOpsListener mMockPipAppOpsListener;
     @Mock private PipBoundsAlgorithm mMockPipBoundsAlgorithm;
+    @Mock private PipKeepClearAlgorithm mMockPipKeepClearAlgorithm;
     @Mock private PipSnapAlgorithm mMockPipSnapAlgorithm;
     @Mock private PipMediaController mMockPipMediaController;
     @Mock private PipTaskOrganizer mMockPipTaskOrganizer;
@@ -101,7 +102,8 @@ public class PipControllerTest extends ShellTestCase {
         }).when(mMockExecutor).execute(any());
         mPipController = new PipController(mContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm,
-                mMockPipBoundsState, mMockPipMediaController,
+                mMockPipKeepClearAlgorithm,
+                mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
                 mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTouchHandler,
                 mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mPipParamsChangedForwarder,
@@ -134,7 +136,8 @@ public class PipControllerTest extends ShellTestCase {
 
         assertNull(PipController.create(spyContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm,
-                mMockPipBoundsState, mMockPipMediaController,
+                mMockPipKeepClearAlgorithm,
+                mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
                 mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTouchHandler,
                 mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mPipParamsChangedForwarder,
