@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedul
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
 
 import android.animation.Animator;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
@@ -393,14 +392,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_NOTIFICATION_ICONS;
             state |= DISABLE_SYSTEM_INFO;
             state |= DISABLE_CLOCK;
-        }
-
-
-        // The shelf will be hidden when dozing with a custom clock, we must show notification
-        // icons in this occasion.
-        if (mStatusBarStateController.isDozing()
-                && mNotificationPanelViewController.hasCustomClock()) {
-            state |= DISABLE_CLOCK | DISABLE_SYSTEM_INFO;
         }
 
         if (mOngoingCallController.hasOngoingCall()) {
