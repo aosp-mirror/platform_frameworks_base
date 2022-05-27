@@ -26,9 +26,9 @@ import android.text.TextUtils
 import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.widget.TextView
+import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.TextAnimator
-import com.android.systemui.animation.GlyphCallback
 import com.android.systemui.shared.R
 import java.io.PrintWriter
 import java.util.Calendar
@@ -331,9 +331,9 @@ class AnimatableClockView @JvmOverloads constructor(
         )
     }
 
-    fun refreshFormat() {
+    fun refreshFormat() = refreshFormat(DateFormat.is24HourFormat(context))
+    fun refreshFormat(use24HourFormat: Boolean) {
         Patterns.update(context)
-        val use24HourFormat = DateFormat.is24HourFormat(context)
 
         format = when {
             isSingleLineInternal && use24HourFormat -> Patterns.sClockView24
