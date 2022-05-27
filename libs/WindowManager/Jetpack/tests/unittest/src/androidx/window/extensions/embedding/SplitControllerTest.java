@@ -19,6 +19,9 @@ package androidx.window.extensions.embedding;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static androidx.window.extensions.embedding.SplitRule.FINISH_ALWAYS;
+import static androidx.window.extensions.embedding.SplitRule.FINISH_NEVER;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
@@ -88,6 +91,10 @@ public class SplitControllerTest {
     private static final float SPLIT_RATIO = 0.5f;
     private static final Intent PLACEHOLDER_INTENT = new Intent().setComponent(
             new ComponentName("test", "placeholder"));
+
+    /** Default finish behavior in Jetpack. */
+    private static final int DEFAULT_FINISH_PRIMARY_WITH_SECONDARY = FINISH_NEVER;
+    private static final int DEFAULT_FINISH_SECONDARY_WITH_PRIMARY = FINISH_ALWAYS;
 
     private Activity mActivity;
     @Mock
@@ -788,6 +795,38 @@ public class SplitControllerTest {
         assertTrue(activityOptions.getAvoidMoveToFront());
     }
 
+    @Test
+    public void testFinishTwoSplitThatShouldFinishTogether() {
+        // Setup two split pairs that should finish each other when finishing one.
+        final Activity secondaryActivity0 = createMockActivity();
+        final Activity secondaryActivity1 = createMockActivity();
+        final TaskFragmentContainer primaryContainer = createMockTaskFragmentContainer(mActivity);
+        final TaskFragmentContainer secondaryContainer0 = createMockTaskFragmentContainer(
+                secondaryActivity0);
+        final TaskFragmentContainer secondaryContainer1 = createMockTaskFragmentContainer(
+                secondaryActivity1);
+        final TaskContainer taskContainer = mSplitController.getTaskContainer(TASK_ID);
+        final SplitRule rule0 = createSplitRule(mActivity, secondaryActivity0, FINISH_ALWAYS,
+                FINISH_ALWAYS, false /* clearTop */);
+        final SplitRule rule1 = createSplitRule(mActivity, secondaryActivity1, FINISH_ALWAYS,
+                FINISH_ALWAYS, false /* clearTop */);
+        registerSplitPair(primaryContainer, secondaryContainer0, rule0);
+        registerSplitPair(primaryContainer, secondaryContainer1, rule1);
+
+        primaryContainer.finish(true /* shouldFinishDependent */, mSplitPresenter,
+                mTransaction, mSplitController);
+
+        // All containers and activities should be finished based on the FINISH_ALWAYS behavior.
+        assertTrue(primaryContainer.isFinished());
+        assertTrue(secondaryContainer0.isFinished());
+        assertTrue(secondaryContainer1.isFinished());
+        verify(mActivity).finish();
+        verify(secondaryActivity0).finish();
+        verify(secondaryActivity1).finish();
+        assertTrue(taskContainer.mContainers.isEmpty());
+        assertTrue(taskContainer.mSplitContainers.isEmpty());
+    }
+
     /** Creates a mock activity in the organizer process. */
     private Activity createMockActivity() {
         final Activity activity = mock(Activity.class);
@@ -863,7 +902,9 @@ public class SplitControllerTest {
     /** Setups a rule to always split the given activities. */
     private void setupSplitRule(@NonNull Activity primaryActivity,
             @NonNull Activity secondaryActivity) {
-        final SplitRule splitRule = createSplitRule(primaryActivity, secondaryActivity);
+        final SplitRule splitRule = createSplitRule(primaryActivity, secondaryActivity,
+                DEFAULT_FINISH_PRIMARY_WITH_SECONDARY, DEFAULT_FINISH_SECONDARY_WITH_PRIMARY,
+                true /* clearTop */);
         mSplitController.setEmbeddingRules(Collections.singleton(splitRule));
     }
 
@@ -883,29 +924,44 @@ public class SplitControllerTest {
     /** Creates a rule to always split the given activities. */
     private SplitRule createSplitRule(@NonNull Activity primaryActivity,
             @NonNull Activity secondaryActivity) {
+        return createSplitRule(primaryActivity, secondaryActivity,
+                DEFAULT_FINISH_PRIMARY_WITH_SECONDARY, DEFAULT_FINISH_SECONDARY_WITH_PRIMARY,
+                true /* clearTop */);
+    }
+
+    /** Creates a rule to always split the given activities with the given finish behaviors. */
+    private SplitRule createSplitRule(@NonNull Activity primaryActivity,
+            @NonNull Activity secondaryActivity, int finishPrimaryWithSecondary,
+            int finishSecondaryWithPrimary, boolean clearTop) {
         final Pair<Activity, Activity> targetPair = new Pair<>(primaryActivity, secondaryActivity);
         return new SplitPairRule.Builder(
                 targetPair::equals,
                 activityIntentPair -> false,
                 w -> true)
                 .setSplitRatio(SPLIT_RATIO)
-                .setShouldClearTop(true)
+                .setFinishPrimaryWithSecondary(finishPrimaryWithSecondary)
+                .setFinishSecondaryWithPrimary(finishSecondaryWithPrimary)
+                .setShouldClearTop(clearTop)
                 .build();
     }
 
     /** Adds a pair of TaskFragments as split for the given activities. */
     private void addSplitTaskFragments(@NonNull Activity primaryActivity,
             @NonNull Activity secondaryActivity) {
-        final TaskFragmentContainer primaryContainer = createMockTaskFragmentContainer(
-                primaryActivity);
-        final TaskFragmentContainer secondaryContainer = createMockTaskFragmentContainer(
-                secondaryActivity);
+        registerSplitPair(createMockTaskFragmentContainer(primaryActivity),
+                createMockTaskFragmentContainer(secondaryActivity),
+                createSplitRule(primaryActivity, secondaryActivity));
+    }
+
+    /** Registers the two given TaskFragments as split pair. */
+    private void registerSplitPair(@NonNull TaskFragmentContainer primaryContainer,
+            @NonNull TaskFragmentContainer secondaryContainer, @NonNull SplitRule rule) {
         mSplitController.registerSplit(
                 mock(WindowContainerTransaction.class),
                 primaryContainer,
-                primaryActivity,
+                primaryContainer.getTopNonFinishingActivity(),
                 secondaryContainer,
-                createSplitRule(primaryActivity, secondaryActivity));
+                rule);
 
         // We need to set those in case we are not respecting clear top.
         // TODO(b/231845476) we should always respect clearTop.
