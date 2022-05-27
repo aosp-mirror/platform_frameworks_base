@@ -28,6 +28,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.view.Display;
 import android.view.SurfaceControl;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.accessibility.IWindowMagnificationConnection;
@@ -89,9 +90,14 @@ public class WindowMagnification extends CoreStartable implements WindowMagnifie
                     TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, /* options */ null);
             return new WindowMagnificationController(
                     windowContext,
-                    mHandler, new WindowMagnificationAnimationController(windowContext),
-                    new SfVsyncFrameCallbackProvider(), null,
-                    new SurfaceControl.Transaction(), mWindowMagnifierCallback, mSysUiState);
+                    mHandler,
+                    new WindowMagnificationAnimationController(windowContext),
+                    new SfVsyncFrameCallbackProvider(),
+                    null,
+                    new SurfaceControl.Transaction(),
+                    mWindowMagnifierCallback,
+                    mSysUiState,
+                    WindowManagerGlobal::getWindowSession);
         }
     }
 

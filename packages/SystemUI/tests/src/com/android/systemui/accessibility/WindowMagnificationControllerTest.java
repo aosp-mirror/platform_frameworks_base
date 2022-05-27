@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -53,18 +54,23 @@ import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.Region;
+import android.graphics.RegionIterator;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.text.TextUtils;
 import android.view.Display;
+import android.view.IWindowSession;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 
@@ -120,15 +126,18 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     private WindowMagnificationController mWindowMagnificationController;
     private Instrumentation mInstrumentation;
     private final ValueAnimator mValueAnimator = ValueAnimator.ofFloat(0, 1.0f).setDuration(0);
+    private IWindowSession mWindowSessionSpy;
 
     @Before
-    public void setUp() {
+    public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mContext = Mockito.spy(getContext());
         mHandler = new FakeHandler(TestableLooper.get(this).getLooper());
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
         mWindowManager = spy(new TestableWindowManager(wm));
+
+        mWindowSessionSpy = spy(WindowManagerGlobal.getWindowSession());
 
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
         doAnswer(invocation -> {
@@ -142,9 +151,17 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         mResources = getContext().getOrCreateTestableResources().getResources();
         mWindowMagnificationAnimationController = new WindowMagnificationAnimationController(
                 mContext, mValueAnimator);
-        mWindowMagnificationController = new WindowMagnificationController(mContext,
-                mHandler, mWindowMagnificationAnimationController, mSfVsyncFrameProvider,
-                mMirrorWindowControl, mTransaction, mWindowMagnifierCallback, mSysUiState);
+        mWindowMagnificationController =
+                new WindowMagnificationController(
+                        mContext,
+                        mHandler,
+                        mWindowMagnificationAnimationController,
+                        mSfVsyncFrameProvider,
+                        mMirrorWindowControl,
+                        mTransaction,
+                        mWindowMagnifierCallback,
+                        mSysUiState,
+                        () -> mWindowSessionSpy);
 
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));
@@ -713,6 +730,77 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         });
 
         ReferenceTestUtils.waitForCondition(() -> hasMagnificationOverlapFlag());
+    }
+
+    @Test
+    public void moveWindowMagnificationToRightEdge_dragHandleMovesToLeftAndUpdatesTapExcludeRegion()
+            throws RemoteException {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        setSystemGestureInsets();
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController.enableWindowMagnificationInternal(
+                            Float.NaN, Float.NaN, Float.NaN);
+                });
+
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController.moveWindowMagnifier(bounds.width(), 0);
+                });
+
+        // Wait for Region updated.
+        waitForIdleSync();
+
+        final ArgumentCaptor<Region> tapExcludeRegionCapturer =
+                ArgumentCaptor.forClass(Region.class);
+        verify(mWindowSessionSpy, times(2))
+                .updateTapExcludeRegion(any(), tapExcludeRegionCapturer.capture());
+        Region tapExcludeRegion = tapExcludeRegionCapturer.getValue();
+        RegionIterator iterator = new RegionIterator(tapExcludeRegion);
+
+        final Rect topRect = new Rect();
+        final Rect bottomRect = new Rect();
+        assertTrue(iterator.next(topRect));
+        assertTrue(iterator.next(bottomRect));
+        assertFalse(iterator.next(new Rect()));
+
+        assertEquals(topRect.right, bottomRect.right);
+        assertNotEquals(topRect.left, bottomRect.left);
+    }
+
+    @Test
+    public void moveWindowMagnificationToLeftEdge_dragHandleMovesToRightAndUpdatesTapExcludeRegion()
+            throws RemoteException {
+        final Rect bounds = mWindowManager.getCurrentWindowMetrics().getBounds();
+        setSystemGestureInsets();
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController.enableWindowMagnificationInternal(
+                            Float.NaN, Float.NaN, Float.NaN);
+                });
+
+        mInstrumentation.runOnMainSync(
+                () -> {
+                    mWindowMagnificationController.moveWindowMagnifier(-bounds.width(), 0);
+                });
+
+        // Wait for Region updated.
+        waitForIdleSync();
+
+        final ArgumentCaptor<Region> tapExcludeRegionCapturer =
+                ArgumentCaptor.forClass(Region.class);
+        verify(mWindowSessionSpy).updateTapExcludeRegion(any(), tapExcludeRegionCapturer.capture());
+        Region tapExcludeRegion = tapExcludeRegionCapturer.getValue();
+        RegionIterator iterator = new RegionIterator(tapExcludeRegion);
+
+        final Rect topRect = new Rect();
+        final Rect bottomRect = new Rect();
+        assertTrue(iterator.next(topRect));
+        assertTrue(iterator.next(bottomRect));
+        assertFalse(iterator.next(new Rect()));
+
+        assertEquals(topRect.left, bottomRect.left);
+        assertNotEquals(topRect.right, bottomRect.right);
     }
 
     @Test

@@ -38,6 +38,7 @@ import android.testing.AndroidTestingRunner;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 import android.view.animation.AccelerateInterpolator;
 
@@ -761,8 +762,16 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                 SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
                 MirrorWindowControl mirrorWindowControl, SurfaceControl.Transaction transaction,
                 WindowMagnifierCallback callback, SysUiState sysUiState) {
-            super(context, handler, animationController, sfVsyncFrameProvider, mirrorWindowControl,
-                    transaction, callback, sysUiState);
+            super(
+                    context,
+                    handler,
+                    animationController,
+                    sfVsyncFrameProvider,
+                    mirrorWindowControl,
+                    transaction,
+                    callback,
+                    sysUiState,
+                    WindowManagerGlobal::getWindowSession);
             mSpyController = Mockito.mock(WindowMagnificationController.class);
         }
 
