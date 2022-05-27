@@ -21,6 +21,7 @@ import android.app.WallpaperColors
 import android.graphics.Color
 import com.android.internal.graphics.ColorUtils
 import com.android.internal.graphics.cam.Cam
+import com.android.internal.graphics.cam.CamUtils
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -207,7 +208,7 @@ enum class Style(internal val coreSpec: CoreSpec) {
 }
 
 class ColorScheme(
-    @ColorInt seed: Int,
+    @ColorInt val seed: Int,
     val darkTheme: Boolean,
     val style: Style = Style.TONAL_SPOT
 ) {
@@ -271,12 +272,14 @@ class ColorScheme(
 
     override fun toString(): String {
         return "ColorScheme {\n" +
-                "  neutral1: ${humanReadable(neutral1)}\n" +
-                "  neutral2: ${humanReadable(neutral2)}\n" +
-                "  accent1: ${humanReadable(accent1)}\n" +
-                "  accent2: ${humanReadable(accent2)}\n" +
-                "  accent3: ${humanReadable(accent3)}\n" +
+                "  seed color: ${stringForColor(seed)}\n" +
                 "  style: $style\n" +
+                "  palettes: \n" +
+                "  ${humanReadable("PRIMARY", accent1)}\n" +
+                "  ${humanReadable("SECONDARY", accent2)}\n" +
+                "  ${humanReadable("TERTIARY", accent3)}\n" +
+                "  ${humanReadable("NEUTRAL", neutral1)}\n" +
+                "  ${humanReadable("NEUTRAL VARIANT", neutral2)}\n" +
                 "}"
     }
 
@@ -426,8 +429,20 @@ class ColorScheme(
             return 180f - ((a - b).absoluteValue - 180f).absoluteValue
         }
 
-        private fun humanReadable(colors: List<Int>): String {
-            return colors.joinToString { "#" + Integer.toHexString(it) }
+        private fun stringForColor(color: Int): String {
+            val width = 4
+            val hct = Cam.fromInt(color)
+            val h = "H${hct.hue.roundToInt().toString().padEnd(width)}"
+            val c = "C${hct.chroma.roundToInt().toString().padEnd(width)}"
+            val t = "T${CamUtils.lstarFromInt(color).roundToInt().toString().padEnd(width)}"
+            val hex = Integer.toHexString(color).replaceRange(0, 2, "").uppercase()
+            return "$h$c$t = #$hex"
+        }
+
+        private fun humanReadable(paletteName: String, colors: List<Int>): String {
+            return "$paletteName\n" + colors.map {
+                stringForColor(it)
+            }.joinToString(separator = "\n") { it }
         }
 
         private fun score(cam: Cam, proportion: Double): Double {
