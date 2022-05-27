@@ -4155,8 +4155,7 @@ public final class ActiveServices {
 
         final boolean isolated = (r.serviceInfo.flags&ServiceInfo.FLAG_ISOLATED_PROCESS) != 0;
         final String procName = r.processName;
-        HostingRecord hostingRecord = new HostingRecord(
-                HostingRecord.HOSTING_TYPE_SERVICE, r.instanceName,
+        HostingRecord hostingRecord = new HostingRecord("service", r.instanceName,
                 r.definingPackageName, r.definingUid, r.serviceInfo.processName);
         ProcessRecord app;
 
