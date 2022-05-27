@@ -533,9 +533,9 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Nullable
     @Override
     @Deprecated
-    public final InstrumentationInfo getInstrumentationInfo(@NonNull ComponentName component,
-            int flags) {
-        return snapshot().getInstrumentationInfo(component, flags);
+    public final InstrumentationInfo getInstrumentationInfoAsUser(@NonNull ComponentName component,
+            int flags, int userId) {
+        return snapshot().getInstrumentationInfoAsUser(component, flags, userId);
     }
 
     @Override
@@ -1017,9 +1017,9 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @NonNull
     @Override
     @Deprecated
-    public final ParceledListSlice<InstrumentationInfo> queryInstrumentation(
-            @NonNull String targetPackage, int flags) {
-        return snapshot().queryInstrumentation(targetPackage, flags);
+    public final ParceledListSlice<InstrumentationInfo> queryInstrumentationAsUser(
+            @NonNull String targetPackage, int flags, int userId) {
+        return snapshot().queryInstrumentationAsUser(targetPackage, flags, userId);
     }
 
     @Override

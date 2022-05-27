@@ -4927,32 +4927,33 @@ public class ComputerEngine implements Computer {
 
     @Nullable
     @Override
-    public InstrumentationInfo getInstrumentationInfo(@NonNull ComponentName component, int flags) {
+    public InstrumentationInfo getInstrumentationInfoAsUser(@NonNull ComponentName component,
+            int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(callingUid);
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "getInstrumentationInfoAsUser");
+        if (!mUserManager.exists(userId)) return null;
         String packageName = component.getPackageName();
         final PackageStateInternal ps = mSettings.getPackage(packageName);
         AndroidPackage pkg = mPackages.get(packageName);
         if (ps == null || pkg == null) return null;
         if (shouldFilterApplication(
-                ps, callingUid, component, TYPE_UNKNOWN, callingUserId)) {
+                ps, callingUid, component, TYPE_UNKNOWN, userId)) {
             return null;
         }
         final ParsedInstrumentation i = mInstrumentation.get(component);
-        return PackageInfoUtils.generateInstrumentationInfo(i, pkg, flags, callingUserId, ps);
+        final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
+        return PackageInfoUtils.generateInstrumentationInfo(i, pkg, flags, state, userId, ps);
     }
 
     @NonNull
     @Override
-    public ParceledListSlice<InstrumentationInfo> queryInstrumentation(
-            @NonNull String targetPackage, int flags) {
+    public ParceledListSlice<InstrumentationInfo> queryInstrumentationAsUser(
+            @NonNull String targetPackage, int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        final PackageStateInternal ps = mSettings.getPackage(targetPackage);
-        if (shouldFilterApplication(ps, callingUid, callingUserId)) {
-            return ParceledListSlice.emptyList();
-        }
-
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "queryInstrumentationAsUser");
+        if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
         ArrayList<InstrumentationInfo> finalList = new ArrayList<>();
 
         final int numInstrumentations = mInstrumentation.size();
@@ -4963,12 +4964,15 @@ public class ComputerEngine implements Computer {
                 String packageName = p.getPackageName();
                 AndroidPackage pkg = mPackages.get(packageName);
                 PackageStateInternal pkgSetting = getPackageStateInternal(packageName);
-                if (pkg != null) {
-                    InstrumentationInfo ii = PackageInfoUtils.generateInstrumentationInfo(p,
-                            pkg, flags, callingUserId, pkgSetting);
-                    if (ii != null) {
-                        finalList.add(ii);
-                    }
+                if (pkg == null || pkgSetting == null
+                        || shouldFilterApplication(pkgSetting, callingUid, userId)) {
+                    continue;
+                }
+                final PackageUserStateInternal state = pkgSetting.getUserStateOrDefault(userId);
+                InstrumentationInfo ii = PackageInfoUtils.generateInstrumentationInfo(p,
+                        pkg, flags, state, userId, pkgSetting);
+                if (ii != null) {
+                    finalList.add(ii);
                 }
             }
         }
