@@ -17,6 +17,7 @@
 package com.android.server.pm.permission;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.CAPTURE_AUDIO_OUTPUT;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.UPDATE_APP_OPS_STATS;
 import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
@@ -1358,8 +1359,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // the only use case for this, so simply override here.
             if (!permissionGranted
                     && Process.isIsolated(uid) // simple check which fails-fast for the common case
-                    && (permission.equals(RECORD_AUDIO)
-                    || permission.equals(CAPTURE_AUDIO_HOTWORD))) {
+                    && (permission.equals(RECORD_AUDIO) || permission.equals(CAPTURE_AUDIO_HOTWORD)
+                    || permission.equals(CAPTURE_AUDIO_OUTPUT))) {
                 HotwordDetectionServiceProvider hotwordServiceProvider =
                         permissionManagerServiceInt.getHotwordDetectionServiceProvider();
                 permissionGranted = hotwordServiceProvider != null
