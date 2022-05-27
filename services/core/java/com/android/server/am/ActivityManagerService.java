@@ -1872,7 +1872,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         false,
                         0,
                         null,
-                        new HostingRecord(HostingRecord.HOSTING_TYPE_SYSTEM));
+                        new HostingRecord("system"));
                 app.setPersistent(true);
                 app.setPid(MY_PID);
                 app.mState.setMaxAdj(ProcessList.SYSTEM_ADJ);
@@ -4721,7 +4721,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException e) {
             app.resetPackageList(mProcessStats);
             mProcessList.startProcessLocked(app,
-                    new HostingRecord(HostingRecord.HOSTING_TYPE_LINK_FAIL, processName),
+                    new HostingRecord("link fail", processName),
                     ZYGOTE_POLICY_FLAG_EMPTY);
             return false;
         }
@@ -4990,17 +4990,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
         }
 
-
-        final HostingRecord hostingRecord = app.getHostingRecord();
-        final String action = hostingRecord.getAction();
-        String shortAction = action;
-        if (action != null) {
-            // only log the last part of the action string to save stats data.
-            int index = action.lastIndexOf(".");
-            if (index != -1 && index != action.length() - 1) {
-                shortAction = action.substring(index + 1);
-            }
-        }
         FrameworkStatsLog.write(
                 FrameworkStatsLog.PROCESS_START_TIME,
                 app.info.uid,
@@ -5010,10 +4999,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.getStartElapsedTime(),
                 (int) (bindApplicationTimeMillis - app.getStartUptime()),
                 (int) (SystemClock.uptimeMillis() - app.getStartUptime()),
-                hostingRecord.getType(),
-                hostingRecord.getName(),
-                shortAction,
-                HostingRecord.getHostingTypeIdStatsd(hostingRecord.getType()));
+                app.getHostingRecord().getType(),
+                (app.getHostingRecord().getName() != null ? app.getHostingRecord().getName() : ""));
         return true;
     }
 
@@ -5112,7 +5099,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         Slog.v(TAG_PROCESSES, "Starting process on hold: " + procs.get(ip));
                     }
                     mProcessList.startProcessLocked(procs.get(ip),
-                            new HostingRecord(HostingRecord.HOSTING_TYPE_ON_HOLD),
+                            new HostingRecord("on-hold"),
                             ZYGOTE_POLICY_FLAG_BATCH_LAUNCH);
                 }
             }
@@ -6698,7 +6685,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     isSdkSandbox,
                     sdkSandboxUid,
                     sdkSandboxClientAppPackage,
-                    new HostingRecord(HostingRecord.HOSTING_TYPE_ADDED_APPLICATION,
+                    new HostingRecord("added application",
                             customProcess != null ? customProcess : info.processName));
             updateLruProcessLocked(app, false, null);
             updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN);
@@ -6727,8 +6714,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (app.getThread() == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
-            mProcessList.startProcessLocked(app, new HostingRecord(
-                    HostingRecord.HOSTING_TYPE_ADDED_APPLICATION,
+            mProcessList.startProcessLocked(app, new HostingRecord("added application",
                     customProcess != null ? customProcess : app.processName),
                     zygotePolicyFlags, disableHiddenApiChecks, disableTestApiChecks,
                     abiOverride);
@@ -12379,8 +12365,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             mProcessList.addProcessNameLocked(app);
             app.setPendingStart(false);
-            mProcessList.startProcessLocked(app, new HostingRecord(
-                    HostingRecord.HOSTING_TYPE_RESTART, app.processName),
+            mProcessList.startProcessLocked(app, new HostingRecord("restart", app.processName),
                     ZYGOTE_POLICY_FLAG_EMPTY);
             return true;
         } else if (pid > 0 && pid != MY_PID) {
@@ -12765,7 +12750,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // startProcessLocked() returns existing proc's record if it's already running
             ProcessRecord proc = startProcessLocked(app.processName, app,
                     false, 0,
-                    new HostingRecord(HostingRecord.HOSTING_TYPE_BACKUP, hostingName),
+                    new HostingRecord("backup", hostingName),
                     ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS, false, false);
             if (proc == null) {
                 Slog.e(TAG, "Unable to start backup agent process " + r);
