@@ -482,7 +482,7 @@ public class ContentProviderHelper {
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = mService.startProcessLocked(
                                     cpi.processName, cpr.appInfo, false, 0,
-                                    new HostingRecord(HostingRecord.HOSTING_TYPE_CONTENT_PROVIDER,
+                                    new HostingRecord("content provider",
                                         new ComponentName(
                                                 cpi.applicationInfo.packageName, cpi.name)),
                                     Process.ZYGOTE_POLICY_FLAG_EMPTY, false, false);
