@@ -14837,7 +14837,7 @@ public class TelephonyManager {
             }
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMvnoMatched(getSubId(), mvnoType, mvnoMatchData);
+                return service.isMvnoMatched(getSlotIndex(), mvnoType, mvnoMatchData);
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "Telephony#matchesCurrentSimOperator RemoteException" + ex);
