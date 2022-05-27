@@ -19,26 +19,16 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"ચિત્રમાં-ચિત્ર"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(કોઈ ટાઇટલ પ્રોગ્રામ નથી)"</string>
-    <!-- no translation found for pip_close (2955969519031223530) -->
-    <skip />
+    <string name="pip_close" msgid="2955969519031223530">"બંધ કરો"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"પૂર્ણ સ્ક્રીન"</string>
-    <!-- no translation found for pip_move (158770205886688553) -->
-    <skip />
-    <!-- no translation found for pip_expand (1051966011679297308) -->
-    <skip />
-    <!-- no translation found for pip_collapse (3903295106641385962) -->
-    <skip />
+    <string name="pip_move" msgid="158770205886688553">"ખસેડો"</string>
+    <string name="pip_expand" msgid="1051966011679297308">"મોટું કરો"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"નાનું કરો"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" નિયંત્રણો માટે "<annotation icon="home_icon">" હોમ "</annotation>" બટન પર બે વાર દબાવો"</string>
-    <!-- no translation found for a11y_pip_menu_entered (5106343214776801614) -->
-    <skip />
-    <!-- no translation found for a11y_action_pip_move_left (6612980937817141583) -->
-    <skip />
-    <!-- no translation found for a11y_action_pip_move_right (1119409122645529936) -->
-    <skip />
-    <!-- no translation found for a11y_action_pip_move_up (98502616918621959) -->
-    <skip />
-    <!-- no translation found for a11y_action_pip_move_down (3858802832725159740) -->
-    <skip />
-    <!-- no translation found for a11y_action_pip_move_done (1486845365134416210) -->
-    <skip />
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"ચિત્રમાં ચિત્ર મેનૂ."</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"ડાબે ખસેડો"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"જમણે ખસેડો"</string>
+    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"ઉપર ખસેડો"</string>
+    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"નીચે ખસેડો"</string>
+    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"થઈ ગયું"</string>
 </resources>
