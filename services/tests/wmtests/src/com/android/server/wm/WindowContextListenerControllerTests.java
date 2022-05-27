@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.window.WindowProvider.KEY_IS_WINDOW_PROVIDER_SERVICE;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -86,7 +87,7 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
         assertEquals(1, mController.mListeners.size());
 
-        final IBinder clientToken = new Binder();
+        final IBinder clientToken = mock(IBinder.class);
         mController.registerWindowContainerListener(clientToken, mContainer, -1,
                 TYPE_APPLICATION_OVERLAY, null /* options */);
 
@@ -103,6 +104,10 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         WindowContextListenerController.WindowContextListenerImpl listener =
                 mController.mListeners.get(mClientToken);
         assertEquals(container, listener.getWindowContainer());
+
+        mController.unregisterWindowContainerListener(clientToken);
+        assertFalse(mController.mListeners.containsKey(clientToken));
+        verify(clientToken).unlinkToDeath(any(), anyInt());
     }
 
     @UseTestDisplay

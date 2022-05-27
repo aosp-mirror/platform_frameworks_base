@@ -27,13 +27,11 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.app.TaskInfo;
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.view.Choreographer;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -257,7 +255,7 @@ public class PipAnimationController {
                 mSurfaceControlTransactionFactory;
         private PipSurfaceTransactionHelper mSurfaceTransactionHelper;
         private @TransitionDirection int mTransitionDirection;
-        protected SurfaceControl mContentOverlay;
+        protected PipContentOverlay mContentOverlay;
 
         private PipTransitionAnimator(TaskInfo taskInfo, SurfaceControl leash,
                 @AnimationType int animationType,
@@ -335,43 +333,26 @@ public class PipAnimationController {
             return false;
         }
 
-        SurfaceControl getContentOverlay() {
-            return mContentOverlay;
+        SurfaceControl getContentOverlayLeash() {
+            return mContentOverlay == null ? null : mContentOverlay.mLeash;
         }
 
-        PipTransitionAnimator<T> setUseContentOverlay(Context context) {
+        void setColorContentOverlay(Context context) {
             final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
             if (mContentOverlay != null) {
-                // remove existing content overlay if there is any.
-                tx.remove(mContentOverlay);
-                tx.apply();
+                mContentOverlay.detach(tx);
             }
-            mContentOverlay = new SurfaceControl.Builder(new SurfaceSession())
-                    .setCallsite("PipAnimation")
-                    .setName("PipContentOverlay")
-                    .setColorLayer()
-                    .build();
-            tx.show(mContentOverlay);
-            tx.setLayer(mContentOverlay, Integer.MAX_VALUE);
-            tx.setColor(mContentOverlay, getContentOverlayColor(context));
-            tx.setAlpha(mContentOverlay, 0f);
-            tx.reparent(mContentOverlay, mLeash);
-            tx.apply();
-            return this;
+            mContentOverlay = new PipContentOverlay.PipColorOverlay(context);
+            mContentOverlay.attach(tx, mLeash);
         }
 
-        private float[] getContentOverlayColor(Context context) {
-            final TypedArray ta = context.obtainStyledAttributes(new int[] {
-                    android.R.attr.colorBackground });
-            try {
-                int colorAccent = ta.getColor(0, 0);
-                return new float[] {
-                        Color.red(colorAccent) / 255f,
-                        Color.green(colorAccent) / 255f,
-                        Color.blue(colorAccent) / 255f };
-            } finally {
-                ta.recycle();
+        void setSnapshotContentOverlay(TaskSnapshot snapshot, Rect sourceRectHint) {
+            final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
+            if (mContentOverlay != null) {
+                mContentOverlay.detach(tx);
             }
+            mContentOverlay = new PipContentOverlay.PipSnapshotOverlay(snapshot, sourceRectHint);
+            mContentOverlay.attach(tx, mLeash);
         }
 
         /**
@@ -575,7 +556,7 @@ public class PipAnimationController {
                     final Rect start = getStartValue();
                     final Rect end = getEndValue();
                     if (mContentOverlay != null) {
-                        tx.setAlpha(mContentOverlay, fraction < 0.5f ? 0 : (fraction - 0.5f) * 2);
+                        mContentOverlay.onAnimationUpdate(tx, fraction);
                     }
                     if (rotatedEndRect != null) {
                         // Animate the bounds in a different orientation. It only happens when
@@ -680,7 +661,7 @@ public class PipAnimationController {
                             .round(tx, leash, shouldApplyCornerRadius())
                             .shadow(tx, leash, shouldApplyShadowRadius());
                     // TODO(b/178632364): this is a work around for the black background when
-                    // entering PiP in buttion navigation mode.
+                    // entering PiP in button navigation mode.
                     if (isInPipDirection(direction)) {
                         tx.setWindowCrop(leash, getStartValue());
                     }
@@ -703,6 +684,9 @@ public class PipAnimationController {
                         tx.setWindowCrop(leash, 0, 0);
                     } else {
                         getSurfaceTransactionHelper().crop(tx, leash, destBounds);
+                    }
+                    if (mContentOverlay != null) {
+                        mContentOverlay.onAnimationEnd(tx, destBounds);
                     }
                 }
 

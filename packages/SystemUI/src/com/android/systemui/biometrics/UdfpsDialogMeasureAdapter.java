@@ -90,6 +90,13 @@ public class UdfpsDialogMeasureAdapter {
         return mBottomSpacerHeight;
     }
 
+    /**
+     * @return sensor diameter size as scaleFactor
+     */
+    public int getSensorDiameter(float scaleFactor) {
+        return (int) (scaleFactor * mSensorProps.getLocation().sensorRadius * 2);
+    }
+
     @NonNull
     private AuthDialog.LayoutParams onMeasureInternalPortrait(int width, int height,
             float scaleFactor) {
@@ -108,8 +115,7 @@ public class UdfpsDialogMeasureAdapter {
         // Go through each of the children and do the custom measurement.
         int totalHeight = 0;
         final int numChildren = mView.getChildCount();
-        final int sensorDiameter =
-                (int) (scaleFactor * mSensorProps.getLocation().sensorRadius * 2);
+        final int sensorDiameter = getSensorDiameter(scaleFactor);
         for (int i = 0; i < numChildren; i++) {
             final View child = mView.getChildAt(i);
             if (child.getId() == R.id.biometric_icon_frame) {
@@ -203,8 +209,7 @@ public class UdfpsDialogMeasureAdapter {
         final int horizontalSpacerWidth = calculateHorizontalSpacerWidthForLandscape(
                 mSensorProps, displayWidth, dialogMargin, horizontalInset, scaleFactor);
 
-        final int sensorDiameter =
-                (int) (scaleFactor * mSensorProps.getLocation().sensorRadius * 2);
+        final int sensorDiameter = getSensorDiameter(scaleFactor);
         final int remeasuredWidth = sensorDiameter + 2 * horizontalSpacerWidth;
 
         int remeasuredHeight = 0;
