@@ -2048,6 +2048,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             task.mLastRecentsAnimationTransaction,
                             task.mLastRecentsAnimationOverlay);
                     task.clearLastRecentsAnimationTransaction(false /* forceRemoveOverlay */);
+                } else {
+                    // Reset the original task surface
+                    task.resetSurfaceControlTransforms();
                 }
 
                 // The organized TaskFragment is becoming empty because this activity is reparented
@@ -2114,6 +2117,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
             // Set the launch bounds for launch-into-pip Activity on the root task.
             if (r.getOptions() != null && r.getOptions().isLaunchIntoPip()) {
+                // Record the snapshot now, it will be later fetched for content-pip animation.
+                // We do this early in the process to make sure the right snapshot is used for
+                // entering content-pip animation.
+                mWindowManager.mTaskSnapshotController.recordTaskSnapshot(
+                        task, false /* allowSnapshotHome */);
                 rootTask.setBounds(r.getOptions().getLaunchBounds());
             }
             rootTask.setDeferTaskAppear(false);

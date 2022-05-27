@@ -1522,8 +1522,8 @@ public class DisplayRotation {
         }
 
         @Override
-        public boolean isKeyguardLocked() {
-            return mService.isKeyguardLocked();
+        public boolean isKeyguardShowingAndNotOccluded() {
+            return mService.isKeyguardShowingAndNotOccluded();
         }
 
         @Override
