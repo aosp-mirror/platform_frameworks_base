@@ -2357,9 +2357,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        if (VDBG) {
-            log("notifyActiveDataSubIdChanged: activeDataSubId=" + activeDataSubId);
-        }
+        log("notifyActiveDataSubIdChanged: activeDataSubId=" + activeDataSubId);
+        mLocalLog.log("notifyActiveDataSubIdChanged: activeDataSubId=" + activeDataSubId);
 
         mActiveDataSubId = activeDataSubId;
         synchronized (mRecords) {
