@@ -16,6 +16,8 @@
 
 package android.view.inputmethod;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,14 +28,20 @@ import static org.mockito.ArgumentMatchers.anyInt;
 
 import android.annotation.Nullable;
 import android.graphics.BlurMaskFilter;
+import android.os.Bundle;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
+import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.MaskFilterSpan;
 import android.text.style.UnderlineSpan;
+import android.util.StringBuilderPrinter;
+import android.view.autofill.AutofillId;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -44,6 +52,7 @@ import org.junit.runner.RunWith;
 /**
  * Supplemental tests that cannot be covered by CTS (e.g. due to hidden API dependencies).
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class EditorInfoTest {
@@ -448,5 +457,73 @@ public class EditorInfoTest {
             builder.append(Integer.toString(i % 10));
         }
         return builder;
+    }
+
+    @Test
+    public void testDump_empty() {
+        final EditorInfo info = new EditorInfo();
+        final StringBuilder sb = new StringBuilder();
+        info.dump(new StringBuilderPrinter(sb), "prefix: ");
+        assertThat(sb.toString()).isEqualTo(
+                "prefix: inputType=0x0 imeOptions=0x0 privateImeOptions=null\n"
+                + "prefix: actionLabel=null actionId=0\n"
+                + "prefix: initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0\n"
+                + "prefix: hintText=null label=null\n"
+                + "prefix: packageName=null autofillId=null fieldId=0 fieldName=null\n"
+                + "prefix: extras=null\n"
+                + "prefix: hintLocales=null\n"
+                + "prefix: contentMimeTypes=null\n");
+    }
+
+    @Test
+    public void testDump_filled() {
+        final EditorInfo info = new EditorInfo();
+        info.inputType = InputType.TYPE_CLASS_TEXT; // 0x1
+        info.imeOptions = EditorInfo.IME_ACTION_GO; // 0x2
+        info.privateImeOptions = "testOptions";
+        info.initialSelStart = 0;
+        info.initialSelEnd = 1;
+        info.initialCapsMode = TextUtils.CAP_MODE_CHARACTERS; // 0x1000
+        info.hintText = "testHintText";
+        info.label = "testLabel";
+        info.packageName = "android.view.inputmethod";
+        info.autofillId = new AutofillId(123);
+        info.fieldId = 456;
+        info.fieldName = "testField";
+        info.extras = new Bundle();
+        info.extras.putString("testKey", "testValue");
+        info.hintLocales = LocaleList.forLanguageTags("en,es,zh");
+        info.contentMimeTypes = new String[] {"image/png"};
+        info.targetInputMethodUser = UserHandle.of(10);
+        final StringBuilder sb = new StringBuilder();
+        info.dump(new StringBuilderPrinter(sb), "prefix2: ");
+        assertThat(sb.toString()).isEqualTo(
+                "prefix2: inputType=0x1 imeOptions=0x2 privateImeOptions=testOptions\n"
+                        + "prefix2: actionLabel=null actionId=0\n"
+                        + "prefix2: initialSelStart=0 initialSelEnd=1 initialCapsMode=0x1000\n"
+                        + "prefix2: hintText=testHintText label=testLabel\n"
+                        + "prefix2: packageName=android.view.inputmethod autofillId=123"
+                        + " fieldId=456 fieldName=testField\n"
+                        + "prefix2: extras=Bundle[{testKey=testValue}]\n"
+                        + "prefix2: hintLocales=[en,es,zh]\n"
+                        + "prefix2: contentMimeTypes=[image/png]\n"
+                        + "prefix2: targetInputMethodUserId=10\n");
+    }
+
+    @Test
+    public void testDump_noDumpExtras() {
+        final EditorInfo info = new EditorInfo();
+        info.extras = new Bundle();
+        info.extras.putString("testKey", "testValue");
+        final StringBuilder sb = new StringBuilder();
+        info.dump(new StringBuilderPrinter(sb), "prefix: ", false /* dumpExtras */);
+        assertThat(sb.toString()).isEqualTo(
+                "prefix: inputType=0x0 imeOptions=0x0 privateImeOptions=null\n"
+                        + "prefix: actionLabel=null actionId=0\n"
+                        + "prefix: initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0\n"
+                        + "prefix: hintText=null label=null\n"
+                        + "prefix: packageName=null autofillId=null fieldId=0 fieldName=null\n"
+                        + "prefix: hintLocales=null\n"
+                        + "prefix: contentMimeTypes=null\n");
     }
 }

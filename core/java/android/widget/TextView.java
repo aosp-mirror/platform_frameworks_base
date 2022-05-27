@@ -12493,6 +12493,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             float viewportToContentVerticalOffset) {
         final int minLine = mLayout.getLineForOffset(startIndex);
         final int maxLine = mLayout.getLineForOffset(endIndex - 1);
+        final Rect rect = new Rect();
+        getLocalVisibleRect(rect);
+        final RectF visibleRect = new RectF(rect);
         for (int line = minLine; line <= maxLine; ++line) {
             final int lineStart = mLayout.getLineStart(line);
             final int lineEnd = mLayout.getLineEnd(line);
@@ -12507,37 +12510,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             for (int offset = offsetStart; offset < offsetEnd; ++offset) {
                 final float charWidth = widths[offset - offsetStart];
                 final boolean isRtl = mLayout.isRtlCharAt(offset);
-                final float primary = mLayout.getPrimaryHorizontal(offset);
-                final float secondary = mLayout.getSecondaryHorizontal(offset);
                 // TODO: This doesn't work perfectly for text with custom styles and
                 // TAB chars.
                 final float left;
-                final float right;
                 if (ltrLine) {
                     if (isRtl) {
-                        left = secondary - charWidth;
-                        right = secondary;
+                        left = mLayout.getSecondaryHorizontal(offset) - charWidth;
                     } else {
-                        left = primary;
-                        right = primary + charWidth;
+                        left = mLayout.getPrimaryHorizontal(offset);
                     }
                 } else {
                     if (!isRtl) {
-                        left = secondary;
-                        right = secondary + charWidth;
+                        left = mLayout.getSecondaryHorizontal(offset);
                     } else {
-                        left = primary - charWidth;
-                        right = primary;
+                        left = mLayout.getPrimaryHorizontal(offset) - charWidth;
                     }
                 }
+                final float right = left + charWidth;
                 // TODO: Check top-right and bottom-left as well.
                 final float localLeft = left + viewportToContentHorizontalOffset;
                 final float localRight = right + viewportToContentHorizontalOffset;
                 final float localTop = top + viewportToContentVerticalOffset;
                 final float localBottom = bottom + viewportToContentVerticalOffset;
-                final boolean isTopLeftVisible = isPositionVisible(localLeft, localTop);
+                final boolean isTopLeftVisible = visibleRect.contains(localLeft, localTop);
                 final boolean isBottomRightVisible =
-                        isPositionVisible(localRight, localBottom);
+                        visibleRect.contains(localRight, localBottom);
                 int characterBoundsFlags = 0;
                 if (isTopLeftVisible || isBottomRightVisible) {
                     characterBoundsFlags |= FLAG_HAS_VISIBLE_REGION;

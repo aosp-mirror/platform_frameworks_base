@@ -885,7 +885,7 @@ public class Watchdog implements Dumpable {
 
         long anrTime = SystemClock.uptimeMillis();
         StringBuilder report = new StringBuilder();
-        report.append(MemoryPressureUtil.currentPsiState());
+        report.append(ResourcePressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
         StringWriter tracesFileException = new StringWriter();
         final File stack = ActivityManagerService.dumpStackTraces(

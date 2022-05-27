@@ -960,6 +960,11 @@ public class EditorInfo implements InputType, Parcelable {
      * Write debug output of this object.
      */
     public void dump(Printer pw, String prefix) {
+        dump(pw, prefix, true /* dumpExtras */);
+    }
+
+    /** @hide */
+    public void dump(Printer pw, String prefix, boolean dumpExtras) {
         pw.println(prefix + "inputType=0x" + Integer.toHexString(inputType)
                 + " imeOptions=0x" + Integer.toHexString(imeOptions)
                 + " privateImeOptions=" + privateImeOptions);
@@ -975,7 +980,9 @@ public class EditorInfo implements InputType, Parcelable {
                 + " autofillId=" + autofillId
                 + " fieldId=" + fieldId
                 + " fieldName=" + fieldName);
-        pw.println(prefix + "extras=" + extras);
+        if (dumpExtras) {
+            pw.println(prefix + "extras=" + extras);
+        }
         pw.println(prefix + "hintLocales=" + hintLocales);
         pw.println(prefix + "contentMimeTypes=" + Arrays.toString(contentMimeTypes));
         if (targetInputMethodUser != null) {

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.WindowConfiguration.WindowingMode;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
@@ -64,7 +65,16 @@ class TaskFragmentContainer {
      * Activities that are being reparented or being started to this container, but haven't been
      * added to {@link #mInfo} yet.
      */
-    private final ArrayList<Activity> mPendingAppearedActivities = new ArrayList<>();
+    @VisibleForTesting
+    final ArrayList<Activity> mPendingAppearedActivities = new ArrayList<>();
+
+    /**
+     * When this container is created for an {@link Intent} to start within, we store that Intent
+     * until the container becomes non-empty on the server side, so that we can use it to check
+     * rules associated with this container.
+     */
+    @Nullable
+    private Intent mPendingAppearedIntent;
 
     /** Containers that are dependent on this one and should be completely destroyed on exit. */
     private final List<TaskFragmentContainer> mContainersToFinishOnExit =
@@ -99,15 +109,22 @@ class TaskFragmentContainer {
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      */
-    TaskFragmentContainer(@Nullable Activity activity, @NonNull TaskContainer taskContainer,
+    TaskFragmentContainer(@Nullable Activity pendingAppearedActivity,
+            @Nullable Intent pendingAppearedIntent, @NonNull TaskContainer taskContainer,
             @NonNull SplitController controller) {
+        if ((pendingAppearedActivity == null && pendingAppearedIntent == null)
+                || (pendingAppearedActivity != null && pendingAppearedIntent != null)) {
+            throw new IllegalArgumentException(
+                    "One and only one of pending activity and intent must be non-null");
+        }
         mController = controller;
         mToken = new Binder("TaskFragmentContainer");
         mTaskContainer = taskContainer;
         taskContainer.mContainers.add(this);
-        if (activity != null) {
-            addPendingAppearedActivity(activity);
+        if (pendingAppearedActivity != null) {
+            addPendingAppearedActivity(pendingAppearedActivity);
         }
+        mPendingAppearedIntent = pendingAppearedIntent;
     }
 
     /**
@@ -118,9 +135,9 @@ class TaskFragmentContainer {
         return mToken;
     }
 
-    /** List of activities that belong to this container and live in this process. */
+    /** List of non-finishing activities that belong to this container and live in this process. */
     @NonNull
-    List<Activity> collectActivities() {
+    List<Activity> collectNonFinishingActivities() {
         final List<Activity> allActivities = new ArrayList<>();
         if (mInfo != null) {
             // Add activities reported from the server.
@@ -154,13 +171,14 @@ class TaskFragmentContainer {
             return false;
         }
         return mPendingAppearedActivities.isEmpty()
-                && mInfo.getActivities().size() == collectActivities().size();
+                && mInfo.getActivities().size() == collectNonFinishingActivities().size();
     }
 
     ActivityStack toActivityStack() {
-        return new ActivityStack(collectActivities(), isEmpty());
+        return new ActivityStack(collectNonFinishingActivities(), isEmpty());
     }
 
+    /** Adds the activity that will be reparented to this container. */
     void addPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
         if (hasActivity(pendingAppearedActivity.getActivityToken())) {
             return;
@@ -172,6 +190,11 @@ class TaskFragmentContainer {
 
     void removePendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
         mPendingAppearedActivities.remove(pendingAppearedActivity);
+    }
+
+    @Nullable
+    Intent getPendingAppearedIntent() {
+        return mPendingAppearedIntent;
     }
 
     boolean hasActivity(@NonNull IBinder token) {
@@ -219,7 +242,12 @@ class TaskFragmentContainer {
         }
 
         mInfo = info;
-        if (mInfo == null || mPendingAppearedActivities.isEmpty()) {
+        if (mInfo == null || mInfo.isEmpty()) {
+            return;
+        }
+        // Only track the pending Intent when the container is empty.
+        mPendingAppearedIntent = null;
+        if (mPendingAppearedActivities.isEmpty()) {
             return;
         }
         // Cleanup activities that were being re-parented
@@ -234,20 +262,13 @@ class TaskFragmentContainer {
 
     @Nullable
     Activity getTopNonFinishingActivity() {
-        List<Activity> activities = collectActivities();
-        if (activities.isEmpty()) {
-            return null;
-        }
-        int i = activities.size() - 1;
-        while (i >= 0 && activities.get(i).isFinishing()) {
-            i--;
-        }
-        return i >= 0 ? activities.get(i) : null;
+        final List<Activity> activities = collectNonFinishingActivities();
+        return activities.isEmpty() ? null : activities.get(activities.size() - 1);
     }
 
     @Nullable
     Activity getBottomMostActivity() {
-        final List<Activity> activities = collectActivities();
+        final List<Activity> activities = collectNonFinishingActivities();
         return activities.isEmpty() ? null : activities.get(0);
     }
 
@@ -320,8 +341,11 @@ class TaskFragmentContainer {
     private void finishActivities(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
         // Finish own activities
-        for (Activity activity : collectActivities()) {
-            if (!activity.isFinishing()) {
+        for (Activity activity : collectNonFinishingActivities()) {
+            if (!activity.isFinishing()
+                    // In case we have requested to reparent the activity to another container (as
+                    // pendingAppeared), we don't want to finish it with this container.
+                    && mController.getContainerWithActivity(activity) == this) {
                 activity.finish();
             }
         }

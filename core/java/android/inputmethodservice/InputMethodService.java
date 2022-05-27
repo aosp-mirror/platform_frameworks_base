@@ -3792,7 +3792,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
         if (mInputEditorInfo != null) {
             p.println("  mInputEditorInfo:");
-            mInputEditorInfo.dump(p, "    ");
+            mInputEditorInfo.dump(p, "    ", false /* dumpExtras */);
         } else {
             p.println("  mInputEditorInfo: null");
         }
