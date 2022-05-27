@@ -16,6 +16,8 @@
 
 package com.android.server.timedetector;
 
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -58,11 +60,15 @@ import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Instant;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeDetectorServiceTest {
 
     private static final int ARBITRARY_USER_ID = 9999;
+    private static final int ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS = 1234;
+    private static final Instant ARBITRARY_AUTO_TIME_LOWER_BOUND = Instant.ofEpochMilli(0);
+    private static final int[] ARBITRARY_ORIGIN_PRIORITIES = { ORIGIN_NETWORK };
 
     private Context mMockContext;
 
@@ -415,6 +421,10 @@ public class TimeDetectorServiceTest {
         return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionSupported(true)
+                .setSystemClockUpdateThresholdMillis(ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
+                .setAutoTimeLowerBound(ARBITRARY_AUTO_TIME_LOWER_BOUND)
+                .setOriginPriorities(ARBITRARY_ORIGIN_PRIORITIES)
+                .setDeviceHasY2038Issue(true)
                 .setAutoDetectionEnabledSetting(autoDetectionEnabled)
                 .build();
     }

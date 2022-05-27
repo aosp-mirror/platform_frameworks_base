@@ -21,6 +21,8 @@ import static android.app.time.Capabilities.CAPABILITY_NOT_APPLICABLE;
 import static android.app.time.Capabilities.CAPABILITY_NOT_SUPPORTED;
 import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
 
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,13 +33,20 @@ import android.app.time.TimeConfiguration;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.timedetector.TimeDetectorStrategy.Origin;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.time.Instant;
 
 @RunWith(AndroidJUnit4.class)
 public class ConfigurationInternalTest {
 
     private static final int ARBITRARY_USER_ID = 99999;
+    private static final int ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS = 1234;
+    private static final Instant ARBITRARY_AUTO_TIME_LOWER_BOUND = Instant.ofEpochMilli(0);
+    private static final @Origin int[] ARBITRARY_ORIGIN_PRIORITIES = { ORIGIN_NETWORK };
 
     /**
      * Tests when {@link ConfigurationInternal#isUserConfigAllowed()} and
@@ -49,6 +58,10 @@ public class ConfigurationInternalTest {
                 baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionSupported(true)
+                .setSystemClockUpdateThresholdMillis(ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
+                .setAutoTimeLowerBound(ARBITRARY_AUTO_TIME_LOWER_BOUND)
+                .setOriginPriorities(ARBITRARY_ORIGIN_PRIORITIES)
+                .setDeviceHasY2038Issue(true)
                 .setAutoDetectionEnabledSetting(true)
                 .build();
         {
@@ -96,6 +109,10 @@ public class ConfigurationInternalTest {
                 baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(false)
                 .setAutoDetectionSupported(true)
+                .setSystemClockUpdateThresholdMillis(ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
+                .setAutoTimeLowerBound(ARBITRARY_AUTO_TIME_LOWER_BOUND)
+                .setOriginPriorities(ARBITRARY_ORIGIN_PRIORITIES)
+                .setDeviceHasY2038Issue(true)
                 .setAutoDetectionEnabledSetting(true)
                 .build();
         {
@@ -141,6 +158,10 @@ public class ConfigurationInternalTest {
         ConfigurationInternal baseConfig = new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionSupported(false)
+                .setSystemClockUpdateThresholdMillis(ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
+                .setAutoTimeLowerBound(ARBITRARY_AUTO_TIME_LOWER_BOUND)
+                .setOriginPriorities(ARBITRARY_ORIGIN_PRIORITIES)
+                .setDeviceHasY2038Issue(true)
                 .setAutoDetectionEnabledSetting(true)
                 .build();
         {
