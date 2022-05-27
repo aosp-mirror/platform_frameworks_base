@@ -162,7 +162,8 @@ public final class UiccCardInfo implements Parcelable {
     @Deprecated
     public String getIccId() {
         if (mIccIdAccessRestricted) {
-            throw new UnsupportedOperationException("getIccId from UiccPortInfo");
+            throw new UnsupportedOperationException("getIccId() is not supported by UiccCardInfo."
+                + " Please Use UiccPortInfo API instead");
         }
         //always return ICCID from first port.
         return getPorts().stream().findFirst().get().getIccId();
