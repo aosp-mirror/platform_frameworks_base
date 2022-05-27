@@ -99,6 +99,9 @@ import java.util.concurrent.atomic.AtomicLong;
  *       mBackupRunner.getBackupResultBlocking().
  */
 public class PerformFullTransportBackupTask extends FullBackupTask implements BackupRestoreTask {
+    /**
+     * @throws IllegalStateException if there's no transport available.
+     */
     public static PerformFullTransportBackupTask newWithCurrentTransport(
             UserBackupManagerService backupManagerService,
             OperationStorage operationStorage,
@@ -115,6 +118,9 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         TransportManager transportManager = backupManagerService.getTransportManager();
         TransportConnection transportConnection = transportManager.getCurrentTransportClient(
                 caller);
+        if (transportConnection == null) {
+            throw new IllegalStateException("No TransportConnection available");
+        }
         OnTaskFinishedListener listener =
                 listenerCaller ->
                         transportManager.disposeOfTransportClient(transportConnection,
