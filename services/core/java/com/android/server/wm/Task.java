@@ -961,27 +961,20 @@ class Task extends WindowContainer<WindowContainer> {
             mCallingPackage = r.launchedFromPackage;
             mCallingFeatureId = r.launchedFromFeatureId;
             setIntent(intent != null ? intent : r.intent, info != null ? info : r.info);
-            final WindowContainer parent = getParent();
-            if (parent != null) {
-                final Task t = parent.asTask();
-                if (t != null) {
-                    t.setIntent(r);
-                }
-            }
         }
         setLockTaskAuth(r);
     }
 
     /** Sets the original intent, _without_ updating the calling uid or package. */
     private void setIntent(Intent _intent, ActivityInfo info) {
-        final boolean isLeaf = isLeafTask();
+        if (!isLeafTask()) return;
         if (intent == null) {
             mNeverRelinquishIdentity = (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
-        } else if (mNeverRelinquishIdentity && isLeaf) {
+        } else if (mNeverRelinquishIdentity) {
             return;
         }
 
-        affinity = isLeaf ? info.taskAffinity : null;
+        affinity = info.taskAffinity;
         if (intent == null) {
             // If this task already has an intent associated with it, don't set the root
             // affinity -- we don't want it changing after initially set, but the initially
