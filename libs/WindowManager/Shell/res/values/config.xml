@@ -70,4 +70,7 @@
 
     <!-- Animation duration when exit starting window: reveal app -->
     <integer name="starting_window_app_reveal_anim_duration">266</integer>
+
+    <!-- Whether to dim a split-screen task when the other is the IME target -->
+    <bool name="config_dimNonImeAttachedSide">true</bool>
 </resources>

@@ -2,7 +2,7 @@
 per-file com_android_server_lights_LightsService.cpp = michaelwr@google.com, santoscordon@google.com
 
 # Input
-per-file com_android_server_input_InputManagerService.cpp = michaelwr@google.com, svv@google.com
+per-file com_android_server_input_* = file:/INPUT_OWNERS
 
 # Power
 per-file com_android_server_HardwarePropertiesManagerService.cpp = michaelwr@google.com, santoscordon@google.com
@@ -15,7 +15,6 @@ per-file Android.bp = file:platform/build/soong:/OWNERS
 per-file com_android_server_Usb* = file:/services/usb/OWNERS
 per-file com_android_server_Vibrator* = file:/services/core/java/com/android/server/vibrator/OWNERS
 per-file com_android_server_hdmi_* = file:/core/java/android/hardware/hdmi/OWNERS
-per-file com_android_server_input_* = file:/core/java/android/hardware/input/OWNERS
 per-file com_android_server_lights_* = file:/services/core/java/com/android/server/lights/OWNERS
 per-file com_android_server_location_* = file:/location/java/android/location/OWNERS
 per-file com_android_server_locksettings_* = file:/services/core/java/com/android/server/locksettings/OWNERS
@@ -23,7 +22,6 @@ per-file com_android_server_net_* = file:/services/core/java/com/android/server/
 per-file com_android_server_pm_* = file:/services/core/java/com/android/server/pm/OWNERS
 per-file com_android_server_power_* = file:/services/core/java/com/android/server/power/OWNERS
 per-file com_android_server_powerstats_* = file:/services/core/java/com/android/server/powerstats/OWNERS
-per-file com_android_server_se_* = file:/core/java/android/se/OWNERS
 per-file com_android_server_security_* = file:/core/java/android/security/OWNERS
 per-file com_android_server_tv_* = file:/media/java/android/media/tv/OWNERS
 per-file com_android_server_vibrator_* = file:/services/core/java/com/android/server/vibrator/OWNERS
