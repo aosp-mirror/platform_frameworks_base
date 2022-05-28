@@ -146,6 +146,12 @@ class StackEducationView constructor(
                 } else {
                     setPadding(paddingLeft, paddingTop, positioner.bubbleSize + stackPadding,
                             paddingBottom)
+                    if (positioner.isLargeScreen || positioner.isLandscape) {
+                        translationX = (positioner.screenRect.right - width - stackPadding)
+                                .toFloat()
+                    } else {
+                        translationX = 0f
+                    }
                 }
                 translationY = stackPosition.y + positioner.bubbleSize / 2 - getHeight() / 2
             }
