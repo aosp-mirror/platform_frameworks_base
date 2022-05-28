@@ -4495,10 +4495,10 @@
                 android:protectionLevel="signature|privileged"/>
 
     <!-- Allows applications to use exact alarm APIs.
-         <p>Exact alarms should only be used for user-facing features.
-         For more details, see <a
-         href="{@docRoot}about/versions/12/behavior-changes-12#exact-alarm-permission">
-         Exact alarm permission</a>.
+         <p>This is a special access permission that can be revoked by the system or the user.
+         It should only be used to enable <b>user-facing features</b> that require exact alarms.
+         For more details, please go through the associated
+          <a href="{@docRoot}training/scheduling/alarms#exact">developer docs</a>.
          <p>Apps need to target API {@link android.os.Build.VERSION_CODES#S} or above to be able to
          request this permission. Note that apps targeting lower API levels do not need this
          permission to use exact alarm APIs.
@@ -4509,6 +4509,7 @@
          {@link android.Manifest.permission#USE_EXACT_ALARM} once it targets API
          {@link android.os.Build.VERSION_CODES#TIRAMISU}. All apps using exact alarms for secondary
          features (which should still be user facing) should continue using this permission.
+         <p>Protection level: appop
      -->
     <permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:protectionLevel="normal|appop"/>

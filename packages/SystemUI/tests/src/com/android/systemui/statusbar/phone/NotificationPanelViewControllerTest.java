@@ -578,19 +578,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void computeMaxKeyguardNotifications_dozeAmountNotZero_returnsExistingMax() {
-        when(mAmbientState.getDozeAmount()).thenReturn(0.5f);
-        mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
-
-        // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
-        assertThat(mNotificationPanelViewController.computeMaxKeyguardNotifications())
-                .isEqualTo(-1);
-    }
-
-    @Test
     public void computeMaxKeyguardNotifications_noTransition_updatesMax() {
         when(mAmbientState.getFractionToShade()).thenReturn(0f);
-        when(mAmbientState.getDozeAmount()).thenReturn(0f);
         mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
 
         // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
@@ -1141,6 +1130,19 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 createMotionEvent(/* x= */ 0, /* y= */ 500, MotionEvent.ACTION_MOVE));
 
         assertThat(mNotificationPanelViewController.isQsTracking()).isFalse();
+    }
+
+    @Test
+    public void testOnAttachRefreshStatusBarState() {
+        mStatusBarStateController.setState(KEYGUARD);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(false);
+        for (View.OnAttachStateChangeListener listener : mOnAttachStateChangeListeners) {
+            listener.onViewAttachedToWindow(mView);
+        }
+        verify(mKeyguardStatusViewController).setKeyguardStatusViewVisibility(
+                KEYGUARD/*statusBarState*/,
+                false/*keyguardFadingAway*/,
+                false/*goingToFullShade*/, SHADE/*oldStatusBarState*/);
     }
 
     private static MotionEvent createMotionEvent(int x, int y, int action) {

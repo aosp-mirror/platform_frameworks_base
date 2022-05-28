@@ -161,7 +161,8 @@ public class UiccSlotInfo implements Parcelable {
     @Deprecated
     public boolean getIsActive() {
         if (mLogicalSlotAccessRestricted) {
-            throw new UnsupportedOperationException("get port status from UiccPortInfo");
+            throw new UnsupportedOperationException("getIsActive() is not supported by "
+            + "UiccSlotInfo. Please Use UiccPortInfo API instead");
         }
         //always return status from first port.
         return getPorts().stream().findFirst().get().isActive();
@@ -198,7 +199,8 @@ public class UiccSlotInfo implements Parcelable {
     @Deprecated
     public int getLogicalSlotIdx() {
         if (mLogicalSlotAccessRestricted) {
-            throw new UnsupportedOperationException("get logical slot index from UiccPortInfo");
+            throw new UnsupportedOperationException("getLogicalSlotIdx() is not supported by "
+                + "UiccSlotInfo. Please use UiccPortInfo API instead");
         }
         //always return logical slot index from first port.
         //portList always have at least one element.
