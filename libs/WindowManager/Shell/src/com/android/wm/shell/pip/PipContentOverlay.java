@@ -132,7 +132,11 @@ public abstract class PipContentOverlay {
             tx.show(mLeash);
             tx.setLayer(mLeash, Integer.MAX_VALUE);
             tx.setBuffer(mLeash, mSnapshot.getHardwareBuffer());
-            tx.setCrop(mLeash, mSourceRectHint);
+            // Relocate the content to parentLeash's coordinates.
+            tx.setPosition(mLeash, -mSourceRectHint.left, -mSourceRectHint.top);
+            tx.setWindowCrop(mLeash,
+                    (int) (mSourceRectHint.width() * mTaskSnapshotScaleX),
+                    (int) (mSourceRectHint.height() * mTaskSnapshotScaleY));
             tx.setScale(mLeash, mTaskSnapshotScaleX, mTaskSnapshotScaleY);
             tx.reparent(mLeash, parentLeash);
             tx.apply();
@@ -149,10 +153,11 @@ public abstract class PipContentOverlay {
             // the atomicTx is committed along with the final WindowContainerTransaction.
             final SurfaceControl.Transaction nonAtomicTx = new SurfaceControl.Transaction();
             final float scaleX = (float) destinationBounds.width()
-                    / mSnapshot.getHardwareBuffer().getWidth();
+                    / mSourceRectHint.width();
             final float scaleY = (float) destinationBounds.height()
-                    / mSnapshot.getHardwareBuffer().getHeight();
-            final float scale = Math.max(scaleX, scaleY);
+                    / mSourceRectHint.height();
+            final float scale = Math.max(
+                    scaleX * mTaskSnapshotScaleX, scaleY * mTaskSnapshotScaleY);
             nonAtomicTx.setScale(mLeash, scale, scale);
             nonAtomicTx.setPosition(mLeash,
                     -scale * mSourceRectHint.left / mTaskSnapshotScaleX,
