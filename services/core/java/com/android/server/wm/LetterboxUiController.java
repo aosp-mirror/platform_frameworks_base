@@ -211,12 +211,10 @@ final class LetterboxUiController {
                 : mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier();
     }
 
-    float getFixedOrientationLetterboxAspectRatio(Configuration parentConfiguration) {
-        // Don't check resolved windowing mode because it may not be updated yet during
-        // configuration change.
-        if (!isHorizontalReachabilityEnabled(parentConfiguration)
-                && !isVerticalReachabilityEnabled(parentConfiguration)) {
-            return mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+    float getDefaultMinAspectRatioForUnresizableApps() {
+        if (!mLetterboxConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled()
+                || mActivityRecord.getDisplayContent() == null) {
+            return mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps();
         }
 
         int dividerWindowWidth =
@@ -226,10 +224,14 @@ final class LetterboxUiController {
         int dividerSize = dividerWindowWidth - dividerInsets * 2;
 
         // Getting the same aspect ratio that apps get in split screen.
-        Rect bounds = new Rect(parentConfiguration.windowConfiguration.getAppBounds());
-        bounds.inset(dividerSize, /* dy */ 0);
-        bounds.right = bounds.centerX();
-
+        Rect bounds = new Rect(mActivityRecord.getDisplayContent().getBounds());
+        if (bounds.width() >= bounds.height()) {
+            bounds.inset(/* dx */ dividerSize, /* dy */ 0);
+            bounds.right = bounds.centerX();
+        } else {
+            bounds.inset(/* dx */ 0, /* dy */ dividerSize);
+            bounds.bottom = bounds.centerY();
+        }
         return computeAspectRatio(bounds);
     }
 
@@ -538,8 +540,11 @@ final class LetterboxUiController {
         pw.println(prefix + "  letterboxVerticalPositionMultiplier="
                 + getVerticalPositionMultiplier(mActivityRecord.getParent().getConfiguration()));
         pw.println(prefix + "  fixedOrientationLetterboxAspectRatio="
-                + getFixedOrientationLetterboxAspectRatio(
-                        mActivityRecord.getParent().getConfiguration()));
+                + mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio());
+        pw.println(prefix + "  defaultMinAspectRatioForUnresizableApps="
+                + mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps());
+        pw.println(prefix + "  isSplitScreenAspectRatioForUnresizableAppsEnabled="
+                + mLetterboxConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled());
     }
 
     /**
@@ -555,6 +560,9 @@ final class LetterboxUiController {
         }
         if (mainWin.isLetterboxedForDisplayCutout()) {
             return "DISPLAY_CUTOUT";
+        }
+        if (mActivityRecord.isAspectRatioApplied()) {
+            return "ASPECT_RATIO";
         }
         return "UNKNOWN_REASON";
     }

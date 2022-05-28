@@ -12517,8 +12517,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setContentIntent(locationSettingsIntent)
                 .setAutoCancel(true)
                 .build();
-        mInjector.getNotificationManager().notify(SystemMessage.NOTE_LOCATION_CHANGED,
-                notification);
+        mHandler.post(() -> mInjector.getNotificationManager().notify(
+                SystemMessage.NOTE_LOCATION_CHANGED, notification));
     }
 
     private String getLocationChangedTitle() {
