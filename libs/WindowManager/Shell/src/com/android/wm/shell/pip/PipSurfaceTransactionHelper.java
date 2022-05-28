@@ -105,8 +105,10 @@ public class PipSurfaceTransactionHelper {
             SurfaceControl leash, Rect sourceRectHint,
             Rect sourceBounds, Rect destinationBounds, Rect insets,
             boolean isInPipDirection) {
-        mTmpSourceRectF.set(sourceBounds);
         mTmpDestinationRect.set(sourceBounds);
+        // Similar to {@link #scale}, we want to position the surface relative to the screen
+        // coordinates so offset the bounds to 0,0
+        mTmpDestinationRect.offsetTo(0, 0);
         mTmpDestinationRect.inset(insets);
         // Scale by the shortest edge and offset such that the top/left of the scaled inset source
         // rect aligns with the top/left of the destination bounds
