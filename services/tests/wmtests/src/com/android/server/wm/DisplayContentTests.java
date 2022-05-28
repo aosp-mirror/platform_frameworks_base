@@ -79,7 +79,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -1460,7 +1460,7 @@ public class DisplayContentTests extends WindowTestsBase {
         displayContent.setRotationAnimation(rotationAnim);
         // The fade rotation animation also starts to hide some non-app windows.
         assertNotNull(displayContent.getAsyncRotationController());
-        assertTrue(statusBar.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
+        assertTrue(statusBar.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
 
         for (WindowState w : windows) {
             w.setOrientationChanging(true);
@@ -1514,10 +1514,10 @@ public class DisplayContentTests extends WindowTestsBase {
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
         assertNotNull(asyncRotationController);
-        assertTrue(mStatusBarWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
-        assertTrue(mNavBarWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
+        assertTrue(mStatusBarWindow.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
+        assertTrue(mNavBarWindow.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
         // Notification shade may have its own view animation in real case so do not fade out it.
-        assertFalse(mNotificationShadeWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
+        assertFalse(mNotificationShadeWindow.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
 
         // If the visibility of insets state is changed, the rotated state should be updated too.
         final InsetsState rotatedState = app.getFixedRotationTransformInsetsState();
@@ -1588,7 +1588,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 app.token, app.token, mDisplayContent.mDisplayId);
         assertTrue(asyncRotationController.isTargetToken(mImeWindow.mToken));
         assertTrue(mImeWindow.mToken.hasFixedRotationTransform());
-        assertTrue(mImeWindow.isAnimating(PARENTS, ANIMATION_TYPE_FIXED_TRANSFORM));
+        assertTrue(mImeWindow.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
 
         // The fixed rotation transform can only be finished when all animation finished.
         doReturn(false).when(app2).isAnimating(anyInt(), anyInt());

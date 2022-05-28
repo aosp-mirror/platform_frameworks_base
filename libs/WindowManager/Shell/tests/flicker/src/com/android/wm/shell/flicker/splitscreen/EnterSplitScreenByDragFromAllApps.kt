@@ -24,15 +24,14 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.traces.common.Rect
-import com.android.wm.shell.flicker.layerBecomesVisible
-import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
-import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
+import com.android.wm.shell.flicker.layerBecomesVisible
+import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
+import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -72,15 +71,10 @@ class EnterSplitScreenByDragFromAllApps(
             }
             transitions {
                 taplInstrumentation.launchedAppState.taskbar
-                        .openAllApps()
-                        .getAppIcon(secondaryApp.appName)
-                        .dragToSplitscreen(secondaryApp.component.packageName,
-                                primaryApp.component.packageName)
-
-                endDisplayBounds = wmHelper.currentState.layerState
-                        .displays.firstOrNull { !it.isVirtual }
-                        ?.layerStackSpace
-                        ?: error("Display not found")
+                    .openAllApps()
+                    .getAppIcon(secondaryApp.appName)
+                    .dragToSplitscreen(secondaryApp.component.packageName,
+                        primaryApp.component.packageName)
             }
         }
 
@@ -99,12 +93,12 @@ class EnterSplitScreenByDragFromAllApps(
     @Presubmit
     @Test
     fun primaryAppBoundsIsVisibleAtEnd() = testSpec.splitAppLayerBoundsIsVisibleAtEnd(
-            testSpec.endRotation, primaryApp.component, isAppLeftTop(true))
+        testSpec.endRotation, primaryApp.component, false /* splitLeftTop */)
 
     @Presubmit
     @Test
     fun secondaryAppBoundsBecomesVisible() = testSpec.splitAppLayerBoundsBecomesVisible(
-            testSpec.endRotation, secondaryApp.component, isAppLeftTop(false))
+        testSpec.endRotation, secondaryApp.component, true /* splitLeftTop */)
 
     @Presubmit
     @Test
@@ -113,27 +107,17 @@ class EnterSplitScreenByDragFromAllApps(
     @Presubmit
     @Test
     fun secondaryAppWindowBecomesVisible() =
-            testSpec.appWindowBecomesVisible(secondaryApp.component)
-
-    private fun isAppLeftTop(primary: Boolean): Boolean {
-        return if (endDisplayBounds.width > endDisplayBounds.height) {
-            !primary
-        } else {
-            primary
-        }
-    }
+        testSpec.appWindowBecomesVisible(secondaryApp.component)
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                    repetitions = SplitScreenHelper.TEST_REPETITIONS,
-                    // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
-                    supportedNavigationModes =
-                        listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
+                repetitions = SplitScreenHelper.TEST_REPETITIONS,
+                // TODO(b/176061063):The 3 buttons of nav bar do not exist in the hierarchy.
+                supportedNavigationModes =
+                    listOf(WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY))
         }
-
-        private lateinit var endDisplayBounds: Rect
     }
 }
