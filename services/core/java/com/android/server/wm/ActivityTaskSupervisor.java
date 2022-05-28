@@ -147,7 +147,6 @@ import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.am.HostingRecord;
 import com.android.server.am.UserState;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
@@ -1062,9 +1061,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         r.notifyUnknownVisibilityLaunchedForKeyguardTransition();
 
         final boolean isTop = andResume && r.isTopRunningActivity();
-        mService.startProcessAsync(r, knownToBeDead, isTop,
-                isTop ? HostingRecord.HOSTING_TYPE_TOP_ACTIVITY
-                        : HostingRecord.HOSTING_TYPE_ACTIVITY);
+        mService.startProcessAsync(r, knownToBeDead, isTop, isTop ? "top-activity" : "activity");
     }
 
     boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo, String resultWho,
