@@ -2503,13 +2503,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
      * @param pkg the package the permissions belong to
      * @param replace if the package is getting replaced (this might change the requested
      *                permissions of this package)
-     * @param packageOfInterest If this is the name of {@code pkg} add extra logging
+     * @param changingPackageName the name of the package that is changing
      * @param callback Result call back
      * @param filterUserId If not {@link UserHandle.USER_ALL}, only restore the permission state for
      *                     this particular user
      */
     private void restorePermissionState(@NonNull AndroidPackage pkg, boolean replace,
-            @Nullable String packageOfInterest, @Nullable PermissionCallback callback,
+            @Nullable String changingPackageName, @Nullable PermissionCallback callback,
             @UserIdInt int filterUserId) {
         // IMPORTANT: There are two types of permissions: install and runtime.
         // Install time permissions are granted when the app is installed to
@@ -2531,6 +2531,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int[] userIds = filterUserId == UserHandle.USER_ALL ? getAllUserIds()
                 : new int[] { filterUserId };
 
+        boolean installPermissionsChanged = false;
         boolean runtimePermissionsRevoked = false;
         int[] updatedUserIds = EMPTY_INT_ARRAY;
 
@@ -2649,7 +2650,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                 UidPermissionState origState = uidState;
 
-                boolean changedInstallPermission = false;
+                boolean installPermissionsChangedForUser = false;
 
                 if (replace) {
                     userState.setInstallPermissionsFixed(ps.getPackageName(), false);
@@ -2690,7 +2691,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     //  permission is present, because otherwise the permission should have been
                     //  removed.
                     if (bp == null /*|| getSourcePackageSetting(bp) == null*/) {
-                        if (packageOfInterest == null || packageOfInterest.equals(
+                        if (changingPackageName == null || changingPackageName.equals(
                                 pkg.getPackageName())) {
                             if (DEBUG_PERMISSIONS) {
                                 Slog.i(TAG, "Unknown permission " + permName
@@ -2815,7 +2816,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                                     && origState.isPermissionGranted(permName))))) {
                         // Grant an install permission.
                         if (uidState.grantPermission(bp)) {
-                            changedInstallPermission = true;
+                            installPermissionsChangedForUser = true;
                         }
                     } else if (bp.isRuntime()) {
                         boolean hardRestricted = bp.isHardRestricted();
@@ -2955,12 +2956,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             }
                         }
                         if (uidState.removePermissionState(bp.getName())) {
-                            changedInstallPermission = true;
+                            installPermissionsChangedForUser = true;
                         }
                     }
                 }
 
-                if ((changedInstallPermission || replace)
+                if ((installPermissionsChangedForUser || replace)
                         && !userState.areInstallPermissionsFixed(ps.getPackageName())
                         && !ps.isSystem() || ps.getTransientState().isUpdatedSystemApp()) {
                     // This is the first that we have heard about this package, so the
@@ -2969,6 +2970,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     userState.setInstallPermissionsFixed(ps.getPackageName(), true);
                 }
 
+                if (installPermissionsChangedForUser) {
+                    installPermissionsChanged = true;
+                    if (changingPackageName != null && replace) {
+                        updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
+                    }
+                }
                 updatedUserIds = revokePermissionsNoLongerImplicitLocked(uidState,
                         pkg.getPackageName(), uidImplicitPermissions, uidTargetSdkVersion, userId,
                         updatedUserIds);
@@ -2985,8 +2992,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         // Persist the runtime permissions state for users with changes. If permissions
         // were revoked because no app in the shared user declares them we have to
         // write synchronously to avoid losing runtime permissions state.
+        // Also write synchronously if we changed any install permission for an updated app, because
+        // the install permission state is likely already fixed before update, and if we lose the
+        // changes here the app won't be reconsidered for newly-added install permissions.
         if (callback != null) {
-            callback.onPermissionUpdated(updatedUserIds, runtimePermissionsRevoked);
+            callback.onPermissionUpdated(updatedUserIds,
+                    (changingPackageName != null && replace && installPermissionsChanged)
+                            || runtimePermissionsRevoked);
         }
 
         for (int userId : updatedUserIds) {

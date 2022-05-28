@@ -10032,7 +10032,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // We reset any translation state as views may be re-used (e.g., as in ListView and
             // RecyclerView). We only need to do this for views important for content capture since
             // views unimportant for content capture won't be translated anyway.
-            clearTranslationState();
+            if (!isTemporarilyDetached()) {
+                clearTranslationState();
+            }
         }
     }
 

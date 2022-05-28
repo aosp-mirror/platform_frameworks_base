@@ -77,8 +77,7 @@
         android:layout_height="@dimen/magnification_drag_view_size"
         android:layout_margin="@dimen/magnification_inner_border_margin"
         android:layout_gravity="right|bottom"
-        android:paddingEnd="@dimen/magnifier_drag_handle_padding"
-        android:paddingBottom="@dimen/magnifier_drag_handle_padding"
+        android:padding="@dimen/magnifier_drag_handle_padding"
         android:scaleType="center"
         android:importantForAccessibility="no"
         android:src="@drawable/ic_move_magnification"/>

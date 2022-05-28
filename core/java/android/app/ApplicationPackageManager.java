@@ -1695,8 +1695,8 @@ public class ApplicationPackageManager extends PackageManager {
         ComponentName className, int flags)
             throws NameNotFoundException {
         try {
-            InstrumentationInfo ii = mPM.getInstrumentationInfo(
-                className, flags);
+            InstrumentationInfo ii = mPM.getInstrumentationInfoAsUser(
+                    className, flags, getUserId());
             if (ii != null) {
                 return ii;
             }
@@ -1713,7 +1713,7 @@ public class ApplicationPackageManager extends PackageManager {
         String targetPackage, int flags) {
         try {
             ParceledListSlice<InstrumentationInfo> parceledList =
-                    mPM.queryInstrumentation(targetPackage, flags);
+                    mPM.queryInstrumentationAsUser(targetPackage, flags, getUserId());
             if (parceledList == null) {
                 return Collections.emptyList();
             }

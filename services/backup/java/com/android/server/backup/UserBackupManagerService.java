@@ -2358,13 +2358,37 @@ public class UserBackupManagerService {
                 }
             } while (headBusy);
 
+            if (runBackup) {
+                CountDownLatch latch = new CountDownLatch(1);
+                String[] pkg = new String[]{entry.packageName};
+                try {
+                    mRunningFullBackupTask = PerformFullTransportBackupTask.newWithCurrentTransport(
+                            this,
+                            mOperationStorage,
+                            /* observer */ null,
+                            pkg,
+                            /* updateSchedule */ true,
+                            scheduledJob,
+                            latch,
+                            /* backupObserver */ null,
+                            /* monitor */ null,
+                            /* userInitiated */ false,
+                            "BMS.beginFullBackup()",
+                            getEligibilityRulesForOperation(OperationType.BACKUP));
+                } catch (IllegalStateException e) {
+                    Slog.w(TAG, "Failed to start backup", e);
+                    runBackup = false;
+                }
+            }
+
             if (!runBackup) {
                 if (DEBUG_SCHEDULING) {
                     Slog.i(
                             TAG,
                             addUserIdToLogMessage(
                                     mUserId,
-                                    "Nothing pending full backup; rescheduling +" + latency));
+                                    "Nothing pending full backup or failed to start the "
+                                            + "operation; rescheduling +" + latency));
                 }
                 final long deferTime = latency;     // pin for the closure
                 FullBackupJob.schedule(mUserId, mContext, deferTime, mConstants);
@@ -2373,21 +2397,6 @@ public class UserBackupManagerService {
 
             // Okay, the top thing is ready for backup now.  Do it.
             mFullBackupQueue.remove(0);
-            CountDownLatch latch = new CountDownLatch(1);
-            String[] pkg = new String[]{entry.packageName};
-            mRunningFullBackupTask = PerformFullTransportBackupTask.newWithCurrentTransport(
-                    this,
-                    mOperationStorage,
-                    /* observer */ null,
-                    pkg,
-                    /* updateSchedule */ true,
-                    scheduledJob,
-                    latch,
-                    /* backupObserver */ null,
-                    /* monitor */ null,
-                    /* userInitiated */ false,
-                    "BMS.beginFullBackup()",
-                    getEligibilityRulesForOperation(OperationType.BACKUP));
             // Acquiring wakelock for PerformFullTransportBackupTask before its start.
             mWakelock.acquire();
             (new Thread(mRunningFullBackupTask)).start();
@@ -2883,7 +2892,6 @@ public class UserBackupManagerService {
     public void fullTransportBackup(String[] pkgNames) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "fullTransportBackup");
-
         final int callingUserHandle = UserHandle.getCallingUserId();
         // TODO: http://b/22388012
         if (callingUserHandle != UserHandle.USER_SYSTEM) {
@@ -2935,6 +2943,9 @@ public class UserBackupManagerService {
                 for (String pkg : pkgNames) {
                     enqueueFullBackup(pkg, now);
                 }
+            } catch (IllegalStateException e) {
+                Slog.w(TAG, "Failed to start backup: ", e);
+                return;
             } finally {
                 Binder.restoreCallingIdentity(oldId);
             }
