@@ -691,6 +691,20 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    public void testVisibleTasks_excludedFromRecents_nonDefaultDisplayTaskNotVisible() {
+        Task excludedTaskOnVirtualDisplay = createTaskBuilder(".excludedTaskOnVirtualDisplay")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .build();
+        excludedTaskOnVirtualDisplay.mUserSetupComplete = true;
+        doReturn(false).when(excludedTaskOnVirtualDisplay).isOnHomeDisplay();
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(excludedTaskOnVirtualDisplay);
+
+        // Expect that the first visible excluded-from-recents task is visible
+        assertGetRecentTasksOrder(0 /* flags */, mTasks.get(0));
+    }
+
+    @Test
     public void testVisibleTasks_excludedFromRecents_withExcluded() {
         // Create some set of tasks, some of which are visible and some are not
         Task t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
@@ -799,6 +813,17 @@ public class RecentTasksTest extends WindowTestsBase {
         assertThat(mCallbacksRecorder.mAdded).hasSize(1);
         assertFalse("embedded task should not be visible recents",
                 mRecentTasks.isVisibleRecentTask(task));
+    }
+
+    @Test
+    public void testVisibleTask_displayCanNotShowTaskFromRecents_expectNotVisible() {
+        final DisplayContent displayContent = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        doReturn(false).when(displayContent).canShowTasksInRecents();
+        final Task task = displayContent.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        mRecentTasks.add(task);
+
+        assertFalse(mRecentTasks.isVisibleRecentTask(task));
     }
 
     @Test

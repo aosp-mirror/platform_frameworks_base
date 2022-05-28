@@ -457,6 +457,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             wct.setBoundsChangeTransaction(mToken, tx);
         }
 
+        // Cancel the existing animator if there is any.
+        cancelCurrentAnimator();
+
         // Set the exiting state first so if there is fixed rotation later, the running animation
         // won't be interrupted by alpha animation for existing PiP.
         mPipTransitionState.setTransitionState(PipTransitionState.EXITING_PIP);
@@ -802,18 +805,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             return;
         }
 
-        final PipAnimationController.PipTransitionAnimator<?> animator =
-                mPipAnimationController.getCurrentAnimator();
-        if (animator != null) {
-            if (animator.getContentOverlayLeash() != null) {
-                removeContentOverlay(animator.getContentOverlayLeash(),
-                        animator::clearContentOverlay);
-            }
-            animator.removeAllUpdateListeners();
-            animator.removeAllListeners();
-            animator.cancel();
-        }
-
+        cancelCurrentAnimator();
         onExitPipFinished(info);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -1050,9 +1042,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 int direction = TRANSITION_DIRECTION_NONE;
                 if (animator != null) {
                     direction = animator.getTransitionDirection();
-                    animator.removeAllUpdateListeners();
-                    animator.removeAllListeners();
-                    animator.cancel();
+                    PipAnimationController.quietCancel(animator);
                     // Do notify the listeners that this was canceled
                     sendOnPipTransitionCancelled(direction);
                     sendOnPipTransitionFinished(direction);
@@ -1586,10 +1576,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 // set a start delay on this animation.
                 ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                         "%s: Task vanished, skip fadeOutAndRemoveOverlay", TAG);
-                animation.removeAllListeners();
-                animation.removeAllUpdateListeners();
-                animation.cancel();
-            } else {
+                PipAnimationController.quietCancel(animation);
+            } else if (surface.isValid()) {
                 final float alpha = (float) animation.getAnimatedValue();
                 final SurfaceControl.Transaction transaction =
                         mSurfaceControlTransactionFactory.getTransaction();
@@ -1626,6 +1614,18 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         tx.setShadowRadius(mLeash, 0f);
         tx.apply();
+    }
+
+    private void cancelCurrentAnimator() {
+        final PipAnimationController.PipTransitionAnimator<?> animator =
+                mPipAnimationController.getCurrentAnimator();
+        if (animator != null) {
+            if (animator.getContentOverlayLeash() != null) {
+                removeContentOverlay(animator.getContentOverlayLeash(),
+                        animator::clearContentOverlay);
+            }
+            PipAnimationController.quietCancel(animator);
+        }
     }
 
     @VisibleForTesting
