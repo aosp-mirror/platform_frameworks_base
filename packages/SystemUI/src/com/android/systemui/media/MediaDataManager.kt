@@ -509,6 +509,11 @@ class MediaDataManager(
      */
     private fun updateState(key: String, state: PlaybackState) {
         mediaEntries.get(key)?.let {
+            val token = it.token
+            if (token == null) {
+                if (DEBUG) Log.d(TAG, "State updated, but token was null")
+                return
+            }
             val actions = createActionsFromState(it.packageName,
                     mediaControllerFactory.create(it.token), UserHandle(it.userId))
             val data = it.copy(
