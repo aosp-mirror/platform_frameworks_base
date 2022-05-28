@@ -730,6 +730,7 @@ status_t JMediaCodec::getOutputFrame(
             switch (c2Buffer->data().type()) {
                 case C2BufferData::LINEAR: {
                     std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
+                    context->mCodecNames.push_back(mNameAtCreation.c_str());
                     context->mBuffer = c2Buffer;
                     ScopedLocalRef<jobject> linearBlock{env, env->NewObject(
                             gLinearBlockInfo.clazz, gLinearBlockInfo.ctorId)};
@@ -769,6 +770,7 @@ status_t JMediaCodec::getOutputFrame(
         } else {
             if (!mGraphicOutput) {
                 std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
+                context->mCodecNames.push_back(mNameAtCreation.c_str());
                 context->mLegacyBuffer = buffer;
                 ScopedLocalRef<jobject> linearBlock{env, env->NewObject(
                         gLinearBlockInfo.clazz, gLinearBlockInfo.ctorId)};
@@ -811,7 +813,6 @@ status_t JMediaCodec::getOutputFrame(
     }
     return OK;
 }
-
 
 status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
     AString name;
@@ -2286,6 +2287,108 @@ static status_t ConvertKeyValueListsToAMessage(
     return OK;
 }
 
+static bool obtain(
+        JMediaCodecLinearBlock *context,
+        int capacity,
+        const std::vector<std::string> &names,
+        bool secure) {
+    if (secure) {
+        // Start at 1MB, which is an arbitrary starting point that can
+        // increase when needed.
+        constexpr size_t kInitialDealerCapacity = 1048576;
+        thread_local sp<MemoryDealer> sDealer = new MemoryDealer(
+                kInitialDealerCapacity, "JNI(1MB)");
+        context->mMemory = sDealer->allocate(capacity);
+        if (context->mMemory == nullptr) {
+            size_t newDealerCapacity = sDealer->getMemoryHeap()->getSize() * 2;
+            while (capacity * 2 > newDealerCapacity) {
+                newDealerCapacity *= 2;
+            }
+            ALOGI("LinearBlock.native_obtain: "
+                  "Dealer capacity increasing from %zuMB to %zuMB",
+                  sDealer->getMemoryHeap()->getSize() / 1048576,
+                  newDealerCapacity / 1048576);
+            sDealer = new MemoryDealer(
+                    newDealerCapacity,
+                    AStringPrintf("JNI(%zuMB)", newDealerCapacity).c_str());
+            context->mMemory = sDealer->allocate(capacity);
+        }
+        context->mHidlMemory = hardware::fromHeap(context->mMemory->getMemory(
+                    &context->mHidlMemoryOffset, &context->mHidlMemorySize));
+    } else {
+        context->mBlock = MediaCodec::FetchLinearBlock(capacity, names);
+        if (!context->mBlock) {
+            return false;
+        }
+    }
+    context->mCodecNames = names;
+    return true;
+}
+
+static void extractMemoryFromContext(
+        JMediaCodecLinearBlock *context,
+        jint offset,
+        jint size,
+        sp<hardware::HidlMemory> *memory) {
+    *memory = context->toHidlMemory();
+    if (*memory == nullptr) {
+        if (!context->mBlock) {
+            ALOGW("extractMemoryFromContext: the buffer is missing both IMemory and C2Block");
+            return;
+        }
+        ALOGD("extractMemoryFromContext: realloc & copying from C2Block to IMemory (cap=%zu)",
+              context->capacity());
+        if (!obtain(context, context->capacity(),
+                    context->mCodecNames, true /* secure */)) {
+            ALOGW("extractMemoryFromContext: failed to obtain secure block");
+            return;
+        }
+        C2WriteView view = context->mBlock->map().get();
+        if (view.error() != C2_OK) {
+            ALOGW("extractMemoryFromContext: failed to map C2Block (%d)", view.error());
+            return;
+        }
+        uint8_t *memoryPtr = static_cast<uint8_t *>(context->mMemory->unsecurePointer());
+        memcpy(memoryPtr + offset, view.base() + offset, size);
+        context->mBlock.reset();
+        context->mReadWriteMapping.reset();
+        *memory = context->toHidlMemory();
+    }
+}
+
+static void extractBufferFromContext(
+        JMediaCodecLinearBlock *context,
+        jint offset,
+        jint size,
+        std::shared_ptr<C2Buffer> *buffer) {
+    *buffer = context->toC2Buffer(offset, size);
+    if (*buffer == nullptr) {
+        if (!context->mMemory) {
+            ALOGW("extractBufferFromContext: the buffer is missing both IMemory and C2Block");
+            return;
+        }
+        ALOGD("extractBufferFromContext: realloc & copying from IMemory to C2Block (cap=%zu)",
+              context->capacity());
+        if (obtain(context, context->capacity(),
+                   context->mCodecNames, false /* secure */)) {
+            ALOGW("extractBufferFromContext: failed to obtain non-secure block");
+            return;
+        }
+        C2WriteView view = context->mBlock->map().get();
+        if (view.error() != C2_OK) {
+            ALOGW("extractBufferFromContext: failed to map C2Block (%d)", view.error());
+            return;
+        }
+        uint8_t *memoryPtr = static_cast<uint8_t *>(context->mMemory->unsecurePointer());
+        memcpy(view.base() + offset, memoryPtr + offset, size);
+        context->mMemory.clear();
+        context->mHidlMemory.clear();
+        context->mHidlMemorySize = 0;
+        context->mHidlMemoryOffset = 0;
+        *buffer = context->toC2Buffer(offset, size);
+    }
+}
+
 static void android_media_MediaCodec_native_queueLinearBlock(
         JNIEnv *env, jobject thiz, jint index, jobject bufferObj,
         jint offset, jint size, jobject cryptoInfoObj,
@@ -2314,12 +2417,10 @@ static void android_media_MediaCodec_native_queueLinearBlock(
             JMediaCodecLinearBlock *context =
                 (JMediaCodecLinearBlock *)env->GetLongField(bufferObj, gLinearBlockInfo.contextId);
             if (codec->hasCryptoOrDescrambler()) {
-                memory = context->toHidlMemory();
-                // TODO: copy if memory is null
+                extractMemoryFromContext(context, offset, size, &memory);
                 offset += context->mHidlMemoryOffset;
             } else {
-                buffer = context->toC2Buffer(offset, size);
-                // TODO: copy if buffer is null
+                extractBufferFromContext(context, offset, size, &buffer);
             }
         }
         env->MonitorExit(lock.get());
@@ -2354,6 +2455,7 @@ static void android_media_MediaCodec_native_queueLinearBlock(
                 flags,
                 tunings,
                 &errorDetailMsg);
+        ALOGI_IF(err != OK, "queueEncryptedLinearBlock returned err = %d", err);
     } else {
         if (!buffer) {
             ALOGI("queueLinearBlock: no C2Buffer found");
@@ -3300,33 +3402,9 @@ static void android_media_MediaCodec_LinearBlock_native_obtain(
             hasNonSecure = true;
         }
     }
-    if (hasSecure && !hasNonSecure) {
-        constexpr size_t kInitialDealerCapacity = 1048576;  // 1MB
-        thread_local sp<MemoryDealer> sDealer = new MemoryDealer(
-                kInitialDealerCapacity, "JNI(1MB)");
-        context->mMemory = sDealer->allocate(capacity);
-        if (context->mMemory == nullptr) {
-            size_t newDealerCapacity = sDealer->getMemoryHeap()->getSize() * 2;
-            while (capacity * 2 > newDealerCapacity) {
-                newDealerCapacity *= 2;
-            }
-            ALOGI("LinearBlock.native_obtain: "
-                  "Dealer capacity increasing from %zuMB to %zuMB",
-                  sDealer->getMemoryHeap()->getSize() / 1048576,
-                  newDealerCapacity / 1048576);
-            sDealer = new MemoryDealer(
-                    newDealerCapacity,
-                    AStringPrintf("JNI(%zuMB)", newDealerCapacity).c_str());
-            context->mMemory = sDealer->allocate(capacity);
-        }
-        context->mHidlMemory = hardware::fromHeap(context->mMemory->getMemory(
-                    &context->mHidlMemoryOffset, &context->mHidlMemorySize));
-    } else {
-        context->mBlock = MediaCodec::FetchLinearBlock(capacity, names);
-        if (!context->mBlock) {
-            jniThrowException(env, "java/io/IOException", nullptr);
-            return;
-        }
+    if (!obtain(context.get(), capacity, names, (hasSecure && !hasNonSecure) /* secure */)) {
+        jniThrowException(env, "java/io/IOException", nullptr);
+        return;
     }
     env->CallVoidMethod(
             thiz,
