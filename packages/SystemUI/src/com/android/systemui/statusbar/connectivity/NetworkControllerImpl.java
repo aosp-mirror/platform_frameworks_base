@@ -1154,6 +1154,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.print("  hasVoiceCallingFeature()=");
         pw.println(hasVoiceCallingFeature());
         pw.println("  mListening=" + mListening);
+        pw.println("  mActiveMobileDataSubscription=" + mActiveMobileDataSubscription);
 
         pw.println("  - connectivity ------");
         pw.print("  mConnectedTransports=");
