@@ -94,6 +94,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -937,6 +938,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         : lhs.getSimSlotIndex() - rhs.getSimSlotIndex();
             }
         });
+        Log.i(
+                TAG,
+                String.format(
+                        Locale.US,
+                        "Subscriptions changed: %s",
+                        createSubscriptionChangeStatement(mCurrentSubscriptions, subscriptions)));
         mCurrentSubscriptions = subscriptions;
 
         SparseArray<MobileSignalController> cachedControllers =
@@ -1474,4 +1481,23 @@ public class NetworkControllerImpl extends BroadcastReceiver
      * get created will also run on the BG Looper.
      */
     private final Runnable mRegisterListeners = () -> registerListeners();
+
+    /** Returns a logging statement for the given old and new list of {@link SubscriptionInfo} */
+    private static String createSubscriptionChangeStatement(
+            final @Nullable List<SubscriptionInfo> oldSubscriptions,
+            final @Nullable List<SubscriptionInfo> newSubscriptions) {
+        return String.format(
+                Locale.US,
+                "old=%s, new=%s",
+                toSubscriptionIds(oldSubscriptions),
+                toSubscriptionIds(newSubscriptions));
+    }
+
+    /** Returns to a list of subscription IDs for the given list of {@link SubscriptionInfo} */
+    @Nullable
+    private static List<Integer> toSubscriptionIds(
+            final @Nullable List<SubscriptionInfo> subscriptions) {
+        return subscriptions != null ? subscriptions.stream().map(
+                SubscriptionInfo::getSubscriptionId).collect(Collectors.toList()) : null;
+    }
 }
