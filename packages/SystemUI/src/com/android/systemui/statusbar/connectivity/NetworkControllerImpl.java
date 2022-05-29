@@ -73,6 +73,9 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.LogLevel;
+import com.android.systemui.log.dagger.StatusBarNetworkControllerLog;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -97,6 +100,8 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import kotlin.Unit;
 
 /** Platform implementation of the network controller. **/
 @SysUISingleton
@@ -134,6 +139,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final FeatureFlags mFeatureFlags;
     private final DumpManager mDumpManager;
+    private final LogBuffer mLogBuffer;
 
     private TelephonyCallback.ActiveDataSubscriptionIdListener mPhoneStateListener;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -232,7 +238,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             @Main Handler handler,
             InternetDialogFactory internetDialogFactory,
             FeatureFlags featureFlags,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            @StatusBarNetworkControllerLog LogBuffer logBuffer) {
         this(context, connectivityManager,
                 telephonyManager,
                 telephonyListenerManager,
@@ -252,7 +259,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 trackerFactory,
                 handler,
                 featureFlags,
-                dumpManager);
+                dumpManager,
+                logBuffer);
         mReceiverHandler.post(mRegisterListeners);
         mInternetDialogFactory = internetDialogFactory;
     }
@@ -277,7 +285,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             WifiStatusTrackerFactory trackerFactory,
             @Main Handler handler,
             FeatureFlags featureFlags,
-            DumpManager dumpManager
+            DumpManager dumpManager,
+            LogBuffer logBuffer
     ) {
         mContext = context;
         mTelephonyListenerManager = telephonyListenerManager;
@@ -298,6 +307,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mCarrierConfigTracker = carrierConfigTracker;
         mFeatureFlags = featureFlags;
         mDumpManager = dumpManager;
+        mLogBuffer = logBuffer;
 
         // telephony
         mPhone = telephonyManager;
@@ -771,6 +781,17 @@ public class NetworkControllerImpl extends BroadcastReceiver
             Log.d(TAG, "onReceive: intent=" + intent);
         }
         final String action = intent.getAction();
+        mLogBuffer.log(
+                TAG,
+                LogLevel.INFO,
+                logMessage -> {
+                    logMessage.setStr1(action);
+                    return Unit.INSTANCE;
+                },
+                logMessage -> String.format(
+                        Locale.US,
+                        "Received broadcast with action \"%s\"",
+                        logMessage.getStr1()));
         switch (action) {
             case ConnectivityManager.CONNECTIVITY_ACTION:
                 updateConnectivity();
