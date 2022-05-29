@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_APPEAR;
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 
@@ -28,7 +30,6 @@ import android.view.animation.AnimationUtils;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
@@ -173,7 +174,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         setTranslationY(mAppearAnimationUtils.getStartTranslation());
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 500 /* duration */,
                 0, mAppearAnimationUtils.getInterpolator(),
-                getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_APPEAR));
+                getAnimationListener(CUJ_LOCKSCREEN_PIN_APPEAR));
         mAppearAnimationUtils.startAnimation2d(mViews,
                 new Runnable() {
                     @Override
@@ -194,12 +195,12 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         disappearAnimationUtils.createAnimation(
                 this, 0, 200, mDisappearYTranslation, false,
                 mDisappearAnimationUtils.getInterpolator(), () -> {
-                    getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR);
                     enableClipping(true);
                     if (finishRunnable != null) {
                         finishRunnable.run();
                     }
-                });
+                },
+                getAnimationListener(CUJ_LOCKSCREEN_PIN_DISAPPEAR));
         return true;
     }
 

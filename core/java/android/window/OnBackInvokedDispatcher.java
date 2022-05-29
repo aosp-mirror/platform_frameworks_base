@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
-import android.os.Build;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,7 +37,7 @@ public interface OnBackInvokedDispatcher {
     String TAG = "OnBackInvokedDispatcher";
 
     /** @hide */
-    boolean DEBUG = Build.isDebuggable();
+    boolean DEBUG = false;
 
     /** @hide */
     @IntDef({
