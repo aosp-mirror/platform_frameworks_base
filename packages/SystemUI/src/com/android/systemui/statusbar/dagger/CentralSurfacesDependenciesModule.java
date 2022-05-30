@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.service.dreams.IDreamManager;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -317,7 +318,8 @@ public interface CentralSurfacesDependenciesModule {
      */
     @Provides
     @SysUISingleton
-    static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager) {
-        return new DialogLaunchAnimator(dreamManager);
+    static DialogLaunchAnimator provideDialogLaunchAnimator(IDreamManager dreamManager,
+            InteractionJankMonitor interactionJankMonitor) {
+        return new DialogLaunchAnimator(dreamManager, interactionJankMonitor);
     }
 }
