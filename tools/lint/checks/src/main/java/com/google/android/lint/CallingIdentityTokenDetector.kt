@@ -33,6 +33,7 @@ import org.jetbrains.uast.UBlockExpression
 import org.jetbrains.uast.UCallExpression
 import org.jetbrains.uast.UDeclarationsExpression
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UIfExpression
 import org.jetbrains.uast.ULocalVariable
 import org.jetbrains.uast.USimpleNameReferenceExpression
 import org.jetbrains.uast.UTryExpression
@@ -52,10 +53,10 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
     private val tokensMap = mutableMapOf<String, Token>()
 
     override fun getApplicableUastTypes(): List<Class<out UElement?>> =
-            listOf(ULocalVariable::class.java, UCallExpression::class.java)
+        listOf(ULocalVariable::class.java, UCallExpression::class.java)
 
     override fun createUastHandler(context: JavaContext): UElementHandler =
-            TokenUastHandler(context)
+        TokenUastHandler(context)
 
     /** File analysis starts with a clear map */
     override fun beforeCheckFile(context: Context) {
@@ -70,9 +71,9 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
     override fun afterCheckFile(context: Context) {
         for (token in tokensMap.values) {
             context.report(
-                    ISSUE_UNUSED_TOKEN,
-                    token.location,
-                    getIncidentMessageUnusedToken(token.variableName)
+                ISSUE_UNUSED_TOKEN,
+                token.location,
+                getIncidentMessageUnusedToken(token.variableName)
             )
         }
         tokensMap.clear()
@@ -96,9 +97,9 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
             val variableName = node.getName()
             if (!node.isFinal) {
                 context.report(
-                        ISSUE_NON_FINAL_TOKEN,
-                        location,
-                        getIncidentMessageNonFinalToken(variableName)
+                    ISSUE_NON_FINAL_TOKEN,
+                    location,
+                    getIncidentMessageNonFinalToken(variableName)
                 )
             }
             // If there exists an unused variable with the same name in the map, we can imply that
@@ -106,9 +107,9 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
             val oldToken = tokensMap[variableName]
             if (oldToken != null) {
                 context.report(
-                        ISSUE_UNUSED_TOKEN,
-                        oldToken.location,
-                        getIncidentMessageUnusedToken(oldToken.variableName)
+                    ISSUE_UNUSED_TOKEN,
+                    oldToken.location,
+                    getIncidentMessageUnusedToken(oldToken.variableName)
                 )
             }
             // If there exists a token in the same scope as the current new token, it means that
@@ -117,56 +118,84 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
             val firstCallToken = findFirstTokenInScope(node)
             if (firstCallToken != null) {
                 context.report(
-                        ISSUE_NESTED_CLEAR_IDENTITY_CALLS,
-                        createNestedLocation(firstCallToken, location),
-                        getIncidentMessageNestedClearIdentityCallsPrimary(
-                                firstCallToken.variableName,
-                                variableName
-                        )
+                    ISSUE_NESTED_CLEAR_IDENTITY_CALLS,
+                    createNestedLocation(firstCallToken, location),
+                    getIncidentMessageNestedClearIdentityCallsPrimary(
+                        firstCallToken.variableName,
+                        variableName
+                    )
                 )
             }
             // If the next statement in the tree is not a try-finally statement, we need to report
             // the "clearCallingIdentity() is not followed by try-finally" issue
             val finallyClause = (getNextStatementOfLocalVariable(node) as? UTryExpression)
-                    ?.finallyClause
+                ?.finallyClause
             if (finallyClause == null) {
                 context.report(
-                        ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY,
-                        location,
-                        getIncidentMessageClearIdentityCallNotFollowedByTryFinally(variableName)
+                    ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY,
+                    location,
+                    getIncidentMessageClearIdentityCallNotFollowedByTryFinally(variableName)
                 )
             }
             tokensMap[variableName] = Token(
-                    variableName,
-                    node.sourcePsi?.getUseScope(),
-                    location,
-                    finallyClause
+                variableName,
+                node.sourcePsi?.getUseScope(),
+                location,
+                finallyClause
             )
         }
 
+        override fun visitCallExpression(node: UCallExpression) {
+            when {
+                isMethodCall(node, Method.BINDER_CLEAR_CALLING_IDENTITY) -> {
+                    checkClearCallingIdentityCall(node)
+                }
+                isMethodCall(node, Method.BINDER_RESTORE_CALLING_IDENTITY) -> {
+                    checkRestoreCallingIdentityCall(node)
+                }
+                isCallerAwareMethod(node) -> checkCallerAwareMethod(node)
+            }
+        }
+
+        private fun checkClearCallingIdentityCall(node: UCallExpression) {
+            var firstNonQualifiedParent = getFirstNonQualifiedParent(node)
+            // if the call expression is inside a ternary, and the ternary is assigned
+            // to a variable, then we are still technically assigning
+            // any result of clearCallingIdentity to a variable
+            if (firstNonQualifiedParent is UIfExpression && firstNonQualifiedParent.isTernary) {
+                firstNonQualifiedParent = firstNonQualifiedParent.uastParent
+            }
+            if (firstNonQualifiedParent !is ULocalVariable) {
+                context.report(
+                    ISSUE_RESULT_OF_CLEAR_IDENTITY_CALL_NOT_STORED_IN_VARIABLE,
+                    context.getLocation(node),
+                    getIncidentMessageResultOfClearIdentityCallNotStoredInVariable(
+                        node.getQualifiedParentOrThis().asRenderString()
+                    )
+                )
+            }
+        }
+
+        private fun checkCallerAwareMethod(node: UCallExpression) {
+            val token = findFirstTokenInScope(node)
+            if (token != null) {
+                context.report(
+                    ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
+                    context.getLocation(node),
+                    getIncidentMessageUseOfCallerAwareMethodsWithClearedIdentity(
+                        token.variableName,
+                        node.asRenderString()
+                    )
+                )
+            }
+        }
+
         /**
-         * For every method():
-         * - Checks use of caller-aware methods issue
-         * For every call of Binder.restoreCallingIdentity(token):
          * - Checks for restoreCallingIdentity() not in the finally block issue
          * - Removes token from tokensMap if token is within the scope of the method
          */
-        override fun visitCallExpression(node: UCallExpression) {
-            val token = findFirstTokenInScope(node)
-            if (isCallerAwareMethod(node) && token != null) {
-                context.report(
-                        ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY,
-                        context.getLocation(node),
-                        getIncidentMessageUseOfCallerAwareMethodsWithClearedIdentity(
-                                token.variableName,
-                                node.asRenderString()
-                        )
-                )
-                return
-            }
-            if (!isMethodCall(node, Method.BINDER_RESTORE_CALLING_IDENTITY)) return
-            val first = node.valueArguments[0].skipParenthesizedExprDown()
-            val arg = first as? USimpleNameReferenceExpression ?: return
+        private fun checkRestoreCallingIdentityCall(node: UCallExpression) {
+            val arg = node.valueArguments[0] as? USimpleNameReferenceExpression ?: return
             val variableName = arg.identifier
             val originalScope = tokensMap[variableName]?.scope ?: return
             val psi = arg.sourcePsi ?: return
@@ -174,26 +203,31 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
             // token declaration. If not within the scope, no action is needed because the token is
             // irrelevant i.e. not in the same scope or was not declared with clearCallingIdentity()
             if (!PsiSearchScopeUtil.isInScope(originalScope, psi)) return
-            // - We do not report "restore identity call not in finally" issue when there is no
+            // We do not report "restore identity call not in finally" issue when there is no
             // finally block because that case is already handled by "clear identity call not
             // followed by try-finally" issue
-            // - UCallExpression can be a child of UQualifiedReferenceExpression, i.e.
-            // receiver.selector, so to get the call's immediate parent we need to get the topmost
-            // parent qualified reference expression and access its parent
             if (tokensMap[variableName]?.finallyBlock != null &&
-                    skipParenthesizedExprUp(node.getQualifiedParentOrThis().uastParent) !=
-                        tokensMap[variableName]?.finallyBlock) {
+                getFirstNonQualifiedParent(node) !=
+                tokensMap[variableName]?.finallyBlock
+            ) {
                 context.report(
-                        ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
-                        context.getLocation(node),
-                        getIncidentMessageRestoreIdentityCallNotInFinallyBlock(variableName)
+                    ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK,
+                    context.getLocation(node),
+                    getIncidentMessageRestoreIdentityCallNotInFinallyBlock(variableName)
                 )
             }
             tokensMap.remove(variableName)
         }
 
+        private fun getFirstNonQualifiedParent(expression: UCallExpression): UElement? {
+            // UCallExpression can be a child of UQualifiedReferenceExpression, i.e.
+            // receiver.selector, so to get the call's immediate parent we need to get the topmost
+            // parent qualified reference expression and access its parent
+            return skipParenthesizedExprUp(expression.getQualifiedParentOrThis().uastParent)
+        }
+
         private fun isCallerAwareMethod(expression: UCallExpression): Boolean =
-                callerAwareMethods.any { method -> isMethodCall(expression, method) }
+            callerAwareMethods.any { method -> isMethodCall(expression, method) }
 
         private fun isMethodCall(
             expression: UCallExpression,
@@ -201,12 +235,12 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
         ): Boolean {
             val psiMethod = expression.resolve() ?: return false
             return psiMethod.getName() == method.methodName &&
-                    context.evaluator.methodMatches(
-                            psiMethod,
-                            method.className,
-                            /* allowInherit */ true,
-                            *method.args
-                    )
+                context.evaluator.methodMatches(
+                    psiMethod,
+                    method.className,
+                    /* allowInherit */ true,
+                    *method.args
+                )
         }
 
         /**
@@ -255,7 +289,7 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                 return declarations[indexInDeclarations + 1]
             }
             val enclosingBlock = node
-                    .getParentOfType<UBlockExpression>(strict = true) ?: return null
+                .getParentOfType<UBlockExpression>(strict = true) ?: return null
             val expressions = enclosingBlock.expressions
             val indexInBlock = expressions.indexOf(declarationsExpression as UElement)
             return if (indexInBlock == -1) null else expressions.getOrNull(indexInBlock + 1)
@@ -301,12 +335,12 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
         secondCallTokenLocation: Location
     ): Location {
         return cloneLocation(secondCallTokenLocation)
-                .withSecondary(
-                        cloneLocation(firstCallToken.location),
-                        getIncidentMessageNestedClearIdentityCallsSecondary(
-                                firstCallToken.variableName
-                        )
+            .withSecondary(
+                cloneLocation(firstCallToken.location),
+                getIncidentMessageNestedClearIdentityCallsSecondary(
+                    firstCallToken.variableName
                 )
+            )
     }
 
     private fun cloneLocation(location: Location): Location {
@@ -347,20 +381,20 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
         const val CLASS_USER_HANDLE = "android.os.UserHandle"
 
         private val callerAwareMethods = listOf(
-                Method.BINDER_GET_CALLING_PID,
-                Method.BINDER_GET_CALLING_UID,
-                Method.BINDER_GET_CALLING_UID_OR_THROW,
-                Method.BINDER_GET_CALLING_USER_HANDLE,
-                Method.USER_HANDLE_GET_CALLING_APP_ID,
-                Method.USER_HANDLE_GET_CALLING_USER_ID
+            Method.BINDER_GET_CALLING_PID,
+            Method.BINDER_GET_CALLING_UID,
+            Method.BINDER_GET_CALLING_UID_OR_THROW,
+            Method.BINDER_GET_CALLING_USER_HANDLE,
+            Method.USER_HANDLE_GET_CALLING_APP_ID,
+            Method.USER_HANDLE_GET_CALLING_USER_ID
         )
 
         /** Issue: unused token from Binder.clearCallingIdentity() */
         @JvmField
         val ISSUE_UNUSED_TOKEN: Issue = Issue.create(
-                id = "UnusedTokenOfOriginalCallingIdentity",
-                briefDescription = "Unused token of Binder.clearCallingIdentity()",
-                explanation = """
+            id = "UnusedTokenOfOriginalCallingIdentity",
+            briefDescription = "Unused token of Binder.clearCallingIdentity()",
+            explanation = """
                     You cleared the original calling identity with \
                     `Binder.clearCallingIdentity()`, but have not used the returned token to \
                     restore the identity.
@@ -370,26 +404,26 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
 
                     `token` is the result of `Binder.clearCallingIdentity()`
                     """,
-                category = Category.SECURITY,
-                priority = 6,
-                severity = Severity.WARNING,
-                implementation = Implementation(
-                        CallingIdentityTokenDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
-                )
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.WARNING,
+            implementation = Implementation(
+                CallingIdentityTokenDetector::class.java,
+                Scope.JAVA_FILE_SCOPE
+            )
         )
 
         private fun getIncidentMessageUnusedToken(variableName: String) = "`$variableName` has " +
-                "not been used to restore the calling identity. Introduce a `try`-`finally` " +
-                "after the declaration and call `Binder.restoreCallingIdentity($variableName)` " +
-                "in `finally` or remove `$variableName`."
+            "not been used to restore the calling identity. Introduce a `try`-`finally` " +
+            "after the declaration and call `Binder.restoreCallingIdentity($variableName)` " +
+            "in `finally` or remove `$variableName`."
 
         /** Issue: non-final token from Binder.clearCallingIdentity() */
         @JvmField
         val ISSUE_NON_FINAL_TOKEN: Issue = Issue.create(
-                id = "NonFinalTokenOfOriginalCallingIdentity",
-                briefDescription = "Non-final token of Binder.clearCallingIdentity()",
-                explanation = """
+            id = "NonFinalTokenOfOriginalCallingIdentity",
+            briefDescription = "Non-final token of Binder.clearCallingIdentity()",
+            explanation = """
                     You cleared the original calling identity with \
                     `Binder.clearCallingIdentity()`, but have not made the returned token `final`.
 
@@ -397,47 +431,47 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                     which can cause problems when restoring the identity with \
                     `Binder.restoreCallingIdentity(token)`.
                     """,
-                category = Category.SECURITY,
-                priority = 6,
-                severity = Severity.WARNING,
-                implementation = Implementation(
-                        CallingIdentityTokenDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
-                )
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.WARNING,
+            implementation = Implementation(
+                CallingIdentityTokenDetector::class.java,
+                Scope.JAVA_FILE_SCOPE
+            )
         )
 
         private fun getIncidentMessageNonFinalToken(variableName: String) = "`$variableName` is " +
-                "a non-final token from `Binder.clearCallingIdentity()`. Add `final` keyword to " +
-                "`$variableName`."
+            "a non-final token from `Binder.clearCallingIdentity()`. Add `final` keyword to " +
+            "`$variableName`."
 
         /** Issue: nested calls of Binder.clearCallingIdentity() */
         @JvmField
         val ISSUE_NESTED_CLEAR_IDENTITY_CALLS: Issue = Issue.create(
-                id = "NestedClearCallingIdentityCalls",
-                briefDescription = "Nested calls of Binder.clearCallingIdentity()",
-                explanation = """
+            id = "NestedClearCallingIdentityCalls",
+            briefDescription = "Nested calls of Binder.clearCallingIdentity()",
+            explanation = """
                     You cleared the original calling identity with \
                     `Binder.clearCallingIdentity()` twice without restoring identity with the \
                     result of the first call.
 
                     Make sure to restore the identity after each clear identity call.
                     """,
-                category = Category.SECURITY,
-                priority = 6,
-                severity = Severity.WARNING,
-                implementation = Implementation(
-                        CallingIdentityTokenDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
-                )
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.WARNING,
+            implementation = Implementation(
+                CallingIdentityTokenDetector::class.java,
+                Scope.JAVA_FILE_SCOPE
+            )
         )
 
         private fun getIncidentMessageNestedClearIdentityCallsPrimary(
             firstCallVariableName: String,
             secondCallVariableName: String
         ): String = "The calling identity has already been cleared and returned into " +
-                "`$firstCallVariableName`. Move `$secondCallVariableName` declaration after " +
-                "restoring the calling identity with " +
-                "`Binder.restoreCallingIdentity($firstCallVariableName)`."
+            "`$firstCallVariableName`. Move `$secondCallVariableName` declaration after " +
+            "restoring the calling identity with " +
+            "`Binder.restoreCallingIdentity($firstCallVariableName)`."
 
         private fun getIncidentMessageNestedClearIdentityCallsSecondary(
             firstCallVariableName: String
@@ -446,10 +480,10 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
         /** Issue: Binder.clearCallingIdentity() is not followed by `try-finally` statement */
         @JvmField
         val ISSUE_CLEAR_IDENTITY_CALL_NOT_FOLLOWED_BY_TRY_FINALLY: Issue = Issue.create(
-                id = "ClearIdentityCallNotFollowedByTryFinally",
-                briefDescription = "Binder.clearCallingIdentity() is not followed by try-finally " +
-                        "statement",
-                explanation = """
+            id = "ClearIdentityCallNotFollowedByTryFinally",
+            briefDescription = "Binder.clearCallingIdentity() is not followed by try-finally " +
+                "statement",
+            explanation = """
                     You cleared the original calling identity with \
                     `Binder.clearCallingIdentity()`, but the next statement is not a `try` \
                     statement.
@@ -472,30 +506,30 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                     code with your identity that was originally intended to run with the calling \
                     application's identity.
                     """,
-                category = Category.SECURITY,
-                priority = 6,
-                severity = Severity.WARNING,
-                implementation = Implementation(
-                        CallingIdentityTokenDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
-                )
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.WARNING,
+            implementation = Implementation(
+                CallingIdentityTokenDetector::class.java,
+                Scope.JAVA_FILE_SCOPE
+            )
         )
 
         private fun getIncidentMessageClearIdentityCallNotFollowedByTryFinally(
             variableName: String
         ): String = "You cleared the calling identity and returned the result into " +
-                "`$variableName`, but the next statement is not a `try`-`finally` statement. " +
-                "Define a `try`-`finally` block after `$variableName` declaration to ensure a " +
-                "safe restore of the calling identity by calling " +
-                "`Binder.restoreCallingIdentity($variableName)` and making it an immediate child " +
-                "of the `finally` block."
+            "`$variableName`, but the next statement is not a `try`-`finally` statement. " +
+            "Define a `try`-`finally` block after `$variableName` declaration to ensure a " +
+            "safe restore of the calling identity by calling " +
+            "`Binder.restoreCallingIdentity($variableName)` and making it an immediate child " +
+            "of the `finally` block."
 
         /** Issue: Binder.restoreCallingIdentity() is not in finally block */
         @JvmField
         val ISSUE_RESTORE_IDENTITY_CALL_NOT_IN_FINALLY_BLOCK: Issue = Issue.create(
-                id = "RestoreIdentityCallNotInFinallyBlock",
-                briefDescription = "Binder.restoreCallingIdentity() is not in finally block",
-                explanation = """
+            id = "RestoreIdentityCallNotInFinallyBlock",
+            briefDescription = "Binder.restoreCallingIdentity() is not in finally block",
+            explanation = """
                     You are restoring the original calling identity with \
                     `Binder.restoreCallingIdentity()`, but the call is not an immediate child of \
                     the `finally` block of the `try` statement.
@@ -516,28 +550,28 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                     `finally` block, you may run code with your identity that was originally \
                     intended to run with the calling application's identity.
                     """,
-                category = Category.SECURITY,
-                priority = 6,
-                severity = Severity.WARNING,
-                implementation = Implementation(
-                        CallingIdentityTokenDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
-                )
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.WARNING,
+            implementation = Implementation(
+                CallingIdentityTokenDetector::class.java,
+                Scope.JAVA_FILE_SCOPE
+            )
         )
 
         private fun getIncidentMessageRestoreIdentityCallNotInFinallyBlock(
             variableName: String
         ): String = "`Binder.restoreCallingIdentity($variableName)` is not an immediate child of " +
-                "the `finally` block of the try statement after `$variableName` declaration. " +
-                        "Surround the call with `finally` block and call it unconditionally."
+            "the `finally` block of the try statement after `$variableName` declaration. " +
+            "Surround the call with `finally` block and call it unconditionally."
 
         /** Issue: Use of caller-aware methods after Binder.clearCallingIdentity() */
         @JvmField
         val ISSUE_USE_OF_CALLER_AWARE_METHODS_WITH_CLEARED_IDENTITY: Issue = Issue.create(
-                id = "UseOfCallerAwareMethodsWithClearedIdentity",
-                briefDescription = "Use of caller-aware methods after " +
-                        "Binder.clearCallingIdentity()",
-                explanation = """
+            id = "UseOfCallerAwareMethodsWithClearedIdentity",
+            briefDescription = "Use of caller-aware methods after " +
+                "Binder.clearCallingIdentity()",
+            explanation = """
                     You cleared the original calling identity with \
                     `Binder.clearCallingIdentity()`, but used one of the methods below before \
                     restoring the identity. These methods will use your own identity instead of \
@@ -556,22 +590,59 @@ class CallingIdentityTokenDetector : Detector(), SourceCodeScanner {
                     UserHandle.getCallingUserId()
                     ```
                     """,
-                category = Category.SECURITY,
-                priority = 6,
-                severity = Severity.WARNING,
-                implementation = Implementation(
-                        CallingIdentityTokenDetector::class.java,
-                        Scope.JAVA_FILE_SCOPE
-                )
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.WARNING,
+            implementation = Implementation(
+                CallingIdentityTokenDetector::class.java,
+                Scope.JAVA_FILE_SCOPE
+            )
         )
 
         private fun getIncidentMessageUseOfCallerAwareMethodsWithClearedIdentity(
             variableName: String,
             methodName: String
         ): String = "You cleared the original identity with `Binder.clearCallingIdentity()` " +
-                "and returned into `$variableName`, so `$methodName` will be using your own " +
-                "identity instead of the caller's. Either explicitly query your own identity or " +
-                "move it after restoring the identity with " +
-                "`Binder.restoreCallingIdentity($variableName)`."
+            "and returned into `$variableName`, so `$methodName` will be using your own " +
+            "identity instead of the caller's. Either explicitly query your own identity or " +
+            "move it after restoring the identity with " +
+            "`Binder.restoreCallingIdentity($variableName)`."
+
+        /** Issue: Result of Binder.clearCallingIdentity() is not stored in a variable */
+        @JvmField
+        val ISSUE_RESULT_OF_CLEAR_IDENTITY_CALL_NOT_STORED_IN_VARIABLE: Issue = Issue.create(
+            id = "ResultOfClearIdentityCallNotStoredInVariable",
+            briefDescription = "Result of Binder.clearCallingIdentity() is not stored in a " +
+                "variable",
+            explanation = """
+           You cleared the original calling identity with \
+           `Binder.clearCallingIdentity()`, but did not store the result of the method \
+           call in a variable. You need to store the result in a variable and restore it later.
+
+           Use the following pattern for running operations with your own identity:
+
+           ```
+           final long token = Binder.clearCallingIdentity();
+           try {
+               // Code using your own identity
+           } finally {
+               Binder.restoreCallingIdentity(token);
+           }
+           ```
+           """,
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.WARNING,
+            implementation = Implementation(
+                CallingIdentityTokenDetector::class.java,
+                Scope.JAVA_FILE_SCOPE
+            )
+        )
+
+        private fun getIncidentMessageResultOfClearIdentityCallNotStoredInVariable(
+            methodName: String
+        ): String = "You cleared the original identity with `$methodName` but did not store the " +
+            "result in a variable. You need to store the result in a variable and restore it " +
+            "later."
     }
 }
