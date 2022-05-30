@@ -67,7 +67,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
             Handler handler = FgThread.getHandler();
 
             ServiceConfigAccessor serviceConfigAccessor =
-                    ServiceConfigAccessor.getInstance(context);
+                    ServiceConfigAccessorImpl.getInstance(context);
             TimeDetectorStrategy timeDetectorStrategy =
                     TimeDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
 
