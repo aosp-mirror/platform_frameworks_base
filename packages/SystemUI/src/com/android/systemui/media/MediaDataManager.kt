@@ -686,7 +686,8 @@ class MediaDataManager(
                 val enabled = deviceIntent != null && deviceIntent.isActivity
                 val deviceDrawable = Icon.createWithResource(sbn.packageName, deviceIcon)
                         .loadDrawable(sbn.getPackageContext(context))
-                device = MediaDeviceData(enabled, deviceDrawable, deviceName, deviceIntent)
+                device = MediaDeviceData(enabled, deviceDrawable, deviceName, deviceIntent,
+                        showBroadcastButton = false)
             }
         }
 

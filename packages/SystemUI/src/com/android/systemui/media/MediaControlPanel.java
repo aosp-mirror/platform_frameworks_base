@@ -70,6 +70,7 @@ import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.bluetooth.BroadcastDialogController;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -188,6 +189,11 @@ public class MediaControlPanel {
     private final SeekBarViewModel.EnabledChangeListener mEnabledChangeListener =
             this::setIsSeekBarEnabled;
 
+    private final BroadcastDialogController mBroadcastDialogController;
+    private boolean mIsCurrentBroadcastedApp = false;
+    private boolean mShowBroadcastDialogButton = false;
+    private String mSwitchBroadcastApp;
+
     /**
      * Initialize a new control panel
      *
@@ -213,7 +219,8 @@ public class MediaControlPanel {
             MediaUiEventLogger logger,
             KeyguardStateController keyguardStateController,
             ActivityIntentHelper activityIntentHelper,
-            NotificationLockscreenUserManager lockscreenUserManager) {
+            NotificationLockscreenUserManager lockscreenUserManager,
+            BroadcastDialogController broadcastDialogController) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mMainExecutor = mainExecutor;
@@ -230,6 +237,7 @@ public class MediaControlPanel {
         mKeyguardStateController = keyguardStateController;
         mActivityIntentHelper = activityIntentHelper;
         mLockscreenUserManager = lockscreenUserManager;
+        mBroadcastDialogController = broadcastDialogController;
 
         mSeekBarViewModel.setLogSeek(() -> {
             if (mPackageName != null && mInstanceId != null) {
@@ -449,7 +457,10 @@ public class MediaControlPanel {
         final MediaController controller = getController();
         mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
 
-        bindOutputSwitcherChip(data);
+        // Show the broadcast dialog button only when the le audio is enabled.
+        mShowBroadcastDialogButton =
+                data.getDevice() != null && data.getDevice().getShowBroadcastButton();
+        bindOutputSwitcherAndBroadcastButton(mShowBroadcastDialogButton, data);
         bindGutsMenuForPlayer(data);
         bindPlayerContentDescription(data);
         bindScrubbingTime(data);
@@ -467,21 +478,40 @@ public class MediaControlPanel {
         Trace.endSection();
     }
 
-    private void bindOutputSwitcherChip(MediaData data) {
-        // Output switcher chip
+    private void bindOutputSwitcherAndBroadcastButton(boolean showBroadcastButton, MediaData data) {
         ViewGroup seamlessView = mMediaViewHolder.getSeamless();
         seamlessView.setVisibility(View.VISIBLE);
         ImageView iconView = mMediaViewHolder.getSeamlessIcon();
         TextView deviceName = mMediaViewHolder.getSeamlessText();
         final MediaDeviceData device = data.getDevice();
 
-        // Disable clicking on output switcher for invalid devices and resumption controls
-        final boolean seamlessDisabled = (device != null && !device.getEnabled())
-                || data.getResumption();
-        final float seamlessAlpha = seamlessDisabled ? DISABLED_ALPHA : 1.0f;
-        mMediaViewHolder.getSeamlessButton().setAlpha(seamlessAlpha);
-        seamlessView.setEnabled(!seamlessDisabled);
-        CharSequence deviceString = mContext.getString(R.string.media_seamless_other_device);
+        final boolean enabled;
+        final boolean seamlessDisabled;
+        final int iconResource;
+        CharSequence deviceString;
+        if (showBroadcastButton) {
+            // TODO(b/233698402): Use the package name instead of app label to avoid the
+            // unexpected result.
+            mIsCurrentBroadcastedApp = device != null
+                    && TextUtils.equals(device.getName(),
+                    MediaDataUtils.getAppLabel(mContext, mPackageName, mContext.getString(
+                            R.string.bt_le_audio_broadcast_dialog_unknown_name)));
+            seamlessDisabled = !mIsCurrentBroadcastedApp;
+            // Always be enabled if the broadcast button is shown
+            enabled = true;
+            deviceString = mContext.getString(R.string.bt_le_audio_broadcast_dialog_unknown_name);
+            iconResource = R.drawable.settings_input_antenna;
+        } else {
+            // Disable clicking on output switcher for invalid devices and resumption controls
+            seamlessDisabled = (device != null && !device.getEnabled()) || data.getResumption();
+            enabled = !seamlessDisabled;
+            deviceString = mContext.getString(R.string.media_seamless_other_device);
+            iconResource = R.drawable.ic_media_home_devices;
+        }
+
+        mMediaViewHolder.getSeamlessButton().setAlpha(seamlessDisabled ? DISABLED_ALPHA : 1.0f);
+        seamlessView.setEnabled(enabled);
+
         if (device != null) {
             Drawable icon = device.getIcon();
             if (icon instanceof AdaptiveIcon) {
@@ -494,7 +524,7 @@ public class MediaControlPanel {
             deviceString = device.getName();
         } else {
             // Set to default icon
-            iconView.setImageResource(R.drawable.ic_media_home_devices);
+            iconView.setImageResource(iconResource);
         }
         deviceName.setText(deviceString);
         seamlessView.setContentDescription(deviceString);
@@ -503,21 +533,39 @@ public class MediaControlPanel {
                     if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
                     }
-                    mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
-                    if (device.getIntent() != null) {
-                        if (device.getIntent().isActivity()) {
-                            mActivityStarter.startActivity(
-                                    device.getIntent().getIntent(), true);
+
+                    if (showBroadcastButton) {
+                        // If the current media app is not broadcasted and users press the outputer
+                        // button, we should pop up the broadcast dialog to check do they want to
+                        // switch broadcast to the other media app, otherwise we still pop up the
+                        // media output dialog.
+                        if (!mIsCurrentBroadcastedApp) {
+                            mLogger.logOpenBroadcastDialog(mUid, mPackageName, mInstanceId);
+                            mSwitchBroadcastApp = device.getName().toString();
+                            mBroadcastDialogController.createBroadcastDialog(mSwitchBroadcastApp,
+                                    mPackageName, true, mMediaViewHolder.getSeamlessButton());
                         } else {
-                            try {
-                                device.getIntent().send();
-                            } catch (PendingIntent.CanceledException e) {
-                                Log.e(TAG, "Device pending intent was canceled");
-                            }
+                            mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
+                            mMediaOutputDialogFactory.create(mPackageName, true,
+                                    mMediaViewHolder.getSeamlessButton());
                         }
                     } else {
-                        mMediaOutputDialogFactory.create(mPackageName, true,
-                                mMediaViewHolder.getSeamlessButton());
+                        mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
+                        if (device.getIntent() != null) {
+                            if (device.getIntent().isActivity()) {
+                                mActivityStarter.startActivity(
+                                        device.getIntent().getIntent(), true);
+                            } else {
+                                try {
+                                    device.getIntent().send();
+                                } catch (PendingIntent.CanceledException e) {
+                                    Log.e(TAG, "Device pending intent was canceled");
+                                }
+                            }
+                        } else {
+                            mMediaOutputDialogFactory.create(mPackageName, true,
+                                    mMediaViewHolder.getSeamlessButton());
+                        }
                     }
                 });
     }
