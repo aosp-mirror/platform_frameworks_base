@@ -24,7 +24,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PropertyInvalidatedCache;
-import android.companion.virtual.IVirtualDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -587,18 +586,28 @@ public final class DisplayManagerGlobal {
     }
 
     public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
-            IVirtualDevice virtualDevice, @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            VirtualDisplay.Callback callback, @Nullable Executor executor,
-            @Nullable Context windowContext) {
+            @NonNull VirtualDisplayConfig virtualDisplayConfig, VirtualDisplay.Callback callback,
+            @Nullable Executor executor, @Nullable Context windowContext) {
         VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, executor);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
         try {
             displayId = mDm.createVirtualDisplay(virtualDisplayConfig, callbackWrapper,
-                    projectionToken, virtualDevice, context.getPackageName());
+                    projectionToken, context.getPackageName());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+        return createVirtualDisplayWrapper(virtualDisplayConfig, windowContext, callbackWrapper,
+                displayId);
+    }
+
+    /**
+     * Create a VirtualDisplay wrapper object for a newly created virtual display ; to be called
+     * once the display has been created in system_server.
+     */
+    @Nullable
+    public VirtualDisplay createVirtualDisplayWrapper(VirtualDisplayConfig virtualDisplayConfig,
+            Context windowContext, IVirtualDisplayCallback callbackWrapper, int displayId) {
         if (displayId < 0) {
             Log.e(TAG, "Could not create virtual display: " + virtualDisplayConfig.getName());
             return null;
@@ -1061,7 +1070,10 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    private final static class VirtualDisplayCallback extends IVirtualDisplayCallback.Stub {
+    /**
+     * Assists in dispatching VirtualDisplay lifecycle event callbacks on a given Executor.
+     */
+    public static final class VirtualDisplayCallback extends IVirtualDisplayCallback.Stub {
         @Nullable private final VirtualDisplay.Callback mCallback;
         @Nullable private final Executor mExecutor;
 
@@ -1073,7 +1085,7 @@ public final class DisplayManagerGlobal {
          * @param executor The executor to call the {@code callback} on. Must not be {@code null} if
          * the callback is not {@code null}.
          */
-        VirtualDisplayCallback(VirtualDisplay.Callback callback, Executor executor) {
+        public VirtualDisplayCallback(VirtualDisplay.Callback callback, Executor executor) {
             mCallback = callback;
             mExecutor = mCallback != null ? Objects.requireNonNull(executor) : null;
         }
