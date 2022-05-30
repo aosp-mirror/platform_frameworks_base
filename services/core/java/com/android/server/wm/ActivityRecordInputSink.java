@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.os.InputConfig;
-import android.os.Process;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -102,8 +101,8 @@ class ActivityRecordInputSink {
         inputWindowHandle.replaceTouchableRegionWithCrop = true;
         inputWindowHandle.name = mName;
         inputWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
-        inputWindowHandle.ownerUid = Process.myUid();
-        inputWindowHandle.ownerPid = Process.myPid();
+        inputWindowHandle.ownerPid = WindowManagerService.MY_PID;
+        inputWindowHandle.ownerUid = WindowManagerService.MY_UID;
         inputWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.NO_INPUT_CHANNEL;
         return inputWindowHandle;
     }
