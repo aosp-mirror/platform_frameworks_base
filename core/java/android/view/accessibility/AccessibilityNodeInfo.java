@@ -2659,8 +2659,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <p>
      * A live region is a node that contains information that is important for
      * the user and when it changes the user should be notified. For example,
-     * in a login screen with a TextView that displays an "incorrect password"
-     * notification, that view should be marked as a live region with mode
+     * a Snackbar that displays a confirmation notification should be marked
+     * as a live region with mode
      * {@link View#ACCESSIBILITY_LIVE_REGION_POLITE}.
      * <p>
      * It is the responsibility of the accessibility service to monitor
