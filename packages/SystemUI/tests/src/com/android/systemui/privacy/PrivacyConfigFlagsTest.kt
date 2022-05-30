@@ -43,6 +43,8 @@ class PrivacyConfigFlagsTest : SysuiTestCase() {
     companion object {
         private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
         private const val LOCATION = SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_ENABLED
+        private const val MEDIA_PROJECTION =
+                SystemUiDeviceConfigFlags.PROPERTY_MEDIA_PROJECTION_INDICATORS_ENABLED
     }
 
     private lateinit var privacyConfig: PrivacyConfig
@@ -90,6 +92,16 @@ class PrivacyConfigFlagsTest : SysuiTestCase() {
     }
 
     @Test
+    fun testMediaProjectionChanged() {
+        changeMediaProjection(false) // default is true
+        executor.runAllReady()
+
+        verify(callback).onFlagMediaProjectionChanged(false)
+
+        assertFalse(privacyConfig.mediaProjectionAvailable)
+    }
+
+    @Test
     fun testLocationChanged() {
         changeLocation(true)
         executor.runAllReady()
@@ -99,8 +111,8 @@ class PrivacyConfigFlagsTest : SysuiTestCase() {
     }
 
     @Test
-    fun testBothChanged() {
-        changeAll(true)
+    fun testMicCamAndLocationChanged() {
+        changeLocation(true)
         changeMicCamera(false)
         executor.runAllReady()
 
@@ -124,10 +136,7 @@ class PrivacyConfigFlagsTest : SysuiTestCase() {
 
     private fun changeMicCamera(value: Boolean?) = changeProperty(MIC_CAMERA, value)
     private fun changeLocation(value: Boolean?) = changeProperty(LOCATION, value)
-    private fun changeAll(value: Boolean?) {
-        changeMicCamera(value)
-        changeLocation(value)
-    }
+    private fun changeMediaProjection(value: Boolean?) = changeProperty(MEDIA_PROJECTION, value)
 
     private fun changeProperty(name: String, value: Boolean?) {
         deviceConfigProxy.setProperty(
