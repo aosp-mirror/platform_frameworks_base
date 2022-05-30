@@ -278,11 +278,19 @@ public final class ServerFlags {
      */
     @NonNull
     public Optional<String[]> getOptionalStringArray(@DeviceConfigKey String key) {
-        Optional<String> string = getOptionalString(key);
-        if (!string.isPresent()) {
+        Optional<String> optionalString = getOptionalString(key);
+        if (!optionalString.isPresent()) {
             return Optional.empty();
         }
-        return Optional.of(string.get().split(","));
+
+        // DeviceConfig appears to have no way to specify an empty string, so we use "_[]_" as a
+        // special value to mean a zero-length array.
+        String value = optionalString.get();
+        if ("_[]_".equals(value)) {
+            return Optional.of(new String[0]);
+        }
+
+        return Optional.of(value.split(","));
     }
 
     /**

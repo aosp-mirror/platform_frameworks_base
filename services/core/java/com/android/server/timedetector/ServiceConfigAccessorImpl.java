@@ -334,7 +334,7 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 }
 
                 int[] priorityInts = null;
-                if (priorityStrings != null && priorityStrings.length > 0) {
+                if (priorityStrings != null) {
                     priorityInts = new int[priorityStrings.length];
                     try {
                         for (int i = 0; i < priorityInts.length; i++) {
