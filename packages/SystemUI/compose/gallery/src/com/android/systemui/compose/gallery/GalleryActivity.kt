@@ -22,11 +22,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
+import com.android.systemui.compose.rememberSystemUiController
 
 class GalleryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,15 +41,13 @@ class GalleryActivity : ComponentActivity() {
             var isDarkTheme by remember { mutableStateOf(isSystemInDarkTheme) }
             val onChangeTheme = { isDarkTheme = !isDarkTheme }
 
-            LaunchedEffect(isDarkTheme) {
-                // Update the status bar color when the theme changes.
-                val insetsController = window.decorView.windowInsetsController
-                if (isDarkTheme) {
-                    insetsController.setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)
-                } else {
-                    insetsController.setSystemBarsAppearance(
-                        APPEARANCE_LIGHT_STATUS_BARS, APPEARANCE_LIGHT_STATUS_BARS)
-                }
+            val systemUiController = rememberSystemUiController()
+            val useDarkIcons = !isDarkTheme
+            SideEffect {
+                systemUiController.setSystemBarsColor(
+                    color = Color.Transparent,
+                    darkIcons = useDarkIcons,
+                )
             }
 
             GalleryApp(isDarkTheme, onChangeTheme)
