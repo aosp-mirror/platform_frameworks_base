@@ -43,8 +43,11 @@ class PrivacyConfig @Inject constructor(
         const val TAG = "PrivacyConfig"
         private const val MIC_CAMERA = SystemUiDeviceConfigFlags.PROPERTY_MIC_CAMERA_ENABLED
         private const val LOCATION = SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_ENABLED
+        private const val MEDIA_PROJECTION =
+                SystemUiDeviceConfigFlags.PROPERTY_MEDIA_PROJECTION_INDICATORS_ENABLED
         private const val DEFAULT_MIC_CAMERA = true
         private const val DEFAULT_LOCATION = false
+        private const val DEFAULT_MEDIA_PROJECTION = true
     }
 
     private val callbacks = mutableListOf<WeakReference<Callback>>()
@@ -52,6 +55,8 @@ class PrivacyConfig @Inject constructor(
     var micCameraAvailable = isMicCameraEnabled()
         private set
     var locationAvailable = isLocationEnabled()
+        private set
+    var mediaProjectionAvailable = isMediaProjectionEnabled()
         private set
 
     private val devicePropertiesChangedListener =
@@ -66,6 +71,14 @@ class PrivacyConfig @Inject constructor(
                     if (properties.keyset.contains(LOCATION)) {
                         locationAvailable = properties.getBoolean(LOCATION, DEFAULT_LOCATION)
                         callbacks.forEach { it.get()?.onFlagLocationChanged(locationAvailable) }
+                    }
+
+                    if (properties.keyset.contains(MEDIA_PROJECTION)) {
+                        mediaProjectionAvailable =
+                                properties.getBoolean(MEDIA_PROJECTION, DEFAULT_MEDIA_PROJECTION)
+                        callbacks.forEach {
+                            it.get()?.onFlagMediaProjectionChanged(mediaProjectionAvailable)
+                        }
                     }
                 }
             }
@@ -86,6 +99,11 @@ class PrivacyConfig @Inject constructor(
     private fun isLocationEnabled(): Boolean {
         return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 LOCATION, DEFAULT_LOCATION)
+    }
+
+    private fun isMediaProjectionEnabled(): Boolean {
+        return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                MEDIA_PROJECTION, DEFAULT_MEDIA_PROJECTION)
     }
 
     fun addCallback(callback: Callback) {
@@ -115,6 +133,7 @@ class PrivacyConfig @Inject constructor(
         ipw.withIncreasedIndent {
             ipw.println("micCameraAvailable: $micCameraAvailable")
             ipw.println("locationAvailable: $locationAvailable")
+            ipw.println("mediaProjectionAvailable: $mediaProjectionAvailable")
             ipw.println("Callbacks:")
             ipw.withIncreasedIndent {
                 callbacks.forEach { callback ->
@@ -131,5 +150,8 @@ class PrivacyConfig @Inject constructor(
 
         @JvmDefault
         fun onFlagLocationChanged(flag: Boolean) {}
+
+        @JvmDefault
+        fun onFlagMediaProjectionChanged(flag: Boolean) {}
     }
 }
