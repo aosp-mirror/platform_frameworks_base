@@ -221,8 +221,11 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.println();
         pw.printf("  %s <geolocation suggestion opts>\n",
                 SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE);
+        pw.printf("    Suggests a time zone as if via the \"location\" origin.\n");
         pw.printf("  %s <manual suggestion opts>\n", SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE);
+        pw.printf("    Suggests a time zone as if via the \"manual\" origin.\n");
         pw.printf("  %s <telephony suggestion opts>\n", SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE);
+        pw.printf("    Suggests a time zone as if via the \"telephony\" origin.\n");
         pw.printf("  %s\n", SHELL_COMMAND_DUMP_METRICS);
         pw.printf("    Dumps the service metrics to stdout for inspection.\n");
         pw.println();
