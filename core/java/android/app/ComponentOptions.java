@@ -99,8 +99,10 @@ public class ComponentOptions {
     public Bundle toBundle() {
         Bundle b = new Bundle();
         b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, mPendingIntentBalAllowed);
-        b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION,
-                mPendingIntentBalAllowedByPermission);
+        if (mPendingIntentBalAllowedByPermission) {
+            b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION,
+                    mPendingIntentBalAllowedByPermission);
+        }
         return b;
     }
 }
