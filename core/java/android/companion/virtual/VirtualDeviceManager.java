@@ -33,6 +33,8 @@ import android.content.Context;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.VirtualDisplayFlag;
+import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.input.VirtualKeyboard;
@@ -65,7 +67,7 @@ import java.util.function.IntConsumer;
 public final class VirtualDeviceManager {
 
     private static final boolean DEBUG = false;
-    private static final String LOG_TAG = "VirtualDeviceManager";
+    private static final String TAG = "VirtualDeviceManager";
 
     private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
             DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
@@ -150,6 +152,7 @@ public final class VirtualDeviceManager {
     public static class VirtualDevice implements AutoCloseable {
 
         private final Context mContext;
+        private final IVirtualDeviceManager mService;
         private final IVirtualDevice mVirtualDevice;
         private final ArrayMap<ActivityListener, ActivityListenerDelegate> mActivityListeners =
                 new ArrayMap<>();
@@ -189,6 +192,7 @@ public final class VirtualDeviceManager {
                 Context context,
                 int associationId,
                 VirtualDeviceParams params) throws RemoteException {
+            mService = service;
             mContext = context.getApplicationContext();
             mVirtualDevice = service.createVirtualDevice(
                     new Binder(),
@@ -274,18 +278,23 @@ public final class VirtualDeviceManager {
             // TODO(b/205343547): Handle display groups properly instead of creating a new display
             //  group for every new virtual display created using this API.
             // belongs to the same display group.
-            DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
-            // DisplayManager will call into VirtualDeviceManagerInternal to register the
-            // created displays.
-            return displayManager.createVirtualDisplay(
-                    mVirtualDevice,
-                    new VirtualDisplayConfig.Builder(
-                            getVirtualDisplayName(), width, height, densityDpi)
-                            .setSurface(surface)
-                            .setFlags(getVirtualDisplayFlags(flags))
-                            .build(),
-                    callback,
-                    executor);
+            VirtualDisplayConfig config = new VirtualDisplayConfig.Builder(
+                    getVirtualDisplayName(), width, height, densityDpi)
+                    .setSurface(surface)
+                    .setFlags(getVirtualDisplayFlags(flags))
+                    .build();
+            IVirtualDisplayCallback callbackWrapper =
+                    new DisplayManagerGlobal.VirtualDisplayCallback(callback, executor);
+            final int displayId;
+            try {
+                displayId = mService.createVirtualDisplay(config, callbackWrapper, mVirtualDevice,
+                        mContext.getPackageName());
+            } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
+            }
+            DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
+            return displayManager.createVirtualDisplayWrapper(config, mContext, callbackWrapper,
+                    displayId);
         }
 
         /**

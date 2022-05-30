@@ -64,7 +64,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.Toast;
-import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -110,11 +109,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     private boolean mDefaultShowPointerIcon = true;
 
-    private ActivityListener createListenerAdapter(int displayId) {
+    private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
 
             @Override
-            public void onTopActivityChanged(int unusedDisplayId, ComponentName topActivity) {
+            public void onTopActivityChanged(int displayId, ComponentName topActivity) {
                 try {
                     mActivityListener.onTopActivityChanged(displayId, topActivity);
                 } catch (RemoteException e) {
@@ -123,7 +122,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
 
             @Override
-            public void onDisplayEmpty(int unusedDisplayId) {
+            public void onDisplayEmpty(int displayId) {
                 try {
                     mActivityListener.onDisplayEmpty(displayId);
                 } catch (RemoteException e) {
@@ -529,24 +528,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mInputController.dump(fout);
     }
 
-    DisplayWindowPolicyController onVirtualDisplayCreatedLocked(int displayId) {
+    GenericWindowPolicyController createWindowPolicyController() {
         synchronized (mVirtualDeviceLock) {
-            if (mVirtualDisplayIds.contains(displayId)) {
-                throw new IllegalStateException(
-                        "Virtual device already have a virtual display with ID " + displayId);
-            }
-            mVirtualDisplayIds.add(displayId);
-            mInputController.setShowPointerIcon(mDefaultShowPointerIcon, displayId);
-            mInputController.setPointerAcceleration(1f, displayId);
-            mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
-                    displayId);
-            mInputController.setLocalIme(displayId);
-
-            // Since we're being called in the middle of the display being created, we post a
-            // task to grab the wakelock instead of doing it synchronously here, to avoid
-            // reentrancy  problems.
-            mContext.getMainThreadHandler().post(() -> addWakeLockForDisplay(displayId));
-
             final GenericWindowPolicyController gwpc =
                     new GenericWindowPolicyController(FLAG_SECURE,
                             SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
@@ -556,19 +539,36 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             mParams.getAllowedActivities(),
                             mParams.getBlockedActivities(),
                             mParams.getDefaultActivityPolicy(),
-                            createListenerAdapter(displayId),
-                            activityInfo -> onActivityBlocked(displayId, activityInfo),
+                            createListenerAdapter(),
+                            this::onActivityBlocked,
                             mAssociationInfo.getDeviceProfile());
             gwpc.registerRunningAppsChangedListener(/* listener= */ this);
-            mWindowPolicyControllers.put(displayId, gwpc);
             return gwpc;
         }
     }
 
-    void addWakeLockForDisplay(int displayId) {
+    void onVirtualDisplayCreatedLocked(GenericWindowPolicyController gwpc, int displayId) {
         synchronized (mVirtualDeviceLock) {
-            if (!mVirtualDisplayIds.contains(displayId)
-                    || mPerDisplayWakelocks.containsKey(displayId)) {
+            if (displayId == Display.INVALID_DISPLAY) {
+                return;
+            }
+            if (mVirtualDisplayIds.contains(displayId)) {
+                throw new IllegalStateException(
+                        "Virtual device already has a virtual display with ID " + displayId);
+            }
+            mVirtualDisplayIds.add(displayId);
+
+            gwpc.setDisplayId(displayId);
+            mWindowPolicyControllers.put(displayId, gwpc);
+
+            mInputController.setShowPointerIcon(mDefaultShowPointerIcon, displayId);
+            mInputController.setPointerAcceleration(1f, displayId);
+            mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
+                    displayId);
+            mInputController.setLocalIme(displayId);
+
+
+            if (mPerDisplayWakelocks.containsKey(displayId)) {
                 Slog.e(TAG, "Not creating wakelock for displayId " + displayId);
                 return;
             }
@@ -576,8 +576,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
                     PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
                     TAG + ":" + displayId, displayId);
-            wakeLock.acquire();
             mPerDisplayWakelocks.put(displayId, wakeLock);
+            wakeLock.acquire();
         }
     }
 
