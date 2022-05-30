@@ -368,7 +368,7 @@ public final class UserHandle implements Parcelable {
     @UnsupportedAppUsage
     @TestApi
     public static int getUid(@UserIdInt int userId, @AppIdInt int appId) {
-        if (MU_ENABLED && appId >= 0) {
+        if (MU_ENABLED) {
             return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
         } else {
             return appId;
