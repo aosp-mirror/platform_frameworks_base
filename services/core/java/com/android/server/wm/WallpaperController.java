@@ -188,7 +188,8 @@ class WallpaperController {
                 && animatingContainer.getAnimation().getShowWallpaper();
         final boolean hasWallpaper = w.hasWallpaper() || animationWallpaper;
         final boolean isRecentsTransitionTarget = (recentsAnimationController != null
-                && recentsAnimationController.isWallpaperVisible(w));
+                && recentsAnimationController.isWallpaperVisible(w))
+                || w.mTransitionController.isTransientHide(w.getTask());
         if (isRecentsTransitionTarget) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);

@@ -282,6 +282,16 @@ class TransitionController {
         return false;
     }
 
+    boolean isTransientHide(@NonNull Task task) {
+        if (mCollectingTransition != null && mCollectingTransition.isTransientHide(task)) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).isTransientHide(task)) return true;
+        }
+        return false;
+    }
+
     /**
      * @return {@code true} if {@param ar} is part of a transient-launch activity in an active
      * transition.

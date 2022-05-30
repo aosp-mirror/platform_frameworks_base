@@ -1559,8 +1559,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
             } else {
                 prev.schedulePauseTimeout();
-                // Unset readiness since we now need to wait until this pause is complete.
-                mTransitionController.setReady(this, false /* ready */);
+                // All activities will be stopped when sleeping, don't need to wait for pause.
+                if (!uiSleeping) {
+                    // Unset readiness since we now need to wait until this pause is complete.
+                    mTransitionController.setReady(this, false /* ready */);
+                }
                 return true;
             }
 
