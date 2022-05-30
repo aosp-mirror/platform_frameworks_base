@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.companion.virtual.IVirtualDevice;
 import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.os.Handler;
@@ -58,6 +59,14 @@ public abstract class DisplayManagerInternal {
      */
     public abstract void initPowerManagement(DisplayPowerCallbacks callbacks,
             Handler handler, SensorManager sensorManager);
+
+    /**
+     * Called by the VirtualDeviceManagerService to create a VirtualDisplay owned by a
+     * VirtualDevice.
+     */
+    public abstract int createVirtualDisplay(VirtualDisplayConfig config,
+            IVirtualDisplayCallback callback, IVirtualDevice virtualDevice,
+            DisplayWindowPolicyController dwpc, String packageName);
 
     /**
      * Called by the power manager to request a new power state.
