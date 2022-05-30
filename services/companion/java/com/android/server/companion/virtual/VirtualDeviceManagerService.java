@@ -31,6 +31,10 @@ import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
+import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.IVirtualDisplayCallback;
+import android.hardware.display.VirtualDisplayConfig;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -41,9 +45,9 @@ import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.widget.Toast;
-import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.companion.virtual.VirtualDeviceImpl.PendingTrampoline;
@@ -203,6 +207,7 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
+    @VisibleForTesting
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub implements
             VirtualDeviceImpl.PendingTrampolineCallback {
 
@@ -262,6 +267,50 @@ public class VirtualDeviceManagerService extends SystemService {
                 }
                 mVirtualDevices.put(associationInfo.getId(), virtualDevice);
                 return virtualDevice;
+            }
+        }
+
+        @Override // Binder call
+        public int createVirtualDisplay(VirtualDisplayConfig virtualDisplayConfig,
+                IVirtualDisplayCallback callback, IVirtualDevice virtualDevice, String packageName)
+                throws RemoteException {
+            final int callingUid = getCallingUid();
+            if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
+                throw new SecurityException(
+                        "Package name " + packageName + " does not belong to calling uid "
+                                + callingUid);
+            }
+            VirtualDeviceImpl virtualDeviceImpl;
+            synchronized (mVirtualDeviceManagerLock) {
+                virtualDeviceImpl = mVirtualDevices.get(virtualDevice.getAssociationId());
+                if (virtualDeviceImpl == null) {
+                    throw new SecurityException("Invalid VirtualDevice");
+                }
+            }
+            if (virtualDeviceImpl.getOwnerUid() != callingUid) {
+                throw new SecurityException(
+                        "uid " + callingUid
+                                + " is not the owner of the supplied VirtualDevice");
+            }
+            GenericWindowPolicyController gwpc;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                gwpc = virtualDeviceImpl.createWindowPolicyController();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+
+            DisplayManagerInternal displayManager = getLocalService(
+                    DisplayManagerInternal.class);
+            int displayId = displayManager.createVirtualDisplay(virtualDisplayConfig, callback,
+                    virtualDevice, gwpc, packageName);
+
+            final long tokenTwo = Binder.clearCallingIdentity();
+            try {
+                virtualDeviceImpl.onVirtualDisplayCreatedLocked(gwpc, displayId);
+                return displayId;
+            } finally {
+                Binder.restoreCallingIdentity(tokenTwo);
             }
         }
 
@@ -333,14 +382,6 @@ public class VirtualDeviceManagerService extends SystemService {
         public boolean isValidVirtualDevice(IVirtualDevice virtualDevice) {
             synchronized (mVirtualDeviceManagerLock) {
                 return isValidVirtualDeviceLocked(virtualDevice);
-            }
-        }
-
-        @Override
-        public DisplayWindowPolicyController onVirtualDisplayCreated(IVirtualDevice virtualDevice,
-                int displayId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                return ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayCreatedLocked(displayId);
             }
         }
 
