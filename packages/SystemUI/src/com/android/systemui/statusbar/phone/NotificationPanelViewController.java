@@ -1161,15 +1161,28 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardMediaController.refreshMediaPosition();
 
         if (splitShadeChanged) {
-            // when we switch from split shade to regular shade we want to enforce setting qs to
-            // the default state: expanded for split shade and collapsed otherwise
-            if (!isOnKeyguard() && mPanelExpanded) {
-                setQsExpanded(mSplitShadeEnabled);
-            }
-            updateClockAppearance();
-            updateQsState();
-            mNotificationStackScrollLayoutController.updateFooter();
+            onSplitShadeEnabledChanged();
         }
+    }
+
+    private void onSplitShadeEnabledChanged() {
+        // when we switch between split shade and regular shade we want to enforce setting qs to
+        // the default state: expanded for split shade and collapsed otherwise
+        if (!isOnKeyguard() && mPanelExpanded) {
+            setQsExpanded(mSplitShadeEnabled);
+        }
+        if (isOnKeyguard() && mQsExpanded && mSplitShadeEnabled) {
+            // In single column keyguard - when you swipe from the top - QS is fully expanded and
+            // StatusBarState is KEYGUARD. That state doesn't make sense for split shade,
+            // where notifications are always visible and we effectively go to fully expanded
+            // shade, that is SHADE_LOCKED.
+            // Also we might just be switching from regular expanded shade, so we don't want
+            // to force state transition if it's already correct.
+            mStatusBarStateController.setState(StatusBarState.SHADE_LOCKED, /* force= */false);
+        }
+        updateClockAppearance();
+        updateQsState();
+        mNotificationStackScrollLayoutController.updateFooter();
     }
 
     private View reInflateStub(int viewId, int stubId, int layoutId, boolean enabled) {
