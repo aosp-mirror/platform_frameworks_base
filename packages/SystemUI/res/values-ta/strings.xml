@@ -910,7 +910,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"வேறு நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"நெட்வொர்க்குகள் எதுவும் கிடைக்கவில்லை"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"வைஃபை"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"இணையத்துடன் இணைய நெட்வொர்க்கைத் தட்டுங்கள்"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"இணைய நெட்வொர்க்கைத் தட்டுங்கள்"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"நெட்வொர்க்குகளைப் பார்க்க அன்லாக் செய்யுங்கள்"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"நெட்வொர்க்குகளைத் தேடுகிறது…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
@@ -935,8 +935,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"முடிந்தது"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"நகலெடுக்கப்பட்டது"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸிலிருந்து"</string>
-    <!-- no translation found for clipboard_dismiss_description (3335990369850165486) -->
-    <skip />
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"நகலெடுக்கப்பட்ட வார்த்தைகளை மூடுக"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"நகலெடுத்த வார்த்தைகளைத் திருத்து"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"நகலெடுத்த படத்தைத் திருத்து"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"அருகிலுள்ள சாதனத்திற்கு அனுப்பு"</string>
