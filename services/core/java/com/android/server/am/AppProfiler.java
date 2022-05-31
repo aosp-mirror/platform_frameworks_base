@@ -573,7 +573,9 @@ public class AppProfiler {
                     holder.state.getPackage(),
                     pss, uss, rss,
                     statType, pssDuration,
-                    holder.appVersion);
+                    holder.appVersion,
+                    profile.getCurrentHostingComponentTypes(),
+                    profile.getHistoricalHostingComponentTypes());
         });
         if (DEBUG_PSS) {
             Slog.d(TAG_PSS,
