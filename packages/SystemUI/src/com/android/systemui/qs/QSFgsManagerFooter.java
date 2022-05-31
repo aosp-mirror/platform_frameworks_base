@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FGS_MANAGER_FOOTER_VIEW;
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
 
 import android.content.Context;
 import android.view.View;
@@ -141,8 +142,8 @@ public class QSFgsManagerFooter implements View.OnClickListener,
 
     public void handleRefreshState() {
         mMainExecutor.execute(() -> {
-            CharSequence text = mContext.getResources().getQuantityString(
-                    R.plurals.fgs_manager_footer_label, mNumPackages, mNumPackages);
+            CharSequence text = icuMessageFormat(mContext.getResources(),
+                    R.string.fgs_manager_footer_label, mNumPackages);
             mFooterText.setText(text);
             mNumberView.setText(Integer.toString(mNumPackages));
             mNumberView.setContentDescription(text);
