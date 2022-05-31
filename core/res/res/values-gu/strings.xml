@@ -91,7 +91,7 @@
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"મોબાઇલ ડેટાની સ્થિતિ"</string>
-    <string name="notification_channel_sms" msgid="1243384981025535724">"SMS સંદેશા"</string>
+    <string name="notification_channel_sms" msgid="1243384981025535724">"SMS મેસેજ"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"વૉઇસમેઇલ સંદેશા"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"વાઇ-ફાઇ કૉલિંગ"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"સિમનું સ્ટેટસ"</string>
