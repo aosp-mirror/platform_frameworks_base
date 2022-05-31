@@ -1604,6 +1604,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Avoid double removal, which is fatal.
             return;
         }
+        if (surface == null || !surface.isValid()) {
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: trying to remove invalid content overlay (%s)", TAG, surface);
+            return;
+        }
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         tx.remove(surface);
         tx.apply();
