@@ -169,7 +169,10 @@ java_library {
     libs: ["unsupportedappusage"],
     sdk_version: "module_current",
     min_sdk_version: "30",
-    apex_available: ["//apex_available:anyapex"],
+    apex_available: [
+        "//apex_available:anyapex",
+        "//apex_available:platform",
+    ],
     visibility: ["//visibility:public"],
 }
 
