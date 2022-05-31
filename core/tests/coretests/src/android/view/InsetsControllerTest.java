@@ -214,19 +214,23 @@ public class InsetsControllerTest {
     }
 
     @Test
-    public void testFrameDoesntMatchDisplay() {
-        mController.onFrameChanged(new Rect(0, 0, 100, 100));
-        mController.getState().setDisplayFrame(new Rect(0, 0, 200, 200));
-        InsetsSourceControl control =
-                new InsetsSourceControl(
-                        ITYPE_STATUS_BAR, mLeash, new Point(), Insets.of(0, 10, 0, 0));
-        mController.onControlsChanged(new InsetsSourceControl[] { control });
+    public void testFrameDoesntOverlapWithInsets() {
         WindowInsetsAnimationControlListener controlListener =
                 mock(WindowInsetsAnimationControlListener.class);
-        mController.controlWindowInsetsAnimation(0, 0 /* durationMs */, new LinearInterpolator(),
-                new CancellationSignal(), controlListener);
-        mController.addOnControllableInsetsChangedListener(
-                (controller, typeMask) -> assertEquals(0, typeMask));
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            //  The frame doesn't overlap with status bar.
+            mController.onFrameChanged(new Rect(0, 10, 100, 100));
+
+            InsetsSourceControl control =
+                    new InsetsSourceControl(
+                            ITYPE_STATUS_BAR, mLeash, new Point(), Insets.of(0, 10, 0, 0));
+            mController.onControlsChanged(new InsetsSourceControl[]{control});
+            mController.controlWindowInsetsAnimation(0, 0 /* durationMs */,
+                    new LinearInterpolator(),
+                    new CancellationSignal(), controlListener);
+            mController.addOnControllableInsetsChangedListener(
+                    (controller, typeMask) -> assertEquals(0, typeMask));
+        });
         verify(controlListener).onCancelled(null);
         verify(controlListener, never()).onReady(any(), anyInt());
     }
