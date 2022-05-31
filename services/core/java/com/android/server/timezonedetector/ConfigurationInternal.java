@@ -24,6 +24,7 @@ import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.time.Capabilities.CapabilityState;
 import android.app.time.TimeZoneCapabilities;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
@@ -205,7 +206,7 @@ public final class ConfigurationInternal {
         // network available or geolocation time zone detection is possible.
         boolean deviceHasAutoTimeZoneDetection = isAutoDetectionSupported();
 
-        final int configureAutoDetectionEnabledCapability;
+        final @CapabilityState int configureAutoDetectionEnabledCapability;
         if (!deviceHasAutoTimeZoneDetection) {
             configureAutoDetectionEnabledCapability = CAPABILITY_NOT_SUPPORTED;
         } else if (!allowConfigDateTime) {
@@ -219,7 +220,7 @@ public final class ConfigurationInternal {
         // Note: allowConfigDateTime does not restrict the ability to change location time zone
         // detection enabled. This is intentional as it has user privacy implications and so it
         // makes sense to leave this under a user's control.
-        final int configureGeolocationDetectionEnabledCapability;
+        final @CapabilityState int configureGeolocationDetectionEnabledCapability;
         if (!deviceHasLocationTimeZoneDetection) {
             configureGeolocationDetectionEnabledCapability = CAPABILITY_NOT_SUPPORTED;
         } else if (!mAutoDetectionEnabledSetting || !getLocationEnabledSetting()) {
@@ -234,7 +235,7 @@ public final class ConfigurationInternal {
         // the current logic above, this could lead to a situation where a device hardware does not
         // support auto detection, the device has been forced into "auto" mode by an admin and the
         // user is unable to disable auto detection.
-        final int suggestManualTimeZoneCapability;
+        final @CapabilityState int suggestManualTimeZoneCapability;
         if (!allowConfigDateTime) {
             suggestManualTimeZoneCapability = CAPABILITY_NOT_ALLOWED;
         } else if (getAutoDetectionEnabledBehavior()) {
