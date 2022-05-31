@@ -4453,13 +4453,11 @@ public class ComputerEngine implements Computer {
         if (p == null) {
             return false;
         }
-        final PackageStateInternal ps = getPackageStateInternal(p.getPackageName());
-        if (ps == null) {
-            return false;
-        }
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (shouldFilterApplication(ps, callingUid, callingUserId)) {
+        final PackageStateInternal ps = getPackageStateInternal(p.getPackageName());
+        if (ps == null
+                || shouldFilterApplicationIncludingUninstalled(ps, callingUid, callingUserId)) {
             return false;
         }
         switch (type) {
