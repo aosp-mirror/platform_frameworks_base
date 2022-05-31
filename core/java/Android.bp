@@ -146,11 +146,14 @@ java_library {
     ],
 }
 
-filegroup {
-    name: "framework-services-net-module-wifi-shared-srcs",
-    srcs: [
-        "android/util/LocalLog.java",
-    ],
+java_library {
+    name: "modules-utils-locallog",
+    srcs: ["android/util/LocalLog.java"],
+    libs: ["unsupportedappusage"],
+    sdk_version: "module_current",
+    min_sdk_version: "30",
+    apex_available: ["//apex_available:anyapex"],
+    visibility: ["//visibility:public"],
 }
 
 // keep these files in sync with the package/Tethering/jarjar-rules.txt and
@@ -372,15 +375,6 @@ filegroup {
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/UserIcons.java",
-    ],
-}
-
-// Avoid including Parcelable classes as we don't want to have two copies of
-// Parcelable cross the process.
-filegroup {
-    name: "framework-cellbroadcast-shared-srcs",
-    srcs: [
-        "android/util/LocalLog.java",
     ],
 }
 
