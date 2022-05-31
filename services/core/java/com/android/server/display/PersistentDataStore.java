@@ -463,6 +463,7 @@ final class PersistentDataStore {
 
             TypedXmlSerializer serializer = Xml.resolveSerializer(os);
             saveToXml(serializer);
+            serializer.flush();
 
             mHandler.removeCallbacksAndMessages(/* token */ null);
             mHandler.post(() -> {
@@ -481,8 +482,6 @@ final class PersistentDataStore {
                     }
                 }
             });
-
-            serializer.flush();
         } catch (IOException ex) {
             Slog.w(TAG, "Failed to process the XML serializer.", ex);
         }
