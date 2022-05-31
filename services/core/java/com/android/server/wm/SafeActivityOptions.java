@@ -173,7 +173,7 @@ public class SafeActivityOptions {
         if (adapter == null) {
             return;
         }
-        if (callingPid == Process.myPid()) {
+        if (callingPid == WindowManagerService.MY_PID) {
             Slog.wtf(TAG, "Safe activity options constructed after clearing calling id");
             return;
         }
