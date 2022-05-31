@@ -4362,6 +4362,9 @@ public class NotificationPanelViewController extends PanelViewController {
                     == firstRow))) {
                 requestScrollerTopPaddingUpdate(false /* animate */);
             }
+            if (mKeyguardShowing) {
+                updateMaxDisplayedNotifications(true);
+            }
             requestPanelHeightUpdate();
         }
 
