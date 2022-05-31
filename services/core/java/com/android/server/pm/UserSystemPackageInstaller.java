@@ -398,7 +398,7 @@ class UserSystemPackageInstaller {
         final String logMessageFmt = "System package %s is not whitelisted using "
                 + "'install-in-user-type' in SystemConfig for any user types!";
         pmInt.forEachPackage(pkg -> {
-            if (!pkg.isSystem()) return;
+            if (!pkg.isSystem() || pkg.isApex()) return;
             final String pkgName = pkg.getManifestPackageName();
             if (!allWhitelistedPackages.contains(pkgName)
                     && !shouldUseOverlayTargetName(pmInt.getPackage(pkgName))) {
@@ -574,7 +574,8 @@ class UserSystemPackageInstaller {
         final String pkgName = shouldUseOverlayTargetName(sysPkg) ?
                 sysPkg.getOverlayTarget() : sysPkg.getManifestPackageName();
         return (implicitlyWhitelist && !userTypeWhitelist.containsKey(pkgName))
-                || userWhitelist.contains(pkgName);
+                || userWhitelist.contains(pkgName)
+                || sysPkg.isApex();
     }
 
     /**
