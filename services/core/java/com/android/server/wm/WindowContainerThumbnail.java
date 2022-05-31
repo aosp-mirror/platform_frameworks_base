@@ -33,7 +33,6 @@ import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.HardwareBuffer;
-import android.os.Process;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
@@ -91,7 +90,7 @@ class WindowContainerThumbnail implements Animatable {
                 .setBLASTLayer()
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setMetadata(METADATA_WINDOW_TYPE, mWindowContainer.getWindowingMode())
-                .setMetadata(METADATA_OWNER_UID, Process.myUid())
+                .setMetadata(METADATA_OWNER_UID, WindowManagerService.MY_UID)
                 .setCallsite("WindowContainerThumbnail")
                 .build();
 
