@@ -3252,7 +3252,8 @@ public class ComputerEngine implements Computer {
 
                 for (PackageStateInternal pkgSetting : pkgSettings) {
                     final AndroidPackage pkg = pkgSetting.getPkg();
-                    if (pkg == null) {
+                    if (pkg == null || pkg.isApex()) {
+                        // Skip APEX which is not dex-optimized
                         continue;
                     }
                     final String pkgName = pkg.getPackageName();
