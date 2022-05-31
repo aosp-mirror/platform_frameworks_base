@@ -1299,6 +1299,7 @@ public class NotificationChildrenContainer extends ViewGroup
             }
             float bottomRoundness = last ? currentBottomRoundness : 0.0f;
             child.setBottomRoundness(bottomRoundness, isShown() /* animate */);
+            child.setTopRoundness(0.0f, false /* animate */);
             last = false;
         }
     }
