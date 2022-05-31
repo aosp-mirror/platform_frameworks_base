@@ -35,6 +35,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
@@ -263,11 +264,7 @@ public class InsetsSourceConsumer {
                     mController.getHost().getInputMethodManager(), null /* icProto */);
         }
 
-        // We still need to let the legacy app know the visibility change even if we don't have the
-        // control. If we don't have the source, we don't change the requested visibility for making
-        // the callback behavior compatible.
-        mController.updateCompatSysUiVisibility(
-                mType, (hasControl || source == null) ? mRequestedVisible : isVisible, hasControl);
+        updateCompatSysUiVisibility(hasControl, source, isVisible);
 
         // If we don't have control, we are not able to change the visibility.
         if (!hasControl) {
@@ -283,6 +280,36 @@ public class InsetsSourceConsumer {
                 mController.getHost().getRootViewTitle(), mRequestedVisible));
         mState.getSource(mType).setVisible(mRequestedVisible);
         return true;
+    }
+
+    private void updateCompatSysUiVisibility(boolean hasControl, InsetsSource source,
+            boolean visible) {
+        final @InsetsType int publicType = InsetsState.toPublicType(mType);
+        if (publicType != WindowInsets.Type.statusBars()
+                && publicType != WindowInsets.Type.navigationBars()) {
+            // System UI visibility only controls status bars and navigation bars.
+            return;
+        }
+        final boolean compatVisible;
+        if (hasControl) {
+            compatVisible = mRequestedVisible;
+        } else if (source != null && !source.getFrame().isEmpty()) {
+            compatVisible = visible;
+        } else {
+            final ArraySet<Integer> types = InsetsState.toInternalType(publicType);
+            for (int i = types.size() - 1; i >= 0; i--) {
+                final InsetsSource s = mState.peekSource(types.valueAt(i));
+                if (s != null && !s.getFrame().isEmpty()) {
+                    // The compat system UI visibility would be updated by another consumer which
+                    // handles the same public insets type.
+                    return;
+                }
+            }
+            // No one provides the public type. Use the requested visibility for making the callback
+            // behavior compatible.
+            compatVisible = mRequestedVisible;
+        }
+        mController.updateCompatSysUiVisibility(mType, compatVisible, hasControl);
     }
 
     @VisibleForTesting
