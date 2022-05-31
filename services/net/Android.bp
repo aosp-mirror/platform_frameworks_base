@@ -35,7 +35,6 @@ java_library_static {
 java_library {
     name: "services.net-module-wifi",
     srcs: [
-        ":framework-services-net-module-wifi-shared-srcs",
         ":net-utils-services-common-srcs",
     ],
     sdk_version: "module_current",
