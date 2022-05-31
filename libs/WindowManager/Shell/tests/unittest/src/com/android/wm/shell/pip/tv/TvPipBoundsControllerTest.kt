@@ -179,6 +179,16 @@ class TvPipBoundsControllerTest {
     }
 
     @Test
+    fun testImmediatePlacement_DoNotStashIfAlreadyUnstashed() {
+        triggerImmediatePlacement(STASHED_PLACEMENT_RESTASH)
+        assertMovement(STASHED_BOUNDS)
+        assertMovementAt(time + STASH_DURATION, ANCHOR_BOUNDS)
+
+        triggerImmediatePlacement(STASHED_PLACEMENT)
+        assertNoMovementUpTo(time + FAR_FUTURE)
+    }
+
+    @Test
     fun testInMoveMode_KeepAtAnchor() {
         startMoveMode()
         triggerImmediatePlacement(STASHED_MOVED_PLACEMENT_RESTASH)
