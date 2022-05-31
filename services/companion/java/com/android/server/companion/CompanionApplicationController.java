@@ -104,10 +104,10 @@ class CompanionApplicationController {
     }
 
     void bindCompanionApplication(@UserIdInt int userId, @NonNull String packageName,
-            boolean bindImportant) {
+            boolean isSelfManaged) {
         if (DEBUG) {
             Log.i(TAG, "bind() u" + userId + "/" + packageName
-                    + " important=" + bindImportant);
+                    + " isSelfManaged=" + isSelfManaged);
         }
 
         final List<ComponentName> companionServices =
@@ -130,7 +130,7 @@ class CompanionApplicationController {
 
             serviceConnectors = CollectionUtils.map(companionServices, componentName ->
                             CompanionDeviceServiceConnector.newInstance(mContext, userId,
-                                    componentName, bindImportant));
+                                    componentName, isSelfManaged));
             mBoundCompanionApplications.setValueForPackage(userId, packageName, serviceConnectors);
         }
 

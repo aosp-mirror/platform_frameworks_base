@@ -34,6 +34,8 @@ class RampAnimator<T> {
     private float mCurrentValue;
     private float mTargetValue;
     private float mRate;
+    private float mAnimationIncreaseMaxTimeSecs;
+    private float mAnimationDecreaseMaxTimeSecs;
 
     private boolean mAnimating;
     private float mAnimatedValue; // higher precision copy of mCurrentValue
@@ -43,10 +45,21 @@ class RampAnimator<T> {
 
     private Listener mListener;
 
-    public RampAnimator(T object, FloatProperty<T> property) {
+    RampAnimator(T object, FloatProperty<T> property) {
         mObject = object;
         mProperty = property;
         mChoreographer = Choreographer.getInstance();
+    }
+
+    /**
+     * Sets the maximum time that a brightness animation can take.
+     */
+    public void setAnimationTimeLimits(long animationRampIncreaseMaxTimeMillis,
+            long animationRampDecreaseMaxTimeMillis) {
+        mAnimationIncreaseMaxTimeSecs = (animationRampIncreaseMaxTimeMillis > 0)
+                ? (animationRampIncreaseMaxTimeMillis / 1000.0f) : 0.0f;
+        mAnimationDecreaseMaxTimeSecs = (animationRampDecreaseMaxTimeMillis > 0)
+                ? (animationRampDecreaseMaxTimeMillis / 1000.0f) : 0.0f;
     }
 
     /**
@@ -81,6 +94,15 @@ class RampAnimator<T> {
                 return true;
             }
             return false;
+        }
+
+        // Adjust the rate so that we do not exceed our maximum animation time.
+        if (target > mCurrentValue && mAnimationIncreaseMaxTimeSecs > 0.0f
+                && ((target - mCurrentValue) / rate) > mAnimationIncreaseMaxTimeSecs) {
+            rate = (target - mCurrentValue) / mAnimationIncreaseMaxTimeSecs;
+        } else if (target < mCurrentValue && mAnimationDecreaseMaxTimeSecs > 0.0f
+                && ((mCurrentValue - target) / rate) > mAnimationDecreaseMaxTimeSecs) {
+            rate = (mCurrentValue - target) / mAnimationDecreaseMaxTimeSecs;
         }
 
         // Adjust the rate based on the closest target.
@@ -206,6 +228,17 @@ class RampAnimator<T> {
             mFirst.setListener(mInternalListener);
             mSecond = new RampAnimator(object, secondProperty);
             mSecond.setListener(mInternalListener);
+        }
+
+        /**
+         * Sets the maximum time that a brightness animation can take.
+         */
+        public void setAnimationTimeLimits(long animationRampIncreaseMaxTimeMillis,
+                long animationRampDecreaseMaxTimeMillis) {
+            mFirst.setAnimationTimeLimits(animationRampIncreaseMaxTimeMillis,
+                    animationRampDecreaseMaxTimeMillis);
+            mSecond.setAnimationTimeLimits(animationRampIncreaseMaxTimeMillis,
+                    animationRampDecreaseMaxTimeMillis);
         }
 
         /**

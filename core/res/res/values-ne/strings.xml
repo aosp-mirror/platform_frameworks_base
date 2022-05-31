@@ -270,7 +270,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"९९९+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"नयाँ सूचना"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"भर्चुअल किबोर्ड"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"वास्तविक किबोर्ड"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"फिजिकल किबोर्ड"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"कार मोड"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"खाताको स्थिति"</string>
@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"फाइल तथा डकुमेन्टहरू"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"आफ्नो डिभाइसमा भएका फाइल र डकुमेन्टहरू प्रयोग गर्नुहोस्"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"फाइलहरू"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"आफ्नो डिभाइसमा रहेका फाइलहरू हेर्नुहोस् र प्रयोग गर्नुहोस्"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"सङ्गीत तथा अडियो"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"तपाईंको डिभाइसबाट सङ्गीत तथा अडियो सुन्ने अनुमति"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"फोटो र भिडियोहरू"</string>
@@ -1378,9 +1378,9 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"सेयर गर्नुहोस्"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"अस्वीकार गर्नुहोस्"</string>
     <string name="select_input_method" msgid="3971267998568587025">"निवेश विधि छान्नुहोस्"</string>
-    <string name="show_ime" msgid="6406112007347443383">"वास्तविक किबोर्ड सक्रिय हुँदा यसलाई स्क्रिनमा राखियोस्"</string>
+    <string name="show_ime" msgid="6406112007347443383">"फिजिकल किबोर्ड सक्रिय हुँदा यसलाई स्क्रिनमा राखियोस्"</string>
     <string name="hardware" msgid="1800597768237606953">"भर्चुअल किबोर्ड देखाउनुहोस्"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"फिजिकल किबोर्डलाई कन्फिगर गर्नुहोस्"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"फिजिकल किबोर्ड कन्फिगर गर्नुहोस्"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"भाषा र लेआउट चयन गर्न ट्याप गर्नुहोस्"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>

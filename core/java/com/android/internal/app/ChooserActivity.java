@@ -1002,6 +1002,7 @@ public class ChooserActivity extends ResolverActivity implements
         mMaxTargetsPerRow = getResources().getInteger(R.integer.config_chooser_max_targets_per_row);
         adjustPreviewWidth(newConfig.orientation, null);
         updateStickyContentPreview();
+        updateTabPadding();
     }
 
     private boolean shouldDisplayLandscape(int orientation) {
@@ -1022,6 +1023,20 @@ public class ChooserActivity extends ResolverActivity implements
         updateLayoutWidth(R.id.content_preview_text_layout, width, parent);
         updateLayoutWidth(R.id.content_preview_title_layout, width, parent);
         updateLayoutWidth(R.id.content_preview_file_layout, width, parent);
+    }
+
+    private void updateTabPadding() {
+        if (shouldShowTabs()) {
+            View tabs = findViewById(R.id.tabs);
+            float iconSize = getResources().getDimension(R.dimen.chooser_icon_size);
+            // The entire width consists of icons or padding. Divide the item padding in half to get
+            // paddingHorizontal.
+            float padding = (tabs.getWidth() - mMaxTargetsPerRow * iconSize)
+                    / mMaxTargetsPerRow / 2;
+            // Subtract the margin the buttons already have.
+            padding -= getResources().getDimension(R.dimen.resolver_profile_tab_margin);
+            tabs.setPadding((int) padding, 0, (int) padding, 0);
+        }
     }
 
     private void updateLayoutWidth(int layoutResourceId, int width, View parent) {
@@ -2480,6 +2495,8 @@ public class ChooserActivity extends ResolverActivity implements
                 recyclerView.setAdapter(gridAdapter);
                 ((GridLayoutManager) recyclerView.getLayoutManager()).setSpanCount(
                         mMaxTargetsPerRow);
+
+                updateTabPadding();
             }
 
             UserHandle currentUserHandle = mChooserMultiProfilePagerAdapter.getCurrentUserHandle();
