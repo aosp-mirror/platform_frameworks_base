@@ -51,6 +51,7 @@ import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -115,6 +116,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private LatencyTracker mLatencyTracker;
     @Mock
     private ScreenOffAnimationController mScreenOffAnimationController;
+    @Mock
+    private VibratorHelper mVibratorHelper;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -136,7 +139,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mMetricsLogger, mDumpManager, mPowerManager,
                 mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
                 mAuthController, mStatusBarStateController, mKeyguardUnlockAnimationController,
-                mSessionTracker, mLatencyTracker, mScreenOffAnimationController);
+                mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setBiometricModeListener(mBiometricModeListener);
     }
