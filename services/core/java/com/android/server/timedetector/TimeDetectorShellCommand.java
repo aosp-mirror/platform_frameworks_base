@@ -75,7 +75,7 @@ class TimeDetectorShellCommand extends ShellCommand {
     private int runIsAutoDetectionEnabled() {
         final PrintWriter pw = getOutPrintWriter();
         boolean enabled = mInterface.getCapabilitiesAndConfig()
-                .getTimeConfiguration()
+                .getConfiguration()
                 .isAutoDetectionEnabled();
         pw.println(enabled);
         return 0;

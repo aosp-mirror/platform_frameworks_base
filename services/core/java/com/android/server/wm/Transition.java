@@ -214,8 +214,24 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mTransientLaunches = new ArrayMap<>();
         }
         mTransientLaunches.put(activity, restoreBelow);
+        setTransientLaunchToChanges(activity);
+
+        if (restoreBelow != null) {
+            final ChangeInfo info = mChanges.get(restoreBelow);
+            info.mFlags |= ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH;
+        }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Transition %d: Set %s as "
                 + "transient-launch", mSyncId, activity);
+    }
+
+    boolean isTransientHide(@NonNull Task task) {
+        if (mTransientLaunches == null) return false;
+        for (int i = 0; i < mTransientLaunches.size(); ++i) {
+            if (mTransientLaunches.valueAt(i) == task) {
+                return true;
+            }
+        }
+        return false;
     }
 
     boolean isTransientLaunch(@NonNull ActivityRecord activity) {
@@ -240,6 +256,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         final ChangeInfo info = mChanges.get(wc);
         if (info == null) return;
         info.mFlags = info.mFlags | ChangeInfo.FLAG_SEAMLESS_ROTATION;
+    }
+
+    /**
+     * Only set flag to the parent tasks and activity itself.
+     */
+    private void setTransientLaunchToChanges(@NonNull WindowContainer wc) {
+        for (WindowContainer curr = wc; curr != null && mChanges.containsKey(curr);
+                curr = curr.getParent()) {
+            if (curr.asTask() == null && curr.asActivityRecord() == null) {
+                return;
+            }
+            final ChangeInfo info = mChanges.get(curr);
+            info.mFlags = info.mFlags | ChangeInfo.FLAG_TRANSIENT_LAUNCH;
+        }
     }
 
     @VisibleForTesting
@@ -1546,10 +1576,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
          * seamless rotation. This is currently only used by DisplayContent during fixed-rotation.
          */
         private static final int FLAG_SEAMLESS_ROTATION = 1;
+        private static final int FLAG_TRANSIENT_LAUNCH = 2;
+        private static final int FLAG_ABOVE_TRANSIENT_LAUNCH = 4;
 
         @IntDef(prefix = { "FLAG_" }, value = {
                 FLAG_NONE,
-                FLAG_SEAMLESS_ROTATION
+                FLAG_SEAMLESS_ROTATION,
+                FLAG_TRANSIENT_LAUNCH,
+                FLAG_ABOVE_TRANSIENT_LAUNCH
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Flag {}
@@ -1586,6 +1620,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
 
         boolean hasChanged(@NonNull WindowContainer newState) {
+            // the task including transient launch must promote to root task
+            if ((mFlags & ChangeInfo.FLAG_TRANSIENT_LAUNCH) != 0
+                    || (mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0) {
+                return true;
+            }
             // If it's invisible and hasn't changed visibility, always return false since even if
             // something changed, it wouldn't be a visible change.
             final boolean currVisible = newState.isVisibleRequested();
@@ -1601,6 +1640,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         @TransitionInfo.TransitionMode
         int getTransitMode(@NonNull WindowContainer wc) {
+            if ((mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0) {
+                return TRANSIT_CLOSE;
+            }
             final boolean nowVisible = wc.isVisibleRequested();
             if (nowVisible == mVisible) {
                 return TRANSIT_CHANGE;
