@@ -607,7 +607,6 @@ public final class ProcessStats implements Parcelable {
                     }
                 } else {
                     ps.makeDead();
-                    mUidStates.get(uids.keyAt(iu)).removeProcess(ps, now);
                     uids.removeAt(iu);
                 }
             }
@@ -1183,7 +1182,16 @@ public final class ProcessStats implements Parcelable {
                         + " " + proc);
                 mProcesses.put(procName, uid, proc);
 
-                mUidStates.get(uid).addProcess(proc);
+                UidState uidState = mUidStates.get(uid);
+                if (uidState == null) {
+                    // This is not expected, log a warning and construct a new UID state.
+                    if (DEBUG_PARCEL) {
+                        Slog.w(TAG, "Couldn't find the common UID " + uid + " for " + proc);
+                    }
+                    uidState = new UidState(this, uid);
+                    mUidStates.put(uid, uidState);
+                }
+                uidState.addProcess(proc);
             }
         }
 

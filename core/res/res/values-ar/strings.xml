@@ -221,7 +221,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"تفعيل اللاسلكي"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف الشبكة اللاسلكية"</string>
     <string name="screen_lock" msgid="2072642720826409809">"قفل الشاشة"</string>
-    <string name="power_off" msgid="4111692782492232778">"إيقاف التشغيل"</string>
+    <string name="power_off" msgid="4111692782492232778">"إطفاء"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"إيقاف الرنين"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"اهتزاز الرنين"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"تشغيل الرنين"</string>
@@ -245,7 +245,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"‏خيارات Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"خيارات الهاتف"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"قفل الشاشة"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"إيقاف التشغيل"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"إطفاء"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"التشغيل"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"إعادة التشغيل"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"الطوارئ"</string>
@@ -309,8 +309,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"الوصول إلى تقويمك"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏إرسال رسائل قصيرة SMS وعرضها"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"الملفات والمستندات"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"الوصول إلى الملفات والمستندات على جهازك"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"الملفات"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"الوصول إلى الملفات على جهازك"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"الموسيقى والمقاطع الصوتية"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"تسمح فئة أذونات التطبيق هذه بالوصول إلى الموسيقى والمقاطع الصوتية على جهازك."</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"الصور والفيديوهات"</string>
@@ -1685,9 +1685,9 @@
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لخدمة <xliff:g id="SERVICE">%1$s</xliff:g> بالتحكّم الكامل في جهازك؟"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بسهولة الاستخدام."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"قراءة محتوى الشاشة والتحكم به"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"يمكنها قراءة كل المحتوى على الشاشة وعرض المحتوى عبر تطبيقات أخرى."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"يمكنها قراءة كل المحتوى على الشاشة وعرض المحتوى فوق تطبيقات أخرى."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"عرض الإجراءات وتنفيذها"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"يمكنها تتبّع تعاملاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"يمكنها تتبّع تفاعلاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"سماح"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رفض"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>

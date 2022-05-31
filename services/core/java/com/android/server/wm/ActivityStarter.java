@@ -1365,10 +1365,9 @@ class ActivityStarter {
                 PendingIntentRecord.isPendingIntentBalAllowedByCaller(checkedOptions);
 
         if (balAllowedByPiSender && realCallingUid != callingUid) {
-            // If the caller is a legacy app, we won't check if the caller has BAL permission.
-            final boolean isPiBalOptionEnabled = CompatChanges.isChangeEnabled(
-                    ENABLE_PENDING_INTENT_BAL_OPTION, realCallingUid);
-            if (isPiBalOptionEnabled && ActivityManager.checkComponentPermission(
+            final boolean useCallerPermission =
+                    PendingIntentRecord.isPendingIntentBalAllowedByPermission(checkedOptions);
+            if (useCallerPermission && ActivityManager.checkComponentPermission(
                     android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
                     realCallingUid, -1, true)
                     == PackageManager.PERMISSION_GRANTED) {

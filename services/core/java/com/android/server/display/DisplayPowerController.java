@@ -255,6 +255,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // to reach the final state.
     private final boolean mBrightnessBucketsInDozeConfig;
 
+    //  Maximum time a ramp animation can take.
+    private long mBrightnessRampIncreaseMaxTimeMillis;
+    private long mBrightnessRampDecreaseMaxTimeMillis;
+
     // The pending power request.
     // Initially null until the first call to requestPowerState.
     @GuardedBy("mLock")
@@ -507,7 +511,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         final Resources resources = context.getResources();
 
-
         // DOZE AND DIM SETTINGS
         mScreenBrightnessDozeConfig = clampAbsoluteBrightness(
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DOZE));
@@ -640,7 +643,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         mIsRbcActive = mCdsi.isReduceBrightColorsActivated();
         mAutomaticBrightnessController.recalculateSplines(mIsRbcActive, adjustedNits);
-
 
         // If rbc is turned on, off or there is a change in strength, we want to reset the short
         // term model. Since the nits range at which brightness now operates has changed due to
@@ -837,6 +839,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         loadNitsRange(mContext.getResources());
         setUpAutoBrightness(mContext.getResources(), mHandler);
         reloadReduceBrightColours();
+        if (mScreenBrightnessRampAnimator != null) {
+            mScreenBrightnessRampAnimator.setAnimationTimeLimits(
+                    mBrightnessRampIncreaseMaxTimeMillis,
+                    mBrightnessRampDecreaseMaxTimeMillis);
+        }
         mHbmController.resetHbmData(info.width, info.height, token, info.uniqueId,
                 mDisplayDeviceConfig.getHighBrightnessModeData(),
                 new HighBrightnessModeController.HdrBrightnessDeviceConfig() {
@@ -883,6 +890,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mScreenBrightnessRampAnimator = new DualRampAnimator<>(mPowerState,
                 DisplayPowerState.SCREEN_BRIGHTNESS_FLOAT,
                 DisplayPowerState.SCREEN_SDR_BRIGHTNESS_FLOAT);
+        mScreenBrightnessRampAnimator.setAnimationTimeLimits(
+                mBrightnessRampIncreaseMaxTimeMillis,
+                mBrightnessRampDecreaseMaxTimeMillis);
         mScreenBrightnessRampAnimator.setListener(mRampAnimatorListener);
 
         noteScreenState(mPowerState.getScreenState());
@@ -1007,6 +1017,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessRampRateFastIncrease = mDisplayDeviceConfig.getBrightnessRampFastIncrease();
         mBrightnessRampRateSlowDecrease = mDisplayDeviceConfig.getBrightnessRampSlowDecrease();
         mBrightnessRampRateSlowIncrease = mDisplayDeviceConfig.getBrightnessRampSlowIncrease();
+        mBrightnessRampDecreaseMaxTimeMillis =
+                mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis();
+        mBrightnessRampIncreaseMaxTimeMillis =
+                mDisplayDeviceConfig.getBrightnessRampIncreaseMaxMillis();
     }
 
     private void loadNitsRange(Resources resources) {
