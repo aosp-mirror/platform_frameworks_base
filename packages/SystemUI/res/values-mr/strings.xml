@@ -448,7 +448,7 @@
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"अलार्म व्यतिरिक्त तुम्हाला कोणत्याही आवाज आणि कंपनांचा व्यत्त्यय आणला जाणार नाही. तरीही तुम्ही प्ले करायचे ठरवलेले कोणतेही संगीत, व्हिडिओ आणि गेमचे आवाज ऐकू शकतात."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"सानुकूलित करा"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"हे अलार्म, संगीत, व्हिडिओ आणि गेमसह, सर्व आवाज आणि कंपने ब्लॉक करते. तरीही तुम्ही फोन कॉल करू शकतात."</string>
-    <string name="zen_silence_introduction" msgid="6117517737057344014">"हे अलार्म, संगीत, व्हिडिओ आणि गेम यासह, सर्व आवाज आणि कंपने अवरोधित करते."</string>
+    <string name="zen_silence_introduction" msgid="6117517737057344014">"हे अलार्म, संगीत, व्हिडिओ आणि गेम यांसह, सर्व आवाज आणि व्हायब्रेशन ब्लॉक करते."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"खाली कमी तातडीच्या सूचना"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"उघडण्यासाठी पुन्हा टॅप करा"</string>
@@ -705,7 +705,7 @@
     <string name="show_silently" msgid="5629369640872236299">"सूचना शांतपणे दर्शवा"</string>
     <string name="block" msgid="188483833983476566">"सर्व सूचना ब्लॉक करा"</string>
     <string name="do_not_silence" msgid="4982217934250511227">"शांत करू नका"</string>
-    <string name="do_not_silence_block" msgid="4361847809775811849">"शांत किंवा अवरोधित करू नका"</string>
+    <string name="do_not_silence_block" msgid="4361847809775811849">"शांत किंवा ब्लॉक करू नका"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"पॉवर सूचना नियंत्रणे"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"सुरू"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"बंद"</string>
