@@ -51,6 +51,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE_PER_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
+import static android.content.pm.ActivityInfo.launchModeToString;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -2041,8 +2042,20 @@ class ActivityStarter {
         }
 
         if (mInTaskFragment != null && !canEmbedActivity(mInTaskFragment, r, newTask, targetTask)) {
-            Slog.e(TAG, "Permission denied: Cannot embed " + r + " to " + mInTaskFragment.getTask()
-                    + " targetTask= " + targetTask);
+            final StringBuilder errorMsg = new StringBuilder("Permission denied: Cannot embed " + r
+                    + " to " + mInTaskFragment.getTask() + ". newTask=" + newTask + ", targetTask= "
+                    + targetTask);
+            if (newTask && isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE,
+                    LAUNCH_SINGLE_INSTANCE_PER_TASK, LAUNCH_SINGLE_TASK)) {
+                errorMsg.append("\nActivity tries to launch on a new task because the launch mode"
+                        + " is " + launchModeToString(mLaunchMode));
+            } else if (newTask && (mLaunchFlags & (FLAG_ACTIVITY_NEW_DOCUMENT
+                    | FLAG_ACTIVITY_NEW_TASK)) != 0) {
+                errorMsg.append("\nActivity tries to launch on a new task because the launch flags"
+                        + " contains FLAG_ACTIVITY_NEW_DOCUMENT or FLAG_ACTIVITY_NEW_TASK. "
+                        + "mLaunchFlag=" + mLaunchFlags);
+            }
+            Slog.e(TAG, errorMsg.toString());
             return START_PERMISSION_DENIED;
         }
 
@@ -3232,12 +3245,8 @@ class ActivityStarter {
             pw.println(mOptions);
         }
         pw.print(prefix);
-        pw.print("mLaunchSingleTop=");
-        pw.print(LAUNCH_SINGLE_TOP == mLaunchMode);
-        pw.print(" mLaunchSingleInstance=");
-        pw.print(LAUNCH_SINGLE_INSTANCE == mLaunchMode);
-        pw.print(" mLaunchSingleTask=");
-        pw.println(LAUNCH_SINGLE_TASK == mLaunchMode);
+        pw.print("mLaunchMode=");
+        pw.print(launchModeToString(mLaunchMode));
         pw.print(prefix);
         pw.print("mLaunchFlags=0x");
         pw.print(Integer.toHexString(mLaunchFlags));

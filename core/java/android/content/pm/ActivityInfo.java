@@ -106,6 +106,24 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public @interface LaunchMode {
     }
 
+    /** @hide */
+    public static String launchModeToString(@LaunchMode int launchMode) {
+        switch(launchMode) {
+            case LAUNCH_MULTIPLE:
+                return "LAUNCH_MULTIPLE";
+            case LAUNCH_SINGLE_TOP:
+                return "LAUNCH_SINGLE_TOP";
+            case LAUNCH_SINGLE_TASK:
+                return "LAUNCH_SINGLE_TASK";
+            case LAUNCH_SINGLE_INSTANCE:
+                return "LAUNCH_SINGLE_INSTANCE";
+            case LAUNCH_SINGLE_INSTANCE_PER_TASK:
+                return "LAUNCH_SINGLE_INSTANCE_PER_TASK";
+            default:
+                return "unknown=" + launchMode;
+        }
+    }
+
     /**
      * The launch mode style requested by the activity.  From the
      * {@link android.R.attr#launchMode} attribute.
@@ -1585,7 +1603,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
                     + " persistableMode=" + persistableModeToString());
         }
         if (launchMode != 0 || flags != 0 || privateFlags != 0 || theme != 0) {
-            pw.println(prefix + "launchMode=" + launchMode
+            pw.println(prefix + "launchMode=" + launchModeToString(launchMode)
                     + " flags=0x" + Integer.toHexString(flags)
                     + " privateFlags=0x" + Integer.toHexString(privateFlags)
                     + " theme=0x" + Integer.toHexString(theme));
