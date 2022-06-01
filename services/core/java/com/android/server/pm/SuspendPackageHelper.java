@@ -680,9 +680,9 @@ public final class SuspendPackageHelper {
                 } else {
                     intentExtras = null;
                 }
-                handler.post(() -> mBroadcastHelper.doSendBroadcast(action, null, intentExtras,
+                mBroadcastHelper.doSendBroadcast(action, null, intentExtras,
                         Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, packageName, null,
-                        targetUserIds, false, null, null));
+                        targetUserIds, false, null, null);
             }
         });
     }

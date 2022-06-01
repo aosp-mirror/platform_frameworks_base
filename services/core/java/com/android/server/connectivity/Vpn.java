@@ -125,6 +125,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
+import com.android.modules.utils.build.SdkLevel;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.NetworkStackConstants;
 import com.android.server.DeviceIdleInternal;
@@ -213,7 +214,9 @@ public class Vpn {
     private final Context mUserIdContext;
     @VisibleForTesting final Dependencies mDeps;
     private final NetworkInfo mNetworkInfo;
+    @GuardedBy("this")
     private int mLegacyState;
+    @GuardedBy("this")
     @VisibleForTesting protected String mPackage;
     private int mOwnerUID;
     private boolean mIsPackageTargetingAtLeastQ;
@@ -251,6 +254,7 @@ public class Vpn {
      * Whether to keep the connection active after rebooting, or upgrading or reinstalling. This
      * only applies to {@link VpnService} connections.
      */
+    @GuardedBy("this")
     @VisibleForTesting protected boolean mAlwaysOn = false;
 
     /**
@@ -258,6 +262,7 @@ public class Vpn {
      * apps can still bypass by choosing explicit networks. Has no effect if {@link mAlwaysOn} is
      * not set. Applies to all types of VPNs.
      */
+    @GuardedBy("this")
     @VisibleForTesting protected boolean mLockdown = false;
 
     /**
@@ -610,7 +615,7 @@ public class Vpn {
     }
 
     /** Returns the package name that is currently prepared. */
-    public String getPackage() {
+    public synchronized String getPackage() {
         return mPackage;
     }
 
@@ -691,6 +696,36 @@ public class Vpn {
         return true;
     }
 
+    private boolean sendEventToVpnManagerApp(@NonNull String category, int errorClass,
+            int errorCode, @NonNull final String packageName, @Nullable final String sessionKey,
+            @NonNull final VpnProfileState profileState, @Nullable final Network underlyingNetwork,
+            @Nullable final NetworkCapabilities nc, @Nullable final LinkProperties lp) {
+        final Intent intent = new Intent(VpnManager.ACTION_VPN_MANAGER_EVENT);
+        intent.setPackage(packageName);
+        intent.addCategory(category);
+        intent.putExtra(VpnManager.EXTRA_VPN_PROFILE_STATE, profileState);
+        intent.putExtra(VpnManager.EXTRA_SESSION_KEY, sessionKey);
+        intent.putExtra(VpnManager.EXTRA_UNDERLYING_NETWORK, underlyingNetwork);
+        intent.putExtra(VpnManager.EXTRA_UNDERLYING_NETWORK_CAPABILITIES, nc);
+        intent.putExtra(VpnManager.EXTRA_UNDERLYING_LINK_PROPERTIES, lp);
+        intent.putExtra(VpnManager.EXTRA_TIMESTAMP_MILLIS, System.currentTimeMillis());
+        if (!VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER.equals(category)
+                || !VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED.equals(category)) {
+            intent.putExtra(VpnManager.EXTRA_ERROR_CLASS, errorClass);
+            intent.putExtra(VpnManager.EXTRA_ERROR_CODE, errorCode);
+        }
+        try {
+            return mUserIdContext.startService(intent) != null;
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Service of VpnManager app " + intent + " failed to start", e);
+            return false;
+        }
+    }
+
+    private boolean isVpnApp(String packageName) {
+        return packageName != null && !VpnConfig.LEGACY_VPN.equals(packageName);
+    }
+
     /**
      * Configures an always-on VPN connection through a specific application. This connection is
      * automatically granted and persisted after a reboot.
@@ -713,9 +748,40 @@ public class Vpn {
             boolean lockdown,
             @Nullable List<String> lockdownAllowlist) {
         enforceControlPermissionOrInternalCaller();
+        // Store mPackage since it might be reset or might be replaced with the other VPN app.
+        final String oldPackage = mPackage;
+        final boolean isPackageChanged = !Objects.equals(packageName, oldPackage);
+        // TODO: Remove "SdkLevel.isAtLeastT()" check once VpnManagerService is decoupled from
+        //  ConnectivityServiceTest.
+        // Only notify VPN apps that were already always-on, and only if the always-on provider
+        // changed, or the lockdown mode changed.
+        final boolean shouldNotifyOldPkg = isVpnApp(oldPackage) && mAlwaysOn
+                && (lockdown != mLockdown || isPackageChanged);
+        // Also notify the new package if there was a provider change.
+        final boolean shouldNotifyNewPkg = isVpnApp(packageName) && isPackageChanged;
 
         if (setAlwaysOnPackageInternal(packageName, lockdown, lockdownAllowlist)) {
             saveAlwaysOnPackage();
+            // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+            //  ConnectivityServiceTest.
+            if (shouldNotifyOldPkg && SdkLevel.isAtLeastT()) {
+                // If both of shouldNotifyOldPkg & isPackageChanged are true, which means the
+                // always-on of old package is disabled or the old package is replaced with the new
+                // package. In this case, VpnProfileState should be disconnected.
+                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
+                        -1 /* errorClass */, -1 /* errorCode*/, oldPackage,
+                        null /* sessionKey */, isPackageChanged ? makeDisconnectedVpnProfileState()
+                                : makeVpnProfileStateLocked(),
+                        null /* underlyingNetwork */, null /* nc */, null /* lp */);
+            }
+            // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+            //  ConnectivityServiceTest.
+            if (shouldNotifyNewPkg && SdkLevel.isAtLeastT()) {
+                sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_ALWAYS_ON_STATE_CHANGED,
+                        -1 /* errorClass */, -1 /* errorCode*/, packageName,
+                        getSessionKeyLocked(), makeVpnProfileStateLocked(),
+                        null /* underlyingNetwork */, null /* nc */, null /* lp */);
+            }
             return true;
         }
         return false;
@@ -1012,6 +1078,7 @@ public class Vpn {
         return true;
     }
 
+    @GuardedBy("this")
     private boolean isCurrentPreparedPackage(String packageName) {
         // We can't just check that packageName matches mPackage, because if the app was uninstalled
         // and reinstalled it will no longer be prepared. Similarly if there is a shared UID, the
@@ -1049,6 +1116,17 @@ public class Vpn {
                 if (!VpnConfig.LEGACY_VPN.equals(mPackage)) {
                     mAppOpsManager.finishOp(
                             AppOpsManager.OPSTR_ESTABLISH_VPN_MANAGER, mOwnerUID, mPackage, null);
+                    // The underlying network, NetworkCapabilities and LinkProperties are not
+                    // necessary to send to VPN app since the purpose of this event is to notify
+                    // VPN app that VPN is deactivated by the user.
+                    // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+                    //  ConnectivityServiceTest.
+                    if (SdkLevel.isAtLeastT()) {
+                        sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
+                                -1 /* errorClass */, -1 /* errorCode*/, mPackage,
+                                getSessionKeyLocked(), makeVpnProfileStateLocked(),
+                                null /* underlyingNetwork */, null /* nc */, null /* lp */);
+                    }
                 }
                 // cleanupVpnStateLocked() is called from mVpnRunner.exit()
                 mVpnRunner.exit();
@@ -1305,6 +1383,7 @@ public class Vpn {
         return true;
     }
 
+    @GuardedBy("this")
     private void agentConnect() {
         LinkProperties lp = makeLinkProperties();
 
@@ -2005,6 +2084,7 @@ public class Vpn {
         return isIkev2VpnRunner() ? VpnManager.TYPE_VPN_PLATFORM : VpnManager.TYPE_VPN_LEGACY;
     }
 
+    @GuardedBy("this")
     private void updateAlwaysOnNotification(DetailedState networkState) {
         final boolean visible = (mAlwaysOn && networkState != DetailedState.CONNECTED);
 
@@ -3593,9 +3673,17 @@ public class Vpn {
         }
     }
 
-    private VpnProfileState makeVpnProfileState() {
+    @GuardedBy("this")
+    @NonNull
+    private VpnProfileState makeVpnProfileStateLocked() {
         return new VpnProfileState(getStateFromLegacyState(mLegacyState),
                 isIkev2VpnRunner() ? getSessionKeyLocked() : null, mAlwaysOn, mLockdown);
+    }
+
+    @NonNull
+    private VpnProfileState makeDisconnectedVpnProfileState() {
+        return new VpnProfileState(VpnProfileState.STATE_DISCONNECTED, null /* sessionKey */,
+                false /* alwaysOn */, false /* lockdown */);
     }
 
     /**
@@ -3609,7 +3697,7 @@ public class Vpn {
             @NonNull String packageName) {
         requireNonNull(packageName, "No package name provided");
         enforceNotRestrictedUser();
-        return isCurrentIkev2VpnLocked(packageName) ? makeVpnProfileState() : null;
+        return isCurrentIkev2VpnLocked(packageName) ? makeVpnProfileStateLocked() : null;
     }
 
     /**

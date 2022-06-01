@@ -76,6 +76,8 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return setUserDisabledHdrTypes();
             case "get-user-disabled-hdr-types":
                 return getUserDisabledHdrTypes();
+            case "get-displays":
+                return getDisplays();
             case "dock":
                 return setDockedAndIdle();
             case "undock":
@@ -133,12 +135,27 @@ class DisplayManagerShellCommand extends ShellCommand {
         pw.println("    Sets the user disabled HDR types as TYPES");
         pw.println("  get-user-disabled-hdr-types");
         pw.println("    Returns the user disabled HDR types");
+        pw.println("  get-displays [CATEGORY]");
+        pw.println("    Returns the current displays. Can specify string category among");
+        pw.println("    DisplayManager.DISPLAY_CATEGORY_*; must use the actual string value.");
         pw.println("  dock");
         pw.println("    Sets brightness to docked + idle screen brightness mode");
         pw.println("  undock");
         pw.println("    Sets brightness to active (normal) screen brightness mode");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
+    }
+
+    private int getDisplays() {
+        String category = getNextArg();
+        DisplayManager dm = mService.getContext().getSystemService(DisplayManager.class);
+        Display[] displays = dm.getDisplays(category);
+        PrintWriter out = getOutPrintWriter();
+        out.println("Displays:");
+        for (int i = 0; i < displays.length; i++) {
+            out.println("  " + displays[i]);
+        }
+        return 0;
     }
 
     private int setBrightness() {

@@ -1390,6 +1390,13 @@ class RecentTasks {
             return false;
         }
 
+        // Ignore the task if it is started on a display which is not allow to show its tasks on
+        // Recents.
+        if (task.getDisplayContent() != null
+                && !task.getDisplayContent().canShowTasksInRecents()) {
+            return false;
+        }
+
         return true;
     }
 
@@ -1399,13 +1406,19 @@ class RecentTasks {
     private boolean isInVisibleRange(Task task, int taskIndex, int numVisibleTasks,
             boolean skipExcludedCheck) {
         if (!skipExcludedCheck) {
-            // Keep the most recent task even if it is excluded from recents
+            // Keep the most recent task of home display even if it is excluded from recents.
             final boolean isExcludeFromRecents =
                     (task.getBaseIntent().getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                             == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
             if (isExcludeFromRecents) {
-                if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
-                return taskIndex == 0;
+                if (DEBUG_RECENTS_TRIM_TASKS) {
+                    Slog.d(TAG,
+                            "\texcludeFromRecents=true, taskIndex = " + taskIndex
+                                    + ", isOnHomeDisplay: " + task.isOnHomeDisplay());
+                }
+                // The Recents is only supported on default display now, we should only keep the
+                // most recent task of home display.
+                return (task.isOnHomeDisplay() && taskIndex == 0);
             }
         }
 

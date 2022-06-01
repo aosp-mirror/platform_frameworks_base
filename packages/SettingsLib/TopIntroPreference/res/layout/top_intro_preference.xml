@@ -33,5 +33,6 @@
         android:clickable="false"
         android:longClickable="false"
         android:maxLines="10"
+        android:hyphenationFrequency="normalFast"
         android:textAppearance="@style/TextAppearance.TopIntroText"/>
 </LinearLayout>

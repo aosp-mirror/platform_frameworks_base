@@ -379,6 +379,11 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_DISALLOW_APPS_CONTROL = 323;
+    /**
+     * Active device admin package.
+     * @hide
+     */
+    public static final int REASON_ACTIVE_DEVICE_ADMIN = 324;
 
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
@@ -459,6 +464,7 @@ public class PowerExemptionManager {
             REASON_OPT_OUT_REQUESTED,
             REASON_DPO_PROTECTED_APP,
             REASON_DISALLOW_APPS_CONTROL,
+            REASON_ACTIVE_DEVICE_ADMIN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
@@ -669,6 +675,8 @@ public class PowerExemptionManager {
                 return AppBackgroundRestrictionsInfo.REASON_DPO_PROTECTED_APP;
             case REASON_DISALLOW_APPS_CONTROL:
                 return AppBackgroundRestrictionsInfo.REASON_DISALLOW_APPS_CONTROL;
+            case REASON_ACTIVE_DEVICE_ADMIN:
+                return AppBackgroundRestrictionsInfo.REASON_ACTIVE_DEVICE_ADMIN;
             default:
                 return AppBackgroundRestrictionsInfo.REASON_DENIED;
         }
@@ -818,6 +826,8 @@ public class PowerExemptionManager {
                 return "DPO_PROTECTED_APP";
             case REASON_DISALLOW_APPS_CONTROL:
                 return "DISALLOW_APPS_CONTROL";
+            case REASON_ACTIVE_DEVICE_ADMIN:
+                return "ACTIVE_DEVICE_ADMIN";
             case REASON_OPT_OUT_REQUESTED:
                 return "REASON_OPT_OUT_REQUESTED";
             default:

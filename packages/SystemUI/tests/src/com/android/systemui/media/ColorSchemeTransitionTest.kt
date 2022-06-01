@@ -146,6 +146,6 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
     @Test
     fun testColorSchemeTransition_update() {
         colorSchemeTransition.updateColorScheme(colorScheme, true)
-        verify(mockAnimatingTransition, times(9)).updateColorScheme(colorScheme)
+        verify(mockAnimatingTransition, times(10)).updateColorScheme(colorScheme)
     }
 }

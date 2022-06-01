@@ -1799,7 +1799,8 @@ public class AppStandbyController
     }
 
     @VisibleForTesting
-    boolean isActiveDeviceAdmin(String packageName, int userId) {
+    @Override
+    public boolean isActiveDeviceAdmin(String packageName, int userId) {
         synchronized (mActiveAdminApps) {
             final Set<String> adminPkgs = mActiveAdminApps.get(userId);
             return adminPkgs != null && adminPkgs.contains(packageName);

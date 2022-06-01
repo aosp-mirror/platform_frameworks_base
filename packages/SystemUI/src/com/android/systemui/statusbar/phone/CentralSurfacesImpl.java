@@ -107,7 +107,6 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
-import android.window.SplashScreen;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.Lifecycle;
@@ -3508,11 +3507,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     @Override
     public void onTrackingStopped(boolean expand) {
-        if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            if (!expand && !mKeyguardStateController.canDismissLockScreen()) {
-                mStatusBarKeyguardViewManager.showBouncer(false /* scrimmed */);
-            }
-        }
     }
 
     // TODO: Figure out way to remove these.
