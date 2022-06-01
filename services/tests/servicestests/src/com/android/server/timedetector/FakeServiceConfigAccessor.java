@@ -18,7 +18,6 @@ package com.android.server.timedetector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -28,7 +27,6 @@ import android.app.time.TimeConfiguration;
 
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,29 +95,5 @@ class FakeServiceConfigAccessor implements ServiceConfigAccessor {
         assertEquals("Multi-user testing not supported currently",
                 userId, mConfigurationInternal.getUserId());
         return mConfigurationInternal;
-    }
-
-    @Override
-    public int systemClockUpdateThresholdMillis() {
-        failUnimplemented();
-        return 0;
-    }
-
-    @Override
-    public Instant autoTimeLowerBound() {
-        failUnimplemented();
-        return null;
-    }
-
-    @Override
-    public @TimeDetectorStrategy.Origin int[] getOriginPriorities() {
-        failUnimplemented();
-        return new int[0];
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    private static <T> T failUnimplemented() {
-        fail("Unimplemented");
-        return null;
     }
 }

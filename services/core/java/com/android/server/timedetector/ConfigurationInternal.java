@@ -21,6 +21,8 @@ import static android.app.time.Capabilities.CAPABILITY_NOT_APPLICABLE;
 import static android.app.time.Capabilities.CAPABILITY_NOT_SUPPORTED;
 import static android.app.time.Capabilities.CAPABILITY_POSSESSED;
 
+import static java.util.stream.Collectors.joining;
+
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.time.Capabilities.CapabilityState;
@@ -29,6 +31,10 @@ import android.app.time.TimeCapabilitiesAndConfig;
 import android.app.time.TimeConfiguration;
 import android.os.UserHandle;
 
+import com.android.server.timedetector.TimeDetectorStrategy.Origin;
+
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -39,12 +45,20 @@ import java.util.Objects;
 public final class ConfigurationInternal {
 
     private final boolean mAutoDetectionSupported;
+    private final int mSystemClockUpdateThresholdMillis;
+    private final Instant mAutoTimeLowerBound;
+    private final @Origin int[] mOriginPriorities;
+    private final boolean mDeviceHasY2038Issue;
     private final boolean mAutoDetectionEnabledSetting;
     private final @UserIdInt int mUserId;
     private final boolean mUserConfigAllowed;
 
     private ConfigurationInternal(Builder builder) {
         mAutoDetectionSupported = builder.mAutoDetectionSupported;
+        mSystemClockUpdateThresholdMillis = builder.mSystemClockUpdateThresholdMillis;
+        mAutoTimeLowerBound = Objects.requireNonNull(builder.mAutoTimeLowerBound);
+        mOriginPriorities = Objects.requireNonNull(builder.mOriginPriorities);
+        mDeviceHasY2038Issue = builder.mDeviceHasY2038Issue;
         mAutoDetectionEnabledSetting = builder.mAutoDetectionEnabledSetting;
 
         mUserId = builder.mUserId;
@@ -54,6 +68,42 @@ public final class ConfigurationInternal {
     /** Returns true if the device supports any form of auto time detection. */
     public boolean isAutoDetectionSupported() {
         return mAutoDetectionSupported;
+    }
+
+    /**
+     * Returns the absolute threshold below which the system clock need not be updated. i.e. if
+     * setting the system clock would adjust it by less than this (either backwards or forwards)
+     * then it need not be set.
+     */
+    public int getSystemClockUpdateThresholdMillis() {
+        return mSystemClockUpdateThresholdMillis;
+    }
+
+    /**
+     * Returns the lower bound for valid automatic times. It is guaranteed to be in the past,
+     * i.e. it is unrelated to the current system clock time.
+     * It holds no other meaning; it could be related to when the device system image was built,
+     * or could be updated by a mainline module.
+     */
+    @NonNull
+    public Instant getAutoTimeLowerBound() {
+        return mAutoTimeLowerBound;
+    }
+
+    /**
+     * Returns the order to look at time suggestions when automatically detecting time.
+     * See {@code #ORIGIN_} constants
+     */
+    public @Origin int[] getAutoOriginPriorities() {
+        return mOriginPriorities;
+    }
+
+    /**
+     * Returns {@code true} if the device may be at risk of time_t overflow (because bionic
+     * defines time_t as a 32-bit signed integer for 32-bit processes).
+     */
+    public boolean getDeviceHasY2038Issue() {
+        return mDeviceHasY2038Issue;
     }
 
     /** Returns the value of the auto time detection enabled setting. */
@@ -146,37 +196,60 @@ public final class ConfigurationInternal {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ConfigurationInternal)) {
+            return false;
+        }
         ConfigurationInternal that = (ConfigurationInternal) o;
         return mAutoDetectionSupported == that.mAutoDetectionSupported
-                && mUserId == that.mUserId
-                && mUserConfigAllowed == that.mUserConfigAllowed
-                && mAutoDetectionEnabledSetting == that.mAutoDetectionEnabledSetting;
+                && mAutoDetectionEnabledSetting == that.mAutoDetectionEnabledSetting
+                && mUserId == that.mUserId && mUserConfigAllowed == that.mUserConfigAllowed
+                && mSystemClockUpdateThresholdMillis == that.mSystemClockUpdateThresholdMillis
+                && mAutoTimeLowerBound.equals(that.mAutoTimeLowerBound)
+                && mDeviceHasY2038Issue == that.mDeviceHasY2038Issue
+                && Arrays.equals(mOriginPriorities, that.mOriginPriorities);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mAutoDetectionSupported, mUserId,
-                mUserConfigAllowed, mAutoDetectionEnabledSetting);
+        int result = Objects.hash(mAutoDetectionSupported, mAutoDetectionEnabledSetting, mUserId,
+                mUserConfigAllowed, mSystemClockUpdateThresholdMillis, mAutoTimeLowerBound,
+                mDeviceHasY2038Issue);
+        result = 31 * result + Arrays.hashCode(mOriginPriorities);
+        return result;
     }
 
     @Override
     public String toString() {
+        String originPrioritiesString =
+                Arrays.stream(mOriginPriorities)
+                        .mapToObj(TimeDetectorStrategy::originToString)
+                        .collect(joining(",", "[", "]"));
         return "ConfigurationInternal{"
                 + "mAutoDetectionSupported=" + mAutoDetectionSupported
-                + "mUserId=" + mUserId
-                + ", mUserConfigAllowed=" + mUserConfigAllowed
+                + ", mSystemClockUpdateThresholdMillis=" + mSystemClockUpdateThresholdMillis
+                + ", mAutoTimeLowerBound=" + mAutoTimeLowerBound
+                + "(" + mAutoTimeLowerBound.toEpochMilli() + ")"
+                + ", mOriginPriorities=" + originPrioritiesString
+                + ", mDeviceHasY2038Issue=" + mDeviceHasY2038Issue
                 + ", mAutoDetectionEnabled=" + mAutoDetectionEnabledSetting
+                + ", mUserId=" + mUserId
+                + ", mUserConfigAllowed=" + mUserConfigAllowed
                 + '}';
     }
 
     static final class Builder {
-        private final @UserIdInt int mUserId;
-
-        private boolean mUserConfigAllowed;
         private boolean mAutoDetectionSupported;
+        private int mSystemClockUpdateThresholdMillis;
+        @NonNull private Instant mAutoTimeLowerBound;
+        @NonNull private @Origin int[] mOriginPriorities;
+        private boolean mDeviceHasY2038Issue;
         private boolean mAutoDetectionEnabledSetting;
+
+        private final @UserIdInt int mUserId;
+        private boolean mUserConfigAllowed;
 
         Builder(@UserIdInt int userId) {
             mUserId = userId;
@@ -189,6 +262,10 @@ public final class ConfigurationInternal {
             this.mUserId = toCopy.mUserId;
             this.mUserConfigAllowed = toCopy.mUserConfigAllowed;
             this.mAutoDetectionSupported = toCopy.mAutoDetectionSupported;
+            this.mSystemClockUpdateThresholdMillis = toCopy.mSystemClockUpdateThresholdMillis;
+            this.mAutoTimeLowerBound = toCopy.mAutoTimeLowerBound;
+            this.mOriginPriorities = toCopy.mOriginPriorities;
+            this.mDeviceHasY2038Issue = toCopy.mDeviceHasY2038Issue;
             this.mAutoDetectionEnabledSetting = toCopy.mAutoDetectionEnabledSetting;
         }
 
@@ -209,10 +286,46 @@ public final class ConfigurationInternal {
         }
 
         /**
+         * Sets the absolute threshold below which the system clock need not be updated. i.e. if
+         * setting the system clock would adjust it by less than this (either backwards or forwards)
+         * then it need not be set.
+         */
+        public Builder setSystemClockUpdateThresholdMillis(int systemClockUpdateThresholdMillis) {
+            mSystemClockUpdateThresholdMillis = systemClockUpdateThresholdMillis;
+            return this;
+        }
+
+        /**
+         * Sets the lower bound for valid automatic times.
+         */
+        public Builder setAutoTimeLowerBound(@NonNull Instant autoTimeLowerBound) {
+            mAutoTimeLowerBound = Objects.requireNonNull(autoTimeLowerBound);
+            return this;
+        }
+
+        /**
+         * Sets the order to look at time suggestions when automatically detecting time.
+         * See {@code #ORIGIN_} constants
+         */
+        public Builder setOriginPriorities(@NonNull @Origin int... originPriorities) {
+            mOriginPriorities = Objects.requireNonNull(originPriorities);
+            return this;
+        }
+
+        /**
          * Sets the value of the automatic time detection enabled setting for this device.
          */
         Builder setAutoDetectionEnabledSetting(boolean autoDetectionEnabledSetting) {
             mAutoDetectionEnabledSetting = autoDetectionEnabledSetting;
+            return this;
+        }
+
+        /**
+         * Returns {@code true} if the device may be at risk of time_t overflow (because bionic
+         * defines time_t as a 32-bit signed integer for 32-bit processes).
+         */
+        Builder setDeviceHasY2038Issue(boolean deviceHasY2038Issue) {
+            mDeviceHasY2038Issue = deviceHasY2038Issue;
             return this;
         }
 
