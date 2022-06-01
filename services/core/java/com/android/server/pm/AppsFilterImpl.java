@@ -55,6 +55,8 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
+import com.android.server.pm.pkg.component.ParsedPermission;
+import com.android.server.pm.pkg.component.ParsedUsesPermission;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watchable;
@@ -68,8 +70,11 @@ import com.android.server.utils.Watcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Implementation of the methods that update the internal structures of AppsFilter. Because of the
@@ -88,6 +93,26 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
      * Watchable machinery
      */
     private final WatchableImpl mWatchable = new WatchableImpl();
+
+    /**
+     * A cache that maps parsed {@link android.R.styleable#AndroidManifestPermission
+     * &lt;permission&gt;} to the packages that define them. While computing visibility based on
+     * permissions, this cache is used to save the cost of reading through every existing package
+     * to determine the App Ids that define a particular permission.
+     */
+    @GuardedBy("mQueryableViaUsesPermissionLock")
+    @NonNull
+    private HashMap<String, Set<Integer>> mPermissionToUids;
+
+    /**
+     * A cache that maps parsed {@link android.R.styleable#AndroidManifestUsesPermission
+     * &lt;uses-permission&gt;} to the packages that request them. While computing visibility based
+     * on permissions, this cache is used to save the cost of reading through every existing
+     * package to determine the App Ids that request a particular permission.
+     */
+    @GuardedBy("mQueryableViaUsesPermissionLock")
+    @NonNull
+    private HashMap<String, Set<Integer>> mUsesPermissionToUids;
 
     /**
      * Ensures an observer is in the list, exactly once. The observer cannot be null.  The
@@ -179,12 +204,18 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         mQueryableViaUsesLibrarySnapshot = new SnapshotCache.Auto<>(
                 mQueryableViaUsesLibrary, mQueryableViaUsesLibrary,
                 "AppsFilter.mQueryableViaUsesLibrary");
+        mQueryableViaUsesPermission = new WatchedSparseSetArray<>();
+        mQueryableViaUsesPermissionSnapshot = new SnapshotCache.Auto<>(
+                mQueryableViaUsesPermission, mQueryableViaUsesPermission,
+                "AppsFilter.mQueryableViaUsesPermission");
         mForceQueryable = new WatchedArraySet<>();
         mForceQueryableSnapshot = new SnapshotCache.Auto<>(
                 mForceQueryable, mForceQueryable, "AppsFilter.mForceQueryable");
         mProtectedBroadcasts = new WatchedArrayList<>();
         mProtectedBroadcastsSnapshot = new SnapshotCache.Auto<>(
                 mProtectedBroadcasts, mProtectedBroadcasts, "AppsFilter.mProtectedBroadcasts");
+        mPermissionToUids = new HashMap<>();
+        mUsesPermissionToUids = new HashMap<>();
 
         mSnapshot = new SnapshotCache<AppsFilterSnapshot>(this, this) {
             @Override
@@ -529,6 +560,54 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                     || (mSystemSigningDetails != null
                     && isSystemSigned(mSystemSigningDetails, newPkgSetting))) {
                 mForceQueryable.add(newPkgSetting.getAppId());
+            }
+        }
+
+        if (!newPkg.getUsesPermissions().isEmpty()) {
+            // newPkg requests some permissions
+            synchronized (mQueryableViaUsesPermissionLock) {
+                for (ParsedUsesPermission usesPermission : newPkg.getUsesPermissions()) {
+                    String usesPermissionName = usesPermission.getName();
+                    // Lookup in the mPermissionToUids cache if installed packages have
+                    // defined this permission.
+                    if (mPermissionToUids.containsKey(usesPermissionName)) {
+                        for (int targetAppId : mPermissionToUids.get(usesPermissionName)) {
+                            if (targetAppId != newPkgSetting.getAppId()) {
+                                mQueryableViaUsesPermission.add(newPkgSetting.getAppId(),
+                                        targetAppId);
+                            }
+                        }
+                    }
+                    // Record in mUsesPermissionToUids that a permission was requested
+                    // by a new package
+                    if (!mUsesPermissionToUids.containsKey(usesPermissionName)) {
+                        mUsesPermissionToUids.put(usesPermissionName, new HashSet<>());
+                    }
+                    mUsesPermissionToUids.get(usesPermissionName).add(newPkgSetting.getAppId());
+                }
+            }
+        }
+        if (!newPkg.getPermissions().isEmpty()) {
+            synchronized (mQueryableViaUsesPermissionLock) {
+                // newPkg defines some permissions
+                for (ParsedPermission permission : newPkg.getPermissions()) {
+                    String permissionName = permission.getName();
+                    // Lookup in the mUsesPermissionToUids cache if installed packages have
+                    // requested this permission.
+                    if (mUsesPermissionToUids.containsKey(permissionName)) {
+                        for (int queryingAppId : mUsesPermissionToUids.get(permissionName)) {
+                            if (queryingAppId != newPkgSetting.getAppId()) {
+                                mQueryableViaUsesPermission.add(queryingAppId,
+                                        newPkgSetting.getAppId());
+                            }
+                        }
+                    }
+                    // Record in mPermissionToUids that a permission was defined by a new package
+                    if (!mPermissionToUids.containsKey(permissionName)) {
+                        mPermissionToUids.put(permissionName, new HashSet<>());
+                    }
+                    mPermissionToUids.get(permissionName).add(newPkgSetting.getAppId());
+                }
             }
         }
 
@@ -958,6 +1037,32 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
                 mQueryableViaUsesLibrary.remove(mQueryableViaUsesLibrary.keyAt(i),
                         setting.getAppId());
             }
+        }
+
+        synchronized (mQueryableViaUsesPermissionLock) {
+            if (setting.getPkg() != null && !setting.getPkg().getPermissions().isEmpty()) {
+                for (ParsedPermission permission : setting.getPkg().getPermissions()) {
+                    String permissionName = permission.getName();
+                    if (mPermissionToUids.containsKey(permissionName)) {
+                        mPermissionToUids.get(permissionName).remove(setting.getAppId());
+                        if (mPermissionToUids.get(permissionName).isEmpty()) {
+                            mPermissionToUids.remove(permissionName);
+                        }
+                    }
+                }
+            }
+            if (setting.getPkg() != null && !setting.getPkg().getUsesPermissions().isEmpty()) {
+                for (ParsedUsesPermission usesPermission : setting.getPkg().getUsesPermissions()) {
+                    String usesPermissionName = usesPermission.getName();
+                    if (mUsesPermissionToUids.containsKey(usesPermissionName)) {
+                        mUsesPermissionToUids.get(usesPermissionName).remove(setting.getAppId());
+                        if (mUsesPermissionToUids.get(usesPermissionName).isEmpty()) {
+                            mUsesPermissionToUids.remove(usesPermissionName);
+                        }
+                    }
+                }
+            }
+            mQueryableViaUsesPermission.remove(setting.getAppId());
         }
 
         synchronized (mForceQueryableLock) {

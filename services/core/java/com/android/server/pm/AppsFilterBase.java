@@ -128,6 +128,16 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
     protected SnapshotCache<WatchedSparseSetArray<Integer>> mQueryableViaUsesLibrarySnapshot;
 
     /**
+     * A mapping from the set of App IDs that query other App IDs via custom permissions to the
+     * list of packages that they can see.
+     */
+    @NonNull
+    @Watched
+    protected WatchedSparseSetArray<Integer> mQueryableViaUsesPermission;
+    @NonNull
+    protected SnapshotCache<WatchedSparseSetArray<Integer>> mQueryableViaUsesPermissionSnapshot;
+
+    /**
      * Handler for running reasonably short background tasks such as building the initial
      * visibility cache.
      */
@@ -215,6 +225,10 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
 
     protected boolean isQueryableViaUsesLibrary(int callingAppId, int targetAppId) {
         return mQueryableViaUsesLibrary.contains(callingAppId, targetAppId);
+    }
+
+    protected boolean isQueryableViaUsesPermission(int callingAppId, int targetAppId) {
+        return mQueryableViaUsesPermission.contains(callingAppId, targetAppId);
     }
 
     protected boolean isQueryableViaComponentWhenRequireRecompute(
@@ -628,6 +642,22 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                 }
             }
 
+            try {
+                if (DEBUG_TRACING) {
+                    Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mQueryableViaUsesPermission");
+                }
+                if (isQueryableViaUsesPermission(callingAppId, targetAppId)) {
+                    if (DEBUG_LOGGING) {
+                        log(callingSetting, targetPkgSetting, "queryable for permission users");
+                    }
+                    return false;
+                }
+            } finally {
+                if (DEBUG_TRACING) {
+                    Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                }
+            }
+
             return true;
         } finally {
             if (DEBUG_TRACING) {
@@ -760,6 +790,13 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
             ToString<Integer> expandPackages) {
         pw.println("  queryable via uses-library:");
         dumpQueriesMap(pw, filteringAppId, mQueryableViaUsesLibrary, "    ",
+                expandPackages);
+    }
+
+    protected void dumpQueriesViaUsesPermission(PrintWriter pw, @Nullable Integer filteringAppId,
+            ToString<Integer> expandPackages) {
+        pw.println("  queryable via uses-permission:");
+        dumpQueriesMap(pw, filteringAppId, mQueryableViaUsesPermission, "    ",
                 expandPackages);
     }
 
