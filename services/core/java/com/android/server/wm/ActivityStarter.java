@@ -89,7 +89,6 @@ import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
@@ -1693,7 +1692,8 @@ class ActivityStarter {
             // Root task should also be detached from display and be removed if it's empty.
             if (startedActivityRootTask != null && startedActivityRootTask.isAttached()
                     && !startedActivityRootTask.hasActivity()
-                    && !startedActivityRootTask.isActivityTypeHome()) {
+                    && !startedActivityRootTask.isActivityTypeHome()
+                    && !startedActivityRootTask.mCreatedByOrganizer) {
                 startedActivityRootTask.removeIfPossible("handleStartResult");
             }
             if (newTransition != null) {
