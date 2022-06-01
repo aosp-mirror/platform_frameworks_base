@@ -118,7 +118,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
-        mActivityTaskManager = getActivityTaskManager();
+        mActivityTaskManager = ActivityTaskManager.getInstance();
         mBiometricManager = context.getSystemService(BiometricManager.class);
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
@@ -144,10 +144,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     protected long getStartTimeMs() {
         return mStartTimeMs;
-    }
-
-    protected ActivityTaskManager getActivityTaskManager() {
-        return ActivityTaskManager.getInstance();
     }
 
     @Override
@@ -326,50 +322,45 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                     sendCancelOnly(listener);
                 }
             });
-        } else { // not authenticated
-            if (isBackgroundAuth) {
-                Slog.e(TAG, "cancelling due to background auth");
-                cancel();
-            } else {
-                // Allow system-defined limit of number of attempts before giving up
-                final @LockoutTracker.LockoutMode int lockoutMode =
-                        handleFailedAttempt(getTargetUserId());
-                if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
-                    markAlreadyDone();
+        } else {
+            // Allow system-defined limit of number of attempts before giving up
+            final @LockoutTracker.LockoutMode int lockoutMode =
+                    handleFailedAttempt(getTargetUserId());
+            if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
+                markAlreadyDone();
+            }
+
+            final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+            coordinator.onAuthenticationRejected(SystemClock.uptimeMillis(), this, lockoutMode,
+                    new CoexCoordinator.Callback() {
+                @Override
+                public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
+                    if (listener != null) {
+                        try {
+                            listener.onAuthenticationFailed(getSensorId());
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Unable to notify listener", e);
+                        }
+                    }
                 }
 
-                final CoexCoordinator coordinator = CoexCoordinator.getInstance();
-                coordinator.onAuthenticationRejected(SystemClock.uptimeMillis(), this, lockoutMode,
-                        new CoexCoordinator.Callback() {
-                            @Override
-                            public void sendAuthenticationResult(boolean addAuthTokenIfStrong) {
-                                if (listener != null) {
-                                    try {
-                                        listener.onAuthenticationFailed(getSensorId());
-                                    } catch (RemoteException e) {
-                                        Slog.e(TAG, "Unable to notify listener", e);
-                                    }
-                                }
-                            }
+                @Override
+                public void sendHapticFeedback() {
+                    if (listener != null && mShouldVibrate) {
+                        vibrateError();
+                    }
+                }
 
-                            @Override
-                            public void sendHapticFeedback() {
-                                if (listener != null && mShouldVibrate) {
-                                    vibrateError();
-                                }
-                            }
+                @Override
+                public void handleLifecycleAfterAuth() {
+                    AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
+                }
 
-                            @Override
-                            public void handleLifecycleAfterAuth() {
-                                AuthenticationClient.this.handleLifecycleAfterAuth(false /* authenticated */);
-                            }
-
-                            @Override
-                            public void sendAuthenticationCanceled() {
-                                sendCancelOnly(listener);
-                            }
-                        });
-            }
+                @Override
+                public void sendAuthenticationCanceled() {
+                    sendCancelOnly(listener);
+                }
+            });
         }
     }
 
