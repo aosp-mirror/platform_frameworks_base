@@ -323,10 +323,10 @@
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Lice prepoznato. Pritisnite da otvorite."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Lice prepoznato. Pritisnite ikonu za otklj. da otvorite."</string>
   <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Pomicanje ulijevo"</item>
-    <item msgid="5558598599408514296">"Pomicanje prema dolje"</item>
-    <item msgid="4844142668312841831">"Pomicanje udesno"</item>
-    <item msgid="5640521437931460125">"Pomicanje prema gore"</item>
+    <item msgid="1901953991150295169">"Pomjeranje ulijevo"</item>
+    <item msgid="5558598599408514296">"Pomjeranje nadolje"</item>
+    <item msgid="4844142668312841831">"Pomjeranje udesno"</item>
+    <item msgid="5640521437931460125">"Pomjeranje nagore"</item>
   </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite prema gore da pokušate ponovo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da koristite NFC"</string>
@@ -755,6 +755,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"kameru"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"lokaciju"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"snimanje ekrana"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez naslova"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje mirovanja"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Prozor za uvećavanje"</string>
@@ -859,6 +860,10 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Uparite novi uređaj"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Da emitirate ovu sesiju, otvorite aplikaciju."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nepoznata aplikacija"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zaustavi emitiranje"</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostupni uređaji za audio izlaz."</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako funkcionira emitiranje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emitirajte"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osobe u vašoj blizini s kompatibilnim Bluetooth uređajima mogu slušati medijske sadržaje koje emitirate"</string>
@@ -951,7 +956,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotovo"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopirano"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Iz aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Odbaci kopirani korisnički interfejs"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Odbaci kopirani tekst"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Uredi kopirani tekst"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Uredi kopiranu sliku"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Pošalji na uređaj u blizini"</string>

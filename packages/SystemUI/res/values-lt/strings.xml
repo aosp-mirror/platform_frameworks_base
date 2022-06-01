@@ -760,6 +760,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"fotoaparatą"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"vietovę"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofoną"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"ekrano įrašymas"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Nėra pavadinimo"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Budėjimo laikas"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Didinimo langas"</string>
@@ -865,6 +866,10 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Naujo įrenginio susiejimas"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Jei norite perduoti šį seansą, atidarykite programą."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nežinoma programa"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Sustabdyti perdavimą"</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Pasiekiami garso išvesties įrenginiai."</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kaip veikia transliacija"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transliacija"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Netoliese esantys žmonės, turintys suderinamus „Bluetooth“ įrenginius, gali klausyti jūsų transliuojamos medijos"</string>
@@ -958,7 +963,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Atlikta"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Nukopijuota"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Iš „<xliff:g id="APPNAME">%1$s</xliff:g>“"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Atsisakyti kopijavimo NS"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Atsisakyti nukopijuoto teksto"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Redaguoti nukopijuotą tekstą"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Redaguoti nukopijuotą vaizdą"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Siųsti į įrenginį netoliese"</string>

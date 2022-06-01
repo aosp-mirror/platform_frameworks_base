@@ -770,6 +770,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"الكاميرا"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"الموقع"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"الميكروفون"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"تسجيل محتوى الشاشة"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بلا عنوان"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"وضع الاستعداد"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"نافذة التكبير"</string>
@@ -877,6 +878,10 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"إقران جهاز جديد"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"لبث هذه الجلسة، يُرجى فتح التطبيق"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"تطبيق غير معروف"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"إيقاف البث"</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"الأجهزة المتاحة لإخراج الصوت"</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"كيفية عمل البث"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"البث"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"يمكن للأشخاص القريبين منك الذين لديهم أجهزة متوافقة تتضمّن بلوتوث الاستماع إلى الوسائط التي تبثها."</string>
@@ -972,7 +977,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"تم"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"تم النسخ."</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"من <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"إغلاق واجهة مستخدم النسخ"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"إغلاق حافظة النص المنسوخ"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"تعديل النص المنسوخ"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"تعديل الصورة المنسوخة"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"الإرسال إلى جهاز مجاور"</string>
