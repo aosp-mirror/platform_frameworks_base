@@ -74,6 +74,7 @@ java_defaults {
         "SettingsLibTwoTargetPreference",
         "SettingsLibSettingsTransition",
         "SettingsLibActivityEmbedding",
+        "zxing-core-1.7",
     ],
 }
 
