@@ -1574,6 +1574,7 @@
   <java-symbol type="layout" name="time_picker_dialog" />
   <java-symbol type="layout" name="tooltip" />
   <java-symbol type="layout" name="transient_notification" />
+  <java-symbol type="layout" name="transient_notification_with_icon" />
   <java-symbol type="layout" name="voice_interaction_session" />
   <java-symbol type="layout" name="web_text_view_dropdown" />
   <java-symbol type="layout" name="webview_find" />

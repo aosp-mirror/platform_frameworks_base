@@ -43,6 +43,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -63,6 +64,7 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.SafetyProtectionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -1181,9 +1183,19 @@ public class ClipboardService extends SystemService {
                 String message =
                         getContext().getString(R.string.pasted_from_clipboard, callingAppLabel);
                 Slog.i(TAG, message);
-                Toast.makeText(
-                        getContext(), UiThread.get().getLooper(), message, Toast.LENGTH_SHORT)
-                        .show();
+                Toast toastToShow;
+                if (SafetyProtectionUtils.shouldShowSafetyProtectionResources(getContext())) {
+                    Drawable safetyProtectionIcon = getContext()
+                            .getDrawable(R.drawable.ic_safety_protection);
+                    toastToShow = Toast.makeCustomToastWithIcon(getContext(),
+                            UiThread.get().getLooper(), message,
+                            Toast.LENGTH_SHORT, safetyProtectionIcon);
+                } else {
+                    toastToShow = Toast.makeText(
+                            getContext(), UiThread.get().getLooper(), message,
+                            Toast.LENGTH_SHORT);
+                }
+                toastToShow.show();
             } catch (PackageManager.NameNotFoundException e) {
                 // do nothing
             }
