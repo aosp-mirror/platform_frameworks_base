@@ -750,6 +750,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"કૅમેરા"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"સ્થાન"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"માઇક્રોફોન"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"સ્ક્રીન રેકોર્ડિંગ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"કોઈ શીર્ષક નથી"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"સ્ટૅન્ડબાય"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"વિસ્તૃતીકરણ વિંડો"</string>
@@ -855,6 +856,8 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"અજાણી ઍપ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"કાસ્ટ કરવાનું રોકો"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ઑડિયો આઉટપુટ માટે ઉપલબ્ધ ડિવાઇસ."</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"બ્રોડકાસ્ટ પ્રક્રિયાની કામ કરવાની રીત"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"બ્રોડકાસ્ટ કરો"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"સુસંગત બ્લૂટૂથ ડિવાઇસ ધરાવતા નજીકના લોકો તમે જે મીડિયા બ્રોડકાસ્ટ કરી રહ્યાં છો તે સાંભળી શકે છે"</string>
@@ -946,7 +949,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"થઈ ગયું"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"કૉપિ કરવામાં આવી"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g>માંથી"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"\'UI | યૂઝર ઇન્ટરફેસ (UI) કૉપિ કરો\'ને છોડી દો"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"કૉપિ કરેલી ટેક્સ્ટ છોડી દો"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"કૉપિ કરેલી ટેક્સ્ટમાં ફેરફાર કરો"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"કૉપિ કરેલી છબીમાં ફેરફાર કરો"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"નજીકના ડિવાઇસને મોકલો"</string>
