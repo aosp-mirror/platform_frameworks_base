@@ -15,25 +15,46 @@
  */
 package com.android.server.timedetector;
 
+import static android.content.Intent.ACTION_USER_SWITCHED;
+
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE;
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE;
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_EXTERNAL;
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_GNSS;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_TELEPHONY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
+import android.app.ActivityManagerInternal;
+import android.app.time.TimeCapabilities;
+import android.app.time.TimeCapabilitiesAndConfig;
+import android.app.time.TimeConfiguration;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.os.Build;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.provider.Settings;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 import com.android.server.timedetector.TimeDetectorStrategy.Origin;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -75,8 +96,14 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @NonNull private final Context mContext;
     @NonNull private final ServerFlags mServerFlags;
+    @NonNull private final ContentResolver mCr;
+    @NonNull private final UserManager mUserManager;
     @NonNull private final ConfigOriginPrioritiesSupplier mConfigOriginPrioritiesSupplier;
     @NonNull private final ServerFlagsOriginPrioritiesSupplier mServerFlagsOriginPrioritiesSupplier;
+
+    @GuardedBy("this")
+    @NonNull private final List<ConfigurationChangeListener> mConfigurationInternalListeners =
+            new ArrayList<>();
 
     /**
      * If a newly calculated system clock time and the current system clock time differs by this or
@@ -87,6 +114,8 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     private ServiceConfigAccessorImpl(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
+        mCr = context.getContentResolver();
+        mUserManager = context.getSystemService(UserManager.class);
         mServerFlags = ServerFlags.getInstance(mContext);
         mConfigOriginPrioritiesSupplier = new ConfigOriginPrioritiesSupplier(context);
         mServerFlagsOriginPrioritiesSupplier =
@@ -94,6 +123,35 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         mSystemClockUpdateThresholdMillis =
                 SystemProperties.getInt("ro.sys.time_detector_update_diff",
                         SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT);
+
+        // Wire up the config change listeners for anything that could affect ConfigurationInternal.
+        // Use the main thread for event delivery, listeners can post to their chosen thread.
+
+        // Listen for the user changing / the user's location mode changing. Report on the main
+        // thread.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_USER_SWITCHED);
+        mContext.registerReceiverForAllUsers(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                handleConfigurationInternalChangeOnMainThread();
+            }
+        }, filter, null, null /* main thread */);
+
+        // Add async callbacks for global settings being changed.
+        ContentResolver contentResolver = mContext.getContentResolver();
+        ContentObserver contentObserver = new ContentObserver(mContext.getMainThreadHandler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                handleConfigurationInternalChangeOnMainThread();
+            }
+        };
+        contentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.AUTO_TIME), true, contentObserver);
+
+        // Watch server flags.
+        mServerFlags.addListener(this::handleConfigurationInternalChangeOnMainThread,
+                SERVER_FLAGS_KEYS_TO_WATCH);
     }
 
     /** Returns the singleton instance. */
@@ -106,15 +164,22 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         }
     }
 
-    /**
-     * Adds a listener that will be called when server flags related to this class change. The
-     * callbacks are delivered on the main looper thread.
-     *
-     * <p>Note: Only for use by long-lived objects. There is deliberately no associated remove
-     * method.
-     */
-    public void addListener(@NonNull ConfigurationChangeListener listener) {
-        mServerFlags.addListener(listener, SERVER_FLAGS_KEYS_TO_WATCH);
+    private synchronized void handleConfigurationInternalChangeOnMainThread() {
+        for (ConfigurationChangeListener changeListener : mConfigurationInternalListeners) {
+            changeListener.onChange();
+        }
+    }
+
+    @Override
+    public synchronized void addConfigurationInternalChangeListener(
+            @NonNull ConfigurationChangeListener listener) {
+        mConfigurationInternalListeners.add(Objects.requireNonNull(listener));
+    }
+
+    @Override
+    public synchronized void removeConfigurationInternalChangeListener(
+            @NonNull ConfigurationChangeListener listener) {
+        mConfigurationInternalListeners.remove(Objects.requireNonNull(listener));
     }
 
     @Override
@@ -142,6 +207,106 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     public Instant autoTimeLowerBound() {
         return mServerFlags.getOptionalInstant(KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE)
                 .orElse(TIME_LOWER_BOUND_DEFAULT);
+    }
+
+    @Override
+    @NonNull
+    public synchronized ConfigurationInternal getCurrentUserConfigurationInternal() {
+        int currentUserId =
+                LocalServices.getService(ActivityManagerInternal.class).getCurrentUserId();
+        return getConfigurationInternal(currentUserId);
+    }
+
+    @Override
+    public synchronized boolean updateConfiguration(@UserIdInt int userId,
+            @NonNull TimeConfiguration requestedConfiguration) {
+        Objects.requireNonNull(requestedConfiguration);
+
+        TimeCapabilitiesAndConfig capabilitiesAndConfig =
+                getCurrentUserConfigurationInternal().capabilitiesAndConfig();
+        TimeCapabilities capabilities = capabilitiesAndConfig.getCapabilities();
+        TimeConfiguration oldConfiguration = capabilitiesAndConfig.getConfiguration();
+
+        final TimeConfiguration newConfiguration =
+                capabilities.tryApplyConfigChanges(oldConfiguration, requestedConfiguration);
+        if (newConfiguration == null) {
+            // The changes could not be made because the user's capabilities do not allow it.
+            return false;
+        }
+
+        // Store the configuration / notify as needed. This will cause the mEnvironment to invoke
+        // handleConfigChanged() asynchronously.
+        storeConfiguration(userId, newConfiguration);
+
+        return true;
+    }
+
+    /**
+     * Stores the configuration properties contained in {@code newConfiguration}.
+     * All checks about user capabilities must be done by the caller and
+     * {@link TimeConfiguration#isComplete()} must be {@code true}.
+     */
+    @GuardedBy("this")
+    private void storeConfiguration(
+            @UserIdInt int userId, @NonNull TimeConfiguration configuration) {
+        Objects.requireNonNull(configuration);
+
+        // Avoid writing the auto detection enabled setting for devices that do not support auto
+        // time detection: if we wrote it down then we'd set the value explicitly, which would
+        // prevent detecting "default" later. That might influence what happens on later releases
+        // that support new types of auto detection on the same hardware.
+        if (isAutoDetectionSupported()) {
+            final boolean autoDetectionEnabled = configuration.isAutoDetectionEnabled();
+            setAutoDetectionEnabledIfRequired(autoDetectionEnabled);
+        }
+    }
+
+    @Override
+    @NonNull
+    public synchronized ConfigurationInternal getConfigurationInternal(@UserIdInt int userId) {
+        return new ConfigurationInternal.Builder(userId)
+                .setUserConfigAllowed(isUserConfigAllowed(userId))
+                .setAutoDetectionSupported(isAutoDetectionSupported())
+                .setAutoDetectionEnabledSetting(getAutoDetectionEnabledSetting())
+                .build();
+    }
+
+    private void setAutoDetectionEnabledIfRequired(boolean enabled) {
+        // This check is racey, but the whole settings update process is racey. This check prevents
+        // a ConfigurationChangeListener callback triggering due to ContentObserver's still
+        // triggering *sometimes* for no-op updates. Because callbacks are async this is necessary
+        // for stable behavior during tests.
+        if (getAutoDetectionEnabledSetting() != enabled) {
+            Settings.Global.putInt(mCr, Settings.Global.AUTO_TIME, enabled ? 1 : 0);
+        }
+    }
+
+    private boolean isUserConfigAllowed(@UserIdInt int userId) {
+        UserHandle userHandle = UserHandle.of(userId);
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_DATE_TIME, userHandle);
+    }
+
+    private boolean getAutoDetectionEnabledSetting() {
+        return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME, 1 /* default */) > 0;
+    }
+
+    /** Returns {@code true} if any form of automatic time detection is supported. */
+    private boolean isAutoDetectionSupported() {
+        @Origin int[] originsSupported = getOriginPriorities();
+        for (@Origin int originSupported : originsSupported) {
+            if (originSupported == ORIGIN_NETWORK
+                    || originSupported == ORIGIN_EXTERNAL
+                    || originSupported == ORIGIN_GNSS) {
+                return true;
+            } else if (originSupported == ORIGIN_TELEPHONY) {
+                boolean deviceHasTelephony = mContext.getPackageManager()
+                        .hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+                if (deviceHasTelephony) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

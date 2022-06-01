@@ -28,7 +28,6 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -71,8 +70,8 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
             TimeDetectorStrategy timeDetectorStrategy =
                     TimeDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
 
-            TimeDetectorService service =
-                    new TimeDetectorService(context, handler, timeDetectorStrategy);
+            TimeDetectorService service = new TimeDetectorService(
+                    context, handler, serviceConfigAccessor, timeDetectorStrategy);
 
             // Publish the binder service so it can be accessed from other (appropriately
             // permissioned) processes.
@@ -82,21 +81,26 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
 
     @NonNull private final Handler mHandler;
     @NonNull private final Context mContext;
-    @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
     @NonNull private final CallerIdentityInjector mCallerIdentityInjector;
+    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
+    @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
 
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeDetectorStrategy timeDetectorStrategy) {
-        this(context, handler, timeDetectorStrategy, CallerIdentityInjector.REAL);
+        this(context, handler, serviceConfigAccessor, timeDetectorStrategy,
+                CallerIdentityInjector.REAL);
     }
 
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeDetectorStrategy timeDetectorStrategy,
             @NonNull CallerIdentityInjector callerIdentityInjector) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
+        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeDetectorStrategy = Objects.requireNonNull(timeDetectorStrategy);
         mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
     }
@@ -108,13 +112,13 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         return getTimeCapabilitiesAndConfig(userId);
     }
 
-    private TimeCapabilitiesAndConfig getTimeCapabilitiesAndConfig(@UserIdInt int userId) {
+    TimeCapabilitiesAndConfig getTimeCapabilitiesAndConfig(@UserIdInt int userId) {
         enforceManageTimeDetectorPermission();
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             ConfigurationInternal configurationInternal =
-                    mTimeDetectorStrategy.getConfigurationInternal(userId);
+                    mServiceConfigAccessor.getConfigurationInternal(userId);
             return configurationInternal.capabilitiesAndConfig();
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
@@ -141,11 +145,12 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         enforceSuggestManualTimePermission();
         Objects.requireNonNull(timeSignal);
 
-        final long token = Binder.clearCallingIdentity();
+        int userId = mCallerIdentityInjector.getCallingUserId();
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            return mTimeDetectorStrategy.suggestManualTime(timeSignal);
+            return mTimeDetectorStrategy.suggestManualTime(userId, timeSignal);
         } finally {
-            Binder.restoreCallingIdentity(token);
+            mCallerIdentityInjector.restoreCallingIdentity(token);
         }
     }
 
@@ -226,5 +231,4 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
                 android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION,
                 "manage time and time zone detection");
     }
-
 }

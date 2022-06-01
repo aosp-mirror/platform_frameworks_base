@@ -13940,8 +13940,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             granted = PackageManager.PERMISSION_GRANTED;
                         }
                     } catch (NameNotFoundException e) {
-                        throw new RemoteException("Cannot check if " + permission
-                                + "is a runtime permission", e, false, true);
+                        // Package does not exit
+                        return DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
                     }
                 }
                 int permFlags = mInjector.getPackageManager().getPermissionFlags(
