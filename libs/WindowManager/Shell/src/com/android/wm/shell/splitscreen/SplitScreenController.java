@@ -83,6 +83,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -366,11 +367,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 if (apps == null || apps.length == 0) {
                     final ActivityManager.RunningTaskInfo pairedTaskInfo =
                             getTaskInfo(SplitLayout.reversePosition(position));
-                    final ComponentName pairedActivity =
-                            pairedTaskInfo != null ? pairedTaskInfo.baseActivity : null;
-                    final ComponentName intentActivity =
-                            intent.getIntent() != null ? intent.getIntent().getComponent() : null;
-                    if (pairedActivity != null && pairedActivity.equals(intentActivity)) {
+                    final ComponentName pairedActivity = pairedTaskInfo != null
+                            ? pairedTaskInfo.baseIntent.getComponent() : null;
+                    final ComponentName intentActivity = intent.getIntent() != null
+                            ? intent.getIntent().getComponent() : null;
+
+                    if (Objects.equals(pairedActivity, intentActivity)) {
                         // Switch split position if dragging the same activity to another side.
                         setSideStagePosition(SplitLayout.reversePosition(
                                 mStageCoordinator.getSideStagePosition()));
