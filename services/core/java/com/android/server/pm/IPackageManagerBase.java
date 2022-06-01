@@ -324,8 +324,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @NonNull
     @Override
     @Deprecated
-    public final String[] getAppOpPermissionPackages(@NonNull String permissionName) {
-        return snapshot().getAppOpPermissionPackages(permissionName);
+    public final String[] getAppOpPermissionPackages(@NonNull String permissionName, int userId) {
+        return snapshot().getAppOpPermissionPackages(permissionName, userId);
     }
 
     @Override

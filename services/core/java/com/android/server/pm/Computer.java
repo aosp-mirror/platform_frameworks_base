@@ -425,7 +425,7 @@ public interface Computer extends PackageDataSnapshot {
     boolean isUidPrivileged(int uid);
 
     @NonNull
-    String[] getAppOpPermissionPackages(@NonNull String permissionName);
+    String[] getAppOpPermissionPackages(@NonNull String permissionName, int userId);
 
     @NonNull
     ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(@NonNull String[] permissions,

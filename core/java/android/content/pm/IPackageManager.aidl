@@ -746,7 +746,7 @@ interface IPackageManager {
     // We need to keep these in IPackageManager for app compatibility
     //------------------------------------------------------------------------
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    String[] getAppOpPermissionPackages(String permissionName);
+    String[] getAppOpPermissionPackages(String permissionName, int userId);
 
     @UnsupportedAppUsage
     PermissionGroupInfo getPermissionGroupInfo(String name, int flags);
