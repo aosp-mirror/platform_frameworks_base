@@ -885,7 +885,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Нет других доступных сетей"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Нет доступных сетей"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Выберите сеть, чтобы подключиться"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Чтобы подключиться к сети, нажмите на ее название"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Разблокируйте, чтобы посмотреть сети Wi-Fi."</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Поиск сетей…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Не удалось подключиться к сети"</string>
