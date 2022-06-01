@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles.animation;
 
+import static android.view.View.LAYOUT_DIRECTION_RTL;
+
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
 import static com.android.wm.shell.bubbles.BubbleStackView.HOME_GESTURE_ENABLED;
 
@@ -243,6 +245,11 @@ public class ExpandedAnimationController
             };
         }
 
+        boolean showBubblesVertically = mPositioner.showBubblesVertically();
+        final boolean isRtl =
+                mLayout.getContext().getResources().getConfiguration().getLayoutDirection()
+                        == LAYOUT_DIRECTION_RTL;
+
         // Animate each bubble individually, since each path will end in a different spot.
         animationsForChildrenFromIndex(0, (index, animation) -> {
             final View bubble = mLayout.getChildAt(index);
@@ -277,9 +284,20 @@ public class ExpandedAnimationController
             // right side, the first bubble is traveling to the top left, so it leads. During
             // collapse to the left, the first bubble has the shortest travel time back to the stack
             // position, so it leads (and vice versa).
-            final boolean firstBubbleLeads =
-                    (expanding && !mLayout.isFirstChildXLeftOfCenter(bubble.getTranslationX()))
+            final boolean firstBubbleLeads;
+            if (showBubblesVertically || !isRtl) {
+                firstBubbleLeads =
+                        (expanding && !mLayout.isFirstChildXLeftOfCenter(bubble.getTranslationX()))
                             || (!expanding && mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x));
+            } else {
+                // For RTL languages, when showing bubbles horizontally, it is reversed. The bubbles
+                // are positioned right to left. This means that when expanding from left, the top
+                // bubble will lead as it will be positioned on the right. And when expanding from
+                // right, the top bubble will have the least travel distance.
+                firstBubbleLeads =
+                        (expanding && mLayout.isFirstChildXLeftOfCenter(bubble.getTranslationX()))
+                            || (!expanding && !mLayout.isFirstChildXLeftOfCenter(mCollapsePoint.x));
+            }
             final int startDelay = firstBubbleLeads
                     ? (index * 10)
                     : ((mLayout.getChildCount() - index) * 10);
