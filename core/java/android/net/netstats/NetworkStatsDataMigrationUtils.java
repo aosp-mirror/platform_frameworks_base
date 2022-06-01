@@ -52,6 +52,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.ProtocolException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -161,9 +162,12 @@ public class NetworkStatsDataMigrationUtils {
     @NonNull
     private static ArrayList<File> getPlatformFileListForPrefix(@NonNull @Prefix String prefix) {
         final ArrayList<File> list = new ArrayList<>();
-        final File platformFiles = new File(getPlatformBaseDir(), "netstats");
+        final File platformFiles = getPlatformBaseDir();
         if (platformFiles.exists()) {
-            for (String name : platformFiles.list()) {
+            final String[] files = platformFiles.list();
+            if (files == null) return list;
+            Arrays.sort(files);
+            for (String name : files) {
                 // Skip when prefix doesn't match.
                 if (!name.startsWith(prefix + ".")) continue;
 
