@@ -3349,7 +3349,7 @@ public final class DisplayManagerService extends SystemService {
                 synchronized (mSyncRoot) {
                     DisplayPowerController dpc = mDisplayPowerControllers.get(displayId);
                     if (dpc != null) {
-                        dpc.putScreenBrightnessSetting(brightness);
+                        dpc.setBrightness(brightness);
                     }
                     mPersistentDataStore.saveIfNeeded();
                 }
