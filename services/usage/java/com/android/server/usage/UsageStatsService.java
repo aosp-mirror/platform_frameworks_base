@@ -882,11 +882,16 @@ public class UsageStatsService extends SystemService implements
             return;
         }
 
-        final File usageStatsDeDir = new File(Environment.getDataSystemDeDirectory(userId),
-                "usagestats");
-        if (!usageStatsDeDir.mkdirs() && !usageStatsDeDir.exists()) {
-            throw new IllegalStateException("Usage stats DE directory does not exist: "
-                    + usageStatsDeDir.getAbsolutePath());
+        final File deDir = Environment.getDataSystemDeDirectory(userId);
+        final File usageStatsDeDir = new File(deDir, "usagestats");
+        if (!usageStatsDeDir.mkdir() && !usageStatsDeDir.exists()) {
+            if (deDir.exists()) {
+                Slog.e(TAG, "Failed to create " + usageStatsDeDir);
+            } else {
+                Slog.w(TAG, "User " + userId + " was already removed! Discarding pending events");
+                pendingEvents.clear();
+            }
+            return;
         }
         final File pendingEventsFile = new File(usageStatsDeDir,
                 "pendingevents_" + System.currentTimeMillis());
