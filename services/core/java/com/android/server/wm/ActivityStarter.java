@@ -1702,7 +1702,8 @@ class ActivityStarter {
             // Root task should also be detached from display and be removed if it's empty.
             if (startedActivityRootTask != null && startedActivityRootTask.isAttached()
                     && !startedActivityRootTask.hasActivity()
-                    && !startedActivityRootTask.isActivityTypeHome()) {
+                    && !startedActivityRootTask.isActivityTypeHome()
+                    && !startedActivityRootTask.mCreatedByOrganizer) {
                 startedActivityRootTask.removeIfPossible("handleStartResult");
             }
             if (newTransition != null) {
