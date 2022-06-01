@@ -70,8 +70,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                     if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {
                         return;
                     }
-                    if (isInPipDirection(direction) && animator.getContentOverlay() != null) {
-                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlay(),
+                    if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
+                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
                                 animator::clearContentOverlay, true /* withStartDelay*/);
                     }
                     onFinishResize(taskInfo, animator.getDestinationBounds(), direction, tx);
@@ -82,8 +82,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
                 public void onPipAnimationCancel(TaskInfo taskInfo,
                         PipAnimationController.PipTransitionAnimator animator) {
                     final int direction = animator.getTransitionDirection();
-                    if (isInPipDirection(direction) && animator.getContentOverlay() != null) {
-                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlay(),
+                    if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
+                        mPipOrganizer.fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
                                 animator::clearContentOverlay, true /* withStartDelay */);
                     }
                     sendOnPipTransitionCancelled(animator.getTransitionDirection());

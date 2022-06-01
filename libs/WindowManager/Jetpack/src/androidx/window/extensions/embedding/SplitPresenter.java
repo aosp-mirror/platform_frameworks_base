@@ -101,7 +101,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     @NonNull
     TaskFragmentContainer createNewSplitWithEmptySideContainer(
             @NonNull WindowContainerTransaction wct, @NonNull Activity primaryActivity,
-            @NonNull SplitPairRule rule) {
+            @NonNull Intent secondaryIntent, @NonNull SplitPairRule rule) {
         final Rect parentBounds = getParentContainerBounds(primaryActivity);
         final Rect primaryRectBounds = getBoundsForPosition(POSITION_START, parentBounds, rule,
                 isLtr(primaryActivity, rule));
@@ -111,7 +111,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // Create new empty task fragment
         final int taskId = primaryContainer.getTaskId();
         final TaskFragmentContainer secondaryContainer = mController.newContainer(
-                null /* activity */, primaryActivity, taskId);
+                secondaryIntent, primaryActivity, taskId);
         final Rect secondaryRectBounds = getBoundsForPosition(POSITION_END, parentBounds,
                 rule, isLtr(primaryActivity, rule));
         final int windowingMode = mController.getTaskContainer(taskId)
@@ -224,7 +224,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         }
 
         final int taskId = primaryContainer.getTaskId();
-        TaskFragmentContainer secondaryContainer = mController.newContainer(null /* activity */,
+        final TaskFragmentContainer secondaryContainer = mController.newContainer(activityIntent,
                 launchingActivity, taskId);
         final int windowingMode = mController.getTaskContainer(taskId)
                 .getWindowingModeForSplitTaskFragment(primaryRectBounds);
