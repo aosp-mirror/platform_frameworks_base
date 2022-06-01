@@ -154,7 +154,8 @@ public final class AccessibilityWindowsPopulator extends WindowInfosListener {
 
         for (InputWindowHandle window : windowHandles) {
             final boolean visible = (window.inputConfig & InputConfig.NOT_VISIBLE) == 0;
-            if (visible && window.getWindow() != null && !window.isClone) {
+            final boolean isNotClone = (window.inputConfig & InputConfig.CLONE) == 0;
+            if (visible && window.getWindow() != null && isNotClone) {
                 tempVisibleWindows.add(window);
             }
         }
