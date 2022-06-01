@@ -646,6 +646,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private int mScrimCornerRadius;
     private int mScreenCornerRadius;
     private boolean mQSAnimatingHiddenFromCollapsed;
+    private boolean mUseLargeScreenShadeHeader;
 
     private int mQsClipTop;
     private int mQsClipBottom;
@@ -1137,18 +1138,20 @@ public class NotificationPanelViewController extends PanelViewController {
         final boolean splitShadeChanged = mSplitShadeEnabled != newSplitShadeEnabled;
         mSplitShadeEnabled = newSplitShadeEnabled;
 
-        boolean useLargeScreenShadeHeader =
-                LargeScreenUtils.shouldUseLargeScreenShadeHeader(mView.getResources());
         if (mQs != null) {
             mQs.setInSplitShade(mSplitShadeEnabled);
         }
+
+        mUseLargeScreenShadeHeader =
+                LargeScreenUtils.shouldUseLargeScreenShadeHeader(mView.getResources());
+
         mLargeScreenShadeHeaderHeight =
                 mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
-        mQuickQsHeaderHeight = useLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
+        mQuickQsHeaderHeight = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
-        int topMargin = useLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
+        int topMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
-        mLargeScreenShadeHeaderController.setActive(useLargeScreenShadeHeader);
+        mLargeScreenShadeHeaderController.setActive(mUseLargeScreenShadeHeader);
         mAmbientState.setStackTopMargin(topMargin);
         mNotificationsQSContainerController.updateResources();
 
@@ -2436,8 +2439,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     /**
-     * Updates scrim bounds, QS clipping, and KSV clipping as well based on the bounds of the shade
-     * and QS state.
+     * Updates scrim bounds, QS clipping, notifications clipping and keyguard status view clipping
+     * as well based on the bounds of the shade and QS state.
      */
     private void setQSClippingBounds() {
         final int qsPanelBottomY = calculateQsBottomPosition(computeQsExpansionFraction());
@@ -2513,6 +2516,13 @@ public class NotificationPanelViewController extends PanelViewController {
         }
     }
 
+    /**
+     * Applies clipping to quick settings, notifications layout and
+     * updates bounds of the notifications background (notifications scrim).
+     *
+     * The parameters are bounds of the notifications area rectangle, this function
+     * calculates bounds for the QS clipping based on the notifications bounds.
+     */
     private void applyQSClippingBounds(int left, int top, int right, int bottom,
             boolean qsVisible) {
         if (!mAnimateNextNotificationBounds || mKeyguardStatusAreaClipBounds.isEmpty()) {
@@ -2648,12 +2658,10 @@ public class NotificationPanelViewController extends PanelViewController {
         if (mTransitioningToFullShadeProgress > 0.0f) {
             return mTransitionToFullShadeQSPosition;
         } else {
-            int qsBottomY = (int) getHeaderTranslation() + mQs.getQsMinExpansionHeight();
-            if (qsExpansionFraction != 0.0) {
-                qsBottomY = (int) MathUtils.lerp(
-                        qsBottomY, mQs.getDesiredHeight(), qsExpansionFraction);
-            }
-            return qsBottomY;
+            int qsBottomYFrom = (int) getHeaderTranslation() + mQs.getQsMinExpansionHeight();
+            int expandedTopMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight : 0;
+            int qsBottomYTo = mQs.getDesiredHeight() + expandedTopMargin;
+            return (int) MathUtils.lerp(qsBottomYFrom, qsBottomYTo, qsExpansionFraction);
         }
     }
 
@@ -5010,7 +5018,8 @@ public class NotificationPanelViewController extends PanelViewController {
             mDebugPaint.setColor(color);
             canvas.drawLine(/* startX= */ 0, /* startY= */ y, /* stopX= */ mView.getWidth(),
                     /* stopY= */ y, mDebugPaint);
-            canvas.drawText(label, /* x= */ 0, /* y= */ computeDebugYTextPosition(y), mDebugPaint);
+            canvas.drawText(label + " = " + y + "px", /* x= */ 0,
+                    /* y= */ computeDebugYTextPosition(y), mDebugPaint);
         }
 
         private int computeDebugYTextPosition(int lineY) {
