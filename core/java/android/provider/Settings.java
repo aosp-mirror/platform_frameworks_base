@@ -10091,7 +10091,7 @@ public final class Settings {
          *
          * @hide
          */
-        @Readable
+        @Readable(maxTargetSdk = VERSION_CODES.TIRAMISU)
         public static final String QS_TILES = "sysui_qs_tiles";
 
         /**
