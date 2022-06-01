@@ -281,6 +281,20 @@ public interface AppStandbyInternal {
     boolean shouldNoteResponseEventForAllBroadcastSessions();
 
     /**
+     * Returns the list of roles whose holders are exempted from the requirement of starting
+     * a response event after receiving a broadcast.
+     */
+    @NonNull
+    List<String> getBroadcastResponseExemptedRoles();
+
+    /**
+     * Returns the list of permissions whose holders are exempted from the requirement of starting
+     * a response event after receiving a broadcast.
+     */
+    @NonNull
+    List<String> getBroadcastResponseExemptedPermissions();
+
+    /**
      * Return the last known value corresponding to the {@code key} from
      * {@link android.provider.DeviceConfig#NAMESPACE_APP_STANDBY} in AppStandbyController.
      */
