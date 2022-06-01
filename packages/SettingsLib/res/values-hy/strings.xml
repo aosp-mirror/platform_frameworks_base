@@ -338,7 +338,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Ստուգել հավելվածները USB-ի նկատմամբ"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Ստուգել հավելվածների անվտանգությունը ADB/ADT-ի միջոցով տեղադրված լինելու դեպքում։"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth սարքերը կցուցադրվեն առանց անունների (միայն MAC հասցեները)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Կասեցնում է Bluetooth-ի ձայնի բացարձակ ուժգնության գործառույթը՝ հեռավոր սարքերի հետ ձայնի ուժգնությանը վերաբերող խնդիրներ ունենալու դեպքում (օրինակ՝ երբ ձայնի ուժգնությունն անընդունելի է կամ դրա կառավարումը հնարավոր չէ):"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Կասեցնում է Bluetooth-ի ձայնի բացարձակ ուժգնության գործառույթը՝ հեռավոր սարքերի հետ ձայնի ուժգնությանը վերաբերող խնդիրներ ունենալու դեպքում (օրինակ, երբ ձայնի ուժգնությունն անընդունելի է կամ դրա կառավարումը հնարավոր չէ):"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Միացնել Bluetooth Gabeldorsche գործառույթի զտիչը"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Միացնում է «Տվյալների լավացված փոխանակում» գործառույթը։"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Տեղային տերմինալ"</string>
@@ -482,6 +482,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Արագ լիցքավորում"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Դանդաղ լիցքավորում"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Անլար լիցքավորում"</string>
+    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"Լիցքավորում դոկ-կայանի միջոցով"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Չի լիցքավորվում"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Միացված է, չի լիցքավորվում"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Լիցքավորված է"</string>

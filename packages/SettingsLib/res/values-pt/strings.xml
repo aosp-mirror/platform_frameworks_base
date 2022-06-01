@@ -149,7 +149,7 @@
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"Parear"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"PAREAR"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"O pareamento dá acesso a seus contatos e ao histórico de chamadas quando estiver conectado."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"O pareamento dá acesso a seus contatos e ao histórico de ligações quando estiver conectado."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Não foi possível parear com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível parear com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> por causa de um PIN ou senha incorretos."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Não é possível se comunicar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -482,6 +482,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carregando rápido"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carregando devagar"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Carregando sem fio"</string>
+    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"Base de carregamento"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Não está carregando"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Conectado sem carregar"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carregada"</string>

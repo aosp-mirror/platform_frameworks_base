@@ -482,6 +482,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"వేగవంతమైన ఛార్జింగ్"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"నెమ్మదిగా ఛార్జింగ్"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"వైర్‌లెస్ ఛార్జింగ్"</string>
+    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"ఛార్జింగ్ డాక్"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ఛార్జ్ కావడం లేదు"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"కనెక్ట్ చేయబడింది, ఛార్జ్ చేయబడలేదు"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ఛార్జ్ చేయబడింది"</string>
