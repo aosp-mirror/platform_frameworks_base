@@ -745,6 +745,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"camera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"lokasyon"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikropono"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"pag-record ng screen"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Walang pamagat"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Naka-standby"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Window ng Pag-magnify"</string>
@@ -850,6 +851,8 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Hindi kilalang app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Ihinto ang pag-cast"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Mga available na device para sa audio output."</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Paano gumagana ang pag-broadcast"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Makakapakinig ang mga taong malapit sa iyo na may mga compatible na Bluetooth device sa media na bino-broadcast mo"</string>
@@ -941,7 +944,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Tapos na"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Nakopya"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Mula sa <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"I-dismiss ang UI ng pagkopya"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"I-dismiss ang nakopyang text"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"I-edit ang kinopyang text"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"I-edit ang kinopyang larawan"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Ipadala sa kalapit na device"</string>
