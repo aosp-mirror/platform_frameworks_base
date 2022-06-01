@@ -2808,6 +2808,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             throw new IllegalArgumentException("Invalid slot index: " + phoneId);
         }
 
+        // In case this is triggered from the caller who has handled multiple SIM config change
+        // firstly, we need to update the status (mNumPhone and mCarrierPrivilegeStates) firstly.
+        // This is almost a no-op if there is no multiple SIM config change in advance.
+        onMultiSimConfigChanged();
+
         synchronized (mRecords) {
             Record r = add(
                     callback.asBinder(), Binder.getCallingUid(), Binder.getCallingPid(), false);
@@ -2868,6 +2873,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             + ", <packages=" + pii(privilegedPackageNames)
                             + ", uids=" + Arrays.toString(privilegedUids) + ">");
         }
+
+        // In case this is triggered from the caller who has handled multiple SIM config change
+        // firstly, we need to update the status (mNumPhone and mCarrierPrivilegeStates) firstly.
+        // This is almost a no-op if there is no multiple SIM config change in advance.
+        onMultiSimConfigChanged();
+
         synchronized (mRecords) {
             mCarrierPrivilegeStates.set(
                     phoneId, new Pair<>(privilegedPackageNames, privilegedUids));
@@ -2899,6 +2910,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             log("notifyCarrierServiceChanged: phoneId=" + phoneId
                     + ", package=" + pii(packageName) + ", uid=" + uid);
         }
+
+        // In case this is triggered from the caller who has handled multiple SIM config change
+        // firstly, we need to update the status (mNumPhone and mCarrierServiceStates) firstly.
+        // This is almost a no-op if there is no multiple SIM config change in advance.
+        onMultiSimConfigChanged();
 
         synchronized (mRecords) {
             mCarrierServiceStates.set(
@@ -3364,7 +3380,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     private boolean validatePhoneId(int phoneId) {
-        boolean valid = (phoneId >= 0) && (phoneId < mNumPhones);
+        // Call getActiveModemCount to get the latest value instead of depending on mNumPhone
+        boolean valid = (phoneId >= 0) && (phoneId < getTelephonyManager().getActiveModemCount());
         if (VDBG) log("validatePhoneId: " + valid);
         return valid;
     }
