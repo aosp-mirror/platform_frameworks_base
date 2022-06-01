@@ -16,22 +16,21 @@
 
 #include "io/ZipArchive.h"
 
-#include "utils/FileMap.h"
-#include "ziparchive/zip_archive.h"
-
-#include "Source.h"
+#include "androidfw/Source.h"
 #include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Util.h"
+#include "utils/FileMap.h"
+#include "ziparchive/zip_archive.h"
 
 using ::android::StringPiece;
 
 namespace aapt {
 namespace io {
 
-ZipFile::ZipFile(ZipArchiveHandle handle, const ZipEntry& entry,
-                 const Source& source)
-    : zip_handle_(handle), zip_entry_(entry), source_(source) {}
+ZipFile::ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const android::Source& source)
+    : zip_handle_(handle), zip_entry_(entry), source_(source) {
+}
 
 std::unique_ptr<IData> ZipFile::OpenAsData() {
   // The file will fail to be mmaped if it is empty
@@ -68,7 +67,7 @@ std::unique_ptr<io::InputStream> ZipFile::OpenInputStream() {
   return OpenAsData();
 }
 
-const Source& ZipFile::GetSource() const {
+const android::Source& ZipFile::GetSource() const {
   return source_;
 }
 
@@ -131,8 +130,8 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
       continue;
     }
 
-    std::unique_ptr<IFile> file = util::make_unique<ZipFile>(collection->handle_, zip_data,
-        Source(zip_entry_path, path.to_string()));
+    std::unique_ptr<IFile> file = util::make_unique<ZipFile>(
+        collection->handle_, zip_data, android::Source(zip_entry_path, path.to_string()));
     collection->files_by_name_[zip_entry_path] = file.get();
     collection->files_.push_back(std::move(file));
   }

@@ -23,8 +23,7 @@
 #include <vector>
 
 #include "android-base/macros.h"
-
-#include "Diagnostics.h"
+#include "androidfw/IDiagnostics.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
@@ -50,8 +49,8 @@ enum class XmlActionExecutorPolicy {
 class XmlNodeAction {
  public:
   using ActionFuncWithPolicyAndDiag =
-      std::function<bool(Element*, XmlActionExecutorPolicy, SourcePathDiagnostics*)>;
-  using ActionFuncWithDiag = std::function<bool(Element*, SourcePathDiagnostics*)>;
+      std::function<bool(Element*, XmlActionExecutorPolicy, android::SourcePathDiagnostics*)>;
+  using ActionFuncWithDiag = std::function<bool(Element*, android::SourcePathDiagnostics*)>;
   using ActionFunc = std::function<bool(Element*)>;
 
   // Find or create a child XmlNodeAction that will be performed for the child element with the
@@ -69,7 +68,7 @@ class XmlNodeAction {
   friend class XmlActionExecutor;
 
   bool Execute(XmlActionExecutorPolicy policy, std::vector<::android::StringPiece>* bread_crumb,
-               SourcePathDiagnostics* diag, Element* el) const;
+               android::SourcePathDiagnostics* diag, Element* el) const;
 
   std::map<std::string, XmlNodeAction> map_;
   std::vector<ActionFuncWithPolicyAndDiag> actions_;
@@ -88,7 +87,7 @@ class XmlActionExecutor {
 
   // Execute the defined actions for this XmlResource.
   // Returns true if all actions return true, otherwise returns false.
-  bool Execute(XmlActionExecutorPolicy policy, IDiagnostics* diag, XmlResource* doc) const;
+  bool Execute(XmlActionExecutorPolicy policy, android::IDiagnostics* diag, XmlResource* doc) const;
 
  private:
   std::map<std::string, XmlNodeAction> map_;

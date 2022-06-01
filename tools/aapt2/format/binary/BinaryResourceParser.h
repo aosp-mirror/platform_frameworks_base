@@ -19,13 +19,13 @@
 
 #include <string>
 
+#include "ResourceTable.h"
+#include "ResourceValues.h"
 #include "android-base/macros.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
-
-#include "ResourceTable.h"
-#include "ResourceValues.h"
-#include "Source.h"
+#include "androidfw/Source.h"
+#include "androidfw/Util.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/Util.h"
 
@@ -40,8 +40,9 @@ class BinaryResourceParser {
  public:
   // Creates a parser, which will read `len` bytes from `data`, and add any resources parsed to
   // `table`. `source` is for logging purposes.
-  BinaryResourceParser(IDiagnostics* diag, ResourceTable* table, const Source& source,
-                       const void* data, size_t data_len, io::IFileCollection* files = nullptr);
+  BinaryResourceParser(android::IDiagnostics* diag, ResourceTable* table,
+                       const android::Source& source, const void* data, size_t data_len,
+                       io::IFileCollection* files = nullptr);
 
   // Parses the binary resource table and returns true if successful.
   bool Parse();
@@ -91,10 +92,10 @@ class BinaryResourceParser {
    */
   bool CollectMetaData(const android::ResTable_map& map_entry, Value* value);
 
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
   ResourceTable* table_;
 
-  const Source source_;
+  const android::Source source_;
 
   const void* data_;
   const size_t data_len_;
@@ -132,11 +133,11 @@ namespace android {
 // Iterator functionality for ResTable_map_entry.
 
 inline const ResTable_map* begin(const ResTable_map_entry* map) {
-  return (const ResTable_map*)((const uint8_t*)map + ::aapt::util::DeviceToHost32(map->size));
+  return (const ResTable_map*)((const uint8_t*)map + android::util::DeviceToHost32(map->size));
 }
 
 inline const ResTable_map* end(const ResTable_map_entry* map) {
-  return begin(map) + aapt::util::DeviceToHost32(map->count);
+  return begin(map) + android::util::DeviceToHost32(map->count);
 }
 
 }  // namespace android

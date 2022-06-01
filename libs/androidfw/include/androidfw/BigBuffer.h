@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_BIG_BUFFER_H
-#define AAPT_BIG_BUFFER_H
+#ifndef _ANDROID_BIG_BUFFER_H
+#define _ANDROID_BIG_BUFFER_H
 
 #include <cstring>
 #include <memory>
@@ -26,7 +26,7 @@
 #include "android-base/logging.h"
 #include "android-base/macros.h"
 
-namespace aapt {
+namespace android {
 
 /**
  * Inspired by protobuf's ZeroCopyOutputStream, offers blocks of memory
@@ -133,22 +133,24 @@ class BigBuffer {
   std::vector<Block> blocks_;
 };
 
-inline BigBuffer::BigBuffer(size_t block_size)
-    : block_size_(block_size), size_(0) {}
+inline BigBuffer::BigBuffer(size_t block_size) : block_size_(block_size), size_(0) {
+}
 
 inline BigBuffer::BigBuffer(BigBuffer&& rhs) noexcept
-    : block_size_(rhs.block_size_),
-      size_(rhs.size_),
-      blocks_(std::move(rhs.blocks_)) {}
+    : block_size_(rhs.block_size_), size_(rhs.size_), blocks_(std::move(rhs.blocks_)) {
+}
 
-inline size_t BigBuffer::size() const { return size_; }
+inline size_t BigBuffer::size() const {
+  return size_;
+}
 
-inline size_t BigBuffer::block_size() const { return block_size_; }
+inline size_t BigBuffer::block_size() const {
+  return block_size_;
+}
 
 template <typename T>
 inline T* BigBuffer::NextBlock(size_t count) {
-  static_assert(std::is_standard_layout<T>::value,
-                "T must be standard_layout type");
+  static_assert(std::is_standard_layout<T>::value, "T must be standard_layout type");
   CHECK(count != 0);
   return reinterpret_cast<T*>(NextBlockImpl(sizeof(T) * count));
 }
@@ -160,14 +162,15 @@ inline void BigBuffer::BackUp(size_t count) {
 }
 
 inline void BigBuffer::AppendBuffer(BigBuffer&& buffer) {
-  std::move(buffer.blocks_.begin(), buffer.blocks_.end(),
-            std::back_inserter(blocks_));
+  std::move(buffer.blocks_.begin(), buffer.blocks_.end(), std::back_inserter(blocks_));
   size_ += buffer.size_;
   buffer.blocks_.clear();
   buffer.size_ = 0;
 }
 
-inline void BigBuffer::Pad(size_t bytes) { NextBlock<char>(bytes); }
+inline void BigBuffer::Pad(size_t bytes) {
+  NextBlock<char>(bytes);
+}
 
 inline void BigBuffer::Align4() {
   const size_t unaligned = size_ % 4;
@@ -184,6 +187,6 @@ inline BigBuffer::const_iterator BigBuffer::end() const {
   return blocks_.end();
 }
 
-}  // namespace aapt
+}  // namespace android
 
-#endif  // AAPT_BIG_BUFFER_H
+#endif  // _ANDROID_BIG_BUFFER_H

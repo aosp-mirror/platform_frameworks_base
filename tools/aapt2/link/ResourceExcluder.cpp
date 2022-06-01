@@ -50,12 +50,9 @@ void RemoveIfExcluded(std::set<std::pair<ConfigDescription, int>>& excluded_conf
 
     if (masked_diff == 0) {
       if (context->IsVerbose()) {
-        context->GetDiagnostics()->Note(
-            DiagMessage(value->value->GetSource())
-                << "excluded resource \""
-                << entry->name
-                << "\" with config "
-                << config.toString());
+        context->GetDiagnostics()->Note(android::DiagMessage(value->value->GetSource())
+                                        << "excluded resource \"" << entry->name
+                                        << "\" with config " << config.toString());
       }
       value->value = {};
       return;

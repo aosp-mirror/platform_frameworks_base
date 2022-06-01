@@ -21,19 +21,18 @@
 #include <sstream>
 #include <type_traits>
 
-#include "android-base/logging.h"
-#include "android-base/macros.h"
-#include "android-base/stringprintf.h"
-#include "androidfw/ResourceUtils.h"
-
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
+#include "android-base/logging.h"
+#include "android-base/macros.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/BigBuffer.h"
+#include "androidfw/ResourceUtils.h"
 #include "format/binary/ChunkWriter.h"
 #include "format/binary/ResourceTypeExtensions.h"
 #include "trace/TraceBuffer.h"
-#include "util/BigBuffer.h"
 
 using namespace android;
 
@@ -54,7 +53,7 @@ static void strcpy16_htod(uint16_t* dst, size_t len, const StringPiece16& src) {
   size_t i;
   const char16_t* src_data = src.data();
   for (i = 0; i < len - 1 && i < src.size(); i++) {
-    dst[i] = util::HostToDevice16((uint16_t)src_data[i]);
+    dst[i] = android::util::HostToDevice16((uint16_t)src_data[i]);
   }
   dst[i] = 0;
 }
@@ -116,7 +115,7 @@ class MapFlattenVisitor : public ConstValueVisitor {
     if (style->parent) {
       const Reference& parent_ref = style->parent.value();
       CHECK(bool(parent_ref.id)) << "parent has no ID";
-      out_entry_->parent.ident = util::HostToDevice32(parent_ref.id.value().id);
+      out_entry_->parent.ident = android::util::HostToDevice32(parent_ref.id.value().id);
     }
 
     // Sort the style.
@@ -195,7 +194,7 @@ class MapFlattenVisitor : public ConstValueVisitor {
    * needs to be done to prepare the entry.
    */
   void Finish() {
-    out_entry_->count = util::HostToDevice32(entry_count_);
+    out_entry_->count = android::util::HostToDevice32(entry_count_);
   }
 
  private:
@@ -203,7 +202,7 @@ class MapFlattenVisitor : public ConstValueVisitor {
 
   void FlattenKey(const Reference* key, ResTable_map* out_entry) {
     CHECK(bool(key->id)) << "key has no ID";
-    out_entry->name.ident = util::HostToDevice32(key->id.value().id);
+    out_entry->name.ident = android::util::HostToDevice32(key->id.value().id);
   }
 
   void FlattenValue(const Item* value, ResTable_map* out_entry) {
@@ -214,7 +213,7 @@ class MapFlattenVisitor : public ConstValueVisitor {
     ResTable_map* out_entry = buffer_->NextBlock<ResTable_map>();
     FlattenKey(key, out_entry);
     FlattenValue(value, out_entry);
-    out_entry->value.size = util::HostToDevice16(sizeof(out_entry->value));
+    out_entry->value.size = android::util::HostToDevice16(sizeof(out_entry->value));
     entry_count_++;
   }
 
@@ -225,7 +224,7 @@ class MapFlattenVisitor : public ConstValueVisitor {
 
 struct OverlayableChunk {
   std::string actor;
-  Source source;
+  android::Source source;
   std::map<PolicyFlags, std::set<ResourceId>> policy_ids;
 };
 
@@ -248,31 +247,33 @@ class PackageFlattener {
     TRACE_CALL();
     ChunkWriter pkg_writer(buffer);
     ResTable_package* pkg_header = pkg_writer.StartChunk<ResTable_package>(RES_TABLE_PACKAGE_TYPE);
-    pkg_header->id = util::HostToDevice32(package_.id.value());
+    pkg_header->id = android::util::HostToDevice32(package_.id.value());
 
     // AAPT truncated the package name, so do the same.
     // Shared libraries require full package names, so don't truncate theirs.
     if (context_->GetPackageType() != PackageType::kApp &&
         package_.name.size() >= arraysize(pkg_header->name)) {
-      diag_->Error(DiagMessage() << "package name '" << package_.name
-                                 << "' is too long. "
-                                    "Shared libraries cannot have truncated package names");
+      diag_->Error(android::DiagMessage()
+                   << "package name '" << package_.name
+                   << "' is too long. "
+                      "Shared libraries cannot have truncated package names");
       return false;
     }
 
     // Copy the package name in device endianness.
-    strcpy16_htod(pkg_header->name, arraysize(pkg_header->name), util::Utf8ToUtf16(package_.name));
+    strcpy16_htod(pkg_header->name, arraysize(pkg_header->name),
+                  android::util::Utf8ToUtf16(package_.name));
 
     // Serialize the types. We do this now so that our type and key strings
     // are populated. We write those first.
-    BigBuffer type_buffer(1024);
+    android::BigBuffer type_buffer(1024);
     FlattenTypes(&type_buffer);
 
-    pkg_header->typeStrings = util::HostToDevice32(pkg_writer.size());
-    StringPool::FlattenUtf16(pkg_writer.buffer(), type_pool_, diag_);
+    pkg_header->typeStrings = android::util::HostToDevice32(pkg_writer.size());
+    android::StringPool::FlattenUtf16(pkg_writer.buffer(), type_pool_, diag_);
 
-    pkg_header->keyStrings = util::HostToDevice32(pkg_writer.size());
-    StringPool::FlattenUtf8(pkg_writer.buffer(), key_pool_, diag_);
+    pkg_header->keyStrings = android::util::HostToDevice32(pkg_writer.size());
+    android::StringPool::FlattenUtf8(pkg_writer.buffer(), key_pool_, diag_);
 
     // Append the types.
     buffer->AppendBuffer(std::move(type_buffer));
@@ -317,9 +318,9 @@ class PackageFlattener {
       out_entry->flags |= ResTable_entry::FLAG_COMPLEX;
     }
 
-    out_entry->flags = util::HostToDevice16(out_entry->flags);
-    out_entry->key.index = util::HostToDevice32(entry->entry_key);
-    out_entry->size = util::HostToDevice16(sizeof(T));
+    out_entry->flags = android::util::HostToDevice16(out_entry->flags);
+    out_entry->key.index = android::util::HostToDevice32(entry->entry_key);
+    out_entry->size = android::util::HostToDevice16(sizeof(T));
     return result;
   }
 
@@ -328,7 +329,7 @@ class PackageFlattener {
       WriteEntry<ResTable_entry, true>(entry, buffer);
       Res_value* outValue = buffer->NextBlock<Res_value>();
       CHECK(item->Flatten(outValue)) << "flatten failed";
-      outValue->size = util::HostToDevice16(sizeof(*outValue));
+      outValue->size = android::util::HostToDevice16(sizeof(*outValue));
     } else {
       ResTable_entry_ext* out_entry = WriteEntry<ResTable_entry_ext, false>(entry, buffer);
       MapFlattenVisitor visitor(out_entry, buffer);
@@ -353,12 +354,12 @@ class PackageFlattener {
     std::vector<uint32_t> offsets;
     offsets.resize(num_total_entries, 0xffffffffu);
 
-    BigBuffer values_buffer(512);
+    android::BigBuffer values_buffer(512);
     for (FlatEntry& flat_entry : *entries) {
       CHECK(static_cast<size_t>(flat_entry.entry->id.value()) < num_total_entries);
       offsets[flat_entry.entry->id.value()] = values_buffer.size();
       if (!FlattenValue(&flat_entry, &values_buffer)) {
-        diag_->Error(DiagMessage()
+        diag_->Error(android::DiagMessage()
                      << "failed to flatten resource '"
                      << ResourceNameRef(package_.name, type.named_type, flat_entry.entry->name)
                      << "' for configuration '" << config << "'");
@@ -382,27 +383,27 @@ class PackageFlattener {
         sparse_encode && ((100 * entries->size()) / num_total_entries) < kSparseEncodingThreshold;
 
     if (sparse_encode) {
-      type_header->entryCount = util::HostToDevice32(entries->size());
+      type_header->entryCount = android::util::HostToDevice32(entries->size());
       type_header->flags |= ResTable_type::FLAG_SPARSE;
       ResTable_sparseTypeEntry* indices =
           type_writer.NextBlock<ResTable_sparseTypeEntry>(entries->size());
       for (size_t i = 0; i < num_total_entries; i++) {
         if (offsets[i] != ResTable_type::NO_ENTRY) {
           CHECK((offsets[i] & 0x03) == 0);
-          indices->idx = util::HostToDevice16(i);
-          indices->offset = util::HostToDevice16(offsets[i] / 4u);
+          indices->idx = android::util::HostToDevice16(i);
+          indices->offset = android::util::HostToDevice16(offsets[i] / 4u);
           indices++;
         }
       }
     } else {
-      type_header->entryCount = util::HostToDevice32(num_total_entries);
+      type_header->entryCount = android::util::HostToDevice32(num_total_entries);
       uint32_t* indices = type_writer.NextBlock<uint32_t>(num_total_entries);
       for (size_t i = 0; i < num_total_entries; i++) {
-        indices[i] = util::HostToDevice32(offsets[i]);
+        indices[i] = android::util::HostToDevice32(offsets[i]);
       }
     }
 
-    type_header->entriesStart = util::HostToDevice32(type_writer.size());
+    type_header->entriesStart = android::util::HostToDevice32(type_writer.size());
     type_writer.buffer()->AppendBuffer(std::move(values_buffer));
     type_writer.Finish();
     return true;
@@ -416,12 +417,12 @@ class PackageFlattener {
     ChunkWriter alias_writer(buffer);
     auto header =
         alias_writer.StartChunk<ResTable_staged_alias_header>(RES_TABLE_STAGED_ALIAS_TYPE);
-    header->count = util::HostToDevice32(aliases_.size());
+    header->count = android::util::HostToDevice32(aliases_.size());
 
     auto mapping = alias_writer.NextBlock<ResTable_staged_alias_entry>(aliases_.size());
     for (auto& p : aliases_) {
-      mapping->stagedResId = util::HostToDevice32(p.first);
-      mapping->finalizedResId = util::HostToDevice32(p.second);
+      mapping->stagedResId = android::util::HostToDevice32(p.first);
+      mapping->finalizedResId = android::util::HostToDevice32(p.second);
       ++mapping;
     }
     alias_writer.Finish();
@@ -461,11 +462,11 @@ class PackageFlattener {
           OverlayableChunk& chunk = iter->second;
           if (!(chunk.source == item.overlayable->source)) {
             // The name of an overlayable set of resources must be unique
-            context_->GetDiagnostics()->Error(DiagMessage(item.overlayable->source)
-                                                  << "duplicate overlayable name"
-                                                  << item.overlayable->name << "'");
-            context_->GetDiagnostics()->Error(DiagMessage(chunk.source)
-                                                  << "previous declaration here");
+            context_->GetDiagnostics()->Error(android::DiagMessage(item.overlayable->source)
+                                              << "duplicate overlayable name"
+                                              << item.overlayable->name << "'");
+            context_->GetDiagnostics()->Error(android::DiagMessage(chunk.source)
+                                              << "previous declaration here");
             return false;
           }
 
@@ -474,7 +475,7 @@ class PackageFlattener {
         }
 
         if (item.policies == 0) {
-          context_->GetDiagnostics()->Error(DiagMessage(item.overlayable->source)
+          context_->GetDiagnostics()->Error(android::DiagMessage(item.overlayable->source)
                                             << "overlayable " << entry.name
                                             << " does not specify policy");
           return false;
@@ -499,38 +500,36 @@ class PackageFlattener {
       auto* overlayable_type =
           overlayable_writer.StartChunk<ResTable_overlayable_header>(RES_TABLE_OVERLAYABLE_TYPE);
       if (name.size() >= arraysize(overlayable_type->name)) {
-        diag_->Error(DiagMessage() << "overlayable name '" << name
-                                   << "' exceeds maximum length ("
-                                   << arraysize(overlayable_type->name)
-                                   << " utf16 characters)");
+        diag_->Error(android::DiagMessage()
+                     << "overlayable name '" << name << "' exceeds maximum length ("
+                     << arraysize(overlayable_type->name) << " utf16 characters)");
         return false;
       }
       strcpy16_htod(overlayable_type->name, arraysize(overlayable_type->name),
-                    util::Utf8ToUtf16(name));
+                    android::util::Utf8ToUtf16(name));
 
       if (overlayable.actor.size() >= arraysize(overlayable_type->actor)) {
-        diag_->Error(DiagMessage() << "overlayable name '" << overlayable.actor
-                                   << "' exceeds maximum length ("
-                                   << arraysize(overlayable_type->actor)
-                                   << " utf16 characters)");
+        diag_->Error(android::DiagMessage()
+                     << "overlayable name '" << overlayable.actor << "' exceeds maximum length ("
+                     << arraysize(overlayable_type->actor) << " utf16 characters)");
         return false;
       }
       strcpy16_htod(overlayable_type->actor, arraysize(overlayable_type->actor),
-                    util::Utf8ToUtf16(overlayable.actor));
+                    android::util::Utf8ToUtf16(overlayable.actor));
 
       // Write each policy block for the overlayable
       for (auto& policy_ids : overlayable.policy_ids) {
         ChunkWriter policy_writer(buffer);
         auto* policy_type = policy_writer.StartChunk<ResTable_overlayable_policy_header>(
             RES_TABLE_OVERLAYABLE_POLICY_TYPE);
-        policy_type->policy_flags =
-            static_cast<PolicyFlags>(util::HostToDevice32(static_cast<uint32_t>(policy_ids.first)));
-        policy_type->entry_count = util::HostToDevice32(static_cast<uint32_t>(
-                                                            policy_ids.second.size()));
+        policy_type->policy_flags = static_cast<PolicyFlags>(
+            android::util::HostToDevice32(static_cast<uint32_t>(policy_ids.first)));
+        policy_type->entry_count =
+            android::util::HostToDevice32(static_cast<uint32_t>(policy_ids.second.size()));
         // Write the ids after the policy header
         auto* id_block = policy_writer.NextBlock<ResTable_ref>(policy_ids.second.size());
         for (const ResourceId& id : policy_ids.second) {
-          id_block->ident = util::HostToDevice32(id.id);
+          id_block->ident = android::util::HostToDevice32(id.id);
           id_block++;
         }
         policy_writer.Finish();
@@ -559,7 +558,7 @@ class PackageFlattener {
     // Since the entries are sorted by ID, the last one will be the biggest.
     const size_t num_entries = sorted_entries.back().id.value() + 1;
 
-    spec_header->entryCount = util::HostToDevice32(num_entries);
+    spec_header->entryCount = android::util::HostToDevice32(num_entries);
 
     // Reserve space for the masks of each resource in this type. These
     // show for which configuration axis the resource changes.
@@ -571,17 +570,18 @@ class PackageFlattener {
       // Populate the config masks for this entry.
       uint32_t& entry_config_masks = config_masks[entry_id];
       if (entry.visibility.level == Visibility::Level::kPublic) {
-        entry_config_masks |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
+        entry_config_masks |= android::util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
       }
       if (entry.visibility.staged_api) {
-        entry_config_masks |= util::HostToDevice32(ResTable_typeSpec::SPEC_STAGED_API);
+        entry_config_masks |= android::util::HostToDevice32(ResTable_typeSpec::SPEC_STAGED_API);
       }
 
       const size_t config_count = entry.values.size();
       for (size_t i = 0; i < config_count; i++) {
         const ConfigDescription& config = entry.values[i]->config;
         for (size_t j = i + 1; j < config_count; j++) {
-          config_masks[entry_id] |= util::HostToDevice32(config.diff(entry.values[j]->config));
+          config_masks[entry_id] |=
+              android::util::HostToDevice32(config.diff(entry.values[j]->config));
         }
       }
     }
@@ -668,33 +668,33 @@ class PackageFlattener {
     const size_t num_entries = (package_.id.value() == 0x00 ? 1 : 0) + shared_libs_->size();
     CHECK(num_entries > 0);
 
-    lib_header->count = util::HostToDevice32(num_entries);
+    lib_header->count = android::util::HostToDevice32(num_entries);
 
     ResTable_lib_entry* lib_entry = buffer->NextBlock<ResTable_lib_entry>(num_entries);
     if (package_.id.value() == 0x00) {
       // Add this package
-      lib_entry->packageId = util::HostToDevice32(0x00);
+      lib_entry->packageId = android::util::HostToDevice32(0x00);
       strcpy16_htod(lib_entry->packageName, arraysize(lib_entry->packageName),
-                    util::Utf8ToUtf16(package_.name));
+                    android::util::Utf8ToUtf16(package_.name));
       ++lib_entry;
     }
 
     for (auto& map_entry : *shared_libs_) {
-      lib_entry->packageId = util::HostToDevice32(map_entry.first);
+      lib_entry->packageId = android::util::HostToDevice32(map_entry.first);
       strcpy16_htod(lib_entry->packageName, arraysize(lib_entry->packageName),
-                    util::Utf8ToUtf16(map_entry.second));
+                    android::util::Utf8ToUtf16(map_entry.second));
       ++lib_entry;
     }
     lib_writer.Finish();
   }
 
   IAaptContext* context_;
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
   const ResourceTablePackageView package_;
   const std::map<size_t, std::string>* shared_libs_;
   bool use_sparse_entries_;
-  StringPool type_pool_;
-  StringPool key_pool_;
+  android::StringPool type_pool_;
+  android::StringPool key_pool_;
   bool collapse_key_stringpool_;
   const std::set<ResourceName>& name_collapse_exemptions_;
   std::map<uint32_t, uint32_t> aliases_;
@@ -706,26 +706,27 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
   TRACE_CALL();
   // We must do this before writing the resources, since the string pool IDs may change.
   table->string_pool.Prune();
-  table->string_pool.Sort([](const StringPool::Context& a, const StringPool::Context& b) -> int {
-    int diff = util::compare(a.priority, b.priority);
-    if (diff == 0) {
-      diff = a.config.compare(b.config);
-    }
-    return diff;
-  });
+  table->string_pool.Sort(
+      [](const android::StringPool::Context& a, const android::StringPool::Context& b) -> int {
+        int diff = util::compare(a.priority, b.priority);
+        if (diff == 0) {
+          diff = a.config.compare(b.config);
+        }
+        return diff;
+      });
 
   // Write the ResTable header.
   const auto& table_view =
       table->GetPartitionedView(ResourceTableViewOptions{.create_alias_entries = true});
   ChunkWriter table_writer(buffer_);
   ResTable_header* table_header = table_writer.StartChunk<ResTable_header>(RES_TABLE_TYPE);
-  table_header->packageCount = util::HostToDevice32(table_view.packages.size());
+  table_header->packageCount = android::util::HostToDevice32(table_view.packages.size());
 
   // Flatten the values string pool.
-  StringPool::FlattenUtf8(table_writer.buffer(), table->string_pool,
-      context->GetDiagnostics());
+  android::StringPool::FlattenUtf8(table_writer.buffer(), table->string_pool,
+                                   context->GetDiagnostics());
 
-  BigBuffer package_buffer(1024);
+  android::BigBuffer package_buffer(1024);
 
   // Flatten each package.
   for (auto& package : table_view.packages) {
@@ -738,7 +739,7 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
         if (!result.second && result.first->second != package.name) {
           // A mapping for this package ID already exists, and is a different package. Error!
           context->GetDiagnostics()->Error(
-              DiagMessage() << android::base::StringPrintf(
+              android::DiagMessage() << android::base::StringPrintf(
                   "can't map package ID %02x to '%s'. Already mapped to '%s'", package_id,
                   package.name.c_str(), result.first->second.c_str()));
           return false;

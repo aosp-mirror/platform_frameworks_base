@@ -47,19 +47,19 @@ class Visitor : public xml::PackageAwareVisitor {
       return;
     }
 
-    const Source src = xml_resource_->file.source.WithLine(el->line_number);
+    const android::Source src = xml_resource_->file.source.WithLine(el->line_number);
 
     xml::Attribute* attr = el->FindAttribute({}, "name");
     if (!attr) {
-      context_->GetDiagnostics()->Error(DiagMessage(src) << "missing 'name' attribute");
+      context_->GetDiagnostics()->Error(android::DiagMessage(src) << "missing 'name' attribute");
       error_ = true;
       return;
     }
 
     std::optional<Reference> ref = ResourceUtils::ParseXmlAttributeName(attr->value);
     if (!ref) {
-      context_->GetDiagnostics()->Error(DiagMessage(src) << "invalid XML attribute '" << attr->value
-                                                         << "'");
+      context_->GetDiagnostics()->Error(android::DiagMessage(src)
+                                        << "invalid XML attribute '" << attr->value << "'");
       error_ = true;
       return;
     }
@@ -67,7 +67,7 @@ class Visitor : public xml::PackageAwareVisitor {
     const ResourceName& name = ref.value().name.value();
     std::optional<xml::ExtractedPackage> maybe_pkg = TransformPackageAlias(name.package);
     if (!maybe_pkg) {
-      context_->GetDiagnostics()->Error(DiagMessage(src)
+      context_->GetDiagnostics()->Error(android::DiagMessage(src)
                                         << "invalid namespace prefix '" << name.package << "'");
       error_ = true;
       return;
@@ -136,15 +136,15 @@ bool InlineXmlFormatParser::Consume(IAaptContext* context, xml::XmlResource* doc
     // Extracted elements must be the only child of <aapt:attr>.
     // Make sure there is one root node in the children (ignore empty text).
     for (std::unique_ptr<xml::Node>& child : decl.el->children) {
-      const Source child_source = doc->file.source.WithLine(child->line_number);
+      const android::Source child_source = doc->file.source.WithLine(child->line_number);
       if (xml::Text* t = xml::NodeCast<xml::Text>(child.get())) {
         if (!util::TrimWhitespace(t->text).empty()) {
-          context->GetDiagnostics()->Error(DiagMessage(child_source)
+          context->GetDiagnostics()->Error(android::DiagMessage(child_source)
                                            << "can't extract text into its own resource");
           return false;
         }
       } else if (new_doc->root) {
-        context->GetDiagnostics()->Error(DiagMessage(child_source)
+        context->GetDiagnostics()->Error(android::DiagMessage(child_source)
                                          << "inline XML resources must have a single root");
         return false;
       } else {
@@ -160,7 +160,7 @@ bool InlineXmlFormatParser::Consume(IAaptContext* context, xml::XmlResource* doc
     // Get the parent element of <aapt:attr>
     xml::Element* parent_el = decl.el->parent;
     if (!parent_el) {
-      context->GetDiagnostics()->Error(DiagMessage(new_doc->file.source)
+      context->GetDiagnostics()->Error(android::DiagMessage(new_doc->file.source)
                                        << "no suitable parent for inheriting attribute");
       return false;
     }

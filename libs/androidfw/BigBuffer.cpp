@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "util/BigBuffer.h"
+#include <androidfw/BigBuffer.h>
 
 #include <algorithm>
 #include <memory>
@@ -22,7 +22,7 @@
 
 #include "android-base/logging.h"
 
-namespace aapt {
+namespace android {
 
 void* BigBuffer::NextBlockImpl(size_t size) {
   if (!blocks_.empty()) {
@@ -84,4 +84,4 @@ std::string BigBuffer::to_string() const {
   return result;
 }
 
-}  // namespace aapt
+}  // namespace android

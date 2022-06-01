@@ -17,15 +17,15 @@
 #ifndef AAPT_IO_BIGBUFFERSTREAM_H
 #define AAPT_IO_BIGBUFFERSTREAM_H
 
+#include "androidfw/BigBuffer.h"
 #include "io/Io.h"
-#include "util/BigBuffer.h"
 
 namespace aapt {
 namespace io {
 
 class BigBufferInputStream : public KnownSizeInputStream {
  public:
-  inline explicit BigBufferInputStream(const BigBuffer* buffer)
+  inline explicit BigBufferInputStream(const android::BigBuffer* buffer)
       : buffer_(buffer), iter_(buffer->begin()) {
   }
   virtual ~BigBufferInputStream() = default;
@@ -47,15 +47,15 @@ class BigBufferInputStream : public KnownSizeInputStream {
  private:
   DISALLOW_COPY_AND_ASSIGN(BigBufferInputStream);
 
-  const BigBuffer* buffer_;
-  BigBuffer::const_iterator iter_;
+  const android::BigBuffer* buffer_;
+  android::BigBuffer::const_iterator iter_;
   size_t offset_ = 0;
   size_t bytes_read_ = 0;
 };
 
 class BigBufferOutputStream : public OutputStream {
  public:
-  inline explicit BigBufferOutputStream(BigBuffer* buffer) : buffer_(buffer) {
+  inline explicit BigBufferOutputStream(android::BigBuffer* buffer) : buffer_(buffer) {
   }
   virtual ~BigBufferOutputStream() = default;
 
@@ -70,7 +70,7 @@ class BigBufferOutputStream : public OutputStream {
  private:
   DISALLOW_COPY_AND_ASSIGN(BigBufferOutputStream);
 
-  BigBuffer* buffer_;
+  android::BigBuffer* buffer_;
 };
 
 }  // namespace io

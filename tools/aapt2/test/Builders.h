@@ -75,7 +75,7 @@ class ResourceTableBuilder {
                                        const OverlayableItem& overlayable);
   ResourceTableBuilder& Add(NewResource&& res);
 
-  StringPool* string_pool();
+  android::StringPool* string_pool();
   std::unique_ptr<ResourceTable> Build();
 
  private:
@@ -97,7 +97,7 @@ class ValueBuilder {
 
   template <typename... Args>
   ValueBuilder& SetSource(Args&&... args) {
-    value_->SetSource(Source{std::forward<Args>(args)...});
+    value_->SetSource(android::Source{std::forward<Args>(args)...});
     return *this;
   }
 

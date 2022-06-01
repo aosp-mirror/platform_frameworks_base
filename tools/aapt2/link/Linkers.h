@@ -101,9 +101,10 @@ class ProductFilter : public IResourceTableConsumer {
   explicit ProductFilter(std::unordered_set<std::string> products) : products_(products) {
   }
 
-  ResourceConfigValueIter SelectProductToKeep(
-      const ResourceNameRef& name, const ResourceConfigValueIter begin,
-      const ResourceConfigValueIter end, IDiagnostics* diag);
+  ResourceConfigValueIter SelectProductToKeep(const ResourceNameRef& name,
+                                              const ResourceConfigValueIter begin,
+                                              const ResourceConfigValueIter end,
+                                              android::IDiagnostics* diag);
 
   bool Consume(IAaptContext* context, ResourceTable* table) override;
 

@@ -20,12 +20,12 @@
 #include <regex>
 
 #include "Command.h"
-#include "Diagnostics.h"
 #include "Resource.h"
-#include "split/TableSplitter.h"
+#include "androidfw/IDiagnostics.h"
 #include "format/binary/TableFlattener.h"
 #include "format/proto/ProtoSerialize.h"
 #include "link/ManifestFixer.h"
+#include "split/TableSplitter.h"
 #include "trace/TraceBuffer.h"
 
 namespace aapt {
@@ -111,8 +111,7 @@ struct LinkOptions {
 
 class LinkCommand : public Command {
  public:
-  explicit LinkCommand(IDiagnostics* diag) : Command("link", "l"),
-                                             diag_(diag) {
+  explicit LinkCommand(android::IDiagnostics* diag) : Command("link", "l"), diag_(diag) {
     SetDescription("Links resources into an apk.");
     AddRequiredFlag("-o", "Output path.", &options_.output_path, Command::kPath);
     AddRequiredFlag("--manifest", "Path to the Android manifest to build.",
@@ -316,7 +315,7 @@ class LinkCommand : public Command {
   int Action(const std::vector<std::string>& args) override;
 
  private:
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
   LinkOptions options_;
 
   std::vector<std::string> overlay_arg_list_;

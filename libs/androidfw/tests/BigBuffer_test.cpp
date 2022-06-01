@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include "util/BigBuffer.h"
+#include "androidfw/BigBuffer.h"
 
-#include "test/Test.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using ::testing::NotNull;
 
-namespace aapt {
+namespace android {
 
 TEST(BigBufferTest, AllocateSingleBlock) {
   BigBuffer buffer(4);
@@ -62,7 +63,7 @@ TEST(BigBufferTest, AppendAndMoveBlock) {
     *b1 = 44;
 
     buffer.AppendBuffer(std::move(buffer2));
-    EXPECT_EQ(0u, buffer2.size()); // NOLINT
+    EXPECT_EQ(0u, buffer2.size());  // NOLINT
     EXPECT_EQ(buffer2.begin(), buffer2.end());
   }
 
@@ -97,4 +98,4 @@ TEST(BigBufferTest, PadAndAlignProperly) {
   ASSERT_EQ(8u, buffer.size());
 }
 
-}  // namespace aapt
+}  // namespace android

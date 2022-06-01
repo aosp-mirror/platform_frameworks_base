@@ -43,12 +43,7 @@ void AssertProducedAndExpectedInfo(const std::string& produced_path,
   EXPECT_EQ(produced_apk_info.DebugString(), expected);
 }
 
-class NoopDiagnostics : public IDiagnostics {
- public:
-  void Log(Level level, DiagMessageActual& actualMsg) override {
-  }
-};
-static NoopDiagnostics noop_diag;
+static android::NoOpDiagnostics noop_diag;
 
 TEST_F(ApkInfoTest, ApkInfoWithBadging) {
   auto apk_path = file::BuildPath(

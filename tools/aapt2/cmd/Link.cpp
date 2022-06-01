@@ -17,19 +17,12 @@
 #include "Link.h"
 
 #include <sys/stat.h>
-#include <cinttypes>
 
 #include <algorithm>
+#include <cinttypes>
 #include <queue>
 #include <unordered_map>
 #include <vector>
-
-#include "android-base/errors.h"
-#include "android-base/expected.h"
-#include "android-base/file.h"
-#include "android-base/stringprintf.h"
-#include "androidfw/Locale.h"
-#include "androidfw/StringPiece.h"
 
 #include "AppInfo.h"
 #include "Debug.h"
@@ -38,6 +31,13 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "android-base/errors.h"
+#include "android-base/expected.h"
+#include "android-base/file.h"
+#include "android-base/stringprintf.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/Locale.h"
+#include "androidfw/StringPiece.h"
 #include "cmd/Util.h"
 #include "compile/IdAssigner.h"
 #include "compile/XmlIdCollector.h"
@@ -98,7 +98,7 @@ constexpr uint8_t kAndroidPackageId = 0x01;
 
 class LinkContext : public IAaptContext {
  public:
-  explicit LinkContext(IDiagnostics* diagnostics)
+  explicit LinkContext(android::IDiagnostics* diagnostics)
       : diagnostics_(diagnostics), name_mangler_({}), symbols_(&name_mangler_) {
   }
 
@@ -110,7 +110,7 @@ class LinkContext : public IAaptContext {
     package_type_ = type;
   }
 
-  IDiagnostics* GetDiagnostics() override {
+  android::IDiagnostics* GetDiagnostics() override {
     return diagnostics_;
   }
 
@@ -170,7 +170,7 @@ class LinkContext : public IAaptContext {
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
   PackageType package_type_ = PackageType::kApp;
-  IDiagnostics* diagnostics_;
+  android::IDiagnostics* diagnostics_;
   NameMangler name_mangler_;
   std::string compilation_package_;
   uint8_t package_id_ = 0x0;
@@ -216,14 +216,16 @@ class FeatureSplitSymbolTableDelegate : public DefaultSymbolTableDelegate {
         // Check that this doesn't overlap another resource.
         if (DefaultSymbolTableDelegate::FindById(rewritten_id, sources) != nullptr) {
           // The ID overlaps, so log a message (since this is a weird failure) and fail.
-          context_->GetDiagnostics()->Error(DiagMessage() << "Failed to rewrite " << name
-                                                          << " for pre-O feature split support");
+          context_->GetDiagnostics()->Error(android::DiagMessage()
+                                            << "Failed to rewrite " << name
+                                            << " for pre-O feature split support");
           return {};
         }
 
         if (context_->IsVerbose()) {
-          context_->GetDiagnostics()->Note(DiagMessage() << "rewriting " << name << " (" << *id
-                                                         << ") -> (" << rewritten_id << ")");
+          context_->GetDiagnostics()->Note(android::DiagMessage()
+                                           << "rewriting " << name << " (" << *id << ") -> ("
+                                           << rewritten_id << ")");
         }
 
         *id = rewritten_id;
@@ -243,14 +245,14 @@ static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
                        OutputFormat format, IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
-    context->GetDiagnostics()->Note(DiagMessage(path) << "writing to archive (keep_raw_values="
-                                                      << (keep_raw_values ? "true" : "false")
-                                                      << ")");
+    context->GetDiagnostics()->Note(android::DiagMessage(path)
+                                    << "writing to archive (keep_raw_values="
+                                    << (keep_raw_values ? "true" : "false") << ")");
   }
 
   switch (format) {
     case OutputFormat::kApk: {
-      BigBuffer buffer(1024);
+      android::BigBuffer buffer(1024);
       XmlFlattenerOptions options = {};
       options.keep_raw_values = keep_raw_values;
       options.use_utf16 = utf16;
@@ -278,14 +280,15 @@ static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
 }
 
 // Inflates an XML file from the source path.
-static std::unique_ptr<xml::XmlResource> LoadXml(const std::string& path, IDiagnostics* diag) {
+static std::unique_ptr<xml::XmlResource> LoadXml(const std::string& path,
+                                                 android::IDiagnostics* diag) {
   TRACE_CALL();
   FileInputStream fin(path);
   if (fin.HadError()) {
-    diag->Error(DiagMessage(path) << "failed to load XML file: " << fin.GetError());
+    diag->Error(android::DiagMessage(path) << "failed to load XML file: " << fin.GetError());
     return {};
   }
-  return xml::Inflate(&fin, diag, Source(path));
+  return xml::Inflate(&fin, diag, android::Source(path));
 }
 
 struct ResourceFileFlattenerOptions {
@@ -451,10 +454,10 @@ std::vector<std::unique_ptr<xml::XmlResource>> ResourceFileFlattener::LinkAndVer
     ResourceTable* table, FileOperation* file_op) {
   TRACE_CALL();
   xml::XmlResource* doc = file_op->xml_to_flatten.get();
-  const Source& src = doc->file.source;
+  const android::Source& src = doc->file.source;
 
   if (context_->IsVerbose()) {
-    context_->GetDiagnostics()->Note(DiagMessage()
+    context_->GetDiagnostics()->Note(android::DiagMessage()
                                      << "linking " << src.path << " (" << doc->file.name << ")");
   }
 
@@ -545,7 +548,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
 
           io::IFile* file = file_ref->file;
           if (!file) {
-            context_->GetDiagnostics()->Error(DiagMessage(file_ref->GetSource())
+            context_->GetDiagnostics()->Error(android::DiagMessage(file_ref->GetSource())
                                               << "file not found");
             return false;
           }
@@ -561,7 +564,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
                file_ref->type == ResourceFile::Type::kProtoXml)) {
             std::unique_ptr<io::IData> data = file->OpenAsData();
             if (!data) {
-              context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+              context_->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
                                                 << "failed to open file");
               return false;
             }
@@ -569,7 +572,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
             if (file_ref->type == ResourceFile::Type::kProtoXml) {
               pb::XmlNode pb_xml_node;
               if (!pb_xml_node.ParseFromArray(data->data(), static_cast<int>(data->size()))) {
-                context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                context_->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
                                                   << "failed to parse proto XML");
                 return false;
               }
@@ -577,7 +580,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               std::string error;
               file_op.xml_to_flatten = DeserializeXmlResourceFromPb(pb_xml_node, &error);
               if (file_op.xml_to_flatten == nullptr) {
-                context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                context_->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
                                                   << "failed to deserialize proto XML: " << error);
                 return false;
               }
@@ -585,7 +588,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
               std::string error_str;
               file_op.xml_to_flatten = xml::Inflate(data->data(), data->size(), &error_str);
               if (file_op.xml_to_flatten == nullptr) {
-                context_->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                context_->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
                                                   << "failed to parse binary XML: " << error_str);
                 return false;
               }
@@ -621,10 +624,10 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
           if (drawable_entry != kDrawableVersions.end()) {
             if (drawable_entry->second > context_->GetMinSdkVersion()
                 && drawable_entry->second > config.sdkVersion) {
-              context_->GetDiagnostics()->Error(DiagMessage(file_op.xml_to_flatten->file.source)
-                                                    << "<" << drawable_entry->first << "> elements "
-                                                    << "require a sdk version of at least "
-                                                    << (int16_t) drawable_entry->second);
+              context_->GetDiagnostics()->Error(
+                  android::DiagMessage(file_op.xml_to_flatten->file.source)
+                  << "<" << drawable_entry->first << "> elements "
+                  << "require a sdk version of at least " << (int16_t)drawable_entry->second);
               error = true;
               continue;
             }
@@ -642,7 +645,7 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
             if (doc->file.config != file_op.config) {
               // Only add the new versioned configurations.
               if (context_->IsVerbose()) {
-                context_->GetDiagnostics()->Note(DiagMessage(doc->file.source)
+                context_->GetDiagnostics()->Note(android::DiagMessage(doc->file.source)
                                                  << "auto-versioning resource from config '"
                                                  << config << "' -> '" << doc->file.config << "'");
               }
@@ -680,12 +683,12 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
   return !error;
 }
 
-static bool WriteStableIdMapToPath(IDiagnostics* diag,
+static bool WriteStableIdMapToPath(android::IDiagnostics* diag,
                                    const std::unordered_map<ResourceName, ResourceId>& id_map,
                                    const std::string& id_map_path) {
   io::FileOutputStream fout(id_map_path);
   if (fout.HadError()) {
-    diag->Error(DiagMessage(id_map_path) << "failed to open: " << fout.GetError());
+    diag->Error(android::DiagMessage(id_map_path) << "failed to open: " << fout.GetError());
     return false;
   }
 
@@ -700,17 +703,17 @@ static bool WriteStableIdMapToPath(IDiagnostics* diag,
   fout.Flush();
 
   if (fout.HadError()) {
-    diag->Error(DiagMessage(id_map_path) << "failed writing to file: " << fout.GetError());
+    diag->Error(android::DiagMessage(id_map_path) << "failed writing to file: " << fout.GetError());
     return false;
   }
   return true;
 }
 
-static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
+static bool LoadStableIdMap(android::IDiagnostics* diag, const std::string& path,
                             std::unordered_map<ResourceName, ResourceId>* out_id_map) {
   std::string content;
   if (!android::base::ReadFileToString(path, &content, true /*follow_symlinks*/)) {
-    diag->Error(DiagMessage(path) << "failed reading stable ID file");
+    diag->Error(android::DiagMessage(path) << "failed reading stable ID file");
     return false;
   }
 
@@ -725,7 +728,7 @@ static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
 
     auto iter = std::find(line.begin(), line.end(), '=');
     if (iter == line.end()) {
-      diag->Error(DiagMessage(Source(path, line_no)) << "missing '='");
+      diag->Error(android::DiagMessage(android::Source(path, line_no)) << "missing '='");
       return false;
     }
 
@@ -733,8 +736,8 @@ static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
     StringPiece res_name_str =
         util::TrimWhitespace(line.substr(0, std::distance(line.begin(), iter)));
     if (!ResourceUtils::ParseResourceName(res_name_str, &name)) {
-      diag->Error(DiagMessage(Source(path, line_no)) << "invalid resource name '" << res_name_str
-                                                     << "'");
+      diag->Error(android::DiagMessage(android::Source(path, line_no))
+                  << "invalid resource name '" << res_name_str << "'");
       return false;
     }
 
@@ -744,8 +747,8 @@ static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
 
     std::optional<ResourceId> maybe_id = ResourceUtils::ParseResourceId(res_id_str);
     if (!maybe_id) {
-      diag->Error(DiagMessage(Source(path, line_no)) << "invalid resource ID '" << res_id_str
-                                                     << "'");
+      diag->Error(android::DiagMessage(android::Source(path, line_no))
+                  << "invalid resource ID '" << res_id_str << "'");
       return false;
     }
 
@@ -835,20 +838,21 @@ class Linker {
     auto asset_source = util::make_unique<AssetManagerSymbolSource>();
     for (const std::string& path : options_.include_paths) {
       if (context_->IsVerbose()) {
-        context_->GetDiagnostics()->Note(DiagMessage() << "including " << path);
+        context_->GetDiagnostics()->Note(android::DiagMessage() << "including " << path);
       }
 
       std::string error;
       auto zip_collection = io::ZipFileCollection::Create(path, &error);
       if (zip_collection == nullptr) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed to open APK: " << error);
+        context_->GetDiagnostics()->Error(android::DiagMessage()
+                                          << "failed to open APK: " << error);
         return false;
       }
 
       if (zip_collection->FindFile(kProtoResourceTablePath) != nullptr) {
         // Load this as a static library include.
         std::unique_ptr<LoadedApk> static_apk = LoadedApk::LoadProtoApkFromFileCollection(
-            Source(path), std::move(zip_collection), context_->GetDiagnostics());
+            android::Source(path), std::move(zip_collection), context_->GetDiagnostics());
         if (static_apk == nullptr) {
           return false;
         }
@@ -857,7 +861,8 @@ class Linker {
           // Can't include static libraries when not building a static library (they have no IDs
           // assigned).
           context_->GetDiagnostics()->Error(
-              DiagMessage(path) << "can't include static library when not building a static lib");
+              android::DiagMessage(path)
+              << "can't include static library when not building a static lib");
           return false;
         }
 
@@ -869,7 +874,8 @@ class Linker {
         if (options_.no_static_lib_packages && !table->packages.empty()) {
           auto lib_package_result = GetStaticLibraryPackage(table);
           if (!lib_package_result.has_value()) {
-            context_->GetDiagnostics()->Error(DiagMessage(path) << lib_package_result.error());
+            context_->GetDiagnostics()->Error(android::DiagMessage(path)
+                                              << lib_package_result.error());
             return false;
           }
           lib_package_result.value()->name = context_->GetCompilationPackage();
@@ -880,7 +886,7 @@ class Linker {
         static_library_includes_.push_back(std::move(static_apk));
       } else {
         if (!asset_source->AddAssetPath(path)) {
-          context_->GetDiagnostics()->Error(DiagMessage()
+          context_->GetDiagnostics()->Error(android::DiagMessage()
                                             << "failed to load include path " << path);
           return false;
         }
@@ -913,7 +919,8 @@ class Linker {
     return true;
   }
 
-  std::optional<AppInfo> ExtractAppInfoFromManifest(xml::XmlResource* xml_res, IDiagnostics* diag) {
+  std::optional<AppInfo> ExtractAppInfoFromManifest(xml::XmlResource* xml_res,
+                                                    android::IDiagnostics* diag) {
     TRACE_CALL();
     // Make sure the first element is <manifest> with package attribute.
     xml::Element* manifest_el = xml::FindRootElement(xml_res->root.get());
@@ -924,13 +931,13 @@ class Linker {
     AppInfo app_info;
 
     if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
-      diag->Error(DiagMessage(xml_res->file.source) << "root tag must be <manifest>");
+      diag->Error(android::DiagMessage(xml_res->file.source) << "root tag must be <manifest>");
       return {};
     }
 
     xml::Attribute* package_attr = manifest_el->FindAttribute({}, "package");
     if (!package_attr) {
-      diag->Error(DiagMessage(xml_res->file.source)
+      diag->Error(android::DiagMessage(xml_res->file.source)
                   << "<manifest> must have a 'package' attribute");
       return {};
     }
@@ -940,7 +947,7 @@ class Linker {
             manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode")) {
       std::optional<uint32_t> maybe_code = ResourceUtils::ParseInt(version_code_attr->value);
       if (!maybe_code) {
-        diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+        diag->Error(android::DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
                     << "invalid android:versionCode '" << version_code_attr->value << "'");
         return {};
       }
@@ -951,9 +958,9 @@ class Linker {
         manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor")) {
       std::optional<uint32_t> maybe_code = ResourceUtils::ParseInt(version_code_major_attr->value);
       if (!maybe_code) {
-        diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
-                        << "invalid android:versionCodeMajor '"
-                        << version_code_major_attr->value << "'");
+        diag->Error(android::DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+                    << "invalid android:versionCodeMajor '" << version_code_major_attr->value
+                    << "'");
         return {};
       }
       app_info.version_code_major = maybe_code.value();
@@ -963,7 +970,7 @@ class Linker {
             manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode")) {
       std::optional<uint32_t> maybe_code = ResourceUtils::ParseInt(revision_code_attr->value);
       if (!maybe_code) {
-        diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+        diag->Error(android::DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
                     << "invalid android:revisionCode '" << revision_code_attr->value << "'");
         return {};
       }
@@ -1016,15 +1023,15 @@ class Linker {
               // Special case the occurrence of an ID that is being generated
               // for the 'android' package. This is due to legacy reasons.
               if (ValueCast<Id>(config_value->value.get()) && package->name == "android") {
-                context_->GetDiagnostics()->Warn(DiagMessage(config_value->value->GetSource())
-                                                 << "generated id '" << res_name
-                                                 << "' for external package '" << package->name
-                                                 << "'");
+                context_->GetDiagnostics()->Warn(
+                    android::DiagMessage(config_value->value->GetSource())
+                    << "generated id '" << res_name << "' for external package '" << package->name
+                    << "'");
               } else {
-                context_->GetDiagnostics()->Error(DiagMessage(config_value->value->GetSource())
-                                                  << "defined resource '" << res_name
-                                                  << "' for external package '" << package->name
-                                                  << "'");
+                context_->GetDiagnostics()->Error(
+                    android::DiagMessage(config_value->value->GetSource())
+                    << "defined resource '" << res_name << "' for external package '"
+                    << package->name << "'");
                 error = true;
               }
             }
@@ -1048,8 +1055,9 @@ class Linker {
         for (const auto& entry : type->entries) {
           if (entry->id) {
             ResourceNameRef res_name(package->name, type->named_type, entry->name);
-            context_->GetDiagnostics()->Error(DiagMessage() << "resource " << res_name << " has ID "
-                                                            << entry->id.value() << " assigned");
+            context_->GetDiagnostics()->Error(android::DiagMessage()
+                                              << "resource " << res_name << " has ID "
+                                              << entry->id.value() << " assigned");
             return false;
           }
         }
@@ -1058,7 +1066,7 @@ class Linker {
     return true;
   }
 
-  bool VerifyLocaleFormat(xml::XmlResource* manifest, IDiagnostics* diag) {
+  bool VerifyLocaleFormat(xml::XmlResource* manifest, android::IDiagnostics* diag) {
     // Skip it if the Manifest doesn't declare the localeConfig attribute within the <application>
     // element.
     const xml::Element* application = manifest->root->FindChild("", "application");
@@ -1084,18 +1092,19 @@ class Linker {
         const std::string& path = value->value->GetSource().path;
         std::unique_ptr<xml::XmlResource> localeConfig_xml = LoadXml(path, diag);
         if (!localeConfig_xml) {
-          diag->Error(DiagMessage(path) << "can't load the XML");
+          diag->Error(android::DiagMessage(path) << "can't load the XML");
           return false;
         }
 
         xml::Element* localeConfig_el = xml::FindRootElement(localeConfig_xml->root.get());
         if (!localeConfig_el) {
-          diag->Error(DiagMessage(path) << "no root tag defined");
+          diag->Error(android::DiagMessage(path) << "no root tag defined");
           return false;
         }
         if (localeConfig_el->name != "locale-config") {
-          diag->Error(DiagMessage(path) << "invalid element name: " << localeConfig_el->name
-                                        << ", expected: locale-config");
+          diag->Error(android::DiagMessage(path)
+                      << "invalid element name: " << localeConfig_el->name
+                      << ", expected: locale-config");
           return false;
         }
 
@@ -1109,15 +1118,15 @@ class Linker {
               // Start to verify the locale format
               ConfigDescription config;
               if (!ConfigDescription::Parse(valid_name, &config)) {
-                diag->Error(DiagMessage(path) << "invalid configuration: " << locale_name);
+                diag->Error(android::DiagMessage(path) << "invalid configuration: " << locale_name);
                 return false;
               }
             } else {
-              diag->Error(DiagMessage(path) << "the attribute android:name is not found");
+              diag->Error(android::DiagMessage(path) << "the attribute android:name is not found");
               return false;
             }
           } else {
-            diag->Error(DiagMessage(path)
+            diag->Error(android::DiagMessage(path)
                         << "invalid element name: " << child_el->name << ", expected: locale");
             return false;
           }
@@ -1147,10 +1156,11 @@ class Linker {
     TRACE_CALL();
     switch (format) {
       case OutputFormat::kApk: {
-        BigBuffer buffer(1024);
+        android::BigBuffer buffer(1024);
         TableFlattener flattener(options_.table_flattener_options, &buffer);
         if (!flattener.Consume(context_, table)) {
-          context_->GetDiagnostics()->Error(DiagMessage() << "failed to flatten resource table");
+          context_->GetDiagnostics()->Error(android::DiagMessage()
+                                            << "failed to flatten resource table");
           return false;
         }
 
@@ -1183,7 +1193,7 @@ class Linker {
       out_path = options_.generate_java_class_path.value();
       file::AppendPath(&out_path, file::PackageToPath(out_package));
       if (!file::mkdirs(out_path)) {
-        context_->GetDiagnostics()->Error(DiagMessage()
+        context_->GetDiagnostics()->Error(android::DiagMessage()
                                           << "failed to create directory '" << out_path << "'");
         return false;
       }
@@ -1192,8 +1202,9 @@ class Linker {
 
       fout = util::make_unique<io::FileOutputStream>(out_path);
       if (fout->HadError()) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
-                                                        << "': " << fout->GetError());
+        context_->GetDiagnostics()->Error(android::DiagMessage()
+                                          << "failed writing to '" << out_path
+                                          << "': " << fout->GetError());
         return false;
       }
     }
@@ -1202,7 +1213,7 @@ class Linker {
     if (out_text_symbols_path) {
       fout_text = util::make_unique<io::FileOutputStream>(out_text_symbols_path.value());
       if (fout_text->HadError()) {
-        context_->GetDiagnostics()->Error(DiagMessage()
+        context_->GetDiagnostics()->Error(android::DiagMessage()
                                           << "failed writing to '" << out_text_symbols_path.value()
                                           << "': " << fout_text->GetError());
         return false;
@@ -1211,7 +1222,7 @@ class Linker {
 
     JavaClassGenerator generator(context_, table, java_options);
     if (!generator.Generate(package_name_to_generate, out_package, fout.get(), fout_text.get())) {
-      context_->GetDiagnostics()->Error(DiagMessage(out_path) << generator.GetError());
+      context_->GetDiagnostics()->Error(android::DiagMessage(out_path) << generator.GetError());
       return false;
     }
 
@@ -1335,8 +1346,8 @@ class Linker {
     file::AppendPath(&out_path, file::PackageToPath(package_utf8));
 
     if (!file::mkdirs(out_path)) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to create directory '" << out_path
-                                                      << "'");
+      context_->GetDiagnostics()->Error(android::DiagMessage()
+                                        << "failed to create directory '" << out_path << "'");
       return false;
     }
 
@@ -1344,8 +1355,8 @@ class Linker {
 
     io::FileOutputStream fout(out_path);
     if (fout.HadError()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to open '" << out_path
-                                                      << "': " << fout.GetError());
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed to open '" << out_path
+                                                               << "': " << fout.GetError());
       return false;
     }
 
@@ -1354,8 +1365,8 @@ class Linker {
     fout.Flush();
 
     if (fout.HadError()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
-                                                      << "': " << fout.GetError());
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed writing to '" << out_path
+                                                               << "': " << fout.GetError());
       return false;
     }
     return true;
@@ -1370,8 +1381,8 @@ class Linker {
     const std::string& out_path = out.value();
     io::FileOutputStream fout(out_path);
     if (fout.HadError()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to open '" << out_path
-                                                      << "': " << fout.GetError());
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed to open '" << out_path
+                                                               << "': " << fout.GetError());
       return false;
     }
 
@@ -1380,8 +1391,8 @@ class Linker {
     fout.Flush();
 
     if (fout.HadError()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
-                                                      << "': " << fout.GetError());
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed writing to '" << out_path
+                                                               << "': " << fout.GetError());
       return false;
     }
     return true;
@@ -1390,12 +1401,13 @@ class Linker {
   bool MergeStaticLibrary(const std::string& input, bool override) {
     TRACE_CALL();
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage() << "merging static library " << input);
+      context_->GetDiagnostics()->Note(android::DiagMessage()
+                                       << "merging static library " << input);
     }
 
     std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(input, context_->GetDiagnostics());
     if (apk == nullptr) {
-      context_->GetDiagnostics()->Error(DiagMessage(input) << "invalid static library");
+      context_->GetDiagnostics()->Error(android::DiagMessage(input) << "invalid static library");
       return false;
     }
 
@@ -1406,7 +1418,7 @@ class Linker {
 
     auto lib_package_result = GetStaticLibraryPackage(table);
     if (!lib_package_result.has_value()) {
-      context_->GetDiagnostics()->Error(DiagMessage(input) << lib_package_result.error());
+      context_->GetDiagnostics()->Error(android::DiagMessage(input) << lib_package_result.error());
       return false;
     }
 
@@ -1425,12 +1437,12 @@ class Linker {
       // Clear the package name, so as to make the resources look like they are coming from the
       // local package.
       pkg->name = "";
-      result = table_merger_->Merge(Source(input), table, override);
+      result = table_merger_->Merge(android::Source(input), table, override);
 
     } else {
       // This is the proper way to merge libraries, where the package name is
       // preserved and resource names are mangled.
-      result = table_merger_->MergeAndMangle(Source(input), pkg->name, table);
+      result = table_merger_->MergeAndMangle(android::Source(input), pkg->name, table);
     }
 
     if (!result) {
@@ -1442,7 +1454,7 @@ class Linker {
     return true;
   }
 
-  bool MergeExportedSymbols(const Source& source,
+  bool MergeExportedSymbols(const android::Source& source,
                             const std::vector<SourcedResourceName>& exported_symbols) {
     TRACE_CALL();
     // Add the exports of this file to the table.
@@ -1472,7 +1484,7 @@ class Linker {
   bool MergeCompiledFile(const ResourceFile& compiled_file, io::IFile* file, bool override) {
     TRACE_CALL();
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage()
+      context_->GetDiagnostics()->Note(android::DiagMessage()
                                        << "merging '" << compiled_file.name
                                        << "' from compiled file " << compiled_file.source);
     }
@@ -1491,14 +1503,14 @@ class Linker {
   bool MergeArchive(const std::string& input, bool override) {
     TRACE_CALL();
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage() << "merging archive " << input);
+      context_->GetDiagnostics()->Note(android::DiagMessage() << "merging archive " << input);
     }
 
     std::string error_str;
     std::unique_ptr<io::ZipFileCollection> collection =
         io::ZipFileCollection::Create(input, &error_str);
     if (!collection) {
-      context_->GetDiagnostics()->Error(DiagMessage(input) << error_str);
+      context_->GetDiagnostics()->Error(android::DiagMessage(input) << error_str);
       return false;
     }
 
@@ -1538,31 +1550,32 @@ class Linker {
   // where we could have other files like classes.dex.
   bool MergeFile(io::IFile* file, bool override) {
     TRACE_CALL();
-    const Source& src = file->GetSource();
+    const android::Source& src = file->GetSource();
 
     if (util::EndsWith(src.path, ".xml") || util::EndsWith(src.path, ".png")) {
       // Since AAPT compiles these file types and appends .flat to them, seeing
       // their raw extensions is a sign that they weren't compiled.
       const StringPiece file_type = util::EndsWith(src.path, ".xml") ? "XML" : "PNG";
-      context_->GetDiagnostics()->Error(DiagMessage(src) << "uncompiled " << file_type
-                                                         << " file passed as argument. Must be "
-                                                            "compiled first into .flat file.");
+      context_->GetDiagnostics()->Error(android::DiagMessage(src)
+                                        << "uncompiled " << file_type
+                                        << " file passed as argument. Must be "
+                                           "compiled first into .flat file.");
       return false;
     } else if (!util::EndsWith(src.path, ".apc") && !util::EndsWith(src.path, ".flat")) {
       if (context_->IsVerbose()) {
-        context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring unrecognized file");
+        context_->GetDiagnostics()->Warn(android::DiagMessage(src) << "ignoring unrecognized file");
         return true;
       }
     }
 
     std::unique_ptr<io::InputStream> input_stream = file->OpenInputStream();
     if (input_stream == nullptr) {
-      context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to open file");
+      context_->GetDiagnostics()->Error(android::DiagMessage(src) << "failed to open file");
       return false;
     }
 
     if (input_stream->HadError()) {
-      context_->GetDiagnostics()->Error(DiagMessage(src)
+      context_->GetDiagnostics()->Error(android::DiagMessage(src)
                                         << "failed to open file: " << input_stream->GetError());
       return false;
     }
@@ -1571,7 +1584,7 @@ class Linker {
     ContainerReader reader(input_stream.get());
 
     if (reader.HadError()) {
-      context_->GetDiagnostics()->Error(DiagMessage(src)
+      context_->GetDiagnostics()->Error(android::DiagMessage(src)
                                         << "failed to read file: " << reader.GetError());
       return false;
     }
@@ -1581,21 +1594,22 @@ class Linker {
         TRACE_NAME(std::string("Process ResTable:") + file->GetSource().path);
         pb::ResourceTable pb_table;
         if (!entry->GetResTable(&pb_table)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to read resource table: "
-                                                             << entry->GetError());
+          context_->GetDiagnostics()->Error(
+              android::DiagMessage(src) << "failed to read resource table: " << entry->GetError());
           return false;
         }
 
         ResourceTable table;
         std::string error;
         if (!DeserializeTableFromPb(pb_table, nullptr /*files*/, &table, &error)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src)
+          context_->GetDiagnostics()->Error(android::DiagMessage(src)
                                             << "failed to deserialize resource table: " << error);
           return false;
         }
 
         if (!table_merger_->Merge(src, &table, override)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to merge resource table");
+          context_->GetDiagnostics()->Error(android::DiagMessage(src)
+                                            << "failed to merge resource table");
           return false;
         }
       } else if (entry->Type() == ContainerEntryType::kResFile) {
@@ -1604,15 +1618,15 @@ class Linker {
         off64_t offset;
         size_t len;
         if (!entry->GetResFileOffsets(&pb_compiled_file, &offset, &len)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src) << "failed to get resource file: "
-                                                             << entry->GetError());
+          context_->GetDiagnostics()->Error(
+              android::DiagMessage(src) << "failed to get resource file: " << entry->GetError());
           return false;
         }
 
         ResourceFile resource_file;
         std::string error;
         if (!DeserializeCompiledFileFromPb(pb_compiled_file, &resource_file, &error)) {
-          context_->GetDiagnostics()->Error(DiagMessage(src)
+          context_->GetDiagnostics()->Error(android::DiagMessage(src)
                                             << "failed to read compiled header: " << error);
           return false;
         }
@@ -1641,10 +1655,10 @@ class Linker {
 
         auto iter = merged_assets.find(full_key);
         if (iter == merged_assets.end()) {
-          merged_assets.emplace(std::move(full_key),
-                                util::make_unique<io::RegularFile>(Source(std::move(full_path))));
+          merged_assets.emplace(std::move(full_key), util::make_unique<io::RegularFile>(
+                                                         android::Source(std::move(full_path))));
         } else if (context_->IsVerbose()) {
-          context_->GetDiagnostics()->Warn(DiagMessage(iter->second->GetSource())
+          context_->GetDiagnostics()->Warn(android::DiagMessage(iter->second->GetSource())
                                            << "asset file overrides '" << full_path << "'");
         }
       }
@@ -1729,10 +1743,10 @@ class Linker {
         continue;
       }
 
-      context_->GetDiagnostics()->Note(DiagMessage() << "generating "
-                                                     << round_icon_reference->name.value()
-                                                     << " with config \"" << config_value->config
-                                                     << "\" for round icon compatibility");
+      context_->GetDiagnostics()->Note(android::DiagMessage()
+                                       << "generating " << round_icon_reference->name.value()
+                                       << " with config \"" << config_value->config
+                                       << "\" for round icon compatibility");
 
       CloningValueTransformer cloner(&table->string_pool);
       auto value = icon_reference->Transform(cloner);
@@ -1758,7 +1772,7 @@ class Linker {
       if (util::IsAndroidSharedUserId(context_->GetCompilationPackage(), shared_user_id)) {
         return true;
       }
-      DiagMessage error_msg(manifest_el->line_number);
+      android::DiagMessage error_msg(manifest_el->line_number);
       error_msg << "attribute 'sharedUserId' in <manifest> tag is not a valid shared user id: '"
                 << shared_user_id << "'";
       if (options_.manifest_fixer_options.warn_validation) {
@@ -1834,7 +1848,7 @@ class Linker {
 
     ResourceFileFlattener file_flattener(file_flattener_options, context_, keep_set);
     if (!file_flattener.Flatten(table, writer)) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed linking file resources");
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed linking file resources");
       return false;
     }
 
@@ -1865,8 +1879,8 @@ class Linker {
 
         if (context_->IsVerbose()) {
           context_->GetDiagnostics()->Note(
-              DiagMessage() << "rewriting resource package name for feature split to '"
-                            << new_package_name << "'");
+              android::DiagMessage() << "rewriting resource package name for feature split to '"
+                                     << new_package_name << "'");
         }
         package_to_rewrite->name = new_package_name;
       }
@@ -1886,7 +1900,7 @@ class Linker {
     }
 
     if (!success) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to write resource table");
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed to write resource table");
     }
     return success;
   }
@@ -1947,7 +1961,7 @@ class Linker {
       // Verify we're building a regular app.
       if (context_->GetPackageType() != PackageType::kApp) {
         context_->GetDiagnostics()->Error(
-            DiagMessage() << "package 'android' can only be built as a regular app");
+            android::DiagMessage() << "package 'android' can only be built as a regular app");
         return 1;
       }
     }
@@ -1960,7 +1974,7 @@ class Linker {
     table_merger_ = util::make_unique<TableMerger>(context_, &final_table_, table_merger_options);
 
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage()
+      context_->GetDiagnostics()->Note(android::DiagMessage()
                                        << StringPrintf("linking package '%s' using package ID %02x",
                                                        context_->GetCompilationPackage().data(),
                                                        context_->GetPackageId()));
@@ -1981,14 +1995,14 @@ class Linker {
 
     for (const std::string& input : input_files) {
       if (!MergePath(input, false)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed parsing input");
+        context_->GetDiagnostics()->Error(android::DiagMessage() << "failed parsing input");
         return 1;
       }
     }
 
     for (const std::string& input : options_.overlay_files) {
       if (!MergePath(input, true)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed parsing overlays");
+        context_->GetDiagnostics()->Error(android::DiagMessage() << "failed parsing overlays");
         return 1;
       }
     }
@@ -2001,14 +2015,15 @@ class Linker {
       PrivateAttributeMover mover;
       if (context_->GetPackageId() == kAndroidPackageId &&
           !mover.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed moving private attributes");
+        context_->GetDiagnostics()->Error(android::DiagMessage()
+                                          << "failed moving private attributes");
         return 1;
       }
 
       // Assign IDs if we are building a regular app.
       IdAssigner id_assigner(&options_.stable_id_map);
       if (!id_assigner.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed assigning IDs");
+        context_->GetDiagnostics()->Error(android::DiagMessage() << "failed assigning IDs");
         return 1;
       }
 
@@ -2052,7 +2067,7 @@ class Linker {
     // are just identifiers.
     if (context_->GetMinSdkVersion() < SDK_O && context_->GetPackageType() == PackageType::kApp) {
       if (context_->IsVerbose()) {
-        context_->GetDiagnostics()->Note(DiagMessage()
+        context_->GetDiagnostics()->Note(android::DiagMessage()
                                          << "enabling pre-O feature split ID rewriting");
       }
       context_->GetExternalSymbols()->SetDelegate(
@@ -2063,7 +2078,7 @@ class Linker {
     // We want to force any references to these to fail the build.
     if (!options_.no_resource_removal) {
       if (!NoDefaultResourceRemover{}.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage()
+        context_->GetDiagnostics()->Error(android::DiagMessage()
                                           << "failed removing resources with no defaults");
         return 1;
       }
@@ -2071,19 +2086,19 @@ class Linker {
 
     ReferenceLinker linker;
     if (!options_.merge_only && !linker.Consume(context_, &final_table_)) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed linking references");
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed linking references");
       return 1;
     }
 
     if (context_->GetPackageType() == PackageType::kStaticLib) {
       if (!options_.products.empty()) {
-        context_->GetDiagnostics()->Warn(DiagMessage()
+        context_->GetDiagnostics()->Warn(android::DiagMessage()
                                          << "can't select products when building static library");
       }
     } else {
       ProductFilter product_filter(options_.products);
       if (!product_filter.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed stripping products");
+        context_->GetDiagnostics()->Error(android::DiagMessage() << "failed stripping products");
         return 1;
       }
     }
@@ -2091,14 +2106,14 @@ class Linker {
     if (!options_.no_auto_version) {
       AutoVersioner versioner;
       if (!versioner.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed versioning styles");
+        context_->GetDiagnostics()->Error(android::DiagMessage() << "failed versioning styles");
         return 1;
       }
     }
 
     if (context_->GetPackageType() != PackageType::kStaticLib && context_->GetMinSdkVersion() > 0) {
       if (context_->IsVerbose()) {
-        context_->GetDiagnostics()->Note(DiagMessage()
+        context_->GetDiagnostics()->Note(android::DiagMessage()
                                          << "collapsing resource versions for minimum SDK "
                                          << context_->GetMinSdkVersion());
       }
@@ -2117,9 +2132,8 @@ class Linker {
         ConfigDescription config_description;
 
         if (!ConfigDescription::Parse(config_string, &config_description)) {
-          context_->GetDiagnostics()->Error(DiagMessage()
-                                                << "failed to parse --excluded-configs "
-                                                << config_string);
+          context_->GetDiagnostics()->Error(
+              android::DiagMessage() << "failed to parse --excluded-configs " << config_string);
           return 1;
         }
 
@@ -2128,7 +2142,8 @@ class Linker {
 
       ResourceExcluder excluder(excluded_configs);
       if (!excluder.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed excluding configurations");
+        context_->GetDiagnostics()->Error(android::DiagMessage()
+                                          << "failed excluding configurations");
         return 1;
       }
     }
@@ -2136,7 +2151,7 @@ class Linker {
     if (!options_.no_resource_deduping) {
       ResourceDeduper deduper;
       if (!deduper.Consume(context_, &final_table_)) {
-        context_->GetDiagnostics()->Error(DiagMessage() << "failed deduping resources");
+        context_->GetDiagnostics()->Error(android::DiagMessage() << "failed deduping resources");
         return 1;
       }
     }
@@ -2148,7 +2163,7 @@ class Linker {
     if (context_->GetPackageType() == PackageType::kStaticLib) {
       if (options_.table_splitter_options.config_filter != nullptr ||
           !options_.table_splitter_options.preferred_densities.empty()) {
-        context_->GetDiagnostics()->Warn(DiagMessage()
+        context_->GetDiagnostics()->Warn(android::DiagMessage()
                                          << "can't strip resources when building static library");
       }
     } else {
@@ -2159,7 +2174,7 @@ class Linker {
           AdjustSplitConstraintsForMinSdk(context_->GetMinSdkVersion(), options_.split_constraints);
 
       if (origConstraintSize != options_.split_constraints.size()) {
-        context_->GetDiagnostics()->Warn(DiagMessage()
+        context_->GetDiagnostics()->Warn(android::DiagMessage()
                                          << "requested to split resources prior to min sdk of "
                                          << context_->GetMinSdkVersion());
       }
@@ -2174,7 +2189,7 @@ class Linker {
       auto split_constraints_iter = options_.split_constraints.begin();
       for (std::unique_ptr<ResourceTable>& split_table : table_splitter.splits()) {
         if (context_->IsVerbose()) {
-          context_->GetDiagnostics()->Note(DiagMessage(*path_iter)
+          context_->GetDiagnostics()->Note(android::DiagMessage(*path_iter)
                                            << "generating split with configurations '"
                                            << util::Joiner(split_constraints_iter->configs, ", ")
                                            << "'");
@@ -2182,7 +2197,7 @@ class Linker {
 
         std::unique_ptr<IArchiveWriter> archive_writer = MakeArchiveWriter(*path_iter);
         if (!archive_writer) {
-          context_->GetDiagnostics()->Error(DiagMessage() << "failed to create archive");
+          context_->GetDiagnostics()->Error(android::DiagMessage() << "failed to create archive");
           return 1;
         }
 
@@ -2192,7 +2207,7 @@ class Linker {
 
         XmlReferenceLinker linker(&final_table_);
         if (!linker.Consume(context_, split_manifest.get())) {
-          context_->GetDiagnostics()->Error(DiagMessage()
+          context_->GetDiagnostics()->Error(android::DiagMessage()
                                             << "failed to create Split AndroidManifest.xml");
           return 1;
         }
@@ -2210,7 +2225,7 @@ class Linker {
     // Start writing the base APK.
     std::unique_ptr<IArchiveWriter> archive_writer = MakeArchiveWriter(options_.output_path);
     if (!archive_writer) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to create archive");
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed to create archive");
       return 1;
     }
 
@@ -2254,7 +2269,7 @@ class Linker {
     }
 
     if (error) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed processing manifest");
+      context_->GetDiagnostics()->Error(android::DiagMessage() << "failed processing manifest");
       return 1;
     }
 
@@ -2327,7 +2342,7 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
       const std::string path = arg.substr(1, arg.size() - 1);
       std::string error;
       if (!file::AppendArgsFromFile(path, &arg_list, &error)) {
-        context.GetDiagnostics()->Error(DiagMessage(path) << error);
+        context.GetDiagnostics()->Error(android::DiagMessage(path) << error);
         return 1;
       }
     } else {
@@ -2341,7 +2356,7 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
       const std::string path = arg.substr(1, arg.size() - 1);
       std::string error;
       if (!file::AppendArgsFromFile(path, &options_.overlay_files, &error)) {
-        context.GetDiagnostics()->Error(DiagMessage(path) << error);
+        context.GetDiagnostics()->Error(android::DiagMessage(path) << error);
         return 1;
       }
     } else {
@@ -2354,9 +2369,9 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
   }
 
   if (int{shared_lib_} + int{static_lib_} + int{proto_format_} > 1) {
-    context.GetDiagnostics()->Error(
-        DiagMessage()
-            << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
+    context.GetDiagnostics()
+        ->Error(android::DiagMessage()
+                << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
     return 1;
   }
 
@@ -2364,15 +2379,16 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     // If a shared library styleable in a public R.java uses a private attribute, attempting to
     // reference the private attribute within the styleable array will cause a link error because
     // the private attribute will not be emitted in the public R.java.
-    context.GetDiagnostics()->Error(DiagMessage()
+    context.GetDiagnostics()->Error(android::DiagMessage()
                                     << "--shared-lib cannot currently be used in combination with"
                                     << " --private-symbols");
     return 1;
   }
 
   if (options_.merge_only && !static_lib_) {
-    context.GetDiagnostics()->Error(
-        DiagMessage() << "the --merge-only flag can be only used when building a static library");
+    context.GetDiagnostics()
+        ->Error(android::DiagMessage()
+                << "the --merge-only flag can be only used when building a static library");
     return 1;
   }
 
@@ -2393,15 +2409,16 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
   if (package_id_) {
     if (context.GetPackageType() != PackageType::kApp) {
       context.GetDiagnostics()->Error(
-          DiagMessage() << "can't specify --package-id when not building a regular app");
+          android::DiagMessage() << "can't specify --package-id when not building a regular app");
       return 1;
     }
 
     const std::optional<uint32_t> maybe_package_id_int =
         ResourceUtils::ParseInt(package_id_.value());
     if (!maybe_package_id_int) {
-      context.GetDiagnostics()->Error(DiagMessage() << "package ID '" << package_id_.value()
-                                                    << "' is not a valid integer");
+      context.GetDiagnostics()->Error(android::DiagMessage()
+                                      << "package ID '" << package_id_.value()
+                                      << "' is not a valid integer");
       return 1;
     }
 
@@ -2410,7 +2427,7 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
         || package_id_int == kFrameworkPackageId
         || (!options_.allow_reserved_package_id && package_id_int < kAppPackageId)) {
       context.GetDiagnostics()->Error(
-          DiagMessage() << StringPrintf(
+          android::DiagMessage() << StringPrintf(
               "invalid package ID 0x%02x. Must be in the range 0x7f-0xff.", package_id_int));
       return 1;
     }
@@ -2474,7 +2491,7 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
       const std::string path = regex.substr(1, regex.size() -1);
       std::string error;
       if (!file::AppendSetArgsFromFile(path, &options_.extensions_to_not_compress, &error)) {
-        context.GetDiagnostics()->Error(DiagMessage(path) << error);
+        context.GetDiagnostics()->Error(android::DiagMessage(path) << error);
         return 1;
       }
     } else {

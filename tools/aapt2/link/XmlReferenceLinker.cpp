@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-#include "link/Linkers.h"
-
-#include "androidfw/ResourceTypes.h"
-
-#include "Diagnostics.h"
 #include "ResourceUtils.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/ResourceTypes.h"
+#include "link/Linkers.h"
 #include "link/ReferenceLinker.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
@@ -38,7 +36,7 @@ class XmlVisitor : public xml::PackageAwareVisitor {
  public:
   using xml::PackageAwareVisitor::Visit;
 
-  XmlVisitor(const Source& source, StringPool* pool, const CallSite& callsite,
+  XmlVisitor(const android::Source& source, android::StringPool* pool, const CallSite& callsite,
              IAaptContext* context, ResourceTable* table, SymbolTable* symbols)
       : source_(source),
         callsite_(callsite),
@@ -61,7 +59,7 @@ class XmlVisitor : public xml::PackageAwareVisitor {
       }
     }
 
-    const Source source = source_.WithLine(el->line_number);
+    const android::Source source = source_.WithLine(el->line_number);
     for (xml::Attribute& attr : el->attributes) {
       // If the attribute has no namespace, interpret values as if
       // they were assigned to the default Attribute.
@@ -80,7 +78,7 @@ class XmlVisitor : public xml::PackageAwareVisitor {
             ReferenceLinker::CompileXmlAttribute(attr_ref, callsite_, context_, symbols_, &err_str);
 
         if (!attr.compiled_attribute) {
-          DiagMessage error_msg(source);
+          android::DiagMessage error_msg(source);
           error_msg << "attribute ";
           ReferenceLinker::WriteAttributeName(attr_ref, callsite_, this, &error_msg);
           error_msg << " " << err_str;
@@ -99,7 +97,7 @@ class XmlVisitor : public xml::PackageAwareVisitor {
         attr.compiled_value = attr.compiled_value->Transform(reference_transformer_);
       } else if ((attribute->type_mask & android::ResTable_map::TYPE_STRING) == 0) {
         // We won't be able to encode this as a string.
-        DiagMessage msg(source);
+        android::DiagMessage msg(source);
         msg << "'" << attr.value << "' is incompatible with attribute " << attr.name << " "
             << *attribute;
         context_->GetDiagnostics()->Error(msg);
@@ -118,7 +116,7 @@ class XmlVisitor : public xml::PackageAwareVisitor {
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlVisitor);
 
-  Source source_;
+  android::Source source_;
   const CallSite& callsite_;
   IAaptContext* context_;
   SymbolTable* symbols_;

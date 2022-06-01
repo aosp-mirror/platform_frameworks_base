@@ -17,12 +17,11 @@
 #ifndef AAPT_FORMAT_BINARY_TABLEFLATTENER_H
 #define AAPT_FORMAT_BINARY_TABLEFLATTENER_H
 
-#include "android-base/macros.h"
-
 #include "Resource.h"
 #include "ResourceTable.h"
+#include "android-base/macros.h"
+#include "androidfw/BigBuffer.h"
 #include "process/IResourceTableConsumer.h"
-#include "util/BigBuffer.h"
 
 namespace aapt {
 
@@ -51,7 +50,7 @@ struct TableFlattenerOptions {
 
 class TableFlattener : public IResourceTableConsumer {
  public:
-  explicit TableFlattener(const TableFlattenerOptions& options, BigBuffer* buffer)
+  explicit TableFlattener(const TableFlattenerOptions& options, android::BigBuffer* buffer)
       : options_(options), buffer_(buffer) {
   }
 
@@ -61,7 +60,7 @@ class TableFlattener : public IResourceTableConsumer {
   DISALLOW_COPY_AND_ASSIGN(TableFlattener);
 
   TableFlattenerOptions options_;
-  BigBuffer* buffer_;
+  android::BigBuffer* buffer_;
 };
 
 }  // namespace aapt

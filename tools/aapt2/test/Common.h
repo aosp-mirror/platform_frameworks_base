@@ -37,7 +37,7 @@
 namespace aapt {
 namespace test {
 
-IDiagnostics* GetDiagnostics();
+android::IDiagnostics* GetDiagnostics();
 
 inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
   ResourceNameRef ref;
@@ -94,14 +94,14 @@ class TestFile : public io::IFile {
     return OpenAsData();
   }
 
-  const Source& GetSource() const override {
+  const android::Source& GetSource() const override {
     return source_;
   }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TestFile);
 
-  Source source_;
+  android::Source source_;
 };
 
 }  // namespace test

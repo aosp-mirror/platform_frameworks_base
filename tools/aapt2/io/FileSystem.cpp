@@ -19,13 +19,12 @@
 #include <dirent.h>
 
 #include "android-base/errors.h"
+#include "androidfw/Source.h"
 #include "androidfw/StringPiece.h"
-#include "utils/FileMap.h"
-#include "Source.h"
 #include "io/FileStream.h"
 #include "util/Files.h"
-
 #include "util/Util.h"
+#include "utils/FileMap.h"
 
 using ::android::StringPiece;
 using ::android::base::SystemErrorCodeToString;
@@ -33,7 +32,8 @@ using ::android::base::SystemErrorCodeToString;
 namespace aapt {
 namespace io {
 
-RegularFile::RegularFile(const Source& source) : source_(source) {}
+RegularFile::RegularFile(const android::Source& source) : source_(source) {
+}
 
 std::unique_ptr<IData> RegularFile::OpenAsData() {
   android::FileMap map;
@@ -50,7 +50,7 @@ std::unique_ptr<io::InputStream> RegularFile::OpenInputStream() {
   return util::make_unique<FileInputStream>(source_.path);
 }
 
-const Source& RegularFile::GetSource() const {
+const android::Source& RegularFile::GetSource() const {
   return source_;
 }
 
@@ -118,7 +118,7 @@ std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiec
 }
 
 IFile* FileCollection::InsertFile(const StringPiece& path) {
-  return (files_[path.to_string()] = util::make_unique<RegularFile>(Source(path))).get();
+  return (files_[path.to_string()] = util::make_unique<RegularFile>(android::Source(path))).get();
 }
 
 IFile* FileCollection::FindFile(const StringPiece& path) {

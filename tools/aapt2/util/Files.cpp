@@ -333,9 +333,8 @@ bool FileFilter::operator()(const std::string& filename, FileType type) const {
 
     if (ignore) {
       if (chatty) {
-        diag_->Warn(DiagMessage()
-                    << "skipping "
-                    << (type == FileType::kDirectory ? "dir '" : "file '")
+        diag_->Warn(android::DiagMessage()
+                    << "skipping " << (type == FileType::kDirectory ? "dir '" : "file '")
                     << filename << "' due to ignore pattern '" << token << "'");
       }
       return false;
@@ -345,11 +344,12 @@ bool FileFilter::operator()(const std::string& filename, FileType type) const {
 }
 
 std::optional<std::vector<std::string>> FindFiles(const android::StringPiece& path,
-                                                  IDiagnostics* diag, const FileFilter* filter) {
+                                                  android::IDiagnostics* diag,
+                                                  const FileFilter* filter) {
   const std::string root_dir = path.to_string();
   std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
   if (!d) {
-    diag->Error(DiagMessage() << SystemErrorCodeToString(errno) << ": " << root_dir);
+    diag->Error(android::DiagMessage() << SystemErrorCodeToString(errno) << ": " << root_dir);
     return {};
   }
 

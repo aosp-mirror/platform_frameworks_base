@@ -94,7 +94,7 @@ TEST_F(TableMergerTest, MergeFile) {
   ResourceFile file_desc;
   file_desc.config = test::ParseConfigOrDie("hdpi-v4");
   file_desc.name = test::ParseNameOrDie("layout/main");
-  file_desc.source = Source("res/layout-hdpi/main.xml");
+  file_desc.source = android::Source("res/layout-hdpi/main.xml");
   test::TestFile test_file("path/to/res/layout-hdpi/main.xml.flat");
 
   ASSERT_TRUE(merger.MergeFile(file_desc, false /*overlay*/, &test_file));

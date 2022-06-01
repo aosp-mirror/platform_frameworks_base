@@ -183,7 +183,8 @@ static void XMLCALL CommentDataHandler(void* user_data, const char* comment) {
   stack->pending_comment += comment;
 }
 
-std::unique_ptr<XmlResource> Inflate(InputStream* in, IDiagnostics* diag, const Source& source) {
+std::unique_ptr<XmlResource> Inflate(InputStream* in, android::IDiagnostics* diag,
+                                     const android::Source& source) {
   Stack stack;
 
   std::unique_ptr<std::remove_pointer<XML_Parser>::type, decltype(XML_ParserFree)*> parser = {
@@ -199,28 +200,29 @@ std::unique_ptr<XmlResource> Inflate(InputStream* in, IDiagnostics* diag, const 
   size_t buffer_size = 0;
   while (in->Next(reinterpret_cast<const void**>(&buffer), &buffer_size)) {
     if (XML_Parse(parser.get(), buffer, buffer_size, false) == XML_STATUS_ERROR) {
-      diag->Error(DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser.get())))
+      diag->Error(android::DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser.get())))
                   << XML_ErrorString(XML_GetErrorCode(parser.get())));
       return {};
     }
   }
 
   if (in->HadError()) {
-    diag->Error(DiagMessage(source) << in->GetError());
+    diag->Error(android::DiagMessage(source) << in->GetError());
     return {};
   } else {
     // Finish off the parsing.
     if (XML_Parse(parser.get(), nullptr, 0u, true) == XML_STATUS_ERROR) {
-      diag->Error(DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser.get())))
+      diag->Error(android::DiagMessage(source.WithLine(XML_GetCurrentLineNumber(parser.get())))
                   << XML_ErrorString(XML_GetErrorCode(parser.get())));
       return {};
     }
   }
   return util::make_unique<XmlResource>(ResourceFile{{}, {}, ResourceFile::Type::kUnknown, source},
-                                        StringPool{}, std::move(stack.root));
+                                        android::StringPool{}, std::move(stack.root));
 }
 
-static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPool* out_pool) {
+static void CopyAttributes(Element* el, android::ResXMLParser* parser,
+                           android::StringPool* out_pool) {
   const size_t attr_count = parser->getAttributeCount();
   if (attr_count > 0) {
     el->attributes.reserve(attr_count);
@@ -229,12 +231,12 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
       size_t len;
       const char16_t* str16 = parser->getAttributeNamespace(i, &len);
       if (str16) {
-        attr.namespace_uri = util::Utf16ToUtf8(StringPiece16(str16, len));
+        attr.namespace_uri = android::util::Utf16ToUtf8(StringPiece16(str16, len));
       }
 
       str16 = parser->getAttributeName(i, &len);
       if (str16) {
-        attr.name = util::Utf16ToUtf8(StringPiece16(str16, len));
+        attr.name = android::util::Utf16ToUtf8(StringPiece16(str16, len));
       }
 
       uint32_t res_id = parser->getAttributeNameResID(i);
@@ -244,7 +246,7 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
 
       str16 = parser->getAttributeStringValue(i, &len);
       if (str16) {
-        attr.value = util::Utf16ToUtf8(StringPiece16(str16, len));
+        attr.value = android::util::Utf16ToUtf8(StringPiece16(str16, len));
       }
 
       android::Res_value res_value;
@@ -294,12 +296,12 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
         size_t len;
         const char16_t* str16 = tree.getNamespacePrefix(&len);
         if (str16) {
-          decl.prefix = util::Utf16ToUtf8(StringPiece16(str16, len));
+          decl.prefix = android::util::Utf16ToUtf8(StringPiece16(str16, len));
         }
 
         str16 = tree.getNamespaceUri(&len);
         if (str16) {
-          decl.uri = util::Utf16ToUtf8(StringPiece16(str16, len));
+          decl.uri = android::util::Utf16ToUtf8(StringPiece16(str16, len));
         }
 
         if (pending_element == nullptr) {
@@ -323,12 +325,12 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
         size_t len;
         const char16_t* str16 = tree.getElementNamespace(&len);
         if (str16) {
-          el->namespace_uri = util::Utf16ToUtf8(StringPiece16(str16, len));
+          el->namespace_uri = android::util::Utf16ToUtf8(StringPiece16(str16, len));
         }
 
         str16 = tree.getElementName(&len);
         if (str16) {
-          el->name = util::Utf16ToUtf8(StringPiece16(str16, len));
+          el->name = android::util::Utf16ToUtf8(StringPiece16(str16, len));
         }
 
         Element* this_el = el.get();
@@ -349,7 +351,7 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
         size_t len;
         const char16_t* str16 = tree.getText(&len);
         if (str16) {
-          text->text = util::Utf16ToUtf8(StringPiece16(str16, len));
+          text->text = android::util::Utf16ToUtf8(StringPiece16(str16, len));
         }
         CHECK(!node_stack.empty());
         node_stack.top()->AppendChild(std::move(text));

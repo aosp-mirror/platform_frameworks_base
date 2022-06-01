@@ -44,7 +44,7 @@ static std::optional<ResourceNamedType> ToResourceNamedType(const char16_t* type
                                                             const char* type, size_t type_len) {
   std::optional<ResourceNamedTypeRef> parsed_type;
   if (type16) {
-    auto converted = util::Utf16ToUtf8(StringPiece16(type16, type_len));
+    auto converted = android::util::Utf16ToUtf8(StringPiece16(type16, type_len));
     parsed_type = ParseResourceNamedType(converted);
   } else if (type) {
     parsed_type = ParseResourceNamedType(StringPiece(type, type_len));
@@ -64,8 +64,7 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
     return {};
   }
 
-  name_out.package =
-      util::Utf16ToUtf8(StringPiece16(name_in.package, name_in.packageLen));
+  name_out.package = android::util::Utf16ToUtf8(StringPiece16(name_in.package, name_in.packageLen));
 
   std::optional<ResourceNamedType> type =
       ToResourceNamedType(name_in.type, name_in.name8, name_in.typeLen);
@@ -75,8 +74,7 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
   name_out.type = *type;
 
   if (name_in.name) {
-    name_out.entry =
-        util::Utf16ToUtf8(StringPiece16(name_in.name, name_in.nameLen));
+    name_out.entry = android::util::Utf16ToUtf8(StringPiece16(name_in.name, name_in.nameLen));
   } else if (name_in.name8) {
     name_out.entry.assign(name_in.name8, name_in.nameLen);
   } else {
@@ -101,8 +99,7 @@ std::optional<ResourceName> ToResourceName(const android::AssetManager2::Resourc
   name_out.type = *type;
 
   if (name_in.entry16) {
-    name_out.entry =
-        util::Utf16ToUtf8(StringPiece16(name_in.entry16, name_in.entry_len));
+    name_out.entry = android::util::Utf16ToUtf8(StringPiece16(name_in.entry16, name_in.entry_len));
   } else if (name_in.entry) {
     name_out.entry = std::string(name_in.entry, name_in.entry_len);
   } else {
@@ -498,7 +495,7 @@ std::optional<bool> ParseBool(const StringPiece& str) {
 }
 
 std::optional<uint32_t> ParseInt(const StringPiece& str) {
-  std::u16string str16 = util::Utf8ToUtf16(str);
+  std::u16string str16 = android::util::Utf8ToUtf16(str);
   android::Res_value value;
   if (android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
     return value.data;
@@ -509,7 +506,7 @@ std::optional<uint32_t> ParseInt(const StringPiece& str) {
 std::optional<ResourceId> ParseResourceId(const StringPiece& str) {
   StringPiece trimmed_str(util::TrimWhitespace(str));
 
-  std::u16string str16 = util::Utf8ToUtf16(trimmed_str);
+  std::u16string str16 = android::util::Utf8ToUtf16(trimmed_str);
   android::Res_value value;
   if (android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
     if (value.dataType == android::Res_value::TYPE_INT_HEX) {
@@ -525,7 +522,7 @@ std::optional<ResourceId> ParseResourceId(const StringPiece& str) {
 std::optional<int> ParseSdkVersion(const StringPiece& str) {
   StringPiece trimmed_str(util::TrimWhitespace(str));
 
-  std::u16string str16 = util::Utf8ToUtf16(trimmed_str);
+  std::u16string str16 = android::util::Utf8ToUtf16(trimmed_str);
   android::Res_value value;
   if (android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
     return static_cast<int>(value.data);
@@ -562,7 +559,7 @@ std::unique_ptr<BinaryPrimitive> MakeBool(bool val) {
 }
 
 std::unique_ptr<BinaryPrimitive> TryParseInt(const StringPiece& str) {
-  std::u16string str16 = util::Utf8ToUtf16(util::TrimWhitespace(str));
+  std::u16string str16 = android::util::Utf8ToUtf16(util::TrimWhitespace(str));
   android::Res_value value;
   if (!android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
     return {};
@@ -575,7 +572,7 @@ std::unique_ptr<BinaryPrimitive> MakeInt(uint32_t val) {
 }
 
 std::unique_ptr<BinaryPrimitive> TryParseFloat(const StringPiece& str) {
-  std::u16string str16 = util::Utf8ToUtf16(util::TrimWhitespace(str));
+  std::u16string str16 = android::util::Utf8ToUtf16(util::TrimWhitespace(str));
   android::Res_value value;
   if (!android::ResTable::stringToFloat(str16.data(), str16.size(), &value)) {
     return {};
@@ -737,7 +734,7 @@ std::string BuildResourceFileName(const ResourceFile& res_file, const NameMangle
 std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const ConfigDescription& config,
                                           const android::ResStringPool& src_pool,
                                           const android::Res_value& res_value,
-                                          StringPool* dst_pool) {
+                                          android::StringPool* dst_pool) {
   if (type == ResourceType::kId) {
     if (res_value.dataType != android::Res_value::TYPE_REFERENCE &&
         res_value.dataType != android::Res_value::TYPE_DYNAMIC_REFERENCE) {
@@ -748,30 +745,32 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
     // fall through to regular reference deserialization logic
   }
 
-  const uint32_t data = util::DeviceToHost32(res_value.data);
+  const uint32_t data = android::util::DeviceToHost32(res_value.data);
   switch (res_value.dataType) {
     case android::Res_value::TYPE_STRING: {
-      const std::string str = util::GetString(src_pool, data);
+      const std::string str = android::util::GetString(src_pool, data);
       auto spans_result = src_pool.styleAt(data);
 
       // Check if the string has a valid style associated with it.
       if (spans_result.has_value() &&
           (*spans_result)->name.index != android::ResStringPool_span::END) {
         const android::ResStringPool_span* spans = spans_result->unsafe_ptr();
-        StyleString style_str = {str};
+        android::StyleString style_str = {str};
         while (spans->name.index != android::ResStringPool_span::END) {
-          style_str.spans.push_back(Span{util::GetString(src_pool, spans->name.index),
-                                         spans->firstChar, spans->lastChar});
+          style_str.spans.push_back(
+              android::Span{android::util::GetString(src_pool, spans->name.index), spans->firstChar,
+                            spans->lastChar});
           spans++;
         }
         return util::make_unique<StyledString>(dst_pool->MakeRef(
-            style_str, StringPool::Context(StringPool::Context::kNormalPriority, config)));
+            style_str,
+            android::StringPool::Context(android::StringPool::Context::kNormalPriority, config)));
       } else {
         if (type != ResourceType::kString && util::StartsWith(str, "res/")) {
           // This must be a FileReference.
-          std::unique_ptr<FileReference> file_ref =
-              util::make_unique<FileReference>(dst_pool->MakeRef(
-                  str, StringPool::Context(StringPool::Context::kHighPriority, config)));
+          std::unique_ptr<FileReference> file_ref = util::make_unique<FileReference>(
+              dst_pool->MakeRef(str, android::StringPool::Context(
+                                         android::StringPool::Context::kHighPriority, config)));
           if (type == ResourceType::kRaw) {
             file_ref->type = ResourceFile::Type::kUnknown;
           } else if (util::EndsWith(*file_ref->path, ".xml")) {
@@ -783,7 +782,8 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
         }
 
         // There are no styles associated with this string, so treat it as a simple string.
-        return util::make_unique<String>(dst_pool->MakeRef(str, StringPool::Context(config)));
+        return util::make_unique<String>(
+            dst_pool->MakeRef(str, android::StringPool::Context(config)));
       }
     } break;
 
@@ -950,7 +950,7 @@ StringBuilder::SpanHandle StringBuilder::StartSpan(const std::string& name) {
 
   // When we start a span, all state associated with whitespace truncation and quotation is ended.
   ResetTextState();
-  Span span;
+  android::Span span;
   span.name = name;
   span.first_char = span.last_char = utf16_len_;
   xml_string_.spans.push_back(std::move(span));

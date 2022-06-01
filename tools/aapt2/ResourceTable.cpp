@@ -464,20 +464,21 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
   return view;
 }
 
-bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
+bool ResourceTable::AddResource(NewResource&& res, android::IDiagnostics* diag) {
   CHECK(diag != nullptr) << "Diagnostic pointer is null";
 
   const bool validate = validation_ == Validation::kEnabled;
-  const Source source = res.value ? res.value->GetSource() : Source{};
+  const android::Source source = res.value ? res.value->GetSource() : android::Source{};
   if (validate && !res.allow_mangled && !IsValidResourceEntryName(res.name.entry)) {
-    diag->Error(DiagMessage(source)
+    diag->Error(android::DiagMessage(source)
                 << "resource '" << res.name << "' has invalid entry name '" << res.name.entry);
     return false;
   }
 
   if (res.id.has_value() && !res.id->first.is_valid()) {
-    diag->Error(DiagMessage(source) << "trying to add resource '" << res.name << "' with ID "
-                                    << res.id->first << " but that ID is invalid");
+    diag->Error(android::DiagMessage(source)
+                << "trying to add resource '" << res.name << "' with ID " << res.id->first
+                << " but that ID is invalid");
     return false;
   }
 
@@ -513,7 +514,7 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
   if (res.id.has_value()) {
     if (entry->id && entry->id.value() != res.id->first) {
       if (res.id->second != OnIdConflict::CREATE_ENTRY) {
-        diag->Error(DiagMessage(source)
+        diag->Error(android::DiagMessage(source)
                     << "trying to add resource '" << res.name << "' with ID " << res.id->first
                     << " but resource already has ID " << entry->id.value());
         return false;
@@ -541,9 +542,9 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
 
   if (res.overlayable.has_value()) {
     if (entry->overlayable_item) {
-      diag->Error(DiagMessage(res.overlayable->source)
+      diag->Error(android::DiagMessage(res.overlayable->source)
                   << "duplicate overlayable declaration for resource '" << res.name << "'");
-      diag->Error(DiagMessage(entry->overlayable_item.value().source)
+      diag->Error(android::DiagMessage(entry->overlayable_item.value().source)
                   << "previous declaration here");
       return false;
     }
@@ -581,9 +582,10 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
           break;
 
         case CollisionResult::kConflict:
-          diag->Error(DiagMessage(source) << "duplicate value for resource '" << res.name << "' "
-                                          << "with config '" << res.config << "'");
-          diag->Error(DiagMessage(source) << "resource previously defined here");
+          diag->Error(android::DiagMessage(source)
+                      << "duplicate value for resource '" << res.name << "' "
+                      << "with config '" << res.config << "'");
+          diag->Error(android::DiagMessage(source) << "resource previously defined here");
           return false;
 
         case CollisionResult::kKeepOriginal:

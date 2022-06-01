@@ -19,11 +19,10 @@
 
 #include <memory>
 
+#include "ResourceValues.h"
 #include "android-base/macros.h"
 #include "androidfw/StringPiece.h"
-
-#include "ResourceValues.h"
-#include "StringPool.h"
+#include "androidfw/StringPool.h"
 
 namespace aapt {
 

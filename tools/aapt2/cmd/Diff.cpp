@@ -16,10 +16,10 @@
 
 #include "Diff.h"
 
-#include "android-base/macros.h"
-
+#include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "ValueVisitor.h"
+#include "android-base/macros.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 
@@ -45,7 +45,7 @@ class DiffContext : public IAaptContext {
     return 0x0;
   }
 
-  IDiagnostics* GetDiagnostics() override {
+  android::IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }
 
@@ -78,7 +78,7 @@ class DiffContext : public IAaptContext {
   SymbolTable symbol_table_;
 };
 
-static void EmitDiffLine(const Source& source, const StringPiece& message) {
+static void EmitDiffLine(const android::Source& source, const StringPiece& message) {
   std::cerr << source << ": " << message << "\n";
 }
 
@@ -385,7 +385,7 @@ int DiffCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
-  IDiagnostics* diag = context.GetDiagnostics();
+  android::IDiagnostics* diag = context.GetDiagnostics();
   std::unique_ptr<LoadedApk> apk_a = LoadedApk::LoadApkFromPath(args[0], diag);
   std::unique_ptr<LoadedApk> apk_b = LoadedApk::LoadApkFromPath(args[1], diag);
   if (!apk_a || !apk_b) {

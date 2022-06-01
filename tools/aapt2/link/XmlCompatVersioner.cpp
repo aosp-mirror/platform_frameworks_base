@@ -22,7 +22,7 @@
 
 namespace aapt {
 
-static xml::Attribute CopyAttr(const xml::Attribute& src, StringPool* out_string_pool) {
+static xml::Attribute CopyAttr(const xml::Attribute& src, android::StringPool* out_string_pool) {
   CloningValueTransformer cloner(out_string_pool);
   xml::Attribute dst{src.namespace_uri, src.name, src.value, src.compiled_attribute};
   if (src.compiled_value != nullptr) {
@@ -34,7 +34,7 @@ static xml::Attribute CopyAttr(const xml::Attribute& src, StringPool* out_string
 // Returns false if the attribute is not copied because an existing attribute takes precedence
 // (came from a rule).
 static bool CopyAttribute(const xml::Attribute& src_attr, bool generated, xml::Element* dst_el,
-                          StringPool* out_string_pool) {
+                          android::StringPool* out_string_pool) {
   CloningValueTransformer cloner(out_string_pool);
   xml::Attribute* dst_attr = dst_el->FindAttribute(src_attr.namespace_uri, src_attr.name);
   if (dst_attr != nullptr) {
@@ -58,7 +58,7 @@ void XmlCompatVersioner::ProcessRule(const xml::Element& src_el, const xml::Attr
                                      const util::Range<ApiVersion>& api_range, bool generated,
                                      xml::Element* dst_el,
                                      std::set<ApiVersion>* out_apis_referenced,
-                                     StringPool* out_string_pool) {
+                                     android::StringPool* out_string_pool) {
   if (src_attr_version <= api_range.start) {
     // The API is compatible, so don't check the rule and just copy.
     if (!CopyAttribute(src_attr, generated, dst_el, out_string_pool)) {
@@ -156,7 +156,7 @@ DegradeToManyRule::DegradeToManyRule(std::vector<ReplacementAttr> attrs)
 }
 
 static inline std::unique_ptr<Item> CloneIfNotNull(const std::unique_ptr<Item>& src,
-                                                   StringPool* out_string_pool) {
+                                                   android::StringPool* out_string_pool) {
   if (src == nullptr) {
     return {};
   }
@@ -166,7 +166,7 @@ static inline std::unique_ptr<Item> CloneIfNotNull(const std::unique_ptr<Item>& 
 
 std::vector<DegradeResult> DegradeToManyRule::Degrade(const xml::Element& src_el,
                                                       const xml::Attribute& src_attr,
-                                                      StringPool* out_string_pool) const {
+                                                      android::StringPool* out_string_pool) const {
   std::vector<DegradeResult> result;
   result.reserve(attrs_.size());
   for (const ReplacementAttr& attr : attrs_) {
