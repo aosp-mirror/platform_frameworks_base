@@ -23,7 +23,7 @@
     <string name="cancel" msgid="1018267193425558088">"ବାତିଲ୍ କରନ୍ତୁ"</string>
     <string name="installing" msgid="4921993079741206516">"ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ଇନଷ୍ଟଲ୍‌ କରାଯାଉଛି…"</string>
-    <string name="install_done" msgid="5987363587661783896">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇଗଲା।"</string>
+    <string name="install_done" msgid="5987363587661783896">"ଆପ ଇନଷ୍ଟଲ ହୋଇଗଲା।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ଆପଣ ଏହି ଆପକୁ ଇନଷ୍ଟଲ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ଆପଣ ଏହି ଆପକୁ ଅପଡେଟ୍ କରିବା ପାଇଁ ଚାହୁଁଛନ୍ତି କି?"</string>
     <string name="install_failed" msgid="5777824004474125469">"ଆପ୍‍ ଇନଷ୍ଟଲ୍‌ ହୋଇନାହିଁ।"</string>
