@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,11 +106,12 @@ public class ContextHubService extends IContextHubService.Stub {
      * {@hide}
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "CONTEXT_HUB_EVENT_" }, value = {
+    @IntDef(prefix = {"CONTEXT_HUB_EVENT_"}, value = {
             CONTEXT_HUB_EVENT_UNKNOWN,
             CONTEXT_HUB_EVENT_RESTARTED,
     })
-    public @interface Type { }
+    public @interface Type {
+    }
 
     public static final int CONTEXT_HUB_EVENT_UNKNOWN = 0;
     public static final int CONTEXT_HUB_EVENT_RESTARTED = 1;
@@ -169,6 +171,10 @@ public class ContextHubService extends IContextHubService.Stub {
     private final SensorPrivacyManagerInternal mSensorPrivacyManagerInternal;
 
     private final Map<Integer, AtomicLong> mLastRestartTimestampMap = new HashMap<>();
+
+    private static final int MAX_NUM_OF_NANOAPP_MESSAGE_RECORDS = 10;
+    private final ConcurrentLinkedEvictingDeque<NanoAppMessage> mNanoAppMessageRecords =
+            new ConcurrentLinkedEvictingDeque<>(MAX_NUM_OF_NANOAPP_MESSAGE_RECORDS);
 
     /**
      * Class extending the callback to register with a Context Hub.
@@ -346,7 +352,7 @@ public class ContextHubService extends IContextHubService.Stub {
                 public void onReceive(Context context, Intent intent) {
                     if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(intent.getAction())
                             || BluetoothAdapter.ACTION_BLE_STATE_CHANGED.equals(
-                                    intent.getAction())) {
+                            intent.getAction())) {
                         sendBtSettingUpdate(false /* forceUpdate */);
                     }
                 }
@@ -684,15 +690,20 @@ public class ContextHubService extends IContextHubService.Stub {
     /**
      * Handles a unicast or broadcast message from a nanoapp.
      *
-     * @param contextHubId   the ID of the hub the message came from
+     * @param contextHubId the ID of the hub the message came from
      * @param hostEndpointId the host endpoint ID of the client receiving this message
-     * @param message        the message contents
-     * @param reqPermissions the permissions required to consume this message
+     * @param message the message contents
+     * @param nanoappPermissions the set of permissions the nanoapp holds
+     * @param messagePermissions the set of permissions that should be used for attributing
+     *     permissions when this message is consumed by a client
      */
     private void handleClientMessageCallback(
-            int contextHubId, short hostEndpointId, NanoAppMessage message,
+            int contextHubId,
+            short hostEndpointId,
+            NanoAppMessage message,
             List<String> nanoappPermissions,
             List<String> messagePermissions) {
+        mNanoAppMessageRecords.add(message);
         mClientManager.onMessageFromNanoApp(
                 contextHubId, hostEndpointId, message, nanoappPermissions, messagePermissions);
     }
@@ -1013,6 +1024,13 @@ public class ContextHubService extends IContextHubService.Stub {
         mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> pw.println(info));
 
         pw.println("");
+        pw.println("=================== NANOAPPS MESSAGES ====================");
+        Iterator<NanoAppMessage> iterator = mNanoAppMessageRecords.descendingIterator();
+        while (iterator.hasNext()) {
+            pw.println(iterator.next());
+        }
+
+        pw.println("");
         pw.println("=================== CLIENTS ====================");
         pw.println(mClientManager);
 
@@ -1227,7 +1245,7 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
-     *  Invokes a daily timer to query all context hubs
+     * Invokes a daily timer to query all context hubs
      */
     private void scheduleDailyMetricSnapshot() {
         Runnable queryAllContextHub = () -> {
