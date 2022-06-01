@@ -192,6 +192,7 @@ class ActivityStarter {
 
     private Task mInTask;
     private TaskFragment mInTaskFragment;
+    private TaskFragment mAddingToTaskFragment;
     @VisibleForTesting
     boolean mAddingToTask;
 
@@ -2285,20 +2286,27 @@ class ActivityStarter {
             // In this situation we want to remove all activities from the task up to the one
             // being started. In most cases this means we are resetting the task to its initial
             // state.
-            final ActivityRecord top = targetTask.performClearTop(mStartActivity, mLaunchFlags);
+            final ActivityRecord clearTop = targetTask.performClearTop(mStartActivity,
+                    mLaunchFlags);
 
-            if (top != null) {
-                if (top.isRootOfTask()) {
+            if (clearTop != null && !clearTop.finishing) {
+                if (clearTop.isRootOfTask()) {
                     // Activity aliases may mean we use different intents for the top activity,
                     // so make sure the task now has the identity of the new intent.
-                    top.getTask().setIntent(mStartActivity);
+                    clearTop.getTask().setIntent(mStartActivity);
                 }
-                deliverNewIntent(top, intentGrants);
+                deliverNewIntent(clearTop, intentGrants);
             } else {
                 // A special case: we need to start the activity because it is not currently
                 // running, and the caller has asked to clear the current task to have this
                 // activity at the top.
                 mAddingToTask = true;
+                // Adding the new activity to the same embedded TF of the clear-top activity if
+                // possible.
+                if (clearTop != null && clearTop.getTaskFragment() != null
+                        && clearTop.getTaskFragment().isEmbedded()) {
+                    mAddingToTaskFragment = clearTop.getTaskFragment();
+                }
                 if (targetTask.getRootTask() == null) {
                     // Target root task got cleared when we all activities were removed above.
                     // Go ahead and reset it.
@@ -2937,14 +2945,19 @@ class ActivityStarter {
                 newParent = mInTaskFragment;
             }
         } else {
-            final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */,
-                    false /* includingEmbeddedTask */);
-            final TaskFragment taskFragment = top != null ? top.getTaskFragment() : null;
-            if (taskFragment != null && taskFragment.isEmbedded()
-                    && canEmbedActivity(taskFragment, mStartActivity, false /* newTask */, task)) {
+            TaskFragment candidateTf = mAddingToTaskFragment != null ? mAddingToTaskFragment : null;
+            if (candidateTf == null) {
+                final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */,
+                        false /* includingEmbeddedTask */);
+                if (top != null) {
+                    candidateTf = top.getTaskFragment();
+                }
+            }
+            if (candidateTf != null && candidateTf.isEmbedded()
+                    && canEmbedActivity(candidateTf, mStartActivity, false /* newTask */, task)) {
                 // Use the embedded TaskFragment of the top activity as the new parent if the
                 // activity can be embedded.
-                newParent = top.getTaskFragment();
+                newParent = candidateTf;
             }
         }
 
