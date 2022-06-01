@@ -58,7 +58,7 @@ constructor(
     private var maxKeyguardNotifications by notNull<Int>()
 
     /** Minimum space between two notifications, see [calculateGapAndDividerHeight]. */
-    private var dividerHeight by notNull<Int>()
+    private var dividerHeight by notNull<Float>()
 
     init {
         updateResources()
@@ -142,9 +142,13 @@ constructor(
                 if (i == children.lastIndex) {
                     0f // No shelf needed.
                 } else {
+                    val firstViewInShelfIndex = i + 1
                     val spaceBeforeShelf =
                         calculateGapAndDividerHeight(
-                            stack, previous = currentNotification, current = children[i + 1], i)
+                            stack,
+                            previous = currentNotification,
+                            current = children[firstViewInShelfIndex],
+                            currentIndex = firstViewInShelfIndex)
                     spaceBeforeShelf + shelfIntrinsicHeight
                 }
 
@@ -156,16 +160,17 @@ constructor(
         maxKeyguardNotifications =
             infiniteIfNegative(resources.getInteger(R.integer.keyguard_max_notification_count))
 
-        dividerHeight = max(1, resources.getDimensionPixelSize(R.dimen.notification_divider_height))
+        dividerHeight =
+            max(1f, resources.getDimensionPixelSize(R.dimen.notification_divider_height).toFloat())
     }
 
     private val NotificationStackScrollLayout.childrenSequence: Sequence<ExpandableView>
         get() = children.map { it as ExpandableView }
 
     @VisibleForTesting
-    fun onLockscreen() : Boolean {
-        return statusBarStateController.state == KEYGUARD
-                && lockscreenShadeTransitionController.fractionToShade == 0f
+    fun onLockscreen(): Boolean {
+        return statusBarStateController.state == KEYGUARD &&
+            lockscreenShadeTransitionController.fractionToShade == 0f
     }
 
     @VisibleForTesting
@@ -207,11 +212,12 @@ constructor(
         stack: NotificationStackScrollLayout,
         previous: ExpandableView?,
         current: ExpandableView?,
-        visibleIndex: Int
+        currentIndex: Int
     ): Float {
-        var height = stack.calculateGapHeight(previous, current, visibleIndex)
-        height += dividerHeight
-        return height
+        if (currentIndex == 0) {
+            return 0f
+        }
+        return stack.calculateGapHeight(previous, current, currentIndex) + dividerHeight
     }
 
     private fun NotificationStackScrollLayout.showableChildren() =
