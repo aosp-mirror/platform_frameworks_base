@@ -301,7 +301,7 @@ public final class ActivityThread extends ClientTransactionHandler
     /** The delay time for retrying to request DirectActions. */
     private static final long REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS = 200;
     /** The max count for retrying to request DirectActions. */
-    private static final int REQUEST_DIRECT_ACTIONS_RETRY_MAX_COUNT = 3;
+    private static final int REQUEST_DIRECT_ACTIONS_RETRY_MAX_COUNT = 7;
 
     /**
      * Denotes an invalid sequence number corresponding to a process state change.
