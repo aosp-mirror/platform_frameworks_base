@@ -19,7 +19,9 @@ package com.android.server.timedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.ITimeDetectorListener;
 import android.app.time.TimeCapabilitiesAndConfig;
 import android.app.time.TimeConfiguration;
 import android.app.timedetector.GnssTimeSuggestion;
@@ -28,11 +30,17 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
+import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
@@ -51,7 +59,8 @@ import java.util.Objects;
  * and making calls async, leaving the (consequently more testable) {@link TimeDetectorStrategy}
  * implementation to deal with the logic around time detection.
  */
-public final class TimeDetectorService extends ITimeDetectorService.Stub {
+public final class TimeDetectorService extends ITimeDetectorService.Stub
+        implements IBinder.DeathRecipient {
     static final String TAG = "time_detector";
 
     public static class Lifecycle extends SystemService {
@@ -85,6 +94,14 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
 
+    /**
+     * Holds the listeners. The key is the {@link IBinder} associated with the listener, the value
+     * is the listener itself.
+     */
+    @GuardedBy("mListeners")
+    @NonNull
+    private final ArrayMap<IBinder, ITimeDetectorListener> mListeners = new ArrayMap<>();
+
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
             @NonNull ServiceConfigAccessor serviceConfigAccessor,
@@ -103,6 +120,11 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeDetectorStrategy = Objects.requireNonNull(timeDetectorStrategy);
         mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
+
+        // Wire up a change listener so that ITimeZoneDetectorListeners can be notified when
+        // the configuration changes for any reason.
+        mServiceConfigAccessor.addConfigurationInternalChangeListener(
+                () -> mHandler.post(this::handleConfigurationInternalChangedOnHandlerThread));
     }
 
     @Override
@@ -126,10 +148,117 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     @Override
-    public boolean updateConfiguration(@NonNull TimeConfiguration timeConfiguration) {
+    public boolean updateConfiguration(@NonNull TimeConfiguration configuration) {
+        int callingUserId = mCallerIdentityInjector.getCallingUserId();
+        return updateConfiguration(callingUserId, configuration);
+    }
+
+    boolean updateConfiguration(@UserIdInt int userId, @NonNull TimeConfiguration configuration) {
+        // Resolve constants like USER_CURRENT to the true user ID as needed.
+        int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, false, "updateConfiguration", null);
+
         enforceManageTimeDetectorPermission();
-        // TODO(b/172891783) Add actual logic
-        return false;
+
+        Objects.requireNonNull(configuration);
+
+        final long token = mCallerIdentityInjector.clearCallingIdentity();
+        try {
+            return mServiceConfigAccessor.updateConfiguration(resolvedUserId, configuration);
+        } finally {
+            mCallerIdentityInjector.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void addListener(@NonNull ITimeDetectorListener listener) {
+        enforceManageTimeDetectorPermission();
+        Objects.requireNonNull(listener);
+
+        synchronized (mListeners) {
+            IBinder listenerBinder = listener.asBinder();
+            if (mListeners.containsKey(listenerBinder)) {
+                return;
+            }
+            try {
+                // Ensure the reference to the listener will be removed if the client process dies.
+                listenerBinder.linkToDeath(this, 0 /* flags */);
+
+                // Only add the listener if we can linkToDeath().
+                mListeners.put(listenerBinder, listener);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to linkToDeath() for listener=" + listener, e);
+            }
+        }
+    }
+
+    @Override
+    public void removeListener(@NonNull ITimeDetectorListener listener) {
+        enforceManageTimeDetectorPermission();
+        Objects.requireNonNull(listener);
+
+        synchronized (mListeners) {
+            IBinder listenerBinder = listener.asBinder();
+            boolean removedListener = false;
+            if (mListeners.remove(listenerBinder) != null) {
+                // Stop listening for the client process to die.
+                listenerBinder.unlinkToDeath(this, 0 /* flags */);
+                removedListener = true;
+            }
+            if (!removedListener) {
+                Slog.w(TAG, "Client asked to remove listener=" + listener
+                        + ", but no listeners were removed."
+                        + " mListeners=" + mListeners);
+            }
+        }
+    }
+
+    @Override
+    public void binderDied() {
+        // Should not be used as binderDied(IBinder who) is overridden.
+        Slog.wtf(TAG, "binderDied() called unexpectedly.");
+    }
+
+    /**
+     * Called when one of the ITimeDetectorListener processes dies before calling
+     * {@link #removeListener(ITimeDetectorListener)}.
+     */
+    @Override
+    public void binderDied(IBinder who) {
+        synchronized (mListeners) {
+            boolean removedListener = false;
+            final int listenerCount = mListeners.size();
+            for (int listenerIndex = listenerCount - 1; listenerIndex >= 0; listenerIndex--) {
+                IBinder listenerBinder = mListeners.keyAt(listenerIndex);
+                if (listenerBinder.equals(who)) {
+                    mListeners.removeAt(listenerIndex);
+                    removedListener = true;
+                    break;
+                }
+            }
+            if (!removedListener) {
+                Slog.w(TAG, "Notified of binder death for who=" + who
+                        + ", but did not remove any listeners."
+                        + " mListeners=" + mListeners);
+            }
+        }
+    }
+
+    void handleConfigurationInternalChangedOnHandlerThread() {
+        // Configuration has changed, but each user may have a different view of the configuration.
+        // It's possible that this will cause unnecessary notifications but that shouldn't be a
+        // problem.
+        synchronized (mListeners) {
+            final int listenerCount = mListeners.size();
+            for (int listenerIndex = 0; listenerIndex < listenerCount; listenerIndex++) {
+                ITimeDetectorListener listener = mListeners.valueAt(listenerIndex);
+                try {
+                    listener.onChange();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to notify listener=" + listener, e);
+                }
+            }
+        }
     }
 
     @Override

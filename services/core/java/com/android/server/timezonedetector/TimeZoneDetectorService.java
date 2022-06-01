@@ -196,8 +196,9 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     boolean updateConfiguration(
             @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration) {
-        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, false, "updateConfiguration", null);
+        // Resolve constants like USER_CURRENT to the true user ID as needed.
+        int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, false, "updateConfiguration", null);
 
         enforceManageTimeZoneDetectorPermission();
 
@@ -205,7 +206,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            return mServiceConfigAccessor.updateConfiguration(userId, configuration);
+            return mServiceConfigAccessor.updateConfiguration(resolvedUserId, configuration);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
