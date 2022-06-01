@@ -218,6 +218,11 @@ public interface AppStandbyInternal {
 
     void setActiveAdminApps(Set<String> adminPkgs, int userId);
 
+    /**
+     * @return {@code true} if the given package is an active device admin app.
+     */
+    boolean isActiveDeviceAdmin(String packageName, int userId);
+
     void onAdminDataAvailable();
 
     void clearCarrierPrivilegedApps();

@@ -20,7 +20,7 @@
     android:id="@+id/autofill_dialog_picker"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bottomsheet_background"
+    android:background="@drawable/autofill_bottomsheet_background"
     android:orientation="vertical">
 
     <LinearLayout

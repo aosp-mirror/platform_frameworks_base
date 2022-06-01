@@ -226,6 +226,13 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        if (mDrawable == null) {
+            Log.e(TAG, "onMeasure() after recycle()!");
+            setMeasuredDimension(0, 0);
+            return;
+        }
+
         if (mIsIsolated) {
             // When isolated we have a fixed size, let's use that sizing.
             setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),

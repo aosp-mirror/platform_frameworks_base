@@ -306,7 +306,7 @@
     <string name="permgrouplab_sms" msgid="795737735126084874">"សារ SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ផ្ញើ និងមើលសារ SMS"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"ឯកសារ"</string>
-    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ចូលប្រើ​ឯកសារ​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ចូលប្រើ​ប្រាស់ឯកសារ​នៅលើ​ឧបករណ៍​របស់អ្នក"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"តន្រ្តី និងសំឡេង"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ចូលប្រើតន្ត្រី និងសំឡេងនៅលើឧបករណ៍របស់អ្នក"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"រូបថត និងវីដេអូ"</string>

@@ -19,7 +19,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bottomsheet_background"
+    android:background="@drawable/autofill_bottomsheet_background"
     android:orientation="vertical">
 
     <LinearLayout

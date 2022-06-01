@@ -1872,7 +1872,7 @@
     <!-- The package name of the default captive portal login app. Must be granted the
          POST_NOTIFICATIONS permission.
     -->
-    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false"></string>
+    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false">com.android.captiveportallogin</string>
 
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
@@ -3000,6 +3000,10 @@
 
     </string-array>
 
+    <!-- Whether to show a notification informing users about notification permission settings
+         upon upgrade to T from a pre-T version -->
+    <bool name="config_notificationReviewPermissions">false</bool>
+
     <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
     <integer name="config_toastDefaultGravity">0x00000051</integer>
 
@@ -3526,6 +3530,9 @@
          To facilitate writing device-independent emulation overlays, the marker `@dp` can be
          appended after the path string to interpret coordinates in dp instead of px units.
          Note that a physical cutout should be configured in pixels for the best results.
+
+         If the display supports multiple resolutions, please define the path config based on the
+         highest resolution so that it can be scaled correctly in each resolution.
 
          Example for a 10px x 10px square top-center cutout:
                 <string ...>M -5,0 L -5,10 L 5,10 L 5,0 Z</string>
