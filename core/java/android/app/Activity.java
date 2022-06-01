@@ -8260,6 +8260,11 @@ public class Activity extends ContextThemeWrapper
         return mMainThread;
     }
 
+    /** @hide */
+    public final ActivityInfo getActivityInfo() {
+        return mActivityInfo;
+    }
+
     final void performCreate(Bundle icicle) {
         performCreate(icicle, null);
     }
