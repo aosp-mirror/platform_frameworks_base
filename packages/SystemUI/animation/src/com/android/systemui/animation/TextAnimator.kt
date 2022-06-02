@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.keyguard
+package com.android.systemui.animation
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -61,8 +61,8 @@ class TextAnimator(
     private val invalidateCallback: () -> Unit
 ) {
     // Following two members are for mutable for testing purposes.
-    internal var textInterpolator: TextInterpolator = TextInterpolator(layout)
-    internal var animator: ValueAnimator = ValueAnimator.ofFloat(1f).apply {
+    public var textInterpolator: TextInterpolator = TextInterpolator(layout)
+    public var animator: ValueAnimator = ValueAnimator.ofFloat(1f).apply {
         duration = DEFAULT_ANIMATION_DURATION
         addUpdateListener {
             textInterpolator.progress = it.animatedValue as Float
