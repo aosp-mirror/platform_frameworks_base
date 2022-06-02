@@ -44,6 +44,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_FOOTER_DOT
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.animation.DialogLaunchAnimator
@@ -81,12 +82,16 @@ class FgsManagerController @Inject constructor(
 
     companion object {
         private val LOG_TAG = FgsManagerController::class.java.simpleName
+        private const val DEFAULT_TASK_MANAGER_ENABLED = true
+        private const val DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT = false
     }
 
     var changesSinceDialog = false
         private set
 
     var isAvailable = false
+        private set
+    var showFooterDot = false
         private set
 
     private val lock = Any()
@@ -151,10 +156,14 @@ class FgsManagerController @Inject constructor(
             deviceConfigProxy.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI,
                     backgroundExecutor) {
                 isAvailable = it.getBoolean(TASK_MANAGER_ENABLED, isAvailable)
+                showFooterDot =
+                        it.getBoolean(TASK_MANAGER_SHOW_FOOTER_DOT, showFooterDot)
             }
 
-            isAvailable = deviceConfigProxy
-                    .getBoolean(NAMESPACE_SYSTEMUI, TASK_MANAGER_ENABLED, true)
+            isAvailable = deviceConfigProxy.getBoolean(NAMESPACE_SYSTEMUI,
+                    TASK_MANAGER_ENABLED, DEFAULT_TASK_MANAGER_ENABLED)
+            showFooterDot = deviceConfigProxy.getBoolean(NAMESPACE_SYSTEMUI,
+                    TASK_MANAGER_SHOW_FOOTER_DOT, DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT)
 
             dumpManager.registerDumpable(this)
 
