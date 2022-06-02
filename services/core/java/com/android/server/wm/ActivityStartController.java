@@ -518,7 +518,8 @@ public class ActivityStartController {
      */
     int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
             @NonNull Intent activityIntent, @Nullable Bundle activityOptions,
-            @Nullable IBinder resultTo, int callingUid, int callingPid) {
+            @Nullable IBinder resultTo, int callingUid, int callingPid,
+            @Nullable IBinder errorCallbackToken) {
         final ActivityRecord caller =
                 resultTo != null ? ActivityRecord.forTokenLocked(resultTo) : null;
         return obtainStarter(activityIntent, "startActivityInTaskFragment")
@@ -531,6 +532,7 @@ public class ActivityStartController {
                 .setRealCallingUid(callingUid)
                 .setRealCallingPid(callingPid)
                 .setUserId(caller != null ? caller.mUserId : mService.getCurrentUserId())
+                .setErrorCallbackToken(errorCallbackToken)
                 .execute();
     }
 

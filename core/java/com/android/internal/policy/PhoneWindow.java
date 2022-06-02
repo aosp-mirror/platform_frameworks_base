@@ -342,7 +342,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     boolean mDecorFitsSystemWindows = true;
 
-    private ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher =
+    private final ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher =
             new ProxyOnBackInvokedDispatcher();
 
     static class WindowManagerHolder {
@@ -378,6 +378,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // window, as we'll be skipping the addView in handleResumeActivity(), and
             // the token will not be updated as for a new window.
             getAttributes().token = preservedWindow.getAttributes().token;
+            mProxyOnBackInvokedDispatcher.setActualDispatcher(
+                    preservedWindow.getOnBackInvokedDispatcher());
         }
         // Even though the device doesn't support picture-in-picture mode,
         // an user can force using it through developer options.

@@ -264,7 +264,7 @@ public class TaskTests extends WindowTestsBase {
         // Detach from process so the activities can be removed from hierarchy when finishing.
         activity1.detachFromProcess();
         activity2.detachFromProcess();
-        assertNull(task.performClearTop(activity1, 0 /* launchFlags */));
+        assertTrue(task.performClearTop(activity1, 0 /* launchFlags */).finishing);
         assertFalse(task.hasChild());
         // In real case, the task should be preserved for adding new activity.
         assertTrue(task.isAttached());
