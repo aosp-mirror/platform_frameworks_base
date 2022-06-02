@@ -222,7 +222,7 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
 
         mReceiver.onReceive(mContext, intent);
 
-        verify(mDialogLaunchAnimator).showFromView(any(), eq(mView));
+        verify(mDialogLaunchAnimator).showFromView(any(), eq(mView), any());
 
         mPowerNotificationWarnings.getSaverConfirmationDialog().dismiss();
     }
