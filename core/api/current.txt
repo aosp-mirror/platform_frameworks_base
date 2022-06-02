@@ -16852,6 +16852,8 @@ package android.hardware {
     field public static final int DATASPACE_SRGB = 142671872; // 0x8810000
     field public static final int DATASPACE_SRGB_LINEAR = 138477568; // 0x8410000
     field public static final int DATASPACE_UNKNOWN = 0; // 0x0
+    field public static final int DEPTH = 4096; // 0x1000
+    field public static final int DYNAMIC_DEPTH = 4098; // 0x1002
     field public static final int RANGE_EXTENDED = 402653184; // 0x18000000
     field public static final int RANGE_FULL = 134217728; // 0x8000000
     field public static final int RANGE_LIMITED = 268435456; // 0x10000000
