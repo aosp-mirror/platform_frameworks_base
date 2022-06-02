@@ -385,6 +385,17 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     void updateTimeZone(TimeZone timeZone) {
         mView.onTimeZoneChanged(timeZone);
+        if (mClockViewController != null) {
+            mClockViewController.onTimeZoneChanged(timeZone);
+            mLargeClockViewController.onTimeZoneChanged(timeZone);
+        }
+    }
+
+    void refreshFormat() {
+        if (mClockViewController != null) {
+            mClockViewController.refreshFormat();
+            mLargeClockViewController.refreshFormat();
+        }
     }
 
     /**
