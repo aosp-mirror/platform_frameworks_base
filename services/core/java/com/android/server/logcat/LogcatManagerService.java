@@ -16,6 +16,8 @@
 
 package com.android.server.logcat;
 
+import static android.os.Process.getParentPid;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,6 +47,7 @@ import com.android.server.SystemService;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -340,13 +343,6 @@ public final class LogcatManagerService extends SystemService {
      * access
      */
     private String getPackageName(LogAccessRequest request) {
-        if (mActivityManagerInternal != null) {
-            String packageName = mActivityManagerInternal.getPackageNameByPid(request.mPid);
-            if (packageName != null) {
-                return packageName;
-            }
-        }
-
         PackageManager pm = mContext.getPackageManager();
         if (pm == null) {
             // Decline the logd access if PackageManager is null
@@ -355,15 +351,28 @@ public final class LogcatManagerService extends SystemService {
         }
 
         String[] packageNames = pm.getPackagesForUid(request.mUid);
-
         if (ArrayUtils.isEmpty(packageNames)) {
             // Decline the logd access if the app name is unknown
             Slog.e(TAG, "Unknown calling package name, declining the logd access");
             return null;
         }
 
-        String firstPackageName = packageNames[0];
+        if (mActivityManagerInternal != null) {
+            int pid = request.mPid;
+            String packageName = mActivityManagerInternal.getPackageNameByPid(pid);
+            while ((packageName == null || !ArrayUtils.contains(packageNames, packageName))
+                    && pid != -1) {
+                pid = getParentPid(pid);
+                packageName = mActivityManagerInternal.getPackageNameByPid(pid);
+            }
 
+            if (packageName != null && ArrayUtils.contains(packageNames, packageName)) {
+                return packageName;
+            }
+        }
+
+        Arrays.sort(packageNames);
+        String firstPackageName = packageNames[0];
         if (firstPackageName == null || firstPackageName.isEmpty()) {
             // Decline the logd access if the package name from uid is unknown
             Slog.e(TAG, "Unknown calling package name, declining the logd access");
