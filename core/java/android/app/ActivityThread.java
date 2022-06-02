@@ -298,6 +298,11 @@ public final class ActivityThread extends ClientTransactionHandler
     /** Use background GC policy and default JIT threshold. */
     private static final int VM_PROCESS_STATE_JANK_IMPERCEPTIBLE = 1;
 
+    /** The delay time for retrying to request DirectActions. */
+    private static final long REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS = 200;
+    /** The max count for retrying to request DirectActions. */
+    private static final int REQUEST_DIRECT_ACTIONS_RETRY_MAX_COUNT = 7;
+
     /**
      * Denotes an invalid sequence number corresponding to a process state change.
      */
@@ -1864,7 +1869,8 @@ public final class ActivityThread extends ClientTransactionHandler
                 cancellationCallback.sendResult(cancellationResult);
             }
             mH.sendMessage(PooledLambda.obtainMessage(ActivityThread::handleRequestDirectActions,
-                    ActivityThread.this, activityToken, interactor, cancellationSignal, callback));
+                    ActivityThread.this, activityToken, interactor, cancellationSignal, callback,
+                    REQUEST_DIRECT_ACTIONS_RETRY_MAX_COUNT));
         }
 
         @Override
@@ -3940,7 +3946,7 @@ public final class ActivityThread extends ClientTransactionHandler
     /** Fetches the user actions for the corresponding activity */
     private void handleRequestDirectActions(@NonNull IBinder activityToken,
             @NonNull IVoiceInteractor interactor, @NonNull CancellationSignal cancellationSignal,
-            @NonNull RemoteCallback callback) {
+            @NonNull RemoteCallback callback, int retryCount) {
         final ActivityClientRecord r = mActivities.get(activityToken);
         if (r == null) {
             Log.w(TAG, "requestDirectActions(): no activity for " + activityToken);
@@ -3948,7 +3954,20 @@ public final class ActivityThread extends ClientTransactionHandler
             return;
         }
         final int lifecycleState = r.getLifecycleState();
-        if (lifecycleState < ON_START || lifecycleState >= ON_STOP) {
+        if (lifecycleState < ON_START) {
+            // TODO(b/234173463): requestDirectActions callback should indicate errors
+            if (retryCount > 0) {
+                mH.sendMessageDelayed(
+                        PooledLambda.obtainMessage(ActivityThread::handleRequestDirectActions,
+                                ActivityThread.this, activityToken, interactor, cancellationSignal,
+                                callback, retryCount - 1), REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS);
+                return;
+            }
+            Log.w(TAG, "requestDirectActions(" + r + "): wrong lifecycle: " + lifecycleState);
+            callback.sendResult(null);
+            return;
+        }
+        if (lifecycleState >= ON_STOP) {
             Log.w(TAG, "requestDirectActions(" + r + "): wrong lifecycle: " + lifecycleState);
             callback.sendResult(null);
             return;

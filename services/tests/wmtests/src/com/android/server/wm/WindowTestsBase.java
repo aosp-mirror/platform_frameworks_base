@@ -1217,6 +1217,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         @Nullable
         private TaskFragmentOrganizer mOrganizer;
         private IBinder mFragmentToken;
+        private Rect mBounds;
 
         TaskFragmentBuilder(ActivityTaskManagerService service) {
             mAtm = service;
@@ -1253,6 +1254,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        TaskFragmentBuilder setBounds(@Nullable Rect bounds) {
+            mBounds = bounds;
+            return this;
+        }
+
         TaskFragment build() {
             SystemServicesTestRule.checkHoldsLock(mAtm.mGlobalLock);
 
@@ -1279,6 +1285,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 taskFragment.setTaskFragmentOrganizer(
                         mOrganizer.getOrganizerToken(), DEFAULT_TASK_FRAGMENT_ORGANIZER_UID,
                         DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
+            }
+            if (mBounds != null && !mBounds.isEmpty()) {
+                taskFragment.setBounds(mBounds);
             }
             spyOn(taskFragment);
             return taskFragment;
