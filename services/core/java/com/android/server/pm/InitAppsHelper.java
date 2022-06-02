@@ -194,7 +194,6 @@ final class InitAppsHelper {
                 apexScanResults = mInstallPackageHelper.scanApexPackages(
                         mApexManager.getAllApexInfos(), mSystemParseFlags, mSystemScanFlags,
                         packageParser, mExecutorService);
-                mApexPackageInfo.notifyScanResult(apexScanResults);
             } else {
                 apexScanResults = mApexPackageInfo.scanApexPackages(
                         mApexManager.getAllApexInfos(), packageParser, mExecutorService);
