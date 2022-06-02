@@ -5534,7 +5534,12 @@ public class Editor {
 
         void onHandleMoved() {}
 
-        public void onDetached() {}
+        /**
+         * Called back when the handle view was detached.
+         */
+        public void onDetached() {
+            dismissMagnifier();
+        }
 
         @Override
         protected void onSizeChanged(int w, int h, int oldw, int oldh) {
