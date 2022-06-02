@@ -192,6 +192,10 @@ public class Vpn {
     // the device idle allowlist during service launch and VPN bootstrap.
     private static final long VPN_LAUNCH_IDLE_ALLOWLIST_DURATION_MS = 60 * 1000;
 
+    // Length of time (in milliseconds) that an app registered for VpnManager events is placed on
+    // the device idle allowlist each time the a VpnManager event is fired.
+    private static final long VPN_MANAGER_EVENT_ALLOWLIST_DURATION_MS = 30 * 1000;
+
     private static final String LOCKDOWN_ALLOWLIST_SETTING_NAME =
             Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST;
     /**
@@ -720,6 +724,14 @@ public class Vpn {
             intent.putExtra(VpnManager.EXTRA_ERROR_CLASS, errorClass);
             intent.putExtra(VpnManager.EXTRA_ERROR_CODE, errorCode);
         }
+
+        // Allow VpnManager app to temporarily run background services to handle this error.
+        // If an app requires anything beyond this grace period, they MUST either declare
+        // themselves as a foreground service, or schedule a job/workitem.
+        DeviceIdleInternal idleController = mDeps.getDeviceIdleInternal();
+        idleController.addPowerSaveTempWhitelistApp(Process.myUid(), packageName,
+                VPN_MANAGER_EVENT_ALLOWLIST_DURATION_MS, mUserId, false, REASON_VPN,
+                "VpnManager event");
         try {
             return mUserIdContext.startService(intent) != null;
         } catch (RuntimeException e) {
