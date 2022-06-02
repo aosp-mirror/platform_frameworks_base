@@ -23,4 +23,5 @@ parcelable FabricatedOverlayInternalEntry {
     @utf8InCpp String resourceName;
     int dataType;
     int data;
+    @nullable @utf8InCpp String stringData;
 }

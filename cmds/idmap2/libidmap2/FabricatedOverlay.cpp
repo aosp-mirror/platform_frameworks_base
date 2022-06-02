@@ -65,7 +65,13 @@ FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetOverlayable(const std
 
 FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
     const std::string& resource_name, uint8_t data_type, uint32_t data_value) {
-  entries_.emplace_back(Entry{resource_name, data_type, data_value});
+  entries_.emplace_back(Entry{resource_name, data_type, data_value, ""});
+  return *this;
+}
+
+FabricatedOverlay::Builder& FabricatedOverlay::Builder::SetResourceValue(
+    const std::string& resource_name, uint8_t data_type, const std::string& data_string_value) {
+  entries_.emplace_back(Entry{resource_name, data_type, 0, data_string_value});
   return *this;
 }
 
@@ -111,7 +117,8 @@ Result<FabricatedOverlay> FabricatedOverlay::Builder::Build() {
       entry = type->second.insert(std::make_pair(entry_name.to_string(), TargetValue())).first;
     }
 
-    entry->second = TargetValue{res_entry.data_type, res_entry.data_value};
+    entry->second = TargetValue{
+        res_entry.data_type, res_entry.data_value, res_entry.data_string_value};
   }
 
   pb::FabricatedOverlay overlay_pb;

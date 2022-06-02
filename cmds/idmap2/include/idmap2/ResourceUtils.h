@@ -40,6 +40,7 @@ using DataValue = uint32_t;  // Res_value::data
 struct TargetValue {
   DataType data_type;
   DataValue data_value;
+  std::string data_string_value;
 };
 
 namespace utils {
