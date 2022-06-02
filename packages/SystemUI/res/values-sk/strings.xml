@@ -749,6 +749,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"fotoaparát"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"poloha"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofón"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"nahrávanie obrazovky"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez názvu"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostný režim"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Okno priblíženia"</string>
@@ -856,6 +857,8 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznáma aplikácia"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zastaviť prenos"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostupné zariadenia pre zvukový výstup."</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ako vysielanie funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysielanie"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ľudia v okolí s kompatibilnými zariadeniami s rozhraním Bluetooth si môžu vypočuť médiá, ktoré vysielate"</string>
