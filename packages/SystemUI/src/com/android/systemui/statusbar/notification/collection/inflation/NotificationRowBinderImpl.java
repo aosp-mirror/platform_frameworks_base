@@ -268,9 +268,11 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseLowPriority(isLowPriority);
 
-        // TODO: Replace this API with RowContentBindParams directly. Also move to a separate
-        // redaction controller.
-        row.setNeedsRedaction(mNotificationLockscreenUserManager.needsRedaction(entry));
+        if (mNotificationLockscreenUserManager.needsRedaction(entry)) {
+            params.requireContentViews(FLAG_CONTENT_VIEW_PUBLIC);
+        } else {
+            params.markContentViewsFreeable(FLAG_CONTENT_VIEW_PUBLIC);
+        }
 
         params.rebindAllContentViews();
         mRowContentBindStage.requestRebind(entry, en -> {
