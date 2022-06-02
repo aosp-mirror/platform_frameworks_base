@@ -829,7 +829,7 @@ public final class ContextHubManager {
 
     /**
      * Equivalent to
-     * {@link #createClient(ContextHubInfo, Executor, String, ContextHubClientCallback)}
+     * {@link  #createClient(Context, ContextHubInfo, Executor, ContextHubClientCallback)}
      * with the {@link Context} being set to null.
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
