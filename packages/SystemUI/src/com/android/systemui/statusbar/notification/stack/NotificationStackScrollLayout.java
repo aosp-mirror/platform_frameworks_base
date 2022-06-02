@@ -1371,12 +1371,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void setExpandedHeight(float height) {
-        final float shadeBottom = getHeight() - getEmptyBottomMargin();
         final boolean skipHeightUpdate = shouldSkipHeightUpdate();
-        if (!skipHeightUpdate) {
-            final float expansionFraction = MathUtils.saturate(height / shadeBottom);
-            mAmbientState.setExpansionFraction(expansionFraction);
-        }
         updateStackPosition();
 
         if (!skipHeightUpdate) {
