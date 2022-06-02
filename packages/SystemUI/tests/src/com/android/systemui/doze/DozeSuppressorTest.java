@@ -16,19 +16,26 @@
 
 package com.android.systemui.doze;
 
+import static android.app.UiModeManager.ACTION_ENTER_CAR_MODE;
+import static android.app.UiModeManager.ACTION_EXIT_CAR_MODE;
+
 import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
+import static com.android.systemui.doze.DozeMachine.State.DOZE_SUSPEND_TRIGGERS;
 import static com.android.systemui.doze.DozeMachine.State.FINISH;
 import static com.android.systemui.doze.DozeMachine.State.INITIALIZED;
 import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 
-import static org.mockito.Matchers.anyObject;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
@@ -77,7 +84,10 @@ public class DozeSuppressorTest extends SysuiTestCase {
 
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiverCaptor;
+    @Captor
+    private ArgumentCaptor<IntentFilter> mIntentFilterCaptor;
     private BroadcastReceiver mBroadcastReceiver;
+    private IntentFilter mIntentFilter;
 
     @Captor
     private ArgumentCaptor<DozeHost.Callback> mDozeHostCaptor;
@@ -122,15 +132,59 @@ public class DozeSuppressorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testEndDoze_carMode() {
+    public void testSuspendTriggersDoze_carMode() {
         // GIVEN car mode
         when(mUiModeManager.getCurrentModeType()).thenReturn(Configuration.UI_MODE_TYPE_CAR);
 
         // WHEN dozing begins
         mDozeSuppressor.transitionTo(UNINITIALIZED, INITIALIZED);
 
-        // THEN doze immediately ends
-        verify(mDozeMachine).requestState(FINISH);
+        // THEN doze continues with all doze triggers disabled.
+        verify(mDozeMachine).requestState(DOZE_SUSPEND_TRIGGERS);
+    }
+
+    @Test
+    public void testSuspendTriggersDoze_enterCarMode() {
+        // GIVEN currently dozing
+        mDozeSuppressor.transitionTo(UNINITIALIZED, INITIALIZED);
+        captureBroadcastReceiver();
+        mDozeSuppressor.transitionTo(INITIALIZED, DOZE);
+
+        // WHEN car mode entered
+        mBroadcastReceiver.onReceive(null, new Intent(ACTION_ENTER_CAR_MODE));
+
+        // THEN doze continues with all doze triggers disabled.
+        verify(mDozeMachine).requestState(DOZE_SUSPEND_TRIGGERS);
+    }
+
+    @Test
+    public void testDozeResume_exitCarMode() {
+        // GIVEN currently suspended, with AOD not enabled
+        when(mConfig.alwaysOnEnabled(anyInt())).thenReturn(false);
+        mDozeSuppressor.transitionTo(UNINITIALIZED, INITIALIZED);
+        captureBroadcastReceiver();
+        mDozeSuppressor.transitionTo(INITIALIZED, DOZE_SUSPEND_TRIGGERS);
+
+        // WHEN exiting car mode
+        mBroadcastReceiver.onReceive(null, new Intent(ACTION_EXIT_CAR_MODE));
+
+        // THEN doze is resumed
+        verify(mDozeMachine).requestState(DOZE);
+    }
+
+    @Test
+    public void testDozeAoDResume_exitCarMode() {
+        // GIVEN currently suspended, with AOD not enabled
+        when(mConfig.alwaysOnEnabled(anyInt())).thenReturn(true);
+        mDozeSuppressor.transitionTo(UNINITIALIZED, INITIALIZED);
+        captureBroadcastReceiver();
+        mDozeSuppressor.transitionTo(INITIALIZED, DOZE_SUSPEND_TRIGGERS);
+
+        // WHEN exiting car mode
+        mBroadcastReceiver.onReceive(null, new Intent(ACTION_EXIT_CAR_MODE));
+
+        // THEN doze AOD is resumed
+        verify(mDozeMachine).requestState(DOZE_AOD);
     }
 
     @Test
@@ -225,7 +279,11 @@ public class DozeSuppressorTest extends SysuiTestCase {
 
     private void captureBroadcastReceiver() {
         verify(mBroadcastDispatcher).registerReceiver(mBroadcastReceiverCaptor.capture(),
-                anyObject());
+                mIntentFilterCaptor.capture());
         mBroadcastReceiver = mBroadcastReceiverCaptor.getValue();
+        mIntentFilter = mIntentFilterCaptor.getValue();
+        assertEquals(2, mIntentFilter.countActions());
+        org.hamcrest.MatcherAssert.assertThat(() -> mIntentFilter.actionsIterator(),
+                containsInAnyOrder(ACTION_ENTER_CAR_MODE, ACTION_EXIT_CAR_MODE));
     }
 }
