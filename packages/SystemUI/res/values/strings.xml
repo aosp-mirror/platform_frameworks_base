@@ -2477,7 +2477,7 @@
     <!-- Title for dialog listing applications currently running [CHAR LIMIT=NONE]-->
     <string name="fgs_manager_dialog_title">Active apps</string>
     <!-- Detailed message for dialog listing applications currently running [CHAR LIMIT=NONE]-->
-    <string name="fgs_manager_dialog_message">Even if you\u2019re not using these apps, they\u2019re still active and might affect battery life</string>
+    <string name="fgs_manager_dialog_message">These apps are active and running, even when you\u2019re not using them. This improves their functionality, but it may also affect battery life.</string>
     <!-- Label of the button to stop an app from running [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_label">Stop</string>
     <!-- Label of the button to stop an app from running but the app is already stopped and the button is disabled [CHAR LIMIT=12]-->
