@@ -139,6 +139,7 @@ public class DozeUi implements DozeMachine.Part {
                 break;
             case DOZE:
             case DOZE_AOD_PAUSED:
+            case DOZE_SUSPEND_TRIGGERS:
                 unscheduleTimeTick();
                 break;
             case DOZE_REQUEST_PULSE:

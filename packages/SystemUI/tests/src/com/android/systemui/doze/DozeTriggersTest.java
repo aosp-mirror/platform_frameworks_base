@@ -17,6 +17,8 @@
 package com.android.systemui.doze;
 
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
+import static com.android.systemui.doze.DozeMachine.State.INITIALIZED;
+import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -133,7 +135,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         ArgumentCaptor<DozeHost.Callback> captor = ArgumentCaptor.forClass(DozeHost.Callback.class);
         doAnswer(invocation -> null).when(mHost).addCallback(captor.capture());
 
-        mTriggers.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        mTriggers.transitionTo(UNINITIALIZED, DozeMachine.State.INITIALIZED);
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
         clearInvocations(mMachine);
 
@@ -192,8 +194,21 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
+    public void transitionToDozeSuspendTriggers_disablesAllCallbacks() {
+        mTriggers.transitionTo(UNINITIALIZED, INITIALIZED);
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_SUSPEND_TRIGGERS);
+
+        mTriggers.transitionTo(DozeMachine.State.INITIALIZED,
+                DozeMachine.State.DOZE_SUSPEND_TRIGGERS);
+
+        verify(mDockManager).removeListener(any());
+        verify(mBroadcastDispatcher).unregisterReceiver(any());
+        verify(mHost).removeCallback(any());
+    }
+
+    @Test
     public void testDockEventListener_registerAndUnregister() {
-        mTriggers.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        mTriggers.transitionTo(UNINITIALIZED, DozeMachine.State.INITIALIZED);
         verify(mDockManager).addListener(any());
 
         mTriggers.transitionTo(DozeMachine.State.DOZE, DozeMachine.State.FINISH);

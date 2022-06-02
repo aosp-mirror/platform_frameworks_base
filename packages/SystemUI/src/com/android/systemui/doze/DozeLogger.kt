@@ -105,7 +105,7 @@ class DozeLogger @Inject constructor(
             bool4 = screenOnFromTouch
         }, {
             "Fling expand=$bool1 aboveThreshold=$bool2 thresholdNeeded=$bool3 " +
-                    "screenOnFromTouch=$bool4"
+                "screenOnFromTouch=$bool4"
         })
     }
 
@@ -151,7 +151,7 @@ class DozeLogger @Inject constructor(
             long2 = triggerAt
         }, {
             "Time tick scheduledAt=${DATE_FORMAT.format(Date(long1))} " +
-                    "triggerAt=${DATE_FORMAT.format(Date(long2))}"
+                "triggerAt=${DATE_FORMAT.format(Date(long2))}"
         })
     }
 
@@ -220,7 +220,7 @@ class DozeLogger @Inject constructor(
             str1 = partUpdated
         }, {
             "Posture changed, posture=${DevicePostureController.devicePostureToString(int1)}" +
-                    " partUpdated=$str1"
+                " partUpdated=$str1"
         })
     }
 
@@ -297,6 +297,18 @@ class DozeLogger @Inject constructor(
             long1 = scrimOpacity
         }, {
             "Doze aod dimming scrim opacity set, opacity=$long1"
+        })
+    }
+
+    fun logCarModeEnded() {
+        buffer.log(TAG, INFO, {}, {
+            "Doze car mode ended"
+        })
+    }
+
+    fun logCarModeStarted() {
+        buffer.log(TAG, INFO, {}, {
+            "Doze car mode started"
         })
     }
 }
