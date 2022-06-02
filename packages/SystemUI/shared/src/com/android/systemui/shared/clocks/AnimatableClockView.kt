@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.keyguard
+package com.android.systemui.shared.clocks
 
 import android.animation.TimeInterpolator
 import android.annotation.ColorInt
@@ -27,9 +27,10 @@ import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.util.Log
 import android.widget.TextView
-import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator
+import com.android.systemui.animation.TextAnimator
+import com.android.systemui.animation.GlyphCallback
+import com.android.systemui.shared.R
 import java.io.PrintWriter
 import java.util.Calendar
 import java.util.Locale
@@ -39,13 +40,13 @@ import java.util.TimeZone
  * Displays the time with the hour positioned above the minutes. (ie: 09 above 30 is 9:30)
  * The time's text color is a gradient that changes its colors based on its controller.
  */
+@SuppressLint("AppCompatCustomView")
 class AnimatableClockView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : TextView(context, attrs, defStyleAttr, defStyleRes) {
-    private val tag = "AnimatableClockView"
 
     private var lastMeasureCall: CharSequence = ""
 
@@ -134,7 +135,7 @@ class AnimatableClockView @JvmOverloads constructor(
         if (!TextUtils.equals(text, formattedText)) {
             text = formattedText
             Log.d(
-                tag, "refreshTime this=$this" +
+                TAG, "refreshTime this=$this" +
                         " currTimeContextDesc=$contentDescription" +
                         " measuredHeight=$measuredHeight" +
                         " lastMeasureCall=$lastMeasureCall" +
@@ -142,7 +143,7 @@ class AnimatableClockView @JvmOverloads constructor(
             )
         } else {
             Log.d(
-                tag, "refreshTime (skipped due to unchanged text)" +
+                TAG, "refreshTime (skipped due to unchanged text)" +
                         " this=$this" +
                         " currTimeContextDesc=$contentDescription" +
                         " measuredHeight=$measuredHeight" +
@@ -169,7 +170,7 @@ class AnimatableClockView @JvmOverloads constructor(
         } else {
             animator.updateLayout(layout)
         }
-        Log.v(tag, "onMeasure this=$this" +
+        Log.v(TAG, "onMeasure this=$this" +
                 " currTimeContextDesc=$contentDescription" +
                 " heightMeasureSpecMode=${MeasureSpec.getMode(heightMeasureSpec)}" +
                 " heightMeasureSpecSize=${MeasureSpec.getSize(heightMeasureSpec)}" +
@@ -180,7 +181,7 @@ class AnimatableClockView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         // intentionally doesn't call super.onDraw here or else the text will be rendered twice
-        Log.d(tag, "onDraw this=$this" +
+        Log.d(TAG, "onDraw this=$this" +
                 " currTimeContextDesc=$contentDescription" +
                 " isSingleLineInternal=$isSingleLineInternal")
         textAnimator?.draw(canvas)
@@ -220,7 +221,7 @@ class AnimatableClockView @JvmOverloads constructor(
         )
     }
 
-    fun animateFoldAppear() {
+    fun animateFoldAppear(animate: Boolean = true) {
         if (textAnimator == null) {
             return
         }
@@ -237,22 +238,22 @@ class AnimatableClockView @JvmOverloads constructor(
             weight = dozingWeightInternal,
             textSize = -1f,
             color = dozingColor,
-            animate = true,
+            animate = animate,
             interpolator = Interpolators.EMPHASIZED_DECELERATE,
-            duration = StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD.toLong(),
+            duration = ANIMATION_DURATION_FOLD_TO_AOD.toLong(),
             delay = 0,
             onAnimationEnd = null
         )
     }
 
-    fun animateCharge(dozeStateGetter: DozeStateGetter) {
+    fun animateCharge(isDozing: () -> Boolean) {
         if (textAnimator == null || textAnimator!!.isRunning()) {
             // Skip charge animation if dozing animation is already playing.
             return
         }
         val startAnimPhase2 = Runnable {
             setTextStyle(
-                weight = if (dozeStateGetter.isDozing) dozingWeight else lockScreenWeight,
+                weight = if (isDozing()) dozingWeight else lockScreenWeight,
                 textSize = -1f,
                 color = null,
                 animate = true,
@@ -262,7 +263,7 @@ class AnimatableClockView @JvmOverloads constructor(
             )
         }
         setTextStyle(
-            weight = if (dozeStateGetter.isDozing) lockScreenWeight else dozingWeight,
+            weight = if (isDozing()) lockScreenWeight else dozingWeight,
             textSize = -1f,
             color = null,
             animate = true,
@@ -412,14 +413,14 @@ class AnimatableClockView @JvmOverloads constructor(
         }
     }
 
-    interface DozeStateGetter {
-        val isDozing: Boolean
+    companion object {
+        private val TAG = AnimatableClockView::class.simpleName
+        const val ANIMATION_DURATION_FOLD_TO_AOD: Int = 600
+        private const val DOUBLE_LINE_FORMAT_12_HOUR = "hh\nmm"
+        private const val DOUBLE_LINE_FORMAT_24_HOUR = "HH\nmm"
+        private const val DOZE_ANIM_DURATION: Long = 300
+        private const val APPEAR_ANIM_DURATION: Long = 350
+        private const val CHARGE_ANIM_DURATION_PHASE_0: Long = 500
+        private const val CHARGE_ANIM_DURATION_PHASE_1: Long = 1000
     }
 }
-
-private const val DOUBLE_LINE_FORMAT_12_HOUR = "hh\nmm"
-private const val DOUBLE_LINE_FORMAT_24_HOUR = "HH\nmm"
-private const val DOZE_ANIM_DURATION: Long = 300
-private const val APPEAR_ANIM_DURATION: Long = 350
-private const val CHARGE_ANIM_DURATION_PHASE_0: Long = 500
-private const val CHARGE_ANIM_DURATION_PHASE_1: Long = 1000
