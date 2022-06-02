@@ -755,6 +755,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"геалакацыя"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"мікрафон"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"запіс экрана"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без назвы"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Рэжым чакання"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Акно павелічэння"</string>
@@ -862,6 +863,8 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Невядомая праграма"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Спыніць трансляцыю"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Даступныя прылады для вываду аўдыя."</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як адбываецца трансляцыя"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляцыя"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Людзі паблізу, у якіх ёсць прылады з Bluetooth, змогуць праслухваць мультымедыйнае змесціва, якое вы трансліруеце"</string>
@@ -955,7 +958,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Гатова"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Скапіравана"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"З праграмы \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Закрыць інтэрфейс капіравання"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Адхіліць устаўку скапіраванага тэксту"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Змяніць скапіраваны тэкст"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Змяніць скапіраваны відарыс"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Адправіць на прыладу паблізу"</string>
