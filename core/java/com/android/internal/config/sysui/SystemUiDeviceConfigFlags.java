@@ -543,6 +543,11 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String TASK_MANAGER_ENABLED = "task_manager_enabled";
 
+    /**
+     * (boolean) Whether the task manager should show an attention grabbing dot when tasks changed.
+     */
+    public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
+
 
     /**
      * (boolean) Whether the clipboard overlay is enabled.
