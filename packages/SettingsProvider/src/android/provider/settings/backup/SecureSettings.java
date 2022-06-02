@@ -37,6 +37,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
+        Settings.Secure.ADAPTIVE_CHARGING_ENABLED,
         Settings.Secure.ADAPTIVE_SLEEP,
         Settings.Secure.CAMERA_AUTOROTATE,
         Settings.Secure.AUTOFILL_SERVICE,
