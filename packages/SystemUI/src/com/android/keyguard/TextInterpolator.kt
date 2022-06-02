@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.animation
+package com.android.keyguard
 
 import android.graphics.Canvas
 import android.graphics.Paint
