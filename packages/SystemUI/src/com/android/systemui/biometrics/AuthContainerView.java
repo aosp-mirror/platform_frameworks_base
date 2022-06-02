@@ -65,6 +65,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashSet;
@@ -803,5 +804,37 @@ public class AuthContainerView extends LinearLayout
         lp.accessibilityTitle = title;
         lp.token = windowToken;
         return lp;
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("    isAttachedToWindow=" + isAttachedToWindow());
+        pw.println("    containerState=" + mContainerState);
+        pw.println("    pendingCallbackReason=" + mPendingCallbackReason);
+        pw.println("    config exist=" + (mConfig != null));
+        if (mConfig != null) {
+            pw.println("    config.sensorIds exist=" + (mConfig.mSensorIds != null));
+        }
+        final AuthBiometricView biometricView = mBiometricView;
+        pw.println("    scrollView=" + findViewById(R.id.biometric_scrollview));
+        pw.println("      biometricView=" + biometricView);
+        if (biometricView != null) {
+            int[] ids = {
+                    R.id.title,
+                    R.id.subtitle,
+                    R.id.description,
+                    R.id.biometric_icon_frame,
+                    R.id.biometric_icon,
+                    R.id.indicator,
+                    R.id.button_bar,
+                    R.id.button_negative,
+                    R.id.button_use_credential,
+                    R.id.button_confirm,
+                    R.id.button_try_again
+            };
+            for (final int id: ids) {
+                pw.println("        " + biometricView.findViewById(id));
+            }
+        }
     }
 }
