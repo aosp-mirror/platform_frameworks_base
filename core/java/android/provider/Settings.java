@@ -11494,7 +11494,7 @@ public final class Settings {
          * Whether or not data roaming is enabled. (0 = false, 1 = true)
          * Use {@link TelephonyManager#isDataRoamingEnabled} instead of calling via settings.
          */
-        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S_V2)
         public static final String DATA_ROAMING = "data_roaming";
 
         /**
