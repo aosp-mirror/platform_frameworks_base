@@ -14538,18 +14538,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             try {
                 ii = pm.getInstrumentationInfoAsUser(className, STOCK_PM_FLAGS, userId);
+                if (ii == null) {
+                    reportStartInstrumentationFailureLocked(watcher, className,
+                            "Unable to find instrumentation info for: " + className);
+                    return false;
+                }
                 ai = pm.getApplicationInfo(ii.targetPackage, STOCK_PM_FLAGS, userId);
+                if (ai == null) {
+                    reportStartInstrumentationFailureLocked(watcher, className,
+                            "Unable to find instrumentation target package: " + ii.targetPackage);
+                    return false;
+                }
             } catch (RemoteException e) {
-            }
-            if (ii == null) {
-                reportStartInstrumentationFailureLocked(watcher, className,
-                        "Unable to find instrumentation info for: " + className);
-                return false;
-            }
-            if (ai == null) {
-                reportStartInstrumentationFailureLocked(watcher, className,
-                        "Unable to find instrumentation target package: " + ii.targetPackage);
-                return false;
             }
 
             if (ii.targetPackage.equals("android")) {
