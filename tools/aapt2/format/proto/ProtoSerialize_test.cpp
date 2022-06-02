@@ -127,9 +127,9 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
                                  context->GetDiagnostics()));
 
   // Make a styled string.
-  StyleString style_string;
+  android::StyleString style_string;
   style_string.str = "hello";
-  style_string.spans.push_back(Span{"b", 0u, 4u});
+  style_string.spans.push_back(android::Span{"b", 0u, 4u});
   ASSERT_TRUE(table->AddResource(
       NewResourceBuilder(test::ParseNameOrDie("com.app.a:string/styled"))
           .SetValue(util::make_unique<StyledString>(table->string_pool.MakeRef(style_string)))
@@ -164,8 +164,8 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
 
   // Make an overlayable resource.
   OverlayableItem overlayable_item(std::make_shared<Overlayable>(
-      "OverlayableName", "overlay://theme", Source("res/values/overlayable.xml", 40)));
-  overlayable_item.source = Source("res/values/overlayable.xml", 42);
+      "OverlayableName", "overlay://theme", android::Source("res/values/overlayable.xml", 40)));
+  overlayable_item.source = android::Source("res/values/overlayable.xml", 42);
   ASSERT_TRUE(
       table->AddResource(NewResourceBuilder(test::ParseNameOrDie("com.app.a:integer/overlayable"))
                              .SetOverlayable(overlayable_item)
@@ -271,7 +271,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   attr.compiled_attribute = xml::AaptAttribute(Attribute{}, ResourceId(0x01010000));
   attr.compiled_value =
       ResourceUtils::TryParseItemForAttribute(attr.value, android::ResTable_map::TYPE_DIMENSION);
-  attr.compiled_value->SetSource(Source().WithLine(25));
+  attr.compiled_value->SetSource(android::Source().WithLine(25));
   element.attributes.push_back(std::move(attr));
 
   std::unique_ptr<xml::Text> text = util::make_unique<xml::Text>();
@@ -292,7 +292,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   pb::XmlNode pb_xml;
   SerializeXmlToPb(element, &pb_xml);
 
-  StringPool pool;
+  android::StringPool pool;
   xml::Element actual_el;
   std::string error;
   ASSERT_TRUE(DeserializeXmlFromPb(pb_xml, &actual_el, &pool, &error));
@@ -365,7 +365,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXmlTrimEmptyWhitepsace) {
   options.remove_empty_text_nodes = true;
   SerializeXmlToPb(element, &pb_xml, options);
 
-  StringPool pool;
+  android::StringPool pool;
   xml::Element actual_el;
   std::string error;
   ASSERT_TRUE(DeserializeXmlFromPb(pb_xml, &actual_el, &pool, &error));
@@ -898,7 +898,8 @@ TEST(ProtoSerializeTest, SerializeMacro) {
   auto original = std::make_unique<Macro>();
   original->raw_value = "\nThis being human is a guest house.";
   original->style_string.str = " This being human is a guest house.";
-  original->style_string.spans.emplace_back(Span{.name = "b", .first_char = 12, .last_char = 16});
+  original->style_string.spans.emplace_back(
+      android::Span{.name = "b", .first_char = 12, .last_char = 16});
   original->untranslatable_sections.emplace_back(UntranslatableSection{.start = 12, .end = 17});
   original->alias_namespaces.emplace_back(
       Macro::Namespace{.alias = "prefix", .package_name = "package.name", .is_private = true});

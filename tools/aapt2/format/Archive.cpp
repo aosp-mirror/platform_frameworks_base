@@ -25,9 +25,9 @@
 #include "android-base/macros.h"
 #include "android-base/utf8.h"
 #include "androidfw/StringPiece.h"
-#include "ziparchive/zip_writer.h"
-
 #include "util/Files.h"
+#include "util/Util.h"
+#include "ziparchive/zip_writer.h"
 
 using ::android::StringPiece;
 using ::android::base::SystemErrorCodeToString;
@@ -256,21 +256,21 @@ class ZipFileWriter : public IArchiveWriter {
 
 }  // namespace
 
-std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(IDiagnostics* diag,
+std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(android::IDiagnostics* diag,
                                                              const StringPiece& path) {
   std::unique_ptr<DirectoryWriter> writer = util::make_unique<DirectoryWriter>();
   if (!writer->Open(path)) {
-    diag->Error(DiagMessage(path) << writer->GetError());
+    diag->Error(android::DiagMessage(path) << writer->GetError());
     return {};
   }
   return std::move(writer);
 }
 
-std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(IDiagnostics* diag,
+std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(android::IDiagnostics* diag,
                                                            const StringPiece& path) {
   std::unique_ptr<ZipFileWriter> writer = util::make_unique<ZipFileWriter>();
   if (!writer->Open(path)) {
-    diag->Error(DiagMessage(path) << writer->GetError());
+    diag->Error(android::DiagMessage(path) << writer->GetError());
     return {};
   }
   return std::move(writer);

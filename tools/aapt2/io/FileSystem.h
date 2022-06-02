@@ -27,16 +27,16 @@ namespace io {
 // A regular file from the file system. Uses mmap to open the data.
 class RegularFile : public IFile {
  public:
-  explicit RegularFile(const Source& source);
+  explicit RegularFile(const android::Source& source);
 
   std::unique_ptr<IData> OpenAsData() override;
   std::unique_ptr<io::InputStream> OpenInputStream() override;
-  const Source& GetSource() const override;
+  const android::Source& GetSource() const override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RegularFile);
 
-  Source source_;
+  android::Source source_;
 };
 
 class FileCollection;

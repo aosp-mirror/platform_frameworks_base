@@ -21,10 +21,10 @@
 #include <iostream>
 #include <memory>
 
-#include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "android-base/file.h"  // for O_BINARY
 #include "android-base/utf8.h"
+#include "androidfw/IDiagnostics.h"
 #include "androidfw/StringPiece.h"
 #include "dump/DumpManifest.h"
 #include "format/proto/ProtoSerialize.h"
@@ -35,7 +35,7 @@ namespace aapt {
 
 int ExportApkInfo(LoadedApk* apk, bool include_resource_table,
                   const std::unordered_set<std::string>& xml_resources, pb::ApkInfo* out_apk_info,
-                  IDiagnostics* diag) {
+                  android::IDiagnostics* diag) {
   auto result = DumpBadgingProto(apk, out_apk_info->mutable_badging(), diag);
   if (result != 0) {
     return result;
@@ -74,14 +74,14 @@ int ApkInfoCommand::Action(const std::vector<std::string>& args) {
   int result =
       ExportApkInfo(apk.get(), include_resource_table_, xml_resources_, &out_apk_info, diag_);
   if (result != 0) {
-    diag_->Error(DiagMessage() << "Failed to serialize ApkInfo into proto.");
+    diag_->Error(android::DiagMessage() << "Failed to serialize ApkInfo into proto.");
     return result;
   }
 
   int mode = O_WRONLY | O_CREAT | O_TRUNC | O_BINARY;
   int outfd = ::android::base::utf8::open(output_path_.c_str(), mode, 0666);
   if (outfd == -1) {
-    diag_->Error(DiagMessage() << "Failed to open output file.");
+    diag_->Error(android::DiagMessage() << "Failed to open output file.");
     return 1;
   }
 

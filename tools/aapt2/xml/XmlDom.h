@@ -21,11 +21,10 @@
 #include <string>
 #include <vector>
 
-#include "androidfw/StringPiece.h"
-
-#include "Diagnostics.h"
 #include "Resource.h"
 #include "ResourceValues.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/StringPiece.h"
 #include "io/Io.h"
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
@@ -150,7 +149,7 @@ class XmlResource {
   // StringPool must come before the xml::Node. Destructors are called in reverse order, and
   // the xml::Node may have StringPool references that need to be destroyed before the StringPool
   // is destroyed.
-  StringPool string_pool;
+  android::StringPool string_pool;
 
   std::unique_ptr<xml::Element> root;
 
@@ -158,7 +157,8 @@ class XmlResource {
 };
 
 // Inflates an XML DOM from an InputStream, logging errors to the logger.
-std::unique_ptr<XmlResource> Inflate(io::InputStream* in, IDiagnostics* diag, const Source& source);
+std::unique_ptr<XmlResource> Inflate(io::InputStream* in, android::IDiagnostics* diag,
+                                     const android::Source& source);
 
 // Inflates an XML DOM from a binary ResXMLTree.
 std::unique_ptr<XmlResource> Inflate(const void* data, size_t len,

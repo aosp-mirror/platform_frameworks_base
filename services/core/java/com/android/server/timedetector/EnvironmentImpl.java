@@ -18,18 +18,14 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.app.AlarmManager;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 
-import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -39,18 +35,13 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
 
     private static final String LOG_TAG = TimeDetectorService.TAG;
 
-    @NonNull private final Context mContext;
     @NonNull private final Handler mHandler;
     @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
-    @NonNull private final ContentResolver mContentResolver;
     @NonNull private final PowerManager.WakeLock mWakeLock;
     @NonNull private final AlarmManager mAlarmManager;
-    @NonNull private final UserManager mUserManager;
 
     EnvironmentImpl(@NonNull Context context, @NonNull Handler handler,
             @NonNull ServiceConfigAccessor serviceConfigAccessor) {
-        mContext = Objects.requireNonNull(context);
-        mContentResolver = Objects.requireNonNull(context.getContentResolver());
         mHandler = Objects.requireNonNull(handler);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
 
@@ -59,8 +50,6 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG));
 
         mAlarmManager = Objects.requireNonNull(context.getSystemService(AlarmManager.class));
-
-        mUserManager = Objects.requireNonNull(context.getSystemService(UserManager.class));
     }
 
     @Override
@@ -69,21 +58,6 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
         ConfigurationChangeListener configurationChangeListener =
                 () -> mHandler.post(listener::onChange);
         mServiceConfigAccessor.addConfigurationInternalChangeListener(configurationChangeListener);
-    }
-
-    @Override
-    public int systemClockUpdateThresholdMillis() {
-        return mServiceConfigAccessor.systemClockUpdateThresholdMillis();
-    }
-
-    @Override
-    public Instant autoTimeLowerBound() {
-        return mServiceConfigAccessor.autoTimeLowerBound();
-    }
-
-    @Override
-    public int[] autoOriginPriorities() {
-        return mServiceConfigAccessor.getOriginPriorities();
     }
 
     @Override
@@ -119,11 +93,6 @@ final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
     public void releaseWakeLock() {
         checkWakeLockHeld();
         mWakeLock.release();
-    }
-
-    @Override
-    public boolean deviceHasY2038Issue() {
-        return Build.SUPPORTED_32_BIT_ABIS.length > 0;
     }
 
     private void checkWakeLockHeld() {

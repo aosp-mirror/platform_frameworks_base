@@ -53,7 +53,8 @@ import java.util.Objects;
 @RunWith(AndroidJUnit4.class)
 public class TimeDetectorStrategyImplTest {
 
-    private static final @UserIdInt int USER_ID = 9876;
+    private static final @UserIdInt int ARBITRARY_USER_ID = 9876;
+    private static final int ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS = 1234;
     private static final Instant TIME_LOWER_BOUND = createUnixEpochTime(2009, 1, 1, 12, 0, 0);
 
     private static final TimestampedValue<Instant> ARBITRARY_CLOCK_INITIALIZATION_INFO =
@@ -62,7 +63,7 @@ public class TimeDetectorStrategyImplTest {
                     createUnixEpochTime(2010, 5, 23, 12, 0, 0));
 
     // This is the traditional ordering for time detection on Android.
-    private static final @Origin int [] PROVIDERS_PRIORITY = { ORIGIN_TELEPHONY, ORIGIN_NETWORK };
+    private static final @Origin int [] ORIGIN_PRIORITIES = { ORIGIN_TELEPHONY, ORIGIN_NETWORK };
 
     /**
      * An arbitrary time, very different from the {@link #ARBITRARY_CLOCK_INITIALIZATION_INFO}
@@ -73,16 +74,26 @@ public class TimeDetectorStrategyImplTest {
     private static final int ARBITRARY_SLOT_INDEX = 123456;
 
     private static final ConfigurationInternal CONFIG_AUTO_DISABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionSupported(true)
+                    .setSystemClockUpdateThresholdMillis(
+                            ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
+                    .setAutoTimeLowerBound(TIME_LOWER_BOUND)
+                    .setOriginPriorities(ORIGIN_PRIORITIES)
+                    .setDeviceHasY2038Issue(true)
                     .setAutoDetectionEnabledSetting(false)
                     .build();
 
     private static final ConfigurationInternal CONFIG_AUTO_ENABLED =
-            new ConfigurationInternal.Builder(USER_ID)
+            new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                     .setUserConfigAllowed(true)
                     .setAutoDetectionSupported(true)
+                    .setSystemClockUpdateThresholdMillis(
+                            ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
+                    .setAutoTimeLowerBound(TIME_LOWER_BOUND)
+                    .setOriginPriorities(ORIGIN_PRIORITIES)
+                    .setDeviceHasY2038Issue(true)
                     .setAutoDetectionEnabledSetting(true)
                     .build();
 
@@ -97,8 +108,7 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestTelephonyTime_autoTimeEnabled() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
         Instant testTime = ARBITRARY_TEST_TIME;
@@ -116,8 +126,7 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestTelephonyTime_emptySuggestionIgnored() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
         TelephonyTimeSuggestion timeSuggestion =
@@ -131,9 +140,11 @@ public class TimeDetectorStrategyImplTest {
     public void testSuggestTelephonyTime_systemClockThreshold() {
         final int systemClockUpdateThresholdMillis = 1000;
         final int clockIncrementMillis = 100;
-        Script script = new Script()
-                .pokeThresholds(systemClockUpdateThresholdMillis)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setSystemClockUpdateThresholdMillis(systemClockUpdateThresholdMillis)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
 
@@ -183,8 +194,7 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestTelephonyTime_multipleSlotIndexsAndBucketing() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
 
         // There are 2 slotIndexes in this test. slotIndex1 and slotIndex2 have different opinions
         // about the current time. slotIndex1 < slotIndex2 (which is important because the strategy
@@ -261,8 +271,7 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestTelephonyTime_autoTimeDisabled() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
         TelephonyTimeSuggestion timeSuggestion =
@@ -275,10 +284,12 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestTelephonyTime_invalidNitzReferenceTimesIgnored() {
-        final int systemClockUpdateThreshold = 2000;
-        Script script = new Script()
-                .pokeThresholds(systemClockUpdateThreshold)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        final int systemClockUpdateThresholdMillis = 2000;
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setSystemClockUpdateThresholdMillis(systemClockUpdateThresholdMillis)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         Instant testTime = ARBITRARY_TEST_TIME;
         int slotIndex = ARBITRARY_SLOT_INDEX;
@@ -297,7 +308,7 @@ public class TimeDetectorStrategyImplTest {
         // The Unix epoch time increment should be larger than the system clock update threshold so
         // we know it shouldn't be ignored for other reasons.
         long validUnixEpochTimeMillis = unixEpochTime1.getValue()
-                + (2 * systemClockUpdateThreshold);
+                + (2 * systemClockUpdateThresholdMillis);
 
         // Now supply a new signal that has an obviously bogus reference time : older than the last
         // one.
@@ -336,8 +347,7 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void telephonyTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
         Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
@@ -354,10 +364,12 @@ public class TimeDetectorStrategyImplTest {
     @Test
     public void testSuggestTelephonyTime_timeDetectionToggled() {
         final int clockIncrementMillis = 100;
-        final int systemClockUpdateThreshold = 2000;
-        Script script = new Script()
-                .pokeThresholds(systemClockUpdateThreshold)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
+        final int systemClockUpdateThresholdMillis = 2000;
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setSystemClockUpdateThresholdMillis(systemClockUpdateThresholdMillis)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
         Instant testTime = ARBITRARY_TEST_TIME;
@@ -392,7 +404,7 @@ public class TimeDetectorStrategyImplTest {
         // Receive another valid time signal.
         // It should be on the threshold and accounting for the clock increments.
         TelephonyTimeSuggestion timeSuggestion2 = script.generateTelephonyTimeSuggestion(
-                slotIndex, script.peekSystemClockMillis() + systemClockUpdateThreshold);
+                slotIndex, script.peekSystemClockMillis() + systemClockUpdateThresholdMillis);
 
         // Simulate more time passing.
         script.simulateTimePassing(clockIncrementMillis);
@@ -414,8 +426,7 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestTelephonyTime_maxSuggestionAge() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
         Instant testTime = ARBITRARY_TEST_TIME;
@@ -445,8 +456,7 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestManualTime_autoTimeDisabled() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
 
         ManualTimeSuggestion timeSuggestion =
                 script.generateManualTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -455,15 +465,14 @@ public class TimeDetectorStrategyImplTest {
 
         long expectedSystemClockMillis =
                 script.calculateTimeInMillisForNow(timeSuggestion.getUnixEpochTime());
-        script.simulateManualTimeSuggestion(USER_ID, timeSuggestion, true /* expectedResult */)
+        script.simulateManualTimeSuggestion(
+                ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
 
     @Test
     public void testSuggestManualTime_retainsAutoSignal() {
-        // Configure the start state.
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
 
@@ -501,7 +510,7 @@ public class TimeDetectorStrategyImplTest {
         long expectedManualClockMillis =
                 script.calculateTimeInMillisForNow(manualTimeSuggestion.getUnixEpochTime());
         script.simulateManualTimeSuggestion(
-                USER_ID, manualTimeSuggestion, true /* expectedResult */)
+                        ARBITRARY_USER_ID, manualTimeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(expectedManualClockMillis)
                 .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
 
@@ -524,35 +533,37 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void manualTimeSuggestion_isIgnored_whenAutoTimeEnabled() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
 
         ManualTimeSuggestion timeSuggestion =
                 script.generateManualTimeSuggestion(ARBITRARY_TEST_TIME);
 
         script.simulateTimePassing()
-                .simulateManualTimeSuggestion(USER_ID, timeSuggestion, false /* expectedResult */)
+                .simulateManualTimeSuggestion(
+                        ARBITRARY_USER_ID, timeSuggestion, false /* expectedResult */)
                 .verifySystemClockWasNotSetAndResetCallTracking();
     }
 
     @Test
     public void manualTimeSuggestion_ignoresTimeLowerBound() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
+        Script script = new Script().simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
         Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
 
         ManualTimeSuggestion timeSuggestion =
                 script.generateManualTimeSuggestion(suggestedTime);
 
-        script.simulateManualTimeSuggestion(USER_ID, timeSuggestion, true /* expectedResult */)
+        script.simulateManualTimeSuggestion(
+                ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(suggestedTime.toEpochMilli());
     }
 
     @Test
     public void testSuggestNetworkTime_autoTimeEnabled() {
-        Script script = new Script()
-                .pokeAutoOriginPriorities(ORIGIN_NETWORK)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         NetworkTimeSuggestion timeSuggestion =
                 script.generateNetworkTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -567,9 +578,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestNetworkTime_autoTimeDisabled() {
-        Script script = new Script()
-                .pokeAutoOriginPriorities(ORIGIN_NETWORK)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         NetworkTimeSuggestion timeSuggestion =
                 script.generateNetworkTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -581,9 +594,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void networkTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
-        Script script = new Script()
-                .pokeAutoOriginPriorities(ORIGIN_NETWORK)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
         NetworkTimeSuggestion timeSuggestion =
@@ -596,9 +611,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestGnssTime_autoTimeEnabled() {
-        Script script = new Script()
-                .pokeAutoOriginPriorities(ORIGIN_GNSS)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_GNSS)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         GnssTimeSuggestion timeSuggestion =
                 script.generateGnssTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -613,9 +630,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestGnssTime_autoTimeDisabled() {
-        Script script = new Script()
-                .pokeAutoOriginPriorities(ORIGIN_GNSS)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setOriginPriorities(ORIGIN_GNSS)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         GnssTimeSuggestion timeSuggestion =
                 script.generateGnssTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -627,9 +646,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestExternalTime_autoTimeEnabled() {
-        Script script = new Script()
-                .pokeAutoOriginPriorities(ORIGIN_EXTERNAL)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_EXTERNAL)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         ExternalTimeSuggestion timeSuggestion =
                 script.generateExternalTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -644,9 +665,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void testSuggestExternalTime_autoTimeDisabled() {
-        Script script = new Script()
-                .pokeAutoOriginPriorities(ORIGIN_EXTERNAL)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setOriginPriorities(ORIGIN_EXTERNAL)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         ExternalTimeSuggestion timeSuggestion =
                 script.generateExternalTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -658,9 +681,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void externalTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
-        Script script = new Script()
-                .pokeAutoOriginPriorities(ORIGIN_EXTERNAL)
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_EXTERNAL)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
         ExternalTimeSuggestion timeSuggestion =
@@ -673,9 +698,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void highPrioritySuggestionsBeatLowerPrioritySuggestions_telephonyNetworkOrigins() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         // Three obviously different times that could not be mistaken for each other.
         Instant networkTime1 = ARBITRARY_TEST_TIME;
@@ -778,9 +805,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void highPrioritySuggestionsBeatLowerPrioritySuggestions_networkGnssOrigins() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_NETWORK, ORIGIN_GNSS);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK, ORIGIN_GNSS)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         // Three obviously different times that could not be mistaken for each other.
         Instant gnssTime1 = ARBITRARY_TEST_TIME;
@@ -883,9 +912,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void highPrioritySuggestionsBeatLowerPrioritySuggestions_networkExternalOrigins() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_NETWORK, ORIGIN_EXTERNAL);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK, ORIGIN_EXTERNAL)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         // Three obviously different times that could not be mistaken for each other.
         Instant externalTime1 = ARBITRARY_TEST_TIME;
@@ -988,10 +1019,12 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void whenAllTimeSuggestionsAreAvailable_higherPriorityWins_lowerPriorityComesFirst() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK, ORIGIN_EXTERNAL,
-                          ORIGIN_GNSS);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK, ORIGIN_EXTERNAL,
+                                ORIGIN_GNSS)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         Instant networkTime = ARBITRARY_TEST_TIME;
         Instant externalTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(15));
@@ -1020,10 +1053,12 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void whenAllTimeSuggestionsAreAvailable_higherPriorityWins_higherPriorityComesFirst() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK,
-                        ORIGIN_EXTERNAL, ORIGIN_GNSS);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK, ORIGIN_EXTERNAL,
+                                ORIGIN_GNSS)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         Instant networkTime = ARBITRARY_TEST_TIME;
         Instant telephonyTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(30));
@@ -1052,9 +1087,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void whenHighestPrioritySuggestionIsNotAvailable_fallbacksToNext() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         NetworkTimeSuggestion timeSuggestion =
                 script.generateNetworkTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -1066,10 +1103,12 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void whenHigherPrioritySuggestionsAreNotAvailable_fallbacksToNext() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK,
-                                ORIGIN_EXTERNAL, ORIGIN_GNSS);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK, ORIGIN_EXTERNAL,
+                                ORIGIN_GNSS)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         GnssTimeSuggestion timeSuggestion =
                 script.generateGnssTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -1081,9 +1120,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void suggestionsFromTelephonyOriginNotInPriorityList_areIgnored() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_NETWORK);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_NETWORK)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         int slotIndex = ARBITRARY_SLOT_INDEX;
         Instant testTime = ARBITRARY_TEST_TIME;
@@ -1097,9 +1138,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void suggestionsFromNetworkOriginNotInPriorityList_areIgnored() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         NetworkTimeSuggestion timeSuggestion = script.generateNetworkTimeSuggestion(
                 ARBITRARY_TEST_TIME);
@@ -1111,9 +1154,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void suggestionsFromGnssOriginNotInPriorityList_areIgnored() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         GnssTimeSuggestion timeSuggestion = script.generateGnssTimeSuggestion(
                 ARBITRARY_TEST_TIME);
@@ -1125,9 +1170,11 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void suggestionsFromExternalOriginNotInPriorityList_areIgnored() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         ExternalTimeSuggestion timeSuggestion = script.generateExternalTimeSuggestion(
                 ARBITRARY_TEST_TIME);
@@ -1139,36 +1186,44 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void autoOriginPrioritiesList_doesNotAffectManualSuggestion() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         ManualTimeSuggestion timeSuggestion =
                 script.generateManualTimeSuggestion(ARBITRARY_TEST_TIME);
 
-        script.simulateManualTimeSuggestion(USER_ID, timeSuggestion, true /* expectedResult */)
+        script.simulateManualTimeSuggestion(
+                ARBITRARY_USER_ID, timeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(ARBITRARY_TEST_TIME.toEpochMilli());
     }
 
     @Test
     public void manualY2038SuggestionsAreRejectedOnAffectedDevices() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY)
-                .pokeDeviceHasY2038Issues(true);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_DISABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .setDeviceHasY2038Issue(true)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
         ManualTimeSuggestion timeSuggestion = script.generateManualTimeSuggestion(y2038IssueTime);
-        script.simulateManualTimeSuggestion(USER_ID, timeSuggestion, false /* expectedResult */)
+        script.simulateManualTimeSuggestion(
+                ARBITRARY_USER_ID, timeSuggestion, false /* expectedResult */)
                 .verifySystemClockWasNotSetAndResetCallTracking();
     }
 
     @Test
     public void telephonyY2038SuggestionsAreRejectedOnAffectedDevices() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY)
-                .pokeDeviceHasY2038Issues(true);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .setDeviceHasY2038Issue(true)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         final int slotIndex = 0;
         Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
@@ -1180,10 +1235,12 @@ public class TimeDetectorStrategyImplTest {
 
     @Test
     public void telephonyY2038SuggestionsAreNotRejectedOnUnaffectedDevices() {
-        Script script = new Script()
-                .simulateConfigurationInternalChange(CONFIG_AUTO_ENABLED)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY)
-                .pokeDeviceHasY2038Issues(false);
+        ConfigurationInternal configInternal =
+                new ConfigurationInternal.Builder(CONFIG_AUTO_ENABLED)
+                        .setOriginPriorities(ORIGIN_TELEPHONY)
+                        .setDeviceHasY2038Issue(false)
+                        .build();
+        Script script = new Script().simulateConfigurationInternalChange(configInternal);
 
         final int slotIndex = 0;
         Instant y2038IssueTime = Instant.ofEpochMilli((1L + Integer.MAX_VALUE) * 1000L);
@@ -1203,10 +1260,7 @@ public class TimeDetectorStrategyImplTest {
         private boolean mWakeLockAcquired;
         private long mElapsedRealtimeMillis;
         private long mSystemClockMillis;
-        private int mSystemClockUpdateThresholdMillis = 2000;
-        private int[] mAutoOriginPriorities = PROVIDERS_PRIORITY;
         private ConfigurationChangeListener mConfigurationInternalChangeListener;
-        private boolean mDeviceHas2038Issues = false;
 
         // Tracking operations.
         private boolean mSystemClockWasSet;
@@ -1223,21 +1277,6 @@ public class TimeDetectorStrategyImplTest {
         @Override
         public void setConfigurationInternalChangeListener(ConfigurationChangeListener listener) {
             mConfigurationInternalChangeListener = Objects.requireNonNull(listener);
-        }
-
-        @Override
-        public int systemClockUpdateThresholdMillis() {
-            return mSystemClockUpdateThresholdMillis;
-        }
-
-        @Override
-        public Instant autoTimeLowerBound() {
-            return TIME_LOWER_BOUND;
-        }
-
-        @Override
-        public int[] autoOriginPriorities() {
-            return mAutoOriginPriorities;
         }
 
         @Override
@@ -1276,24 +1315,11 @@ public class TimeDetectorStrategyImplTest {
             mWakeLockAcquired = false;
         }
 
-        public void setDeviceHas2038Issues(boolean hasIssues) {
-            mDeviceHas2038Issues = hasIssues;
-        }
-
-        @Override
-        public boolean deviceHasY2038Issue() {
-            return mDeviceHas2038Issues;
-        }
-
         // Methods below are for managing the fake's behavior.
 
         void simulateConfigurationInternalChange(ConfigurationInternal configurationInternal) {
             mConfigurationInternal = configurationInternal;
             mConfigurationInternalChangeListener.onChange();
-        }
-
-        void pokeSystemClockUpdateThreshold(int thresholdMillis) {
-            mSystemClockUpdateThresholdMillis = thresholdMillis;
         }
 
         void pokeElapsedRealtimeMillis(long elapsedRealtimeMillis) {
@@ -1302,10 +1328,6 @@ public class TimeDetectorStrategyImplTest {
 
         void pokeSystemClockMillis(long systemClockMillis) {
             mSystemClockMillis = systemClockMillis;
-        }
-
-        void pokeAutoOriginPriorities(@Origin int[] autoOriginPriorities) {
-            mAutoOriginPriorities = autoOriginPriorities;
         }
 
         long peekElapsedRealtimeMillis() {
@@ -1353,21 +1375,6 @@ public class TimeDetectorStrategyImplTest {
         Script() {
             mFakeEnvironment = new FakeEnvironment();
             mTimeDetectorStrategy = new TimeDetectorStrategyImpl(mFakeEnvironment);
-        }
-
-        Script pokeThresholds(int systemClockUpdateThreshold) {
-            mFakeEnvironment.pokeSystemClockUpdateThreshold(systemClockUpdateThreshold);
-            return this;
-        }
-
-        Script pokeAutoOriginPriorities(@Origin int... autoOriginPriorities) {
-            mFakeEnvironment.pokeAutoOriginPriorities(autoOriginPriorities);
-            return this;
-        }
-
-        Script pokeDeviceHasY2038Issues(boolean hasIssues) {
-            mFakeEnvironment.setDeviceHas2038Issues(hasIssues);
-            return this;
         }
 
         long peekElapsedRealtimeMillis() {

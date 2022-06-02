@@ -23,11 +23,10 @@
 #include <string>
 #include <vector>
 
+#include "androidfw/BigBuffer.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 #include "utils/ByteOrder.h"
-
-#include "util/BigBuffer.h"
 
 #ifdef _WIN32
 // TODO(adamlesinski): remove once http://b/32447322 is resolved.
@@ -149,15 +148,6 @@ template <typename Container>
   };
 }
 
-// Helper method to extract a UTF-16 string from a StringPool. If the string is stored as UTF-8,
-// the conversion to UTF-16 happens within ResStringPool.
-android::StringPiece16 GetString16(const android::ResStringPool& pool, size_t idx);
-
-// Helper method to extract a UTF-8 string from a StringPool. If the string is stored as UTF-16,
-// the conversion from UTF-16 to UTF-8 does not happen in ResStringPool and is done by this method,
-// which maintains no state or cache. This means we must return an std::string copy.
-std::string GetString(const android::ResStringPool& pool, size_t idx);
-
 // Checks that the Java string format contains no non-positional arguments (arguments without
 // explicitly specifying an index) when there are more than one argument. This is an error
 // because translations may rearrange the order of the arguments in the string, which will
@@ -212,19 +202,8 @@ inline StringBuilder::operator bool() const {
   return error_.empty();
 }
 
-// Converts a UTF8 string into Modified UTF8
-std::string Utf8ToModifiedUtf8(const std::string& utf8);
-std::string ModifiedUtf8ToUtf8(const std::string& modified_utf8);
-
-// Converts a UTF8 string to a UTF16 string.
-std::u16string Utf8ToUtf16(const android::StringPiece& utf8);
-std::string Utf16ToUtf8(const android::StringPiece16& utf16);
-
 // Writes the entire BigBuffer to the output stream.
-bool WriteAll(std::ostream& out, const BigBuffer& buffer);
-
-// Copies the entire BigBuffer into a single buffer.
-std::unique_ptr<uint8_t[]> Copy(const BigBuffer& buffer);
+bool WriteAll(std::ostream& out, const android::BigBuffer& buffer);
 
 // A Tokenizer implemented as an iterable collection. It does not allocate any memory on the heap
 // nor use standard containers.
@@ -277,22 +256,6 @@ inline Tokenizer Tokenize(const android::StringPiece& str, char sep) {
   return Tokenizer(str, sep);
 }
 
-inline uint16_t HostToDevice16(uint16_t value) {
-  return htods(value);
-}
-
-inline uint32_t HostToDevice32(uint32_t value) {
-  return htodl(value);
-}
-
-inline uint16_t DeviceToHost16(uint16_t value) {
-  return dtohs(value);
-}
-
-inline uint32_t DeviceToHost32(uint32_t value) {
-  return dtohl(value);
-}
-
 // Given a path like: res/xml-sw600dp/foo.xml
 //
 // Extracts "res/xml-sw600dp/" into outPrefix.
@@ -305,13 +268,15 @@ bool ExtractResFilePathParts(const android::StringPiece& path, android::StringPi
 
 }  // namespace util
 
+}  // namespace aapt
+
+namespace std {
 // Stream operator for functions. Calls the function with the stream as an argument.
 // In the aapt namespace for lookup.
 inline ::std::ostream& operator<<(::std::ostream& out,
                                   const ::std::function<::std::ostream&(::std::ostream&)>& f) {
   return f(out);
 }
-
-}  // namespace aapt
+}  // namespace std
 
 #endif  // AAPT_UTIL_H

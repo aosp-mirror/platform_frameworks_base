@@ -20,15 +20,14 @@
 #include <functional>
 #include <memory>
 
+#include "NameMangler.h"
+#include "Resource.h"
+#include "ResourceValues.h"
 #include "androidfw/AssetManager2.h"
 #include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
-
-#include "NameMangler.h"
-#include "Resource.h"
-#include "ResourceValues.h"
-#include "StringPool.h"
+#include "androidfw/StringPool.h"
 
 namespace aapt {
 namespace ResourceUtils {
@@ -230,14 +229,14 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type,
                                           const android::ConfigDescription& config,
                                           const android::ResStringPool& src_pool,
                                           const android::Res_value& res_value,
-                                          StringPool* dst_pool);
+                                          android::StringPool* dst_pool);
 
 // A string flattened from an XML hierarchy, which maintains tags and untranslatable sections
 // in parallel data structures.
 struct FlattenedXmlString {
   std::string text;
   std::vector<UntranslatableSection> untranslatable_sections;
-  std::vector<Span> spans;
+  std::vector<android::Span> spans;
 };
 
 // Flattens an XML hierarchy into a FlattenedXmlString, formatting the text, escaping characters,

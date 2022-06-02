@@ -32,17 +32,17 @@ namespace io {
 // and copied into memory when opened. Otherwise it is mmapped from the ZIP archive.
 class ZipFile : public IFile {
  public:
-  ZipFile(::ZipArchiveHandle handle, const ::ZipEntry& entry, const Source& source);
+  ZipFile(::ZipArchiveHandle handle, const ::ZipEntry& entry, const android::Source& source);
 
   std::unique_ptr<IData> OpenAsData() override;
   std::unique_ptr<io::InputStream> OpenInputStream() override;
-  const Source& GetSource() const override;
+  const android::Source& GetSource() const override;
   bool WasCompressed() override;
 
  private:
   ::ZipArchiveHandle zip_handle_;
   ::ZipEntry zip_entry_;
-  Source source_;
+  android::Source source_;
 };
 
 class ZipFileCollection;

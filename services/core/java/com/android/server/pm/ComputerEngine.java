@@ -4613,22 +4613,21 @@ public class ComputerEngine implements Computer {
     // NOTE: Can't remove due to unsupported app usage
     @NonNull
     @Override
-    public String[] getAppOpPermissionPackages(@NonNull String permissionName) {
-        if (permissionName == null) {
-            return EmptyArray.STRING;
-        }
+    public String[] getAppOpPermissionPackages(@NonNull String permissionName, int userId) {
         final int callingUid = Binder.getCallingUid();
-        if (getInstantAppPackageName(callingUid) != null) {
+        enforceCrossUserPermission(callingUid, userId, false /* requireFullPermission */,
+                false /* checkShell */, "getAppOpPermissionPackages");
+        if (permissionName == null || getInstantAppPackageName(callingUid) != null
+                || !mUserManager.exists(userId)) {
             return EmptyArray.STRING;
         }
-        final int callingUserId = UserHandle.getUserId(callingUid);
 
         final ArraySet<String> packageNames = new ArraySet(
                 mPermissionManager.getAppOpPermissionPackages(permissionName));
         for (int i = packageNames.size() - 1; i >= 0; i--) {
             final String packageName = packageNames.valueAt(i);
-            if (!shouldFilterApplication(mSettings.getPackage(packageName), callingUid,
-                    callingUserId)) {
+            if (!shouldFilterApplicationIncludingUninstalled(
+                    mSettings.getPackage(packageName), callingUid, userId)) {
                 continue;
             }
             packageNames.removeAt(i);

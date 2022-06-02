@@ -24,6 +24,7 @@ import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
 import android.content.pm.ProviderInfo;
 import android.os.Process;
+import android.os.UserHandle;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -102,7 +103,7 @@ public class AppEnumerationInternalTests {
         installPackage(HAS_APPOP_PERMISSION_APK_PATH, true /* forceQueryable */);
 
         final String[] packageNames = mIPackageManager.getAppOpPermissionPackages(
-                PERMISSION_REQUEST_INSTALL_PACKAGES);
+                PERMISSION_REQUEST_INSTALL_PACKAGES, UserHandle.myUserId());
 
         assertThat(packageNames).asList().contains(TARGET_HAS_APPOP_PERMISSION);
     }
@@ -112,7 +113,7 @@ public class AppEnumerationInternalTests {
         installPackage(HAS_APPOP_PERMISSION_APK_PATH, false /* forceQueryable */);
 
         final String[] packageNames = mIPackageManager.getAppOpPermissionPackages(
-                PERMISSION_REQUEST_INSTALL_PACKAGES);
+                PERMISSION_REQUEST_INSTALL_PACKAGES, UserHandle.myUserId());
 
         assertThat(packageNames).asList().doesNotContain(TARGET_HAS_APPOP_PERMISSION);
     }

@@ -601,6 +601,10 @@ base::expected<FindEntryResult, NullOrIOError> AssetManager2::FindEntry(
     return base::unexpected(result.error());
   }
 
+  if (type_idx == 0x1c) {
+    LOG(ERROR) << base::StringPrintf("foobar first result %s", result->package_name->c_str());
+  }
+
   bool overlaid = false;
   if (!stop_at_first_match && !ignore_configuration && !apk_assets_[result->cookie]->IsLoader()) {
     for (const auto& id_map : package_group.overlays_) {

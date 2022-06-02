@@ -537,6 +537,61 @@ public final class AutofillManager {
     public static final int RESULT_CODE_NOT_SERVICE = -1;
 
     /**
+     *  Reasons to commit the Autofill context.
+     *
+     *  <p>If adding a new reason, modify
+     *  {@link com.android.server.autofill.PresentationStatsEventLogger#getNoPresentationEventReason(int)}
+     *  as well.</p>
+     *
+     *  TODO(b/233833662): Expose this as a public API in U.
+     *  @hide
+     */
+    @IntDef(prefix = { "COMMIT_REASON_" }, value = {
+            COMMIT_REASON_UNKNOWN,
+            COMMIT_REASON_ACTIVITY_FINISHED,
+            COMMIT_REASON_VIEW_COMMITTED,
+            COMMIT_REASON_VIEW_CLICKED,
+            COMMIT_REASON_VIEW_CHANGED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AutofillCommitReason {}
+
+    /**
+     * Autofill context was committed because of an unknown reason.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_UNKNOWN = 0;
+
+    /**
+     * Autofill context was committed because activity finished.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_ACTIVITY_FINISHED = 1;
+
+    /**
+     * Autofill context was committed because {@link #commit()} was called.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_VIEW_COMMITTED = 2;
+
+    /**
+     * Autofill context was committed because view was clicked.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_VIEW_CLICKED = 3;
+
+    /**
+     * Autofill context was committed because of view changed.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_VIEW_CHANGED = 4;
+
+    /**
      * Makes an authentication id from a request id and a dataset id.
      *
      * @param requestId The request id.
@@ -1605,7 +1660,7 @@ public final class AutofillManager {
             }
             if (mSaveTriggerId != null && mSaveTriggerId.equals(id)) {
                 if (sDebug) Log.d(TAG, "triggering commit by click of " + id);
-                commitLocked();
+                commitLocked(/* commitReason= */ COMMIT_REASON_VIEW_CLICKED);
                 mMetricsLogger.write(newLog(MetricsEvent.AUTOFILL_SAVE_EXPLICITLY_TRIGGERED));
             }
         }
@@ -1623,7 +1678,7 @@ public final class AutofillManager {
         synchronized (mLock) {
             if (mSaveOnFinish) {
                 if (sDebug) Log.d(TAG, "onActivityFinishing(): calling commitLocked()");
-                commitLocked();
+                commitLocked(/* commitReason= */ COMMIT_REASON_ACTIVITY_FINISHED);
             } else {
                 if (sDebug) Log.d(TAG, "onActivityFinishing(): calling cancelLocked()");
                 cancelLocked();
@@ -1648,16 +1703,16 @@ public final class AutofillManager {
         }
         if (sVerbose) Log.v(TAG, "commit() called by app");
         synchronized (mLock) {
-            commitLocked();
+            commitLocked(/* commitReason= */ COMMIT_REASON_VIEW_COMMITTED);
         }
     }
 
     @GuardedBy("mLock")
-    private void commitLocked() {
+    private void commitLocked(@AutofillCommitReason int commitReason) {
         if (!mEnabled && !isActiveLocked()) {
             return;
         }
-        finishSessionLocked();
+        finishSessionLocked(/* commitReason= */ commitReason);
     }
 
     /**
@@ -2123,13 +2178,13 @@ public final class AutofillManager {
     }
 
     @GuardedBy("mLock")
-    private void finishSessionLocked() {
+    private void finishSessionLocked(@AutofillCommitReason int commitReason) {
         if (sVerbose) Log.v(TAG, "finishSessionLocked(): " + getStateAsStringLocked());
 
         if (!isActiveLocked()) return;
 
         try {
-            mService.finishSession(mSessionId, mContext.getUserId());
+            mService.finishSession(mSessionId, mContext.getUserId(), commitReason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3624,7 +3679,7 @@ public final class AutofillManager {
             }
 
             if (mVisibleTrackedIds == null) {
-                finishSessionLocked();
+                finishSessionLocked(/* commitReason= */ COMMIT_REASON_VIEW_CHANGED);
             }
         }
 
@@ -3657,9 +3712,9 @@ public final class AutofillManager {
 
             if (mVisibleTrackedIds == null) {
                 if (sVerbose) {
-                    Log.v(TAG, "No more visible ids. Invisibile = " + mInvisibleTrackedIds);
+                    Log.v(TAG, "No more visible ids. Invisible = " + mInvisibleTrackedIds);
                 }
-                finishSessionLocked();
+                finishSessionLocked(/* commitReason= */ COMMIT_REASON_VIEW_CHANGED);
             }
         }
 
@@ -3731,7 +3786,7 @@ public final class AutofillManager {
                 if (sVerbose) {
                     Log.v(TAG, "onVisibleForAutofillChangedLocked(): no more visible ids");
                 }
-                finishSessionLocked();
+                finishSessionLocked(/* commitReason= */ COMMIT_REASON_VIEW_CHANGED);
             }
         }
     }

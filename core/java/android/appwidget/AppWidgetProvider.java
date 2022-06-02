@@ -58,7 +58,12 @@ public class AppWidgetProvider extends BroadcastReceiver {
         // Protect against rogue update broadcasts (not really a security issue,
         // just filter bad broacasts out so subclasses are less likely to crash).
         String action = intent.getAction();
-        if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
+        if (AppWidgetManager.ACTION_APPWIDGET_ENABLE_AND_UPDATE.equals(action)) {
+            this.onReceive(context, new Intent(intent)
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_ENABLED));
+            this.onReceive(context, new Intent(intent)
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE));
+        } else if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 int[] appWidgetIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);

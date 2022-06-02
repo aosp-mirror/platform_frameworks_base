@@ -51,6 +51,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE_PER_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
+import static android.content.pm.ActivityInfo.launchModeToString;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.INVALID_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -89,7 +90,6 @@ import android.app.PendingIntent;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
@@ -192,6 +192,7 @@ class ActivityStarter {
 
     private Task mInTask;
     private TaskFragment mInTaskFragment;
+    private TaskFragment mAddingToTaskFragment;
     @VisibleForTesting
     boolean mAddingToTask;
 
@@ -369,6 +370,13 @@ class ActivityStarter {
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
         boolean allowBackgroundActivityStart;
+        /**
+         * The error callback token passed in {@link android.window.WindowContainerTransaction}
+         * for TaskFragment operation error handling via
+         * {@link android.window.TaskFragmentOrganizer#onTaskFragmentError(IBinder, Throwable)}.
+         */
+        @Nullable
+        IBinder errorCallbackToken;
 
         /**
          * If set to {@code true}, allows this activity start to look into
@@ -422,6 +430,7 @@ class ActivityStarter {
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
             allowBackgroundActivityStart = false;
+            errorCallbackToken = null;
         }
 
         /**
@@ -464,6 +473,7 @@ class ActivityStarter {
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
             allowBackgroundActivityStart = request.allowBackgroundActivityStart;
+            errorCallbackToken = request.errorCallbackToken;
         }
 
         /**
@@ -1693,7 +1703,8 @@ class ActivityStarter {
             // Root task should also be detached from display and be removed if it's empty.
             if (startedActivityRootTask != null && startedActivityRootTask.isAttached()
                     && !startedActivityRootTask.hasActivity()
-                    && !startedActivityRootTask.isActivityTypeHome()) {
+                    && !startedActivityRootTask.isActivityTypeHome()
+                    && !startedActivityRootTask.mCreatedByOrganizer) {
                 startedActivityRootTask.removeIfPossible("handleStartResult");
             }
             if (newTransition != null) {
@@ -2061,8 +2072,20 @@ class ActivityStarter {
         }
 
         if (mInTaskFragment != null && !canEmbedActivity(mInTaskFragment, r, newTask, targetTask)) {
-            Slog.e(TAG, "Permission denied: Cannot embed " + r + " to " + mInTaskFragment.getTask()
-                    + " targetTask= " + targetTask);
+            final StringBuilder errorMsg = new StringBuilder("Permission denied: Cannot embed " + r
+                    + " to " + mInTaskFragment.getTask() + ". newTask=" + newTask + ", targetTask= "
+                    + targetTask);
+            if (newTask && isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE,
+                    LAUNCH_SINGLE_INSTANCE_PER_TASK, LAUNCH_SINGLE_TASK)) {
+                errorMsg.append("\nActivity tries to launch on a new task because the launch mode"
+                        + " is " + launchModeToString(mLaunchMode));
+            } else if (newTask && (mLaunchFlags & (FLAG_ACTIVITY_NEW_DOCUMENT
+                    | FLAG_ACTIVITY_NEW_TASK)) != 0) {
+                errorMsg.append("\nActivity tries to launch on a new task because the launch flags"
+                        + " contains FLAG_ACTIVITY_NEW_DOCUMENT or FLAG_ACTIVITY_NEW_TASK. "
+                        + "mLaunchFlag=" + mLaunchFlags);
+            }
+            Slog.e(TAG, errorMsg.toString());
             return START_PERMISSION_DENIED;
         }
 
@@ -2285,20 +2308,27 @@ class ActivityStarter {
             // In this situation we want to remove all activities from the task up to the one
             // being started. In most cases this means we are resetting the task to its initial
             // state.
-            final ActivityRecord top = targetTask.performClearTop(mStartActivity, mLaunchFlags);
+            final ActivityRecord clearTop = targetTask.performClearTop(mStartActivity,
+                    mLaunchFlags);
 
-            if (top != null) {
-                if (top.isRootOfTask()) {
+            if (clearTop != null && !clearTop.finishing) {
+                if (clearTop.isRootOfTask()) {
                     // Activity aliases may mean we use different intents for the top activity,
                     // so make sure the task now has the identity of the new intent.
-                    top.getTask().setIntent(mStartActivity);
+                    clearTop.getTask().setIntent(mStartActivity);
                 }
-                deliverNewIntent(top, intentGrants);
+                deliverNewIntent(clearTop, intentGrants);
             } else {
                 // A special case: we need to start the activity because it is not currently
                 // running, and the caller has asked to clear the current task to have this
                 // activity at the top.
                 mAddingToTask = true;
+                // Adding the new activity to the same embedded TF of the clear-top activity if
+                // possible.
+                if (clearTop != null && clearTop.getTaskFragment() != null
+                        && clearTop.getTaskFragment().isEmbedded()) {
+                    mAddingToTaskFragment = clearTop.getTaskFragment();
+                }
                 if (targetTask.getRootTask() == null) {
                     // Target root task got cleared when we all activities were removed above.
                     // Go ahead and reset it.
@@ -2926,6 +2956,7 @@ class ActivityStarter {
     private void addOrReparentStartingActivity(@NonNull Task task, String reason) {
         TaskFragment newParent = task;
         if (mInTaskFragment != null) {
+            // TODO(b/234351413): remove remaining embedded Task logic.
             // mInTaskFragment is created and added to the leaf task by task fragment organizer's
             // request. If the task was resolved and different than mInTaskFragment, reparent the
             // task to mInTaskFragment for embedding.
@@ -2937,17 +2968,29 @@ class ActivityStarter {
                 newParent = mInTaskFragment;
             }
         } else {
-            final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */,
-                    false /* includingEmbeddedTask */);
-            final TaskFragment taskFragment = top != null ? top.getTaskFragment() : null;
-            if (taskFragment != null && taskFragment.isEmbedded()
-                    && canEmbedActivity(taskFragment, mStartActivity, false /* newTask */, task)) {
+            TaskFragment candidateTf = mAddingToTaskFragment != null ? mAddingToTaskFragment : null;
+            if (candidateTf == null) {
+                final ActivityRecord top = task.topRunningActivity(false /* focusableOnly */,
+                        false /* includingEmbeddedTask */);
+                if (top != null) {
+                    candidateTf = top.getTaskFragment();
+                }
+            }
+            if (candidateTf != null && candidateTf.isEmbedded()
+                    && canEmbedActivity(candidateTf, mStartActivity, false /* newTask */, task)) {
                 // Use the embedded TaskFragment of the top activity as the new parent if the
                 // activity can be embedded.
-                newParent = top.getTaskFragment();
+                newParent = candidateTf;
             }
         }
-
+        // Start Activity to the Task if mStartActivity's min dimensions are not satisfied.
+        if (newParent.isEmbedded() && newParent.smallerThanMinDimension(mStartActivity)) {
+            reason += " - MinimumDimensionViolation";
+            mService.mWindowOrganizerController.sendMinimumDimensionViolation(
+                    newParent, mStartActivity.getMinDimensions(), mRequest.errorCallbackToken,
+                    reason);
+            newParent = task;
+        }
         if (mStartActivity.getTaskFragment() == null
                 || mStartActivity.getTaskFragment() == newParent) {
             newParent.addChild(mStartActivity, POSITION_TOP);
@@ -3232,6 +3275,11 @@ class ActivityStarter {
         return this;
     }
 
+    ActivityStarter setErrorCallbackToken(@Nullable IBinder errorCallbackToken) {
+        mRequest.errorCallbackToken = errorCallbackToken;
+        return this;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);
         pw.print("mCurrentUser=");
@@ -3266,12 +3314,8 @@ class ActivityStarter {
             pw.println(mOptions);
         }
         pw.print(prefix);
-        pw.print("mLaunchSingleTop=");
-        pw.print(LAUNCH_SINGLE_TOP == mLaunchMode);
-        pw.print(" mLaunchSingleInstance=");
-        pw.print(LAUNCH_SINGLE_INSTANCE == mLaunchMode);
-        pw.print(" mLaunchSingleTask=");
-        pw.println(LAUNCH_SINGLE_TASK == mLaunchMode);
+        pw.print("mLaunchMode=");
+        pw.print(launchModeToString(mLaunchMode));
         pw.print(prefix);
         pw.print("mLaunchFlags=0x");
         pw.print(Integer.toHexString(mLaunchFlags));

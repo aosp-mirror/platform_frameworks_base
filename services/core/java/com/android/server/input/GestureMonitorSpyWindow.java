@@ -27,6 +27,8 @@ import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
+import com.android.server.policy.WindowManagerPolicy;
+
 /**
  * An internal implementation of an {@link InputMonitor} that uses a spy window.
  *
@@ -67,7 +69,9 @@ class GestureMonitorSpyWindow {
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
-        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+        // Gesture monitor should be above handwriting event surface, hence setting it to
+        // WindowManagerPolicy.INPUT_DISPLAY_OVERLAY_LAYER + 1
+        t.setLayer(mInputSurface, WindowManagerPolicy.INPUT_DISPLAY_OVERLAY_LAYER + 1);
         t.setPosition(mInputSurface, 0, 0);
         t.setCrop(mInputSurface, null /* crop to parent surface */);
         t.show(mInputSurface);

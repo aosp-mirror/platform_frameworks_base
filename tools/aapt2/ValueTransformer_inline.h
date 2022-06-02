@@ -19,7 +19,7 @@
 
 namespace aapt {
 
-inline ValueTransformer::ValueTransformer(StringPool* new_pool) : pool_(new_pool) {
+inline ValueTransformer::ValueTransformer(android::StringPool* new_pool) : pool_(new_pool) {
 }
 
 template <typename Derived, typename Base>

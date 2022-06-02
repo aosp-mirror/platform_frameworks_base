@@ -24,11 +24,10 @@
 #include <vector>
 
 #include "android-base/macros.h"
+#include "androidfw/IDiagnostics.h"
+#include "androidfw/Source.h"
 #include "androidfw/StringPiece.h"
 #include "utils/FileMap.h"
-
-#include "Diagnostics.h"
-#include "Source.h"
 
 namespace aapt {
 namespace file {
@@ -98,7 +97,8 @@ bool AppendSetArgsFromFile(const android::StringPiece& path,
 // Pattern format is specified in the FileFilter::SetPattern() method.
 class FileFilter {
  public:
-  explicit FileFilter(IDiagnostics* diag) : diag_(diag) {}
+  explicit FileFilter(android::IDiagnostics* diag) : diag_(diag) {
+  }
 
   // Patterns syntax:
   // - Delimiter is :
@@ -120,14 +120,14 @@ class FileFilter {
  private:
   DISALLOW_COPY_AND_ASSIGN(FileFilter);
 
-  IDiagnostics* diag_;
+  android::IDiagnostics* diag_;
   std::vector<std::string> pattern_tokens_;
 };
 
 // Returns a list of files relative to the directory identified by `path`.
 // An optional FileFilter filters out any files that don't pass.
 std::optional<std::vector<std::string>> FindFiles(const android::StringPiece& path,
-                                                  IDiagnostics* diag,
+                                                  android::IDiagnostics* diag,
                                                   const FileFilter* filter = nullptr);
 
 }  // namespace file

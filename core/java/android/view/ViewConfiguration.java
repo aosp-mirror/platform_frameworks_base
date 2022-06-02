@@ -27,7 +27,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.hardware.input.InputManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -353,7 +352,6 @@ public class ViewConfiguration {
     private final int mSmartSelectionInitializedTimeout;
     private final int mSmartSelectionInitializingTimeout;
     private final boolean mPreferKeepClearForFocusEnabled;
-    private final String mVelocityTrackerStrategy;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 123768915)
     private boolean sHasPermanentMenuKey;
@@ -401,7 +399,6 @@ public class ViewConfiguration {
         mSmartSelectionInitializedTimeout = SMART_SELECTION_INITIALIZED_TIMEOUT_IN_MILLISECOND;
         mSmartSelectionInitializingTimeout = SMART_SELECTION_INITIALIZING_TIMEOUT_IN_MILLISECOND;
         mPreferKeepClearForFocusEnabled = false;
-        mVelocityTrackerStrategy = InputManager.getInstance().getVelocityTrackerStrategy();
     }
 
     /**
@@ -520,16 +517,6 @@ public class ViewConfiguration {
                 com.android.internal.R.integer.config_smartSelectionInitializingTimeoutMillis);
         mPreferKeepClearForFocusEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_preferKeepClearForFocus);
-
-        mVelocityTrackerStrategy = InputManager.getInstance().getVelocityTrackerStrategy();
-    }
-
-    /**
-     * Get the current VelocityTracker strategy
-     * @hide
-     */
-    public String getVelocityTrackerStrategy() {
-        return mVelocityTrackerStrategy;
     }
 
     /**

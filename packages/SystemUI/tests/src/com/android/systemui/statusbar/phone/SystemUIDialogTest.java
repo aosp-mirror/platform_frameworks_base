@@ -76,7 +76,7 @@ public class SystemUIDialogTest extends SysuiTestCase {
 
     @Test
     public void testNoRegisterReceiver() {
-        final SystemUIDialog dialog = new SystemUIDialog(mContext, false);
+        final SystemUIDialog dialog = new SystemUIDialog(mContext, 0, false);
 
         dialog.show();
         verify(mBroadcastDispatcher, never()).registerReceiver(any(), any(), eq(null), any());

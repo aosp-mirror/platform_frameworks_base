@@ -18,8 +18,6 @@ package com.android.server.timedetector;
 
 import static com.android.server.timedetector.TimeDetectorStrategy.originToString;
 
-import static java.util.stream.Collectors.joining;
-
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
@@ -153,28 +151,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         /** Returns the {@link ConfigurationInternal} for the current user. */
         @NonNull ConfigurationInternal getCurrentUserConfigurationInternal();
 
-        /**
-         * Returns the absolute threshold below which the system clock need not be updated. i.e. if
-         * setting the system clock would adjust it by less than this (either backwards or forwards)
-         * then it need not be set.
-         */
-        int systemClockUpdateThresholdMillis();
-
-        /**
-         * Returns a lower bound for valid automatic times. It is guaranteed to be in the past,
-         * i.e. it is unrelated to the current system clock time.
-         * It holds no other meaning; it could be related to when the device system image was built,
-         * or could be updated by a mainline module.
-         */
-        @NonNull
-        Instant autoTimeLowerBound();
-
-        /**
-         * Returns the order to look at time suggestions when automatically detecting time.
-         * See {@code #ORIGIN_} constants
-         */
-        @Origin int[] autoOriginPriorities();
-
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
 
@@ -191,12 +167,6 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         /** Release the wake lock acquired by a call to {@link #acquireWakeLock()}. */
         void releaseWakeLock();
-
-        /**
-         * Returns {@code true} if the device may be at risk of time_t overflow (because bionic
-         * defines time_t as a 32-bit signed integer for 32-bit processes).
-         */
-        boolean deviceHasY2038Issue();
     }
 
     static TimeDetectorStrategy create(
@@ -384,25 +354,13 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
         ipw.println("mLastAutoSystemClockTimeSet=" + mLastAutoSystemClockTimeSet);
         ipw.println("mCurrentConfigurationInternal=" + mCurrentConfigurationInternal);
-        ipw.println("[Capabilities=" + mCurrentConfigurationInternal.capabilitiesAndConfig()
-                + "]");
+        ipw.println("[Capabilities=" + mCurrentConfigurationInternal.capabilitiesAndConfig() + "]");
         long elapsedRealtimeMillis = mEnvironment.elapsedRealtimeMillis();
         ipw.printf("mEnvironment.elapsedRealtimeMillis()=%s (%s)\n",
                 Duration.ofMillis(elapsedRealtimeMillis), elapsedRealtimeMillis);
         long systemClockMillis = mEnvironment.systemClockMillis();
         ipw.printf("mEnvironment.systemClockMillis()=%s (%s)\n",
                 Instant.ofEpochMilli(systemClockMillis), systemClockMillis);
-        ipw.println("mEnvironment.systemClockUpdateThresholdMillis()="
-                + mEnvironment.systemClockUpdateThresholdMillis());
-        Instant autoTimeLowerBound = mEnvironment.autoTimeLowerBound();
-        ipw.printf("mEnvironment.autoTimeLowerBound()=%s (%s)\n",
-                autoTimeLowerBound, autoTimeLowerBound.toEpochMilli());
-        String priorities =
-                Arrays.stream(mEnvironment.autoOriginPriorities())
-                        .mapToObj(TimeDetectorStrategy::originToString)
-                        .collect(joining(",", "[", "]"));
-        ipw.println("mEnvironment.autoOriginPriorities()=" + priorities);
-        ipw.println("mEnvironment.deviceHasY2038Issue()=" + mEnvironment.deviceHasY2038Issue());
 
         ipw.println("Time change log:");
         ipw.increaseIndent(); // level 2
@@ -467,6 +425,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         return true;
     }
 
+    @GuardedBy("this")
     private boolean validateSuggestionTime(
             @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion) {
         if (newUnixEpochTime.getValue() == null) {
@@ -485,7 +444,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         if (newUnixEpochTime.getValue() > Y2038_LIMIT_IN_MILLIS
-                && mEnvironment.deviceHasY2038Issue()) {
+                && mCurrentConfigurationInternal.getDeviceHasY2038Issue()) {
             // This check won't prevent a device's system clock exceeding Integer.MAX_VALUE Unix
             // seconds through the normal passage of time, but it will stop it jumping above 2038
             // because of a "bad" suggestion. b/204193177
@@ -496,15 +455,17 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         return true;
     }
 
+    @GuardedBy("this")
     private boolean validateAutoSuggestionTime(
             @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion)  {
         return validateSuggestionTime(newUnixEpochTime, suggestion)
                 && validateSuggestionAgainstLowerBound(newUnixEpochTime, suggestion);
     }
 
+    @GuardedBy("this")
     private boolean validateSuggestionAgainstLowerBound(
             @NonNull TimestampedValue<Long> newUnixEpochTime, @NonNull Object suggestion) {
-        Instant lowerBound = mEnvironment.autoTimeLowerBound();
+        Instant lowerBound = mCurrentConfigurationInternal.getAutoTimeLowerBound();
 
         // Suggestion is definitely wrong if it comes before lower time bound.
         if (lowerBound.isAfter(Instant.ofEpochMilli(newUnixEpochTime.getValue()))) {
@@ -524,7 +485,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         // Try the different origins one at a time.
-        int[] originPriorities = mEnvironment.autoOriginPriorities();
+        int[] originPriorities = mCurrentConfigurationInternal.getAutoOriginPriorities();
         for (int origin : originPriorities) {
             TimestampedValue<Long> newUnixEpochTime = null;
             String cause = null;
@@ -814,7 +775,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // Check if the new signal would make sufficient difference to the system clock. If it's
         // below the threshold then ignore it.
         long absTimeDifference = Math.abs(newSystemClockMillis - actualSystemClockMillis);
-        long systemClockUpdateThreshold = mEnvironment.systemClockUpdateThresholdMillis();
+        long systemClockUpdateThreshold =
+                mCurrentConfigurationInternal.getSystemClockUpdateThresholdMillis();
         if (absTimeDifference < systemClockUpdateThreshold) {
             if (DBG) {
                 Slog.d(LOG_TAG, "Not setting system clock. New time and"

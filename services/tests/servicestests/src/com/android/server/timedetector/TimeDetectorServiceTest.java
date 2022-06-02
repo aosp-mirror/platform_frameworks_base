@@ -16,19 +16,27 @@
 
 package com.android.server.timedetector;
 
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.ITimeDetectorListener;
+import android.app.time.TimeConfiguration;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
@@ -36,6 +44,7 @@ import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
 
@@ -51,11 +60,15 @@ import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Instant;
 
 @RunWith(AndroidJUnit4.class)
 public class TimeDetectorServiceTest {
 
     private static final int ARBITRARY_USER_ID = 9999;
+    private static final int ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS = 1234;
+    private static final Instant ARBITRARY_AUTO_TIME_LOWER_BOUND = Instant.ofEpochMilli(0);
+    private static final int[] ARBITRARY_ORIGIN_PRIORITIES = { ORIGIN_NETWORK };
 
     private Context mMockContext;
 
@@ -122,6 +135,115 @@ public class TimeDetectorServiceTest {
         verify(mMockContext).enforceCallingPermission(
                 eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
                 anyString());
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testAddListener_withoutPermission() {
+        doThrow(new SecurityException("Mock"))
+                .when(mMockContext).enforceCallingPermission(anyString(), any());
+
+        ITimeDetectorListener mockListener = mock(ITimeDetectorListener.class);
+        try {
+            mTimeDetectorService.addListener(mockListener);
+            fail("Expected SecurityException");
+        } finally {
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
+                    anyString());
+        }
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testRemoveListener_withoutPermission() {
+        doThrow(new SecurityException("Mock"))
+                .when(mMockContext).enforceCallingPermission(anyString(), any());
+
+        ITimeDetectorListener mockListener = mock(ITimeDetectorListener.class);
+        try {
+            mTimeDetectorService.removeListener(mockListener);
+            fail("Expected a SecurityException");
+        } finally {
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
+                    anyString());
+        }
+    }
+
+    @Test
+    public void testListenerRegistrationAndCallbacks() throws Exception {
+        ConfigurationInternal initialConfiguration =
+                createConfigurationInternal(false /* autoDetectionEnabled */);
+        mFakeServiceConfigAccessor.initializeConfiguration(initialConfiguration);
+
+        IBinder mockListenerBinder = mock(IBinder.class);
+        ITimeDetectorListener mockListener = mock(ITimeDetectorListener.class);
+
+        {
+            doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+            when(mockListener.asBinder()).thenReturn(mockListenerBinder);
+
+            mTimeDetectorService.addListener(mockListener);
+
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
+                    anyString());
+            verify(mockListener).asBinder();
+            verify(mockListenerBinder).linkToDeath(any(), anyInt());
+            verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
+            reset(mockListenerBinder, mockListener, mMockContext);
+        }
+
+        {
+            doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+
+            // Simulate the configuration being changed and verify the mockListener was notified.
+            TimeConfiguration autoDetectEnabledConfiguration =
+                    createTimeConfiguration(true /* autoDetectionEnabled */);
+            mTimeDetectorService.updateConfiguration(autoDetectEnabledConfiguration);
+
+            // The configuration update notification is asynchronous.
+            mTestHandler.waitForMessagesToBeProcessed();
+
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
+                    anyString());
+            verify(mockListener).onChange();
+            verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
+            reset(mockListenerBinder, mockListener, mMockContext);
+        }
+
+        {
+            doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+            when(mockListener.asBinder()).thenReturn(mockListenerBinder);
+            when(mockListenerBinder.unlinkToDeath(any(), anyInt())).thenReturn(true);
+
+            // Now remove the listener, change the config again, and verify the listener is not
+            // called.
+            mTimeDetectorService.removeListener(mockListener);
+
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
+                    anyString());
+            verify(mockListener).asBinder();
+            verify(mockListenerBinder).unlinkToDeath(any(), eq(0));
+            verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
+            reset(mockListenerBinder, mockListener, mMockContext);
+        }
+
+        {
+            doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
+
+            TimeConfiguration autoDetectDisabledConfiguration =
+                    createTimeConfiguration(false /* autoDetectionEnabled */);
+            mTimeDetectorService.updateConfiguration(autoDetectDisabledConfiguration);
+
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.MANAGE_TIME_AND_ZONE_DETECTION),
+                    anyString());
+            verify(mockListener, never()).onChange();
+            verifyNoMoreInteractions(mockListenerBinder, mockListener, mMockContext);
+            reset(mockListenerBinder, mockListener, mMockContext);
+        }
     }
 
     @Test(expected = SecurityException.class)
@@ -289,10 +411,20 @@ public class TimeDetectorServiceTest {
         mStubbedTimeDetectorStrategy.verifyDumpCalled();
     }
 
+    private static TimeConfiguration createTimeConfiguration(boolean autoDetectionEnabled) {
+        return new TimeConfiguration.Builder()
+                .setAutoDetectionEnabled(autoDetectionEnabled)
+                .build();
+    }
+
     private static ConfigurationInternal createConfigurationInternal(boolean autoDetectionEnabled) {
         return new ConfigurationInternal.Builder(ARBITRARY_USER_ID)
                 .setUserConfigAllowed(true)
                 .setAutoDetectionSupported(true)
+                .setSystemClockUpdateThresholdMillis(ARBITRARY_SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS)
+                .setAutoTimeLowerBound(ARBITRARY_AUTO_TIME_LOWER_BOUND)
+                .setOriginPriorities(ARBITRARY_ORIGIN_PRIORITIES)
+                .setDeviceHasY2038Issue(true)
                 .setAutoDetectionEnabledSetting(autoDetectionEnabled)
                 .build();
     }

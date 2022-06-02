@@ -36,6 +36,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
@@ -1089,12 +1090,6 @@ public class PackageManagerServiceUtils {
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
-        // Do not enforce filter matching when the caller is system or root.
-        // see ActivityManager#checkComponentPermission(String, int, int, boolean)
-        if (filterCallingUid == Process.ROOT_UID || filterCallingUid == Process.SYSTEM_UID) {
-            return;
-        }
-
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
@@ -1102,8 +1097,9 @@ public class PackageManagerServiceUtils {
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
 
-            // Do not enforce filter matching when the caller is the same app
-            if (info.applicationInfo.uid == filterCallingUid) {
+            // Do not enforce filter matching when the caller is system, root, or the same app
+            if (ActivityManager.checkComponentPermission(null, filterCallingUid,
+                    info.applicationInfo.uid, false) == PackageManager.PERMISSION_GRANTED) {
                 continue;
             }
 

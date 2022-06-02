@@ -102,7 +102,7 @@ TEST (UtilTest, LongVersionCodeUndefined) {
 
 
 TEST (UtilTest, ParseSplitParameters) {
-  IDiagnostics* diagnostics = test::ContextBuilder().Build().get()->GetDiagnostics();
+  android::IDiagnostics* diagnostics = test::ContextBuilder().Build().get()->GetDiagnostics();
   std::string path;
   SplitConstraints constraints;
   ConfigDescription expected_configuration;
@@ -356,7 +356,7 @@ TEST (UtilTest, ParseSplitParameters) {
 TEST (UtilTest, AdjustSplitConstraintsForMinSdk) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
 
-  IDiagnostics* diagnostics = context.get()->GetDiagnostics();
+  android::IDiagnostics* diagnostics = context.get()->GetDiagnostics();
   std::vector<SplitConstraints> test_constraints;
   std::string path;
 

@@ -57,8 +57,8 @@ static const char* ResourceFileTypeToString(const ResourceFile::Type& type) {
   return "UNKNOWN";
 }
 
-static void DumpCompiledFile(const ResourceFile& file, const Source& source, off64_t offset,
-                             size_t len, Printer* printer) {
+static void DumpCompiledFile(const ResourceFile& file, const android::Source& source,
+                             off64_t offset, size_t len, Printer* printer) {
   printer->Print("Resource: ");
   printer->Println(file.name.to_string());
 
@@ -83,7 +83,7 @@ class DumpContext : public IAaptContext {
     return PackageType::kApp;
   }
 
-  IDiagnostics* GetDiagnostics() override {
+  android::IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }
 
@@ -138,7 +138,7 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
   print_options.show_values = !no_values_;
 
   if (args.size() < 1) {
-    diag_->Error(DiagMessage() << "No dump container specified");
+    diag_->Error(android::DiagMessage() << "No dump container specified");
     return 1;
   }
 
@@ -146,7 +146,7 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
   for (auto container : args) {
     io::FileInputStream input(container);
     if (input.HadError()) {
-      context.GetDiagnostics()->Error(DiagMessage(container)
+      context.GetDiagnostics()->Error(android::DiagMessage(container)
                                       << "failed to open file: " << input.GetError());
       error = true;
       continue;
@@ -155,7 +155,7 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
     // Try as a compiled file.
     ContainerReader reader(&input);
     if (reader.HadError()) {
-      context.GetDiagnostics()->Error(DiagMessage(container)
+      context.GetDiagnostics()->Error(android::DiagMessage(container)
                                       << "failed to read container: " << reader.GetError());
       error = true;
       continue;
@@ -170,7 +170,7 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
 
         pb::ResourceTable pb_table;
         if (!entry->GetResTable(&pb_table)) {
-          context.GetDiagnostics()->Error(DiagMessage(container)
+          context.GetDiagnostics()->Error(android::DiagMessage(container)
                                           << "failed to parse proto table: " << entry->GetError());
           error = true;
           continue;
@@ -179,7 +179,7 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
         ResourceTable table;
         error.clear();
         if (!DeserializeTableFromPb(pb_table, nullptr /*files*/, &table, &error)) {
-          context.GetDiagnostics()->Error(DiagMessage(container)
+          context.GetDiagnostics()->Error(android::DiagMessage(container)
                                           << "failed to parse table: " << error);
           error = true;
           continue;
@@ -194,7 +194,7 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
         off64_t offset;
         size_t length;
         if (!entry->GetResFileOffsets(&pb_compiled_file, &offset, &length)) {
-          context.GetDiagnostics()->Error(DiagMessage(container)
+          context.GetDiagnostics()->Error(android::DiagMessage(container)
                                           << "failed to parse compiled proto file: "
                                           << entry->GetError());
           error = true;
@@ -203,14 +203,14 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
 
         ResourceFile file;
         if (!DeserializeCompiledFileFromPb(pb_compiled_file, &file, &error)) {
-          context.GetDiagnostics()->Warn(DiagMessage(container)
+          context.GetDiagnostics()->Warn(android::DiagMessage(container)
                                          << "failed to parse compiled file: " << error);
           error = true;
           continue;
         }
 
         printer_->Indent();
-        DumpCompiledFile(file, Source(container), offset, length, printer_);
+        DumpCompiledFile(file, android::Source(container), offset, length, printer_);
         printer_->Undent();
       }
     }
@@ -228,7 +228,7 @@ int DumpBadgerCommand::Action(const std::vector<std::string>& args) {
 int DumpConfigsCommand::Dump(LoadedApk* apk) {
   ResourceTable* table = apk->GetResourceTable();
   if (!table) {
-    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    GetDiagnostics()->Error(android::DiagMessage() << "Failed to retrieve resource table");
     return 1;
   }
 
@@ -268,13 +268,13 @@ int DumpPackageNameCommand::Dump(LoadedApk* apk) {
 int DumpStringsCommand::Dump(LoadedApk* apk) {
   ResourceTable* table = apk->GetResourceTable();
   if (!table) {
-    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    GetDiagnostics()->Error(android::DiagMessage() << "Failed to retrieve resource table");
     return 1;
   }
 
   // Load the run-time xml string pool using the flattened data
-  BigBuffer buffer(4096);
-  StringPool::FlattenUtf8(&buffer, table->string_pool, GetDiagnostics());
+  android::BigBuffer buffer(4096);
+  android::StringPool::FlattenUtf8(&buffer, table->string_pool, GetDiagnostics());
   auto data = buffer.to_string();
   android::ResStringPool pool(data.data(), data.size(), false);
   Debug::DumpResStringPool(&pool, GetPrinter());
@@ -291,14 +291,14 @@ int DumpStyleParentCommand::Dump(LoadedApk* apk) {
   const auto table = apk->GetResourceTable();
 
   if (!table) {
-    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    GetDiagnostics()->Error(android::DiagMessage() << "Failed to retrieve resource table");
     return 1;
   }
 
   std::optional<ResourceTable::SearchResult> target = table->FindResource(target_style);
   if (!target) {
-    GetDiagnostics()->Error(
-        DiagMessage() << "Target style \"" << target_style.entry << "\" does not exist");
+    GetDiagnostics()->Error(android::DiagMessage()
+                            << "Target style \"" << target_style.entry << "\" does not exist");
     return 1;
   }
 
@@ -315,7 +315,7 @@ int DumpTableCommand::Dump(LoadedApk* apk) {
 
   ResourceTable* table = apk->GetResourceTable();
   if (!table) {
-    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    GetDiagnostics()->Error(android::DiagMessage() << "Failed to retrieve resource table");
     return 1;
   }
 
@@ -340,7 +340,7 @@ int DumpXmlStringsCommand::Dump(LoadedApk* apk) {
       }
 
       // Flatten the xml document to get a binary representation of the proto xml file
-      BigBuffer buffer(4096);
+      android::BigBuffer buffer(4096);
       XmlFlattenerOptions options = {};
       options.keep_raw_values = true;
       XmlFlattener flattener(&buffer, options);
@@ -356,7 +356,7 @@ int DumpXmlStringsCommand::Dump(LoadedApk* apk) {
     } else if (apk->GetApkFormat() == ApkFormat::kBinary) {
       io::IFile* file = apk->GetFileCollection()->FindFile(xml_file);
       if (!file) {
-        GetDiagnostics()->Error(DiagMessage(xml_file)
+        GetDiagnostics()->Error(android::DiagMessage(xml_file)
                                 << "File '" << xml_file << "' not found in APK");
         error = true;
         continue;
@@ -364,7 +364,7 @@ int DumpXmlStringsCommand::Dump(LoadedApk* apk) {
 
       std::unique_ptr<io::IData> data = file->OpenAsData();
       if (!data) {
-        GetDiagnostics()->Error(DiagMessage() << "Failed to open " << xml_file);
+        GetDiagnostics()->Error(android::DiagMessage() << "Failed to open " << xml_file);
         error = true;
         continue;
       }
@@ -372,7 +372,7 @@ int DumpXmlStringsCommand::Dump(LoadedApk* apk) {
       // Load the run-time xml tree from the file data
       tree.setTo(data->data(), data->size(), /** copyData */ true);
     } else {
-      GetDiagnostics()->Error(DiagMessage(apk->GetSource()) << "Unknown APK format");
+      GetDiagnostics()->Error(android::DiagMessage(apk->GetSource()) << "Unknown APK format");
       error = true;
       continue;
     }
@@ -396,7 +396,7 @@ int DumpXmlTreeCommand::Dump(LoadedApk* apk) {
 int DumpOverlayableCommand::Dump(LoadedApk* apk) {
   ResourceTable* table = apk->GetResourceTable();
   if (!table) {
-    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    GetDiagnostics()->Error(android::DiagMessage() << "Failed to retrieve resource table");
     return 1;
   }
 
@@ -563,13 +563,13 @@ const char DumpBadgerCommand::kBadgerData[2925] = {
 int DumpChunks::Dump(LoadedApk* apk) {
   auto file = apk->GetFileCollection()->FindFile("resources.arsc");
   if (!file) {
-    GetDiagnostics()->Error(DiagMessage() << "Failed to find resources.arsc in APK");
+    GetDiagnostics()->Error(android::DiagMessage() << "Failed to find resources.arsc in APK");
     return 1;
   }
 
   auto data = file->OpenAsData();
   if (!data) {
-    GetDiagnostics()->Error(DiagMessage() << "Failed to open resources.arsc ");
+    GetDiagnostics()->Error(android::DiagMessage() << "Failed to open resources.arsc ");
     return 1;
   }
 

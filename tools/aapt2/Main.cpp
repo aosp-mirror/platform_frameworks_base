@@ -27,6 +27,7 @@
 #include "Diagnostics.h"
 #include "android-base/stringprintf.h"
 #include "android-base/utf8.h"
+#include "androidfw/IDiagnostics.h"
 #include "androidfw/StringPiece.h"
 #include "cmd/ApkInfo.h"
 #include "cmd/Command.h"
@@ -63,7 +64,7 @@ class VersionCommand : public Command {
 /** The main entry point of AAPT. */
 class MainCommand : public Command {
  public:
-  explicit MainCommand(text::Printer* printer, IDiagnostics* diagnostics)
+  explicit MainCommand(text::Printer* printer, android::IDiagnostics* diagnostics)
       : Command("aapt2"), diagnostics_(diagnostics) {
     AddOptionalSubcommand(util::make_unique<CompileCommand>(diagnostics));
     AddOptionalSubcommand(util::make_unique<LinkCommand>(diagnostics));
@@ -77,9 +78,9 @@ class MainCommand : public Command {
 
   int Action(const std::vector<std::string>& args) override {
     if (args.size() == 0) {
-      diagnostics_->Error(DiagMessage() << "no subcommand specified");
+      diagnostics_->Error(android::DiagMessage() << "no subcommand specified");
     } else {
-      diagnostics_->Error(DiagMessage() << "unknown subcommand '" << args[0] << "'");
+      diagnostics_->Error(android::DiagMessage() << "unknown subcommand '" << args[0] << "'");
     }
 
     Usage(&std::cerr);
@@ -87,7 +88,7 @@ class MainCommand : public Command {
   }
 
  private:
-  IDiagnostics* diagnostics_;
+  android::IDiagnostics* diagnostics_;
 };
 
 /*
@@ -98,7 +99,7 @@ class MainCommand : public Command {
  */
 class DaemonCommand : public Command {
  public:
-  explicit DaemonCommand(io::FileOutputStream* out, IDiagnostics* diagnostics)
+  explicit DaemonCommand(io::FileOutputStream* out, android::IDiagnostics* diagnostics)
       : Command("daemon", "m"), out_(out), diagnostics_(diagnostics) {
     SetDescription("Runs aapt in daemon mode. Each subsequent line is a single parameter to the\n"
         "command. The end of an invocation is signaled by providing an empty line.");
@@ -147,7 +148,7 @@ class DaemonCommand : public Command {
 
  private:
   io::FileOutputStream* out_;
-  IDiagnostics* diagnostics_;
+  android::IDiagnostics* diagnostics_;
   std::optional<std::string> trace_folder_;
 };
 

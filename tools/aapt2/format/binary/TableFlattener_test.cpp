@@ -45,7 +45,7 @@ class TableFlattenerTest : public ::testing::Test {
 
   ::testing::AssertionResult Flatten(IAaptContext* context, const TableFlattenerOptions& options,
                                      ResourceTable* table, std::string* out_content) {
-    BigBuffer buffer(1024);
+    android::BigBuffer buffer(1024);
     TableFlattener flattener(options, &buffer);
     if (!flattener.Consume(context, table)) {
       return ::testing::AssertionFailure() << "failed to flatten ResourceTable";
@@ -254,13 +254,13 @@ TEST_F(TableFlattenerTest, FlattenArray) {
   // Parse the flattened resource table
   ResChunkPullParser parser(result.data(), result.size());
   ASSERT_TRUE(parser.IsGoodEvent(parser.Next()));
-  ASSERT_EQ(util::DeviceToHost16(parser.chunk()->type), RES_TABLE_TYPE);
+  ASSERT_EQ(android::util::DeviceToHost16(parser.chunk()->type), RES_TABLE_TYPE);
 
   // Retrieve the package of the entry
   ResChunkPullParser table_parser(GetChunkData(parser.chunk()), GetChunkDataLen(parser.chunk()));
   const ResChunk_header* package_chunk = nullptr;
   while (table_parser.IsGoodEvent(table_parser.Next())) {
-    if (util::DeviceToHost16(table_parser.chunk()->type) == RES_TABLE_PACKAGE_TYPE) {
+    if (android::util::DeviceToHost16(table_parser.chunk()->type) == RES_TABLE_PACKAGE_TYPE) {
       package_chunk = table_parser.chunk();
       break;
     }
@@ -272,7 +272,7 @@ TEST_F(TableFlattenerTest, FlattenArray) {
                                     GetChunkDataLen(table_parser.chunk()));
   const ResChunk_header* type_chunk = nullptr;
   while (package_parser.IsGoodEvent(package_parser.Next())) {
-    if (util::DeviceToHost16(package_parser.chunk()->type) == RES_TABLE_TYPE_TYPE) {
+    if (android::util::DeviceToHost16(package_parser.chunk()->type) == RES_TABLE_TYPE_TYPE) {
       type_chunk = package_parser.chunk();
       break;
     }
@@ -282,7 +282,7 @@ TEST_F(TableFlattenerTest, FlattenArray) {
   ASSERT_NE(type_chunk, nullptr);
   TypeVariant typeVariant((const ResTable_type*) type_chunk);
   auto entry = (const ResTable_map_entry*)*typeVariant.beginEntries();
-  ASSERT_EQ(util::DeviceToHost16(entry->count), 2u);
+  ASSERT_EQ(android::util::DeviceToHost16(entry->count), 2u);
 
   // Check that the value and name of the array entries are correct
   auto values = (const ResTable_map*)(((const uint8_t *)entry) + entry->size);

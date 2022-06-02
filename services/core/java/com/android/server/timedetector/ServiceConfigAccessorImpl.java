@@ -184,33 +184,6 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @Override
     @NonNull
-    public @Origin int[] getOriginPriorities() {
-        int[] serverFlagsValue = mServerFlagsOriginPrioritiesSupplier.get();
-        if (serverFlagsValue != null) {
-            return serverFlagsValue;
-        }
-
-        int[] configValue = mConfigOriginPrioritiesSupplier.get();
-        if (configValue != null) {
-            return configValue;
-        }
-        return DEFAULT_AUTOMATIC_TIME_ORIGIN_PRIORITIES;
-    }
-
-    @Override
-    public int systemClockUpdateThresholdMillis() {
-        return mSystemClockUpdateThresholdMillis;
-    }
-
-    @Override
-    @NonNull
-    public Instant autoTimeLowerBound() {
-        return mServerFlags.getOptionalInstant(KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE)
-                .orElse(TIME_LOWER_BOUND_DEFAULT);
-    }
-
-    @Override
-    @NonNull
     public synchronized ConfigurationInternal getCurrentUserConfigurationInternal() {
         int currentUserId =
                 LocalServices.getService(ActivityManagerInternal.class).getCurrentUserId();
@@ -268,6 +241,10 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
                 .setAutoDetectionSupported(isAutoDetectionSupported())
                 .setAutoDetectionEnabledSetting(getAutoDetectionEnabledSetting())
+                .setSystemClockUpdateThresholdMillis(getSystemClockUpdateThresholdMillis())
+                .setAutoTimeLowerBound(getAutoTimeLowerBound())
+                .setOriginPriorities(getOriginPriorities())
+                .setDeviceHasY2038Issue(getDeviceHasY2038Issue())
                 .build();
     }
 
@@ -307,6 +284,34 @@ final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             }
         }
         return false;
+    }
+
+    private int getSystemClockUpdateThresholdMillis() {
+        return mSystemClockUpdateThresholdMillis;
+    }
+
+    @NonNull
+    private Instant getAutoTimeLowerBound() {
+        return mServerFlags.getOptionalInstant(KEY_TIME_DETECTOR_LOWER_BOUND_MILLIS_OVERRIDE)
+                .orElse(TIME_LOWER_BOUND_DEFAULT);
+    }
+
+    @NonNull
+    private @Origin int[] getOriginPriorities() {
+        @Origin int[] serverFlagsValue = mServerFlagsOriginPrioritiesSupplier.get();
+        if (serverFlagsValue != null) {
+            return serverFlagsValue;
+        }
+
+        @Origin int[] configValue = mConfigOriginPrioritiesSupplier.get();
+        if (configValue != null) {
+            return configValue;
+        }
+        return DEFAULT_AUTOMATIC_TIME_ORIGIN_PRIORITIES;
+    }
+
+    private boolean getDeviceHasY2038Issue() {
+        return Build.SUPPORTED_32_BIT_ABIS.length > 0;
     }
 
     /**

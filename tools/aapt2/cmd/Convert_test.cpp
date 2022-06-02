@@ -101,7 +101,8 @@ TEST_F(ConvertTest, KeepRawXmlStrings) {
   // Check that the raw string index has been set to the correct string pool entry
   int32_t raw_index = tree.getAttributeValueStringID(0);
   ASSERT_THAT(raw_index, Ne(-1));
-  EXPECT_THAT(util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)), Eq("007"));
+  EXPECT_THAT(android::util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)),
+              Eq("007"));
 }
 
 TEST_F(ConvertTest, DuplicateEntriesWrittenOnce) {

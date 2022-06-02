@@ -30,16 +30,16 @@ using android::StringPiece;
 
 namespace aapt {
 
-static bool RequiredNameIsNotEmpty(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool RequiredNameIsNotEmpty(xml::Element* el, android::SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
   if (attr == nullptr) {
-    diag->Error(DiagMessage(el->line_number)
+    diag->Error(android::DiagMessage(el->line_number)
                 << "<" << el->name << "> is missing attribute 'android:name'");
     return false;
   }
 
   if (attr->value.empty()) {
-    diag->Error(DiagMessage(el->line_number)
+    diag->Error(android::DiagMessage(el->line_number)
                 << "attribute 'android:name' in <" << el->name << "> tag must not be empty");
     return false;
   }
@@ -48,7 +48,7 @@ static bool RequiredNameIsNotEmpty(xml::Element* el, SourcePathDiagnostics* diag
 
 // This is how PackageManager builds class names from AndroidManifest.xml entries.
 static bool NameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
-                                SourcePathDiagnostics* diag) {
+                                android::SourcePathDiagnostics* diag) {
   // We allow unqualified class names (ie: .HelloActivity)
   // Since we don't know the package name, we can just make a fake one here and
   // the test will be identical as long as the real package name is valid too.
@@ -60,51 +60,50 @@ static bool NameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
                                          : attr->value;
 
   if (!util::IsJavaClassName(qualified_class_name)) {
-    diag->Error(DiagMessage(el->line_number)
-                << "attribute 'android:name' in <" << el->name
-                << "> tag must be a valid Java class name");
+    diag->Error(android::DiagMessage(el->line_number) << "attribute 'android:name' in <" << el->name
+                                                      << "> tag must be a valid Java class name");
     return false;
   }
   return true;
 }
 
-static bool OptionalNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool OptionalNameIsJavaClassName(xml::Element* el, android::SourcePathDiagnostics* diag) {
   if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
     return NameIsJavaClassName(el, attr, diag);
   }
   return true;
 }
 
-static bool RequiredNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool RequiredNameIsJavaClassName(xml::Element* el, android::SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
   if (attr == nullptr) {
-    diag->Error(DiagMessage(el->line_number)
+    diag->Error(android::DiagMessage(el->line_number)
                 << "<" << el->name << "> is missing attribute 'android:name'");
     return false;
   }
   return NameIsJavaClassName(el, attr, diag);
 }
 
-static bool RequiredNameIsJavaPackage(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool RequiredNameIsJavaPackage(xml::Element* el, android::SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
   if (attr == nullptr) {
-    diag->Error(DiagMessage(el->line_number)
+    diag->Error(android::DiagMessage(el->line_number)
                 << "<" << el->name << "> is missing attribute 'android:name'");
     return false;
   }
 
   if (!util::IsJavaPackageName(attr->value)) {
-    diag->Error(DiagMessage(el->line_number) << "attribute 'android:name' in <" << el->name
-                                             << "> tag must be a valid Java package name");
+    diag->Error(android::DiagMessage(el->line_number) << "attribute 'android:name' in <" << el->name
+                                                      << "> tag must be a valid Java package name");
     return false;
   }
   return true;
 }
 
 static xml::XmlNodeAction::ActionFuncWithDiag RequiredAndroidAttribute(const std::string& attr) {
-  return [=](xml::Element* el, SourcePathDiagnostics* diag) -> bool {
+  return [=](xml::Element* el, android::SourcePathDiagnostics* diag) -> bool {
     if (el->FindAttribute(xml::kSchemaAndroid, attr) == nullptr) {
-      diag->Error(DiagMessage(el->line_number)
+      diag->Error(android::DiagMessage(el->line_number)
                   << "<" << el->name << "> is missing required attribute 'android:" << attr << "'");
       return false;
     }
@@ -114,17 +113,17 @@ static xml::XmlNodeAction::ActionFuncWithDiag RequiredAndroidAttribute(const std
 
 static xml::XmlNodeAction::ActionFuncWithDiag RequiredOneAndroidAttribute(
     const std::string& attrName1, const std::string& attrName2) {
-  return [=](xml::Element* el, SourcePathDiagnostics* diag) -> bool {
+  return [=](xml::Element* el, android::SourcePathDiagnostics* diag) -> bool {
     xml::Attribute* attr1 = el->FindAttribute(xml::kSchemaAndroid, attrName1);
     xml::Attribute* attr2 = el->FindAttribute(xml::kSchemaAndroid, attrName2);
     if (attr1 == nullptr && attr2 == nullptr) {
-      diag->Error(DiagMessage(el->line_number)
+      diag->Error(android::DiagMessage(el->line_number)
                   << "<" << el->name << "> is missing required attribute 'android:" << attrName1
                   << "' or 'android:" << attrName2 << "'");
       return false;
     }
     if (attr1 != nullptr && attr2 != nullptr) {
-      diag->Error(DiagMessage(el->line_number)
+      diag->Error(android::DiagMessage(el->line_number)
                   << "<" << el->name << "> can only specify one of attribute 'android:" << attrName1
                   << "' or 'android:" << attrName2 << "'");
       return false;
@@ -133,7 +132,7 @@ static xml::XmlNodeAction::ActionFuncWithDiag RequiredOneAndroidAttribute(
   };
 }
 
-static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool AutoGenerateIsFeatureSplit(xml::Element* el, android::SourcePathDiagnostics* diag) {
   constexpr const char* kFeatureSplit = "featureSplit";
   constexpr const char* kIsFeatureSplit = "isFeatureSplit";
 
@@ -149,7 +148,7 @@ static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* 
       if (!ResourceUtils::ParseBool(attr->value).value_or(false)) {
         // The isFeatureSplit attribute is false, which conflicts with the use
         // of "featureSplit".
-        diag->Error(DiagMessage(el->line_number)
+        diag->Error(android::DiagMessage(el->line_number)
                     << "attribute 'featureSplit' used in <manifest> but 'android:isFeatureSplit' "
                        "is not 'true'");
         return false;
@@ -163,7 +162,7 @@ static bool AutoGenerateIsFeatureSplit(xml::Element* el, SourcePathDiagnostics* 
   return true;
 }
 
-static bool AutoGenerateIsSplitRequired(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool AutoGenerateIsSplitRequired(xml::Element* el, android::SourcePathDiagnostics* diag) {
   constexpr const char* kRequiredSplitTypes = "requiredSplitTypes";
   constexpr const char* kIsSplitRequired = "isSplitRequired";
 
@@ -175,7 +174,7 @@ static bool AutoGenerateIsSplitRequired(xml::Element* el, SourcePathDiagnostics*
       if (!ResourceUtils::ParseBool(attr->value).value_or(false)) {
         // The isFeatureSplit attribute is false, which conflicts with the use
         // of "featureSplit".
-        diag->Error(DiagMessage(el->line_number)
+        diag->Error(android::DiagMessage(el->line_number)
                     << "attribute 'requiredSplitTypes' used in <manifest> but "
                        "'android:isSplitRequired' is not 'true'");
         return false;
@@ -189,18 +188,18 @@ static bool AutoGenerateIsSplitRequired(xml::Element* el, SourcePathDiagnostics*
 }
 
 static bool VerifyManifest(xml::Element* el, xml::XmlActionExecutorPolicy policy,
-                           SourcePathDiagnostics* diag) {
+                           android::SourcePathDiagnostics* diag) {
   xml::Attribute* attr = el->FindAttribute({}, "package");
   if (!attr) {
-    diag->Error(DiagMessage(el->line_number)
+    diag->Error(android::DiagMessage(el->line_number)
                 << "<manifest> tag is missing 'package' attribute");
     return false;
   } else if (ResourceUtils::IsReference(attr->value)) {
-    diag->Error(DiagMessage(el->line_number)
+    diag->Error(android::DiagMessage(el->line_number)
                 << "attribute 'package' in <manifest> tag must not be a reference");
     return false;
   } else if (!util::IsAndroidPackageName(attr->value)) {
-    DiagMessage error_msg(el->line_number);
+    android::DiagMessage error_msg(el->line_number);
     error_msg << "attribute 'package' in <manifest> tag is not a valid Android package name: '"
               << attr->value << "'";
     if (policy == xml::XmlActionExecutorPolicy::kAllowListWarning) {
@@ -215,8 +214,9 @@ static bool VerifyManifest(xml::Element* el, xml::XmlActionExecutorPolicy policy
   attr = el->FindAttribute({}, "split");
   if (attr) {
     if (!util::IsJavaPackageName(attr->value)) {
-      diag->Error(DiagMessage(el->line_number) << "attribute 'split' in <manifest> tag is not a "
-                                                  "valid split name");
+      diag->Error(android::DiagMessage(el->line_number)
+                  << "attribute 'split' in <manifest> tag is not a "
+                     "valid split name");
       return false;
     }
   }
@@ -225,11 +225,11 @@ static bool VerifyManifest(xml::Element* el, xml::XmlActionExecutorPolicy policy
 
 // The coreApp attribute in <manifest> is not a regular AAPT attribute, so type
 // checking on it is manual.
-static bool FixCoreAppAttribute(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool FixCoreAppAttribute(xml::Element* el, android::SourcePathDiagnostics* diag) {
   if (xml::Attribute* attr = el->FindAttribute("", "coreApp")) {
     std::unique_ptr<BinaryPrimitive> result = ResourceUtils::TryParseBool(attr->value);
     if (!result) {
-      diag->Error(DiagMessage(el->line_number) << "attribute coreApp must be a boolean");
+      diag->Error(android::DiagMessage(el->line_number) << "attribute coreApp must be a boolean");
       return false;
     }
     attr->compiled_value = std::move(result);
@@ -238,11 +238,11 @@ static bool FixCoreAppAttribute(xml::Element* el, SourcePathDiagnostics* diag) {
 }
 
 // Checks that <uses-feature> has android:glEsVersion or android:name, not both (or neither).
-static bool VerifyUsesFeature(xml::Element* el, SourcePathDiagnostics* diag) {
+static bool VerifyUsesFeature(xml::Element* el, android::SourcePathDiagnostics* diag) {
   bool has_name = false;
   if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
     if (attr->value.empty()) {
-      diag->Error(DiagMessage(el->line_number)
+      diag->Error(android::DiagMessage(el->line_number)
                   << "android:name in <uses-feature> must not be empty");
       return false;
     }
@@ -252,7 +252,7 @@ static bool VerifyUsesFeature(xml::Element* el, SourcePathDiagnostics* diag) {
   bool has_gl_es_version = false;
   if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "glEsVersion")) {
     if (has_name) {
-      diag->Error(DiagMessage(el->line_number)
+      diag->Error(android::DiagMessage(el->line_number)
                   << "cannot define both android:name and android:glEsVersion in <uses-feature>");
       return false;
     }
@@ -260,7 +260,7 @@ static bool VerifyUsesFeature(xml::Element* el, SourcePathDiagnostics* diag) {
   }
 
   if (!has_name && !has_gl_es_version) {
-    diag->Error(DiagMessage(el->line_number)
+    diag->Error(android::DiagMessage(el->line_number)
                 << "<uses-feature> must have either android:name or android:glEsVersion attribute");
     return false;
   }
@@ -294,34 +294,29 @@ static void EnsureNamespaceIsDeclared(const std::string& prefix, const std::stri
   }
 }
 
-bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
-                               IDiagnostics* diag) {
+bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagnostics* diag) {
   // First verify some options.
   if (options_.rename_manifest_package) {
     if (!util::IsJavaPackageName(options_.rename_manifest_package.value())) {
-      diag->Error(DiagMessage() << "invalid manifest package override '"
-                                << options_.rename_manifest_package.value()
-                                << "'");
+      diag->Error(android::DiagMessage() << "invalid manifest package override '"
+                                         << options_.rename_manifest_package.value() << "'");
       return false;
     }
   }
 
   if (options_.rename_instrumentation_target_package) {
     if (!util::IsJavaPackageName(options_.rename_instrumentation_target_package.value())) {
-      diag->Error(DiagMessage()
+      diag->Error(android::DiagMessage()
                   << "invalid instrumentation target package override '"
-                  << options_.rename_instrumentation_target_package.value()
-                  << "'");
+                  << options_.rename_instrumentation_target_package.value() << "'");
       return false;
     }
   }
 
   if (options_.rename_overlay_target_package) {
     if (!util::IsJavaPackageName(options_.rename_overlay_target_package.value())) {
-      diag->Error(DiagMessage()
-                  << "invalid overlay target package override '"
-                  << options_.rename_overlay_target_package.value()
-                  << "'");
+      diag->Error(android::DiagMessage() << "invalid overlay target package override '"
+                                         << options_.rename_overlay_target_package.value() << "'");
       return false;
     }
   }
@@ -614,7 +609,7 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
   TRACE_CALL();
   xml::Element* root = xml::FindRootElement(doc->root.get());
   if (!root || !root->namespace_uri.empty() || root->name != "manifest") {
-    context->GetDiagnostics()->Error(DiagMessage(doc->file.source)
+    context->GetDiagnostics()->Error(android::DiagMessage(doc->file.source)
                                      << "root tag must be <manifest>");
     return false;
   }

@@ -19,6 +19,7 @@
 #include <android-base/file.h>
 
 #include "AppInfo.h"
+#include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "test/Test.h"
 
@@ -87,7 +88,8 @@ TEST_F(LinkTest, KeepRawXmlStrings) {
   // Check that the raw string index has been set to the correct string pool entry
   int32_t raw_index = tree.getAttributeValueStringID(0);
   ASSERT_THAT(raw_index, Ne(-1));
-  EXPECT_THAT(util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)), Eq("007"));
+  EXPECT_THAT(android::util::GetString(tree.getStrings(), static_cast<size_t>(raw_index)),
+              Eq("007"));
 }
 
 TEST_F(LinkTest, NoCompressAssets) {
@@ -410,7 +412,7 @@ struct SourceXML {
 
 static void BuildApk(const std::vector<SourceXML>& source_files, const std::string& apk_path,
                      LinkCommandBuilder&& link_args, CommandTestFixture* fixture,
-                     IDiagnostics* diag) {
+                     android::IDiagnostics* diag) {
   TemporaryDir res_dir;
   TemporaryDir compiled_res_dir;
   for (auto& source_file : source_files) {
@@ -423,7 +425,7 @@ static void BuildApk(const std::vector<SourceXML>& source_files, const std::stri
 
 static void BuildSDK(const std::vector<SourceXML>& source_files, const std::string& apk_path,
                      const std::string& java_root_path, CommandTestFixture* fixture,
-                     IDiagnostics* diag) {
+                     android::IDiagnostics* diag) {
   auto android_manifest = ManifestBuilder(fixture).SetPackageName("android").Build();
 
   auto android_link_args = LinkCommandBuilder(fixture)
@@ -435,7 +437,7 @@ static void BuildSDK(const std::vector<SourceXML>& source_files, const std::stri
 }
 
 static void BuildNonFinalizedSDK(const std::string& apk_path, const std::string& java_path,
-                                 CommandTestFixture* fixture, IDiagnostics* diag) {
+                                 CommandTestFixture* fixture, android::IDiagnostics* diag) {
   const std::string android_values =
       R"(<resources>
           <public type="attr" name="finalized_res" id="0x01010001"/>
@@ -471,7 +473,7 @@ static void BuildNonFinalizedSDK(const std::string& apk_path, const std::string&
 }
 
 static void BuildFinalizedSDK(const std::string& apk_path, const std::string& java_path,
-                              CommandTestFixture* fixture, IDiagnostics* diag) {
+                              CommandTestFixture* fixture, android::IDiagnostics* diag) {
   const std::string android_values =
       R"(<resources>
           <public type="attr" name="finalized_res" id="0x01010001"/>
@@ -511,7 +513,7 @@ static void BuildFinalizedSDK(const std::string& apk_path, const std::string& ja
 
 static void BuildAppAgainstSDK(const std::string& apk_path, const std::string& java_path,
                                const std::string& sdk_path, CommandTestFixture* fixture,
-                               IDiagnostics* diag) {
+                               android::IDiagnostics* diag) {
   const std::string app_values =
       R"(<resources xmlns:android="http://schemas.android.com/apk/res/android">
            <attr name="bar" />

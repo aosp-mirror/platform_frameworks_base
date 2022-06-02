@@ -73,15 +73,15 @@ class CommandTestFixture : public TestDirectoryFixture {
   // Wries the contents of the file to the specified path. The file is compiled and the flattened
   // file is written to the out directory.
   bool CompileFile(const std::string& path, const std::string& contents,
-                   const android::StringPiece& flat_out_dir, IDiagnostics* diag);
+                   const android::StringPiece& flat_out_dir, android::IDiagnostics* diag);
 
   // Executes the link command with the specified arguments.
-  bool Link(const std::vector<std::string>& args, IDiagnostics* diag);
+  bool Link(const std::vector<std::string>& args, android::IDiagnostics* diag);
 
   // Executes the link command with the specified arguments. The flattened files residing in the
   // flat directory will be added to the link command as file arguments.
   bool Link(const std::vector<std::string>& args, const android::StringPiece& flat_dir,
-            IDiagnostics* diag);
+            android::IDiagnostics* diag);
 
   // Creates a minimal android manifest within the test directory and returns the file path.
   std::string GetDefaultManifest(const char* package_name = kDefaultPackageName);
@@ -114,7 +114,7 @@ struct ManifestBuilder {
 
 struct LinkCommandBuilder {
   explicit LinkCommandBuilder(CommandTestFixture* fixture);
-  LinkCommandBuilder& AddCompiledResDir(const std::string& dir, IDiagnostics* diag);
+  LinkCommandBuilder& AddCompiledResDir(const std::string& dir, android::IDiagnostics* diag);
   LinkCommandBuilder& AddFlag(const std::string& flag);
   LinkCommandBuilder& AddParameter(const std::string& param, const std::string& value);
   LinkCommandBuilder& SetManifestFile(const std::string& manifest_path);

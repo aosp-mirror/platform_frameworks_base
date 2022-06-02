@@ -57,7 +57,6 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.util.LifecycleFragment;
-import com.android.systemui.util.Utils;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -625,7 +624,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             mQSAnimator.setPosition(expansion);
         }
         mQqsMediaHost.setSquishFraction(mSquishinessFraction);
-        updateMediaPositions();
     }
 
     private void setAlphaAnimationProgress(float progress) {
@@ -660,54 +658,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQsMediaHost.getCurrentClipping().set(left, top, left + getView().getMeasuredWidth(),
                 top + mQSPanelScrollView.getMeasuredHeight()
                         - mQSPanelScrollView.getPaddingBottom());
-    }
-
-    private void updateMediaPositions() {
-        if (Utils.useQsMediaPlayer(getContext())) {
-            mContainer.getLocationOnScreen(mTmpLocation);
-            float absoluteBottomPosition = mTmpLocation[1] + mContainer.getHeight();
-            // The Media can be scrolled off screen by default, let's offset it
-            float expandedMediaPosition = absoluteBottomPosition - mQSPanelScrollView.getScrollY()
-                    + mQSPanelScrollView.getScrollRange();
-            pinToBottom(expandedMediaPosition, mQsMediaHost, true /* expanded */);
-            // The expanded media host should never move above the laid out position
-            pinToBottom(absoluteBottomPosition, mQqsMediaHost, false /* expanded */);
-        }
-    }
-
-    private void pinToBottom(float absoluteBottomPosition, MediaHost mediaHost, boolean expanded) {
-        View hostView = mediaHost.getHostView();
-        // On keyguard we cross-fade to expanded, so no need to pin it.
-        // If the collapsed qs isn't visible, we also just keep it at the laid out position.
-        if (mLastQSExpansion > 0 && !isKeyguardState() && mQqsMediaHost.getVisible()) {
-            float targetPosition = absoluteBottomPosition - getTotalBottomMargin(hostView)
-                    - hostView.getHeight();
-            float currentPosition = mediaHost.getCurrentBounds().top
-                    - hostView.getTranslationY();
-            float translationY = targetPosition - currentPosition;
-            if (expanded) {
-                // Never go below the laid out position. This is necessary since the qs panel can
-                // change in height and we don't want to ever go below it's position
-                translationY = Math.min(translationY, 0);
-            } else {
-                translationY = Math.max(translationY, 0);
-            }
-            hostView.setTranslationY(translationY);
-        } else {
-            hostView.setTranslationY(0);
-        }
-    }
-
-    private float getTotalBottomMargin(View startView) {
-        int result = 0;
-        View child = startView;
-        View parent = (View) startView.getParent();
-        while (!(parent instanceof QSContainerImpl) && parent != null) {
-            result += parent.getHeight() - child.getBottom();
-            child = parent;
-            parent = (View) parent.getParent();
-        }
-        return result;
     }
 
     private boolean headerWillBeAnimating() {

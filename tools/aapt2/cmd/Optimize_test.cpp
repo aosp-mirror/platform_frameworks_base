@@ -17,9 +17,9 @@
 #include "Optimize.h"
 
 #include "AppInfo.h"
-#include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "Resource.h"
+#include "androidfw/IDiagnostics.h"
 #include "test/Test.h"
 
 using testing::Contains;

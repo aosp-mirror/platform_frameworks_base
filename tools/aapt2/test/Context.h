@@ -19,10 +19,10 @@
 
 #include <list>
 
+#include "Diagnostics.h"
+#include "NameMangler.h"
 #include "android-base/logging.h"
 #include "android-base/macros.h"
-
-#include "NameMangler.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 #include "test/Common.h"
@@ -43,7 +43,7 @@ class Context : public IAaptContext {
     return &symbols_;
   }
 
-  IDiagnostics* GetDiagnostics() override {
+  android::IDiagnostics* GetDiagnostics() override {
     return &diagnostics_;
   }
 

@@ -459,6 +459,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
+    final TransitionTracer mTransitionTracer;
 
     private final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
 
@@ -1238,6 +1239,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowTracing = WindowTracing.createDefaultAndStartLooper(this,
                 Choreographer.getInstance());
+        mTransitionTracer = new TransitionTracer();
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
@@ -5882,6 +5884,21 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void startTransitionTrace() {
+        mTransitionTracer.startTrace(null /* printwriter */);
+    }
+
+    @Override
+    public void stopTransitionTrace() {
+        mTransitionTracer.stopTrace(null /* printwriter */);
+    }
+
+    @Override
+    public boolean isTransitionTraceEnabled() {
+        return mTransitionTracer.isEnabled();
+    }
+
+    @Override
     public boolean registerCrossWindowBlurEnabledListener(
                 ICrossWindowBlurEnabledListener listener) {
         return mBlurController.registerCrossWindowBlurEnabledListener(listener);
@@ -8223,7 +8240,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         .setContainerLayer()
                         .setName("IME Handwriting Surface")
                         .setCallsite("getHandwritingSurfaceForDisplay")
-                        .setParent(dc.getSurfaceControl())
+                        .setParent(dc.getOverlayLayer())
                         .build();
             }
         }

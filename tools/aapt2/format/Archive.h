@@ -22,12 +22,11 @@
 #include <string>
 #include <vector>
 
+#include "androidfw/BigBuffer.h"
+#include "androidfw/IDiagnostics.h"
 #include "androidfw/StringPiece.h"
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
-
-#include "Diagnostics.h"
 #include "io/Io.h"
-#include "util/BigBuffer.h"
 #include "util/Files.h"
 
 namespace aapt {
@@ -70,10 +69,10 @@ class IArchiveWriter : public ::google::protobuf::io::CopyingOutputStream {
   virtual std::string GetError() const = 0;
 };
 
-std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(IDiagnostics* diag,
+std::unique_ptr<IArchiveWriter> CreateDirectoryArchiveWriter(android::IDiagnostics* diag,
                                                              const android::StringPiece& path);
 
-std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(IDiagnostics* diag,
+std::unique_ptr<IArchiveWriter> CreateZipFileArchiveWriter(android::IDiagnostics* diag,
                                                            const android::StringPiece& path);
 
 }  // namespace aapt

@@ -265,8 +265,9 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     private boolean canRequestInteractAcrossProfilesUnchecked(String packageName) {
+        final int callingUserId = mInjector.getCallingUserId();
         final int[] enabledProfileIds =
-                mInjector.getUserManager().getEnabledProfileIds(mInjector.getCallingUserId());
+                mInjector.getUserManager().getEnabledProfileIds(callingUserId);
         if (enabledProfileIds.length < 2) {
             return false;
         }
@@ -274,13 +275,14 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             return false;
         }
         return hasRequestedAppOpPermission(
-                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName);
+                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName,
+                callingUserId);
     }
 
-    private boolean hasRequestedAppOpPermission(String permission, String packageName) {
+    private boolean hasRequestedAppOpPermission(String permission, String packageName, int userId) {
         try {
             String[] packages =
-                    mInjector.getIPackageManager().getAppOpPermissionPackages(permission);
+                    mInjector.getIPackageManager().getAppOpPermissionPackages(permission, userId);
             return ArrayUtils.contains(packages, packageName);
         } catch (RemoteException exc) {
             Slog.e(TAG, "PackageManager dead. Cannot get permission info");
@@ -604,7 +606,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             return false;
         }
         if (!hasRequestedAppOpPermission(
-                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName)) {
+                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName, userId)) {
             return false;
         }
         return isCrossProfilePackageAllowlisted(packageName);
@@ -627,7 +629,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             return false;
         }
         if (!hasRequestedAppOpPermission(
-                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName)) {
+                AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName, userId)) {
             return false;
         }
         return !isPlatformSignedAppWithNonUserConfigurablePermission(packageName, profileIds);

@@ -30,12 +30,14 @@ bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, const std:
                               uint32_t compression_flags, IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
-    context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path << " to archive");
+    context->GetDiagnostics()->Note(android::DiagMessage()
+                                    << "writing " << out_path << " to archive");
   }
 
   if (!writer->WriteFile(out_path, compression_flags, in)) {
-    context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << out_path
-                                                   << " to archive: " << writer->GetError());
+    context->GetDiagnostics()->Error(android::DiagMessage()
+                                     << "failed to write " << out_path
+                                     << " to archive: " << writer->GetError());
     return false;
   }
   return true;
@@ -46,7 +48,8 @@ bool CopyFileToArchive(IAaptContext* context, io::IFile* file, const std::string
   TRACE_CALL();
   std::unique_ptr<io::IData> data = file->OpenAsData();
   if (!data) {
-    context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << "failed to open file");
+    context->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
+                                     << "failed to open file");
     return false;
   }
   return CopyInputStreamToArchive(context, data.get(), out_path, compression_flags, writer);
@@ -63,7 +66,8 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* prot
                         IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
-    context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path << " to archive");
+    context->GetDiagnostics()->Note(android::DiagMessage()
+                                    << "writing " << out_path << " to archive");
   }
 
   if (writer->StartEntry(out_path, compression_flags)) {
@@ -72,8 +76,8 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* prot
       // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
       ::google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
       if (!proto_msg->SerializeToZeroCopyStream(&adaptor)) {
-        context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << out_path
-                                                       << " to archive");
+        context->GetDiagnostics()->Error(android::DiagMessage()
+                                         << "failed to write " << out_path << " to archive");
         return false;
       }
     }
@@ -82,8 +86,8 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* prot
       return true;
     }
   }
-  context->GetDiagnostics()->Error(DiagMessage() << "failed to write " << out_path
-                                                 << " to archive: " << writer->GetError());
+  context->GetDiagnostics()->Error(android::DiagMessage() << "failed to write " << out_path
+                                                          << " to archive: " << writer->GetError());
   return false;
 }
 

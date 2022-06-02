@@ -30,12 +30,7 @@ namespace aapt {
 
 using DumpTest = CommandTestFixture;
 
-class NoopDiagnostics : public IDiagnostics {
- public:
-  void Log(Level level, DiagMessageActual& actualMsg) override {
-  }
-};
-static NoopDiagnostics noop_diag;
+static android::NoOpDiagnostics noop_diag;
 
 void DumpBadgingToString(LoadedApk* loaded_apk, std::string* output, bool include_meta_data = false,
                          bool only_permissions = false) {

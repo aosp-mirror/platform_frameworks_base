@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_SOURCE_H
-#define AAPT_SOURCE_H
+#ifndef _ANDROID_SOURCE_H
+#define _ANDROID_SOURCE_H
 
 #include <optional>
 #include <ostream>
@@ -24,7 +24,7 @@
 #include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 
-namespace aapt {
+namespace android {
 
 // Represents a file on disk. Used for logging and showing errors.
 struct Source {
@@ -38,10 +38,12 @@ struct Source {
   }
 
   inline Source(const android::StringPiece& path, const android::StringPiece& archive)
-      : path(path.to_string()), archive(archive.to_string()) {}
+      : path(path.to_string()), archive(archive.to_string()) {
+  }
 
   inline Source(const android::StringPiece& path, size_t line)
-      : path(path.to_string()), line(line) {}
+      : path(path.to_string()), line(line) {
+  }
 
   inline Source WithLine(size_t line) const {
     return Source(path, line);
@@ -84,6 +86,6 @@ inline bool operator<(const Source& lhs, const Source& rhs) {
   return bool(rhs.line);
 }
 
-}  // namespace aapt
+}  // namespace android
 
-#endif  // AAPT_SOURCE_H
+#endif  // _ANDROID_SOURCE_H
