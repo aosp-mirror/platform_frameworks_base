@@ -1512,16 +1512,7 @@ class Task extends TaskFragment {
                         !REMOVE_FROM_RECENTS, reason);
             }
         } else if (!mReuseTask && shouldRemoveSelfOnLastChildRemoval()) {
-            // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
-            // or created by task organizer.
-            if (!isRootTask()) {
-                final WindowContainer<?> parent = getParent();
-                if (parent != null) {
-                    parent.asTaskFragment().removeChild(this);
-                }
-            }
-            EventLogTags.writeWmTaskRemoved(mTaskId,
-                    "removeChild:" + reason + " last r=" + r + " in t=" + this);
+            reason += ", last child = " + r + " in " + this;
             removeIfPossible(reason);
         }
     }

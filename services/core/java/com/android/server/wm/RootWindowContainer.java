@@ -32,8 +32,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
-import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -2721,23 +2719,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         });
         return result[0];
-    }
-
-    void handleAppCrash(WindowProcessController app) {
-        final PooledConsumer c = PooledLambda.obtainConsumer(
-                RootWindowContainer::handleAppCrash, PooledLambda.__(ActivityRecord.class), app);
-        forAllActivities(c);
-        c.recycle();
-    }
-
-    private static void handleAppCrash(ActivityRecord r, WindowProcessController app) {
-        if (r.app != app) return;
-        Slog.w(TAG, "  Force finishing activity "
-                + r.intent.getComponent().flattenToShortString());
-        r.detachFromProcess();
-        r.mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE,
-                TRANSIT_FLAG_APP_CRASHED);
-        r.destroyIfPossible("handleAppCrashed");
     }
 
     ActivityRecord findActivity(Intent intent, ActivityInfo info, boolean compareIntentFilters) {
