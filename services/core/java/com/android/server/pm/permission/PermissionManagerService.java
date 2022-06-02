@@ -969,8 +969,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             final PackageManagerInternal packageManagerInternal = LocalServices.getService(
                     PackageManagerInternal.class);
-            if (packageManagerInternal.getPackageUid(source.getPackageName(), 0,
-                    UserHandle.getUserId(callingUid)) != source.getUid()) {
+
+            // TODO(b/234653108): Clean up this UID/package & cross-user check.
+            // If calling from the system process, allow registering attribution for package from
+            // any user
+            int userId = UserHandle.getUserId((callingUid == Process.SYSTEM_UID ? source.getUid()
+                    : callingUid));
+            if (packageManagerInternal.getPackageUid(source.getPackageName(), 0, userId)
+                    != source.getUid()) {
                 throw new SecurityException("Cannot register attribution source for package:"
                         + source.getPackageName() + " from uid:" + callingUid);
             }
