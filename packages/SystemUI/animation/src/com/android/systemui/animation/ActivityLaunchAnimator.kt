@@ -333,6 +333,17 @@ class ActivityLaunchAnimator(
             get() = false
 
         /**
+         * Whether the expandable controller by this [Controller] is below the launching window that
+         * is going to be animated.
+         *
+         * This should be `false` when launching an app from the shade or status bar, given that
+         * they are drawn above all apps. This is usually `true` when using this launcher in a
+         * normal app or a launcher, that are drawn below the animating activity/window.
+         */
+        val isBelowAnimatingWindow: Boolean
+            get() = false
+
+        /**
          * The intent was started. If [willAnimate] is false, nothing else will happen and the
          * animation will not be started.
          */
@@ -468,7 +479,7 @@ class ActivityLaunchAnimator(
             // We animate the opening window and delegate the view expansion to [this.controller].
             val delegate = this.controller
             val controller =
-                object : LaunchAnimator.Controller by delegate {
+                object : Controller by delegate {
                     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
                         listeners.forEach { it.onLaunchAnimationStart() }
                         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
@@ -488,7 +499,7 @@ class ActivityLaunchAnimator(
                         // Apply the state to the window only if it is visible, i.e. when the
                         // expanding view is *not* visible.
                         if (!state.visible) {
-                            applyStateToWindow(window, state)
+                            applyStateToWindow(window, state, linearProgress)
                         }
                         navigationBar?.let { applyStateToNavigationBar(it, state, linearProgress) }
 
@@ -502,11 +513,16 @@ class ActivityLaunchAnimator(
                     controller,
                     endState,
                     windowBackgroundColor,
-                    drawHole = true
+                    fadeOutWindowBackgroundLayer = !controller.isBelowAnimatingWindow,
+                    drawHole = !controller.isBelowAnimatingWindow,
                 )
         }
 
-        private fun applyStateToWindow(window: RemoteAnimationTarget, state: LaunchAnimator.State) {
+        private fun applyStateToWindow(
+            window: RemoteAnimationTarget,
+            state: LaunchAnimator.State,
+            linearProgress: Float,
+        ) {
             if (transactionApplierView.viewRootImpl == null) {
                 // If the view root we synchronize with was detached, don't apply any transaction
                 // (as [SyncRtSurfaceTransactionApplier.scheduleApply] would otherwise throw).
@@ -548,6 +564,24 @@ class ActivityLaunchAnimator(
                 windowCropF.bottom.roundToInt()
             )
 
+            // The alpha of the opening window. If it opens above the expandable, then it should
+            // fade in progressively. Otherwise, it should be fully opaque and will be progressively
+            // revealed as the window background color layer above the window fades out.
+            val alpha =
+                if (controller.isBelowAnimatingWindow) {
+                    val windowProgress =
+                        LaunchAnimator.getProgress(
+                            TIMINGS,
+                            linearProgress,
+                            TIMINGS.contentAfterFadeInDelay,
+                            TIMINGS.contentAfterFadeInDuration
+                        )
+
+                    INTERPOLATORS.contentAfterFadeInInterpolator.getInterpolation(windowProgress)
+                } else {
+                    1f
+                }
+
             // The scale will also be applied to the corner radius, so we divide by the scale to
             // keep the original radius. We use the max of (topCornerRadius, bottomCornerRadius) to
             // make sure that the window does not draw itself behind the expanding view. This is
@@ -556,7 +590,7 @@ class ActivityLaunchAnimator(
             val cornerRadius = maxOf(state.topCornerRadius, state.bottomCornerRadius) / scale
             val params =
                 SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(window.leash)
-                    .withAlpha(1f)
+                    .withAlpha(alpha)
                     .withMatrix(matrix)
                     .withWindowCrop(windowCrop)
                     .withCornerRadius(cornerRadius)

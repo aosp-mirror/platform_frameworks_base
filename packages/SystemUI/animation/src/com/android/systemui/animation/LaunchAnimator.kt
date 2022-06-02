@@ -199,17 +199,19 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
 
     /**
      * Start a launch animation controlled by [controller] towards [endState]. An intermediary layer
-     * with [windowBackgroundColor] will fade in then fade out above the expanding view, and should
-     * be the same background color as the opening (or closing) window. If [drawHole] is true, then
-     * this intermediary layer will be drawn with SRC blending mode while it fades out.
+     * with [windowBackgroundColor] will fade in then (optionally) fade out above the expanding
+     * view, and should be the same background color as the opening (or closing) window.
      *
-     * TODO(b/184121838): Remove [drawHole] and instead make the StatusBar draw this hole instead.
+     * If [fadeOutWindowBackgroundLayer] is true, then this intermediary layer will fade out during
+     * the second half of the animation, and will have SRC blending mode (ultimately punching a hole
+     * in the [launch container][Controller.launchContainer]) iff [drawHole] is true.
      */
     fun startAnimation(
         controller: Controller,
         endState: State,
         windowBackgroundColor: Int,
-        drawHole: Boolean = false
+        fadeOutWindowBackgroundLayer: Boolean = true,
+        drawHole: Boolean = false,
     ): Animation {
         val state = controller.createAnimatorState()
 
@@ -369,6 +371,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
                 state,
                 linearProgress,
                 container,
+                fadeOutWindowBackgroundLayer,
                 drawHole
             )
             controller.onLaunchAnimationProgress(state, progress, linearProgress)
@@ -397,6 +400,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
         state: State,
         linearProgress: Float,
         launchContainer: View,
+        fadeOutWindowBackgroundLayer: Boolean,
         drawHole: Boolean
     ) {
         // Update position.
@@ -432,7 +436,7 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
             val alpha =
                 interpolators.contentBeforeFadeOutInterpolator.getInterpolation(fadeInProgress)
             drawable.alpha = (alpha * 0xFF).roundToInt()
-        } else {
+        } else if (fadeOutWindowBackgroundLayer) {
             val fadeOutProgress =
                 getProgress(
                     timings,
@@ -447,6 +451,8 @@ class LaunchAnimator(private val timings: Timings, private val interpolators: In
             if (drawHole) {
                 drawable.setXfermode(SRC_MODE)
             }
+        } else {
+            drawable.alpha = 0xFF
         }
     }
 }
