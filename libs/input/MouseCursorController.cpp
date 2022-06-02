@@ -22,6 +22,7 @@
 
 #include "MouseCursorController.h"
 
+#include <input/Input.h>
 #include <log/log.h>
 
 namespace {
@@ -286,7 +287,7 @@ void MouseCursorController::setDisplayViewport(const DisplayViewport& viewport,
     updatePointerLocked();
 }
 
-void MouseCursorController::updatePointerIcon(int32_t iconId) {
+void MouseCursorController::updatePointerIcon(PointerIconStyle iconId) {
     std::scoped_lock lock(mLock);
 
     if (mLocked.requestedPointerType != iconId) {
@@ -299,7 +300,7 @@ void MouseCursorController::updatePointerIcon(int32_t iconId) {
 void MouseCursorController::setCustomPointerIcon(const SpriteIcon& icon) {
     std::scoped_lock lock(mLock);
 
-    const int32_t iconId = mContext.getPolicy()->getCustomPointerIconId();
+    const PointerIconStyle iconId = mContext.getPolicy()->getCustomPointerIconId();
     mLocked.additionalMouseResources[iconId] = icon;
     mLocked.requestedPointerType = iconId;
     mLocked.updatePointerIcon = true;
@@ -334,7 +335,7 @@ bool MouseCursorController::doFadingAnimationLocked(nsecs_t timestamp) REQUIRES(
 }
 
 bool MouseCursorController::doBitmapAnimationLocked(nsecs_t timestamp) REQUIRES(mLock) {
-    std::map<int32_t, PointerAnimation>::const_iterator iter =
+    std::map<PointerIconStyle, PointerAnimation>::const_iterator iter =
             mLocked.animationResources.find(mLocked.requestedPointerType);
     if (iter == mLocked.animationResources.end()) {
         return false;
@@ -380,10 +381,10 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
         if (mLocked.requestedPointerType == mContext.getPolicy()->getDefaultPointerIconId()) {
             mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
         } else {
-            std::map<int32_t, SpriteIcon>::const_iterator iter =
+            std::map<PointerIconStyle, SpriteIcon>::const_iterator iter =
                     mLocked.additionalMouseResources.find(mLocked.requestedPointerType);
             if (iter != mLocked.additionalMouseResources.end()) {
-                std::map<int32_t, PointerAnimation>::const_iterator anim_iter =
+                std::map<PointerIconStyle, PointerAnimation>::const_iterator anim_iter =
                         mLocked.animationResources.find(mLocked.requestedPointerType);
                 if (anim_iter != mLocked.animationResources.end()) {
                     mLocked.animationFrameIndex = 0;

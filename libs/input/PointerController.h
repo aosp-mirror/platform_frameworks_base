@@ -65,7 +65,7 @@ public:
                           BitSet32 spotIdBits, int32_t displayId);
     virtual void clearSpots();
 
-    void updatePointerIcon(int32_t iconId);
+    void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();

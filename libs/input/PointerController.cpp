@@ -264,7 +264,7 @@ void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
     }
 }
 
-void PointerController::updatePointerIcon(int32_t iconId) {
+void PointerController::updatePointerIcon(PointerIconStyle iconId) {
     std::scoped_lock lock(getLock());
     mCursorController.updatePointerIcon(iconId);
 }

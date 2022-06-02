@@ -54,7 +54,7 @@ public:
     void unfade(PointerControllerInterface::Transition transition);
     void setDisplayViewport(const DisplayViewport& viewport, bool getAdditionalMouseResources);
 
-    void updatePointerIcon(int32_t iconId);
+    void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void reloadPointerResources(bool getAdditionalMouseResources);
 
@@ -88,10 +88,10 @@ private:
 
         bool resourcesLoaded;
 
-        std::map<int32_t, SpriteIcon> additionalMouseResources;
-        std::map<int32_t, PointerAnimation> animationResources;
+        std::map<PointerIconStyle, SpriteIcon> additionalMouseResources;
+        std::map<PointerIconStyle, PointerAnimation> animationResources;
 
-        int32_t requestedPointerType;
+        PointerIconStyle requestedPointerType;
 
         int32_t buttonState;
 

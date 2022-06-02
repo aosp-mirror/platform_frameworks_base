@@ -242,7 +242,7 @@ void SpriteController::doUpdateSprites() {
                     && (becomingVisible
                             || (update.state.dirty & (DIRTY_HOTSPOT | DIRTY_ICON_STYLE)))) {
                 Parcel p;
-                p.writeInt32(update.state.icon.style);
+                p.writeInt32(static_cast<int32_t>(update.state.icon.style));
                 p.writeFloat(update.state.icon.hotSpotX);
                 p.writeFloat(update.state.icon.hotSpotY);
 
