@@ -83,7 +83,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -781,7 +780,8 @@ public class CentralSurfacesImpl extends CoreStartable implements
             InteractionJankMonitor jankMonitor,
             DeviceStateManager deviceStateManager,
             DreamOverlayStateController dreamOverlayStateController,
-            WiredChargingRippleController wiredChargingRippleController) {
+            WiredChargingRippleController wiredChargingRippleController,
+            IDreamManager dreamManager) {
         super(context);
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
@@ -872,6 +872,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
         mNotifPipelineFlags = notifPipelineFlags;
+        mDreamManager = dreamManager;
         lockscreenShadeTransitionController.setCentralSurfaces(this);
         statusBarWindowStateController.addListener(this::onStatusBarWindowStateChanged);
 
@@ -925,8 +926,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 SysuiStatusBarStateController.RANK_STATUS_BAR);
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
 
         mDisplay = mContext.getDisplay();
         mDisplayId = mDisplay.getDisplayId();
@@ -1791,6 +1790,12 @@ public class CentralSurfacesImpl extends CoreStartable implements
             // The animation will take care of dismissing the shade at the end of the animation. If
             // we don't animate, collapse it directly.
             collapseShade();
+        }
+
+        // We should exit the dream to prevent the activity from starting below the
+        // dream.
+        if (mKeyguardUpdateMonitor.isDreaming()) {
+            awakenDreams();
         }
 
         mActivityLaunchAnimator.startIntentWithAnimation(controller, animate,
@@ -2738,6 +2743,10 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
                     afterKeyguardGone);
         } else {
+            // If the keyguard isn't showing but the device is dreaming, we should exit the dream.
+            if (mKeyguardUpdateMonitor.isDreaming()) {
+                awakenDreams();
+            }
             action.onDismiss();
         }
     }
@@ -3986,7 +3995,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     protected WindowManager mWindowManager;
     protected IWindowManager mWindowManagerService;
-    private IDreamManager mDreamManager;
+    private final IDreamManager mDreamManager;
 
     protected Display mDisplay;
     private int mDisplayId;

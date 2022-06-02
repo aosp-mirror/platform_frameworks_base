@@ -543,6 +543,21 @@ interface IWindowManager
     boolean isWindowTraceEnabled();
 
     /**
+     * Starts a transition trace.
+     */
+    void startTransitionTrace();
+
+    /**
+     * Stops a transition trace.
+     */
+    void stopTransitionTrace();
+
+    /**
+     * Returns true if transition trace is enabled.
+     */
+    boolean isTransitionTraceEnabled();
+
+    /**
      * Gets the windowing mode of the display.
      *
      * @param displayId The id of the display.
