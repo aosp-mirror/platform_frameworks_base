@@ -17,6 +17,9 @@ Note: The default UI used in AOD shares views with the Lock Screen and does not 
 ### DOZE
 Device is asleep and listening for enabled pulsing and wake-up gesture triggers. In this state, no UI shows.
 
+### DOZE_SUSPEND_TRIGGERS
+Device is asleep and not listening for any triggers to wake up. This state is used only when CAR_MODE is active. In this state, no UI shows.
+
 ### DOZE_AOD
 Device is asleep, showing UI, and listening for enabled pulsing and wake-up triggers. In this state, screen brightness is handled by [DozeScreenBrightness][5] which uses the brightness sensor specified by `doze_brightness_sensor_type` in the [SystemUI config][6]. To save power, this should be a low-powered sensor that shouldn't trigger as often as the light sensor used for on-screen adaptive brightness.
 
