@@ -391,6 +391,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     int mSyncSeqId = 0;
     int mLastSeqIdSentToRelayout = 0;
+    boolean mAlreadyRequestedSync;
 
     /**
      * {@code true} when the client was still drawing for sync when the sync-set was finished or
@@ -4412,6 +4413,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 pw.println(prefix + "Requested visibilities: " + visibilityString);
             }
         }
+
+        pw.println(prefix + "mAlreadyRequestedSync=" + mAlreadyRequestedSync);
     }
 
     @Override
@@ -5951,6 +5954,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mRedrawForSyncReported) {
             mClientWasDrawingForSync = true;
         }
+        mAlreadyRequestedSync = false;
         super.finishSync(outMergedTransaction, cancel);
     }
 
@@ -6216,5 +6220,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void dumpProto(ProtoOutputStream proto, long fieldId,
                           @WindowTraceLogLevel int logLevel) {
         dumpDebug(proto, fieldId, logLevel);
+    }
+
+    public boolean cancelAndRedraw() {
+        return mSyncState != SYNC_STATE_NONE && mAlreadyRequestedSync;
     }
 }

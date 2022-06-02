@@ -250,6 +250,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public boolean cancelDraw(IWindow window) {
+        return mService.cancelDraw(this, window);
+    }
+
+    @Override
     public int relayout(IWindow window, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,

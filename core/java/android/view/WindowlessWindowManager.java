@@ -552,4 +552,9 @@ public class WindowlessWindowManager implements IWindowSession {
             }
         }
     }
+
+    @Override
+    public boolean cancelDraw(IWindow window) {
+        return false;
+    }
 }
