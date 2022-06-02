@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
+import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -97,6 +98,7 @@ public class RotationButtonController {
     @SuppressLint("InlinedApi")
     private @WindowInsetsController.Behavior
     int mBehavior = WindowInsetsController.BEHAVIOR_DEFAULT;
+    private int mNavBarMode;
     private boolean mSkipOverrideUserLockPrefsOnce;
     private final int mLightIconColor;
     private final int mDarkIconColor;
@@ -397,6 +399,10 @@ public class RotationButtonController {
         if (rotateSuggestionsDisabled) onRotationSuggestionsDisabled();
     }
 
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
+    }
+
     public void onBehaviorChanged(int displayId, @WindowInsetsController.Behavior int behavior) {
         if (DEFAULT_DISPLAY != displayId) {
             return;
@@ -433,7 +439,8 @@ public class RotationButtonController {
      */
     @SuppressLint("InlinedApi")
     private boolean canShowRotationButton() {
-        return mIsNavigationBarShowing || mBehavior == WindowInsetsController.BEHAVIOR_DEFAULT;
+        return mIsNavigationBarShowing || mBehavior == WindowInsetsController.BEHAVIOR_DEFAULT
+                || isGesturalMode(mNavBarMode);
     }
 
     @DrawableRes
