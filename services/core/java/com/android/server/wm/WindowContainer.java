@@ -3661,10 +3661,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mChildren.get(i).finishSync(outMergedTransaction, cancel);
         }
         if (cancel && mSyncGroup != null) mSyncGroup.onCancelSync(this);
-        clearSyncState();
-    }
-
-    void clearSyncState() {
         mSyncState = SYNC_STATE_NONE;
         mSyncGroup = null;
     }

@@ -668,6 +668,15 @@ class WindowToken extends WindowContainer<WindowState> {
         }
     }
 
+    @Override
+    boolean prepareSync() {
+        if (mDisplayContent != null && mDisplayContent.isRotationChanging()
+                && AsyncRotationController.canBeAsync(this)) {
+            return false;
+        }
+        return super.prepareSync();
+    }
+
     @CallSuper
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,

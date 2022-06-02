@@ -661,6 +661,11 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.setLastHasContent();
         mDisplayContent.requestChangeTransitionIfNeeded(1 /* any changes */,
                 null /* displayChange */);
+        assertEquals(WindowContainer.SYNC_STATE_NONE, statusBar.mSyncState);
+        assertEquals(WindowContainer.SYNC_STATE_NONE, navBar.mSyncState);
+        assertEquals(WindowContainer.SYNC_STATE_NONE, screenDecor.mSyncState);
+        assertEquals(WindowContainer.SYNC_STATE_WAITING_FOR_DRAW, ime.mSyncState);
+
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
         assertNotNull(asyncRotationController);
@@ -774,7 +779,7 @@ public class TransitionTests extends WindowTestsBase {
 
         player.start();
         player.finish();
-        app.getTask().clearSyncState();
+        app.getTask().finishSync(mWm.mTransactionFactory.get(), false /* cancel */);
 
         // The open transition is finished. Continue to play seamless display change transition,
         // so the previous async rotation controller should still exist.
