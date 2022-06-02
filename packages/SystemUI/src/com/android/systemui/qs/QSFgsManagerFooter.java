@@ -149,8 +149,8 @@ public class QSFgsManagerFooter implements View.OnClickListener,
             if (mFgsManagerController.shouldUpdateFooterVisibility()) {
                 mRootView.setVisibility(mNumPackages > 0
                         && mFgsManagerController.isAvailable() ? View.VISIBLE : View.GONE);
-                int dotVis =
-                        mFgsManagerController.getChangesSinceDialog() ? View.VISIBLE : View.GONE;
+                int dotVis = mFgsManagerController.getShowFooterDot()
+                        && mFgsManagerController.getChangesSinceDialog() ? View.VISIBLE : View.GONE;
                 mDotView.setVisibility(dotVis);
                 mCollapsedDotView.setVisibility(dotVis);
                 if (mVisibilityChangedListener != null) {
