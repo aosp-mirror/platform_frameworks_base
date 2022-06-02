@@ -1079,7 +1079,7 @@ public class BubbleStackView extends FrameLayout
             if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                 float alpha = (float) valueAnimator.getAnimatedValue();
                 mExpandedBubble.getExpandedView().setContentAlpha(alpha);
-                mExpandedBubble.getExpandedView().setAlpha(alpha);
+                mExpandedBubble.getExpandedView().setBackgroundAlpha(alpha);
             }
         });
 
@@ -2215,7 +2215,7 @@ public class BubbleStackView extends FrameLayout
 
         if (mExpandedBubble.getExpandedView() != null) {
             mExpandedBubble.getExpandedView().setContentAlpha(0f);
-            mExpandedBubble.getExpandedView().setAlpha(0f);
+            mExpandedBubble.getExpandedView().setBackgroundAlpha(0f);
 
             // We'll be starting the alpha animation after a slight delay, so set this flag early
             // here.

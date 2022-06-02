@@ -15,12 +15,11 @@
  */
 package com.android.wm.shell.bubbles.animation;
 
-import static android.view.View.ALPHA;
-
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_COLLAPSE_ANIMATOR;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_EXPANDED_VIEW_DRAGGING;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.wm.shell.bubbles.BubbleExpandedView.BACKGROUND_ALPHA;
 import static com.android.wm.shell.bubbles.BubbleExpandedView.BOTTOM_CLIP_PROPERTY;
 import static com.android.wm.shell.bubbles.BubbleExpandedView.CONTENT_ALPHA;
 import static com.android.wm.shell.bubbles.BubbleExpandedView.MANAGE_BUTTON_ALPHA;
@@ -314,7 +313,7 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
             mBackToExpandedAnimation.cancel();
         }
         mExpandedView.setContentAlpha(1);
-        mExpandedView.setAlpha(1);
+        mExpandedView.setBackgroundAlpha(1);
         mExpandedView.setManageButtonAlpha(1);
         setCollapsedAmount(0);
         mExpandedView.setBottomClip(0);
@@ -416,7 +415,7 @@ public class ExpandedViewAnimationControllerImpl implements ExpandedViewAnimatio
     }
 
     private ObjectAnimator createBackgroundAlphaAnimation() {
-        ObjectAnimator animator = ObjectAnimator.ofFloat(mExpandedView, ALPHA, 0f);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(mExpandedView, BACKGROUND_ALPHA, 0f);
         animator.setDuration(BACKGROUND_OPACITY_ANIM_DURATION_MS);
         animator.setInterpolator(Interpolators.LINEAR);
         animator.setStartDelay(BACKGROUND_OPACITY_ANIM_DELAY_MS);
