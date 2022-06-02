@@ -90,10 +90,12 @@ public class EditTextActivity extends Activity
 
     @Override // ClipboardManager.OnPrimaryClipChangedListener
     public void onPrimaryClipChanged() {
-        hideImeAndFinish();
+        hideIme();
+        finish();
     }
 
     private void saveToClipboard() {
+        hideIme();
         Editable editedText = mEditText.getText();
         editedText.clearSpans();
         ClipData clip = ClipData.newPlainText("text", editedText);
@@ -101,7 +103,7 @@ public class EditTextActivity extends Activity
         extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, mSensitive);
         clip.getDescription().setExtras(extras);
         mClipboardManager.setPrimaryClip(clip);
-        hideImeAndFinish();
+        finish();
     }
 
     private void share() {
@@ -114,9 +116,8 @@ public class EditTextActivity extends Activity
         startActivity(shareIntent);
     }
 
-    private void hideImeAndFinish() {
+    private void hideIme() {
         InputMethodManager imm = getSystemService(InputMethodManager.class);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
-        finish();
     }
 }
