@@ -35,7 +35,6 @@ import android.widget.TextView;
 
 import androidx.core.graphics.drawable.IconCompat;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.qrcode.QrCodeGenerator;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -177,8 +176,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         refreshUi();
     }
 
-    @VisibleForTesting
-    void refreshUi() {
+    private void refreshUi() {
         setQrCodeView();
 
         mCurrentBroadcastName = getBroadcastMetadataInfo(METADATA_BROADCAST_NAME);
@@ -217,8 +215,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         mIsPasswordHide = !mIsPasswordHide;
     }
 
-    @VisibleForTesting
-    void launchBroadcastUpdatedDialog(boolean isBroadcastCode, String editString) {
+    private void launchBroadcastUpdatedDialog(boolean isBroadcastCode, String editString) {
         final View layout = LayoutInflater.from(mContext).inflate(
                 R.layout.media_output_broadcast_update_dialog, null);
         final EditText editText = layout.requireViewById(R.id.broadcast_edit_text);
@@ -245,8 +242,7 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
         return mMediaOutputController.getBroadcastMetadata();
     }
 
-    @VisibleForTesting
-    void updateBroadcastInfo(boolean isBroadcastCode, String updatedString) {
+    private void updateBroadcastInfo(boolean isBroadcastCode, String updatedString) {
         Button positiveBtn = mAlertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
         if (positiveBtn != null) {
             positiveBtn.setEnabled(false);
@@ -348,10 +344,5 @@ public class MediaOutputBroadcastDialog extends MediaOutputBaseDialog {
             mRetryCount = 0;
             mBroadcastErrorMessage.setText(R.string.media_output_broadcast_last_update_error);
         }
-    }
-
-    @VisibleForTesting
-    int getRetryCount() {
-        return mRetryCount;
     }
 }

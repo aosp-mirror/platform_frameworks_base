@@ -241,6 +241,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     private void sendPendingIntent(int displayId, PendingIntent pendingIntent)
             throws PendingIntent.CanceledException {
+        final ActivityOptions options = ActivityOptions.makeBasic().setLaunchDisplayId(displayId);
+        options.setPendingIntentBackgroundActivityLaunchAllowed(true);
+        options.setPendingIntentBackgroundActivityLaunchAllowedByPermission(true);
         pendingIntent.send(
                 mContext,
                 /* code= */ 0,
@@ -248,9 +251,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 /* onFinished= */ null,
                 /* handler= */ null,
                 /* requiredPermission= */ null,
-                ActivityOptions.makeBasic()
-                        .setLaunchDisplayId(displayId)
-                        .toBundle());
+                options.toBundle());
     }
 
     @Override // Binder call
