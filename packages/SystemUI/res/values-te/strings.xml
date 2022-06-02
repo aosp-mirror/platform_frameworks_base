@@ -932,7 +932,8 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"కొత్త సమాచారం"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"యాక్టివ్‌గా ఉన్న యాప్‌లు"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"మీరు ఈ యాప్‌లను ఉపయోగించకపోయినా, అవి ఇప్పటికీ యాక్టివ్‌గా ఉంటాయి, బ్యాటరీ జీవితకాలాన్ని ప్రభావితం చేయవచ్చు"</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ఆపివేయండి"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ఆపివేయబడింది"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"పూర్తయింది"</string>

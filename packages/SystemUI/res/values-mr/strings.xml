@@ -845,11 +845,10 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अज्ञात अ‍ॅप"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्ट करणे थांबवा"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ऑडिओ आउटपुटसाठी उपलब्ध डिव्हाइस."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"व्हॉल्यूम"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्टिंग कसे काम करते"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करा"</string>
-    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"कंपॅटिबिल ब्लूटूथ डिव्‍हाइस असलेले तुमच्या जवळपासचे लोक हे तुम्ही ब्रॉडकास्ट करत असलेला मीडिया ऐकू शकतात"</string>
+    <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"कंपॅटिबल ब्लूटूथ डिव्‍हाइस असलेले तुमच्या जवळपासचे लोक हे तुम्ही ब्रॉडकास्ट करत असलेला मीडिया ऐकू शकतात"</string>
     <string name="media_output_broadcasting_message" msgid="4150299923404886073">"तुमचे ब्रॉडकास्ट ऐकण्यासाठी, कंपॅटिबल ब्लूटूथ डिव्‍हाइस असलेले जवळपासचे लोक तुमचा QR कोड स्कॅन करू शकतात किंवा तुमच्या ब्रॉडकास्टचे नाव आणि पासवर्ड वापरू शकतात"</string>
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ब्रॉडकास्टचे नाव"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"पासवर्ड"</string>
@@ -932,7 +931,8 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"नवीन माहिती"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"अ‍ॅक्टिव्ह ॲप्स"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"तुम्ही ही अ‍ॅप्स वापरत नसलात, तरीही ती अ‍ॅक्टिव्ह असतात आणि बॅटरी लाइफवर त्याचा परिणाम होऊ शकतो"</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"थांबवा"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"थांबवले"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"पूर्ण झाले"</string>
