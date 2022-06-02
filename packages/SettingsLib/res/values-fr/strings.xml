@@ -185,7 +185,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Aucun paramètre par défaut défini"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Paramètres de la synthèse vocale"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Sortie de la synthèse vocale"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Cadence"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Débit"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Vitesse à laquelle le texte est énoncé"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Affecte le ton utilisé pour la synthèse vocale"</string>
@@ -482,6 +482,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charge rapide"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Charge lente"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"En charge sans fil"</string>
+    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"Station de charge"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Pas en charge"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Connectée, pas en charge"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Chargée"</string>

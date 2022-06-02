@@ -482,6 +482,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ricarica veloce"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Ricarica lenta"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"In carica, wireless"</string>
+    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"In carica nel dock"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Non in carica"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Dispositivo connesso, non in carica"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Carica"</string>

@@ -482,6 +482,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"ଶୀଘ୍ର ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ୱେୟରଲେସ ଭାବେ ଚାର୍ଜିଂ"</string>
+    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"ଡକ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ସଂଯୋଗ କରାଯାଇଛି, ଚାର୍ଜ ହେଉନାହିଁ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"ଚାର୍ଜ ହୋଇଯାଇଛି"</string>
@@ -491,7 +492,7 @@
     <string name="disabled" msgid="8017887509554714950">"ଅକ୍ଷମ ହୋଇଛି"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ଅନୁମତି ଦିଆଯାଇଛି"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ଅନୁମତି ନାହିଁ"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"ଅଜଣା ଆପ୍‌ ଇନଷ୍ଟଲ୍‌ କରନ୍ତୁ"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"ଅଜଣା ଆପ ଇନଷ୍ଟଲ କରନ୍ତୁ"</string>
     <string name="home" msgid="973834627243661438">"ସେଟିଂସ ହୋମ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
