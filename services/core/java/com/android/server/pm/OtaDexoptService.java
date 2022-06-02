@@ -142,6 +142,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         others = new ArrayList<>(allPackageStates);
         others.removeAll(important);
         others.removeIf(PackageManagerServiceUtils.REMOVE_IF_NULL_PKG);
+        others.removeIf(PackageManagerServiceUtils.REMOVE_IF_APEX_PKG);
         others.removeIf(isPlatformPackage);
 
         // Pre-size the array list by over-allocating by a factor of 1.5.

@@ -29,6 +29,7 @@ import static com.android.server.pm.PackageManagerService.STUB_SUFFIX;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getCompilerFilterForReason;
 import static com.android.server.pm.PackageManagerServiceCompilerMapping.getDefaultCompilerFilter;
+import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_APEX_PKG;
 import static com.android.server.pm.PackageManagerServiceUtils.REMOVE_IF_NULL_PKG;
 
 import android.Manifest;
@@ -572,6 +573,7 @@ final class DexOptHelper {
 
         // First, remove all settings without available packages
         remainingPkgSettings.removeIf(REMOVE_IF_NULL_PKG);
+        remainingPkgSettings.removeIf(REMOVE_IF_APEX_PKG);
 
         ArrayList<PackageStateInternal> sortTemp = new ArrayList<>(remainingPkgSettings.size());
 

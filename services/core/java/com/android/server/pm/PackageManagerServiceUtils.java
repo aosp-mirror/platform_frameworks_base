@@ -136,7 +136,10 @@ public class PackageManagerServiceUtils {
 
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
-    public final static Predicate<PackageStateInternal> REMOVE_IF_NULL_PKG =
+    // Skip APEX which doesn't have a valid UID
+    public static final Predicate<PackageStateInternal> REMOVE_IF_APEX_PKG =
+            pkgSetting -> pkgSetting.getPkg().isApex();
+    public static final Predicate<PackageStateInternal> REMOVE_IF_NULL_PKG =
             pkgSetting -> pkgSetting.getPkg() == null;
 
     /**
