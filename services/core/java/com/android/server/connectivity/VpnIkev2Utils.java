@@ -88,7 +88,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 /**
  * Utility class to build and convert IKEv2/IPsec parameters.
@@ -379,10 +379,10 @@ public class VpnIkev2Utils {
     static class Ikev2VpnNetworkCallback extends NetworkCallback {
         private final String mTag;
         private final Vpn.IkeV2VpnRunnerCallback mCallback;
-        private final ExecutorService mExecutor;
+        private final Executor mExecutor;
 
         Ikev2VpnNetworkCallback(String tag, Vpn.IkeV2VpnRunnerCallback callback,
-                ExecutorService executor) {
+                Executor executor) {
             mTag = tag;
             mCallback = callback;
             mExecutor = executor;
