@@ -254,8 +254,9 @@ public final class FrameMetrics {
         int GPU_COMPLETED = 19;
         int SWAP_BUFFERS_COMPLETED = 20;
         int DISPLAY_PRESENT_TIME = 21;
+        int COMMAND_SUBMISSION_COMPLETED = 22;
 
-        int FRAME_STATS_COUNT = 22; // must always be last and in sync with
+        int FRAME_STATS_COUNT = 23; // must always be last and in sync with
                                     // FrameInfoIndex::NumIndexes in libs/hwui/FrameInfo.h
     }
 
@@ -291,7 +292,7 @@ public final class FrameMetrics {
         // RESERVED VSYNC_TIMESTAMP
         0, 0,
         // GPU_DURATION
-        Index.SWAP_BUFFERS, Index.GPU_COMPLETED,
+        Index.COMMAND_SUBMISSION_COMPLETED, Index.GPU_COMPLETED,
         // DEADLINE
         Index.INTENDED_VSYNC, Index.FRAME_DEADLINE,
     };
