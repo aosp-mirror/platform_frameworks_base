@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -1046,6 +1047,21 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 })
                 .build(bgExecutor, sensorIds, mFpProps, mFaceProps, wakefulnessLifecycle,
                         userManager, lockPatternUtils, mInteractionJankMonitor);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        final AuthDialog dialog = mCurrentDialog;
+        pw.println("  stableDisplaySize=" + mStableDisplaySize);
+        pw.println("  faceAuthSensorLocation=" + mFaceAuthSensorLocation);
+        pw.println("  fingerprintLocation=" + mFingerprintLocation);
+        pw.println("  udfpsBounds=" + mUdfpsBounds);
+        pw.println("  allFingerprintAuthenticatorsRegistered="
+                + mAllFingerprintAuthenticatorsRegistered);
+        pw.println("  currentDialog=" + dialog);
+        if (dialog != null) {
+            dialog.dump(pw, args);
+        }
     }
 
     /**
