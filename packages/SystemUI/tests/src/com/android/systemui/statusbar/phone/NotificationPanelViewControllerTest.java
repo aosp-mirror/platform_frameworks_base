@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -121,6 +122,8 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
@@ -565,6 +568,38 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void tearDown() {
         mNotificationPanelViewController.cancelHeightAnimator();
         mMainHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Test
+    public void onNotificationHeightChangeWhileOnKeyguardWillComputeMaxKeyguardNotifications() {
+        mStatusBarStateController.setState(KEYGUARD);
+        ArgumentCaptor<OnHeightChangedListener> captor =
+                ArgumentCaptor.forClass(OnHeightChangedListener.class);
+        verify(mNotificationStackScrollLayoutController)
+                .setOnHeightChangedListener(captor.capture());
+        OnHeightChangedListener listener = captor.getValue();
+
+        clearInvocations(mNotificationStackSizeCalculator);
+        listener.onHeightChanged(mock(ExpandableView.class), false);
+
+        verify(mNotificationStackSizeCalculator)
+                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void onNotificationHeightChangeWhileInShadeWillNotComputeMaxKeyguardNotifications() {
+        mStatusBarStateController.setState(SHADE);
+        ArgumentCaptor<OnHeightChangedListener> captor =
+                ArgumentCaptor.forClass(OnHeightChangedListener.class);
+        verify(mNotificationStackScrollLayoutController)
+                .setOnHeightChangedListener(captor.capture());
+        OnHeightChangedListener listener = captor.getValue();
+
+        clearInvocations(mNotificationStackSizeCalculator);
+        listener.onHeightChanged(mock(ExpandableView.class), false);
+
+        verify(mNotificationStackSizeCalculator, never())
+                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat());
     }
 
     @Test
