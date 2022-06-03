@@ -2463,8 +2463,8 @@ public class AppOpsManager {
      * restriction} for a certain app-op.
      */
     private static RestrictionBypass[] sOpAllowSystemRestrictionBypass = new RestrictionBypass[] {
-            new RestrictionBypass(true, false), //COARSE_LOCATION
-            new RestrictionBypass(true, false), //FINE_LOCATION
+            null, //COARSE_LOCATION
+            null, //FINE_LOCATION
             null, //GPS
             null, //VIBRATE
             null, //READ_CONTACTS
