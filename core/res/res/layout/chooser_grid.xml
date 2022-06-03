@@ -41,7 +41,7 @@
             android:src="@drawable/ic_drag_handle"
             android:layout_marginTop="@dimen/chooser_edge_margin_thin"
             android:layout_marginBottom="@dimen/chooser_edge_margin_thin"
-            android:tint="@color/lighter_gray"
+            android:tint="?attr/colorSurfaceVariant"
             android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true" />
 

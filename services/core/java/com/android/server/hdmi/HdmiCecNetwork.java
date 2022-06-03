@@ -413,7 +413,7 @@ public class HdmiCecNetwork {
      */
     boolean isConnectedToArcPort(int physicalAddress) {
         int portId = physicalAddressToPortId(physicalAddress);
-        if (portId != Constants.INVALID_PORT_ID) {
+        if (portId != Constants.INVALID_PORT_ID && portId != Constants.CEC_SWITCH_HOME) {
             return mPortInfoMap.get(portId).isArcSupported();
         }
         return false;

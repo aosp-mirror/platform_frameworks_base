@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Messagerie texte"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et afficher des messages texte"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fichiers et documents"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"accédez aux fichiers et aux documents sur votre appareil"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Fichiers"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"accéder aux fichiers sur votre appareil"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musique et audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accédez aux fichiers musicaux et audio sur votre appareil"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Photos et vidéos"</string>
@@ -1356,7 +1356,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Un accessoire audio analogique a été détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Touchez ici en savoir plus."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Débogage USB activé"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Touchez ici pour désactiver le débogage USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Touchez pour désactiver le débogage USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Sélectionnez cette option pour désactiver le débogage USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Débogage sans fil connecté"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Touchez l\'écran pour désactiver le débogage sans fil"</string>
@@ -1678,12 +1678,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ne pas activer"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVÉ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DÉSACTIVÉ"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permettre à <xliff:g id="SERVICE">%1$s</xliff:g> de commander complètement votre appareil?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permettre à <xliff:g id="SERVICE">%1$s</xliff:g> de contrôler complètement votre appareil?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des applications."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et commander l\'écran"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et contrôler l\'écran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Cette fonctionnalité peut lire tout le contenu à l\'écran et afficher du contenu par-dessus d\'autres applications."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Afficher et effectuer des actions"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut faire le suivi de vos interactions avec une application ou un capteur matériel, et interagir avec des applications en votre nom."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut faire le suivi de vos interactions avec une application ou un capteur matériel et interagir avec des applications en votre nom."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Autoriser"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuser"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toucher une fonctionnalité pour commencer à l\'utiliser :"</string>
