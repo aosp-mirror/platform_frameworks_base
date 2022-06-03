@@ -17,6 +17,7 @@
 package com.android.systemui.doze;
 
 import static android.app.UiModeManager.ACTION_ENTER_CAR_MODE;
+import static android.app.UiModeManager.ACTION_EXIT_CAR_MODE;
 
 import android.app.UiModeManager;
 import android.content.BroadcastReceiver;
@@ -96,6 +97,7 @@ public class DozeSuppressor implements DozeMachine.Part {
                 registerBroadcastReceiver();
                 mDozeHost.addCallback(mHostCallback);
                 checkShouldImmediatelyEndDoze();
+                checkShouldImmediatelySuspendDoze();
                 break;
             case FINISH:
                 destroy();
@@ -110,11 +112,16 @@ public class DozeSuppressor implements DozeMachine.Part {
         mDozeHost.removeCallback(mHostCallback);
     }
 
+    private void checkShouldImmediatelySuspendDoze() {
+        if (mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR) {
+            mDozeLog.traceCarModeStarted();
+            mMachine.requestState(DozeMachine.State.DOZE_SUSPEND_TRIGGERS);
+        }
+    }
+
     private void checkShouldImmediatelyEndDoze() {
         String reason = null;
-        if (mUiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_CAR) {
-            reason = "car_mode";
-        } else if (!mDozeHost.isProvisioned()) {
+        if (!mDozeHost.isProvisioned()) {
             reason = "device_unprovisioned";
         } else if (mBiometricUnlockControllerLazy.get().hasPendingAuthentication()) {
             reason = "has_pending_auth";
@@ -141,6 +148,7 @@ public class DozeSuppressor implements DozeMachine.Part {
             return;
         }
         IntentFilter filter = new IntentFilter(ACTION_ENTER_CAR_MODE);
+        filter.addAction(ACTION_EXIT_CAR_MODE);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter);
         mBroadcastReceiverRegistered = true;
     }
@@ -156,9 +164,14 @@ public class DozeSuppressor implements DozeMachine.Part {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
-                mDozeLog.traceImmediatelyEndDoze("car_mode");
-                mMachine.requestState(DozeMachine.State.FINISH);
+            String action = intent.getAction();
+            if (ACTION_ENTER_CAR_MODE.equals(action)) {
+                mDozeLog.traceCarModeStarted();
+                mMachine.requestState(DozeMachine.State.DOZE_SUSPEND_TRIGGERS);
+            } else if (ACTION_EXIT_CAR_MODE.equals(action)) {
+                mDozeLog.traceCarModeEnded();
+                mMachine.requestState(mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)
+                        ? DozeMachine.State.DOZE_AOD : DozeMachine.State.DOZE);
             }
         }
     };

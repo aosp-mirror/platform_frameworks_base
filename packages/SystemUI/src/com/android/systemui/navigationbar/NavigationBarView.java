@@ -812,6 +812,7 @@ public class NavigationBarView extends FrameLayout {
         mImeDrawsImeNavBar = imeDrawsImeNavBar;
         mBarTransitions.onNavigationModeChanged(mNavBarMode);
         mEdgeBackGestureHandler.onNavigationModeChanged(mNavBarMode);
+        mRotationButtonController.onNavigationModeChanged(mNavBarMode);
         updateRotationButton();
     }
 

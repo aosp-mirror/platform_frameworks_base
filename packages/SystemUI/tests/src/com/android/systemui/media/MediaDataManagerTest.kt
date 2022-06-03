@@ -603,6 +603,7 @@ class MediaDataManagerTest : SysuiTestCase() {
                 .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
     }
 
+    @Ignore("b/229838140")
     @Test
     fun testMediaRecommendationDisabled_removesSmartspaceData() {
         // GIVEN a media recommendation card is present

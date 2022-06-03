@@ -270,8 +270,11 @@ class MediaViewController @Inject constructor(
             }
         }
         gutsIds.forEach { id ->
-            viewState.widgetStates.get(id)?.alpha = if (isGutsVisible) 1f else 0f
-            viewState.widgetStates.get(id)?.gone = !isGutsVisible
+            viewState.widgetStates.get(id)?.let { state ->
+                // Make sure to use the unmodified state if guts are visible
+                state.alpha = if (isGutsVisible) state.alpha else 0f
+                state.gone = if (isGutsVisible) state.gone else true
+            }
         }
     }
 

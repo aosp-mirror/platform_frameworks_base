@@ -10871,6 +10871,15 @@ public final class Settings {
                 "launcher_taskbar_education_showing";
 
         /**
+         * Whether or not adaptive charging feature is enabled by user.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         *
+         * @hide
+         */
+        public static final String ADAPTIVE_CHARGING_ENABLED = "adaptive_charging_enabled";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
@@ -11433,7 +11442,7 @@ public final class Settings {
          * Whether or not data roaming is enabled. (0 = false, 1 = true)
          * Use {@link TelephonyManager#isDataRoamingEnabled} instead of calling via settings.
          */
-        @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @Readable(maxTargetSdk = Build.VERSION_CODES.S_V2)
         public static final String DATA_ROAMING = "data_roaming";
 
         /**

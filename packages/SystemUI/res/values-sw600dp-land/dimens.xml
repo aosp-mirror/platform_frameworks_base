@@ -47,6 +47,8 @@
 
     <dimen name="lockscreen_shade_max_over_scroll_amount">32dp</dimen>
 
+    <dimen name="status_view_margin_horizontal">8dp</dimen>
+
     <!-- Distance that the full shade transition takes in order to complete by tapping on a button
          like "expand". -->
     <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
