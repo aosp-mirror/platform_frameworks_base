@@ -36,9 +36,11 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
+import android.text.Layout;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
@@ -101,6 +103,37 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private List<DisplayResolveInfo> mSortedList = new ArrayList<>();
     private AppPredictor mAppPredictor;
     private AppPredictor.Callback mAppPredictorCallback;
+
+    // For pinned direct share labels, if the text spans multiple lines, the TextView will consume
+    // the full width, even if the characters actually take up less than that. Measure the actual
+    // line widths and constrain the View's width based upon that so that the pin doesn't end up
+    // very far from the text.
+    private final View.OnLayoutChangeListener mPinTextSpacingListener =
+            new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    TextView textView = (TextView) v;
+                    Layout layout = textView.getLayout();
+                    if (layout != null) {
+                        int textWidth = 0;
+                        for (int line = 0; line < layout.getLineCount(); line++) {
+                            textWidth = Math.max((int) Math.ceil(layout.getLineMax(line)),
+                                    textWidth);
+                        }
+                        int desiredWidth = textWidth + textView.getPaddingLeft()
+                                + textView.getPaddingRight();
+                        if (textView.getWidth() > desiredWidth) {
+                            ViewGroup.LayoutParams params = textView.getLayoutParams();
+                            params.width = desiredWidth;
+                            textView.setLayoutParams(params);
+                            // Need to wait until layout pass is over before requesting layout.
+                            textView.post(() -> textView.requestLayout());
+                        }
+                        textView.removeOnLayoutChangeListener(this);
+                    }
+                }
+            };
 
     public ChooserListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
@@ -225,6 +258,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     @Override
     protected void onBindView(View view, TargetInfo info, int position) {
         final ViewHolder holder = (ViewHolder) view.getTag();
+
         if (info == null) {
             holder.icon.setImageDrawable(
                     mContext.getDrawable(R.drawable.resolver_icon_placeholder));
@@ -274,6 +308,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
             holder.itemView.setBackground(holder.defaultItemViewBackground);
         }
 
+        // Always remove the spacing listener, attach as needed to direct share targets below.
+        holder.text.removeOnLayoutChangeListener(mPinTextSpacingListener);
+
         if (info instanceof MultiDisplayResolveInfo) {
             // If the target is grouped show an indicator
             Drawable bkg = mContext.getDrawable(R.drawable.chooser_group_background);
@@ -286,6 +323,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
             Drawable bkg = mContext.getDrawable(R.drawable.chooser_pinned_background);
             holder.text.setPaddingRelative(bkg.getIntrinsicWidth() /* start */, 0, 0, 0);
             holder.text.setBackground(bkg);
+            holder.text.addOnLayoutChangeListener(mPinTextSpacingListener);
         } else {
             holder.text.setBackground(null);
             holder.text.setPaddingRelative(0, 0, 0, 0);

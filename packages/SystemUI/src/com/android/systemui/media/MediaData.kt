@@ -212,5 +212,8 @@ data class MediaDeviceData
     val name: CharSequence?,
 
     /** Optional intent to override the default output switcher for this control */
-    val intent: PendingIntent? = null
+    val intent: PendingIntent? = null,
+
+    /** Unique id for this device */
+    val id: String? = null
 )

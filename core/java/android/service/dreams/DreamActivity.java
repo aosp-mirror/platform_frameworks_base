@@ -58,8 +58,9 @@ public class DreamActivity extends Activity {
             setTitle(title);
         }
 
-        DreamService.DreamServiceWrapper callback =
-                (DreamService.DreamServiceWrapper) getIntent().getIBinderExtra(EXTRA_CALLBACK);
+        final Bundle extras = getIntent().getExtras();
+        final DreamService.DreamActivityCallback callback =
+                (DreamService.DreamActivityCallback) extras.getBinder(EXTRA_CALLBACK);
 
         if (callback != null) {
             callback.onActivityCreated(this);
