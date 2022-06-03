@@ -297,12 +297,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public Rect getNonMinimizedSplitScreenSecondaryBounds() {
-            // Deprecated
-            return null;
-        }
-
-        @Override
         public void setNavBarButtonAlpha(float alpha, boolean animate) {
             verifyCallerAndClearCallingIdentityPostMain("setNavBarButtonAlpha", () ->
                     notifyNavBarButtonAlphaChanged(alpha, animate));
@@ -346,17 +340,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         mContext.startActivityAsUser(intent, UserHandle.CURRENT);
                     });
-        }
-
-        @Override
-        public void handleImageAsScreenshot(Bitmap screenImage, Rect locationInScreen,
-                                            Insets visibleInsets, int taskId) {
-            // Deprecated
-        }
-
-        @Override
-        public void setSplitScreenMinimized(boolean minimized) {
-            // Deprecated
         }
 
         @Override
