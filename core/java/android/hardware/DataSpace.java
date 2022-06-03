@@ -388,6 +388,28 @@ public final class DataSpace {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
+        DEPTH,
+        DYNAMIC_DEPTH,
+    })
+    public @interface DataSpaceDepth {};
+
+    /**
+     * Depth.
+     *
+     * This value is valid with formats HAL_PIXEL_FORMAT_Y16 and HAL_PIXEL_FORMAT_BLOB.
+     */
+    public static final int DEPTH = 4096;
+
+    /**
+     * ISO 16684-1:2011(E) Dynamic Depth.
+     *
+     * Embedded depth metadata following the dynamic depth specification.
+     */
+    public static final int DYNAMIC_DEPTH = 4098;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, value = {
         DATASPACE_UNKNOWN,
         DATASPACE_SCRGB_LINEAR,
         DATASPACE_SRGB,
