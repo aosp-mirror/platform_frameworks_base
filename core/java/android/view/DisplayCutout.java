@@ -77,8 +77,8 @@ public final class DisplayCutout {
 
     private static final Rect ZERO_RECT = new Rect();
     private static final CutoutPathParserInfo EMPTY_PARSER_INFO = new CutoutPathParserInfo(
-            0 /* displayWidth */, 0 /* stableDisplayHeight */,
-            0 /* stableDisplayHeight */, 0 /* displayHeight */, 0f /* density */,
+            0 /* displayWidth */, 0 /* physicalDisplayHeight */,
+            0 /* physicalDisplayHeight */, 0 /* displayHeight */, 0f /* density */,
             "" /* cutoutSpec */, 0 /* ROTATION_0 */, 0f /* scale */,
             0f /* physicalPixelDisplaySizeRatio*/);
 
@@ -258,21 +258,21 @@ public final class DisplayCutout {
     public static class CutoutPathParserInfo {
         private final int mDisplayWidth;
         private final int mDisplayHeight;
-        private final int mStableDisplayWidth;
-        private final int mStableDisplayHeight;
+        private final int mPhysicalDisplayWidth;
+        private final int mPhysicalDisplayHeight;
         private final float mDensity;
         private final String mCutoutSpec;
         private final @Rotation int mRotation;
         private final float mScale;
         private final float mPhysicalPixelDisplaySizeRatio;
 
-        public CutoutPathParserInfo(int displayWidth, int displayHeight, int stableDisplayWidth,
-                int stableDisplayHeight, float density, @Nullable String cutoutSpec,
+        public CutoutPathParserInfo(int displayWidth, int displayHeight, int physicalDisplayWidth,
+                int physicalDisplayHeight, float density, @Nullable String cutoutSpec,
                 @Rotation int rotation, float scale, float physicalPixelDisplaySizeRatio) {
             mDisplayWidth = displayWidth;
             mDisplayHeight = displayHeight;
-            mStableDisplayWidth = stableDisplayWidth;
-            mStableDisplayHeight = stableDisplayHeight;
+            mPhysicalDisplayWidth = physicalDisplayWidth;
+            mPhysicalDisplayHeight = physicalDisplayHeight;
             mDensity = density;
             mCutoutSpec = cutoutSpec == null ? "" : cutoutSpec;
             mRotation = rotation;
@@ -283,8 +283,8 @@ public final class DisplayCutout {
         public CutoutPathParserInfo(@NonNull CutoutPathParserInfo cutoutPathParserInfo) {
             mDisplayWidth = cutoutPathParserInfo.mDisplayWidth;
             mDisplayHeight = cutoutPathParserInfo.mDisplayHeight;
-            mStableDisplayWidth = cutoutPathParserInfo.mStableDisplayWidth;
-            mStableDisplayHeight = cutoutPathParserInfo.mStableDisplayHeight;
+            mPhysicalDisplayWidth = cutoutPathParserInfo.mPhysicalDisplayWidth;
+            mPhysicalDisplayHeight = cutoutPathParserInfo.mPhysicalDisplayHeight;
             mDensity = cutoutPathParserInfo.mDensity;
             mCutoutSpec = cutoutPathParserInfo.mCutoutSpec;
             mRotation = cutoutPathParserInfo.mRotation;
@@ -300,12 +300,12 @@ public final class DisplayCutout {
             return mDisplayHeight;
         }
 
-        public int getStableDisplayWidth() {
-            return mStableDisplayWidth;
+        public int getPhysicalDisplayWidth() {
+            return mPhysicalDisplayWidth;
         }
 
-        public int getStableDisplayHeight() {
-            return mStableDisplayHeight;
+        public int getPhysicalDisplayHeight() {
+            return mPhysicalDisplayHeight;
         }
 
         public float getDensity() {
@@ -342,8 +342,8 @@ public final class DisplayCutout {
             result = result * 48271 + Integer.hashCode(mRotation);
             result = result * 48271 + Float.hashCode(mScale);
             result = result * 48271 + Float.hashCode(mPhysicalPixelDisplaySizeRatio);
-            result = result * 48271 + Integer.hashCode(mStableDisplayWidth);
-            result = result * 48271 + Integer.hashCode(mStableDisplayHeight);
+            result = result * 48271 + Integer.hashCode(mPhysicalDisplayWidth);
+            result = result * 48271 + Integer.hashCode(mPhysicalDisplayHeight);
             return result;
         }
 
@@ -355,8 +355,8 @@ public final class DisplayCutout {
             if (o instanceof CutoutPathParserInfo) {
                 CutoutPathParserInfo c = (CutoutPathParserInfo) o;
                 return mDisplayWidth == c.mDisplayWidth && mDisplayHeight == c.mDisplayHeight
-                        && mStableDisplayWidth == c.mStableDisplayWidth
-                        && mStableDisplayHeight == c.mStableDisplayHeight
+                        && mPhysicalDisplayWidth == c.mPhysicalDisplayWidth
+                        && mPhysicalDisplayHeight == c.mPhysicalDisplayHeight
                         && mDensity == c.mDensity && mCutoutSpec.equals(c.mCutoutSpec)
                         && mRotation == c.mRotation && mScale == c.mScale
                         && mPhysicalPixelDisplaySizeRatio == c.mPhysicalPixelDisplaySizeRatio;
@@ -368,8 +368,8 @@ public final class DisplayCutout {
         public String toString() {
             return "CutoutPathParserInfo{displayWidth=" + mDisplayWidth
                     + " displayHeight=" + mDisplayHeight
-                    + " stableDisplayHeight=" + mStableDisplayWidth
-                    + " stableDisplayHeight=" + mStableDisplayHeight
+                    + " physicalDisplayWidth=" + mPhysicalDisplayWidth
+                    + " physicalDisplayHeight=" + mPhysicalDisplayHeight
                     + " density={" + mDensity + "}"
                     + " cutoutSpec={" + mCutoutSpec + "}"
                     + " rotation={" + mRotation + "}"
@@ -750,8 +750,8 @@ public final class DisplayCutout {
             }
         }
         final CutoutSpecification cutoutSpec = new CutoutSpecification.Parser(
-                mCutoutPathParserInfo.getDensity(), mCutoutPathParserInfo.getStableDisplayWidth(),
-                mCutoutPathParserInfo.getStableDisplayHeight(),
+                mCutoutPathParserInfo.getDensity(), mCutoutPathParserInfo.getPhysicalDisplayWidth(),
+                mCutoutPathParserInfo.getPhysicalDisplayHeight(),
                 mCutoutPathParserInfo.getPhysicalPixelDisplaySizeRatio())
                 .parse(mCutoutPathParserInfo.getCutoutSpec());
 
@@ -1053,11 +1053,11 @@ public final class DisplayCutout {
      * @hide
      */
     public static DisplayCutout fromResourcesRectApproximation(Resources res,
-            String displayUniqueId, int stableDisplayWidth, int stableDisplayHeight,
+            String displayUniqueId, int physicalDisplayWidth, int physicalDisplayHeight,
             int displayWidth, int displayHeight) {
         return pathAndDisplayCutoutFromSpec(getDisplayCutoutPath(res, displayUniqueId),
-                getDisplayCutoutApproximationRect(res, displayUniqueId), stableDisplayWidth,
-                stableDisplayHeight, displayWidth, displayHeight,
+                getDisplayCutoutApproximationRect(res, displayUniqueId), physicalDisplayWidth,
+                physicalDisplayHeight, displayWidth, displayHeight,
                 DENSITY_DEVICE_STABLE / (float) DENSITY_DEFAULT,
                 getWaterfallInsets(res, displayUniqueId)).second;
     }
@@ -1080,8 +1080,8 @@ public final class DisplayCutout {
      *
      * @param pathSpec the spec string read from config_mainBuiltInDisplayCutout.
      * @param rectSpec the spec string read from config_mainBuiltInDisplayCutoutRectApproximation.
-     * @param stableDisplayWidth the stable display width.
-     * @param stableDisplayHeight the stable display height.
+     * @param physicalDisplayWidth the max physical display width the display supports.
+     * @param physicalDisplayHeight the max physical display height the display supports.
      * @param displayWidth the display width.
      * @param displayHeight the display height.
      * @param density the display density.
@@ -1089,7 +1089,7 @@ public final class DisplayCutout {
      * @return a Pair contains the cutout path and the corresponding DisplayCutout instance.
      */
     private static Pair<Path, DisplayCutout> pathAndDisplayCutoutFromSpec(
-            String pathSpec, String rectSpec, int stableDisplayWidth, int stableDisplayHeight,
+            String pathSpec, String rectSpec, int physicalDisplayWidth, int physicalDisplayHeight,
             int displayWidth, int displayHeight, float density, Insets waterfallInsets) {
         // Always use the rect approximation spec to create the cutout if it's not null because
         // transforming and sending a Region constructed from a path is very costly.
@@ -1099,7 +1099,7 @@ public final class DisplayCutout {
         }
 
         final float physicalPixelDisplaySizeRatio = DisplayUtils.getPhysicalPixelDisplaySizeRatio(
-                stableDisplayWidth, stableDisplayHeight, displayWidth, displayHeight);
+                physicalDisplayWidth, physicalDisplayHeight, displayWidth, displayHeight);
 
         synchronized (CACHE_LOCK) {
             if (spec.equals(sCachedSpec) && sCachedDisplayWidth == displayWidth
@@ -1114,7 +1114,8 @@ public final class DisplayCutout {
         spec = spec.trim();
 
         CutoutSpecification cutoutSpec = new CutoutSpecification.Parser(density,
-                stableDisplayWidth, stableDisplayHeight, physicalPixelDisplaySizeRatio).parse(spec);
+                physicalDisplayWidth, physicalDisplayHeight, physicalPixelDisplaySizeRatio)
+                .parse(spec);
         Rect safeInset = cutoutSpec.getSafeInset();
         final Rect boundLeft = cutoutSpec.getLeftBound();
         final Rect boundTop = cutoutSpec.getTopBound();
@@ -1131,7 +1132,7 @@ public final class DisplayCutout {
         }
 
         final CutoutPathParserInfo cutoutPathParserInfo = new CutoutPathParserInfo(
-                displayWidth, displayHeight, stableDisplayWidth, stableDisplayHeight, density,
+                displayWidth, displayHeight, physicalDisplayWidth, physicalDisplayHeight, density,
                 pathSpec.trim(), ROTATION_0, 1f /* scale */, physicalPixelDisplaySizeRatio);
 
         final DisplayCutout cutout = new DisplayCutout(
@@ -1182,9 +1183,9 @@ public final class DisplayCutout {
         Collections.rotate(Arrays.asList(newBounds), -rotation);
         final CutoutPathParserInfo info = getCutoutPathParserInfo();
         final CutoutPathParserInfo newInfo = new CutoutPathParserInfo(
-                info.getDisplayWidth(), info.getDisplayHeight(), info.getStableDisplayWidth(),
-                info.getStableDisplayHeight(), info.getDensity(), info.getCutoutSpec(), toRotation,
-                info.getScale(), info.getPhysicalPixelDisplaySizeRatio());
+                info.getDisplayWidth(), info.getDisplayHeight(), info.getPhysicalDisplayWidth(),
+                info.getPhysicalDisplayHeight(), info.getDensity(), info.getCutoutSpec(),
+                toRotation, info.getScale(), info.getPhysicalPixelDisplaySizeRatio());
         final boolean swapAspect = (rotation % 2) != 0;
         final int endWidth = swapAspect ? startHeight : startWidth;
         final int endHeight = swapAspect ? startWidth : startHeight;
@@ -1284,8 +1285,8 @@ public final class DisplayCutout {
                 out.writeTypedObject(cutout.mWaterfallInsets, flags);
                 out.writeInt(cutout.mCutoutPathParserInfo.getDisplayWidth());
                 out.writeInt(cutout.mCutoutPathParserInfo.getDisplayHeight());
-                out.writeInt(cutout.mCutoutPathParserInfo.getStableDisplayWidth());
-                out.writeInt(cutout.mCutoutPathParserInfo.getStableDisplayHeight());
+                out.writeInt(cutout.mCutoutPathParserInfo.getPhysicalDisplayWidth());
+                out.writeInt(cutout.mCutoutPathParserInfo.getPhysicalDisplayHeight());
                 out.writeFloat(cutout.mCutoutPathParserInfo.getDensity());
                 out.writeString(cutout.mCutoutPathParserInfo.getCutoutSpec());
                 out.writeInt(cutout.mCutoutPathParserInfo.getRotation());
@@ -1336,16 +1337,16 @@ public final class DisplayCutout {
             Insets waterfallInsets = in.readTypedObject(Insets.CREATOR);
             int displayWidth = in.readInt();
             int displayHeight = in.readInt();
-            int stableDisplayWidth = in.readInt();
-            int stableDisplayHeight = in.readInt();
+            int physicalDisplayWidth = in.readInt();
+            int physicalDisplayHeight = in.readInt();
             float density = in.readFloat();
             String cutoutSpec = in.readString();
             int rotation = in.readInt();
             float scale = in.readFloat();
             float physicalPixelDisplaySizeRatio = in.readFloat();
             final CutoutPathParserInfo info = new CutoutPathParserInfo(
-                    displayWidth, displayHeight, stableDisplayWidth, stableDisplayHeight, density,
-                    cutoutSpec, rotation, scale, physicalPixelDisplaySizeRatio);
+                    displayWidth, displayHeight, physicalDisplayWidth, physicalDisplayHeight,
+                    density, cutoutSpec, rotation, scale, physicalPixelDisplaySizeRatio);
 
             return new DisplayCutout(
                     safeInsets, waterfallInsets, bounds, info, false /* copyArguments */);
@@ -1373,8 +1374,8 @@ public final class DisplayCutout {
             final CutoutPathParserInfo info = new CutoutPathParserInfo(
                     mInner.mCutoutPathParserInfo.getDisplayWidth(),
                     mInner.mCutoutPathParserInfo.getDisplayHeight(),
-                    mInner.mCutoutPathParserInfo.getStableDisplayWidth(),
-                    mInner.mCutoutPathParserInfo.getStableDisplayHeight(),
+                    mInner.mCutoutPathParserInfo.getPhysicalDisplayWidth(),
+                    mInner.mCutoutPathParserInfo.getPhysicalDisplayHeight(),
                     mInner.mCutoutPathParserInfo.getDensity(),
                     mInner.mCutoutPathParserInfo.getCutoutSpec(),
                     mInner.mCutoutPathParserInfo.getRotation(),

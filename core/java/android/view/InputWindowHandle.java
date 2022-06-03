@@ -157,6 +157,11 @@ public final class InputWindowHandle {
      */
     public Matrix transform;
 
+    /**
+     * Whether this window is a clone or the original window.
+     */
+    public boolean isClone;
+
     private native void nativeDispose();
 
     public InputWindowHandle(InputApplicationHandle inputApplicationHandle, int displayId) {
@@ -205,6 +210,7 @@ public final class InputWindowHandle {
                 .append(", scaleFactor=").append(scaleFactor)
                 .append(", transform=").append(transform)
                 .append(", windowToken=").append(windowToken)
+                .append(", isClone=").append(isClone)
                 .toString();
 
     }

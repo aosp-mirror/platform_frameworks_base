@@ -286,7 +286,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mBackGestureStarted = true;
 
         try {
-            mBackNavigationInfo = mActivityTaskManager.startBackNavigation();
+            boolean requestAnimation = mEnableAnimations.get();
+            mBackNavigationInfo = mActivityTaskManager.startBackNavigation(requestAnimation);
             onBackNavigationInfoReceived(mBackNavigationInfo);
         } catch (RemoteException remoteException) {
             Log.e(TAG, "Failed to initAnimation", remoteException);
