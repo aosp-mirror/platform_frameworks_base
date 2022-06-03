@@ -208,7 +208,7 @@ public class QuickAccessWalletController {
     public void startQuickAccessUiIntent(ActivityStarter activityStarter,
             ActivityLaunchAnimator.Controller animationController,
             boolean hasCard) {
-        mQuickAccessWalletClient.getWalletPendingIntent(mBgExecutor,
+        mQuickAccessWalletClient.getWalletPendingIntent(mExecutor,
                 walletPendingIntent -> {
                     if (walletPendingIntent != null) {
                         startQuickAccessViaPendingIntent(walletPendingIntent, activityStarter,

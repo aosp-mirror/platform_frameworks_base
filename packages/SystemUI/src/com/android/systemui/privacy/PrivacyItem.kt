@@ -43,6 +43,12 @@ enum class PrivacyType(
         com.android.internal.R.drawable.perm_group_location,
         android.Manifest.permission_group.LOCATION,
         "location"
+    ),
+    TYPE_MEDIA_PROJECTION(
+            R.string.privacy_type_media_projection,
+            R.drawable.stat_sys_cast,
+            android.Manifest.permission_group.UNDEFINED,
+            "media projection"
     );
 
     fun getName(context: Context) = context.resources.getString(nameId)

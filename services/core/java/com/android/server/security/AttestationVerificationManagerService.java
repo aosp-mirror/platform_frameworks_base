@@ -16,6 +16,7 @@
 
 package com.android.server.security;
 
+import static android.Manifest.permission.USE_ATTESTATION_VERIFICATION_SERVICE;
 import static android.security.attestationverification.AttestationVerificationManager.PROFILE_PEER_DEVICE;
 import static android.security.attestationverification.AttestationVerificationManager.PROFILE_SELF_TRUSTED;
 import static android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE;
@@ -60,6 +61,7 @@ public class AttestationVerificationManagerService extends SystemService {
                 Bundle requirements,
                 byte[] attestation,
                 AndroidFuture resultCallback) throws RemoteException {
+            enforceUsePermission();
             try {
                 Slog.d(TAG, "verifyAttestation");
                 verifyAttestationForAllVerifiers(profile, localBindingType, requirements,
@@ -73,8 +75,13 @@ public class AttestationVerificationManagerService extends SystemService {
         @Override
         public void verifyToken(VerificationToken token, ParcelDuration parcelDuration,
                 AndroidFuture resultCallback) throws RemoteException {
+            enforceUsePermission();
             // TODO(b/201696614): Implement
             resultCallback.complete(RESULT_UNKNOWN);
+        }
+
+        private void enforceUsePermission() {
+            getContext().enforceCallingOrSelfPermission(USE_ATTESTATION_VERIFICATION_SERVICE, null);
         }
     };
 
