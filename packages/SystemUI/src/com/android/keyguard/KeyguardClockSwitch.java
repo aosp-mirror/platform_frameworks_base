@@ -305,7 +305,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onLayout(changed, l, t, r, b);
 
         if (mDisplayedClockSize != null && !mChildrenAreLaidOut) {
-            updateClockViews(mDisplayedClockSize == LARGE, /* animate */ true);
+            post(() -> updateClockViews(mDisplayedClockSize == LARGE, /* animate */ true));
         }
 
         mChildrenAreLaidOut = true;
