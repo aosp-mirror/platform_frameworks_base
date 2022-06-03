@@ -15,8 +15,8 @@
  */
 package android.hardware.camera2.extension;
 
-import android.hardware.camera2.extension.Size;
 import android.hardware.camera2.extension.OutputConfigId;
+import android.hardware.camera2.extension.Size;
 import android.view.Surface;
 
 /** @hide */
@@ -35,5 +35,5 @@ parcelable CameraOutputConfig
     OutputConfigId outputId;
     int surfaceGroupId;
     String physicalCameraId;
-    List<OutputConfigId> surfaceSharingOutputConfigs;
+    List<CameraOutputConfig> sharedSurfaceConfigs;
 }
