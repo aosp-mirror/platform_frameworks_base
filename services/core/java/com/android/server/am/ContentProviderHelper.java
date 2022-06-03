@@ -22,6 +22,9 @@ import static android.os.Process.PROC_PARENS;
 import static android.os.Process.PROC_SPACE_TERM;
 import static android.os.Process.SYSTEM_UID;
 
+import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
+import static com.android.internal.util.FrameworkStatsLog.PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
 import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_PROVIDER;
@@ -73,6 +76,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.RescueParty;
 import com.android.server.pm.UserManagerInternal;
@@ -241,6 +245,10 @@ public class ContentProviderHelper {
                     ContentProviderHolder holder = cpr.newHolder(null, true);
                     // don't give caller the provider object, it needs to make its own.
                     holder.provider = null;
+                    FrameworkStatsLog.write(
+                            PROVIDER_ACQUISITION_EVENT_REPORTED,
+                            r.uid, callingUid,
+                            PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
                     return holder;
                 }
 
@@ -307,6 +315,10 @@ public class ContentProviderHelper {
                         dyingProc = cpr.proc;
                     } else {
                         cpr.proc.mState.setVerifiedAdj(cpr.proc.mState.getSetAdj());
+                        FrameworkStatsLog.write(
+                                PROVIDER_ACQUISITION_EVENT_REPORTED,
+                                cpr.proc.uid, callingUid,
+                                PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(origId);
@@ -479,6 +491,10 @@ public class ContentProviderHelper {
                                 } catch (RemoteException e) {
                                 }
                             }
+                            FrameworkStatsLog.write(
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED,
+                                    proc.uid, callingUid,
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
                         } else {
                             checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = mService.startProcessLocked(
@@ -495,6 +511,10 @@ public class ContentProviderHelper {
                                         + ": process is bad");
                                 return null;
                             }
+                            FrameworkStatsLog.write(
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED,
+                                    proc.uid, callingUid,
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);
