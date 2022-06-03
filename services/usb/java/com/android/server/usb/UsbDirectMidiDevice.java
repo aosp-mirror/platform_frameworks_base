@@ -81,7 +81,7 @@ public final class UsbDirectMidiDevice implements Closeable {
     private static final int BULK_TRANSFER_TIMEOUT_MILLISECONDS = 10;
 
     // Arbitrary number for timeout when closing a thread
-    private static final int THREAD_JOIN_TIMEOUT_MILLISECONDS = 50;
+    private static final int THREAD_JOIN_TIMEOUT_MILLISECONDS = 200;
 
     private ArrayList<UsbDeviceConnection> mUsbDeviceConnections;
     private ArrayList<ArrayList<UsbEndpoint>> mInputUsbEndpoints;
@@ -370,6 +370,10 @@ public final class UsbDirectMidiDevice implements Closeable {
                                         convertedArray = swapEndiannessPerWord(inputBuffer,
                                                 bytesRead);
                                     } else {
+                                        if (mUsbMidiPacketConverter == null) {
+                                            Log.w(TAG, "mUsbMidiPacketConverter is null");
+                                            break;
+                                        }
                                         convertedArray =
                                                 mUsbMidiPacketConverter.usbMidiToRawMidi(
                                                          inputBuffer, bytesRead);
@@ -379,12 +383,20 @@ public final class UsbDirectMidiDevice implements Closeable {
                                         logByteArray("Input after conversion ", convertedArray,
                                                 0, convertedArray.length);
                                     }
+
+                                    if ((outputReceivers == null)
+                                            || (outputReceivers[portFinal] == null)) {
+                                        Log.w(TAG, "outputReceivers is null");
+                                        break;
+                                    }
                                     outputReceivers[portFinal].send(convertedArray, 0,
                                             convertedArray.length, timestamp);
                                 }
                             }
                         } catch (IOException e) {
                             Log.d(TAG, "reader thread exiting");
+                        } catch (NullPointerException e) {
+                            Log.e(TAG, "input thread: ", e);
                         } finally {
                             request.close();
                         }
@@ -414,49 +426,57 @@ public final class UsbDirectMidiDevice implements Closeable {
                 Thread newThread = new Thread("UsbDirectMidiDevice output thread " + portFinal) {
                     @Override
                     public void run() {
-                        while (true) {
-                            if (Thread.currentThread().interrupted()) {
-                                Log.w(TAG, "output thread interrupted");
-                                break;
-                            }
-                            MidiEvent event;
-                            try {
-                                event = (MidiEvent) eventSchedulerFinal.waitNextEvent();
-                            } catch (InterruptedException e) {
-                                Log.w(TAG, "event scheduler interrupted");
-                                break;
-                            }
-                            if (event == null) {
-                                Log.w(TAG, "event is null");
-                                break;
-                            }
+                        try {
+                            while (true) {
+                                if (Thread.currentThread().interrupted()) {
+                                    Log.w(TAG, "output thread interrupted");
+                                    break;
+                                }
+                                MidiEvent event;
+                                try {
+                                    event = (MidiEvent) eventSchedulerFinal.waitNextEvent();
+                                } catch (InterruptedException e) {
+                                    Log.w(TAG, "event scheduler interrupted");
+                                    break;
+                                }
+                                if (event == null) {
+                                    Log.w(TAG, "event is null");
+                                    break;
+                                }
 
-                            if (DEBUG) {
-                                logByteArray("Output before conversion ", event.data, 0,
-                                        event.count);
-                            }
+                                if (DEBUG) {
+                                    logByteArray("Output before conversion ", event.data, 0,
+                                            event.count);
+                                }
 
-                            byte[] convertedArray;
-                            if (mIsUniversalMidiDevice) {
-                                // For USB, each 32 bit word of a UMP is
-                                // sent with the least significant byte first.
-                                convertedArray = swapEndiannessPerWord(event.data,
-                                        event.count);
-                            } else {
-                                convertedArray =
-                                        mUsbMidiPacketConverter.rawMidiToUsbMidi(
-                                                 event.data, event.count, portFinal);
-                            }
+                                byte[] convertedArray;
+                                if (mIsUniversalMidiDevice) {
+                                    // For USB, each 32 bit word of a UMP is
+                                    // sent with the least significant byte first.
+                                    convertedArray = swapEndiannessPerWord(event.data,
+                                            event.count);
+                                } else {
+                                    if (mUsbMidiPacketConverter == null) {
+                                        Log.w(TAG, "mUsbMidiPacketConverter is null");
+                                        break;
+                                    }
+                                    convertedArray =
+                                            mUsbMidiPacketConverter.rawMidiToUsbMidi(
+                                                     event.data, event.count, portFinal);
+                                }
 
-                            if (DEBUG) {
-                                logByteArray("Output after conversion ", convertedArray, 0,
-                                        convertedArray.length);
-                            }
+                                if (DEBUG) {
+                                    logByteArray("Output after conversion ", convertedArray, 0,
+                                            convertedArray.length);
+                                }
 
-                            connectionFinal.bulkTransfer(endpointFinal, convertedArray,
-                                    convertedArray.length,
-                                    BULK_TRANSFER_TIMEOUT_MILLISECONDS);
-                            eventSchedulerFinal.addEventToPool(event);
+                                connectionFinal.bulkTransfer(endpointFinal, convertedArray,
+                                        convertedArray.length,
+                                        BULK_TRANSFER_TIMEOUT_MILLISECONDS);
+                                eventSchedulerFinal.addEventToPool(event);
+                            }
+                        } catch (NullPointerException e) {
+                            Log.e(TAG, "output thread: ", e);
                         }
                         Log.d(TAG, "output thread exit");
                     }

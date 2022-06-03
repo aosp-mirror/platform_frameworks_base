@@ -491,7 +491,7 @@
     <string name="disabled" msgid="8017887509554714950">"ଅକ୍ଷମ ହୋଇଛି"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ଅନୁମତି ଦିଆଯାଇଛି"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ଅନୁମତି ନାହିଁ"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"ଅଜଣା ଆପ୍‌ ଇନଷ୍ଟଲ୍‌ କରନ୍ତୁ"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"ଅଜଣା ଆପ ଇନଷ୍ଟଲ କରନ୍ତୁ"</string>
     <string name="home" msgid="973834627243661438">"ସେଟିଂସ ହୋମ"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

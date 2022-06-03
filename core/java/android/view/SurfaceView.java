@@ -719,13 +719,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void releaseSurfaces(boolean releaseSurfacePackage) {
         mSurfaceAlpha = 1f;
-	
-        mSurfaceLock.lock();
-        try {
-            mSurface.destroy();
-        } finally {
-            mSurfaceLock.unlock();
-        }
+        mSurface.destroy();
+
         synchronized (mSurfaceControlLock) {
             if (mBlastBufferQueue != null) {
                 mBlastBufferQueue.destroy();

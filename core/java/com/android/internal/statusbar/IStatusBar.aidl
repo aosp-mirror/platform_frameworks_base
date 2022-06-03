@@ -242,7 +242,8 @@ oneway interface IStatusBar
      * Displays a text toast.
      */
     void showToast(int uid, String packageName, IBinder token, CharSequence text,
-            IBinder windowToken, int duration, @nullable ITransientNotificationCallback callback);
+            IBinder windowToken, int duration, @nullable ITransientNotificationCallback callback,
+            int displayId);
 
     /**
      * Cancels toast with token {@code token} in {@code packageName}.
