@@ -603,6 +603,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun getSelectedPage(): Int {
                 return -1
             }
+
+            override fun getCurrentCardTopPadding(): Int {
+                return 0
+            }
         })
     }
 }

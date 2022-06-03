@@ -55,6 +55,7 @@ import static android.content.Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+import static android.os.PowerExemptionManager.REASON_ACTIVE_DEVICE_ADMIN;
 import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerExemptionManager.REASON_CARRIER_PRIVILEGED_APP;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
@@ -2777,6 +2778,7 @@ public final class AppRestrictionController {
         if (packages != null) {
             final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
             final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
+            final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
             for (String pkg : packages) {
                 if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
                         uid, pkg) == AppOpsManager.MODE_ALLOWED) {
@@ -2794,6 +2796,8 @@ public final class AppRestrictionController {
                     return REASON_SYSTEM_ALLOW_LISTED;
                 } else if (pm.isPackageStateProtected(pkg, userId)) {
                     return REASON_DPO_PROTECTED_APP;
+                } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
+                    return REASON_ACTIVE_DEVICE_ADMIN;
                 }
             }
         }
