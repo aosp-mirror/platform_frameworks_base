@@ -40,6 +40,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
@@ -95,10 +96,11 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private IStatusBarService mService;
     @Mock private BindEventManagerImpl mBindEventManagerImpl;
+    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
     private final SectionStyleProvider mSectionStyleProvider = new SectionStyleProvider();
-    private final NotifUiAdjustmentProvider mAdjustmentProvider =
-            new NotifUiAdjustmentProvider(mSectionStyleProvider);
+
+    private NotifUiAdjustmentProvider mAdjustmentProvider;
 
     @NonNull
     private NotificationEntryBuilder getNotificationEntryBuilder() {
@@ -108,7 +110,8 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
+        mAdjustmentProvider =
+            new NotifUiAdjustmentProvider(mLockscreenUserManager, mSectionStyleProvider);
         mEntry = getNotificationEntryBuilder().setParent(ROOT_ENTRY).build();
         mInflationError = new Exception(TEST_MESSAGE);
         mErrorManager = new NotifInflationErrorManager();
