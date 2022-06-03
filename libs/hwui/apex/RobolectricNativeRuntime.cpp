@@ -42,6 +42,7 @@ int register_android_graphics_RenderEffect(JNIEnv* env);
 namespace android {
 
 int register_android_graphics_Canvas(JNIEnv* env);
+int register_android_graphics_CanvasProperty(JNIEnv* env);
 int register_android_graphics_ColorFilter(JNIEnv* env);
 int register_android_graphics_ColorSpace(JNIEnv* env);
 int register_android_graphics_FontFamily(JNIEnv* env);
@@ -50,6 +51,7 @@ int register_android_graphics_Paint(JNIEnv* env);
 int register_android_graphics_Path(JNIEnv* env);
 int register_android_graphics_PathMeasure(JNIEnv* env);
 int register_android_graphics_Region(JNIEnv* env);
+int register_android_graphics_animation_RenderNodeAnimator(JNIEnv* env);
 int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env);
 int register_android_graphics_drawable_VectorDrawable(JNIEnv* env);
 int register_android_graphics_fonts_Font(JNIEnv* env);
@@ -72,6 +74,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_BitmapFactory),
         REG_JNI(register_android_graphics_ByteBufferStreamAdaptor),
         REG_JNI(register_android_graphics_Canvas),
+        REG_JNI(register_android_graphics_CanvasProperty),
         REG_JNI(register_android_graphics_ColorFilter),
         REG_JNI(register_android_graphics_ColorSpace),
         REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor),
@@ -86,6 +89,7 @@ static const RegJNIRec graphicsJNI[] = {
         REG_JNI(register_android_graphics_PathEffect),
         REG_JNI(register_android_graphics_PathMeasure),
         REG_JNI(register_android_graphics_Region),
+        REG_JNI(register_android_graphics_animation_RenderNodeAnimator),
         REG_JNI(register_android_graphics_drawable_AnimatedVectorDrawable),
         REG_JNI(register_android_graphics_drawable_VectorDrawable),
         REG_JNI(register_android_graphics_RenderEffect),
