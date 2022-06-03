@@ -51,7 +51,6 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
@@ -88,7 +87,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private final ActivityStarter mActivityStarter;
     private final KeyguardStateController mKeyguardStateController;
-    private final NotificationViewHierarchyManager mViewHierarchyManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final NotifShadeEventSource mNotifShadeEventSource;
@@ -139,7 +137,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             ShadeController shadeController,
             LockscreenShadeTransitionController shadeTransitionController,
             CommandQueue commandQueue,
-            NotificationViewHierarchyManager notificationViewHierarchyManager,
             NotificationLockscreenUserManager lockscreenUserManager,
             SysuiStatusBarStateController sysuiStatusBarStateController,
             NotifShadeEventSource notifShadeEventSource,
@@ -166,7 +163,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
         mShadeController = shadeController;
         mShadeTransitionController = shadeTransitionController;
         mCommandQueue = commandQueue;
-        mViewHierarchyManager = notificationViewHierarchyManager;
         mLockscreenUserManager = lockscreenUserManager;
         mStatusBarStateController = sysuiStatusBarStateController;
         mNotifShadeEventSource = notifShadeEventSource;
@@ -203,21 +199,10 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
 
         initController.addPostInitTask(() -> {
             mKeyguardIndicationController.init();
-            mViewHierarchyManager.setUpWithPresenter(this,
-                    stackScrollerController.getNotifStackController(),
-                    mNotifListContainer);
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
-            if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
-                mEntryManager.setUpWithPresenter(this);
-                mEntryManager.addNotificationLifetimeExtender(mHeadsUpManager);
-                mEntryManager.addNotificationLifetimeExtender(mGutsManager);
-                mEntryManager.addNotificationLifetimeExtenders(
-                        remoteInputManager.getLifetimeExtenders());
-            }
             notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
             mLockscreenUserManager.setUpWithPresenter(this);
-            mMediaManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(
                     this, mNotifListContainer, mCheckSaveListener, mOnSettingsClickListener);
             // ForegroundServiceNotificationListener adds its listener in its constructor
@@ -329,7 +314,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             mShadeController.addPostCollapseAction(() -> updateNotificationViews(reason));
             return;
         }
-        mViewHierarchyManager.updateNotificationViews();
         mNotificationPanel.updateNotificationViews(reason);
     }
 

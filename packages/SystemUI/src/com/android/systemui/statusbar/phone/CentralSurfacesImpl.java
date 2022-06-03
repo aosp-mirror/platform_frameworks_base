@@ -1151,7 +1151,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
         // TODO: Deal with the ugliness that comes from having some of the status bar broken out
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
-        mNotificationLogger.setUpWithContainer(mNotifListContainer);
         mNotificationIconAreaController.setupShelf(mNotificationShelfController);
         mPanelExpansionStateManager.addExpansionListener(mWakeUpCoordinator);
         mUserSwitcherController.init(mNotificationShadeWindowView);

@@ -46,7 +46,6 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
@@ -121,7 +120,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(ShadeControllerImpl.class),
                 mock(LockscreenShadeTransitionController.class),
                 mCommandQueue,
-                mock(NotificationViewHierarchyManager.class),
                 mock(NotificationLockscreenUserManager.class),
                 mock(SysuiStatusBarStateController.class),
                 mock(NotifShadeEventSource.class),
