@@ -49,7 +49,6 @@ import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -64,7 +63,6 @@ import android.app.PendingIntent;
 import android.app.admin.SecurityLog;
 import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -134,6 +132,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -147,7 +146,6 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.FuseUnavailableMountException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
@@ -179,7 +177,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -285,7 +282,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private static final boolean DEBUG_EVENTS = false;
     private static final boolean DEBUG_OBB = false;
 
     /**
@@ -330,11 +326,6 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ATTR_LAST_SEEN_MILLIS = "lastSeenMillis";
     private static final String ATTR_LAST_TRIM_MILLIS = "lastTrimMillis";
     private static final String ATTR_LAST_BENCH_MILLIS = "lastBenchMillis";
-
-    private static final String[] ALL_STORAGE_PERMISSIONS = {
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
 
     @Nullable public static String sMediaStoreAuthorityProcessName;
 
@@ -390,25 +381,13 @@ class StorageManagerService extends IStorageManager.Stub
     private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_STORAGE);
 
     /**
-     * Similar to {@link #mLock}, never hold this lock while performing downcalls into vold.
-     * Also, never hold this while calling into PackageManagerService since it is used in callbacks
-     * from PackageManagerService.
-     *
-     * If both {@link #mLock} and this lock need to be held, {@link #mLock} should be acquired
-     * before this.
-     *
-     * Use -PL suffix for methods that need to called with this lock held.
-     */
-    private final Object mPackagesLock = new Object();
-
-    /**
      * mLocalUnlockedUsers affects the return value of isUserUnlocked.  If
      * any value in the array changes, then the binder cache for
      * isUserUnlocked must be invalidated.  When adding mutating methods to
      * WatchedLockedUsers, be sure to invalidate the cache in the new
      * methods.
      */
-    private class WatchedLockedUsers {
+    private static class WatchedLockedUsers {
         private int[] users = EmptyArray.INT;
         public WatchedLockedUsers() {
             invalidateIsUserUnlockedCache();
@@ -495,7 +474,7 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mAppFuseLock")
     private AppFuseBridge mAppFuseBridge = null;
 
-    private HashMap<Integer, Integer> mUserSharesMediaWith = new HashMap<>();
+    private final SparseIntArray mUserSharesMediaWith = new SparseIntArray();
 
     /** Matches known application dir paths. The first group contains the generic part of the path,
      * the second group contains the user id (or null if it's a public volume without users), the
@@ -513,18 +492,6 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
         throw new IllegalArgumentException("No volume found for ID " + id);
-    }
-
-    private String findVolumeIdForPathOrThrow(String path) {
-        synchronized (mLock) {
-            for (int i = 0; i < mVolumes.size(); i++) {
-                final VolumeInfo vol = mVolumes.valueAt(i);
-                if (vol.path != null && path.startsWith(vol.path)) {
-                    return vol.id;
-                }
-            }
-        }
-        throw new IllegalArgumentException("No volume found for path " + path);
     }
 
     private VolumeRecord findRecordForPath(String path) {
@@ -570,30 +537,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private boolean shouldBenchmark() {
-        final long benchInterval = Settings.Global.getLong(mContext.getContentResolver(),
-                Settings.Global.STORAGE_BENCHMARK_INTERVAL, DateUtils.WEEK_IN_MILLIS);
-        if (benchInterval == -1) {
-            return false;
-        } else if (benchInterval == 0) {
-            return true;
-        }
-
-        synchronized (mLock) {
-            for (int i = 0; i < mVolumes.size(); i++) {
-                final VolumeInfo vol = mVolumes.valueAt(i);
-                final VolumeRecord rec = mRecords.get(vol.fsUuid);
-                if (vol.isMountedWritable() && rec != null) {
-                    final long benchAge = System.currentTimeMillis() - rec.lastBenchMillis;
-                    if (benchAge >= benchInterval) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    }
-
     private CountDownLatch findOrCreateDiskScanLatch(String diskId) {
         synchronized (mLock) {
             CountDownLatch latch = mDiskScanLatches.get(diskId);
@@ -606,7 +549,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private final Context mContext;
-    private final ContentResolver mResolver;
 
     private volatile IVold mVold;
     private volatile IStoraged mStoraged;
@@ -650,7 +592,7 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mLock")
     private final Set<Integer> mUidsWithLegacyExternalStorage = new ArraySet<>();
     // Not guarded by lock, always used on the ActivityManager thread
-    private final Map<Integer, PackageMonitor> mPackageMonitorsForUser = new ArrayMap<>();
+    private final SparseArray<PackageMonitor> mPackageMonitorsForUser = new SparseArray<>();
 
 
     class ObbState implements IBinder.DeathRecipient {
@@ -896,7 +838,7 @@ class StorageManagerService extends IStorageManager.Stub
                     final int userSerialNumber = um.getUserSerialNumber(userId);
                     mVold.onUserAdded(userId, userSerialNumber);
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                    synchronized (mVolumes) {
+                    synchronized (mLock) {
                         final int size = mVolumes.size();
                         for (int i = 0; i < size; i++) {
                             final VolumeInfo vol = mVolumes.valueAt(i);
@@ -1060,41 +1002,6 @@ class StorageManagerService extends IStorageManager.Stub
                 Slog.d(TAG, "onAnrDelayCompleted for " + packageName + ". Skipping ANR dialog...");
                 return false;
             }
-        }
-    }
-
-    /**
-     * MediaProvider has a ton of code that makes assumptions about storage
-     * paths never changing, so we outright kill them to pick up new state.
-     */
-    @Deprecated
-    private void killMediaProvider(List<UserInfo> users) {
-        if (users == null) return;
-
-        final long token = Binder.clearCallingIdentity();
-        try {
-            for (UserInfo user : users) {
-                // System user does not have media provider, so skip.
-                if (user.isSystemOnly()) continue;
-
-                final ProviderInfo provider = mPmInternal.resolveContentProvider(
-                        MediaStore.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        user.id, Process.SYSTEM_UID);
-                if (provider != null) {
-                    final IActivityManager am = ActivityManager.getService();
-                    try {
-                        am.killApplication(provider.applicationInfo.packageName,
-                                UserHandle.getAppId(provider.applicationInfo.uid),
-                                UserHandle.USER_ALL, "vold reset");
-                        // We only need to run this once. It will kill all users' media processes.
-                        break;
-                    } catch (RemoteException e) {
-                    }
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -1318,14 +1225,13 @@ class StorageManagerService extends IStorageManager.Stub
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
-        PackageMonitor monitor = mPackageMonitorsForUser.remove(userId);
+        PackageMonitor monitor = mPackageMonitorsForUser.removeReturnOld(userId);
         if (monitor != null) {
             monitor.unregister();
         }
     }
 
     private void maybeRemountVolumes(int userId) {
-        boolean reset = false;
         List<VolumeInfo> volumesToRemount = new ArrayList<>();
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
@@ -1471,7 +1377,7 @@ class StorageManagerService extends IStorageManager.Stub
                     args.argi1 = oldState;
                     args.argi2 = newState;
                     mHandler.obtainMessage(H_VOLUME_STATE_CHANGED, args).sendToTarget();
-                    onVolumeStateChangedLocked(vInfo, oldState, newState);
+                    onVolumeStateChangedLocked(vInfo, newState);
                 }
             }
         }
@@ -1657,7 +1563,8 @@ class StorageManagerService extends IStorageManager.Stub
         return true;
     }
 
-    private void onVolumeStateChangedLocked(VolumeInfo vol, int oldState, int newState) {
+    @GuardedBy("mLock")
+    private void onVolumeStateChangedLocked(VolumeInfo vol, int newState) {
         if (vol.type == VolumeInfo.TYPE_EMULATED) {
             if (newState != VolumeInfo.STATE_MOUNTED) {
                 mFuseMountedUser.remove(vol.getMountUserId());
@@ -1677,7 +1584,9 @@ class StorageManagerService extends IStorageManager.Stub
 
                     // Add fuse mounted user after migration to prevent ProcessList tries to
                     // create obb directory before migration is done.
-                    mFuseMountedUser.add(userId);
+                    synchronized (mLock) {
+                        mFuseMountedUser.add(userId);
+                    }
 
                     Map<Integer, String> pidPkgMap = null;
                     // getProcessesWithPendingBindMounts() could fail when a new app process is
@@ -1920,7 +1829,6 @@ class StorageManagerService extends IStorageManager.Stub
         mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
                 ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
         mContext = context;
-        mResolver = mContext.getContentResolver();
         mCallbacks = new Callbacks(FgThread.get().getLooper());
         mLockPatternUtils = new LockPatternUtils(mContext);
 
@@ -2142,19 +2050,6 @@ class StorageManagerService extends IStorageManager.Stub
         } else {
             Slog.w(TAG, "PackageMonitor is already registered for: " + userId);
         }
-    }
-
-    private static long getLastAccessTime(AppOpsManager manager,
-            int uid, String packageName, int[] ops) {
-        long maxTime = 0;
-        final List<AppOpsManager.PackageOps> pkgs = manager.getOpsForPackage(uid, packageName, ops);
-        for (AppOpsManager.PackageOps pkg : CollectionUtils.emptyIfNull(pkgs)) {
-            for (AppOpsManager.OpEntry op : CollectionUtils.emptyIfNull(pkg.getOps())) {
-                maxTime = Math.max(maxTime, op.getLastAccessTime(
-                    AppOpsManager.OP_FLAGS_ALL_TRUSTED));
-            }
-        }
-        return maxTime;
     }
 
     private void systemReady() {
@@ -3849,7 +3744,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final ArrayList<StorageVolume> res = new ArrayList<>();
         final ArraySet<String> resUuids = new ArraySet<>();
-        final int userIdSharingMedia = mUserSharesMediaWith.getOrDefault(userId, -1);
+        final int userIdSharingMedia = mUserSharesMediaWith.get(userId, -1);
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final String volId = mVolumes.keyAt(i);
@@ -3868,6 +3763,7 @@ class StorageManagerService extends IStorageManager.Stub
                             break;
                         }
                         // Skip if emulated volume not for userId
+                        continue;
                     default:
                         continue;
                 }
@@ -4023,8 +3919,8 @@ class StorageManagerService extends IStorageManager.Stub
             mContext.enforceCallingPermission(android.Manifest.permission.STORAGE_INTERNAL, TAG);
         }
         final long token = Binder.clearCallingIdentity();
-        final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
         try {
+            final StorageStatsManager stats = mContext.getSystemService(StorageStatsManager.class);
             return stats.getCacheQuotaBytes(volumeUuid, uid);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -4233,7 +4129,7 @@ class StorageManagerService extends IStorageManager.Stub
                         Slog.i(TAG, "Flushing all OBB state for path " + path);
 
                     synchronized (mObbMounts) {
-                        final List<ObbState> obbStatesToRemove = new LinkedList<ObbState>();
+                        final List<ObbState> obbStatesToRemove = new ArrayList<>();
 
                         final Iterator<ObbState> i = mObbPathToStateMap.values().iterator();
                         while (i.hasNext()) {
@@ -4284,7 +4180,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    abstract class ObbAction {
+    private static abstract class ObbAction {
 
         ObbState mObbState;
 
