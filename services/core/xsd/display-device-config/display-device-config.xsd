@@ -57,6 +57,16 @@
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncrease">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Maximum time in milliseconds that a brightness increase animation
+                     can take. -->
+                <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampIncreaseMaxMillis">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Maximum time in milliseconds that a brightness decrease animation
+                     can take. -->
+                <xs:element type="xs:nonNegativeInteger" name="screenBrightnessRampDecreaseMaxMillis">
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <xs:element type="sensorDetails" name="lightSensor">
                     <xs:annotation name="final"/>
                 </xs:element>

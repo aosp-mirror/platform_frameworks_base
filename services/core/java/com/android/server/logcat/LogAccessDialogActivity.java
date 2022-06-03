@@ -105,7 +105,7 @@ public class LogAccessDialogActivity extends Activity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mAlert != null && mAlert.isShowing()) {
+        if (!isChangingConfigurations() && mAlert != null && mAlert.isShowing()) {
             mAlert.dismiss();
         }
         mAlert = null;
