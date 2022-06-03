@@ -134,9 +134,6 @@ public abstract class PipContentOverlay {
             tx.setBuffer(mLeash, mSnapshot.getHardwareBuffer());
             // Relocate the content to parentLeash's coordinates.
             tx.setPosition(mLeash, -mSourceRectHint.left, -mSourceRectHint.top);
-            tx.setWindowCrop(mLeash,
-                    (int) (mSourceRectHint.width() * mTaskSnapshotScaleX),
-                    (int) (mSourceRectHint.height() * mTaskSnapshotScaleY));
             tx.setScale(mLeash, mTaskSnapshotScaleX, mTaskSnapshotScaleY);
             tx.reparent(mLeash, parentLeash);
             tx.apply();
