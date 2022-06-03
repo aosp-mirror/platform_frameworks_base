@@ -158,6 +158,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String PROPERTY_LOCATION_INDICATORS_ENABLED = "location_indicators_enabled";
 
     /**
+     * Whether to show privacy chip for media projection.
+     */
+    public static final String PROPERTY_MEDIA_PROJECTION_INDICATORS_ENABLED =
+            "media_projection_indicators_enabled";
+
+    /**
      * Whether to show old location indicator on all location accesses.
      */
     public static final String PROPERTY_LOCATION_INDICATORS_SMALL_ENABLED =
@@ -536,6 +542,11 @@ public final class SystemUiDeviceConfigFlags {
      * (boolean) Whether the task manager entrypoint is enabled.
      */
     public static final String TASK_MANAGER_ENABLED = "task_manager_enabled";
+
+    /**
+     * (boolean) Whether the task manager should show an attention grabbing dot when tasks changed.
+     */
+    public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
 
 
     /**
