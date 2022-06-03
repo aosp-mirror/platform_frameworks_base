@@ -9284,22 +9284,39 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return poComponent;
                 }
             }
-            final String supervisor = mContext.getResources().getString(
-                    com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
-            if (supervisor == null) {
-                return null;
+
+            // Check profile owner first as that is what most likely is set.
+            if (isSupervisionComponent(poComponent)) {
+                return poComponent;
             }
-            final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
-            if (supervisorComponent == null) {
-                return null;
+
+            if (isSupervisionComponent(doComponent)) {
+                return doComponent;
             }
-            if (supervisorComponent.equals(doComponent) || supervisorComponent.equals(
-                    poComponent)) {
-                return supervisorComponent;
-            } else {
-                return null;
+
+            return null;
+        }
+    }
+
+    private boolean isSupervisionComponent(@Nullable ComponentName who) {
+        if (who == null) {
+            return false;
+        }
+
+        final String configComponent = mContext.getResources().getString(
+                com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
+        if (configComponent != null) {
+            final ComponentName componentName = ComponentName.unflattenFromString(configComponent);
+            if (who.equals(componentName)) {
+                return true;
             }
         }
+
+        // Check the system supervision role.
+        final String configPackage = mContext.getResources().getString(
+                com.android.internal.R.string.config_systemSupervision);
+
+        return who.getPackageName().equals(configPackage);
     }
 
     @Override
@@ -9485,22 +9502,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     "Cannot set the profile owner on a user which is already set-up");
 
             if (!mIsWatch) {
-                final String supervisionRolePackage = mContext.getResources().getString(
-                        com.android.internal.R.string.config_systemSupervision);
-                // Only the default supervision profile owner or supervision role holder
-                // can be set as profile owner after SUW
-                final String supervisor = mContext.getResources().getString(
-                        com.android.internal.R.string
-                                .config_defaultSupervisionProfileOwnerComponent);
-                if (supervisor == null && supervisionRolePackage == null) {
-                    throw new IllegalStateException("Unable to set profile owner post-setup, no"
-                            + "default supervisor profile owner defined");
-                }
-
-                final ComponentName supervisorComponent = ComponentName.unflattenFromString(
-                        supervisor);
-                if (!owner.equals(supervisorComponent)
-                        && !owner.getPackageName().equals(supervisionRolePackage)) {
+                if (!isSupervisionComponent(owner)) {
                     throw new IllegalStateException("Unable to set non-default profile owner"
                             + " post-setup " + owner);
                 }
@@ -12087,7 +12089,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             // Allow testOnly admins to bypass supervision config requirement.
             Preconditions.checkCallAuthorization(isAdminTestOnlyLocked(who, caller.getUserId())
-                    || isDefaultSupervisor(caller), "Admin %s is not the "
+                    || isSupervisionComponent(caller.getComponentName()), "Admin %s is not the "
                     + "default supervision component", caller.getComponentName());
             DevicePolicyData policy = getUserData(caller.getUserId());
             policy.mSecondaryLockscreenEnabled = enabled;
@@ -12104,16 +12106,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean isManagedProfileOwner(CallerIdentity caller) {
         return isProfileOwner(caller) && isManagedProfile(caller.getUserId());
-    }
-
-    private boolean isDefaultSupervisor(CallerIdentity caller) {
-        final String supervisor = mContext.getResources().getString(
-                com.android.internal.R.string.config_defaultSupervisionProfileOwnerComponent);
-        if (supervisor == null) {
-            return false;
-        }
-        final ComponentName supervisorComponent = ComponentName.unflattenFromString(supervisor);
-        return caller.getComponentName().equals(supervisorComponent);
     }
 
     @Override
@@ -12999,16 +12991,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return false;
                 }
 
-                final String supervisionString = mContext.getResources().getString(
-                        com.android.internal.R.string
-                                .config_defaultSupervisionProfileOwnerComponent);
-                if (supervisionString == null) {
-                    return false;
-                }
-
-                final ComponentName supervisorComponent = ComponentName.unflattenFromString(
-                        supervisionString);
-                return admin.info.getComponent().equals(supervisorComponent);
+                return isSupervisionComponent(admin.info.getComponent());
             }
         }
 
