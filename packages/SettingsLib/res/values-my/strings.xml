@@ -448,8 +448,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (အပြာ-အဝါ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင်ပြင်ဆင်မှု"</string>
-    <!-- syntax error in translation for accessibility_display_daltonizer_preference_subtitle (1522101114585266455) org.xmlpull.v1.XmlPullParserException: expected: /string read: li (position:END_TAG </li>@1:326 in     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း</li> </ol>"</string>
-)  -->
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&amp;lt&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ခန့် ကျန်သည်"</string>
@@ -483,6 +482,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"အမြန် အားသွင်းနေသည်"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"နှေးကွေးစွာ အားသွင်း"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"ကြိုးမဲ့ အားသွင်းနေသည်"</string>
+    <string name="battery_info_status_charging_dock" msgid="3554147903321236585">"အားသွင်းအထိုင်"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"အားသွင်းမနေပါ"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"ချိတ်ဆက်ထားသည်၊ အားသွင်းမနေပါ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"အားသွင်းပြီးပါပြီ"</string>

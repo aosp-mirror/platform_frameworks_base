@@ -320,10 +320,12 @@
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Låst opp med ansiktet. Trykk for å åpne."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Ansiktet er gjenkjent. Trykk for å åpne."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Ansiktet er gjenkjent. Trykk på lås opp-ikon for å fortsette"</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Flytt til venstre"</item>
+    <item msgid="5558598599408514296">"Flytt ned"</item>
+    <item msgid="4844142668312841831">"Flytt til høyre"</item>
+    <item msgid="5640521437931460125">"Flytt opp"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Sveip opp for å prøve igjen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås opp for å bruke NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Denne enheten tilhører organisasjonen din"</string>
@@ -699,10 +701,8 @@
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Varsler"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batteri"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skjermdumper"</string>
-    <!-- no translation found for notification_channel_instant (7556135423486752680) -->
-    <skip />
-    <!-- no translation found for notification_channel_setup (7660580986090760350) -->
-    <skip />
+    <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
+    <string name="notification_channel_setup" msgid="7660580986090760350">"Konfigurering"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Lagring"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Hint"</string>
     <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
@@ -750,6 +750,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"kameraet"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"posisjon"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofonen"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"skjermopptak"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ingen tittel"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ventemodus"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Forstørringsvindu"</string>
@@ -854,7 +855,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"For å caste denne økten, åpne appen."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ukjent app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stopp castingen"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Tilgjengelige enheter for lydutgang."</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
     <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Slik fungerer kringkasting"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Kringkasting"</string>
@@ -947,7 +949,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Ferdig"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopiert"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Fra <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Lukk kopi-UI"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Lukk kopiert tekst"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Rediger den kopierte teksten"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Rediger det kopierte bildet"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Send til en enhet i nærheten"</string>

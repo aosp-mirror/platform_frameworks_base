@@ -16,6 +16,10 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.doze.DozeMachine.State.DOZE_SUSPEND_TRIGGERS;
+import static com.android.systemui.doze.DozeMachine.State.FINISH;
+import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
+
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -437,14 +441,18 @@ public class DozeTriggers implements DozeMachine.Part {
 
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
+        if (oldState == DOZE_SUSPEND_TRIGGERS && (newState != FINISH
+                && newState != UNINITIALIZED)) {
+            // Register callbacks that were unregistered when we switched to
+            // DOZE_SUSPEND_TRIGGERS state.
+            registerCallbacks();
+        }
         switch (newState) {
             case INITIALIZED:
                 mAodInterruptRunnable = null;
                 sWakeDisplaySensorState = true;
-                mBroadcastReceiver.register(mBroadcastDispatcher);
-                mDockManager.addListener(mDockEventListener);
+                registerCallbacks();
                 mDozeSensors.requestTemporaryDisable();
-                mDozeHost.addCallback(mHostCallback);
                 break;
             case DOZE:
             case DOZE_AOD:
@@ -472,19 +480,34 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE_PULSE_DONE:
                 mDozeSensors.requestTemporaryDisable();
                 break;
+            case DOZE_SUSPEND_TRIGGERS:
             case FINISH:
-                mBroadcastReceiver.unregister(mBroadcastDispatcher);
-                mDozeHost.removeCallback(mHostCallback);
-                mDockManager.removeListener(mDockEventListener);
-                mDozeSensors.setListening(false, false);
-                mDozeSensors.setProxListening(false);
-                mWantSensors = false;
-                mWantProxSensor = false;
-                mWantTouchScreenSensors = false;
+                stopListeningToAllTriggers();
                 break;
             default:
         }
         mDozeSensors.setListening(mWantSensors, mWantTouchScreenSensors);
+    }
+
+    private void registerCallbacks() {
+        mBroadcastReceiver.register(mBroadcastDispatcher);
+        mDockManager.addListener(mDockEventListener);
+        mDozeHost.addCallback(mHostCallback);
+    }
+
+    private void unregisterCallbacks() {
+        mBroadcastReceiver.unregister(mBroadcastDispatcher);
+        mDozeHost.removeCallback(mHostCallback);
+        mDockManager.removeListener(mDockEventListener);
+    }
+
+    private void stopListeningToAllTriggers() {
+        unregisterCallbacks();
+        mDozeSensors.setListening(false, false);
+        mDozeSensors.setProxListening(false);
+        mWantSensors = false;
+        mWantProxSensor = false;
+        mWantTouchScreenSensors = false;
     }
 
     @Override

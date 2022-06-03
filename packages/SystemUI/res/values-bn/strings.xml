@@ -750,6 +750,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"ক্যামেরা"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"লোকেশন"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"মাইক্রোফোন"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"স্ক্রিন রেকর্ডিং"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"কোনও শীর্ষক নেই"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"উইন্ডো বড় করে দেখা"</string>
@@ -855,6 +856,8 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"অজানা অ্যাপ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাস্ট করা বন্ধ করুন"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিও আউটপুটের জন্য উপলভ্য ডিভাইস।"</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ব্রডকাস্ট কীভাবে কাজ করে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্রচার করুন"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"আশপাশে লোকজন যাদের মানানসই ব্লুটুথ ডিভাইস আছে, তারা আপনার ব্রডকাস্ট করা মিডিয়া শুনতে পারবেন"</string>
@@ -946,7 +949,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হয়ে গেছে"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"কপি করা হয়েছে"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> থেকে"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"কপি করা UI বাতিল করুন"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"কপি করা টেক্সট বাতিল করুন"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"কপি করা টেক্সট এডিট করুন"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"কপি করা ছবি এডিট করুন"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"আশেপাশের ডিভাইসে পাঠান"</string>

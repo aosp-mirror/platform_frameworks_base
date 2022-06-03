@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
+
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
@@ -136,8 +138,8 @@ public class HybridGroupManager {
         if (!text.equals(reusableView.getText())) {
             reusableView.setText(text);
         }
-        String contentDescription = String.format(mContext.getResources().getQuantityString(
-                R.plurals.notification_group_overflow_description, number), number);
+        String contentDescription = icuMessageFormat(mContext.getResources(),
+                R.string.notification_group_overflow_description, number);
 
         reusableView.setContentDescription(contentDescription);
         reusableView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mOverflowNumberSize);
