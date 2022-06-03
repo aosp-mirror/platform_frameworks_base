@@ -18,6 +18,9 @@ package com.android.internal.graphics.cam;
 
 import static org.junit.Assert.assertEquals;
 
+import android.platform.test.annotations.LargeTest;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -69,7 +72,7 @@ public final class CamTest {
     public void camFromGreen() {
         Cam cam = Cam.fromInt(GREEN);
         assertEquals(79.331f, cam.getJ(), 0.001f);
-        assertEquals(108.409f, cam.getChroma(), 0.001f);
+        assertEquals(108.410f, cam.getChroma(), 0.001f);
         assertEquals(142.139f, cam.getHue(), 0.001f);
         assertEquals(85.587f, cam.getM(), 0.001f);
         assertEquals(78.604f, cam.getS(), 0.001f);
@@ -192,5 +195,33 @@ public final class CamTest {
     @Test
     public void deltaERedToBlue() {
         assertEquals(21.415f, Cam.fromInt(RED).distance(Cam.fromInt(BLUE)), 0.001f);
+    }
+
+    @Test
+    public void viewingConditions_default() {
+        Frame vc = Frame.DEFAULT;
+
+        Assert.assertEquals(0.184, vc.getN(), 0.001);
+        Assert.assertEquals(29.981, vc.getAw(), 0.001);
+        Assert.assertEquals(1.016, vc.getNbb(), 0.001);
+        Assert.assertEquals(1.021, vc.getRgbD()[0], 0.001);
+        Assert.assertEquals(0.986, vc.getRgbD()[1], 0.001);
+        Assert.assertEquals(0.933, vc.getRgbD()[2], 0.001);
+        Assert.assertEquals(0.789, vc.getFlRoot(), 0.001);
+    }
+
+    @LargeTest
+    @Test
+    public void testHctReflexivity() {
+        for (int i = 0; i <= 0x00ffffff; i++) {
+            int color = 0xFF000000 | i;
+            Cam hct = Cam.fromInt(color);
+            int reconstructedFromHct = Cam.getInt(hct.getHue(), hct.getChroma(),
+                    CamUtils.lstarFromInt(color));
+
+            Assert.assertEquals("input was " + Integer.toHexString(color)
+                            + "; output was " + Integer.toHexString(reconstructedFromHct),
+                    reconstructedFromHct, reconstructedFromHct);
+        }
     }
 }

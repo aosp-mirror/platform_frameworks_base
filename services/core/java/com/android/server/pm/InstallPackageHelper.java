@@ -335,7 +335,10 @@ final class InstallPackageHelper {
             mPm.mTransferredPackages.add(pkg.getPackageName());
         }
 
-        if (reconciledPkg.mCollectedSharedLibraryInfos != null) {
+        if (reconciledPkg.mCollectedSharedLibraryInfos != null
+                || (oldPkgSetting != null && oldPkgSetting.getUsesLibraryInfos() != null)) {
+            // Reconcile if the new package or the old package uses shared libraries.
+            // It is possible that the old package uses shared libraries but the new one doesn't.
             mSharedLibraries.executeSharedLibrariesUpdateLPw(pkg, pkgSetting, null, null,
                     reconciledPkg.mCollectedSharedLibraryInfos, allUsers);
         }
@@ -648,10 +651,6 @@ final class InstallPackageHelper {
             int userId, PackageInstalledInfo res, @Nullable PostInstallData data) {
         if (DEBUG_INSTALL) {
             Log.v(TAG, "restoreAndPostInstall userId=" + userId + " package=" + res.mPkg);
-        }
-
-        if (res.mPkg != null) {
-            PackageManagerServiceUtils.verifySelinuxLabels(res.mPkg.getPath());
         }
 
         // A restore should be requested at this point if (a) the install
@@ -3577,7 +3576,6 @@ final class InstallPackageHelper {
             @ParsingPackageUtils.ParseFlags int parseFlags,
             @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
-        PackageManagerServiceUtils.verifySelinuxLabels(parsedPackage.getPath());
 
         final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
                 parsedPackage, parseFlags, scanFlags, user);

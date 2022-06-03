@@ -152,6 +152,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <screenBrightnessRampSlowDecrease>0.03</screenBrightnessRampSlowDecrease>
  *      <screenBrightnessRampSlowIncrease>0.04</screenBrightnessRampSlowIncrease>
  *
+ *      <screenBrightnessRampIncreaseMaxMillis>2000</screenBrightnessRampIncreaseMaxMillis>
+ *      <screenBrightnessRampDecreaseMaxMillis>3000</screenBrightnessRampDecreaseMaxMillis>
+ *
  *      <lightSensor>
  *        <type>android.sensor.light</type>
  *        <name>1234 Ambient Light Sensor</name>
@@ -259,6 +262,8 @@ public class DisplayDeviceConfig {
     private float mBrightnessRampFastIncrease = Float.NaN;
     private float mBrightnessRampSlowDecrease = Float.NaN;
     private float mBrightnessRampSlowIncrease = Float.NaN;
+    private long mBrightnessRampDecreaseMaxMillis = 0;
+    private long mBrightnessRampIncreaseMaxMillis = 0;
     private int mAmbientHorizonLong = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
     private int mAmbientHorizonShort = AMBIENT_LIGHT_SHORT_HORIZON_MILLIS;
     private float mScreenBrighteningMinThreshold = 0.0f;     // Retain behaviour as though there is
@@ -534,6 +539,14 @@ public class DisplayDeviceConfig {
         return mBrightnessRampSlowIncrease;
     }
 
+    public long getBrightnessRampDecreaseMaxMillis() {
+        return mBrightnessRampDecreaseMaxMillis;
+    }
+
+    public long getBrightnessRampIncreaseMaxMillis() {
+        return mBrightnessRampIncreaseMaxMillis;
+    }
+
     public int getAmbientHorizonLong() {
         return mAmbientHorizonLong;
     }
@@ -628,6 +641,8 @@ public class DisplayDeviceConfig {
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
+                + ", mBrightnessRampDecreaseMaxMillis=" + mBrightnessRampDecreaseMaxMillis
+                + ", mBrightnessRampIncreaseMaxMillis=" + mBrightnessRampIncreaseMaxMillis
                 + ", mAmbientHorizonLong=" + mAmbientHorizonLong
                 + ", mAmbientHorizonShort=" + mAmbientHorizonShort
                 + ", mScreenDarkeningMinThreshold=" + mScreenDarkeningMinThreshold
@@ -725,6 +740,8 @@ public class DisplayDeviceConfig {
         mBrightnessRampFastIncrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowDecrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowIncrease = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessRampDecreaseMaxMillis = 0;
+        mBrightnessRampIncreaseMaxMillis = 0;
         setSimpleMappingStrategyValues();
         loadAmbientLightSensorFromConfigXml();
         setProxSensorUnspecified();
@@ -1114,6 +1131,15 @@ public class DisplayDeviceConfig {
                         + "values are present in display device config");
             }
             loadBrightnessRampsFromConfigXml();
+        }
+
+        final BigInteger increaseMax = config.getScreenBrightnessRampIncreaseMaxMillis();
+        if (increaseMax != null) {
+            mBrightnessRampIncreaseMaxMillis = increaseMax.intValue();
+        }
+        final BigInteger decreaseMax = config.getScreenBrightnessRampDecreaseMaxMillis();
+        if (decreaseMax != null) {
+            mBrightnessRampDecreaseMaxMillis = decreaseMax.intValue();
         }
     }
 

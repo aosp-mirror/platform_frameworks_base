@@ -307,8 +307,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"wysyłanie i wyświetlanie SMS‑ów"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Pliki i dokumenty"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"dostęp do plików i dokumentów na urządzeniu"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Pliki"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"dostęp do plików na urządzeniu"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzyka i dźwięk"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"dostęp do muzyki i dźwięku na urządzeniu"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Zdjęcia i filmy"</string>
