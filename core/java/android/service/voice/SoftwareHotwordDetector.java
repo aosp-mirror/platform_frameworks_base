@@ -164,6 +164,17 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
                     HotwordDetector.Callback::onError,
                     mCallback));
         }
+
+        @Override
+        public void onRejected(@Nullable HotwordRejectedResult result) {
+            if (result == null) {
+                result = new HotwordRejectedResult.Builder().build();
+            }
+            mHandler.sendMessage(obtainMessage(
+                    HotwordDetector.Callback::onRejected,
+                    mCallback,
+                    result));
+        }
     }
 
     private static class InitializationStateListener

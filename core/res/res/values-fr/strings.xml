@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"accéder à votre agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envoyer et consulter des SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fichiers et documents"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"accéder aux fichiers et documents sur votre appareil"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Fichiers"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"accéder aux fichiers de votre appareil"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musique et audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"accéder aux contenus musicaux et audio sur votre appareil"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Photos et vidéos"</string>
@@ -2052,8 +2052,8 @@
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Appuyez pour en savoir plus et pour modifier les paramètres."</string>
     <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Le mode Ne pas déranger a été modifié"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Appuyez pour vérifier les contenus bloqués."</string>
-    <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulter les paramètres de notification"</string>
-    <string name="review_notification_settings_text" msgid="5916244866751849279">"À partir d\'Android 13, les applis que vous installez ont besoin de votre autorisation pour vous envoyer des notifications. Appuyez pour modifier cette autorisation pour les applis déjà installées."</string>
+    <string name="review_notification_settings_title" msgid="5102557424459810820">"Vérifiez les paramètres de notification"</string>
+    <string name="review_notification_settings_text" msgid="5916244866751849279">"À partir d\'Android 13, les applications que vous installez ont besoin de votre autorisation pour envoyer des notifications. Appuyez pour modifier cette autorisation pour les applications déjà installées."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Plus tard"</string>
     <string name="review_notification_settings_dismiss" msgid="4160916504616428294">"Fermer"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Système"</string>
