@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -182,10 +184,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         List<CachedBluetoothDevice> connectedDevices = mController.getConnectedDevices();
         if (enabled && connected && !connectedDevices.isEmpty()) {
             if (connectedDevices.size() > 1) {
-                // TODO(b/76102598): add a new string for "X connected devices" after P
-                return mContext.getResources().getQuantityString(
-                        R.plurals.quick_settings_hotspot_secondary_label_num_devices,
-                        connectedDevices.size(),
+                return icuMessageFormat(mContext.getResources(),
+                        R.string.quick_settings_hotspot_secondary_label_num_devices,
                         connectedDevices.size());
             }
 

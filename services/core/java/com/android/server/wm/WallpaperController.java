@@ -21,6 +21,7 @@ import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
@@ -181,16 +182,11 @@ class WallpaperController {
             mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
         final boolean animationWallpaper = animatingContainer != null
                 && animatingContainer.getAnimation() != null
                 && animatingContainer.getAnimation().getShowWallpaper();
         final boolean hasWallpaper = w.hasWallpaper() || animationWallpaper;
-        final boolean isRecentsTransitionTarget = (recentsAnimationController != null
-                && recentsAnimationController.isWallpaperVisible(w))
-                || w.mTransitionController.isTransientHide(w.getTask());
-        if (isRecentsTransitionTarget) {
+        if (isRecentsTransitionTarget(w)) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             return true;
@@ -213,6 +209,22 @@ class WallpaperController {
         }
         return false;
     };
+
+    private boolean isRecentsTransitionTarget(WindowState w) {
+        if (w.mTransitionController.isShellTransitionsEnabled()) {
+            // Because the recents activity is invisible in background while keyguard is occluded
+            // (the activity window is on screen while keyguard is locked) with recents animation,
+            // the task animating by recents needs to be wallpaper target to make wallpaper visible.
+            // While for unlocked case, because recents activity will be moved to top, it can be
+            // the wallpaper target naturally.
+            return w.mActivityRecord != null && w.mAttrs.type == TYPE_BASE_APPLICATION
+                    && mDisplayContent.isKeyguardLocked()
+                    && w.mTransitionController.isTransientHide(w.getTask());
+        }
+        // The window is either the recents activity or is in the task animating by the recents.
+        final RecentsAnimationController controller = mService.getRecentsAnimationController();
+        return controller != null && controller.isWallpaperVisible(w);
+    }
 
     /**
      * @see #computeLastWallpaperZoomOut()

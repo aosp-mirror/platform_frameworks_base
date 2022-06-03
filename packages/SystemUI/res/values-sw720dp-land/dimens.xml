@@ -25,6 +25,8 @@
 
     <dimen name="status_bar_header_height_keyguard">56dp</dimen>
 
+    <dimen name="status_view_margin_horizontal">24dp</dimen>
+
     <dimen name="qs_media_session_height_expanded">251dp</dimen>
     <dimen name="qs_content_horizontal_padding">40dp</dimen>
     <dimen name="qs_horizontal_margin">40dp</dimen>

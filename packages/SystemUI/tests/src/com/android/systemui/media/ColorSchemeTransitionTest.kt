@@ -57,11 +57,13 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
 
     private lateinit var animatingColorTransitionFactory: AnimatingColorTransitionFactory
     @Mock private lateinit var mediaViewHolder: MediaViewHolder
+    @Mock private lateinit var gutsViewHolder: GutsViewHolder
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
+        whenever(mediaViewHolder.gutsViewHolder).thenReturn(gutsViewHolder)
         animatingColorTransitionFactory = { _, _, _ -> mockAnimatingTransition }
         whenever(extractColor.invoke(colorScheme)).thenReturn(TARGET_COLOR)
 
@@ -147,5 +149,6 @@ class ColorSchemeTransitionTest : SysuiTestCase() {
     fun testColorSchemeTransition_update() {
         colorSchemeTransition.updateColorScheme(colorScheme, true)
         verify(mockAnimatingTransition, times(10)).updateColorScheme(colorScheme)
+        verify(gutsViewHolder).colorScheme = colorScheme
     }
 }

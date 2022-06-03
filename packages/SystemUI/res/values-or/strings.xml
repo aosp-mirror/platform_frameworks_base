@@ -750,6 +750,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"କ୍ୟାମେରା"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ଲୋକେସନ୍‍"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"ମାଇକ୍ରୋଫୋନ୍"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"ସ୍କ୍ରିନ ରେକର୍ଡିଂ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"କୌଣସି ଶୀର୍ଷକ ନାହିଁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ"</string>
@@ -855,6 +856,8 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"ଅଜଣା ଆପ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"କାଷ୍ଟ କରିବା ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ଅଡିଓ ଆଉଟପୁଟ ପାଇଁ ଉପଲବ୍ଧ ଡିଭାଇସଗୁଡ଼ିକ।"</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ବ୍ରଡକାଷ୍ଟିଂ କିପରି କାମ କରେ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ବ୍ରଡକାଷ୍ଟ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ଆପଣଙ୍କ ଆଖପାଖର କମ୍ପାଟିବଲ ବ୍ଲୁଟୁଥ ଡିଭାଇସ ଥିବା ଲୋକମାନେ ଆପଣ ବ୍ରଡକାଷ୍ଟ କରୁଥିବା ମିଡିଆ ଶୁଣିପାରିବେ"</string>
@@ -946,7 +949,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ହୋଇଗଲା"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"କପି କରାଯାଇଛି"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g>ରୁ"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"କପି କରାଯାଇଥିବା UIକୁ ଖାରଜ କରନ୍ତୁ"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"କପି କରାଯାଇଥିବା ଟେକ୍ସଟକୁ ଖାରଜ କରନ୍ତୁ"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"କପି କରାଯାଇଥିବା ଟେକ୍ସଟକୁ ଏଡିଟ କରନ୍ତୁ"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"କପି କରାଯାଇଥିବା ଇମେଜକୁ ଏଡିଟ କରନ୍ତୁ"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ନିକଟସ୍ଥ ଡିଭାଇସକୁ ପଠାନ୍ତୁ"</string>

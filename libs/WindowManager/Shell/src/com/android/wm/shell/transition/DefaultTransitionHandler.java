@@ -472,8 +472,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 }
 
                 final Rect clipRect = Transitions.isClosingType(change.getMode())
-                        ? mRotator.getEndBoundsInStartRotation(change)
-                        : change.getEndAbsBounds();
+                        ? new Rect(mRotator.getEndBoundsInStartRotation(change))
+                        : new Rect(change.getEndAbsBounds());
+                clipRect.offsetTo(0, 0);
 
                 if (delayedEdgeExtension) {
                     // If the edge extension needs to happen after the startTransition has been
@@ -973,7 +974,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     private static void applyTransformation(long time, SurfaceControl.Transaction t,
             SurfaceControl leash, Animation anim, Transformation transformation, float[] matrix,
-            Point position, float cornerRadius, @Nullable Rect clipRect) {
+            Point position, float cornerRadius, @Nullable Rect immutableClipRect) {
         anim.getTransformation(time, transformation);
         if (position != null) {
             transformation.getMatrix().postTranslate(position.x, position.y);
@@ -981,6 +982,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         t.setMatrix(leash, transformation.getMatrix(), matrix);
         t.setAlpha(leash, transformation.getAlpha());
 
+        final Rect clipRect = immutableClipRect == null ? null : new Rect(immutableClipRect);
         Insets extensionInsets = Insets.min(transformation.getInsets(), Insets.NONE);
         if (!extensionInsets.equals(Insets.NONE) && clipRect != null && !clipRect.isEmpty()) {
             // Clip out any overflowing edge extension
