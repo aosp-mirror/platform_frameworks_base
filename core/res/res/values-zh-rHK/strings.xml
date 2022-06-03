@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"存取您的日曆"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"短訊"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"傳送和查看短訊"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"檔案和文件"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"存取裝置上的檔案和文件"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"檔案"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"存取裝置上的檔案"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"音樂和音訊"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"在裝置上使用音樂和音訊"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"相片和影片"</string>
@@ -1678,8 +1678,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不要開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置嗎？"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"為您提供所需無障礙功能的應用程式有權完全控制您的裝置，但大部分應用程式均沒有此權限。"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置？"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"對於為您提供無障礙功能的應用程式，您可授予完整控制權，但大部分應用程式都不應獲授予此權限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"這項功能可以讀出螢幕上的所有內容，並透過其他應用程式顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看和執行動作"</string>

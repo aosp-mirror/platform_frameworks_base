@@ -674,8 +674,6 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         taskDisplayArea.positionChildAt(POSITION_TOP, alwaysOnTopRootTask,
                 false /* includingParents */);
         assertTrue(alwaysOnTopRootTask.isAlwaysOnTop());
-        // Ensure always on top state is synced to the children of the root task.
-        assertTrue(alwaysOnTopRootTask.getTopNonFinishingActivity().isAlwaysOnTop());
         assertEquals(alwaysOnTopRootTask, taskDisplayArea.getTopRootTask());
 
         final Task pinnedRootTask = taskDisplayArea.createRootTask(
