@@ -136,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Επιβεβαιώθηκε"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Πατήστε Επιβεβαίωση για ολοκλήρωση"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ξεκλ. με αναγν. προσώπου. Πατ. το εικον. ξεκλ. για συνέχεια."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ξεκλείδωμα με πρόσωπο. Πατήστε το εικονίδιο ξεκλειδώματος."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Ολοκληρώθηκε ο έλεγχος ταυτότητας"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Χρήση PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Χρήση μοτίβου"</string>
@@ -312,7 +312,7 @@
     <string name="tap_again" msgid="1315420114387908655">"Πατήστε ξανά"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Σύρετε προς τα επάνω για άνοιγμα"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Πατήστε το εικονίδιο ξεκλειδώματος για άνοιγμα"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ξεκλ. με αναγν. προσώπου. Πατ. το εικον. ξεκλ. για άνοιγμα."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ξεκλείδωμα με πρόσωπο. Πατήστε το εικονίδιο ξεκλειδώματος."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Μετακίνηση αριστερά"</item>
     <item msgid="5558598599408514296">"Μετακίνηση κάτω"</item>
@@ -932,7 +932,8 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Νέες πληροφορίες"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ενεργές εφαρμογές"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Ακόμη και αν δεν χρησιμοποιείτε αυτές τις εφαρμογές, εξακολουθούν να είναι ενεργές και ενδέχεται να επηρεάζουν τη διάρκεια ζωής της μπαταρίας"</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Διακοπή"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Διακόπηκε"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Τέλος"</string>
