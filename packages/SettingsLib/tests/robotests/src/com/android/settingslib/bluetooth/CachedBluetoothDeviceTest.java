@@ -965,24 +965,24 @@ public class CachedBluetoothDeviceTest {
 
         mCachedDevice.mRssi = RSSI_1;
         mCachedDevice.mJustDiscovered = JUSTDISCOVERED_1;
+        mCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
         mSubCachedDevice.mRssi = RSSI_2;
         mSubCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
+        mSubCachedDevice.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
         mCachedDevice.setSubDevice(mSubCachedDevice);
 
-        assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_1);
-        assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
-        assertThat(mCachedDevice.mDevice).isEqualTo(mDevice);
-        assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_2);
-        assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
-        assertThat(mSubCachedDevice.mDevice).isEqualTo(mSubDevice);
         mCachedDevice.switchSubDeviceContent();
 
         assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
         assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
         assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
+        assertThat(mCachedDevice.getDeviceSide()).isEqualTo(
+                HearingAidProfile.DeviceSide.SIDE_RIGHT);
         assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
         assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
         assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);
+        assertThat(mSubCachedDevice.getDeviceSide()).isEqualTo(
+                HearingAidProfile.DeviceSide.SIDE_LEFT);
     }
 
     @Test
