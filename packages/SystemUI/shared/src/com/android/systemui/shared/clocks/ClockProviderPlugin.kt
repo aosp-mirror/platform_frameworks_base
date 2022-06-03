@@ -13,11 +13,14 @@
  */
 package com.android.systemui.shared.clocks
 
-import com.android.systemui.plugins.Plugin
-import com.android.systemui.plugins.annotations.ProvidesInterface
-import android.annotation.FloatRange
 import android.graphics.drawable.Drawable
 import android.view.View
+import com.android.internal.colorextraction.ColorExtractor
+import com.android.systemui.plugins.Plugin
+import com.android.systemui.plugins.annotations.ProvidesInterface
+import java.io.PrintWriter
+import java.util.Locale
+import java.util.TimeZone
 
 /** Identifies a clock design */
 typealias ClockId = String
@@ -51,11 +54,53 @@ interface Clock {
     /** A large version of the clock, appropriate when a bigger viewport is available */
     val largeClock: View
 
-    /** Callback to update the clock view to the current time */
+    /** Events that clocks may need to respond to */
+    val events: ClockEvents
+
+    /** Triggers for various animations */
+    val animation: ClockAnimation
+
+    /** Optional method for dumping debug information */
+    fun dump(pw: PrintWriter) { }
+}
+
+/** Events that should call when various rendering parameters change */
+interface ClockEvents {
+    /** Call every time tick */
     fun onTimeTick()
 
-    /** Sets the level of the AOD transition */
-    fun setAodFraction(@FloatRange(from = 0.0, to = 1.0) fraction: Float)
+    /** Call whenever timezone changes */
+    fun onTimeZoneChanged(timeZone: TimeZone) { }
+
+    /** Call whenever the text time format changes (12hr vs 24hr) */
+    fun onTimeFormatChanged(is24Hr: Boolean) { }
+
+    /** Call whenever the locale changes */
+    fun onLocaleChanged(locale: Locale) { }
+
+    /** Call whenever font settings change */
+    fun onFontSettingChanged() { }
+
+    /** Call whenever the color pallete should update */
+    fun onColorPaletteChanged(palette: ColorExtractor.GradientColors) { }
+}
+
+/** Methods which trigger various clock animations */
+interface ClockAnimation {
+    /** Initializes the doze & fold animation positions. Defaults to neither folded nor dozing. */
+    fun initialize(dozeFraction: Float, foldFraction: Float) { }
+
+    /** Runs an enter animation (if any) */
+    fun enter() { }
+
+    /** Sets how far into AOD the device currently is. */
+    fun doze(fraction: Float) { }
+
+    /** Sets how far into the folding animation the device is. */
+    fun fold(fraction: Float) { }
+
+    /** Runs the battery animation (if any). */
+    fun charge() { }
 }
 
 /** Some data about a clock design */
