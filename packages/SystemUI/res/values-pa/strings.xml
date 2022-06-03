@@ -932,7 +932,8 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ਨਵੀਂ ਜਾਣਕਾਰੀ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ਕਿਰਿਆਸ਼ੀਲ ਐਪਾਂ"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"ਭਾਵੇਂ ਤੁਸੀਂ ਇਨ੍ਹਾਂ ਐਪਾਂ ਦੀ ਵਰਤੋਂ ਨਾ ਵੀ ਕਰ ਰਹੇ ਹੋਵੋ, ਉਹ ਫਿਰ ਵੀ ਕਿਰਿਆਸ਼ੀਲ ਰਹਿੰਦੀਆਂ ਹਨ ਅਤੇ ਬੈਟਰੀ ਲਾਈਫ਼ ਨੂੰ ਪ੍ਰਭਾਵਿਤ ਕਰ ਸਕਦੀਆਂ ਹਨ"</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ਬੰਦ ਕਰੋ"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ਬੰਦ ਹੈ"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ਹੋ ਗਿਆ"</string>

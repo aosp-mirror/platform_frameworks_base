@@ -156,7 +156,7 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"عند إدخال نقش غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"عند إدخال رقم تعريف شخصي غير صحيح في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"عند إدخال كلمة مرور غير صحيحة في المحاولة التالية، سيتم حذف ملفك الشخصي للعمل وبياناته."</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس مستشعر بصمة الإصبع"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"المس أداة استشعار بصمة الإصبع"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"رمز بصمة الإصبع"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"يتعذّر التعرّف على الوجه. استخدِم بصمة الإصبع بدلاً من ذلك."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -960,7 +960,8 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"معلومات جديدة"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"التطبيقات النشطة"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"حتى لو لم تكن تستخدم هذه التطبيقات، فإنّها ستظل نشطة وقد تؤثر على عمر البطارية."</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"إيقاف"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"متوقّف"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"تم"</string>
