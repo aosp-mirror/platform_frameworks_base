@@ -32,6 +32,8 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
+import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
@@ -63,7 +65,7 @@ import javax.inject.Inject;
  * passed along to the NotifCollection.
  */
 @MainThread
-public class GroupCoalescer implements Dumpable {
+public class GroupCoalescer implements Dumpable, PipelineDumpable {
     private final DelayableExecutor mMainExecutor;
     private final SystemClock mClock;
     private final GroupCoalescerLogger mLogger;
@@ -312,6 +314,11 @@ public class GroupCoalescer implements Dumpable {
                 pw.println("        " + event.getKey());
             }
         }
+    }
+
+    @Override
+    public void dumpPipeline(@NonNull PipelineDumper d) {
+        d.dump("handler", mHandler);
     }
 
     private final Comparator<CoalescedEvent> mEventComparator = (o1, o2) -> {
