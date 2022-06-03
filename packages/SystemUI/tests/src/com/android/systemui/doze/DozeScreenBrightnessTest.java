@@ -24,6 +24,7 @@ import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSE_DONE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_REQUEST_PULSE;
+import static com.android.systemui.doze.DozeMachine.State.DOZE_SUSPEND_TRIGGERS;
 import static com.android.systemui.doze.DozeMachine.State.FINISH;
 import static com.android.systemui.doze.DozeMachine.State.INITIALIZED;
 import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
@@ -171,6 +172,21 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         // GIVEN the device is DOZE and the display state changes to ON
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
+        waitForSensorManager();
+
+        // WHEN new sensor event sent
+        mSensor.sendSensorEvent(3);
+
+        // THEN brightness is NOT changed, it's set to the default brightness
+        assertNotSame(3, mServiceFake.screenBrightness);
+        assertEquals(DEFAULT_BRIGHTNESS, mServiceFake.screenBrightness);
+    }
+
+    @Test
+    public void dozeSuspendTriggers_doesNotUseLightSensor() {
+        // GIVEN the device is DOZE and the display state changes to ON
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_SUSPEND_TRIGGERS);
         waitForSensorManager();
 
         // WHEN new sensor event sent

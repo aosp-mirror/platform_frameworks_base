@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.keyguard
+package com.android.systemui.animation
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

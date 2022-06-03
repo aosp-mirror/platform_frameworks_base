@@ -16839,6 +16839,7 @@ package android.hardware {
     method public static int pack(int, int, int);
     field public static final int DATASPACE_ADOBE_RGB = 151715840; // 0x90b0000
     field public static final int DATASPACE_BT2020 = 147193856; // 0x8c60000
+    field public static final int DATASPACE_BT2020_HLG = 168165376; // 0xa060000
     field public static final int DATASPACE_BT2020_PQ = 163971072; // 0x9c60000
     field public static final int DATASPACE_BT601_525 = 281280512; // 0x10c40000
     field public static final int DATASPACE_BT601_625 = 281149440; // 0x10c20000

@@ -393,6 +393,7 @@ public final class DataSpace {
         DATASPACE_SRGB,
         DATASPACE_SCRGB,
         DATASPACE_DISPLAY_P3,
+        DATASPACE_BT2020_HLG,
         DATASPACE_BT2020_PQ,
         DATASPACE_ADOBE_RGB,
         DATASPACE_JFIF,
@@ -471,6 +472,18 @@ public final class DataSpace {
      *   Range: RANGE_FULL</pre>
      */
     public static final int DATASPACE_DISPLAY_P3 = 143261696;
+
+    /**
+     * Hybrid Log Gamma encoding.
+     *
+     * <p>Composed of the following -</p>
+     * <pre>
+     *   Primaries: STANDARD_BT2020
+     *   Transfer: TRANSFER_HLG
+     *   Range: RANGE_FULL</pre>
+     */
+    public static final int DATASPACE_BT2020_HLG = 168165376;
+
     /**
      * ITU-R Recommendation 2020 (BT.2020)
      *

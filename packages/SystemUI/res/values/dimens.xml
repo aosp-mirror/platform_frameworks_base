@@ -31,7 +31,7 @@
 
     <!-- dimensions for the navigation bar handle -->
     <dimen name="navigation_handle_radius">2dp</dimen>
-    <dimen name="navigation_handle_bottom">8dp</dimen>
+    <dimen name="navigation_handle_bottom">10dp</dimen>
     <dimen name="navigation_handle_sample_horizontal_margin">10dp</dimen>
     <dimen name="navigation_home_handle_width">108dp</dimen>
 
@@ -495,7 +495,7 @@
     <dimen name="navigation_key_padding">0dp</dimen>
 
     <!-- Floating rotation button -->
-    <dimen name="floating_rotation_button_diameter">40dp</dimen>
+    <dimen name="floating_rotation_button_diameter">52dp</dimen>
     <dimen name="floating_rotation_button_min_margin">20dp</dimen>
     <dimen name="floating_rotation_button_taskbar_left_margin">20dp</dimen>
     <dimen name="floating_rotation_button_taskbar_bottom_margin">10dp</dimen>

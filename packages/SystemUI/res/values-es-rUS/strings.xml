@@ -750,6 +750,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"cámara"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"ubicación"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"micrófono"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"Grabación de pant."</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sin título"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventana de ampliación"</string>
@@ -853,6 +854,10 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Vincular dispositivo nuevo"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Para transmitir esta sesión, abre la app"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconocida"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Detener transmisión"</string>
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos disponibles para salida de audio."</string>
+    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cómo funciona la transmisión"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmisión"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Las personas cercanas con dispositivos Bluetooth compatibles pueden escuchar el contenido multimedia que transmites"</string>
@@ -904,7 +909,7 @@
     <string name="person_available" msgid="2318599327472755472">"Disponible"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problema al leer el medidor de batería"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Presiona para obtener más información"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"No se estableció alarma"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"No establecida"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor de huellas dactilares"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticar"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"ingresar al dispositivo"</string>
@@ -944,7 +949,7 @@
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Listo"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Se copió"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"De <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Descartar la copia de la IU"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Descartar el texto copiado"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Editar el texto copiado"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Editar la imagen copiada"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Enviar a dispositivos cercanos"</string>

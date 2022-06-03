@@ -44,6 +44,7 @@ android_test {
         "truth-prebuilt",
         "testables",
         "platform-test-annotations",
+        "frameworks-base-testutils",
     ],
 
     libs: [

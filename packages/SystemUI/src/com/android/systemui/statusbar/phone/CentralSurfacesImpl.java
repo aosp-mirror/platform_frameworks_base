@@ -1441,6 +1441,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
         mStackScrollerController.setNotificationActivityStarter(mNotificationActivityStarter);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
         mNotificationsController.initialize(
+                this,
                 mPresenter,
                 mNotifListContainer,
                 mStackScrollerController.getNotifStackController(),

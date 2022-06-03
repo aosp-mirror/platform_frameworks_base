@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -57,10 +59,9 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         if (attemptsRemaining == 0) {
             displayMessage = getContext().getString(R.string.kg_password_wrong_puk_code_dead);
         } else if (attemptsRemaining > 0) {
-            int msgId = isDefault ? R.plurals.kg_password_default_puk_message :
-                    R.plurals.kg_password_wrong_puk_code;
-            displayMessage = getContext().getResources()
-                    .getQuantityString(msgId, attemptsRemaining, attemptsRemaining);
+            int msgId = isDefault ? R.string.kg_password_default_puk_message :
+                    R.string.kg_password_wrong_puk_code;
+            displayMessage = icuMessageFormat(getResources(), msgId, attemptsRemaining);
         } else {
             int msgId = isDefault ? R.string.kg_puk_enter_puk_hint :
                     R.string.kg_password_puk_failed;

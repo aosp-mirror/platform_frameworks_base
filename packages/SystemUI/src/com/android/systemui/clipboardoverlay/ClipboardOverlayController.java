@@ -51,7 +51,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -100,7 +99,6 @@ import android.widget.TextView;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
-import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.BroadcastSender;
@@ -166,10 +164,9 @@ public class ClipboardOverlayController {
 
     private boolean mBlockAttach = false;
     private Animator mExitAnimator;
+    private Animator mEnterAnimator;
+    private final int mOrientation;
 
-    /** Tracks config changes that require updating insets */
-    private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
-            ActivityInfo.CONFIG_KEYBOARD_HIDDEN);
 
     public ClipboardOverlayController(Context context,
             BroadcastDispatcher broadcastDispatcher,
@@ -255,6 +252,7 @@ public class ClipboardOverlayController {
         mRemoteCopyChip.setIcon(
                 Icon.createWithResource(mContext, R.drawable.ic_baseline_devices_24), true);
         mShareChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_share), true);
+        mOrientation = mContext.getResources().getConfiguration().orientation;
 
         attachWindow();
         withWindowAttached(() -> {
@@ -266,9 +264,10 @@ public class ClipboardOverlayController {
                         @Override
                         public void onConfigurationChanged(Configuration overrideConfig,
                                 int newDisplayId) {
-                            if (mConfigChanges.applyNewConfig(mContext.getResources())) {
-                                updateInsets(
-                                        mWindowManager.getCurrentWindowMetrics().getWindowInsets());
+                            if (mContext.getResources().getConfiguration().orientation
+                                    != mOrientation) {
+                                mUiEventLogger.log(CLIPBOARD_OVERLAY_DISMISSED_OTHER);
+                                hideImmediate();
                             }
                         }
 
@@ -366,7 +365,7 @@ public class ClipboardOverlayController {
         Intent remoteCopyIntent = getRemoteCopyIntent(clipData);
         // Only show remote copy if it's available.
         PackageManager packageManager = mContext.getPackageManager();
-        if (remoteCopyIntent != null && packageManager.resolveActivity(
+        if (packageManager.resolveActivity(
                 remoteCopyIntent, PackageManager.ResolveInfoFlags.of(0)) != null) {
             mRemoteCopyChip.setVisibility(View.VISIBLE);
             mRemoteCopyChip.setOnClickListener((v) -> {
@@ -381,7 +380,9 @@ public class ClipboardOverlayController {
         withWindowAttached(() -> {
             updateInsets(
                     mWindowManager.getCurrentWindowMetrics().getWindowInsets());
-            mView.post(this::animateIn);
+            if (mEnterAnimator == null || !mEnterAnimator.isRunning()) {
+                mView.post(this::animateIn);
+            }
             mView.announceForAccessibility(accessibilityAnnouncement);
         });
         mTimeoutHandler.resetTimeout();
@@ -652,7 +653,8 @@ public class ClipboardOverlayController {
         if (mAccessibilityManager.isEnabled()) {
             mDismissButton.setVisibility(View.VISIBLE);
         }
-        getEnterAnimation().start();
+        mEnterAnimator = getEnterAnimation();
+        mEnterAnimator.start();
     }
 
     private void animateOut() {

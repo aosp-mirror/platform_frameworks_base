@@ -1498,8 +1498,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     int getOrientation(int candidate) {
         mLastOrientationSource = null;
-        if (!fillsParent()) {
-            // Ignore containers that don't completely fill their parents.
+        if (!providesOrientation()) {
             return SCREEN_ORIENTATION_UNSET;
         }
 
@@ -1533,8 +1532,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 continue;
             }
 
-            if (wc.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                // Use the orientation if the container fills its parent or requested an explicit
+            if (wc.providesOrientation() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                // Use the orientation if the container can provide or requested an explicit
                 // orientation that isn't SCREEN_ORIENTATION_UNSPECIFIED.
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "%s is requesting orientation %d (%s)",
                         wc.toString(), orientation,
@@ -1561,6 +1560,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         return source;
+    }
+
+    boolean providesOrientation() {
+        return fillsParent();
     }
 
     /**
