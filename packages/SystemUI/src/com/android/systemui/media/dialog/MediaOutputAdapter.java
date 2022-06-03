@@ -28,7 +28,6 @@ import android.widget.CheckBox;
 import androidx.annotation.NonNull;
 import androidx.core.widget.CompoundButtonCompat;
 
-import com.android.settingslib.Utils;
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
@@ -257,9 +256,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
                         false /* bFocused */);
                 final Drawable d = mContext.getDrawable(R.drawable.ic_add);
-                d.setColorFilter(new PorterDuffColorFilter(
-                        Utils.getColorAccentDefaultColor(mContext), PorterDuff.Mode.SRC_IN));
                 mTitleIcon.setImageDrawable(d);
+                mTitleIcon.setColorFilter(mController.getColorItemContent());
                 mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
             }
         }

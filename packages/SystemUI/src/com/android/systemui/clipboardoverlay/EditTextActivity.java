@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.text.Editable;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -89,16 +90,20 @@ public class EditTextActivity extends Activity
 
     @Override // ClipboardManager.OnPrimaryClipChangedListener
     public void onPrimaryClipChanged() {
-        hideImeAndFinish();
+        hideIme();
+        finish();
     }
 
     private void saveToClipboard() {
-        ClipData clip = ClipData.newPlainText("text", mEditText.getText());
+        hideIme();
+        Editable editedText = mEditText.getText();
+        editedText.clearSpans();
+        ClipData clip = ClipData.newPlainText("text", editedText);
         PersistableBundle extras = new PersistableBundle();
         extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, mSensitive);
         clip.getDescription().setExtras(extras);
         mClipboardManager.setPrimaryClip(clip);
-        hideImeAndFinish();
+        finish();
     }
 
     private void share() {
@@ -111,9 +116,8 @@ public class EditTextActivity extends Activity
         startActivity(shareIntent);
     }
 
-    private void hideImeAndFinish() {
+    private void hideIme() {
         InputMethodManager imm = getSystemService(InputMethodManager.class);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
-        finish();
     }
 }

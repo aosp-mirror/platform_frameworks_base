@@ -108,6 +108,13 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class SizeCompatTests extends WindowTestsBase {
+    private static final String CONFIG_NEVER_CONSTRAIN_DISPLAY_APIS =
+            "never_constrain_display_apis";
+    private static final String CONFIG_ALWAYS_CONSTRAIN_DISPLAY_APIS =
+            "always_constrain_display_apis";
+    private static final String CONFIG_NEVER_CONSTRAIN_DISPLAY_APIS_ALL_PACKAGES =
+            "never_constrain_display_apis_all_packages";
+
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
@@ -123,8 +130,10 @@ public class SizeCompatTests extends WindowTestsBase {
         doReturn(mActivityMetricsLogger).when(mAtm.mTaskSupervisor).getActivityMetricsLogger();
         mInitialConstrainDisplayApisFlags = DeviceConfig.getProperties(
                 NAMESPACE_CONSTRAIN_DISPLAY_APIS);
-        DeviceConfig.setProperties(
-                new Properties.Builder(NAMESPACE_CONSTRAIN_DISPLAY_APIS).build());
+        // Provide empty default values for the configs.
+        setNeverConstrainDisplayApisFlag("", true);
+        setNeverConstrainDisplayApisAllPackagesFlag(false, true);
+        setAlwaysConstrainDisplayApisFlag("", true);
     }
 
     @After
@@ -805,9 +814,9 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testNeverConstrainDisplayApisDeviceConfig_allPackagesFlagTrue_sandboxNotApplied() {
         setUpDisplaySizeWithApp(1000, 1200);
 
-        setNeverConstrainDisplayApisAllPackagesFlag("true");
+        setNeverConstrainDisplayApisAllPackagesFlag(true, false);
         // Setting 'never_constrain_display_apis' as well to make sure it is ignored.
-        setNeverConstrainDisplayApisFlag("com.android.other::,com.android.other2::");
+        setNeverConstrainDisplayApisFlag("com.android.other::,com.android.other2::", false);
 
         // Make the task root resizable.
         mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
@@ -830,7 +839,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         setNeverConstrainDisplayApisFlag(
                 "com.android.frameworks.wmtests:20:,com.android.other::,"
-                        + "com.android.frameworks.wmtests:0:10");
+                        + "com.android.frameworks.wmtests:0:10", false);
 
         // Make the task root resizable.
         mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
@@ -851,7 +860,8 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testNeverConstrainDisplayApisDeviceConfig_packageOutsideRange_sandboxingApplied() {
         setUpDisplaySizeWithApp(1000, 1200);
 
-        setNeverConstrainDisplayApisFlag("com.android.other::,com.android.frameworks.wmtests:1:5");
+        setNeverConstrainDisplayApisFlag("com.android.other::,com.android.frameworks.wmtests:1:5",
+                false);
 
         // Make the task root resizable.
         mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
@@ -870,7 +880,7 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testNeverConstrainDisplayApisDeviceConfig_packageNotInFlag_sandboxingApplied() {
         setUpDisplaySizeWithApp(1000, 1200);
 
-        setNeverConstrainDisplayApisFlag("com.android.other::,com.android.other2::");
+        setNeverConstrainDisplayApisFlag("com.android.other::,com.android.other2::", false);
 
         // Make the task root resizable.
         mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
@@ -952,7 +962,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         setAlwaysConstrainDisplayApisFlag(
                 "com.android.frameworks.wmtests:20:,com.android.other::,"
-                        + "com.android.frameworks.wmtests:0:10");
+                        + "com.android.frameworks.wmtests:0:10", false);
 
         // Make the task root resizable.
         mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
@@ -2562,19 +2572,22 @@ public class SizeCompatTests extends WindowTestsBase {
         displayContent.onRequestedOverrideConfigurationChanged(c);
     }
 
-    private static void setNeverConstrainDisplayApisFlag(@Nullable String value) {
-        DeviceConfig.setProperty(NAMESPACE_CONSTRAIN_DISPLAY_APIS, "never_constrain_display_apis",
-                value, /* makeDefault= */ false);
-    }
-
-    private static void setNeverConstrainDisplayApisAllPackagesFlag(@Nullable String value) {
+    private static void setNeverConstrainDisplayApisFlag(@Nullable String value,
+            boolean makeDefault) {
         DeviceConfig.setProperty(NAMESPACE_CONSTRAIN_DISPLAY_APIS,
-                "never_constrain_display_apis_all_packages",
-                value, /* makeDefault= */ false);
+                CONFIG_NEVER_CONSTRAIN_DISPLAY_APIS, value, makeDefault);
     }
 
-    private static void setAlwaysConstrainDisplayApisFlag(@Nullable String value) {
-        DeviceConfig.setProperty(NAMESPACE_CONSTRAIN_DISPLAY_APIS, "always_constrain_display_apis",
-                value, /* makeDefault= */ false);
+    private static void setNeverConstrainDisplayApisAllPackagesFlag(boolean value,
+            boolean makeDefault) {
+        DeviceConfig.setProperty(NAMESPACE_CONSTRAIN_DISPLAY_APIS,
+                CONFIG_NEVER_CONSTRAIN_DISPLAY_APIS_ALL_PACKAGES, String.valueOf(value),
+                makeDefault);
+    }
+
+    private static void setAlwaysConstrainDisplayApisFlag(@Nullable String value,
+            boolean makeDefault) {
+        DeviceConfig.setProperty(NAMESPACE_CONSTRAIN_DISPLAY_APIS,
+                CONFIG_ALWAYS_CONSTRAIN_DISPLAY_APIS, value, makeDefault);
     }
 }
