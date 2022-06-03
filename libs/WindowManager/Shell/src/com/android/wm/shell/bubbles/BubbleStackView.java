@@ -108,7 +108,7 @@ public class BubbleStackView extends FrameLayout
      * Set to {@code true} to enable home gesture handling in bubbles
      */
     public static final boolean HOME_GESTURE_ENABLED =
-            SystemProperties.getBoolean("persist.wm.debug.bubbles_home_gesture", false);
+            SystemProperties.getBoolean("persist.wm.debug.bubbles_home_gesture", true);
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleStackView" : TAG_BUBBLES;
 
