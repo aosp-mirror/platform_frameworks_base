@@ -153,8 +153,7 @@ public class TakeScreenshotService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (mScreenshot != null) {
-            mScreenshot.removeWindow();
-            mScreenshot.releaseContext();
+            mScreenshot.onDestroy();
             mScreenshot = null;
         }
         if (DEBUG_SERVICE) {
