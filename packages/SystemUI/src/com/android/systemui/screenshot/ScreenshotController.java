@@ -27,6 +27,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER;
 
 import static java.util.Objects.requireNonNull;
 
@@ -349,6 +350,7 @@ public class ScreenshotController {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (ClipboardOverlayController.COPY_OVERLAY_ACTION.equals(intent.getAction())) {
+                    mUiEventLogger.log(SCREENSHOT_DISMISSED_OTHER);
                     dismissScreenshot(false);
                 }
             }

@@ -631,10 +631,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void showToast(int uid, String packageName, IBinder token, CharSequence text,
                 IBinder windowToken, int duration,
-                @Nullable ITransientNotificationCallback callback) {
+                @Nullable ITransientNotificationCallback callback, int displayId) {
             if (mBar != null) {
                 try {
-                    mBar.showToast(uid, packageName, token, text, windowToken, duration, callback);
+                    mBar.showToast(uid, packageName, token, text, windowToken, duration, callback,
+                            displayId);
                 } catch (RemoteException ex) { }
             }
         }

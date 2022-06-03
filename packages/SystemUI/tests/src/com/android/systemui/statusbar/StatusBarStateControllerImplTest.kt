@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar
 
+import android.animation.ObjectAnimator
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -46,6 +47,7 @@ import org.mockito.Mockito.`when` as whenever
 class StatusBarStateControllerImplTest : SysuiTestCase() {
 
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
+    @Mock private lateinit var mockDarkAnimator: ObjectAnimator
 
     private lateinit var controller: StatusBarStateControllerImpl
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -57,11 +59,13 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         whenever(interactionJankMonitor.end(anyInt())).thenReturn(true)
 
         uiEventLogger = UiEventLoggerFake()
-        controller = StatusBarStateControllerImpl(
+        controller = object : StatusBarStateControllerImpl(
             uiEventLogger,
             mock(DumpManager::class.java),
             interactionJankMonitor
-        )
+        ) {
+            override fun createDarkAnimator(): ObjectAnimator { return mockDarkAnimator }
+        }
     }
 
     @Test
@@ -126,5 +130,24 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
 
         // Double check that we can still force it to happen.
         assertTrue(controller.setState(StatusBarState.SHADE, true /* force */))
+    }
+
+    @Test
+    fun testSetDozeAmount_immediatelyChangesDozeAmount_lockscreenTransitionFromAod() {
+        // Put controller in AOD state
+        controller.setDozeAmount(1f, false)
+
+        // When waking from doze, CentralSurfaces#updateDozingState will update the dozing state
+        // before the doze amount changes
+        controller.setIsDozing(false)
+
+        // Animate the doze amount to 0f, as would normally happen
+        controller.setAndInstrumentDozeAmount(null, 0f, true)
+
+        // Check that the doze amount is immediately set to a value slightly less than 1f. This is
+        // to ensure that any scrim implementation changes its opacity immediately rather than
+        // waiting an extra frame. Waiting an extra frame will cause a relayout (which is expensive)
+        // and cause us to drop a frame during the LOCKSCREEN_TRANSITION_FROM_AOD CUJ.
+        assertEquals(0.99f, controller.dozeAmount, 0.009f)
     }
 }

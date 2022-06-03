@@ -44,6 +44,16 @@ class PrivacyLogger @Inject constructor(
         })
     }
 
+    fun logUpdatedItemFromMediaProjection(uid: Int, packageName: String, active: Boolean) {
+        log(LogLevel.INFO, {
+            int1 = uid
+            str1 = packageName
+            bool1 = active
+        }, {
+            "MediaProjection: $str1($int1), active=$bool1"
+        })
+    }
+
     fun logRetrievedPrivacyItemsList(list: List<PrivacyItem>) {
         log(LogLevel.INFO, {
             str1 = listToString(list)
