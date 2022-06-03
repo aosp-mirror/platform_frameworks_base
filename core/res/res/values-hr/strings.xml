@@ -306,8 +306,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pristupati kalendaru"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"slati i pregledavati SMS poruke"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Datoteke i dokumenti"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"pristup datotekama i dokumentima na vašem uređaju"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Datoteke"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"pristupati datotekama na vašem uređaju"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Glazba i zvuk"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pristupite glazbi i zvuku na svom uređaju"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotografije i videozapisi"</string>
