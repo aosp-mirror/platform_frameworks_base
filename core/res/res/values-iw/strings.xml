@@ -307,8 +307,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"גישה אל היומן"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‏שליחה והצגה של הודעות SMS"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"קבצים ומסמכים"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"גישה לקבצים ולמסמכים במכשיר"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"קבצים"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"גישה לקבצים במכשיר שלך"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"מוזיקה ואודיו"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"גישה למוזיקה ולאודיו במכשיר"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"תמונות וסרטונים"</string>
@@ -1714,7 +1714,7 @@
     <string name="user_switching_message" msgid="1912993630661332336">"מעבר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"מתבצע ניתוק של <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"בעלים"</string>
-    <string name="guest_name" msgid="8502103277839834324">"אורח/ת"</string>
+    <string name="guest_name" msgid="8502103277839834324">"אורח"</string>
     <string name="error_message_title" msgid="4082495589294631966">"שגיאה"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"מנהל המערכת שלך לא מאפשר את השינוי הזה"</string>
     <string name="app_not_found" msgid="3429506115332341800">"לא נמצאה אפליקציה שתומכת בפעולה הזו"</string>

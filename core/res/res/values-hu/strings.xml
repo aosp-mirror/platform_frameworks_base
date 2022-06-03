@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"hozzáférés a naptárhoz"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS-ek küldése és megtekintése"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Fájlok és dokumentumok"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"hozzáférhet fájljaihoz és dokumentumaihoz az eszközén"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Fájlok"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"hozzáférés az eszközön lévő fájlokhoz"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Zene és hang"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"hozzáférés a zenékhez és más hanganyagokhoz az eszközön"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotók és videók"</string>
