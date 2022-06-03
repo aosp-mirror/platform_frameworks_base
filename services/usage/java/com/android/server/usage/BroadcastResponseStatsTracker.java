@@ -23,15 +23,23 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager.ProcessState;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.app.usage.BroadcastResponseStats;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.permission.PermissionManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.lang.annotation.Retention;
@@ -71,12 +79,31 @@ class BroadcastResponseStatsTracker {
     private SparseArray<SparseArray<UserBroadcastResponseStats>> mUserResponseStats =
             new SparseArray<>();
 
+    /**
+     * Cache of package names holding exempted roles.
+     *
+     * Contains the mapping of userId -> {roleName -> <packages>} data.
+     */
+    // TODO: Use SparseArrayMap to simplify the logic.
+    @GuardedBy("mLock")
+    private SparseArray<ArrayMap<String, List<String>>> mExemptedRoleHoldersCache =
+            new SparseArray<>();
+    private final OnRoleHoldersChangedListener mRoleHoldersChangedListener =
+            this::onRoleHoldersChanged;
+
     private AppStandbyInternal mAppStandby;
     private BroadcastResponseStatsLogger mLogger;
+    private RoleManager mRoleManager;
 
     BroadcastResponseStatsTracker(@NonNull AppStandbyInternal appStandby) {
         mAppStandby = appStandby;
         mLogger = new BroadcastResponseStatsLogger();
+    }
+
+    void onSystemServicesReady(Context context) {
+        mRoleManager = context.getSystemService(RoleManager.class);
+        mRoleManager.addOnRoleHoldersChangedListenerAsUser(BackgroundThread.getExecutor(),
+                mRoleHoldersChangedListener, UserHandle.ALL);
     }
 
     // TODO (206518114): Move all callbacks handling to a handler thread.
@@ -86,8 +113,17 @@ class BroadcastResponseStatsTracker {
         mLogger.logBroadcastDispatchEvent(sourceUid, targetPackage, targetUser,
                 idForResponseEvent, timestampMs, targetUidProcState);
         if (targetUidProcState <= mAppStandby.getBroadcastResponseFgThresholdState()) {
-            // No need to track the broadcast response state while the target app is
+            // No need to track the broadcast response stats while the target app is
             // in the foreground.
+            return;
+        }
+        if (doesPackageHoldExemptedRole(targetPackage, targetUser)) {
+            // Package holds an exempted role, so no need to track the broadcast response stats.
+            return;
+        }
+        if (doesPackageHoldExemptedPermission(targetPackage, targetUser)) {
+            // Package holds an exempted permission, so no need to track the broadcast response
+            // stats
             return;
         }
         synchronized (mLock) {
@@ -253,6 +289,62 @@ class BroadcastResponseStatsTracker {
         }
     }
 
+    boolean doesPackageHoldExemptedRole(@NonNull String packageName, @NonNull UserHandle user) {
+        final List<String> exemptedRoles = mAppStandby.getBroadcastResponseExemptedRoles();
+        synchronized (mLock) {
+            for (int i = exemptedRoles.size() - 1; i >= 0; --i) {
+                final String roleName = exemptedRoles.get(i);
+                final List<String> roleHolders = getRoleHoldersLocked(roleName, user);
+                if (CollectionUtils.contains(roleHolders, packageName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    boolean doesPackageHoldExemptedPermission(@NonNull String packageName,
+            @NonNull UserHandle user) {
+        final List<String> exemptedPermissions = mAppStandby
+                .getBroadcastResponseExemptedPermissions();
+        for (int i = exemptedPermissions.size() - 1; i >= 0; --i) {
+            final String permissionName = exemptedPermissions.get(i);
+            if (PermissionManager.checkPackageNamePermission(permissionName, packageName,
+                    user.getIdentifier()) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private List<String> getRoleHoldersLocked(@NonNull String roleName, @NonNull UserHandle user) {
+        ArrayMap<String, List<String>> roleHoldersForUser = mExemptedRoleHoldersCache.get(
+                user.getIdentifier());
+        if (roleHoldersForUser == null) {
+            roleHoldersForUser = new ArrayMap<>();
+            mExemptedRoleHoldersCache.put(user.getIdentifier(), roleHoldersForUser);
+        }
+        List<String> roleHolders = roleHoldersForUser.get(roleName);
+        if (roleHolders == null && mRoleManager != null) {
+            roleHolders = mRoleManager.getRoleHoldersAsUser(roleName, user);
+            roleHoldersForUser.put(roleName, roleHolders);
+        }
+        return roleHolders;
+    }
+
+    private void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+        synchronized (mLock) {
+            final ArrayMap<String, List<String>> roleHoldersForUser =
+                    mExemptedRoleHoldersCache.get(user.getIdentifier());
+            if (roleHoldersForUser == null) {
+                return;
+            }
+            roleHoldersForUser.remove(roleName);
+        }
+    }
+
     void onUserRemoved(@UserIdInt int userId) {
         synchronized (mLock) {
             mUserBroadcastEvents.remove(userId);
@@ -260,6 +352,7 @@ class BroadcastResponseStatsTracker {
             for (int i = mUserResponseStats.size() - 1; i >= 0; --i) {
                 mUserResponseStats.valueAt(i).remove(userId);
             }
+            mExemptedRoleHoldersCache.remove(userId);
         }
     }
 
@@ -373,6 +466,8 @@ class BroadcastResponseStatsTracker {
             ipw.println();
             dumpResponseStatsLocked(ipw);
             ipw.println();
+            dumpRoleHoldersLocked(ipw);
+            ipw.println();
             mLogger.dumpLogs(ipw);
         }
 
@@ -412,6 +507,33 @@ class BroadcastResponseStatsTracker {
                 ipw.increaseIndent();
                 broadcastResponseStats.dump(ipw);
                 ipw.decreaseIndent();
+            }
+            ipw.decreaseIndent();
+        }
+        ipw.decreaseIndent();
+    }
+
+    @GuardedBy("mLock")
+    private void dumpRoleHoldersLocked(@NonNull IndentingPrintWriter ipw) {
+        ipw.println("Role holders:");
+        ipw.increaseIndent();
+        for (int userIdx = 0; userIdx < mExemptedRoleHoldersCache.size(); ++userIdx) {
+            final int userId = mExemptedRoleHoldersCache.keyAt(userIdx);
+            final ArrayMap<String, List<String>> roleHoldersForUser =
+                    mExemptedRoleHoldersCache.valueAt(userIdx);
+            ipw.println("User " + userId + ":");
+            ipw.increaseIndent();
+            for (int roleIdx = 0; roleIdx < roleHoldersForUser.size(); ++roleIdx) {
+                final String roleName = roleHoldersForUser.keyAt(roleIdx);
+                final List<String> holders = roleHoldersForUser.valueAt(roleIdx);
+                ipw.print(roleName + ": ");
+                for (int holderIdx = 0; holderIdx < holders.size(); ++holderIdx) {
+                    if (holderIdx > 0) {
+                        ipw.print(", ");
+                    }
+                    ipw.print(holders.get(holderIdx));
+                }
+                ipw.println();
             }
             ipw.decreaseIndent();
         }

@@ -358,8 +358,10 @@ public class HearingAidDeviceManagerTest {
     public void onProfileConnectionStateChanged_disconnected_mainDevice_subDeviceConnected_switch()
     {
         when(mCachedDevice1.getHiSyncId()).thenReturn(HISYNCID1);
+        mCachedDevice1.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_LEFT);
         when(mCachedDevice2.getHiSyncId()).thenReturn(HISYNCID1);
         when(mCachedDevice2.isConnected()).thenReturn(true);
+        mCachedDevice2.setDeviceSide(HearingAidProfile.DeviceSide.SIDE_RIGHT);
         mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
         mCachedDevice1.setSubDevice(mCachedDevice2);
 
@@ -370,6 +372,10 @@ public class HearingAidDeviceManagerTest {
 
         assertThat(mCachedDevice1.mDevice).isEqualTo(mDevice2);
         assertThat(mCachedDevice2.mDevice).isEqualTo(mDevice1);
+        assertThat(mCachedDevice1.getDeviceSide()).isEqualTo(
+                HearingAidProfile.DeviceSide.SIDE_RIGHT);
+        assertThat(mCachedDevice2.getDeviceSide()).isEqualTo(
+                HearingAidProfile.DeviceSide.SIDE_LEFT);
         verify(mCachedDevice1).refresh();
     }
 
