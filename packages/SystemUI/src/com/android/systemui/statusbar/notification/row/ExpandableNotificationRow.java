@@ -2587,8 +2587,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setSensitive(boolean sensitive, boolean hideSensitive) {
+        int intrinsicBefore = getIntrinsicHeight();
         mSensitive = sensitive;
         mSensitiveHiddenInGeneral = hideSensitive;
+        if (intrinsicBefore != getIntrinsicHeight()) {
+            // The animation has a few flaws and is highly visible, so jump cut instead.
+            notifyHeightChanged(false /* needsAnimation */);
+        }
     }
 
     @Override
