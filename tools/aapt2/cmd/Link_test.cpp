@@ -23,7 +23,6 @@
 #include "LoadedApk.h"
 #include "test/Test.h"
 
-using android::ConfigDescription;
 using testing::Eq;
 using testing::HasSubstr;
 using testing::IsNull;
@@ -784,53 +783,6 @@ TEST_F(LinkTest, MacroSubstitution) {
 
   EXPECT_THAT(xml_attrs[1].compiled_value.get(), IsNull());
   EXPECT_THAT(xml_attrs[1].value, Eq("Hello World!"));
-}
-
-TEST_F(LinkTest, ParseLocaleConfig) {
-  StdErrDiagnostics diag;
-  const std::string xml_values =
-      R"(<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
-            <locale android:name="pt"/>
-            <locale android:name="chr"/>
-            <locale android:name="chr-US"/>
-            <locale android:name="zh-Hant"/>
-            <locale android:name="es-419"/>
-            <locale android:name="en-US"/>
-            <locale android:name="zh-Hans-SG"/>
-        </locale-config>)";
-
-  const std::string res = GetTestPath("test-res");
-  ASSERT_TRUE(CompileFile(GetTestPath("res/xml/locale_config.xml"), xml_values, res, &diag));
-
-  const std::string out_apk = GetTestPath("out.apk");
-  auto link_args = LinkCommandBuilder(this)
-                       .SetManifestFile(ManifestBuilder(this).SetPackageName("com.test").Build())
-                       .AddCompiledResDir(res, &diag)
-                       .AddFlag("--no-auto-version")
-                       .Build(out_apk);
-  ASSERT_TRUE(Link(link_args, &diag));
-
-  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(out_apk, &diag);
-  ASSERT_THAT(apk, Ne(nullptr));
-
-  auto xml = apk->LoadXml("res/xml/locale_config.xml", &diag);
-  ASSERT_THAT(xml, NotNull());
-  EXPECT_THAT(xml->root->name, Eq("locale-config"));
-  ASSERT_THAT(xml->root->children.size(), Eq(7));
-  for (auto& node : xml->root->children) {
-    const xml::Element* child_el = xml::NodeCast<xml::Element>(node.get());
-    ASSERT_THAT(child_el, NotNull());
-    EXPECT_THAT(child_el->name, Eq("locale"));
-
-    auto& xml_attrs = child_el->attributes;
-    for (auto& attr : xml_attrs) {
-      std::string locale = "b+";
-      locale += attr.value;
-      std::replace(locale.begin(), locale.end(), '-', '+');
-      ConfigDescription config;
-      ASSERT_TRUE(ConfigDescription::Parse(locale, &config));
-    }
-  }
 }
 
 }  // namespace aapt
