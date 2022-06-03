@@ -218,6 +218,11 @@ public interface AppStandbyInternal {
 
     void setActiveAdminApps(Set<String> adminPkgs, int userId);
 
+    /**
+     * @return {@code true} if the given package is an active device admin app.
+     */
+    boolean isActiveDeviceAdmin(String packageName, int userId);
+
     void onAdminDataAvailable();
 
     void clearCarrierPrivilegedApps();
@@ -274,6 +279,20 @@ public interface AppStandbyInternal {
      * broadcast response window.
      */
     boolean shouldNoteResponseEventForAllBroadcastSessions();
+
+    /**
+     * Returns the list of roles whose holders are exempted from the requirement of starting
+     * a response event after receiving a broadcast.
+     */
+    @NonNull
+    List<String> getBroadcastResponseExemptedRoles();
+
+    /**
+     * Returns the list of permissions whose holders are exempted from the requirement of starting
+     * a response event after receiving a broadcast.
+     */
+    @NonNull
+    List<String> getBroadcastResponseExemptedPermissions();
 
     /**
      * Return the last known value corresponding to the {@code key} from
