@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.IBinder;
@@ -141,6 +144,11 @@ final class ProcessServiceRecord {
         mHasForegroundServices = hasForegroundServices;
         mFgServiceTypes = fgServiceTypes;
         mApp.getWindowProcessController().setHasForegroundServices(hasForegroundServices);
+        if (hasForegroundServices) {
+            mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE);
+        } else {
+            mApp.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE);
+        }
     }
 
     boolean hasForegroundServices() {
@@ -295,6 +303,7 @@ final class ProcessServiceRecord {
         boolean added = mServices.add(record);
         if (added && record.serviceInfo != null) {
             mApp.getWindowProcessController().onServiceStarted(record.serviceInfo);
+            updateHostingComonentTypeForBindingsLocked();
         }
         if (record.lastTopAlmostPerceptibleBindRequestUptimeMs > 0) {
             mLastTopStartedAlmostPerceptibleBindRequestUptimeMs = Math.max(
@@ -317,6 +326,9 @@ final class ProcessServiceRecord {
         final boolean removed = mServices.remove(record);
         if (record.lastTopAlmostPerceptibleBindRequestUptimeMs > 0) {
             updateHasTopStartedAlmostPerceptibleServices();
+        }
+        if (removed) {
+            updateHostingComonentTypeForBindingsLocked();
         }
         return removed;
     }
@@ -434,6 +446,23 @@ final class ProcessServiceRecord {
     void clearBoundClientUids() {
         mBoundClientUids.clear();
         mApp.getWindowProcessController().setBoundClientUids(mBoundClientUids);
+    }
+
+    @GuardedBy("mService")
+    void updateHostingComonentTypeForBindingsLocked() {
+        boolean hasBoundClient = false;
+        for (int i = numberOfRunningServices() - 1; i >= 0; i--) {
+            final ServiceRecord sr = getRunningServiceAt(i);
+            if (sr != null && !sr.getConnections().isEmpty()) {
+                hasBoundClient = true;
+                break;
+            }
+        }
+        if (hasBoundClient) {
+            mApp.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BOUND_SERVICE);
+        } else {
+            mApp.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_BOUND_SERVICE);
+        }
     }
 
     @GuardedBy("mService")
