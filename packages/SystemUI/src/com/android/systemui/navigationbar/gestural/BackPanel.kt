@@ -58,14 +58,16 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         SpringForce().apply {
             stiffness = 600f
             dampingRatio = 0.65f
-        })
+        }
+    )
 
     private val backgroundHeight = AnimatedFloat(
         name = "backgroundHeight",
         SpringForce().apply {
             stiffness = 600f
             dampingRatio = 0.65f
-        })
+        }
+    )
 
     /**
      * Corners of the background closer to the edge of the screen (where the arrow appeared from).
@@ -76,18 +78,20 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         SpringForce().apply {
             stiffness = 400f
             dampingRatio = SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY
-        })
+        }
+    )
 
     /**
      * Corners of the background further from the edge of the screens (toward the direction the
      * arrow is being dragged). Used for animating [arrowBackgroundRect]
      */
-    private val backgroundDragCornerRadius = AnimatedFloat(
+    private val backgroundFarCornerRadius = AnimatedFloat(
         name = "backgroundDragCornerRadius",
         SpringForce().apply {
             stiffness = 2200f
             dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
-        })
+        }
+    )
 
     /**
      * Left/right position of the background relative to the canvas. Also corresponds with the
@@ -96,14 +100,32 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
      */
     private var horizontalTranslation = AnimatedFloat("horizontalTranslation", SpringForce())
 
+    private val currentAlpha: FloatPropertyCompat<BackPanel> =
+        object : FloatPropertyCompat<BackPanel>("currentAlpha") {
+            override fun setValue(panel: BackPanel, value: Float) {
+                panel.alpha = value
+            }
+
+            override fun getValue(panel: BackPanel): Float = panel.alpha
+        }
+
+    private val alphaAnimation = SpringAnimation(this, currentAlpha)
+        .setSpring(
+            SpringForce()
+                .setStiffness(60f)
+                .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
+        )
+
     /**
      * Canvas vertical translation. How far up/down the arrow and background appear relative to the
      * canvas.
      */
-    private var verticalTranslation: AnimatedFloat =
-        AnimatedFloat("verticalTranslation", SpringForce().apply {
+    private var verticalTranslation: AnimatedFloat = AnimatedFloat(
+        name = "verticalTranslation",
+        SpringForce().apply {
             stiffness = SpringForce.STIFFNESS_MEDIUM
-        })
+        }
+    )
 
     /**
      * Use for drawing debug info. Can only be set if [DEBUG]=true
@@ -160,6 +182,17 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
             animation.animateToFinalPosition(restingPosition + stretchAmount)
         }
 
+        /**
+         * Animates to a new position ([finalPosition]) that is the given fraction ([amount])
+         * between the existing [restingPosition] and the new [finalPosition].
+         *
+         * The [restingPosition] will remain unchanged. Only the animation is updated.
+         */
+        fun stretchBy(finalPosition: Float, amount: Float) {
+            val stretchedAmount = amount * (finalPosition - restingPosition)
+            animation.animateToFinalPosition(restingPosition + stretchedAmount)
+        }
+
         fun updateRestingPosition(pos: Float, animated: Boolean) {
             restingPosition = pos
             if (animated)
@@ -192,7 +225,10 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
     }
 
     fun addEndListener(endListener: DelayedOnAnimationEndListener): Boolean {
-        return if (horizontalTranslation.animation.isRunning) {
+        return if (alphaAnimation.isRunning) {
+            alphaAnimation.addEndListener(endListener)
+            true
+        } else if (horizontalTranslation.animation.isRunning) {
             horizontalTranslation.animation.addEndListener(endListener)
             true
         } else {
@@ -202,47 +238,59 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
     }
 
     fun setStretch(
-        arrowLengthStretch: Float,
-        arrowHeightStretch: Float,
-        backgroundWidthStretch: Float,
-        backgroundHeightStretch: Float,
-        backgroundEdgeCornerRadiusStretch: Float,
-        backgroundDragCornerRadiusStretch: Float,
-        horizontalTranslationStretch: Float
+        horizontalTranslationStretchAmount: Float,
+        arrowStretchAmount: Float,
+        backgroundWidthStretchAmount: Float,
+        fullyStretchedDimens: EdgePanelParams.BackIndicatorDimens
     ) {
-        arrowLength.stretchTo(arrowLengthStretch)
-        arrowHeight.stretchTo(arrowHeightStretch)
-        backgroundWidth.stretchTo(backgroundWidthStretch)
-        backgroundHeight.stretchTo(backgroundHeightStretch)
-        backgroundEdgeCornerRadius.stretchTo(backgroundEdgeCornerRadiusStretch)
-        backgroundDragCornerRadius.stretchTo(backgroundDragCornerRadiusStretch)
-        horizontalTranslation.stretchTo(horizontalTranslationStretch)
+        horizontalTranslation.stretchBy(
+            finalPosition = fullyStretchedDimens.horizontalTranslation,
+            amount = horizontalTranslationStretchAmount
+        )
+        arrowLength.stretchBy(
+            finalPosition = fullyStretchedDimens.arrowDimens.length,
+            amount = arrowStretchAmount
+        )
+        arrowHeight.stretchBy(
+            finalPosition = fullyStretchedDimens.arrowDimens.height,
+            amount = arrowStretchAmount
+        )
+        backgroundWidth.stretchBy(
+            finalPosition = fullyStretchedDimens.backgroundDimens.width,
+            amount = backgroundWidthStretchAmount
+        )
     }
 
     fun resetStretch() {
-        setStretch(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+        horizontalTranslation.stretchTo(0f)
+        arrowLength.stretchTo(0f)
+        arrowHeight.stretchTo(0f)
+        backgroundWidth.stretchTo(0f)
+        backgroundHeight.stretchTo(0f)
+        backgroundEdgeCornerRadius.stretchTo(0f)
+        backgroundFarCornerRadius.stretchTo(0f)
     }
 
     /**
      * Updates resting arrow and background size not accounting for stretch
      */
-    internal fun updateRestingArrowDimens(
-        backgroundWidth: Float,
-        backgroundHeight: Float,
-        backgroundEdgeCornerRadius: Float,
-        backgroundDragCornerRadius: Float,
-        arrowLength: Float,
-        arrowHeight: Float,
-        horizontalTranslation: Float,
+    internal fun setRestingDimens(
+        restingParams: EdgePanelParams.BackIndicatorDimens,
         animate: Boolean
     ) {
-        this.arrowLength.updateRestingPosition(arrowLength, animate)
-        this.arrowHeight.updateRestingPosition(arrowHeight, animate)
-        this.backgroundWidth.updateRestingPosition(backgroundWidth, animate)
-        this.backgroundHeight.updateRestingPosition(backgroundHeight, animate)
-        this.backgroundEdgeCornerRadius.updateRestingPosition(backgroundEdgeCornerRadius, animate)
-        this.backgroundDragCornerRadius.updateRestingPosition(backgroundDragCornerRadius, animate)
-        this.horizontalTranslation.updateRestingPosition(horizontalTranslation, animate)
+        horizontalTranslation.updateRestingPosition(restingParams.horizontalTranslation, animate)
+        arrowLength.updateRestingPosition(restingParams.arrowDimens.length, animate)
+        arrowHeight.updateRestingPosition(restingParams.arrowDimens.height, animate)
+        backgroundWidth.updateRestingPosition(restingParams.backgroundDimens.width, animate)
+        backgroundHeight.updateRestingPosition(restingParams.backgroundDimens.height, animate)
+        backgroundEdgeCornerRadius.updateRestingPosition(
+            restingParams.backgroundDimens.edgeCornerRadius,
+            animate
+        )
+        backgroundFarCornerRadius.updateRestingPosition(
+            restingParams.backgroundDimens.farCornerRadius,
+            animate
+        )
     }
 
     fun animateVertically(yPos: Float) = verticalTranslation.stretchTo(yPos)
@@ -262,7 +310,7 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
 
     override fun onDraw(canvas: Canvas) {
         var edgeCorner = backgroundEdgeCornerRadius.pos
-        val farCorner = backgroundDragCornerRadius.pos
+        val farCorner = backgroundFarCornerRadius.pos
         val halfHeight = backgroundHeight.pos / 2
 
         canvas.save()
@@ -336,5 +384,14 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
             bottomLeft, bottomLeft
         )
         addRoundRect(this@toPathWithRoundCorners, corners, Path.Direction.CW)
+    }
+
+    fun cancelAlphaAnimations() {
+        alphaAnimation.cancel()
+        alpha = 1f
+    }
+
+    fun fadeOut() {
+        alphaAnimation.animateToFinalPosition(0f)
     }
 }
