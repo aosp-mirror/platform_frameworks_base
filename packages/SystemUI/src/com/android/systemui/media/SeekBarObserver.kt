@@ -99,7 +99,9 @@ open class SeekBarObserver(
         holder.seekBar.setMax(data.duration)
         val totalTimeString = DateUtils.formatElapsedTime(
             data.duration / DateUtils.SECOND_IN_MILLIS)
-        holder.scrubbingTotalTimeView.text = totalTimeString
+        if (data.scrubbing) {
+            holder.scrubbingTotalTimeView.text = totalTimeString
+        }
 
         data.elapsedTime?.let {
             if (!data.scrubbing && !(seekBarResetAnimator?.isRunning ?: false)) {
@@ -113,9 +115,12 @@ open class SeekBarObserver(
                     holder.seekBar.progress = it
                 }
             }
+
             val elapsedTimeString = DateUtils.formatElapsedTime(
                 it / DateUtils.SECOND_IN_MILLIS)
-            holder.scrubbingElapsedTimeView.text = elapsedTimeString
+            if (data.scrubbing) {
+                holder.scrubbingElapsedTimeView.text = elapsedTimeString
+            }
 
             holder.seekBar.contentDescription = holder.seekBar.context.getString(
                 R.string.controls_media_seekbar_description,

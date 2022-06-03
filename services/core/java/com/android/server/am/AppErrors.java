@@ -836,12 +836,18 @@ class AppErrors {
             report.type = ApplicationErrorReport.TYPE_CRASH;
             report.crashInfo = crashInfo;
         } else if (errState.isNotResponding()) {
+            final ActivityManager.ProcessErrorStateInfo anrReport =
+                    errState.getNotRespondingReport();
+            if (anrReport == null) {
+                // The ANR dump is still ongoing, ignore it for now.
+                return null;
+            }
             report.type = ApplicationErrorReport.TYPE_ANR;
             report.anrInfo = new ApplicationErrorReport.AnrInfo();
 
-            report.anrInfo.activity = errState.getNotRespondingReport().tag;
-            report.anrInfo.cause = errState.getNotRespondingReport().shortMsg;
-            report.anrInfo.info = errState.getNotRespondingReport().longMsg;
+            report.anrInfo.activity = anrReport.tag;
+            report.anrInfo.cause = anrReport.shortMsg;
+            report.anrInfo.info = anrReport.longMsg;
         }
 
         return report;

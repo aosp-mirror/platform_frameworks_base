@@ -291,8 +291,11 @@ import java.util.concurrent.locks.ReentrantLock;
  most of its life. When you queue an input buffer with the {@linkplain #BUFFER_FLAG_END_OF_STREAM
  end-of-stream marker}, the codec transitions to the End-of-Stream sub-state. In this state the
  codec no longer accepts further input buffers, but still generates output buffers until the
- end-of-stream is reached on the output. You can move back to the Flushed sub-state at any time
- while in the Executing state using {@link #flush}.
+ end-of-stream is reached on the output. For decoders, you can move back to the Flushed sub-state
+ at any time while in the Executing state using {@link #flush}.
+ <p class=note>
+ <strong>Note:</strong> Going back to Flushed state is only supported for decoders, and may not
+ work for encoders (the behavior is undefined).
  <p>
  Call {@link #stop} to return the codec to the Uninitialized state, whereupon it may be configured
  again. When you are done using a codec, you must release it by calling {@link #release}.
@@ -2317,10 +2320,6 @@ final public class MediaCodec {
      */
     public final void start() {
         native_start();
-        synchronized(mBufferLock) {
-            cacheBuffers(true /* input */);
-            cacheBuffers(false /* input */);
-        }
     }
     private native final void native_start();
 
@@ -3952,6 +3951,9 @@ final public class MediaCodec {
                         + "objects and attach to QueueRequest objects.");
             }
             if (mCachedInputBuffers == null) {
+                cacheBuffers(true /* input */);
+            }
+            if (mCachedInputBuffers == null) {
                 throw new IllegalStateException();
             }
             // FIXME: check codec status
@@ -3988,6 +3990,9 @@ final public class MediaCodec {
                 throw new IncompatibleWithBlockModelException("getOutputBuffers() "
                         + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
                         + "Please use getOutputFrame to get output frames.");
+            }
+            if (mCachedOutputBuffers == null) {
+                cacheBuffers(false /* input */);
             }
             if (mCachedOutputBuffers == null) {
                 throw new IllegalStateException();

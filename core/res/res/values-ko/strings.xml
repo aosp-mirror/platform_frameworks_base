@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"캘린더에 액세스"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS 메시지 전송 및 보기"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"파일 및 문서"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"기기의 파일 및 문서에 액세스"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"파일"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"내 기기의 파일에 액세스"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"음악 및 오디오"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"기기의 음악 및 오디오에 액세스"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"사진 및 동영상"</string>
@@ -1843,7 +1843,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"두 번째 업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"세 번째 업무용<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"고정 해제 이전에 PIN 요청"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"고정 해제 이전에 잠금해제 패턴 요청"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"고정 해제 시 잠금 해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"고정 해제 이전에 비밀번호 요청"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"관리자에 의해 설치되었습니다."</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"관리자에 의해 업데이트되었습니다."</string>

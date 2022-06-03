@@ -54,6 +54,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.media.MediaRouter2Manager;
+import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
@@ -318,6 +319,11 @@ public class FrameworkServicesModule {
     @Singleton
     public LayoutInflater providerLayoutInflater(Context context) {
         return LayoutInflater.from(context);
+    }
+
+    @Provides
+    static MediaProjectionManager provideMediaProjectionManager(Context context) {
+        return context.getSystemService(MediaProjectionManager.class);
     }
 
     @Provides
