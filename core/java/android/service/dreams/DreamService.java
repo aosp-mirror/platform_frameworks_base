@@ -1130,18 +1130,16 @@ public class DreamService extends Service implements Window.Callback {
 
         final PackageManager pm = context.getPackageManager();
 
-        final TypedArray rawMetadata = readMetadata(pm, serviceInfo);
-        if (rawMetadata == null) return null;
-
-        final DreamMetadata metadata = new DreamMetadata(
-                convertToComponentName(rawMetadata.getString(
-                        com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
-                rawMetadata.getDrawable(
-                        com.android.internal.R.styleable.Dream_previewImage),
-                rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
-                        DEFAULT_SHOW_COMPLICATIONS));
-        rawMetadata.recycle();
-        return metadata;
+        try (TypedArray rawMetadata = readMetadata(pm, serviceInfo)) {
+            if (rawMetadata == null) return null;
+            return new DreamMetadata(
+                    convertToComponentName(rawMetadata.getString(
+                            com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
+                    rawMetadata.getDrawable(
+                            com.android.internal.R.styleable.Dream_previewImage),
+                    rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
+                            DEFAULT_SHOW_COMPLICATIONS));
+        }
     }
 
     /**
