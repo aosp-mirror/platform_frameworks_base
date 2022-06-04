@@ -68,15 +68,11 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ നിങ്ങളുടെ പാസ്‌വേഡ് ‌തെറ്റായി ‌ടൈപ്പുചെയ്തു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ അൺലോക്ക് പാറ്റേൺ ‌തെറ്റായി ‌വരച്ചു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ ഇനി നിങ്ങളുടെ കാരിയറുമായി ബന്ധപ്പെടണം."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
-      <item quantity="other">സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
-      <item quantity="one">സിം പിൻ കോഡ് തെറ്റാണ്, ഉപകരണം അൺലോക്കുചെയ്യാൻ സേവനദാതാവുമായി ബന്ധപ്പെടേണ്ടിവരുന്നതിനു മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
+    <skip />
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"സിം ഉപയോഗയോഗ്യമല്ല. നിങ്ങളുടെ കാരിയറെ ബന്ധപ്പെടുക."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
-      <item quantity="other">സിം PUK കോഡ് തെറ്റാണ്, സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
-      <item quantity="one">സിം PUK കോഡ് തെറ്റാണ്, സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി നിങ്ങൾക്ക് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
+    <skip />
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"പിൻ ഉപയോഗിച്ച് സിം അൺലോക്കു‌ചെയ്യാനുള്ള ‌ശ്രമം പരാജയപ്പെട്ടു!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK ഉപയോഗിച്ച് സിം അൺലോക്കു‌ചെയ്യാനുള്ള ‌ശ്രമം പരാജയപ്പെട്ടു!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ഇൻപുട്ട് രീതി മാറുക"</string>
@@ -90,15 +86,12 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ഉപകരണം അഡ്‌മിൻ ലോക്കുചെയ്തു"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ഉപകരണം നേരിട്ട് ലോക്കുചെയ്തു"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"തിരിച്ചറിയുന്നില്ല"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ഫെയ്‌സ് അൺലോക്ക് ഉപയോഗിക്കാൻ, ക്രമീകരണം &gt; സ്വകാര്യത എന്നതിൽ "<b>"ക്യാമറാ ആക്‌സസ്"</b>" ഓണാക്കുക"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="other">സിം പിൻ നൽകുക. നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
-      <item quantity="one">സിം പിൻ നൽകുക. ഉപകരണം അൺലോക്ക് ചെയ്യാൻ കാരിയറുമായി ബന്ധപ്പെടേണ്ടിവരുന്നതിന് മുമ്പ് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>
-    </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="other">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
-      <item quantity="one">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
-    </plurals>
+    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
+    <skip />
+    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
+    <skip />
+    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
+    <skip />
     <string name="clock_title_default" msgid="6342735240617459864">"ഡിഫോൾട്ട്"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ബബിൾ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"അനലോഗ്"</string>
