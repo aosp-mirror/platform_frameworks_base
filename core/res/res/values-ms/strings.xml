@@ -2038,7 +2038,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BUKA JUGA"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Apl berbahaya dikesan"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Benarkan <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> mengakses semua log peranti?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses sekali"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Benarkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Jangan benarkan"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Log peranti merekodkan perkara yang berlaku pada peranti anda. Apl dapat menggunakan log ini untuk menemukan dan membetulkan isu.\n\nSesetengah log mungkin mengandungi maklumat sensitif, jadi benarkan apl yang anda percaya sahaja untuk mengakses semua log peranti. \n\nJika anda tidak membenarkan apl ini mengakses semua log peranti, apl masih boleh mengakses log sendiri. Pengilang peranti anda mungkin masih boleh mengakses sesetengah log atau maklumat pada peranti anda. Ketahui lebih lanjut"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Jangan tunjuk lagi"</string>

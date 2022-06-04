@@ -136,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Жүздүн аныктыгы текшерилди"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Ырасталды"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Бүтүрүү үчүн \"Ырастоо\" баскычын басыңыз"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Кулпусун жүзүңүз менен ачтыңыз. Улантуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Кулпуну жүзүңүз менен ачтыңыз. Улантуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аныктыгы текшерилди"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN кодду колдонуу"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Графикалык ачкычты колдонуу"</string>
@@ -311,8 +311,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Ачуу үчүн кайра таптап коюңуз"</string>
     <string name="tap_again" msgid="1315420114387908655">"Кайра таптап коюңуз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ачуу үчүн өйдө сүрүңүз"</string>
-    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Ачуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Кулпусун жүзүңүз менен ачтыңыз. Ачуу үчүн кулпусун ачуу сүрөтчөсүн басыңыз."</string>
+    <string name="keyguard_unlock_press" msgid="9140109453735019209">"Кулпуну ачуу сүрөтчөсүн басыңыз"</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Кулпуну жүзүңүз менен ачтыңыз. Эми кулпуну ачуу сүрөтчөсүн басыңыз."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1901953991150295169">"Солго жылдыруу"</item>
     <item msgid="5558598599408514296">"Төмөн жылдыруу"</item>
@@ -932,7 +932,8 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Жаңы маалымат"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Жигердүү колдонмолор"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Бул колдонмолорду колдонбосоңуз да, алар иштей берип, батареяны тез отургузуп салышы мүмкүн"</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Токтотуу"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Токтотулду"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Бүттү"</string>
