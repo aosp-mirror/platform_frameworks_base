@@ -251,4 +251,14 @@ public class LogModule {
             return new LogcatEchoTrackerProd();
         }
     }
+
+    /**
+     * Provides a {@link LogBuffer} for use by the status bar network controller.
+     */
+    @Provides
+    @SysUISingleton
+    @StatusBarNetworkControllerLog
+    public static LogBuffer provideStatusBarNetworkControllerBuffer(LogBufferFactory factory) {
+        return factory.create("StatusBarNetworkControllerLog", 20);
+    }
 }
