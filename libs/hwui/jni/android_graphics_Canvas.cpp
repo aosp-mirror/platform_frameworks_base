@@ -570,6 +570,23 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray c
             static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr /* measured text */);
 }
 
+// Required for Android O (26) - Android O_MR1 (27).
+static void drawTextCharsTypeface(JNIEnv* env, jobject, jlong canvasHandle, jcharArray charArray,
+                                  jint index, jint count, jfloat x, jfloat y, jint bidiFlags,
+                                  jlong paintHandle, jlong typefaceHandle) {
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    ScopedCharArrayRO text(env, charArray);
+    // drawTextString and drawTextChars doesn't use context info
+    get_canvas(canvasHandle)
+            ->drawText(text.get() + index, count,  // text buffer
+                       0, count,                   // draw range
+                       0, count,                   // context range
+                       x, y,                       // draw position
+                       static_cast<minikin::Bidi>(bidiFlags), *paint, typeface,
+                       nullptr /* measured text */);
+}
+
 static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring strObj,
                            jint start, jint end, jfloat x, jfloat y, jint bidiFlags,
                            jlong paintHandle) {
@@ -584,6 +601,24 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring str
             0, count,  // context range
             x, y,  // draw position
             static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr /* measured text */);
+}
+
+// Required for Android O (26) - Android O_MR1 (27).
+static void drawTextStringTypeface(JNIEnv* env, jobject, jlong canvasHandle, jstring strObj,
+                                   jint start, jint end, jfloat x, jfloat y, jint bidiFlags,
+                                   jlong paintHandle, jlong typefaceHandle) {
+    ScopedStringChars text(env, strObj);
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    const int count = end - start;
+    // drawTextString and drawTextChars doesn't use context info
+    get_canvas(canvasHandle)
+            ->drawText(text.get() + start, count,  // text buffer
+                       0, count,                   // draw range
+                       0, count,                   // context range
+                       x, y,                       // draw position
+                       static_cast<minikin::Bidi>(bidiFlags), *paint, typeface,
+                       nullptr /* measured text */);
 }
 
 static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray charArray,
@@ -604,6 +639,24 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
             bidiFlags, *paint, typeface, mt);
 }
 
+// Required for Android O (26) - Android O_MR1 (27).
+static void drawTextRunCharsTypeface(JNIEnv* env, jobject, jlong canvasHandle, jcharArray charArray,
+                                     jint index, jint count, jint contextIndex, jint contextCount,
+                                     jfloat x, jfloat y, jboolean isRtl, jlong paintHandle,
+                                     jlong typefaceHandle) {
+    const minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
+
+    ScopedCharArrayRO text(env, charArray);
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    get_canvas(canvasHandle)
+            ->drawText(text.get(), text.size(),     // text buffer
+                       index, count,                // draw range
+                       contextIndex, contextCount,  // context range,
+                       x, y,                        // draw position
+                       bidiFlags, *paint, typeface, nullptr /* measured text */);
+}
+
 static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstring strObj,
                               jint start, jint end, jint contextStart, jint contextEnd,
                               jfloat x, jfloat y, jboolean isRtl, jlong paintHandle) {
@@ -618,6 +671,24 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
             contextStart, contextEnd - contextStart,  // context range
             x, y,  // draw position
             bidiFlags, *paint, typeface, nullptr /* measured text */);
+}
+
+// Required for Android O (26) - Android O_MR1 (27).
+static void drawTextRunStringTypeface(JNIEnv* env, jobject obj, jlong canvasHandle, jstring strObj,
+                                      jint start, jint end, jint contextStart, jint contextEnd,
+                                      jfloat x, jfloat y, jboolean isRtl, jlong paintHandle,
+                                      jlong typefaceHandle) {
+    const minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
+
+    ScopedStringChars text(env, strObj);
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    get_canvas(canvasHandle)
+            ->drawText(text.get(), text.size(),                  // text buffer
+                       start, end - start,                       // draw range
+                       contextStart, contextEnd - contextStart,  // context range
+                       x, y,                                     // draw position
+                       bidiFlags, *paint, typeface, nullptr /* measured text */);
 }
 
 static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
@@ -635,6 +706,24 @@ static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharA
     env->ReleaseCharArrayElements(text, jchars, 0);
 }
 
+// Required for Android O (26) - Android O_MR1 (27).
+static void drawTextOnPathCharsTypeface(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
+                                        jint index, jint count, jlong pathHandle, jfloat hOffset,
+                                        jfloat vOffset, jint bidiFlags, jlong paintHandle,
+                                        jlong typefaceHandle) {
+    SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+
+    jchar* jchars = env->GetCharArrayElements(text, NULL);
+
+    get_canvas(canvasHandle)
+            ->drawTextOnPath(jchars + index, count, static_cast<minikin::Bidi>(bidiFlags), *path,
+                             hOffset, vOffset, *paint, typeface);
+
+    env->ReleaseCharArrayElements(text, jchars, 0);
+}
+
 static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstring text,
                                  jlong pathHandle, jfloat hOffset, jfloat vOffset,
                                  jint bidiFlags, jlong paintHandle) {
@@ -647,6 +736,24 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
 
     get_canvas(canvasHandle)->drawTextOnPath(jchars, count, static_cast<minikin::Bidi>(bidiFlags),
             *path, hOffset, vOffset, *paint, typeface);
+
+    env->ReleaseStringChars(text, jchars);
+}
+
+// Required for Android O (26) - Android O_MR1 (27).
+static void drawTextOnPathStringTypeface(JNIEnv* env, jobject, jlong canvasHandle, jstring text,
+                                         jlong pathHandle, jfloat hOffset, jfloat vOffset,
+                                         jint bidiFlags, jlong paintHandle, jlong typefaceHandle) {
+    SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
+    Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+
+    const jchar* jchars = env->GetStringChars(text, NULL);
+    int count = env->GetStringLength(text);
+
+    get_canvas(canvasHandle)
+            ->drawTextOnPath(jchars, count, static_cast<minikin::Bidi>(bidiFlags), *path, hOffset,
+                             vOffset, *paint, typeface);
 
     env->ReleaseStringChars(text, jchars);
 }
@@ -716,38 +823,45 @@ static const JNINativeMethod gMethods[] = {
 // If called from Canvas these are regular JNI
 // If called from DisplayListCanvas they are @FastNative
 static const JNINativeMethod gDrawMethods[] = {
-    {"nDrawColor","(JII)V", (void*) CanvasJNI::drawColor},
-    {"nDrawColor","(JJJI)V", (void*) CanvasJNI::drawColorLong},
-    {"nDrawPaint","(JJ)V", (void*) CanvasJNI::drawPaint},
-    {"nDrawPoint", "(JFFJ)V", (void*) CanvasJNI::drawPoint},
-    {"nDrawPoints", "(J[FIIJ)V", (void*) CanvasJNI::drawPoints},
-    {"nDrawLine", "(JFFFFJ)V", (void*) CanvasJNI::drawLine},
-    {"nDrawLines", "(J[FIIJ)V", (void*) CanvasJNI::drawLines},
-    {"nDrawRect","(JFFFFJ)V", (void*) CanvasJNI::drawRect},
-    {"nDrawRegion", "(JJJ)V", (void*) CanvasJNI::drawRegion },
-    {"nDrawRoundRect","(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
-    {"nDrawDoubleRoundRect", "(JFFFFFFFFFFFFJ)V", (void*) CanvasJNI::drawDoubleRoundRectXY},
-    {"nDrawDoubleRoundRect", "(JFFFF[FFFFF[FJ)V", (void*) CanvasJNI::drawDoubleRoundRectRadii},
-    {"nDrawCircle","(JFFFJ)V", (void*) CanvasJNI::drawCircle},
-    {"nDrawOval","(JFFFFJ)V", (void*) CanvasJNI::drawOval},
-    {"nDrawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},
-    {"nDrawPath","(JJJ)V", (void*) CanvasJNI::drawPath},
-    {"nDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
-    {"nDrawNinePatch", "(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
-    {"nDrawBitmapMatrix", "(JJJJ)V", (void*)CanvasJNI::drawBitmapMatrix},
-    {"nDrawBitmapMesh", "(JJII[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
-    {"nDrawBitmap","(JJFFJIII)V", (void*) CanvasJNI::drawBitmap},
-    {"nDrawBitmap","(JJFFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
-    {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
-    {"nDrawGlyphs", "(J[I[FIIIJJ)V", (void*)CanvasJNI::drawGlyphs},
-    {"nDrawText","(J[CIIFFIJ)V", (void*) CanvasJNI::drawTextChars},
-    {"nDrawText","(JLjava/lang/String;IIFFIJ)V", (void*) CanvasJNI::drawTextString},
-    {"nDrawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
-    {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJ)V", (void*) CanvasJNI::drawTextRunString},
-    {"nDrawTextOnPath","(J[CIIJFFIJ)V", (void*) CanvasJNI::drawTextOnPathChars},
-    {"nDrawTextOnPath","(JLjava/lang/String;JFFIJ)V", (void*) CanvasJNI::drawTextOnPathString},
-    {"nPunchHole", "(JFFFFFF)V", (void*) CanvasJNI::punchHole}
-};
+        {"nDrawColor", "(JII)V", (void*)CanvasJNI::drawColor},
+        {"nDrawColor", "(JJJI)V", (void*)CanvasJNI::drawColorLong},
+        {"nDrawPaint", "(JJ)V", (void*)CanvasJNI::drawPaint},
+        {"nDrawPoint", "(JFFJ)V", (void*)CanvasJNI::drawPoint},
+        {"nDrawPoints", "(J[FIIJ)V", (void*)CanvasJNI::drawPoints},
+        {"nDrawLine", "(JFFFFJ)V", (void*)CanvasJNI::drawLine},
+        {"nDrawLines", "(J[FIIJ)V", (void*)CanvasJNI::drawLines},
+        {"nDrawRect", "(JFFFFJ)V", (void*)CanvasJNI::drawRect},
+        {"nDrawRegion", "(JJJ)V", (void*)CanvasJNI::drawRegion},
+        {"nDrawRoundRect", "(JFFFFFFJ)V", (void*)CanvasJNI::drawRoundRect},
+        {"nDrawDoubleRoundRect", "(JFFFFFFFFFFFFJ)V", (void*)CanvasJNI::drawDoubleRoundRectXY},
+        {"nDrawDoubleRoundRect", "(JFFFF[FFFFF[FJ)V", (void*)CanvasJNI::drawDoubleRoundRectRadii},
+        {"nDrawCircle", "(JFFFJ)V", (void*)CanvasJNI::drawCircle},
+        {"nDrawOval", "(JFFFFJ)V", (void*)CanvasJNI::drawOval},
+        {"nDrawArc", "(JFFFFFFZJ)V", (void*)CanvasJNI::drawArc},
+        {"nDrawPath", "(JJJ)V", (void*)CanvasJNI::drawPath},
+        {"nDrawVertices", "(JII[FI[FI[II[SIIJ)V", (void*)CanvasJNI::drawVertices},
+        {"nDrawNinePatch", "(JJJFFFFJII)V", (void*)CanvasJNI::drawNinePatch},
+        {"nDrawBitmapMatrix", "(JJJJ)V", (void*)CanvasJNI::drawBitmapMatrix},
+        {"nDrawBitmapMesh", "(JJII[FI[IIJ)V", (void*)CanvasJNI::drawBitmapMesh},
+        {"nDrawBitmap", "(JJFFJIII)V", (void*)CanvasJNI::drawBitmap},
+        {"nDrawBitmap", "(JJFFFFFFFFJII)V", (void*)CanvasJNI::drawBitmapRect},
+        {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
+        {"nDrawGlyphs", "(J[I[FIIIJJ)V", (void*)CanvasJNI::drawGlyphs},
+        {"nDrawText", "(J[CIIFFIJ)V", (void*)CanvasJNI::drawTextChars},
+        {"nDrawText", "(JLjava/lang/String;IIFFIJ)V", (void*)CanvasJNI::drawTextString},
+        {"nDrawText", "(J[CIIFFIJJ)V", (void*)CanvasJNI::drawTextCharsTypeface},
+        {"nDrawText", "(JLjava/lang/String;IIFFIJJ)V", (void*)CanvasJNI::drawTextStringTypeface},
+        {"nDrawTextRun", "(J[CIIIIFFZJJ)V", (void*)CanvasJNI::drawTextRunChars},
+        {"nDrawTextRun", "(JLjava/lang/String;IIIIFFZJ)V", (void*)CanvasJNI::drawTextRunString},
+        {"nDrawTextRunTypeface", "(J[CIIIIFFZJJ)V", (void*)CanvasJNI::drawTextRunCharsTypeface},
+        {"nDrawTextRun", "(JLjava/lang/String;IIIIFFZJJ)V",
+         (void*)CanvasJNI::drawTextRunStringTypeface},
+        {"nDrawTextOnPath", "(J[CIIJFFIJ)V", (void*)CanvasJNI::drawTextOnPathChars},
+        {"nDrawTextOnPath", "(JLjava/lang/String;JFFIJ)V", (void*)CanvasJNI::drawTextOnPathString},
+        {"nDrawTextOnPath", "(J[CIIJFFIJJ)V", (void*)CanvasJNI::drawTextOnPathCharsTypeface},
+        {"nDrawTextOnPath", "(JLjava/lang/String;JFFIJJ)V",
+         (void*)CanvasJNI::drawTextOnPathStringTypeface},
+        {"nPunchHole", "(JFFFFFF)V", (void*)CanvasJNI::punchHole}};
 
 int register_android_graphics_Canvas(JNIEnv* env) {
     int ret = 0;
