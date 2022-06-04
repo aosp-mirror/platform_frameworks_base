@@ -462,7 +462,7 @@
     <string name="status_bar_alarm" msgid="87160847643623352">"Sveglia"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Portafoglio"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Imposta un metodo di pagamento per effettuare acquisti in modo più rapido e sicuro con il telefono"</string>
-    <string name="wallet_app_button_label" msgid="7123784239111190992">"Espandi"</string>
+    <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostra tutto"</string>
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Aggiungi una carta"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Aggiornamento in corso…"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Sblocca per usare"</string>
