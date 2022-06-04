@@ -28,7 +28,6 @@ import static com.android.internal.accessibility.util.AccessibilityUtils.isUserS
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -103,30 +102,21 @@ public class AccessibilityShortcutChooserActivity extends Activity {
         final AccessibilityTarget target = mTargets.get(position);
 
         if ((target instanceof AccessibilityServiceTarget) && !target.isShortcutEnabled()) {
-            showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target, mTargetAdapter);
+            mPermissionDialog = new AlertDialog.Builder(this)
+                    .setView(createEnableDialogContentView(this,
+                            (AccessibilityServiceTarget) target,
+                            v -> {
+                                mPermissionDialog.dismiss();
+                                mTargetAdapter.notifyDataSetChanged();
+                            },
+                            v -> mPermissionDialog.dismiss()))
+                    .create();
+            mPermissionDialog.show();
             return;
         }
 
         target.onCheckedChanged(!target.isShortcutEnabled());
         mTargetAdapter.notifyDataSetChanged();
-    }
-
-    private void showPermissionDialogIfNeeded(Context context,
-            AccessibilityServiceTarget serviceTarget, ShortcutTargetAdapter targetAdapter) {
-        if (mPermissionDialog != null) {
-            return;
-        }
-
-        mPermissionDialog = new AlertDialog.Builder(context)
-                .setView(createEnableDialogContentView(context, serviceTarget,
-                        v -> {
-                            mPermissionDialog.dismiss();
-                            targetAdapter.notifyDataSetChanged();
-                        },
-                        v -> mPermissionDialog.dismiss()))
-                .setOnDismissListener(dialog -> mPermissionDialog = null)
-                .create();
-        mPermissionDialog.show();
     }
 
     private void onDoneButtonClicked() {

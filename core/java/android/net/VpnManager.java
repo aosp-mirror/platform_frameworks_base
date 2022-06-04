@@ -100,6 +100,12 @@ public class VpnManager {
     /**
      * Action sent in {@link android.content.Intent}s to VpnManager clients when an event occurred.
      *
+     * <p>If the provisioning application declares a service handling this intent action, but is not
+     * already running, it will be started. Upon starting, the application is granted a short grace
+     * period to run in the background even while the device is idle to handle any potential
+     * failures. Applications requiring long-running actions triggered by one of these events should
+     * declare a foreground service to prevent being killed once the grace period expires.
+     *
      * This action will have a category of either {@link #CATEGORY_EVENT_IKE_ERROR},
      * {@link #CATEGORY_EVENT_NETWORK_ERROR}, or {@link #CATEGORY_EVENT_DEACTIVATED_BY_USER},
      * that the app can use to filter events it's interested in reacting to.

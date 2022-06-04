@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -564,7 +565,7 @@ public class AccessibilityWindowManager {
                     final WindowInfo windowInfo = windows.get(i);
                     final AccessibilityWindowInfo window;
                     if (mTrackingWindows) {
-                        window = populateReportedWindowLocked(userId, windowInfo);
+                        window = populateReportedWindowLocked(userId, windowInfo, oldWindowsById);
                         if (window == null) {
                             hasWindowIgnore = true;
                         }
@@ -677,7 +678,7 @@ public class AccessibilityWindowManager {
         }
 
         private AccessibilityWindowInfo populateReportedWindowLocked(int userId,
-                WindowInfo window) {
+                WindowInfo window, SparseArray<AccessibilityWindowInfo> oldWindowsById) {
             final int windowId = findWindowIdLocked(userId, window.token);
             if (windowId < 0) {
                 return null;
@@ -716,6 +717,18 @@ public class AccessibilityWindowManager {
                 }
             }
 
+            final AccessibilityWindowInfo oldWindowInfo = oldWindowsById.get(windowId);
+            if (oldWindowInfo == null) {
+                reportedWindow.setTransitionTimeMillis(SystemClock.uptimeMillis());
+            } else {
+                final Region oldTouchRegion = new Region();
+                oldWindowInfo.getRegionInScreen(oldTouchRegion);
+                if (oldTouchRegion.equals(window.regionInScreen)) {
+                    reportedWindow.setTransitionTimeMillis(oldWindowInfo.getTransitionTimeMillis());
+                } else {
+                    reportedWindow.setTransitionTimeMillis(SystemClock.uptimeMillis());
+                }
+            }
             return reportedWindow;
         }
 

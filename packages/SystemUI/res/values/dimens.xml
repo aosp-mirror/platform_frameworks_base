@@ -44,7 +44,7 @@
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
     <!-- The threshold to progress back animation for edge swipe -->
-    <dimen name="navigation_edge_action_progress_threshold">400dp</dimen>
+    <dimen name="navigation_edge_action_progress_threshold">412dp</dimen>
     <!-- The minimum display position of the arrow on the screen -->
     <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
     <!-- The amount by which the arrow is shifted to avoid the finger-->
@@ -80,13 +80,11 @@
     <dimen name="navigation_edge_active_arrow_length">8dp</dimen>
     <dimen name="navigation_edge_active_arrow_height">9dp</dimen>
 
-    <!-- stretch @412 dp -->
-    <dimen name="navigation_edge_stretch_threshold">412dp</dimen>
     <dimen name="navigation_edge_stretch_margin">18dp</dimen>
     <dimen name="navigation_edge_stretch_background_width">74dp</dimen>
     <dimen name="navigation_edge_stretch_background_height">60dp</dimen>
-    <dimen name="navigation_edge_stretch_left_corners">30dp</dimen>
-    <dimen name="navigation_edge_stretch_right_corners">30dp</dimen>
+    <dimen name="navigation_edge_stretch_edge_corners">30dp</dimen>
+    <dimen name="navigation_edge_stretch_far_corners">30dp</dimen>
     <dimen name="navigation_edge_stretched_arrow_length">7dp</dimen>
     <dimen name="navigation_edge_stretched_arrow_height">10dp</dimen>
 

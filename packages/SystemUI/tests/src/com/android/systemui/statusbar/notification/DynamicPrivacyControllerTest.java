@@ -63,7 +63,7 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
                 mock(StatusBarKeyguardViewManager.class));
         mDynamicPrivacyController.addListener(mListener);
         // Disable dynamic privacy by default
-        allowPrivateNotificationsInPublic(true);
+        allowNotificationsInPublic(false);
     }
 
     @Test
@@ -108,24 +108,21 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
 
     @Test
     public void dynamicPrivacyOnlyWhenHidingPrivate() {
-        // Verify that when only hiding notifications, this isn't enabled
-        allowPrivateNotificationsInPublic(true);
-        when(mLockScreenUserManager.shouldHideNotifications(any())).thenReturn(
-                false);
-        assertFalse("Dynamic privacy shouldn't be enabled when only hiding notifications",
+        // Verify that when hiding notifications, this isn't enabled
+        allowNotificationsInPublic(false);
+        assertFalse("Dynamic privacy shouldn't be enabled when hiding notifications",
                 mDynamicPrivacyController.isDynamicPrivacyEnabled());
-        allowPrivateNotificationsInPublic(false);
-        assertTrue("Should be enabled when hiding notification contents",
+        allowNotificationsInPublic(true);
+        assertTrue("Should be enabled whenever notifications are visible",
                 mDynamicPrivacyController.isDynamicPrivacyEnabled());
     }
 
     private void enableDynamicPrivacy() {
-        allowPrivateNotificationsInPublic(false);
+        allowNotificationsInPublic(true);
     }
 
-    private void allowPrivateNotificationsInPublic(boolean allow) {
-        when(mLockScreenUserManager.userAllowsPrivateNotificationsInPublic(anyInt())).thenReturn(
-                allow);
+    private void allowNotificationsInPublic(boolean allow) {
+        when(mLockScreenUserManager.userAllowsNotificationsInPublic(anyInt())).thenReturn(allow);
     }
 
     @Test

@@ -108,6 +108,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.providers.settings.SettingsState.Setting;
 import com.android.server.SystemConfig;
 
@@ -223,6 +224,11 @@ public class SettingsProvider extends ContentProvider {
     public static final int SETTINGS_TYPE_SECURE = SettingsState.SETTINGS_TYPE_SECURE;
     public static final int SETTINGS_TYPE_SSAID = SettingsState.SETTINGS_TYPE_SSAID;
     public static final int SETTINGS_TYPE_CONFIG = SettingsState.SETTINGS_TYPE_CONFIG;
+
+    private static final int CHANGE_TYPE_INSERT = 0;
+    private static final int CHANGE_TYPE_DELETE = 1;
+    private static final int CHANGE_TYPE_UPDATE = 2;
+    private static final int CHANGE_TYPE_RESET = 3;
 
     private static final Bundle NULL_SETTING_BUNDLE = Bundle.forPair(
             Settings.NameValueTable.VALUE, null);
@@ -3020,6 +3026,9 @@ public class SettingsProvider extends ContentProvider {
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
             }
+            if (success) {
+                logSettingChanged(userId, name, type, CHANGE_TYPE_INSERT);
+            }
             return success;
         }
 
@@ -3063,6 +3072,9 @@ public class SettingsProvider extends ContentProvider {
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
             }
+            if (success) {
+                logSettingChanged(userId, name, type, CHANGE_TYPE_DELETE);
+            }
             return success;
         }
 
@@ -3085,7 +3097,9 @@ public class SettingsProvider extends ContentProvider {
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
             }
-
+            if (success) {
+                logSettingChanged(userId, name, type, CHANGE_TYPE_UPDATE);
+            }
             return success;
         }
 
@@ -3129,6 +3143,7 @@ public class SettingsProvider extends ContentProvider {
                             if (settingsState.resetSettingLocked(name)) {
                                 someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
+                                logSettingChanged(userId, name, type, CHANGE_TYPE_RESET);
                             }
                         }
                         if (someSettingChanged) {
@@ -3149,6 +3164,7 @@ public class SettingsProvider extends ContentProvider {
                             if (settingsState.resetSettingLocked(name)) {
                                 someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
+                                logSettingChanged(userId, name, type, CHANGE_TYPE_RESET);
                             }
                         }
                         if (someSettingChanged) {
@@ -3170,10 +3186,12 @@ public class SettingsProvider extends ContentProvider {
                                 if (settingsState.resetSettingLocked(name)) {
                                     someSettingChanged = true;
                                     notifyForSettingsChange(key, name);
+                                    logSettingChanged(userId, name, type, CHANGE_TYPE_RESET);
                                 }
                             } else if (settingsState.deleteSettingLocked(name)) {
                                 someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
+                                logSettingChanged(userId, name, type, CHANGE_TYPE_DELETE);
                             }
                         }
                         if (someSettingChanged) {
@@ -3193,10 +3211,12 @@ public class SettingsProvider extends ContentProvider {
                             if (settingsState.resetSettingLocked(name)) {
                                 someSettingChanged = true;
                                 notifyForSettingsChange(key, name);
+                                logSettingChanged(userId, name, type, CHANGE_TYPE_RESET);
                             }
                         } else if (settingsState.deleteSettingLocked(name)) {
                             someSettingChanged = true;
                             notifyForSettingsChange(key, name);
+                            logSettingChanged(userId, name, type, CHANGE_TYPE_DELETE);
                         }
                         if (someSettingChanged) {
                             settingsState.persistSyncLocked();
@@ -3436,6 +3456,11 @@ public class SettingsProvider extends ContentProvider {
 
             // Always notify that our data changed
             mHandler.obtainMessage(MyHandler.MSG_NOTIFY_DATA_CHANGED).sendToTarget();
+        }
+
+        private void logSettingChanged(int userId, String name, int type, int changeType) {
+            FrameworkStatsLog.write(FrameworkStatsLog.SETTINGS_PROVIDER_SETTING_CHANGED, userId,
+                    name, type, changeType);
         }
 
         private void notifyForConfigSettingsChangeLocked(int key, String prefix,

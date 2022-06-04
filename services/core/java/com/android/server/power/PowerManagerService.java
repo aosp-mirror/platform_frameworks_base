@@ -94,7 +94,9 @@ import android.service.dreams.DreamManagerInternal;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.sysprop.InitProperties;
+import android.util.ArrayMap;
 import android.util.KeyValueListParser;
+import android.util.LongArray;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -136,8 +138,10 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -274,6 +278,11 @@ public final class PowerManagerService extends SystemService
      * {@link PowerManager#ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED} broadcasts.
      */
     private static final long ENHANCED_DISCHARGE_PREDICTION_BROADCAST_MIN_DELAY_MS = 60 * 1000L;
+
+    /** Reason ID for holding display suspend blocker. */
+    private static final String HOLDING_DISPLAY_SUSPEND_BLOCKER = "holding display";
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
     private final Context mContext;
     private final ServiceThread mHandlerThread;
@@ -1135,7 +1144,7 @@ public final class PowerManagerService extends SystemService
                 mHoldingBootingSuspendBlocker = true;
             }
             if (mDisplaySuspendBlocker != null) {
-                mDisplaySuspendBlocker.acquire();
+                mDisplaySuspendBlocker.acquire(HOLDING_DISPLAY_SUSPEND_BLOCKER);
                 mHoldingDisplaySuspendBlocker = true;
             }
             mHalAutoSuspendModeEnabled = false;
@@ -3530,13 +3539,13 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
-        public void acquireSuspendBlocker() {
-            mDisplaySuspendBlocker.acquire();
+        public void acquireSuspendBlocker(String name) {
+            mDisplaySuspendBlocker.acquire(name);
         }
 
         @Override
-        public void releaseSuspendBlocker() {
-            mDisplaySuspendBlocker.release();
+        public void releaseSuspendBlocker(String name) {
+            mDisplaySuspendBlocker.release(name);
         }
     };
 
@@ -3580,7 +3589,7 @@ public final class PowerManagerService extends SystemService
             mHoldingWakeLockSuspendBlocker = true;
         }
         if (needDisplaySuspendBlocker && !mHoldingDisplaySuspendBlocker) {
-            mDisplaySuspendBlocker.acquire();
+            mDisplaySuspendBlocker.acquire(HOLDING_DISPLAY_SUSPEND_BLOCKER);
             mHoldingDisplaySuspendBlocker = true;
         }
 
@@ -3610,7 +3619,7 @@ public final class PowerManagerService extends SystemService
             mHoldingWakeLockSuspendBlocker = false;
         }
         if (!needDisplaySuspendBlocker && mHoldingDisplaySuspendBlocker) {
-            mDisplaySuspendBlocker.release();
+            mDisplaySuspendBlocker.release(HOLDING_DISPLAY_SUSPEND_BLOCKER);
             mHoldingDisplaySuspendBlocker = false;
         }
 
@@ -5236,9 +5245,14 @@ public final class PowerManagerService extends SystemService
     }
 
     private final class SuspendBlockerImpl implements SuspendBlocker {
+        private static final String UNKNOWN_ID = "unknown";
         private final String mName;
         private final String mTraceName;
         private int mReferenceCount;
+
+        // Maps suspend blocker IDs to a list (LongArray) of open acquisitions for the suspend
+        // blocker. Each value is a timestamp of when the acquisition was made.
+        private final ArrayMap<String, LongArray> mOpenReferenceTimes = new ArrayMap<>();
 
         public SuspendBlockerImpl(String name) {
             mName = name;
@@ -5262,7 +5276,13 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public void acquire() {
+            acquire(UNKNOWN_ID);
+        }
+
+        @Override
+        public void acquire(String id) {
             synchronized (this) {
+                recordReferenceLocked(id);
                 mReferenceCount += 1;
                 if (mReferenceCount == 1) {
                     if (DEBUG_SPEW) {
@@ -5276,7 +5296,13 @@ public final class PowerManagerService extends SystemService
 
         @Override
         public void release() {
+            release(UNKNOWN_ID);
+        }
+
+        @Override
+        public void release(String id) {
             synchronized (this) {
+                removeReferenceLocked(id);
                 mReferenceCount -= 1;
                 if (mReferenceCount == 0) {
                     if (DEBUG_SPEW) {
@@ -5295,7 +5321,32 @@ public final class PowerManagerService extends SystemService
         @Override
         public String toString() {
             synchronized (this) {
-                return mName + ": ref count=" + mReferenceCount;
+                StringBuilder builder = new StringBuilder();
+                builder.append(mName);
+                builder.append(": ref count=").append(mReferenceCount);
+                builder.append(" [");
+                int size = mOpenReferenceTimes.size();
+                for (int i = 0; i < size; i++) {
+                    String id = mOpenReferenceTimes.keyAt(i);
+                    LongArray times = mOpenReferenceTimes.valueAt(i);
+                    if (times == null || times.size() == 0) {
+                        continue;
+                    }
+
+                    if (i > 0) {
+                        builder.append(", ");
+                    }
+                    builder.append(id).append(": (");
+                    for (int j = 0; j < times.size(); j++) {
+                        if (j > 0) {
+                            builder.append(", ");
+                        }
+                        builder.append(DATE_FORMAT.format(new Date(times.get(j))));
+                    }
+                    builder.append(")");
+                }
+                builder.append("]");
+                return builder.toString();
             }
         }
 
@@ -5306,6 +5357,22 @@ public final class PowerManagerService extends SystemService
                 proto.write(SuspendBlockerProto.REFERENCE_COUNT, mReferenceCount);
             }
             proto.end(sbToken);
+        }
+
+        private void recordReferenceLocked(String id) {
+            LongArray times = mOpenReferenceTimes.get(id);
+            if (times == null) {
+                times = new LongArray();
+                mOpenReferenceTimes.put(id, times);
+            }
+            times.add(System.currentTimeMillis());
+        }
+
+        private void removeReferenceLocked(String id) {
+            LongArray times = mOpenReferenceTimes.get(id);
+            if (times != null && times.size() > 0) {
+                times.remove(times.size() - 1);
+            }
         }
     }
 

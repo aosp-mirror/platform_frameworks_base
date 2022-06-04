@@ -19,11 +19,13 @@ package android.view.accessibility;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityTaskManager;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
@@ -126,6 +128,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     private LongArray mChildIds;
     private CharSequence mTitle;
     private long mAnchorId = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
+    private long mTransitionTime;
 
     private int mConnectionId = UNDEFINED_CONNECTION_ID;
 
@@ -526,6 +529,31 @@ public final class AccessibilityWindowInfo implements Parcelable {
         return mDisplayId;
     }
 
+
+    /**
+     * Sets the timestamp of the transition.
+     *
+     * @param transitionTime The timestamp from {@link SystemClock#uptimeMillis()} at which the
+     *                       transition happens.
+     *
+     * @hide
+     */
+    @UptimeMillisLong
+    public void setTransitionTimeMillis(long transitionTime) {
+        mTransitionTime = transitionTime;
+    }
+
+    /**
+     * Return the {@link SystemClock#uptimeMillis()} at which the last transition happens.
+     * A transition happens when {@link #getBoundsInScreen(Rect)} is changed.
+     *
+     * @return The transition timestamp.
+     */
+    @UptimeMillisLong
+    public long getTransitionTimeMillis() {
+        return mTransitionTime;
+    }
+
     /**
      * Returns a cached instance if such is available or a new one is
      * created.
@@ -634,6 +662,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mRegionInScreen.writeToParcel(parcel, flags);
         parcel.writeCharSequence(mTitle);
         parcel.writeLong(mAnchorId);
+        parcel.writeLong(mTransitionTime);
 
         final LongArray childIds = mChildIds;
         if (childIds == null) {
@@ -665,6 +694,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mRegionInScreen.set(other.mRegionInScreen);
         mTitle = other.mTitle;
         mAnchorId = other.mAnchorId;
+        mTransitionTime = other.mTransitionTime;
 
         if (mChildIds != null) mChildIds.clear();
         if (other.mChildIds != null && other.mChildIds.size() > 0) {
@@ -689,6 +719,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mRegionInScreen = Region.CREATOR.createFromParcel(parcel);
         mTitle = parcel.readCharSequence();
         mAnchorId = parcel.readLong();
+        mTransitionTime = parcel.readLong();
 
         final int childCount = parcel.readInt();
         if (childCount > 0) {
@@ -739,6 +770,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         builder.append(", focused=").append(isFocused());
         builder.append(", active=").append(isActive());
         builder.append(", pictureInPicture=").append(isInPictureInPictureMode());
+        builder.append(", transitionTime=").append(mTransitionTime);
         if (DEBUG) {
             builder.append(", parent=").append(mParentId);
             builder.append(", children=[");
