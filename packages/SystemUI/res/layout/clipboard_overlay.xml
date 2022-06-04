@@ -22,7 +22,8 @@
     android:theme="@style/FloatingOverlay"
     android:alpha="0"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:contentDescription="@string/clipboard_overlay_window_name">
     <ImageView
         android:id="@+id/actions_container_background"
         android:visibility="gone"
@@ -121,6 +122,7 @@
             android:id="@+id/image_preview"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
+            android:contentDescription="@string/clipboard_image_preview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
         <TextView
