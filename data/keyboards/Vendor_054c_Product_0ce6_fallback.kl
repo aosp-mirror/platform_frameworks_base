@@ -1,4 +1,4 @@
-# Copyright (C) 2021 The Android Open Source Project
+# Copyright (C) 2022 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,53 +16,55 @@
 # Sony Playstation(R) DualSense Controller
 #
 
-# Only use this key layout if we have HID_PLAYSTATION!
-requires_kernel_config CONFIG_HID_PLAYSTATION
+# Use this if HID_PLAYSTATION is not available
 
 # Mapping according to https://developer.android.com/training/game-controllers/controller-input.html
 
 # Square
-key 0x134   BUTTON_X
+key 304   BUTTON_X
 # Cross
-key 0x130   BUTTON_A
+key 305   BUTTON_A
 # Circle
-key 0x131   BUTTON_B
+key 306   BUTTON_B
 # Triangle
-key 0x133   BUTTON_Y
+key 307   BUTTON_Y
 
-key 0x136   BUTTON_L1
-key 0x137   BUTTON_R1
-key 0x138   BUTTON_L2
-key 0x139   BUTTON_R2
+key 308   BUTTON_L1
+key 309   BUTTON_R1
+key 310   BUTTON_L2
+key 311   BUTTON_R2
 
 # L2 axis
-axis 0x02   LTRIGGER
+axis 0x03   LTRIGGER
 # R2 axis
-axis 0x05   RTRIGGER
+axis 0x04   RTRIGGER
 
 # Left Analog Stick
 axis 0x00   X
 axis 0x01   Y
 # Right Analog Stick
-axis 0x03   Z
-axis 0x04   RZ
+axis 0x02   Z
+axis 0x05   RZ
 
 # Left stick click
-key 0x13d   BUTTON_THUMBL
+key 314   BUTTON_THUMBL
 # Right stick click
-key 0x13e   BUTTON_THUMBR
+key 315   BUTTON_THUMBR
 
 # Hat
 axis 0x10   HAT_X
 axis 0x11   HAT_Y
 
 # Mapping according to https://www.kernel.org/doc/Documentation/input/gamepad.txt
-# Share
-key 0x13a   BUTTON_SELECT
-# Options
-key 0x13b   BUTTON_START
+# Share / "half-sun"
+key 312   BUTTON_SELECT
+# Options / three horizontal lines
+key 313   BUTTON_START
 # PS key
-key 0x13c   BUTTON_MODE
+key 316   BUTTON_MODE
+
+# Touchpad press
+key 317 BUTTON_1
 
 # SENSORs
 sensor 0x00 ACCELEROMETER X

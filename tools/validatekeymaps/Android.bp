@@ -21,6 +21,7 @@ cc_binary_host {
     cflags: [
         "-Wall",
         "-Werror",
+        "-Wextra",
     ],
 
     static_libs: [
@@ -30,6 +31,9 @@ cc_binary_host {
         "libcutils",
         "liblog",
         "libui-types",
+    ],
+    shared_libs: [
+        "libvintf",
     ],
     target: {
         host_linux: {
