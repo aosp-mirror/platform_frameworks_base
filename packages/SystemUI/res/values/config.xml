@@ -654,7 +654,7 @@
     <integer name="config_connectionMinDuration">1000</integer>
 
     <!-- Flag to activate notification to contents feature -->
-    <bool name="config_notificationToContents">true</bool>
+    <bool name="config_notificationToContents">false</bool>
 
     <!-- The rounded corner drawable for each display in a multi-display device.
          {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
