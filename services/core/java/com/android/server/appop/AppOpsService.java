@@ -4502,8 +4502,9 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @return The restriction matching the package
      */
     private RestrictionBypass getBypassforPackage(@NonNull AndroidPackage pkg) {
-        return new RestrictionBypass(pkg.isPrivileged(), mContext.checkPermission(
-                android.Manifest.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS, -1, pkg.getUid())
+        return new RestrictionBypass(pkg.getUid() == Process.SYSTEM_UID, pkg.isPrivileged(),
+                mContext.checkPermission(android.Manifest.permission
+                        .EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS, -1, pkg.getUid())
                 == PackageManager.PERMISSION_GRANTED);
     }
 
@@ -4785,6 +4786,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (opBypass != null) {
                     // If we are the system, bypass user restrictions for certain codes
                     synchronized (this) {
+                        if (opBypass.isSystemUid && appBypass != null && appBypass.isSystemUid) {
+                            return false;
+                        }
                         if (opBypass.isPrivileged && appBypass != null && appBypass.isPrivileged) {
                             return false;
                         }
