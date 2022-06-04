@@ -97,6 +97,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.systemui.R;
@@ -218,6 +221,7 @@ public class ClipboardOverlayController {
         mRemoteCopyChip.setAlpha(1);
         mDismissButton = requireNonNull(mView.findViewById(R.id.dismiss_button));
 
+        mShareChip.setContentDescription(mContext.getString(com.android.internal.R.string.share));
         mView.setCallbacks(new DraggableConstraintLayout.SwipeDismissCallbacks() {
             @Override
             public void onInteraction() {
@@ -367,6 +371,8 @@ public class ClipboardOverlayController {
         PackageManager packageManager = mContext.getPackageManager();
         if (packageManager.resolveActivity(
                 remoteCopyIntent, PackageManager.ResolveInfoFlags.of(0)) != null) {
+            mRemoteCopyChip.setContentDescription(
+                    mContext.getString(R.string.clipboard_send_nearby_description));
             mRemoteCopyChip.setVisibility(View.VISIBLE);
             mRemoteCopyChip.setOnClickListener((v) -> {
                 mUiEventLogger.log(CLIPBOARD_OVERLAY_REMOTE_COPY_TAPPED);
@@ -581,6 +587,7 @@ public class ClipboardOverlayController {
         TextView textView = hidden ? mHiddenPreview : mTextPreview;
         showTextPreview(text, textView);
         View.OnClickListener listener = v -> editText();
+        setAccessibilityActionToEdit(textView);
         if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                 CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON, false)) {
             mEditChip.setVisibility(View.VISIBLE);
@@ -602,6 +609,7 @@ public class ClipboardOverlayController {
             showSinglePreview(mHiddenPreview);
             if (isEditableImage) {
                 mHiddenPreview.setOnClickListener(listener);
+                setAccessibilityActionToEdit(mHiddenPreview);
             }
         } else if (isEditableImage) { // if the MIMEtype is image, try to load
             try {
@@ -612,6 +620,7 @@ public class ClipboardOverlayController {
                 showSinglePreview(mImagePreview);
                 mImagePreview.setImageBitmap(thumbnail);
                 mImagePreview.setOnClickListener(listener);
+                setAccessibilityActionToEdit(mImagePreview);
             } catch (IOException e) {
                 Log.e(TAG, "Thumbnail loading failed", e);
                 showTextPreview(
@@ -633,6 +642,12 @@ public class ClipboardOverlayController {
                     mContext.getString(R.string.clipboard_edit_image_description));
         }
         return isEditableImage;
+    }
+
+    private void setAccessibilityActionToEdit(View view) {
+        ViewCompat.replaceAccessibilityAction(view,
+                AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
+                mContext.getString(R.string.clipboard_edit), null);
     }
 
     private Intent getRemoteCopyIntent(ClipData clipData) {
