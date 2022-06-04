@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import static java.util.Objects.requireNonNull;
 
+import android.os.Handler;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -59,6 +60,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -97,6 +99,8 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private IStatusBarService mService;
     @Mock private BindEventManagerImpl mBindEventManagerImpl;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    @Mock private Handler mHandler;
+    @Mock private SecureSettings mSecureSettings;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
     private final SectionStyleProvider mSectionStyleProvider = new SectionStyleProvider();
 
@@ -110,8 +114,11 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mAdjustmentProvider =
-            new NotifUiAdjustmentProvider(mLockscreenUserManager, mSectionStyleProvider);
+        mAdjustmentProvider = new NotifUiAdjustmentProvider(
+                mHandler,
+                mSecureSettings,
+                mLockscreenUserManager,
+                mSectionStyleProvider);
         mEntry = getNotificationEntryBuilder().setParent(ROOT_ENTRY).build();
         mInflationError = new Exception(TEST_MESSAGE);
         mErrorManager = new NotifInflationErrorManager();
