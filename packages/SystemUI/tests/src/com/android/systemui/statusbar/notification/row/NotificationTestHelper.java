@@ -124,6 +124,7 @@ public class NotificationTestHelper {
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     public final OnUserInteractionCallback mOnUserInteractionCallback;
     public final Runnable mFutureDismissalRunnable;
+    private @InflationFlag int mDefaultInflationFlags;
 
     public NotificationTestHelper(
             Context context,
@@ -189,6 +190,10 @@ public class NotificationTestHelper {
                 .thenReturn(mFutureDismissalRunnable);
     }
 
+    public void setDefaultInflationFlags(@InflationFlag int defaultInflationFlags) {
+        mDefaultInflationFlags = defaultInflationFlags;
+    }
+
     /**
      * Creates a generic row.
      *
@@ -220,7 +225,7 @@ public class NotificationTestHelper {
      * @throws Exception
      */
     public ExpandableNotificationRow createRow(Notification notification) throws Exception {
-        return generateRow(notification, PKG, UID, USER_HANDLE, 0 /* extraInflationFlags */);
+        return generateRow(notification, PKG, UID, USER_HANDLE, mDefaultInflationFlags);
     }
 
     /**
@@ -271,7 +276,7 @@ public class NotificationTestHelper {
                 null /* groupKey */, makeBubbleMetadata(null));
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
-                0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+                mDefaultInflationFlags, IMPORTANCE_HIGH);
         modifyRanking(row.getEntry())
                 .setCanBubble(true)
                 .build();
@@ -287,7 +292,7 @@ public class NotificationTestHelper {
                 null /* groupKey */, makeShortcutBubbleMetadata(shortcutId));
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
-                0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+                mDefaultInflationFlags, IMPORTANCE_HIGH);
         modifyRanking(row.getEntry())
                 .setCanBubble(true)
                 .build();
@@ -304,7 +309,7 @@ public class NotificationTestHelper {
                 GROUP_KEY /* groupKey */, makeBubbleMetadata(null));
         n.flags |= FLAG_BUBBLE;
         ExpandableNotificationRow row = generateRow(n, PKG, UID, USER_HANDLE,
-                0 /* extraInflationFlags */, IMPORTANCE_HIGH);
+                mDefaultInflationFlags, IMPORTANCE_HIGH);
         modifyRanking(row.getEntry())
                 .setCanBubble(true)
                 .build();
@@ -383,7 +388,7 @@ public class NotificationTestHelper {
             @Nullable String groupKey)
             throws Exception {
         Notification notif = createNotification(isGroupSummary, groupKey);
-        return generateRow(notif, pkg, uid, userHandle, 0 /* inflationFlags */);
+        return generateRow(notif, pkg, uid, userHandle, mDefaultInflationFlags);
     }
 
     /**
