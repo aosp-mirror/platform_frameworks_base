@@ -3322,19 +3322,48 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    public void testIsActiveSupervisionApp() throws Exception {
-        when(mServiceContext.resources
-                .getString(R.string.config_defaultSupervisionProfileOwnerComponent))
-                .thenReturn(admin1.flattenToString());
+    public void testSupervisionConfig() throws Exception {
+        final int uid = UserHandle.getUid(15, 19436);
+        addManagedProfile(admin1, uid, admin1);
+        mContext.binder.callingUid = uid;
 
-        final int PROFILE_USER = 15;
-        final int PROFILE_ADMIN = UserHandle.getUid(PROFILE_USER, 19436);
-        addManagedProfile(admin1, PROFILE_ADMIN, admin1);
-        mContext.binder.callingUid = PROFILE_ADMIN;
+        verifySupervisionConfig(uid, null, null);
+        verifySupervisionConfig(uid, "", null);
+        verifySupervisionConfig(uid, null, "");
+        verifySupervisionConfig(uid, "", "");
 
+        verifySupervisionConfig(uid, admin1.flattenToString(), null);
+        verifySupervisionConfig(uid, admin1.flattenToString(), "");
+
+        verifySupervisionConfig(uid, null, admin1.getPackageName());
+        verifySupervisionConfig(uid, "", admin1.getPackageName());
+    }
+
+    private void verifySupervisionConfig(
+            int uid , String configComponentName, String configPackageName) {
+        final boolean isAdmin = admin1.flattenToString().equals(configComponentName)
+                || admin1.getPackageName().equals(configPackageName);
+
+        final UserHandle user = UserHandle.getUserHandleForUid(uid);
         final DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
-        assertThat(dpmi.isActiveSupervisionApp(PROFILE_ADMIN)).isTrue();
+
+        when(mServiceContext.resources
+                .getString(R.string.config_defaultSupervisionProfileOwnerComponent))
+                .thenReturn(configComponentName);
+
+        when(mServiceContext.resources
+                .getString(R.string.config_systemSupervision))
+                .thenReturn(configPackageName);
+
+        if (isAdmin) {
+            assertThat(dpmi.isActiveSupervisionApp(uid)).isTrue();
+            assertThat(dpm.getProfileOwnerOrDeviceOwnerSupervisionComponent(user))
+                        .isEqualTo(admin1);
+        } else {
+            assertThat(dpmi.isActiveSupervisionApp(uid)).isFalse();
+            assertThat(dpm.getProfileOwnerOrDeviceOwnerSupervisionComponent(user)).isNull();
+        }
     }
 
     // Test if lock timeout on managed profile is handled correctly depending on whether profile
