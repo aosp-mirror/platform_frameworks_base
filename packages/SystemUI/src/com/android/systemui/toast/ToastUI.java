@@ -27,6 +27,7 @@ import android.app.INotificationManager;
 import android.app.ITransientNotificationCallback;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.hardware.display.DisplayManager;
 import android.os.IBinder;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -106,10 +107,15 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
     @Override
     @MainThread
     public void showToast(int uid, String packageName, IBinder token, CharSequence text,
-            IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback) {
+            IBinder windowToken, int duration, @Nullable ITransientNotificationCallback callback,
+            int displayId) {
         Runnable showToastRunnable = () -> {
             UserHandle userHandle = UserHandle.getUserHandleForUid(uid);
             Context context = mContext.createContextAsUser(userHandle, 0);
+
+            DisplayManager mDisplayManager = mContext.getSystemService(DisplayManager.class);
+            Context displayContext = context.createDisplayContext(
+                    mDisplayManager.getDisplay(displayId));
             mToast = mToastFactory.createToast(mContext /* sysuiContext */, text, packageName,
                     userHandle.getIdentifier(), mOrientation);
 
@@ -118,7 +124,7 @@ public class ToastUI extends CoreStartable implements CommandQueue.Callbacks {
             }
 
             mCallback = callback;
-            mPresenter = new ToastPresenter(context, mIAccessibilityManager,
+            mPresenter = new ToastPresenter(displayContext, mIAccessibilityManager,
                     mNotificationManager, packageName);
             // Set as trusted overlay so touches can pass through toasts
             mPresenter.getLayoutParams().setTrustedOverlay();
