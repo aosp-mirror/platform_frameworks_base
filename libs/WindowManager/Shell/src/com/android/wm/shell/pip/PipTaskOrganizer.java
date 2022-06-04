@@ -462,7 +462,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         // Cancel the existing animator if there is any.
-        cancelCurrentAnimator();
+        // TODO(b/232439933): this is disabled temporarily to unblock b/234502692.
+        // cancelCurrentAnimator();
 
         // Set the exiting state first so if there is fixed rotation later, the running animation
         // won't be interrupted by alpha animation for existing PiP.

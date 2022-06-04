@@ -53,6 +53,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_QS_TILE;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_APP_LAUNCH_FROM_SETTINGS_BUTTON;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_EXPAND_COLLAPSE_LOCK;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_APPEAR;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_HEADS_UP_DISAPPEAR;
@@ -75,6 +76,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_DIALOG_OPEN;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
@@ -202,6 +204,8 @@ public class InteractionJankMonitor {
     public static final int CUJ_VOLUME_CONTROL = 55;
     public static final int CUJ_BIOMETRIC_PROMPT_TRANSITION = 56;
     public static final int CUJ_SETTINGS_TOGGLE = 57;
+    public static final int CUJ_SHADE_DIALOG_OPEN = 58;
+    public static final int CUJ_USER_DIALOG_OPEN = 59;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -268,6 +272,8 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__BIOMETRIC_PROMPT_TRANSITION,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_TOGGLE,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_DIALOG_OPEN,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -346,6 +352,8 @@ public class InteractionJankMonitor {
             CUJ_VOLUME_CONTROL,
             CUJ_BIOMETRIC_PROMPT_TRANSITION,
             CUJ_SETTINGS_TOGGLE,
+            CUJ_SHADE_DIALOG_OPEN,
+            CUJ_USER_DIALOG_OPEN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -780,6 +788,10 @@ public class InteractionJankMonitor {
                 return "BIOMETRIC_PROMPT_TRANSITION";
             case CUJ_SETTINGS_TOGGLE:
                 return "SETTINGS_TOGGLE";
+            case CUJ_SHADE_DIALOG_OPEN:
+                return "SHADE_DIALOG_OPEN";
+            case CUJ_USER_DIALOG_OPEN:
+                return "USER_DIALOG_OPEN";
         }
         return "UNKNOWN";
     }

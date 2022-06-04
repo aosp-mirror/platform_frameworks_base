@@ -2504,6 +2504,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 // supported, so it's always null.
                 mContext.getMainExecutor().execute(() -> {
                     if (finishedCallback == null) {
+                        mKeyguardUnlockAnimationControllerLazy.get()
+                                .notifyFinishedKeyguardExitAnimation(false /* cancelled */);
                         mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                         return;
                     }

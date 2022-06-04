@@ -24,6 +24,8 @@ import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanki
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifySbn;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -39,10 +41,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.DisplayMetrics;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -53,6 +57,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
+import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 
 import org.junit.Assert;
@@ -71,6 +76,8 @@ import java.util.List;
 public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mGroupRow;
+    private ExpandableNotificationRow mNotifRow;
+    private ExpandableNotificationRow mPublicRow;
 
     private NotificationTestHelper mNotificationTestHelper;
     boolean mHeadsUpAnimatingAway = false;
@@ -84,9 +91,101 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
                 mContext,
                 mDependency,
                 TestableLooper.get(this));
+        mNotificationTestHelper.setDefaultInflationFlags(FLAG_CONTENT_VIEW_ALL);
+        // create a standard private notification row
+        Notification normalNotif = mNotificationTestHelper.createNotification();
+        normalNotif.publicVersion = null;
+        mNotifRow = mNotificationTestHelper.createRow(normalNotif);
+        // create a notification row whose public version is identical
+        Notification publicNotif = mNotificationTestHelper.createNotification();
+        publicNotif.publicVersion = mNotificationTestHelper.createNotification();
+        mPublicRow = mNotificationTestHelper.createRow(publicNotif);
+        // create a group row
         mGroupRow = mNotificationTestHelper.createGroup();
         mGroupRow.setHeadsUpAnimatingAwayListener(
                 animatingAway -> mHeadsUpAnimatingAway = animatingAway);
+
+    }
+
+    @Test
+    public void testSetSensitiveOnNotifRowNotifiesOfHeightChange() throws InterruptedException {
+        // GIVEN a sensitive notification row that's currently redacted
+        measureAndLayout(mNotifRow);
+        mNotifRow.setHideSensitiveForIntrinsicHeight(true);
+        mNotifRow.setSensitive(true, true);
+        assertThat(mNotifRow.getShowingLayout()).isSameInstanceAs(mNotifRow.getPublicLayout());
+        assertThat(mNotifRow.getIntrinsicHeight()).isGreaterThan(0);
+
+        // GIVEN that the row has a height change listener
+        OnHeightChangedListener listener = mock(OnHeightChangedListener.class);
+        mNotifRow.setOnHeightChangedListener(listener);
+
+        // WHEN the row is set to no longer be sensitive
+        mNotifRow.setSensitive(false, true);
+
+        // VERIFY that the height change listener is invoked
+        assertThat(mNotifRow.getShowingLayout()).isSameInstanceAs(mNotifRow.getPrivateLayout());
+        assertThat(mNotifRow.getIntrinsicHeight()).isGreaterThan(0);
+        verify(listener).onHeightChanged(eq(mNotifRow), eq(false));
+    }
+
+    @Test
+    public void testSetSensitiveOnGroupRowNotifiesOfHeightChange() {
+        // GIVEN a sensitive group row that's currently redacted
+        measureAndLayout(mGroupRow);
+        mGroupRow.setHideSensitiveForIntrinsicHeight(true);
+        mGroupRow.setSensitive(true, true);
+        assertThat(mGroupRow.getShowingLayout()).isSameInstanceAs(mGroupRow.getPublicLayout());
+        assertThat(mGroupRow.getIntrinsicHeight()).isGreaterThan(0);
+
+        // GIVEN that the row has a height change listener
+        OnHeightChangedListener listener = mock(OnHeightChangedListener.class);
+        mGroupRow.setOnHeightChangedListener(listener);
+
+        // WHEN the row is set to no longer be sensitive
+        mGroupRow.setSensitive(false, true);
+
+        // VERIFY that the height change listener is invoked
+        assertThat(mGroupRow.getShowingLayout()).isSameInstanceAs(mGroupRow.getPrivateLayout());
+        assertThat(mGroupRow.getIntrinsicHeight()).isGreaterThan(0);
+        verify(listener).onHeightChanged(eq(mGroupRow), eq(false));
+    }
+
+    @Test
+    public void testSetSensitiveOnPublicRowDoesNotNotifyOfHeightChange() {
+        // GIVEN a sensitive public row that's currently redacted
+        measureAndLayout(mPublicRow);
+        mPublicRow.setHideSensitiveForIntrinsicHeight(true);
+        mPublicRow.setSensitive(true, true);
+        assertThat(mPublicRow.getShowingLayout()).isSameInstanceAs(mPublicRow.getPublicLayout());
+        assertThat(mPublicRow.getIntrinsicHeight()).isGreaterThan(0);
+
+        // GIVEN that the row has a height change listener
+        OnHeightChangedListener listener = mock(OnHeightChangedListener.class);
+        mPublicRow.setOnHeightChangedListener(listener);
+
+        // WHEN the row is set to no longer be sensitive
+        mPublicRow.setSensitive(false, true);
+
+        // VERIFY that the height change listener is not invoked, because the height didn't change
+        assertThat(mPublicRow.getShowingLayout()).isSameInstanceAs(mPublicRow.getPrivateLayout());
+        assertThat(mPublicRow.getIntrinsicHeight()).isGreaterThan(0);
+        assertThat(mPublicRow.getPrivateLayout().getMinHeight())
+                .isEqualTo(mPublicRow.getPublicLayout().getMinHeight());
+        verify(listener, never()).onHeightChanged(eq(mPublicRow), eq(false));
+    }
+
+    private void measureAndLayout(ExpandableNotificationRow row) {
+        DisplayMetrics dm = new DisplayMetrics();
+        getContext().getDisplay().getRealMetrics(dm);
+        int width = (int) Math.ceil(400f * dm.density);
+        int height = (int) Math.ceil(600f * dm.density);
+
+        row.measure(
+                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.UNSPECIFIED)
+        );
+        row.layout(0, 0, row.getMeasuredWidth(), row.getMeasuredHeight());
     }
 
     @Test
