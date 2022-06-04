@@ -946,6 +946,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"ടെക്‌സ്റ്റ് പകർത്തി"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"ചിത്രം പകർത്തി"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"ഉള്ളടക്കം പകർത്തി"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"ചേർക്കുക"</string>
     <string name="manage_users" msgid="1823875311934643849">"ഉപയോക്താക്കളെ മാനേജ് ചെയ്യുക"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"സ്പ്ലിറ്റ് സ്ക്രീനിലേക്ക് വലിച്ചിടുന്നതിനെ ഈ അറിയിപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>

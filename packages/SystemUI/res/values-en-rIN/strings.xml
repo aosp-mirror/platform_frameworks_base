@@ -845,8 +845,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Unknown app"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stop casting"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Available devices for audio output."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"How broadcasting works"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"People near you with compatible Bluetooth devices can listen to the media that you\'re broadcasting"</string>
@@ -947,6 +946,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Text copied"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Image copied"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Content copied"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Add"</string>
     <string name="manage_users" msgid="1823875311934643849">"Manage users"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"This notification does not support dragging to Split screen."</string>

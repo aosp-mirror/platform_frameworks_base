@@ -845,8 +845,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"अनजान ऐप्लिकेशन"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"कास्टिंग करना रोकें"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ऑडियो आउटपुट के लिए उपलब्ध डिवाइस."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"वॉल्यूम"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्ट करने की सुविधा कैसे काम करती है"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करें"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"आपके आस-पास मौजूद लोग, ब्रॉडकास्ट किए जा रहे मीडिया को सुन सकते हैं. हालांकि, इसके लिए उनके पास ऐसे ब्लूटूथ डिवाइस होने चाहिए जिन पर मीडिया चलाया जा सके"</string>
@@ -947,6 +946,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"टेक्स्ट कॉपी किया गया"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"इमेज कॉपी की गई"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"कॉन्टेंट कॉपी किया गया"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"जोड़ें"</string>
     <string name="manage_users" msgid="1823875311934643849">"उपयोगकर्ताओं को मैनेज करें"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"इस सूचना को स्प्लिट स्क्रीन मोड में, खींचा और छोड़ा नहीं जा सकता."</string>
