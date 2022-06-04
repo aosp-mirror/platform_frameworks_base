@@ -22,7 +22,6 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -51,7 +50,6 @@ public class EditTextActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.clipboard_edit_text_activity);
         findViewById(R.id.done_button).setOnClickListener((v) -> saveToClipboard());
-        findViewById(R.id.share).setOnClickListener((v) -> share());
         mEditText = findViewById(R.id.edit_text);
         mAttribution = findViewById(R.id.attribution);
         mClipboardManager = requireNonNull(getSystemService(ClipboardManager.class));
@@ -90,10 +88,12 @@ public class EditTextActivity extends Activity
 
     @Override // ClipboardManager.OnPrimaryClipChangedListener
     public void onPrimaryClipChanged() {
-        hideImeAndFinish();
+        hideIme();
+        finish();
     }
 
     private void saveToClipboard() {
+        hideIme();
         Editable editedText = mEditText.getText();
         editedText.clearSpans();
         ClipData clip = ClipData.newPlainText("text", editedText);
@@ -101,22 +101,11 @@ public class EditTextActivity extends Activity
         extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, mSensitive);
         clip.getDescription().setExtras(extras);
         mClipboardManager.setPrimaryClip(clip);
-        hideImeAndFinish();
+        finish();
     }
 
-    private void share() {
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, mEditText.getText().toString());
-        sendIntent.setType("text/plain");
-
-        Intent shareIntent = Intent.createChooser(sendIntent, null);
-        startActivity(shareIntent);
-    }
-
-    private void hideImeAndFinish() {
+    private void hideIme() {
         InputMethodManager imm = getSystemService(InputMethodManager.class);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
-        finish();
     }
 }
