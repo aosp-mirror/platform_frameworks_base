@@ -2548,28 +2548,31 @@ final class InstallPackageHelper {
     public void sendPendingBroadcasts() {
         String[] packages;
         ArrayList<String>[] components;
-        int size = 0;
+        int numBroadcasts = 0, numUsers;
         int[] uids;
 
         synchronized (mPm.mLock) {
             final SparseArray<ArrayMap<String, ArrayList<String>>> userIdToPackagesToComponents =
                     mPm.mPendingBroadcasts.copiedMap();
-            size = userIdToPackagesToComponents.size();
-            if (size <= 0) {
+            numUsers = userIdToPackagesToComponents.size();
+            for (int n = 0; n < numUsers; n++) {
+                numBroadcasts += userIdToPackagesToComponents.valueAt(n).size();
+            }
+            if (numBroadcasts == 0) {
                 // Nothing to be done. Just return
                 return;
             }
-            packages = new String[size];
-            components = new ArrayList[size];
-            uids = new int[size];
+            packages = new String[numBroadcasts];
+            components = new ArrayList[numBroadcasts];
+            uids = new int[numBroadcasts];
             int i = 0;  // filling out the above arrays
 
-            for (int n = 0; n < size; n++) {
+            for (int n = 0; n < numUsers; n++) {
                 final int packageUserId = userIdToPackagesToComponents.keyAt(n);
                 final ArrayMap<String, ArrayList<String>> componentsToBroadcast =
                         userIdToPackagesToComponents.valueAt(n);
                 final int numComponents = CollectionUtils.size(componentsToBroadcast);
-                for (int index = 0; i < size && index < numComponents; index++) {
+                for (int index = 0; index < numComponents; index++) {
                     packages[i] = componentsToBroadcast.keyAt(index);
                     components[i] = componentsToBroadcast.valueAt(index);
                     final PackageSetting ps = mPm.mSettings.getPackageLPr(packages[i]);
@@ -2579,12 +2582,12 @@ final class InstallPackageHelper {
                     i++;
                 }
             }
-            size = i;
+            numBroadcasts = i;
             mPm.mPendingBroadcasts.clear();
         }
         final Computer snapshot = mPm.snapshotComputer();
         // Send broadcasts
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < numBroadcasts; i++) {
             mPm.sendPackageChangedBroadcast(snapshot, packages[i], true /* dontKillApp */,
                     components[i], uids[i], null /* reason */);
         }
