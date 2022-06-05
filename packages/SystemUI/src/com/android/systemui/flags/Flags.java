@@ -168,7 +168,7 @@ public class Flags {
      */
     @Keep
     public static final SysPropBooleanFlag BUBBLES_HOME_GESTURE =
-            new SysPropBooleanFlag(1101, "persist.wm.debug.bubbles_home_gesture", false);
+            new SysPropBooleanFlag(1101, "persist.wm.debug.bubbles_home_gesture", true);
 
     // 1200 - predictive back
     @Keep
