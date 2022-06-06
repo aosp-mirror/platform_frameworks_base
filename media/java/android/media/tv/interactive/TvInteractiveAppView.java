@@ -281,6 +281,10 @@ public class TvInteractiveAppView extends ViewGroup {
         mSurfaceView.setSecure(true);
         mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
         mSurfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+
+        mSurfaceView.setZOrderOnTop(false);
+        mSurfaceView.setZOrderMediaOverlay(true);
+
         addView(mSurfaceView);
     }
 
