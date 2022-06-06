@@ -19,11 +19,15 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mic_active" msgid="5766614241012047024">"Mikrofon je aktiven"</string>
-    <string name="app_accessed_mic" msgid="2754428675130470196">"Aplikacija %1$s je dostopala do mikrofona"</string>
     <string name="notification_vpn_connected" msgid="3891023882833274730">"Povezava z omrežjem VPN je vzpostavljena"</string>
     <string name="notification_vpn_disconnected" msgid="7150747626448044843">"Povezava z omrežjem VPN je prekinjena"</string>
     <string name="notification_disclosure_vpn_text" msgid="3873532735584866236">"Prek storitve <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="tv_notification_panel_title" msgid="5311050946506276154">"Obvestila"</string>
     <string name="tv_notification_panel_no_notifications" msgid="9115191912267270678">"Ni obvestil"</string>
+    <string name="mic_recording_announcement" msgid="7587123608060316575">"Snemanje z mikrofonom"</string>
+    <string name="camera_recording_announcement" msgid="7240177719403759112">"Snemanje s fotoaparatom"</string>
+    <string name="mic_and_camera_recording_announcement" msgid="8599231390508812667">"Snemanje s fotoaparatom in mikrofonom"</string>
+    <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"Ustavljeno snemanje z mikrofonom"</string>
+    <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"Ustavljeno snemanje s fotoaparatom"</string>
+    <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"Ustavljeno snemanje s fotoaparatom in mikrofonom"</string>
 </resources>
