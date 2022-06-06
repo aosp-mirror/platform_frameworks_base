@@ -47,7 +47,7 @@
     <item msgid="287997784730044767">"ਚਾਲੂ ਹੈ"</item>
   </string-array>
   <string-array name="tile_states_battery">
-    <item msgid="6311253873330062961">"ਅਣਉਪਲਬਧ ਹੈ"</item>
+    <item msgid="6311253873330062961">"ਅਣਉਪਲਬਧ"</item>
     <item msgid="7838121007534579872">"ਬੰਦ ਹੈ"</item>
     <item msgid="1578872232501319194">"ਚਾਲੂ ਹੈ"</item>
   </string-array>

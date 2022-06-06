@@ -58,7 +58,7 @@
   </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"Indisponível"</item>
-    <item msgid="5044688398303285224">"Desligado"</item>
+    <item msgid="5044688398303285224">"Desligada"</item>
     <item msgid="8527389108867454098">"Ligado"</item>
   </string-array>
   <string-array name="tile_states_rotation">
