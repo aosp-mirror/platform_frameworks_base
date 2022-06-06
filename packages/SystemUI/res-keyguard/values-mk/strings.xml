@@ -90,7 +90,8 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Уредот е заклучен од администраторот"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Уредот е заклучен рачно"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Непознат"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
+    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">Внесете PIN-код за SIM-картичката. Ви преостанува уште <xliff:g id="NUMBER_1">%d</xliff:g> обид.</item>
       <item quantity="other">Внесете PIN-код за SIM-картичката. Ви преостануваат уште <xliff:g id="NUMBER_1">%d</xliff:g> обиди.</item>

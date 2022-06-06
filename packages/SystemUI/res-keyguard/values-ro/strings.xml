@@ -92,7 +92,8 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispozitiv blocat de administrator"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Dispozitivul a fost blocat manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nu este recunoscut"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Pentru a folosi Deblocarea facială, activați "<b>"Accesul la cameră"</b>" în Setări și confidențialitate"</string>
+    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="few">Introduceți codul PIN pentru cardul SIM. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări.</item>
       <item quantity="other">Introduceți codul PIN pentru cardul SIM. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări.</item>
