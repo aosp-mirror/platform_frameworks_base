@@ -580,6 +580,9 @@
         280
     </integer>
 
+    <!-- The time (in ms) needed to trigger the lock icon view's long-press affordance -->
+    <integer name="config_lockIconLongPress" translatable="false">200</integer>
+
     <!-- package name of a built-in camera app to use to restrict implicit intent resolution
          when the double-press power gesture is used. Ignored if empty. -->
     <string translatable="false" name="config_cameraGesturePackage"></string>
