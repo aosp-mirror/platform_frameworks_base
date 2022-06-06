@@ -50,6 +50,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -146,6 +147,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private final SpringAnimation mSpringAnimation;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final List<Gefingerpoken> mMotionEventListeners = new ArrayList<>();
+    private final GestureDetector mDoubleTapDetector;
 
     private float mLastTouchY = -1;
     private int mActivePointerId = -1;
@@ -305,6 +307,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
         super(context, attrs, defStyle);
         mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
         mViewConfiguration = ViewConfiguration.get(context);
+        mDoubleTapDetector = new GestureDetector(context, new DoubleTapListener());
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
@@ -434,6 +437,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
+        mDoubleTapDetector.onTouchEvent(event);
 
         boolean result =  mMotionEventListeners.stream()
                 .anyMatch(listener -> listener.onTouchEvent(event))
@@ -475,13 +479,19 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 if (mSwipeListener != null) {
                     mSwipeListener.onSwipeUp();
                 }
-            } else {
-                if (!mIsDragging) {
-                    mViewMode.handleTap(event);
-                }
             }
         }
         return true;
+    }
+
+    private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            if (!mIsDragging) {
+                mViewMode.handleDoubleTap(e);
+            }
+            return true;
+        }
     }
 
     void addMotionEventListener(Gefingerpoken listener) {
@@ -736,8 +746,8 @@ public class KeyguardSecurityContainer extends FrameLayout {
         /** Alter the ViewFlipper position, based upon a touch outside of it */
         default void updatePositionByTouchX(float x) {};
 
-        /** A tap on the container, outside of the ViewFlipper */
-        default void handleTap(MotionEvent event) {};
+        /** A double tap on the container, outside of the ViewFlipper */
+        default void handleDoubleTap(MotionEvent event) {};
 
         /** Called when the view needs to reset or hides */
         default void reset() {};
@@ -1111,11 +1121,11 @@ public class KeyguardSecurityContainer extends FrameLayout {
         }
 
         /**
-         * Determine if a tap on this view is on the other side. If so, will animate positions
-         * and record the preference to always show on this side.
+         * Determine if a double tap on this view is on the other side. If so, will animate
+         * positions and record the preference to always show on this side.
          */
         @Override
-        public void handleTap(MotionEvent event) {
+        public void handleDoubleTap(MotionEvent event) {
             float x = event.getX();
             boolean currentlyLeftAligned = isLeftAligned();
             // Did the tap hit the "other" side of the bouncer?
