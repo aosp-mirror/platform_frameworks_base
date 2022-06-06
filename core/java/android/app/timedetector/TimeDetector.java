@@ -44,6 +44,12 @@ public interface TimeDetector {
     String SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED = "is_auto_detection_enabled";
 
     /**
+     * A shell command that sets the current "auto time detection" global setting value.
+     * @hide
+     */
+    String SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED = "set_auto_detection_enabled";
+
+    /**
      * A shell command that injects a manual time suggestion.
      * @hide
      */

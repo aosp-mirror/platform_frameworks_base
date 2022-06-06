@@ -17,6 +17,7 @@ package com.android.server.timedetector;
 
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SERVICE_NAME;
+import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_EXTERNAL_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_GNSS_TIME;
 import static android.app.timedetector.TimeDetector.SHELL_COMMAND_SUGGEST_MANUAL_TIME;
@@ -28,11 +29,13 @@ import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_LOWE
 import static com.android.server.timedetector.ServerFlags.KEY_TIME_DETECTOR_ORIGIN_PRIORITIES_OVERRIDE;
 
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeConfiguration;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.ShellCommand;
+import android.os.UserHandle;
 
 import java.io.PrintWriter;
 import java.util.function.Consumer;
@@ -56,6 +59,8 @@ class TimeDetectorShellCommand extends ShellCommand {
         switch (cmd) {
             case SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED:
                 return runIsAutoDetectionEnabled();
+            case SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED:
+                return runSetAutoDetectionEnabled();
             case SHELL_COMMAND_SUGGEST_MANUAL_TIME:
                 return runSuggestManualTime();
             case SHELL_COMMAND_SUGGEST_TELEPHONY_TIME:
@@ -79,6 +84,15 @@ class TimeDetectorShellCommand extends ShellCommand {
                 .isAutoDetectionEnabled();
         pw.println(enabled);
         return 0;
+    }
+
+    private int runSetAutoDetectionEnabled() {
+        boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        int userId = UserHandle.USER_CURRENT;
+        TimeConfiguration configuration = new TimeConfiguration.Builder()
+                .setAutoDetectionEnabled(enabled)
+                .build();
+        return mInterface.updateConfiguration(userId, configuration) ? 0 : 1;
     }
 
     private int runSuggestManualTime() {
@@ -136,12 +150,19 @@ class TimeDetectorShellCommand extends ShellCommand {
         pw.printf("    Print this help text.\n");
         pw.printf("  %s\n", SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED);
         pw.printf("    Prints true/false according to the automatic time detection setting.\n");
+        pw.printf("  %s true|false\n", SHELL_COMMAND_SET_AUTO_DETECTION_ENABLED);
+        pw.printf("    Sets the automatic time detection setting.\n");
         pw.println();
         pw.printf("  %s <manual suggestion opts>\n", SHELL_COMMAND_SUGGEST_MANUAL_TIME);
+        pw.printf("    Suggests a time as if via the \"manual\" origin.\n");
         pw.printf("  %s <telephony suggestion opts>\n", SHELL_COMMAND_SUGGEST_TELEPHONY_TIME);
+        pw.printf("    Suggests a time as if via the \"telephony\" origin.\n");
         pw.printf("  %s <network suggestion opts>\n", SHELL_COMMAND_SUGGEST_NETWORK_TIME);
+        pw.printf("    Suggests a time as if via the \"network\" origin.\n");
         pw.printf("  %s <gnss suggestion opts>\n", SHELL_COMMAND_SUGGEST_GNSS_TIME);
+        pw.printf("    Suggests a time as if via the \"gnss\" origin.\n");
         pw.printf("  %s <external suggestion opts>\n", SHELL_COMMAND_SUGGEST_EXTERNAL_TIME);
+        pw.printf("    Suggests a time as if via the \"external\" origin.\n");
         pw.println();
         ManualTimeSuggestion.printCommandLineOpts(pw);
         pw.println();
