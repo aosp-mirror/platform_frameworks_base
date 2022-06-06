@@ -424,8 +424,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite á aplicación modificar o rexistro de chamadas da tableta, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite que a aplicación modifique o rexistro de chamadas do dispositivo Android TV, incluídos os datos acerca de chamadas entrantes e saíntes. As aplicacións maliciosas poden utilizar este permiso para borrar ou modificar o rexistro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Permite á aplicación modificar o rexistro de chamadas do teléfono, incluídos os datos acerca de chamadas entrantes e saíntes. É posible que aplicacións maliciosas utilicen esta acción para borrar ou modificar o teu rexistro de chamadas."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"acceder a sensores corporais (como monitores de ritmo cardíaco)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permite que a aplicación acceda aos datos dos sensores que controlan o teu estado físico, como o ritmo cardíaco."</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"acceder a sensores corporais (como monitores de frecuencia cardíaca)"</string>
+    <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Permite que a aplicación acceda aos datos dos sensores que controlan o teu estado físico, como a frecuencia cardíaca."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler os detalles e os eventos do calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta aplicación pode ler todos os eventos do calendario almacenados na túa tableta e compartir ou gardar os datos do calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta aplicación pode ler todos os eventos do calendario almacenados no dispositivo Android TV e compartir ou gardar os datos do calendario."</string>
@@ -1383,10 +1383,10 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Detectouse un accesorio de audio analóxico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"O dispositivo conectado non é compatible con este teléfono. Toca para obter máis información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar a depuración por USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca e desactiva a depuración por USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selecciona a opción para desactivar a depuración por USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"A depuración sen fíos está conectada"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar a depuración sen fíos"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca e desactiva a depuración sen fíos"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Selecciona para desactivar a depuración sen fíos."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Activouse o modo de axente de proba"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Restablece a configuración de fábrica para desactivar o modo de axente de proba."</string>
@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ACTIVADO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DESACTIVADO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Queres permitir que <xliff:g id="SERVICE">%1$s</xliff:g> poida controlar totalmente o teu dispositivo?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se activas <xliff:g id="SERVICE">%1$s</xliff:g>, o dispositivo non utilizará o teu bloqueo de pantalla para mellorar a encriptación de datos."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"O control total é adecuado para as aplicacións que che axudan coa accesibilidade, pero non para a maioría das aplicacións."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar a pantalla"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o contido da pantalla e mostralo sobre outras aplicacións."</string>
@@ -2146,7 +2145,7 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Non hai recomendacións de persoas coas que compartir contido"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicacións"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación non está autorizada a realizar gravacións, pero pode capturar audio a través deste dispositivo USB."</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Esta aplicación non está autorizada a realizar gravacións, pero podería capturar audio a través deste dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Inicio"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Volver"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Aplicacións recentes"</string>
@@ -2298,7 +2297,7 @@
     <string name="window_magnification_prompt_title" msgid="2876703640772778215">"Novas opcións de configuración de ampliación"</string>
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Xa podes ampliar parte da pantalla"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activar en Configuración"</string>
-    <string name="dismiss_action" msgid="1728820550388704784">"Ignorar"</string>
+    <string name="dismiss_action" msgid="1728820550388704784">"Pechar"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Desbloquea o micrófono do dispositivo"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Desbloquea a cámara do dispositivo"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Para &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; e todas as aplicacións e servizos"</string>

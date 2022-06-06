@@ -1337,7 +1337,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Je nastaven tichý vyzvánění"</string>
     <string name="volume_call" msgid="7625321655265747433">"Hlasitost hovoru"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Hlasitost příchozích hovorů při připojení Bluetooth"</string>
-    <string name="volume_alarm" msgid="4486241060751798448">"Hlasitost budíku"</string>
+    <string name="volume_alarm" msgid="4486241060751798448">"Hlasitost budíků"</string>
     <string name="volume_notification" msgid="6864412249031660057">"Hlasitost oznámení"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Hlasitost"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Hlasitost Bluetooth"</string>
@@ -1755,7 +1755,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ZAP"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"VYP"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Chcete službě <xliff:g id="SERVICE">%1$s</xliff:g> povolit plnou kontrolu nad vaším zařízením?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Pokud zapnete službu <xliff:g id="SERVICE">%1$s</xliff:g>, zařízení nebude používat zámek obrazovky k vylepšení šifrování dat."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Plná kontrola je vhodná u aplikací, které vám pomáhají s usnadněním přístupu. U většiny aplikací však vhodná není."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Zobrazení a ovládání obrazovky"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Služba může číst veškerý obsah obrazovky a zobrazovat ho přes ostatní aplikace."</string>
@@ -1926,7 +1925,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Před uvolněním požádat o PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Před uvolněním požádat o bezpečnostní gesto"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Před uvolněním požádat o heslo"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Před odepnutím požádat o heslo"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Nainstalováno administrátorem"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Smazáno administrátorem"</string>
