@@ -106,6 +106,20 @@ public class BubbleExpandedView extends LinearLayout {
                 }
             };
 
+    /** {@link FloatProperty} for updating background and pointer alpha */
+    public static final FloatProperty<BubbleExpandedView> BACKGROUND_ALPHA =
+            new FloatProperty<BubbleExpandedView>("backgroundAlpha") {
+                @Override
+                public void setValue(BubbleExpandedView expandedView, float value) {
+                    expandedView.setBackgroundAlpha(value);
+                }
+
+                @Override
+                public Float get(BubbleExpandedView expandedView) {
+                    return expandedView.getAlpha();
+                }
+            };
+
     /** {@link FloatProperty} for updating manage button alpha */
     public static final FloatProperty<BubbleExpandedView> MANAGE_BUTTON_ALPHA =
             new FloatProperty<BubbleExpandedView>("manageButtonAlpha") {
@@ -600,6 +614,14 @@ public class BubbleExpandedView extends LinearLayout {
         } else if (mTaskView != null) {
             mTaskView.setAlpha(alpha);
         }
+    }
+
+    /**
+     * Sets the alpha of the background and the pointer view.
+     */
+    public void setBackgroundAlpha(float alpha) {
+        mPointerView.setAlpha(alpha);
+        setAlpha(alpha);
     }
 
     /**
