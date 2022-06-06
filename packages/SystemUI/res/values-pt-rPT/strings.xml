@@ -24,7 +24,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Não é possível carregar através de USB."</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Utilize o carregador fornecido com o dispositivo."</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Pretende ativar a Poupança de bateria?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Ativar a Poupança de bateria?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Acerca da Poupança de bateria"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ativar"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Ativar a Poupança de bateria"</string>
@@ -45,13 +45,13 @@
     <string name="usb_debugging_always" msgid="4003121804294739548">"Permitir sempre a partir deste computador"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuração USB não permitida"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"O utilizador com sessão iniciada atualmente neste dispositivo não pode ativar a depuração USB. Para utilizar esta funcionalidade, mude para o utilizador principal."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"O utilizador com sessão iniciada atualmente neste dispositivo não pode ativar a depuração USB. Para usar esta funcionalidade, mude para o utilizador principal."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Permitir a depuração sem fios nesta rede?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nome da rede (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nEndereço Wi-Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Permitir sempre nesta rede"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Permitir"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"Depuração sem fios não permitida"</string>
-    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"O utilizador com sessão iniciada atualmente neste dispositivo não pode ativar a depuração sem fios. Para utilizar esta funcionalidade, mude para o utilizador principal."</string>
+    <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"O utilizador com sessão iniciada atualmente neste dispositivo não pode ativar a depuração sem fios. Para usar esta funcionalidade, mude para o utilizador principal."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"Porta USB desativada"</string>
     <string name="usb_contaminant_message" msgid="7730476585174719805">"Para proteger o dispositivo contra líquidos ou resíduos, a porta USB está desativada e não irá detetar quaisquer acessórios.\n\nSerá notificado quando for seguro utilizar a porta USB novamente."</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"Porta USB ativada para detetar carregadores e acessórios"</string>
@@ -80,7 +80,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Gravador de ecrã"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"A processar a gravação de ecrã"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificação persistente de uma sessão de gravação de ecrã"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Pretende iniciar a gravação?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Iniciar a gravação?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Enquanto estiver a gravar, o sistema Android pode capturar quaisquer informações confidenciais que estejam visíveis no ecrã ou que sejam reproduzidas no dispositivo. Isto inclui palavras-passe, informações de pagamento, fotos, mensagens e áudio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Gravar áudio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Áudio do dispositivo"</string>
@@ -349,8 +349,8 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Remover"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"A app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> terá acesso a todas as informações que estiverem visíveis no ecrã ou que forem reproduzidas a partir do dispositivo durante a gravação ou transmissão. Isto inclui informações como palavras-passe, detalhes de pagamentos, fotos, mensagens e áudio reproduzido."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"O serviço que fornece esta função terá acesso a todas as informações que estiverem visíveis no ecrã ou que forem reproduzidas a partir do dispositivo durante a gravação ou transmissão. Isto inclui informações como palavras-passe, detalhes de pagamentos, fotos, mensagens e áudio reproduzido."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Pretende começar a gravar ou a transmitir?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Pretende começar a gravar ou a transmitir com a app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Começar a gravar ou a transmitir?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Começar a gravar ou a transmitir com a app <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gerir"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Histórico"</string>
@@ -417,7 +417,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Esta opção mantém o item visível até o soltar. Deslize rapidamente para cima e mantenha pressionado para soltar."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Vista geral para soltar."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Esta opção mantém o item visível até o soltar. Toque sem soltar em Página inicial para soltar."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Os dados pessoais podem ficar acessíveis (tais como contactos e conteúdo do email)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Os dados pessoais, tais como contactos e conteúdo do email, podem ficar acessíveis."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Uma app fixada pode abrir outras apps."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Para soltar esta app, toque sem soltar nos botões Anterior e Vista geral."</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para soltar esta app, toque sem soltar nos botões Anterior e Página inicial."</string>
@@ -479,7 +479,7 @@
     <string name="tuner_toast" msgid="3812684836514766951">"Parabéns! O Sintonizador da interface do sistema foi adicionado às Definições"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Remover das Definições"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Remover o Sintonizador da interface do sistema das Definições e deixar de utilizar todas as respetivas funcionalidades?"</string>
-    <string name="enable_bluetooth_title" msgid="866883307336662596">"Pretende ativar o Bluetooth?"</string>
+    <string name="enable_bluetooth_title" msgid="866883307336662596">"Ativar o Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="6740938333772779717">"Para ligar o teclado ao tablet, tem de ativar primeiro o Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Ativar"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Controlos de notificações do consumo de energia"</string>
@@ -704,7 +704,7 @@
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"O modo Não incomodar foi ativado por uma regra automática ou por uma app."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apps em execução em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Toque para obter detalhes acerca da utilização da bateria e dos dados"</string>
-    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Pretende desativar os dados móveis?"</string>
+    <string name="mobile_data_disable_title" msgid="5366476131671617790">"Desativar os dados móveis?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"Não terá acesso a dados ou à Internet através do operador <xliff:g id="CARRIER">%s</xliff:g>. A Internet estará disponível apenas por Wi-Fi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"o seu operador"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Uma vez que uma app está a ocultar um pedido de autorização, as Definições não conseguem validar a sua resposta."</string>
@@ -716,7 +716,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Recusar"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Tocar para agendar a Poupança de bateria"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Ativar quando for provável que a bateria se esgote"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Não, obrigado"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Não"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Despejar pilha SysUI"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"As aplicações estão a utilizar o(a) <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -864,7 +864,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dados móveis"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ligado"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Não é efetuada ligação de dados móveis automática"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Sem ligação automática com dados móveis"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Sem ligação"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Nenhuma outra rede disponível"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Sem redes disponíveis"</string>
@@ -877,6 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Veja tudo"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Para mudar de rede, desligue a Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Para melhorar a experiência do dispositivo, as apps e os serviços podem continuar a procurar redes Wi-Fi em qualquer altura, mesmo quando o Wi-Fi está desativado. Pode alterar esta opção nas definições de procura de Wi-Fi. "<annotation id="link">"Alterar"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desative o modo de avião"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Desativar o modo de avião"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecione utilizador"</string>
 </resources>

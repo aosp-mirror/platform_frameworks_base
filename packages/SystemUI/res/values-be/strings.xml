@@ -24,7 +24,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Не ўдалося выканаць зарадку праз USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Уключыць рэжым эканоміі зараду?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Уключыць рэжым энергазберажэння?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Інфармацыя пра рэжым эканоміі зараду"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Уключыць"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Уключыць рэжым эканоміі зараду"</string>
@@ -70,7 +70,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Змяніць"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Змяніць здымак экрана"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Абагуліць здымак экрана"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Зняць больш"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Захапіць больш"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Адхіліць здымак экрана"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Перадпрагляд здымка экрана"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Верхняя граніца: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
@@ -413,7 +413,7 @@
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Налады гуку"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Аўтаматычныя субцітры"</string>
-    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Падказка \"Схавайце цітры\""</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Закрыць падказку пра субцітры"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Накладанне субцітраў"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"уключыць"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"адключыць"</string>

@@ -288,7 +288,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"CCP"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"CCP désactivée"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"CCP activée"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Enregistrement de l\'écran"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Enregistrement d\'écran"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Démarrer"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le microphone de l\'appareil?"</string>
@@ -406,7 +406,7 @@
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Maintenu déverrouillé par TrustAgent"</string>
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Paramètres sonores"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Aj. auto. s-titres aux médias"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Sous-titrer automatiquement"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Astuce concernant les sous-titres"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Superposition de sous-titres"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activer"</string>
@@ -451,9 +451,9 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Les appels et les notifications seront annoncés par une sonnerie (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barre d\'état"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Mode de démonstration de l\'interface système"</string>
-    <string name="enable_demo_mode" msgid="3180345364745966431">"Activer le mode Démonstration"</string>
-    <string name="show_demo_mode" msgid="3677956462273059726">"Afficher le mode Démonstration"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Mode Démo de l\'interface système"</string>
+    <string name="enable_demo_mode" msgid="3180345364745966431">"Activer le mode Démo"</string>
+    <string name="show_demo_mode" msgid="3677956462273059726">"Afficher le mode Démo"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarme"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
@@ -845,7 +845,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Le contenu sera bientôt affiché"</string>
     <string name="missed_call" msgid="4228016077700161689">"Appel manqué"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Affichez les messages récents, les appels manqués et les mises à jour d\'état"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Afficher les messages récents, les appels manqués et les mises à jour d\'état"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversation"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Interrompue par la fonctionnalité Ne pas déranger"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> a envoyé un message : <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
@@ -878,5 +878,5 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Pour changer de réseau, débranchez le câble Ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Pour améliorer l\'expérience de l\'appareil, les applications et les services peuvent quand même rechercher des réseaux Wi-Fi en tout temps, même lorsque le Wi-Fi est désactivé. Vous pouvez modifier vos préférences dans les paramètres de recherche de réseaux Wi-Fi. "<annotation id="link">"Modifier"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Désactiver le mode Avion"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Sélect. utilisateur"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir l\'utilisateur"</string>
 </resources>

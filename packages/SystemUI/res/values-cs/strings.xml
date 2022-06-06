@@ -86,7 +86,7 @@
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zařízení"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk ze zařízení, například hudba, hovory a vyzvánění"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk a mikrofon zařízení"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk zařízení a mikrofon"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Spustit"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Nahrávání obrazovky"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Nahrávání obrazovky a zvuku"</string>
@@ -241,8 +241,8 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Uživatel"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Dostupné sítě"</string>
-    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nedostupné sítě"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Sítě jsou k dispozici"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Sítě nejsou k dispozici"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Žádné sítě Wi-Fi nejsou k dispozici"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Zapínání…"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Vzdálená obrazovka"</string>
@@ -420,7 +420,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikace je připnutá"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítek Zpět a Přehled."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítek Zpět a Plocha."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Díky připnutí bude vidět, dokud ji neodepnete. Odepnout ji můžete přejetím nahoru a podržením."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Díky připnutí bude aplikace vidět, dokud ji neodepnete. Odepnout ji můžete přejetím prstem nahoru a podržením."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Přehled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítka Plocha."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Může mít přístup k soukromým datům (například kontaktům a obsahu e-mailů)."</string>
@@ -853,7 +853,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Poslouchá"</string>
     <string name="game_status" msgid="1340694320630973259">"Hraji hru"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Přátelé"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat."</string>
+    <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah se brzy zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

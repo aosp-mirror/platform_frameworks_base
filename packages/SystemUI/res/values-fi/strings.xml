@@ -32,9 +32,9 @@
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> käyttöoikeuden (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> tämän pääsyoikeuden: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nSovellus ei ole saanut tallennuslupaa, mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> käyttöoikeuden (<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>)?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?\nSovellus ei ole saanut tallennuslupaa, mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Asennetut sov. eivät toimi tämän USB-laitteen kanssa. Lisätietoja laitteesta: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-lisälaite"</string>
     <string name="label_view" msgid="6815442985276363364">"Näytä"</string>
@@ -81,9 +81,9 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Näytön tallennusta käsitellään"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pysyvä ilmoitus näytön tallentamisesta"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Aloitetaanko tallennus?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Tallennuksen aikana Android-järjestelmä voi tallentaa mitä tahansa näytöllä näkyvää tai laitteen toistamaa arkaluontoista tietoa. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja äänisisältö."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Tallenna ääntä"</string>
-    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Laitteen äänet"</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Tallennuksen aikana Android-järjestelmä voi tallentaa mitä tahansa näytöllä näkyvää tai laitteen toistamaa arkaluontoista tietoa. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja audio."</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Tallenna audiota"</string>
+    <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Laitteen audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Musiikki, puhelut, soittoäänet ja muut äänet laitteesta"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofoni"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Laitteen äänet ja mikrofoni"</string>
