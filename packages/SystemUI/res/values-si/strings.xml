@@ -851,8 +851,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"නොදන්නා යෙදුම"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"විකාශය නවතන්න"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ශ්‍රව්‍ය ප්‍රතිදානය සඳහා තිබෙන උපාංග."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"හඬ පරිමාව"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"විකාශනය ක්‍රියා කරන ආකාරය"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"විකාශනය"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ගැළපෙන බ්ලූටූත් උපාංග සහිත ඔබ අවට සිටින පුද්ගලයින්ට ඔබ විකාශනය කරන මාධ්‍යයට සවන් දිය හැකිය"</string>
@@ -938,7 +937,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"නව තොරතුරු"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"සක්‍රිය යෙදුම්"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"ඔබ මෙම යෙදුම් භාවිත නොකරන්නේ නම් පවා, ඒවා තවමත් සක්‍රියව පවතින අතර බැටරි ආයු කාලයට බලපෑ හැකිය"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ඔබ මේවා භාවිත නොකරමින් සිටින විට පවා මෙම යෙදුම් ක්‍රියාකාරීව සහ ධාවනය වෙමින් පවතියි. මෙය මේවායේ කාර්යය වැඩිදියුණු කරයි, නමුත් බැටරි ආයු කාලයට ද බලපා හැකි ය."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"නවත්වන්න"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"නවත්වන ලදි"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"නිමයි"</string>
@@ -952,6 +951,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"පෙළ පිටපත් කරන ලදී"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"රූපය පිටපත් කරන ලදි"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"අන්තර්ගතය පිටපත් කරන ලදි"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"එක් කරන්න"</string>
     <string name="manage_users" msgid="1823875311934643849">"පරිශීලකයන් කළමනාකරණය කරන්න"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"මෙම දැනුම්දීම බෙදුම් තිරය වෙත ඇද ගෙන යාමට සහාය නොදක්වයි."</string>

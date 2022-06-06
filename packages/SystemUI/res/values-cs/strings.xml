@@ -952,7 +952,8 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nové informace"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivní aplikace"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"I když tyto aplikace nepoužíváte, jsou stále aktivní a mohou mít vliv na výdrž baterie"</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Konec"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zastaveno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Hotovo"</string>
@@ -966,6 +967,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Text byl zkopírován"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Obrázek byl zkopírován"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Obsah byl zkopírován"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Přidat"</string>
     <string name="manage_users" msgid="1823875311934643849">"Správa uživatelů"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Toto oznámení nepodporuje přetažení na rozdělenou obrazovku."</string>
