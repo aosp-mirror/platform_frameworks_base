@@ -24,6 +24,7 @@ import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
 import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
 import static com.android.wm.shell.animation.Interpolators.DIM_INTERPOLATOR;
@@ -55,7 +56,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.R;
@@ -407,6 +407,15 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         }
     }
 
+    void onStartDragging() {
+        InteractionJankMonitorUtils.beginTracing(CUJ_SPLIT_SCREEN_RESIZE, mContext,
+                getDividerLeash(), null /* tag */);
+    }
+
+    void onDraggingCancelled() {
+        InteractionJankMonitorUtils.cancelTracing(CUJ_SPLIT_SCREEN_RESIZE);
+    }
+
     void onDoubleTappedDivider() {
         mSplitLayoutHandler.onDoubleTappedDivider();
     }
@@ -438,10 +447,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         if (from == to) {
             // No animation run, still callback to stop resizing.
             mSplitLayoutHandler.onLayoutSizeChanged(this);
+            InteractionJankMonitorUtils.endTracing(
+                    CUJ_SPLIT_SCREEN_RESIZE);
             return;
         }
-        InteractionJankMonitorUtils.beginTracing(InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE,
-                mSplitWindowManager.getDividerView(), "Divider fling");
         ValueAnimator animator = ValueAnimator
                 .ofInt(from, to)
                 .setDuration(250);
@@ -455,7 +464,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
                     flingFinishedCallback.run();
                 }
                 InteractionJankMonitorUtils.endTracing(
-                        InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE);
+                        CUJ_SPLIT_SCREEN_RESIZE);
             }
 
             @Override
