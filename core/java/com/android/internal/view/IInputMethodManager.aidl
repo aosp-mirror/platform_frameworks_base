@@ -22,10 +22,10 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 import android.window.ImeOnBackInvokedDispatcher;
 
-import com.android.internal.inputmethod.InputBindResult;
+import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
+import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
 
 /**
  * Public interface to the global input method manager, used by all client
