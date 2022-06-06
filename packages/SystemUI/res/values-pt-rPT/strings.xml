@@ -136,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Rosto autenticado"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmado"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Toque em Confirmar para concluir."</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueado c/ rosto. Prima o ícone de desb. p/ continuar."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueio com a face. Prima o ícone de desb. p/ continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Desbloqueado com o rosto. Prima para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Rosto reconhecido. Prima para continuar."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Rosto reconhecido. Prima ícone de desbloqueio para continuar"</string>
@@ -205,10 +205,8 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Sensores desativados ativo"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Limpar todas as notificações."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="other">Mais <xliff:g id="NUMBER_1">%s</xliff:g> notificações no grupo.</item>
-      <item quantity="one">Mais <xliff:g id="NUMBER_0">%s</xliff:g> notificação no grupo.</item>
-    </plurals>
+    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
+    <skip />
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"O ecrã está bloqueado na orientação horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"O ecrã está bloqueado na orientação vertical."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Vitrina de sobremesas"</string>
@@ -256,10 +254,8 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Zona Wi-Fi"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"A ativar..."</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Poup. dados ativada"</string>
-    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="other">%d dispositivos</item>
-      <item quantity="one">%d dispositivo</item>
-    </plurals>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
+    <skip />
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lanterna"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Câmara em utilização"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Dados móveis"</string>
@@ -316,7 +312,7 @@
     <string name="tap_again" msgid="1315420114387908655">"Toque novamente"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Deslize rapidamente para cima para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Prima o ícone de desbloqueio para abrir"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueado com o rosto. Prima o ícone de desbl. p/ abrir."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueio com a face. Prima ícone de desbloqueio p/ abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Desbloqueado com o rosto. Prima para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Rosto reconhecido. Prima para abrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Rosto reconhecido. Prima o ícone de desbloqueio para abrir."</string>
@@ -356,10 +352,8 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Está no modo convidado"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Ao adicionar um novo utilizador, o modo convidado é fechado e todas as apps e dados da sessão de convidado atual são eliminados."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite de utilizadores alcançado"</string>
-    <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="other">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
-      <item quantity="one">Apenas é possível criar um utilizador.</item>
-    </plurals>
+    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
+    <skip />
     <string name="user_remove_user_title" msgid="9124124694835811874">"Remover o utilizador?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Serão eliminados todos os dados e todas as aplicações deste utilizador."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Remover"</string>
@@ -545,14 +539,10 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Lembrar-me"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Anular"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Suspensa por <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="other">%d horas</item>
-      <item quantity="one">%d hora</item>
-    </plurals>
-    <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="other">%d minutos</item>
-      <item quantity="one">%d minuto</item>
-    </plurals>
+    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
+    <skip />
+    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
+    <skip />
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Poupança de bateria"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Botão <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Início"</string>
@@ -776,10 +766,8 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ativar/desativar"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Controlos de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha uma app para adicionar controlos"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlos adicionados.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controlo adicionado.</item>
-    </plurals>
+    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
+    <skip />
     <string name="controls_removed" msgid="3731789252222856959">"Removido"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Adicionado aos favoritos"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Adicionados aos favoritos, posição <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -856,8 +844,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"App desconhecida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Parar transmissão"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos disponíveis para a saída de áudio."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmissão"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas de si com dispositivos Bluetooth compatíveis podem ouvir o conteúdo multimédia que está a transmitir"</string>
@@ -937,13 +924,12 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Adicionar mosaico"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Não adicion. mosaico"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecione utilizador"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apps estão ativas</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app está ativa</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
+    <skip />
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Novas informações"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Apps ativas"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Mesmo que não esteja a usar estas apps, continuam ativas e podem afetar a autonomia da bateria"</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Parar"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Parada"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Concluir"</string>
@@ -957,6 +943,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Texto copiado"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Imagem copiada"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Conteúdo copiado"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Adicionar"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gerir utilizadores"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Esta notificação não pode ser arrastada para o ecrã dividido."</string>
