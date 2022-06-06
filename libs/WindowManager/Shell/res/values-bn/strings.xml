@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"বন্ধ করুন"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"বড় করুন"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"সেটিংস"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"\'স্প্লিট স্ক্রিন\' মোড চালু করুন"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"মেনু"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"ছবির-মধ্যে-ছবি তে <xliff:g id="NAME">%s</xliff:g> আছেন"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> কে এই বৈশিষ্ট্যটি ব্যবহার করতে দিতে না চাইলে ট্যাপ করে সেটিংসে গিয়ে সেটি বন্ধ করে দিন।"</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"এগিয়ে যাওয়ার জন্য এড়িয়ে যান"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"পিছনে যাওয়ার জন্য এড়িয়ে যান"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"রিসাইজ করুন"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"স্ট্যাস করুন"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"আনস্ট্যাস করুন"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"অ্যাপটি স্প্লিট স্ক্রিনে কাজ নাও করতে পারে।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"অ্যাপ্লিকেশান বিভক্ত-স্ক্রিন সমর্থন করে না৷"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"সেকেন্ডারি ডিসপ্লেতে অ্যাপটি কাজ নাও করতে পারে।"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ম্যানেজ করুন"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল বাতিল করা হয়েছে।"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"এই অ্যাপ রিস্টার্ট করতে ট্যাপ করুন ও \'ফুল-স্ক্রিন\' মোড ব্যবহার করুন।"</string>
-    <string name="got_it" msgid="4428750913636945527">"বুঝেছি"</string>
 </resources>

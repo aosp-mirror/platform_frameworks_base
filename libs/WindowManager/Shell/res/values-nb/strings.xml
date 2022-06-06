@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Lukk"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Vis"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Innstillinger"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"Aktivér delt skjerm"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Meny"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> er i bilde-i-bilde"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Hopp til neste"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"Hopp til forrige"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Endre størrelse"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"Oppbevar"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Avslutt oppbevaring"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Det kan hende at appen ikke fungerer med delt skjerm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Appen støtter ikke delt skjerm."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Appen fungerer kanskje ikke på en sekundær skjerm."</string>
@@ -60,7 +63,7 @@
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Lukk boblen"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ikke vis samtaler i bobler"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chat med bobler"</string>
-    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nye samtaler vises som flytende ikoner eller bobler. Trykk for å åpne bobler. Dra for å flytte dem."</string>
+    <string name="bubbles_user_education_description" msgid="4215862563054175407">"Nye samtaler vises som flytende ikoner eller bobler. Trykk for å åpne en boble. Dra for å flytte den."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Kontrollér bobler når som helst"</string>
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Trykk på Administrer for å slå av bobler for denne appen"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Greit"</string>
@@ -70,5 +73,4 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Administrer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Boblen er avvist."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Trykk for å starte denne appen på nytt og vise den i fullskjerm."</string>
-    <string name="got_it" msgid="4428750913636945527">"Greit"</string>
 </resources>
