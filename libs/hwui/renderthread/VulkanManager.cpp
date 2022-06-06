@@ -494,7 +494,7 @@ static void destroy_semaphore(void* context) {
     }
 }
 
-void VulkanManager::finishFrame(SkSurface* surface) {
+nsecs_t VulkanManager::finishFrame(SkSurface* surface) {
     ATRACE_NAME("Vulkan finish frame");
     ALOGE_IF(mSwapSemaphore != VK_NULL_HANDLE || mDestroySemaphoreContext != nullptr,
              "finishFrame already has an outstanding semaphore");
@@ -530,6 +530,7 @@ void VulkanManager::finishFrame(SkSurface* surface) {
     GrDirectContext* context = GrAsDirectContext(surface->recordingContext());
     ALOGE_IF(!context, "Surface is not backed by gpu");
     context->submit();
+    const nsecs_t submissionTime = systemTime();
     if (semaphore != VK_NULL_HANDLE) {
         if (submitted == GrSemaphoresSubmitted::kYes) {
             mSwapSemaphore = semaphore;
@@ -558,6 +559,8 @@ void VulkanManager::finishFrame(SkSurface* surface) {
         }
     }
     skiapipeline::ShaderCache::get().onVkFrameFlushed(context);
+
+    return submissionTime;
 }
 
 void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect) {

@@ -386,6 +386,13 @@ public class Cam {
         // Yellows are very chromatic at L = 100, and blues are very chromatic at L = 0. All the
         // other hues are white at L = 100, and black at L = 0. To preserve consistency for users of
         // this system, it is better to simply return white at L* > 99, and black and L* < 0.
+        if (frame == Frame.DEFAULT) {
+            // If the viewing conditions are the same as the default sRGB-like viewing conditions,
+            // skip to using HctSolver: it uses geometrical insights to find the closest in-gamut
+            // match to hue/chroma/lstar.
+            return HctSolver.solveToInt(hue, chroma, lstar);
+        }
+
         if (chroma < 1.0 || Math.round(lstar) <= 0.0 || Math.round(lstar) >= 100.0) {
             return CamUtils.intFromLstar(lstar);
         }
