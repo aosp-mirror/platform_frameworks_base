@@ -27,7 +27,6 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.fullscreen.FullscreenTaskListener;
-import com.android.wm.shell.fullscreen.FullscreenUnfoldController;
 import com.android.wm.shell.kidsmode.KidsModeTaskOrganizer;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
@@ -35,6 +34,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
 import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 
 import java.util.Optional;
@@ -55,7 +55,7 @@ public class ShellInitImpl {
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<PipTouchHandler> mPipTouchHandlerOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
-    private final Optional<FullscreenUnfoldController> mFullscreenUnfoldController;
+    private final Optional<UnfoldAnimationController> mUnfoldController;
     private final Optional<UnfoldTransitionHandler> mUnfoldTransitionHandler;
     private final Optional<FreeformTaskListener> mFreeformTaskListenerOptional;
     private final ShellExecutor mMainExecutor;
@@ -76,7 +76,7 @@ public class ShellInitImpl {
             Optional<SplitScreenController> splitScreenOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
             FullscreenTaskListener fullscreenTaskListener,
-            Optional<FullscreenUnfoldController> fullscreenUnfoldTransitionController,
+            Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformTaskListener> freeformTaskListenerOptional,
             Optional<RecentTasksController> recentTasks,
@@ -93,7 +93,7 @@ public class ShellInitImpl {
         mSplitScreenOptional = splitScreenOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
         mPipTouchHandlerOptional = pipTouchHandlerOptional;
-        mFullscreenUnfoldController = fullscreenUnfoldTransitionController;
+        mUnfoldController = unfoldAnimationController;
         mUnfoldTransitionHandler = unfoldTransitionHandler;
         mFreeformTaskListenerOptional = freeformTaskListenerOptional;
         mRecentTasks = recentTasks;
@@ -146,7 +146,7 @@ public class ShellInitImpl {
                 mShellTaskOrganizer.addListenerForType(
                         f, ShellTaskOrganizer.TASK_LISTENER_TYPE_FREEFORM));
 
-        mFullscreenUnfoldController.ifPresent(FullscreenUnfoldController::init);
+        mUnfoldController.ifPresent(UnfoldAnimationController::init);
         mRecentTasks.ifPresent(RecentTasksController::init);
 
         // Initialize kids mode task organizer
