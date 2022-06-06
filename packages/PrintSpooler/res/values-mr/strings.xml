@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"पीडीएफ वर सेव्ह करा"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"प्रिंट पर्याय विस्तृत झाले"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"प्रिंट पर्याय संक्षिप्त झाले"</string>
-    <string name="search" msgid="5421724265322228497">"Search"</string>
+    <string name="search" msgid="5421724265322228497">"शोधा"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सर्व प्रिंटर"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा जोडा"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"शोध बॉक्स दर्शविला"</string>
@@ -82,7 +82,7 @@
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> प्रिंट करत आहे"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> रद्द करत आहे"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"प्रिंटर एरर <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <string name="blocked_notification_title_template" msgid="1175435827331588646">"प्रिंटरने <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> अवरोधित केले"</string>
+    <string name="blocked_notification_title_template" msgid="1175435827331588646">"प्रिंटरने <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ब्लॉक केला"</string>
     <string name="cancel" msgid="4373674107267141885">"रद्द करा"</string>
     <string name="restart" msgid="2472034227037808749">"रीस्टार्ट करा"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटरवर कोणतेही कनेक्‍शन नाही"</string>
