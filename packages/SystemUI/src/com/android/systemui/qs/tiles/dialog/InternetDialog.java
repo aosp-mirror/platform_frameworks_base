@@ -33,6 +33,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.text.Html;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -395,6 +396,7 @@ public class InternetDialog extends SystemUIDialog implements
             if (!TextUtils.isEmpty(summary)) {
                 mMobileSummaryText.setText(
                         Html.fromHtml(summary, Html.FROM_HTML_MODE_LEGACY));
+                mMobileSummaryText.setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE);
                 mMobileSummaryText.setVisibility(View.VISIBLE);
             } else {
                 mMobileSummaryText.setVisibility(View.GONE);
