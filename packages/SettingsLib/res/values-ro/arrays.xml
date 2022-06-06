@@ -185,8 +185,8 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"Dezactivată"</item>
-    <item msgid="7126170197336963369">"Toate zonele-tampon pentru jurnale"</item>
-    <item msgid="7167543126036181392">"Toate zonele-tampon pentru jurnale fără cele radio"</item>
+    <item msgid="7126170197336963369">"Toată memoria temporară pentru jurnale"</item>
+    <item msgid="7167543126036181392">"Toată memoria temporară pentru jurnale fără radio"</item>
     <item msgid="5135340178556563979">"numai memoria temporară pentru jurnalul nucleului"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
@@ -217,7 +217,7 @@
     <item msgid="2464080977843960236">"Animație la scara 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="4497393944195787240">"Niciuna"</item>
+    <item msgid="4497393944195787240">"Fără"</item>
     <item msgid="8461943978957133391">"480p"</item>
     <item msgid="6923083594932909205">"480p (securizat)"</item>
     <item msgid="1226941831391497335">"720p"</item>

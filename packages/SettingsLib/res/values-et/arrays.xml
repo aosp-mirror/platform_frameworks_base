@@ -185,7 +185,7 @@
   </string-array>
   <string-array name="select_logpersist_summaries">
     <item msgid="97587758561106269">"Väljas"</item>
-    <item msgid="7126170197336963369">"Kõik logi puhvrid"</item>
+    <item msgid="7126170197336963369">"Kõik logipuhvrid"</item>
     <item msgid="7167543126036181392">"Kõik, v.a raadiologi puhvrid"</item>
     <item msgid="5135340178556563979">"ainult tuuma logi puhver"</item>
   </string-array>

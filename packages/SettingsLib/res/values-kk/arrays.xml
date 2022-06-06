@@ -54,9 +54,9 @@
     <item msgid="9048424957228926377">"Әрқашан тексеру"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="4045840870658484038">"Ешқашан HDCP (жоғары кең жолақты сандық мазмұн қорғаушы) тексерулерін қолданбаңыз"</item>
+    <item msgid="4045840870658484038">"Ешқашан HDCP (жоғары кең жолақты цифрлық мазмұн қорғаушы) тексерулерін қолданбаңыз"</item>
     <item msgid="8254225038262324761">"HDCP тексерісін DRM мазмұны үшін ғана қолдану"</item>
-    <item msgid="6421717003037072581">"Әрқашан HDCP (жоғары кең жолақты сандық мазмұн қорғаушы) тексерулерін қолданыңыз"</item>
+    <item msgid="6421717003037072581">"Әрқашан HDCP (жоғары кең жолақты цифрлық мазмұн қорғаушы) тексерулерін қолданыңыз"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"Өшірулі"</item>
@@ -217,7 +217,7 @@
     <item msgid="2464080977843960236">"Анимация өлшемі 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
-    <item msgid="4497393944195787240">"Ешқандай"</item>
+    <item msgid="4497393944195787240">"Жоқ"</item>
     <item msgid="8461943978957133391">"480p"</item>
     <item msgid="6923083594932909205">"480p (қауіпсіз)"</item>
     <item msgid="1226941831391497335">"720p"</item>
@@ -231,7 +231,7 @@
     <item msgid="7346816300608639624">"720p, 1080p (қос экранды)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
-    <item msgid="4433736508877934305">"Ешқандай"</item>
+    <item msgid="4433736508877934305">"Жоқ"</item>
     <item msgid="9140053004929079158">"Logcat"</item>
     <item msgid="3866871644917859262">"Systrace (Графика)"</item>
     <item msgid="7345673972166571060">"glGetError қоңыраулар тізімі"</item>
