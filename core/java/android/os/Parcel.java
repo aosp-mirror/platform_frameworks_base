@@ -347,7 +347,15 @@ public final class Parcel {
     private static final int EX_SERVICE_SPECIFIC = -8;
     private static final int EX_PARCELABLE = -9;
     /** @hide */
+    // WARNING: DO NOT add more 'reply' headers. These also need to add work to native
+    // code and this encodes extra information in object statuses. If we need to expand
+    // this design, we should add a generic way to attach parcelables/structured parcelables
+    // to transactions which can work across languages.
     public static final int EX_HAS_NOTED_APPOPS_REPLY_HEADER = -127; // special; see below
+    // WARNING: DO NOT add more 'reply' headers. These also need to add work to native
+    // code and this encodes extra information in object statuses. If we need to expand
+    // this design, we should add a generic way to attach parcelables/structured parcelables
+    // to transactions which can work across languages.
     private static final int EX_HAS_STRICTMODE_REPLY_HEADER = -128;  // special; see below
     // EX_TRANSACTION_FAILED is used exclusively in native code.
     // see libbinder's binder/Status.h
