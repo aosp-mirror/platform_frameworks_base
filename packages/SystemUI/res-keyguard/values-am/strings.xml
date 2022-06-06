@@ -68,15 +68,11 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"የይለፍ ቃልዎን <xliff:g id="NUMBER_0">%1$d</xliff:g> ጊዜ ትክክል ባልሆነ መንገድ ተይበዋል።\n\nበ<xliff:g id="NUMBER_1">%2$d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%1$d</xliff:g> ጊዜ ትክክል ባልሆነ መንገድ ስለውታል።\n\nበ<xliff:g id="NUMBER_1">%2$d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ልክ ያልሆነ የሲም ፒን ኮድ። አሁን መሣሪያዎን ለማስከፈት አገልግሎት አቅራቢዎን ማነጋገር አለብዎት።"</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
-      <item quantity="one">ልክ ያልሆነ የሲም ፒን ኮድ፣ <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-      <item quantity="other">ልክ ያልሆነ የሲም ፒን ኮድ፣ <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
+    <skip />
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"ሲሙ ጥቅም ላይ መዋል እይችልም። የአገልግሎት አቅራቢዎን ያነጋግሩ።"</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
-      <item quantity="one">ልክ ያልሆነ የሲም ፒዩኬ ኮድ፣ ሲሙ እስከመጨረሻው የማይሰራ ከመሆኑ በፊት <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-      <item quantity="other">ልክ ያልሆነ የሲም ፒዩኬ ኮድ፣ ሲሙ እስከመጨረሻው የማይሰራ ከመሆኑ በፊት <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
+    <skip />
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"የሲም ፒን ክወና አልተሳካም!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"የሲም PUK ክወና አልተሳካም!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"የግቤት ስልት ቀይር"</string>
@@ -90,15 +86,12 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"መሣሪያ በአስተዳዳሪ ተቆልፏል"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"መሣሪያ በተጠቃሚው ራሱ ተቆልፏል"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"አልታወቀም"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"በመልክ መክፈትን ለመጠቀም "<b>"የካሜራ መዳረሻ"</b>"ን በቅንብሮች እና ግላዊነት ውስጥ ያብሩ"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="one">የሲም ፒን ያስገቡ። <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-      <item quantity="other">የሲም ፒን ያስገቡ። <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-    </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="one">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
-      <item quantity="other">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
-    </plurals>
+    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
+    <skip />
+    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
+    <skip />
+    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
+    <skip />
     <string name="clock_title_default" msgid="6342735240617459864">"ነባሪ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"አረፋ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"አናሎግ"</string>
