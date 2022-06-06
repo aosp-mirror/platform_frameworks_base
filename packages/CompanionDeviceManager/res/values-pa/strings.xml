@@ -38,8 +38,8 @@
     <string name="helper_summary_computer" msgid="1676407599909474428">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ਦੀ ਤਰਫ਼ੋਂ ਤੁਹਾਡੇ ਡੀਵਾਈਸਾਂ ਵਿਚਕਾਰ ਐਪਾਂ ਨੂੰ ਸਟ੍ਰੀਮ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਮੰਗ ਰਹੀ ਹੈ"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ਡੀਵਾਈਸ"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
-    <string name="consent_yes" msgid="8344487259618762872">"ਇਜਾਜ਼ਤ ਦਿਓ"</string>
-    <string name="consent_no" msgid="2640796915611404382">"ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"ਆਗਿਆ ਦਿਓ"</string>
+    <string name="consent_no" msgid="2640796915611404382">"ਆਗਿਆ ਨਾ ਦਿਓ"</string>
     <string name="consent_back" msgid="2560683030046918882">"ਪਿੱਛੇ"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ਐਪ ਇਜਾਜ਼ਤਾਂ ਨੂੰ ਆਪਣੀ ਘੜੀ \'ਤੇ ਟ੍ਰਾਂਸਫ਼ਰ ਕਰੋ"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"ਤੁਹਾਡੀ ਘੜੀ ਦਾ ਸੈੱਟਅੱਪ ਕਰਨਾ ਆਸਾਨ ਬਣਾਉਣ ਲਈ, ਤੁਹਾਡੀ ਘੜੀ \'ਤੇ ਸਥਾਪਤ ਐਪਾਂ ਸੈੱਟਅੱਪ ਦੌਰਾਨ ਉਹੀ ਇਜਾਜ਼ਤਾਂ ਵਰਤਣਗੀਆਂ ਜੋ ਤੁਹਾਡਾ ਫ਼ੋਨ ਵਰਤਦਾ ਹੈ।\n\n ਇਨ੍ਹਾਂ ਇਜਾਜ਼ਤਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਘੜੀ ਦੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਅਤੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਸ਼ਾਮਲ ਹੋ ਸਕਦੀ ਹੈ।"</string>
