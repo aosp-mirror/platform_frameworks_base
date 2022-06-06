@@ -672,4 +672,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"ඔබ <xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය කළහොත් හෝ ප්‍රතිදානය වෙනස් කළහොත්, ඔබගේ වත්මන් විකාශනය නවතිනු ඇත."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"ප්‍රතිදානය වෙනස් කරන්න"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"පුරෝකථනමය පසු සජීවිකරණ"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"පුරෝකථනමය ආපසු සඳහා පද්ධති සජීවිකරණ සබල කරන්න."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"මෙම සැකසීම පුරෝකථනමය ඉංගිත සජීවිකරණය සඳහා පද්ධති සජීවිකරණ සබල කරයි. එයට මැනිෆෙස්ට් ගොනුව තුළ එක් යෙදුමකට enableOnBackInvokedCallback සත්‍ය ලෙස සැකසීම අවශ්‍ය වේ."</string>
 </resources>

@@ -672,4 +672,7 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Wenn du <xliff:g id="SWITCHAPP">%1$s</xliff:g> streamst oder die Ausgabe änderst, wird dein aktueller Stream beendet"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> streamen"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Ausgabe ändern"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Animationen für intelligente „Zurück“-Touch-Geste"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Du kannst Systemanimationen für die intelligente „Zurück“-Touch-Geste aktivieren."</string>
+    <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Diese Einstellung aktiviert Systemanimationen für intelligente Touch-Gesten. Dazu muss in der Manifestdatei enableOnBackInvokedCallback auf App-Ebene auf „true“ gesetzt werden."</string>
 </resources>
