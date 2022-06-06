@@ -29,10 +29,10 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Uključi"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Uključi Uštedu baterije"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatsko rotiranje ekrana"</string>
-    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Želite li da dozvolite da <xliff:g id="APPLICATION">%1$s</xliff:g> pristupa uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Dozvoljavate da <xliff:g id="APPLICATION">%1$s</xliff:g> pristupa uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Želite li da dozvolite da <xliff:g id="APPLICATION">%1$s</xliff:g> pristupa uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nOva aplikacija nema dozvolu za snimanje, ali bi mogla da snima zvuk pomoću ovog USB uređaja."</string>
-    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Želite li da dozvolite da <xliff:g id="APPLICATION">%1$s</xliff:g> pristupa uređaju <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite li da otvorite aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> da biste koristili uređaj <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Dozvoljavate da <xliff:g id="APPLICATION">%1$s</xliff:g> pristupa uređaju <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite da otvorite <xliff:g id="APPLICATION">%1$s</xliff:g> da biste koristili <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite li da otvorite aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> radi rukovanja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nOva aplikacija nema dozvolu za snimanje, ali bi mogla da snima zvuk pomoću ovog USB uređaja."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite li da otvorite aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> da biste koristili uređaj <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Instalirane aplikacije ne funkcionišu sa ovim USB pomoćnim uređajem. Saznajte više o njemu na adresi <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -332,7 +332,7 @@
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Zameni korisnika"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodaj korisnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite li da uklonite gosta?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Želite da uklonite gosta?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci u ovoj sesiji će biti izbrisani."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ukloni"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Dobro došli nazad, goste!"</string>
@@ -506,7 +506,7 @@
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Prikazuje se u vrhu obaveštenja o konverzacijama i kao slika profila na zaključanom ekranu, pojavljuje se kao oblačić"</string>
     <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikazuje se u vrhu obaveštenja o konverzacijama i kao slika profila na zaključanom ekranu, prekida režim Ne uznemiravaj"</string>
     <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikazuje se u vrhu obaveštenja o konverzacijama i kao slika profila na zaključanom ekranu, pojavljuje se kao oblačić, prekida režim Ne uznemiravaj"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritetno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava funkcije konverzacije"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ova obaveštenja ne mogu da se menjaju."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ova grupa obaveštenja ne može da se konfiguriše ovde"</string>

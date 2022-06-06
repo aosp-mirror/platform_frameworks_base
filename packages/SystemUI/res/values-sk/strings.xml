@@ -24,7 +24,7 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Zostáva <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nedá sa nabíjať cez USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Použite nabíjačku dodanú so zariadením"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Zapnúť šetrič batérie?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Chcete zapnúť šetrič batérie?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Šetrič batérie"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Zapnúť"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Zapnúť šetrič batérie"</string>
@@ -103,7 +103,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Dostupnosť"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Otočenie obrazovky"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"Prehľad"</string>
-    <string name="accessibility_camera_button" msgid="2938898391716647247">"Fotoaparát"</string>
+    <string name="accessibility_camera_button" msgid="2938898391716647247">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefón"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Hlasový asistent"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Peňaženka"</string>
@@ -233,7 +233,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatické otáčanie"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otáčanie obrazovky"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Prístup k fotoaparátu"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Prístup ku kamere"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Prístup k mikrofónu"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"K dispozícii"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Blokované"</string>
@@ -341,7 +341,7 @@
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Chcete v relácii pokračovať?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Začať odznova"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Áno, pokračovať"</string>
-    <string name="user_add_user_title" msgid="4172327541504825032">"Pridať nového používateľa?"</string>
+    <string name="user_add_user_title" msgid="4172327541504825032">"Chcete pridať nového používateľa?"</string>
     <string name="user_add_user_message_short" msgid="2599370307878014791">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor.\n\nKtorýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dosiahnutý limit počtu používateľov"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
@@ -420,7 +420,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikácia je pripnutá"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidiel Späť a Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidiel Späť a Domov."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete. Odpojíte ju potiahnutím nahor a pridržaním."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Táto možnosť ponechá položku v zobrazení, dokým ju neodopnete potiahnutím nahor a pridržaním."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho stlačením a podržaním tlačidla Prehľad."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Obsah bude pripnutý v zobrazení, dokým ho neuvoľníte. Uvoľníte ho pridržaním tlačidla Domov."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Môže mať prístup k osobným údajom (napríklad kontaktom a obsahu správ)."</string>
@@ -727,7 +727,7 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Klepnutím naplánujete aktivovanie Šetriča batérie"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Zapnite, keď je batéria takmer vybitá"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nie, vďaka"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"V7pis haldy SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Výpis haldy SysUI"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikácie používajú zoznam <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" a "</string>
@@ -778,7 +778,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstránite z obľúbených"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Presunúť na pozíciu <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládacie prvky"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládanie, ku ktorému chcete mať prístup z rýchlych nastavení"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládače, ku ktorému chcete mať prístup z rýchlych nastavení"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Polohu každého ovládača môžete zmeniť jeho pridržaním a presunutím"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všetky ovládače boli odstránené"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmeny neboli uložené"</string>

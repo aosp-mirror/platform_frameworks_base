@@ -80,7 +80,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Perekam Layar"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses perekaman layar"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai Merekam?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Mulai merekam?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Saat merekam, Sistem Android dapat ikut merekam informasi sensitif yang terlihat di layar atau diputar di perangkat Anda. Informasi ini mencakup sandi, info pembayaran, foto, pesan, dan audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekam audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio perangkat"</string>
@@ -217,7 +217,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Layar dikunci dalam orientasi lanskap."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Layar dikunci dalam orientasi potret."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Etalase Hidangan Penutup"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Screen saver"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Screensaver"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Jangan Ganggu"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -272,7 +272,7 @@
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Melebihi batas"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> digunakan"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Batas <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Peringatan <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
+    <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Peri­ngatan <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6440531507319809121">"Aplikasi kerja"</string>
     <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Cahaya Malam"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Aktif saat malam"</string>
@@ -331,7 +331,7 @@
     <string name="user_add_user" msgid="4336657383006913022">"Tambahkan pengguna"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Pengguna baru"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Hapus tamu?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua aplikasi dan data di sesi ini akan dihapus."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Semua aplikasi dan data dalam sesi ini akan dihapus."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Hapus"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Selamat datang kembali, tamu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Lanjutkan sesi Anda?"</string>
@@ -417,8 +417,8 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Aplikasi akan terus ditampilkan sampai sematan dilepaskan. Geser ke atas dan tahan agar sematan lepas."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Ringkasan untuk melepas sematan."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ini akan terus ditampilkan sampai Anda melepas sematan. Sentuh lama tombol Beranda untuk melepas sematan."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Data pribadi dapat diakses (seperti kontak dan konten email)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplikasi yang disematkan dapat membuka aplikasi lain."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Data pribadi mungkin dapat diakses (seperti kontak dan konten email)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplikasi yang disematkan mungkin dapat membuka aplikasi lain."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Untuk melepas sematan aplikasi ini, sentuh lama tombol Kembali dan Ringkasan"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Untuk melepas sematan aplikasi ini, sentuh lama tombol Kembali dan Layar utama"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Untuk melepas sematan aplikasi ini, geser ke atas &amp; tahan"</string>
@@ -501,8 +501,8 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Status:&lt;/b&gt; Diberi Peringkat Lebih Rendah"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, mengganggu fitur Jangan Ganggu"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, mengganggu fitur Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, mengganggu mode Jangan Ganggu"</string>
+    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Muncul di atas notifikasi percakapan dan sebagai foto profil di layar kunci, ditampilkan sebagai balon, mengganggu mode Jangan Ganggu"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritas"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung fitur percakapan"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Notifikasi ini tidak dapat diubah."</string>
@@ -568,7 +568,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Terbaru"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Kembali"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifikasi"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Pintasan Keyboard"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Pintasan keyboard"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Ganti tata letak keyboard"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikasi"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Bantuan"</string>
@@ -767,7 +767,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Pindah ke posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrol"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Pilih kontrol untuk diakses dari Setelan Cepat"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tahan &amp; tarik untuk mengatur ulang kontrol"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tahan &amp; tarik untuk menata ulang kontrol"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Semua kontrol dihapus"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Perubahan tidak disimpan"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Lihat aplikasi lainnya"</string>
@@ -877,6 +877,6 @@
     <string name="see_all_networks" msgid="3773666844913168122">"Lihat semua"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Untuk beralih jaringan, lepaskan kabel ethernet"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Agar pengalaman perangkat menjadi lebih baik, aplikasi dan layanan tetap dapat memindai jaringan Wi-Fi kapan saja, bahkan saat Wi-Fi nonaktif. Anda dapat mengubahnya di setelan pemindaian Wi-Fi. "<annotation id="link">"Ubah"</annotation></string>
-    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Menonaktifkan mode pesawat"</string>
+    <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Nonaktifkan mode pesawat"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Pilih pengguna"</string>
 </resources>

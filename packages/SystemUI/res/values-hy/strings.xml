@@ -331,14 +331,14 @@
     <string name="user_add_user" msgid="4336657383006913022">"Ավելացնել օգտատեր"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Նոր օգտատեր"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Հեռացնե՞լ հյուրին"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր ծրագրերն ու տվյալները կջնջվեն:"</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Այս աշխատաշրջանի բոլոր հավելվածներն ու տվյալները կջնջվեն:"</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Հեռացնել"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Բարի վերադարձ, հյուր"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Շարունակե՞լ աշխատաշրջանը։"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Վերսկսել"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Այո, շարունակել"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Ավելացնե՞լ նոր օգտատեր"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Երբ նոր օգտատեր եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտատեր կարող է թարմացնել հավելվածները մյուս բոլոր հաշիվների համար:"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Երբ նոր օգտատեր եք ավելացնում, նա պետք է կարգավորի իր պրոֆիլը:\n\nՑանկացած օգտատեր կարող է թարմացնել հավելվածները բոլոր օգտատերերի համար:"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Սահմանաչափը սպառված է"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Հնարավոր է ավելացնել առավելագույնը <xliff:g id="COUNT">%d</xliff:g> օգտատեր։</item>
@@ -417,7 +417,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Էկրանը կցուցադրվի, մինչև չեղարկեք ամրացումը: Չեղարկելու համար մատը սահեցրեք վեր և պահեք։"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Էկրանը կմնա տեսադաշտում, մինչև այն ապամրացնեք: Ապամրացնելու համար հպեք և պահեք Համատեսք կոճակը:"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Էկրանը կցուցադրվի, մինչև չեղարկեք ամրացումը: Չեղարկելու համար հպեք և պահեք գլխավոր էկրանի կոճակը:"</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Ձեր անձնական տվյալները (օր․՝ կոնտակտները և նամակների բովանդակությունը) կարող են հասանելի դառնալ։"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Ձեր անձնական տվյալները (կոնտակտները, նամակների բովանդակությունը և այլն) կարող են հասանելի լինել։"</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Ամրացված հավելվածը կարող է այլ հավելվածներ գործարկել։"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Հավելվածն ապամրացնելու համար հպեք և պահեք «Հետ» և «Համատեսք» կոճակները"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Հավելվածն ապամրացնելու համար հպեք և պահեք «Հետ» և «Գլխավոր էկրան» կոճակները"</string>
@@ -491,7 +491,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Կանխադրված"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Ավտոմատ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Առանց ձայնի կամ թրթռոցի"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Հայտնվում է զրույցների ցանկի ներքևում, առանց ձայնի և թրթռոցի"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Առանց ձայնի և թրթռոցի, հայտնվում է զրույցների ցանկի ներքևում"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Կարող է զնգալ կամ թրթռալ (հեռախոսի կարգավորումներից կախված)"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Կարող է զնգալ կամ թրթռալ (հեռախոսի կարգավորումներից կախված)։ <xliff:g id="APP_NAME">%1$s</xliff:g>-ի զրույցներն ըստ կանխադրման հայտնվում են ամպիկների տեսքով։"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Թող համակարգն ավտոմատ որոշի՝ արդյոք այս ծանուցումը ձայնով, թե թրթռոցով է պետք մատուցել"</string>
@@ -608,7 +608,7 @@
     <item msgid="5874146774389433072">"Աջակողմյան"</item>
   </string-array>
     <string name="save" msgid="3392754183673848006">"Պահել"</string>
-    <string name="reset" msgid="8715144064608810383">"Վերակայել"</string>
+    <string name="reset" msgid="8715144064608810383">"Զրոյացնել"</string>
     <string name="clipboard" msgid="8517342737534284617">"Սեղմատախտակ"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"Հատուկ նավիգացիայի կոճակ"</string>
     <string name="left_keycode" msgid="8211040899126637342">"Ձախ ստեղնային կոդ"</string>

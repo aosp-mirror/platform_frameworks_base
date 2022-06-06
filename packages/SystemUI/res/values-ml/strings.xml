@@ -564,7 +564,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"നംപാഡ് <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"അറ്റാച്ച്മെന്റ് നീക്കം ചെയ്യുക"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"സിസ്‌റ്റം"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"വീട്"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"ഹോം"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"പുതിയവ"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"മടങ്ങുക"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"അറിയിപ്പുകൾ"</string>
@@ -864,7 +864,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"കണക്റ്റ് ചെയ്തു"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"മൊബൈൽ ഡാറ്റ സ്വയമേവ കണക്റ്റ് ചെയ്യില്ല"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"മൊബൈൽ ഡാറ്റ സ്വയം കണക്റ്റ് ചെയ്യില്ല"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"കണക്ഷനില്ല"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"മറ്റ് നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"നെറ്റ്‌വർക്കുകളൊന്നും ലഭ്യമല്ല"</string>

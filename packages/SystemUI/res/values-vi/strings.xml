@@ -330,7 +330,7 @@
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Chuyển đổi người dùng"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Thêm người dùng"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Người dùng mới"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Xóa phiên khách?"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Xóa khách?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Tất cả ứng dụng và dữ liệu trong phiên này sẽ bị xóa."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Xóa"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Chào mừng bạn trở lại!"</string>
@@ -696,7 +696,7 @@
     <string name="mobile_data" msgid="4564407557775397216">"Dữ liệu di động"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi tắt"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi đang tắt"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth tắt"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Không làm phiền tắt"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Không làm phiền đã được một quy tắc tự động (<xliff:g id="ID_1">%s</xliff:g>) bật."</string>
@@ -766,7 +766,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"bỏ yêu thích"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Di chuyển tới vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các chế độ điều khiển sẽ truy cập từ trình đơn Cài đặt nhanh"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các tuỳ chọn điều khiển để truy cập từ trình đơn Cài đặt nhanh"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tùy chọn điều khiển"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả tùy chọn điều khiển"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Chưa lưu các thay đổi"</string>
