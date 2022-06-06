@@ -635,7 +635,12 @@ final class UiModeManagerService extends SystemService {
                         + "permission ENTER_CAR_MODE_PRIORITIZED");
             }
 
-            assertLegit(callingPackage);
+            // Allow the user to enable car mode using the shell,
+            // e.g. 'adb shell cmd uimode car yes'
+            boolean isShellCaller = mInjector.getCallingUid() == Process.SHELL_UID;
+            if (!isShellCaller) {
+              assertLegit(callingPackage);
+            }
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -676,8 +681,13 @@ final class UiModeManagerService extends SystemService {
             // If the caller is the system, we will allow the DISABLE_CAR_MODE_ALL_PRIORITIES car
             // mode flag to be specified; this is so that the user can disable car mode at all
             // priorities using the persistent notification.
-            boolean isSystemCaller = mInjector.getCallingUid() == Process.SYSTEM_UID;
-            if (!isSystemCaller) {
+            //
+            // We also allow the user to disable car mode using the shell,
+            // e.g. 'adb shell cmd uimode car no'
+            int callingUid = mInjector.getCallingUid();
+            boolean isSystemCaller = callingUid == Process.SYSTEM_UID;
+            boolean isShellCaller = callingUid == Process.SHELL_UID;
+            if (!isSystemCaller && !isShellCaller) {
                 assertLegit(callingPackage);
             }
             final int carModeFlags =
