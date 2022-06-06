@@ -275,6 +275,25 @@ public class AudioService extends IAudioService.Stub
     // indicates whether the system maps all streams to a single stream.
     private final boolean mIsSingleVolume;
 
+    /**
+     * indicates whether STREAM_NOTIFICATION is aliased to STREAM_RING
+     *     not final due to test method, see {@link #setNotifAliasRingForTest(boolean)}.
+     */
+    private boolean mNotifAliasRing;
+
+    /**
+     * Test method to temporarily override whether STREAM_NOTIFICATION is aliased to STREAM_RING,
+     * volumes will be updated in case of a change.
+     * @param alias if true, STREAM_NOTIFICATION is aliased to STREAM_RING
+     */
+    /*package*/ void setNotifAliasRingForTest(boolean alias) {
+        boolean update = (mNotifAliasRing != alias);
+        mNotifAliasRing = alias;
+        if (update) {
+            updateStreamVolumeAlias(true, "AudioServiceTest");
+        }
+    }
+
     /*package*/ boolean isPlatformVoice() {
         return mPlatformType == AudioSystem.PLATFORM_VOICE;
     }
@@ -942,10 +961,25 @@ public class AudioService extends IAudioService.Stub
      */
     public AudioService(Context context, AudioSystemAdapter audioSystem,
             SystemServerAdapter systemServer, SettingsAdapter settings, @Nullable Looper looper) {
+        this (context, audioSystem, systemServer, settings, looper,
+                context.getSystemService(AppOpsManager.class));
+    }
+
+    /**
+     * @param context
+     * @param audioSystem Adapter for {@link AudioSystem}
+     * @param systemServer Adapter for privilieged functionality for system server components
+     * @param settings Adapter for {@link Settings}
+     * @param looper Looper to use for the service's message handler. If this is null, an
+     *               {@link AudioSystemThread} is created as the messaging thread instead.
+     */
+    public AudioService(Context context, AudioSystemAdapter audioSystem,
+            SystemServerAdapter systemServer, SettingsAdapter settings, @Nullable Looper looper,
+            AppOpsManager appOps) {
         sLifecycleLogger.log(new AudioEventLogger.StringEvent("AudioService()"));
         mContext = context;
         mContentResolver = context.getContentResolver();
-        mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
+        mAppOps = appOps;
 
         mAudioSystem = audioSystem;
         mSystemServer = systemServer;
@@ -975,6 +1009,9 @@ public class AudioService extends IAudioService.Stub
 
         mUseVolumeGroupAliases = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_handleVolumeAliasesUsingVolumeGroups);
+
+        mNotifAliasRing = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_alias_ring_notif_stream_types);
 
         // Initialize volume
         // Priority 1 - Android Property
@@ -2008,7 +2045,13 @@ public class AudioService extends IAudioService.Stub
         pw.println("\nStream volumes (device: index)");
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         for (int i = 0; i < numStreamTypes; i++) {
-            pw.println("- " + AudioSystem.STREAM_NAMES[i] + ":");
+            StringBuilder alias = new StringBuilder();
+            if (mStreamVolumeAlias[i] != i) {
+                alias.append(" (aliased to: ")
+                        .append(AudioSystem.STREAM_NAMES[mStreamVolumeAlias[i]])
+                        .append(")");
+            }
+            pw.println("- " + AudioSystem.STREAM_NAMES[i] + alias + ":");
             mStreamStates[i].dump(pw);
             pw.println("");
         }
@@ -2039,6 +2082,10 @@ public class AudioService extends IAudioService.Stub
                 default:
                     mStreamVolumeAlias = STREAM_VOLUME_ALIAS_DEFAULT;
                     dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
+            }
+            if (!mNotifAliasRing) {
+                mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] =
+                        AudioSystem.STREAM_NOTIFICATION;
             }
         }
 
@@ -9888,6 +9935,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mBtScoOnByApp="); pw.println(mBtScoOnByApp);
         pw.print("  mIsSingleVolume="); pw.println(mIsSingleVolume);
         pw.print("  mUseFixedVolume="); pw.println(mUseFixedVolume);
+        pw.print("  mNotifAliasRing="); pw.println(mNotifAliasRing);
         pw.print("  mFixedVolumeDevices="); pw.println(dumpDeviceTypes(mFixedVolumeDevices));
         pw.print("  mFullVolumeDevices="); pw.println(dumpDeviceTypes(mFullVolumeDevices));
         pw.print("  mAbsoluteVolumeDevices.keySet()="); pw.println(dumpDeviceTypes(
