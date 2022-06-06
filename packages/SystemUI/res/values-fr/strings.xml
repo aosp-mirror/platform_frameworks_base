@@ -136,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Visage authentifié"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmé"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Appuyez sur \"Confirmer\" pour terminer"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Déverrouillé par visage. Appuyez sur icône déverrouillage pour continuer."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Déverrouillage par visage. Appuyez sur l\'icône de déverrouillage pour continuer."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifié"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Utiliser un code PIN"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utiliser un schéma"</string>
@@ -932,8 +932,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nouvelles informations"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Applis actives"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ces applis sont actives et s\'exécutent même lorsque vous ne les utilisez pas. Cela améliore leur fonctionnement, mais peut également affecter l\'autonomie de la batterie."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Arrêter"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Arrêtée"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"OK"</string>
@@ -947,6 +946,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Texte copié"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Image copiée"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Contenu copié"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Ajouter"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gérer les utilisateurs"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Impossible de faire glisser cette notification vers l\'écran partagé."</string>
