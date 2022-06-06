@@ -186,33 +186,42 @@ static void end(JNIEnv* env, jobject clazz, jlong animatorPtr) {
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/graphics/animation/RenderNodeAnimator";
-
 static const JNINativeMethod gMethods[] = {
-    { "nCreateAnimator", "(IF)J", (void*) createAnimator },
-    { "nCreateCanvasPropertyFloatAnimator", "(JF)J", (void*) createCanvasPropertyFloatAnimator },
-    { "nCreateCanvasPropertyPaintAnimator", "(JIF)J", (void*) createCanvasPropertyPaintAnimator },
-    { "nCreateRevealAnimator", "(IIFF)J", (void*) createRevealAnimator },
-    { "nSetStartValue", "(JF)V", (void*) setStartValue },
-    { "nSetDuration", "(JJ)V", (void*) setDuration },
-    { "nGetDuration", "(J)J", (void*) getDuration },
-    { "nSetStartDelay", "(JJ)V", (void*) setStartDelay },
-    { "nSetInterpolator", "(JJ)V", (void*) setInterpolator },
-    { "nSetAllowRunningAsync", "(JZ)V", (void*) setAllowRunningAsync },
-    { "nSetListener", "(JLandroid/graphics/animation/RenderNodeAnimator;)V", (void*) setListener},
-    { "nStart", "(J)V", (void*) start},
-    { "nEnd", "(J)V", (void*) end },
+        {"nCreateAnimator", "(IF)J", (void*)createAnimator},
+        {"nCreateCanvasPropertyFloatAnimator", "(JF)J", (void*)createCanvasPropertyFloatAnimator},
+        {"nCreateCanvasPropertyPaintAnimator", "(JIF)J", (void*)createCanvasPropertyPaintAnimator},
+        {"nCreateRevealAnimator", "(IIFF)J", (void*)createRevealAnimator},
+        {"nSetStartValue", "(JF)V", (void*)setStartValue},
+        {"nSetDuration", "(JJ)V", (void*)setDuration},
+        {"nGetDuration", "(J)J", (void*)getDuration},
+        {"nSetStartDelay", "(JJ)V", (void*)setStartDelay},
+        {"nSetInterpolator", "(JJ)V", (void*)setInterpolator},
+        {"nSetAllowRunningAsync", "(JZ)V", (void*)setAllowRunningAsync},
+        {"nSetListener", "(JLjava/lang/Object;)V", (void*)setListener},
+        {"nStart", "(J)V", (void*)start},
+        {"nEnd", "(J)V", (void*)end},
 };
 
 int register_android_graphics_animation_RenderNodeAnimator(JNIEnv* env) {
+    int robolectricApiLevel = GetRobolectricApiLevel(env);
+    const char* const kClassPathName = robolectricApiLevel >= 30
+                                               ? "android/graphics/animation/RenderNodeAnimator"
+                                               : "android/view/RenderNodeAnimator";
+
     sLifecycleChecker.incStrong(0);
     gRenderNodeAnimatorClassInfo.clazz = FindClassOrDie(env, kClassPathName);
     gRenderNodeAnimatorClassInfo.clazz = MakeGlobalRefOrDie(env,
                                                             gRenderNodeAnimatorClassInfo.clazz);
 
-    gRenderNodeAnimatorClassInfo.callOnFinished = GetStaticMethodIDOrDie(
-            env, gRenderNodeAnimatorClassInfo.clazz, "callOnFinished",
-            "(Landroid/graphics/animation/RenderNodeAnimator;)V");
+    if (robolectricApiLevel >= 30) {
+        gRenderNodeAnimatorClassInfo.callOnFinished =
+                GetStaticMethodIDOrDie(env, gRenderNodeAnimatorClassInfo.clazz, "callOnFinished",
+                                       "(Landroid/graphics/animation/RenderNodeAnimator;)V");
+    } else {
+        gRenderNodeAnimatorClassInfo.callOnFinished =
+                GetStaticMethodIDOrDie(env, gRenderNodeAnimatorClassInfo.clazz, "callOnFinished",
+                                       "(Landroid/view/RenderNodeAnimator;)V");
+    }
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
