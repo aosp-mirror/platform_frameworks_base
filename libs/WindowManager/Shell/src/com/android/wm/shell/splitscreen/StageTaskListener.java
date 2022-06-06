@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Point;
@@ -94,14 +95,18 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     // TODO(b/204308910): Extracts SplitDecorManager related code to common package.
     private SplitDecorManager mSplitDecorManager;
 
+    private final StageTaskUnfoldController mStageTaskUnfoldController;
+
     StageTaskListener(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider) {
+            SurfaceSession surfaceSession, IconProvider iconProvider,
+            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
         mContext = context;
         mCallbacks = callbacks;
         mSyncQueue = syncQueue;
         mSurfaceSession = surfaceSession;
         mIconProvider = iconProvider;
+        mStageTaskUnfoldController = stageTaskUnfoldController;
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_MULTI_WINDOW, this);
     }
 
@@ -202,6 +207,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
         }
+
+        if (mStageTaskUnfoldController != null) {
+            mStageTaskUnfoldController.onTaskAppeared(taskInfo, leash);
+        }
     }
 
     @Override
@@ -268,6 +277,10 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
+        }
+
+        if (mStageTaskUnfoldController != null) {
+            mStageTaskUnfoldController.onTaskVanished(taskInfo);
         }
     }
 
