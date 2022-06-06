@@ -205,10 +205,8 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"«Sensorene er av» er aktiv"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Fjern alle varslinger."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> andre varsler i gruppen.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> annet varsel i gruppen.</item>
-    </plurals>
+    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
+    <skip />
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Skjermen er låst i liggende retning."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Skjermen er låst i stående retning."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Dessertmonter"</string>
@@ -256,10 +254,8 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Wi-Fi-sone"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Slår på …"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Datasparing er på"</string>
-    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="other">%d enheter</item>
-      <item quantity="one">%d enhet</item>
-    </plurals>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
+    <skip />
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lommelykt"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kameraet er i bruk"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobildata"</string>
@@ -356,10 +352,8 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Du er i gjestemodus"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Hvis du legger til en ny bruker, avsluttes gjestemodus, og alle apper og data fra den gjeldende gjesteøkten slettes."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Grensen for antall brukere er nådd"</string>
-    <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="other">Du kan legge til opptil <xliff:g id="COUNT">%d</xliff:g> brukere.</item>
-      <item quantity="one">Du kan bare opprette én bruker.</item>
-    </plurals>
+    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
+    <skip />
     <string name="user_remove_user_title" msgid="9124124694835811874">"Vil du fjerne brukeren?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Alle apper og data som tilhører denne brukeren, blir slettet."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Fjern"</string>
@@ -545,14 +539,10 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Minn meg på det"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Angre"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Slumrer i <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="other">%d timer</item>
-      <item quantity="one">%d time</item>
-    </plurals>
-    <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="other">%d minutter</item>
-      <item quantity="one">%d minutt</item>
-    </plurals>
+    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
+    <skip />
+    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
+    <skip />
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Batterisparing"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g>-knappen"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Startskjerm"</string>
@@ -776,10 +766,8 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"slå av/på"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Enhetsstyring"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Velg en app for å legge til kontroller"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontroller er lagt til.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontroll er lagt til.</item>
-    </plurals>
+    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
+    <skip />
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Favoritt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Favoritt, posisjon <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -937,13 +925,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Legg til brikke"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ikke legg til brikke"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Velg bruker"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> apper er aktive</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> app er aktiv</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
+    <skip />
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Ny informasjon"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktive apper"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Selv om du ikke bruker disse appene, er de fremdeles aktive og kan påvirke batterilevetiden"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Disse appene er aktive og kjører – selv når du ikke bruker dem. Dette forbedrer funksjonaliteten deres, men det kan også påvirke batterilevetiden."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Stopp"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Stoppet"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Ferdig"</string>
@@ -957,6 +943,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Teksten er kopiert"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Bildet er kopiert"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Innholdet er kopiert"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Legg til"</string>
     <string name="manage_users" msgid="1823875311934643849">"Administrer brukere"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Dette varselet støtter ikke at du drar det til en delt skjerm."</string>

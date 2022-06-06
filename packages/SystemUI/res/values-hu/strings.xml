@@ -136,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Arc hitelesítve"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Megerősítve"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Koppintson a Megerősítés lehetőségre"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Zárolás arccal feloldva. Folytatás: Feloldásra koppintás."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Arccal feloldva. A folytatáshoz nyomja meg a feloldás ikont."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Zárolás arccal feloldva. Koppintson a folytatáshoz."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Arc felismerve. Koppintson a folytatáshoz."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Arc felismerve. A folytatáshoz koppintson a Feloldásra."</string>
@@ -205,10 +205,8 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Az Érzékelők kikapcsolva kártya aktív"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Minden értesítés törlése"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> további értesítés.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> további értesítés.</item>
-    </plurals>
+    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
+    <skip />
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"A képernyő zárolva van fekvő tájolásban."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"A képernyő zárolva van álló tájolásban."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Dessert Case"</string>
@@ -256,10 +254,8 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Bekapcsolás…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Aktív adatcsökkentés"</string>
-    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="other">%d eszköz</item>
-      <item quantity="one">%d eszköz</item>
-    </plurals>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
+    <skip />
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Zseblámpa"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"A kamera használatban van"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobiladatok"</string>
@@ -316,7 +312,7 @@
     <string name="tap_again" msgid="1315420114387908655">"Koppintson újra"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Csúsztasson felfelé a megnyitáshoz"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Az eszköz használatához nyomja meg a feloldás ikonját"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Zárolás arccal feloldva. Eszköz használata: Feloldás ikon."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Arccal feloldva. A megnyitáshoz nyomja meg a feloldás ikont."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Zárolás arccal feloldva. Koppintson az eszköz használatához."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Arc felismerve. Koppintson az eszköz használatához."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Arc felismerve. Eszköz használata: Feloldás ikon."</string>
@@ -356,10 +352,8 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Vendég módban van"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Új felhasználó felvételével kilép a vendég módból, és az aktuális vendégmunkamenetből származó összes alkalmazás és adat törlődik majd."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Maximális felhasználószám elérve"</string>
-    <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="other">Legfeljebb <xliff:g id="COUNT">%d</xliff:g> felhasználót adhat hozzá.</item>
-      <item quantity="one">Csak egy felhasználót lehet létrehozni.</item>
-    </plurals>
+    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
+    <skip />
     <string name="user_remove_user_title" msgid="9124124694835811874">"Törli a felhasználót?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"A felhasználóhoz tartozó minden adat és alkalmazás törölve lesz."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Eltávolítás"</string>
@@ -545,14 +539,10 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Emlékeztessen"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Visszavonás"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Elhalasztva: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="other">%d óra</item>
-      <item quantity="one">%d óra</item>
-    </plurals>
-    <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="other">%d perc</item>
-      <item quantity="one">%d perc</item>
-    </plurals>
+    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
+    <skip />
+    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
+    <skip />
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Akkumulátorkímélő mód"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> gomb"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Kezdőképernyő"</string>
@@ -776,10 +766,8 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"váltás"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Eszközvezérlők"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Válasszon alkalmazást a vezérlők hozzáadásához"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> vezérlő hozzáadva.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> vezérlő hozzáadva.</item>
-    </plurals>
+    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
+    <skip />
     <string name="controls_removed" msgid="3731789252222856959">"Eltávolítva"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Hozzáadva a kedvencekhez"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Hozzáadva a kedvencekhez <xliff:g id="NUMBER">%d</xliff:g>. helyen"</string>
@@ -856,8 +844,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ismeretlen alkalmazás"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Átküldés leállítása"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Rendelkezésre álló eszközök a hangkimenethez."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Hangerő"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"A közvetítés működése"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Közvetítés"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"A közelben tartózkodó, kompatibilis Bluetooth-eszközzel rendelkező személyek meghallgathatják az Ön közvetített médiatartalmait"</string>
@@ -937,13 +924,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Mozaik hozzáadása"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne legyen hozzáadva"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Felhasználóválasztás"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> alkalmazás aktív</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> alkalmazás aktív</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
+    <skip />
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Új információ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktív alkalmazások"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Még ha nem is használja ezeket az alkalmazásokat, továbbra is aktívak maradnak, és hatással lehetnek az akkumulátor élettartamára"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ezek az alkalmazások aktívak és futnak, még akkor is, amikor nem használja őket. Ez javítja a működésüket, de hatással lehet az akkumulátor-élettartamra is."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Leállítás"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Leállítva"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Kész"</string>
@@ -957,6 +942,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Szöveg másolva"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Kép másolva"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Tartalom másolva"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Hozzáadás"</string>
     <string name="manage_users" msgid="1823875311934643849">"Felhasználók kezelése"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Az értesítés nem támogatja a megosztott képernyőre való áthúzást."</string>
