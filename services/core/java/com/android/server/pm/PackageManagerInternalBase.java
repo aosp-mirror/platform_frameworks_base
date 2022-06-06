@@ -122,8 +122,9 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
 
     @Override
     @Deprecated
-    public final boolean filterAppAccess(String packageName, int callingUid, int userId) {
-        return snapshot().filterAppAccess(packageName, callingUid, userId);
+    public final boolean filterAppAccess(String packageName, int callingUid, int userId,
+            boolean filterUninstalled) {
+        return snapshot().filterAppAccess(packageName, callingUid, userId, filterUninstalled);
     }
 
     @Override

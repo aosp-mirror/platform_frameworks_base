@@ -1358,10 +1358,19 @@ public class LauncherAppsService extends SystemService {
                     user.getIdentifier(), debugMsg, false);
         }
 
-        /** Returns whether or not the result to the listener should be filtered. */
-        private boolean isPackageVisibleToListener(String packageName, BroadcastCookie cookie) {
+        /**
+         * Returns whether or not the result to the listener should be filtered.
+         *
+         * @param packageName The package to be accessed by the listener.
+         * @param cookie      The listener
+         * @param user        The user where the package resides.
+         */
+        private boolean isPackageVisibleToListener(String packageName, BroadcastCookie cookie,
+                UserHandle user) {
+            // Do not filter the uninstalled package access since it might break callbacks such as
+            // shortcut changes and unavailable packages events.
             return !mPackageManagerInternal.filterAppAccess(packageName, cookie.callingUid,
-                    cookie.user.getIdentifier());
+                    user.getIdentifier(), false /* filterUninstalled */);
         }
 
         /** Returns whether or not the given appId is in allow list */
@@ -1372,10 +1381,11 @@ public class LauncherAppsService extends SystemService {
             return Arrays.binarySearch(appIdAllowList, appId) > -1;
         }
 
-        private String[] getFilteredPackageNames(String[] packageNames, BroadcastCookie cookie) {
+        private String[] getFilteredPackageNames(String[] packageNames, BroadcastCookie cookie,
+                UserHandle user) {
             final List<String> filteredPackageNames = new ArrayList<>();
             for (String packageName : packageNames) {
-                if (!isPackageVisibleToListener(packageName, cookie)) {
+                if (!isPackageVisibleToListener(packageName, cookie, user)) {
                     continue;
                 }
                 filteredPackageNames.add(packageName);
@@ -1619,7 +1629,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackageAdded")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         try {
@@ -1653,7 +1663,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackageModified")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         try {
@@ -1678,7 +1688,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesAvailable")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1707,7 +1718,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesUnavailable")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1751,7 +1763,7 @@ public class LauncherAppsService extends SystemService {
                             continue;
                         }
                         final String[] filteredPackagesWithoutExtras =
-                                getFilteredPackageNames(packagesNullExtras, cookie);
+                                getFilteredPackageNames(packagesNullExtras, cookie, user);
                         try {
                             if (!ArrayUtils.isEmpty(filteredPackagesWithoutExtras)) {
                                 listener.onPackagesSuspended(user, filteredPackagesWithoutExtras,
@@ -1759,7 +1771,8 @@ public class LauncherAppsService extends SystemService {
                             }
                             for (int idx = 0; idx < packagesWithExtras.size(); idx++) {
                                 Pair<String, Bundle> packageExtraPair = packagesWithExtras.get(idx);
-                                if (!isPackageVisibleToListener(packageExtraPair.first, cookie)) {
+                                if (!isPackageVisibleToListener(
+                                        packageExtraPair.first, cookie, user)) {
                                     continue;
                                 }
                                 listener.onPackagesSuspended(user,
@@ -1786,7 +1799,8 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesUnsuspended")) {
                             continue;
                         }
-                        final String[] filteredPackages = getFilteredPackageNames(packages, cookie);
+                        final String[] filteredPackages =
+                                getFilteredPackageNames(packages, cookie, user);
                         // If all packages are filtered, skip notifying listener.
                         if (ArrayUtils.isEmpty(filteredPackages)) {
                             continue;
@@ -1822,7 +1836,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, user, "onShortcutChanged")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(packageName, cookie)) {
+                        if (!isPackageVisibleToListener(packageName, cookie, user)) {
                             continue;
                         }
                         final int launcherUserId = cookie.user.getIdentifier();
@@ -1896,7 +1910,7 @@ public class LauncherAppsService extends SystemService {
                         if (!isEnabledProfileOf(cookie.user, mUser, "onLoadingProgressChanged")) {
                             continue;
                         }
-                        if (!isPackageVisibleToListener(mPackageName, cookie)) {
+                        if (!isPackageVisibleToListener(mPackageName, cookie, mUser)) {
                             continue;
                         }
                         try {

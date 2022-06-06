@@ -89,7 +89,8 @@ public final class DomainVerificationConnection implements DomainVerificationSer
 
     @Override
     public boolean filterAppAccess(String packageName, int callingUid, int userId) {
-        return mPm.snapshotComputer().filterAppAccess(packageName, callingUid, userId);
+        return mPm.snapshotComputer().filterAppAccess(
+                packageName, callingUid, userId, true /* filterUninstalled */);
     }
 
     @Override

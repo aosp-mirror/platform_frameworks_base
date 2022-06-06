@@ -1695,7 +1695,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
                         providerPackageName, providerProfileId)
                         && !mPackageManagerInternal.filterAppAccess(providerPackageName, callingUid,
-                        userId)) {
+                        profileId)) {
                     result.add(cloneIfLocalBinder(info));
                 }
             }
