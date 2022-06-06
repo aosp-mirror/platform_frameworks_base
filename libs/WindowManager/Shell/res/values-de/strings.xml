@@ -20,7 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"Schließen"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"Maximieren"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"Einstellungen"</string>
-    <string name="pip_phone_enter_split" msgid="7042877263880641911">"„Bildschirm teilen“ aktivieren"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"„Geteilter Bildschirm“ aktivieren"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menü"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ist in Bild im Bild"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Wenn du nicht möchtest, dass <xliff:g id="NAME">%s</xliff:g> diese Funktion verwendet, tippe, um die Einstellungen zu öffnen und die Funktion zu deaktivieren."</string>
@@ -31,7 +31,7 @@
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"Größe anpassen"</string>
     <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"In Stash legen"</string>
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Aus Stash entfernen"</string>
-    <string name="dock_forced_resizable" msgid="1749750436092293116">"Die App funktioniert unter Umständen bei geteiltem Bildschirmmodus nicht."</string>
+    <string name="dock_forced_resizable" msgid="1749750436092293116">"Die App funktioniert unter Umständen im Modus für geteilten Bildschirm nicht."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Das Teilen des Bildschirms wird in dieser App nicht unterstützt."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Die App funktioniert auf einem sekundären Display möglicherweise nicht."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Die App unterstützt den Start auf sekundären Displays nicht."</string>
