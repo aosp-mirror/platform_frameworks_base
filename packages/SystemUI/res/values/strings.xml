@@ -2046,6 +2046,9 @@
     <!-- Text for microphone app op [CHAR LIMIT=20]-->
     <string name="privacy_type_microphone">microphone</string>
 
+    <!-- Text for media projection privacy type [CHAR LIMIT=20]-->
+    <string name="privacy_type_media_projection">screen recording</string>
+
     <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
     <string name="music_controls_no_title">No title</string>
 
@@ -2281,6 +2284,8 @@
     <string name="media_output_dialog_button_stop_casting">Stop casting</string>
     <!-- Accessibility text describing purpose of media output dialog. [CHAR LIMIT=NONE] -->
     <string name="media_output_dialog_accessibility_title">Available devices for audio output.</string>
+    <!-- Accessibility text describing purpose of seekbar in media output dialog. [CHAR LIMIT=NONE] -->
+    <string name="media_output_dialog_accessibility_seekbar">Volume</string>
 
     <!-- Media Output Broadcast Dialog -->
     <!-- Title for Broadcast First Notify Dialog [CHAR LIMIT=60] -->
@@ -2472,7 +2477,7 @@
     <!-- Title for dialog listing applications currently running [CHAR LIMIT=NONE]-->
     <string name="fgs_manager_dialog_title">Active apps</string>
     <!-- Detailed message for dialog listing applications currently running [CHAR LIMIT=NONE]-->
-    <string name="fgs_manager_dialog_message">Even if you\u2019re not using these apps, they\u2019re still active and might affect battery life</string>
+    <string name="fgs_manager_dialog_message">These apps are active and running, even when you\u2019re not using them. This improves their functionality, but it may also affect battery life.</string>
     <!-- Label of the button to stop an app from running [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_label">Stop</string>
     <!-- Label of the button to stop an app from running but the app is already stopped and the button is disabled [CHAR LIMIT=12]-->
@@ -2494,12 +2499,22 @@
     <string name="clipboard_send_nearby_description">Send to nearby device</string>
     <!-- Text informing user that copied content is hidden [CHAR LIMIT=NONE] -->
     <string name="clipboard_text_hidden">Tap to view</string>
+    <!-- Asterisks replacing sensitive text content -->
+    <string name="clipboard_asterisks" translatable="false">••••••</string>
     <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
     <string name="clipboard_text_copied">Text copied</string>
     <!-- Accessibility announcement informing user that text has been copied [CHAR LIMIT=NONE] -->
     <string name="clipboard_image_copied">Image copied</string>
     <!-- Accessibility announcement informing user that something has been copied [CHAR LIMIT=NONE] -->
     <string name="clipboard_content_copied">Content copied</string>
+    <!-- Name of the screen that lets the user edit the context of the clipboard (copy/paste) [CHAR LIMIT=NONE] -->
+    <string name="clipboard_editor">Clipboard Editor</string>
+    <!-- Name for the window showing the clipboard (copy/paste) preview and controls [CHAR LIMIT=NONE] -->
+    <string name="clipboard_overlay_window_name">Clipboard</string>
+    <!-- Accessibility label for an image preview [CHAR LIMIT=NONE] -->
+    <string name="clipboard_image_preview">Image preview</string>
+    <!-- Accessibility string describing what will happen when the user selects the clipboard preview. Completing the sentence "Double tap to ..." [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit">edit</string>
 
     <!-- Generic "add" string [CHAR LIMIT=NONE] -->
     <string name="add">Add</string>

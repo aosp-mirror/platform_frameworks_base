@@ -114,6 +114,11 @@ public class TestableNotificationManagerService extends NotificationManagerServi
         mChannelToastsSent.add(uid);
     }
 
+    // Helper method for testing behavior when turning on/off the review permissions notification.
+    protected void setShowReviewPermissionsNotification(boolean setting) {
+        mShowReviewPermissionsNotification = setting;
+    }
+
     public class StrongAuthTrackerFake extends NotificationManagerService.StrongAuthTracker {
         private int mGetStrongAuthForUserReturnValue = 0;
         StrongAuthTrackerFake(Context context) {
