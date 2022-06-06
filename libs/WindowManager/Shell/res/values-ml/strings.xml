@@ -20,6 +20,7 @@
     <string name="pip_phone_close" msgid="5783752637260411309">"അവസാനിപ്പിക്കുക"</string>
     <string name="pip_phone_expand" msgid="2579292903468287504">"വികസിപ്പിക്കുക"</string>
     <string name="pip_phone_settings" msgid="5468987116750491918">"ക്രമീകരണം"</string>
+    <string name="pip_phone_enter_split" msgid="7042877263880641911">"സ്ക്രീൻ വിഭജന മോഡിൽ പ്രവേശിക്കുക"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"മെനു"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> ചിത്രത്തിനുള്ളിൽ ചിത്രം രീതിയിലാണ്"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"<xliff:g id="NAME">%s</xliff:g> ഈ ഫീച്ചർ ഉപയോഗിക്കേണ്ടെങ്കിൽ, ടാപ്പ് ചെയ്‌ത് ക്രമീകരണം തുറന്ന് അത് ഓഫാക്കുക."</string>
@@ -28,6 +29,8 @@
     <string name="pip_skip_to_next" msgid="8403429188794867653">"അടുത്തതിലേക്ക് പോകുക"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"മുമ്പത്തേതിലേക്ക് പോകുക"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"വലുപ്പം മാറ്റുക"</string>
+    <string name="accessibility_action_pip_stash" msgid="4060775037619702641">"സ്റ്റാഷ് ചെയ്യൽ"</string>
+    <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"അൺസ്റ്റാഷ് ചെയ്യൽ"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"സ്‌ക്രീൻ വിഭജന മോഡിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"സ്പ്ലിറ്റ്-സ്ക്രീനിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
@@ -66,9 +69,8 @@
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"മനസ്സിലായി"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"അടുത്തിടെയുള്ള ബബിളുകൾ, ഡിസ്മിസ് ചെയ്ത ബബിളുകൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
-    <string name="notification_bubble_title" msgid="6082910224488253378">"ബബ്ൾ"</string>
+    <string name="notification_bubble_title" msgid="6082910224488253378">"ബബിൾ"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"മാനേജ് ചെയ്യുക"</string>
-    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ബബ്ൾ ഡിസ്മിസ് ചെയ്തു."</string>
+    <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ബബിൾ ഡിസ്മിസ് ചെയ്തു."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ഈ ആപ്പ് റീസ്‌റ്റാർട്ട് ചെയ്‌ത് പൂർണ്ണ സ്ക്രീനിലേക്ക് മാറാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <string name="got_it" msgid="4428750913636945527">"മനസ്സിലായി"</string>
 </resources>
