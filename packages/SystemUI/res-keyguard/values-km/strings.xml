@@ -20,26 +20,16 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="514691256816366517">"Keyguard"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"វាយ​បញ្ចូល​កូដ PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"វាយ​បញ្ចូលកូដ PIN ថ្មី​ និងកូដ PUK របស់​ស៊ីម"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"កូដ PUK របស់​ស៊ីម"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"កូដ PIN របស់​ស៊ីម​ថ្មី"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"ចុច​ដើម្បី​បញ្ចូល​ពាក្យ​សម្ងាត់"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"វាយ​បញ្ចូល​ពាក្យ​សម្ងាត់​ ដើម្បី​ដោះ​សោ"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"វាយ​បញ្ចូល​កូដ PIN ដើម្បី​ដោះ​សោ"</string>
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"បញ្ចូល​កូដ PIN របស់​អ្នក"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"បញ្ចូល​លំនាំ​របស់​អ្នក"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"បញ្ចូល​ពាក្យ​សម្ងាត់​របស់អ្នក"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ។"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"បណ្ណមិនត្រឹមត្រូវទេ។"</string>
-    <string name="keyguard_charged" msgid="5478247181205188995">"បាន​សាក​ថ្ម"</string>
+    <string name="keyguard_charged" msgid="5478247181205188995">"បាន​សាក​ថ្មពេញ"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុងសាកថ្ម​ឥតខ្សែ"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុងបង្កើនប្រសិទ្ធភាព​គុណភាពថ្ម"</string>
-    <string name="keyguard_low_battery" msgid="1868012396800230904">"សូមសាក​ថ្ម​របស់​អ្នក។"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • បានដាក់កំហិតលើ​ការសាកថ្មជា​បណ្ដោះអាសន្ន"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ចុចម៉ឺនុយ ​ដើម្បី​ដោះ​សោ។"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"បណ្ដាញ​ជាប់​សោ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"គ្មាន​ស៊ីម​កាត​ទេ"</string>
@@ -54,13 +44,11 @@
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"ពាក្យសម្ងាត់​ឧបករណ៍"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"ប្រអប់​បំពេញ​កូដ PIN របស់​ស៊ីម"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"ប្រអប់​បំពេញ​កូដ PUK របស់​ស៊ីម"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"បាន​កំណត់ម៉ោង​រោទិ៍​បន្ទាប់​នៅថ្ងៃ <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"លុប"</string>
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"បិទ eSIM"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"មិនអាច​បិទ eSIM បាន​ទេ"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"មិនអាច​បិទ eSIM បានទេ ដោយសារ​មាន​បញ្ហា។"</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Enter"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"ភ្លេច​​លំនាំ"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"លំនាំមិនត្រឹមត្រូវ"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ"</string>
@@ -68,12 +56,9 @@
       <item quantity="other">ព្យាយាមម្តងទៀតក្នុងរយៈពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី។</item>
       <item quantity="one">ព្យាយាមម្តងទៀតក្នុងរយៈពេល 1 វិនាទី។</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="5376036737065051736">"គូរ​លំនាំ​របស់​អ្នក"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"បញ្ចូល​កូដ PIN របស់​ស៊ីម។"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"បញ្ចូល​កូដ PIN របស់​ស៊ីម​សម្រាប់ \"<xliff:g id="CARRIER">%1$s</xliff:g>\"។"</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> បិទ eSIM ដើម្បី​ប្រើ​ឧបករណ៍​ដោយ​គ្មាន​សេវាកម្ម​ទូរសព្ទ​ចល័ត។"</string>
-    <string name="kg_pin_instructions" msgid="822353548385014361">"បញ្ចូល​កូដ PIN"</string>
-    <string name="kg_password_instructions" msgid="324455062831719903">"បញ្ចូល​ពាក្យ​សម្ងាត់"</string>
     <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"ឥឡូវ​នេះ​ ស៊ីម​ត្រូវ​បាន​បិទ​ដំណើរការ​ហើយ។ បញ្ចូល​កូដ PUK ដើម្បី​បន្ត។ សូម​ទាក់ទង​ទៅក្រុមហ៊ុន​បម្រើ​សេវា​ទូរសព្ទ​របស់​អ្នក ដើម្បី​ទទួល​បាន​ព័ត៌មាន​លម្អិត។"</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"ឥឡូវ​នេះ​ ស៊ីម \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ត្រូវ​បាន​បិទ​ដំណើរការហើយ។ បញ្ចូល​កូដ PUK ដើម្បី​បន្ត។ សូម​ទាក់ទង​ទៅក្រុមហ៊ុន​បម្រើ​សេវា​ទូរសព្ទ​របស់​អ្នក ដើម្បី​ទទួល​បាន​ព័ត៌មាន​លម្អិត។"</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"បញ្ចូល​កូដ PIN ដែល​ចង់​បាន"</string>
@@ -81,8 +66,6 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"កំពុង​ដោះ​សោ​ស៊ីមកាត..."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"វាយ​បញ្ចូល​កូដ PIN ​ចន្លោះពី 4 ទៅ 8 ខ្ទង់"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"កូដ PUK គួរ​តែ​មាន​លេខ 8 ខ្ទង់ ឬ​ច្រើន​ជាង​នេះ។"</string>
-    <string name="kg_invalid_puk" msgid="1774337070084931186">"សូម​បញ្ចូល​កូដ PUK ម្ដង​ទៀត។ ការ​ព្យាយាម​ដដែល​ច្រើន​ដង​នឹង​បិទ​ដំណើរការ​ស៊ីម​នេះ​ជា​អចិន្ត្រៃយ៍។"</string>
-    <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"ការព្យាយាម​បញ្ចូល​លំនាំ​ច្រើន​ដង​ពេកហើយ"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"អ្នក​បាន​វាយ​បញ្ចូល​កូដ PIN របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង​ហើយ។ \n\nសូម​ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី​ទៀត។"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"អ្នក​បាន​វាយ​បញ្ចូល​ពាក្យ​សម្ងាត់​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង​ហើយ។ \n\nសូម​ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី​ទៀត។"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង​ហើយ។ \n\nសូមព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_1">%2$d</xliff:g> វិនាទី​ទៀត។"</string>
@@ -98,8 +81,6 @@
     </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"មិន​អាច​ដោះ​សោ​ដោយ​ប្រើកូដ​ PIN របស់​ស៊ីម​បានទេ!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"មិន​អាច​ដោះ​សោ​ដោយ​ប្រើកូដ​ PUK របស់​ស៊ីម​បានទេ!"</string>
-    <string name="kg_pin_accepted" msgid="1625501841604389716">"កូដត្រូវ​បានទទួល​យក!"</string>
-    <string name="keyguard_carrier_default" msgid="6359808469637388586">"គ្មាន​សេវា​ទេ។"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ប្ដូរ​វិធី​បញ្ចូល"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"​ពេល​ជិះ​យន្តហោះ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"តម្រូវឲ្យប្រើលំនាំ បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
@@ -108,25 +89,11 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"តម្រូវឲ្យប្រើលំនាំ ដើម្បីទទួលបានសវុត្ថិភាពបន្ថែម"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"តម្រូវឲ្យបញ្ចូលកូដ PIN ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់ ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"តម្រូវ​ឲ្យ​ប្រើ​លំនាំ​ នៅ​ពេល​ដែល​អ្នក​ប្តូរកម្រង​ព័ត៌មាន"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"តម្រូវ​ឲ្យ​បញ្ចូល​កូដ PIN នៅ​ពេល​ដែល​អ្នក​ប្តូរ​កម្រង​ព័ត៌មាន"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"តម្រូវ​ឲ្យ​បញ្ចូល​ពាក្យសម្ងាត់​ នៅ​ពេល​ដែល​អ្នក​ប្តូរ​កម្រង​ព័ត៌មាន"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ឧបករណ៍​ត្រូវបាន​ចាក់សោ​ដោយអ្នក​គ្រប់គ្រង"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ឧបករណ៍ត្រូវបានចាក់សោដោយអ្នកប្រើផ្ទាល់"</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
-      <item quantity="other">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​លំនាំ។</item>
-      <item quantity="one">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​លំនាំ។</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
-      <item quantity="other">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​កូដ PIN ។</item>
-      <item quantity="one">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​កូដ PIN ។</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
-      <item quantity="other">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​ពាក្យ​សម្ងាត់។</item>
-      <item quantity="one">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​ពាក្យ​សម្ងាត់។</item>
-    </plurals>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"មិនអាចសម្គាល់បានទេ"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ដើម្បីប្រើមុខងារដោះសោតាមទម្រង់មុខ សូមបើក"<b>"ការចូលប្រើកាមេរ៉ា"</b>"នៅក្នុងការកំណត់ &gt; ឯកជនភាព"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">បញ្ចូល​កូដ PIN របស់ស៊ីម។ អ្នកនៅ​សល់ការ​ព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត។</item>
       <item quantity="one">បញ្ចូលកូដ PIN របស់ស៊ីម។ អ្នក​នៅសល់​ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដង​ទៀត មុន​ពេល​ដែលអ្នក​ត្រូវទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​របស់អ្នក​ដើម្បី​ដោះសោ​ឧបករណ៍​របស់អ្នក។</item>

@@ -20,26 +20,16 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="514691256816366517">"Bloqueo de teclado"</string>
-    <string name="keyguard_password_enter_pin_code" msgid="8582296866585566671">"Escribe o código PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3813154965969758868">"Escribe o PUK da SIM e o código PIN novo"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="3529260761374385243">"Código PUK da SIM"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="2304037870481240781">"Código PIN da SIM novo"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="6180028658339706333"><font size="17">"Toca e escribe o contrasinal"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="7393393239623946777">"Escribe o contrasinal para desbloquear"</string>
-    <string name="keyguard_password_enter_pin_password_code" msgid="3692259677395250509">"Escribe o PIN para desbloquear"</string>
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Introduce o teu PIN"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Introduce o padrón"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introduce o contrasinal"</string>
-    <string name="keyguard_password_wrong_pin_code" msgid="3514267777289393046">"Código PIN incorrecto"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"A tarxeta non é válida."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Cargado"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando sen fíos"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rapidamente"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1158086783302116604">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Optimizando a preservación da batería"</string>
-    <string name="keyguard_low_battery" msgid="1868012396800230904">"Conecta o cargador."</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="6091488837901216962">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carga limitada temporalmente"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Preme Menú para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Bloqueada pola rede"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Sen tarxeta SIM"</string>
@@ -54,13 +44,11 @@
     <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Contrasinal do dispositivo"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"Área do PIN da tarxeta SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"Área do PUK da tarxeta SIM"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="4492876946798984630">"Próxima alarma definida para: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Eliminar"</string>
     <string name="disable_carrier_button_text" msgid="7153361131709275746">"Desactivar eSIM"</string>
     <string name="error_disable_esim_title" msgid="3802652622784813119">"Non se puido desactivar a eSIM"</string>
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"A eSIM non se puido desactivar debido a un erro."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Intro"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="3304688032024541260">"Esqueciches o padrón"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"O padrón é incorrecto"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"O contrasinal é incorrecto"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN incorrecto"</string>
@@ -68,12 +56,9 @@
       <item quantity="other">Téntao de novo dentro de <xliff:g id="NUMBER">%d</xliff:g> segundos.</item>
       <item quantity="one">Téntao de novo dentro de 1 segundo.</item>
     </plurals>
-    <string name="kg_pattern_instructions" msgid="5376036737065051736">"Debuxa o teu padrón"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Introduce o PIN da SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Introduce o PIN da SIM para \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Desactiva a eSIM para usar o dispositivo sen o servizo móbil."</string>
-    <string name="kg_pin_instructions" msgid="822353548385014361">"Introduce o PIN"</string>
-    <string name="kg_password_instructions" msgid="324455062831719903">"Escribe o teu contrasinal"</string>
     <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"Agora a tarxeta SIM está desactivada. Introduce o código PUK para continuar. Ponte en contacto co operador para obter máis información."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"Agora a SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" está desactivada. Introduce o código PUK para continuar. Ponte en contacto co operador para obter máis información."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Introduce o código PIN desexado"</string>
@@ -81,8 +66,6 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"Desbloqueando tarxeta SIM…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="2762202646949552978">"Escribe un PIN que teña entre 4 e 8 números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="5319756880543857694">"O código PUK debe ter 8 números como mínimo."</string>
-    <string name="kg_invalid_puk" msgid="1774337070084931186">"Volve introducir o código PUK correcto. Se realizas intentos repetidos é posible que se desactive a tarxeta SIM permanentemente."</string>
-    <string name="kg_login_too_many_attempts" msgid="4519957179182578690">"Tentaches debuxar o padrón moitas veces"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"Introduciches o PIN incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Introduciches o contrasinal incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Debuxaches incorrectamente o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
@@ -98,8 +81,6 @@
     </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Produciuse un erro no funcionamento do PIN da SIM"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Produciuse un erro ao tentar desbloquear a tarxeta SIM co código PUK."</string>
-    <string name="kg_pin_accepted" msgid="1625501841604389716">"Código válido"</string>
-    <string name="keyguard_carrier_default" msgid="6359808469637388586">"Non hai servizo."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Cambia o método de introdución"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Modo avión"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"É necesario o padrón despois do reinicio do dispositivo"</string>
@@ -108,25 +89,11 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"É necesario o padrón para obter seguranza adicional"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"É necesario o PIN para obter seguranza adicional"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"É necesario o contrasinal para obter seguranza adicional"</string>
-    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"É necesario o padrón para cambiar os perfís"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"É necesario o PIN para cambiar os perfís"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"É necesario o contrasinal para cambiar os perfís"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"O administrador bloqueou o dispositivo"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo bloqueouse manualmente"</string>
-    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="1337428979661197957">
-      <item quantity="other">O dispositivo non se desbloqueou durante <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirma o padrón.</item>
-      <item quantity="one">O dispositivo non se desbloqueou durante <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirma o padrón.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="6444519502336330270">
-      <item quantity="other">O dispositivo non se desbloqueou durante <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirma o PIN.</item>
-      <item quantity="one">O dispositivo non se desbloqueou durante <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirma o PIN.</item>
-    </plurals>
-    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5343961527665116914">
-      <item quantity="other">O dispositivo non se desbloqueou durante <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirma o contrasinal.</item>
-      <item quantity="one">O dispositivo non se desbloqueou durante <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirma o contrasinal.</item>
-    </plurals>
     <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Non se recoñeceu"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non se recoñeceu"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Para usar o desbloqueo facial, activa "<b>"Acceso á cámara"</b>" en Configuración &gt; Privacidade"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Introduce o código PIN da SIM. Quédanche <xliff:g id="NUMBER_1">%d</xliff:g> intentos.</item>
       <item quantity="one">Introduce o código PIN da SIM. Quédache <xliff:g id="NUMBER_0">%d</xliff:g> intento antes de que teñas que contactar co operador para desbloquear o dispositivo.</item>
