@@ -286,6 +286,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 setTouching();
                 mStartPos = touchPos;
                 mMoving = false;
+                mSplitLayout.onStartDragging();
                 break;
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
@@ -301,7 +302,10 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 releaseTouching();
-                if (!mMoving) break;
+                if (!mMoving) {
+                    mSplitLayout.onDraggingCancelled();
+                    break;
+                }
 
                 mVelocityTracker.addMovement(event);
                 mVelocityTracker.computeCurrentVelocity(1000 /* units */);
