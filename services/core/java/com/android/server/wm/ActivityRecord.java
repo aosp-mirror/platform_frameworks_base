@@ -7971,8 +7971,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isInTransition() {
-        return mTransitionController.inTransition(this) // Shell transitions.
-                || isAnimating(PARENTS | TRANSITION); // Legacy transitions.
+        return inTransitionSelfOrParent();
     }
 
     /**
