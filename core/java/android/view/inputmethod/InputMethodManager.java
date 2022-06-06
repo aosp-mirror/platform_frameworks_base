@@ -108,7 +108,6 @@ import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 
@@ -283,7 +282,8 @@ public final class InputMethodManager {
 
     /**
      * Provide this to {@link IInputMethodManager#startInputOrWindowGainedFocus(
-     * int, IInputMethodClient, IBinder, int, int, int, EditorInfo, IInputContext, int)} to receive
+     * int, IInputMethodClient, IBinder, int, int, int, EditorInfo,
+     * com.android.internal.inputmethod.IRemoteInputConnection, int)} to receive
      * {@link android.window.OnBackInvokedCallback} registrations from IME.
      */
     private final ImeOnBackInvokedDispatcher mImeDispatcher =

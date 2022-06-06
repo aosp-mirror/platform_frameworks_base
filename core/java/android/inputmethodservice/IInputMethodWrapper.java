@@ -41,11 +41,11 @@ import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
@@ -98,7 +98,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
      *
      * <p>This field must be set and cleared only from the binder thread(s), where the system
      * guarantees that {@link #bindInput(InputBinding)},
-     * {@link #startInput(IBinder, IInputContext, int, EditorInfo, boolean, boolean)}, and
+     * {@link #startInput(IBinder, IRemoteInputConnection, int, EditorInfo, boolean, boolean)}, and
      * {@link #unbindInput()} are called with the same order as the original calls
      * in {@link com.android.server.inputmethod.InputMethodManagerService}.
      * See {@link IBinder#FLAG_ONEWAY} for detailed semantics.</p>
@@ -195,7 +195,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_START_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
                 final IBinder startInputToken = (IBinder) args.arg1;
-                final IInputContext inputContext = (IInputContext) ((SomeArgs) args.arg2).arg1;
+                final IRemoteInputConnection remoteIc =
+                        (IRemoteInputConnection) ((SomeArgs) args.arg2).arg1;
                 final ImeOnBackInvokedDispatcher imeDispatcher =
                         (ImeOnBackInvokedDispatcher) ((SomeArgs) args.arg2).arg2;
                 final EditorInfo info = (EditorInfo) args.arg3;
@@ -203,8 +204,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final boolean restarting = args.argi5 == 1;
                 @InputMethodNavButtonFlags
                 final int navButtonFlags = args.argi6;
-                final InputConnection ic = inputContext != null
-                        ? new RemoteInputConnection(mTarget, inputContext, cancellationGroup)
+                final InputConnection ic = remoteIc != null
+                        ? new RemoteInputConnection(mTarget, remoteIc, cancellationGroup)
                         : null;
                 info.makeCompatible(mTargetSdkVersion);
                 inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken,
@@ -329,7 +330,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
         }
         mCancellationGroup = new CancellationGroup();
         InputConnection ic = new RemoteInputConnection(mTarget,
-                IInputContext.Stub.asInterface(binding.getConnectionToken()), mCancellationGroup);
+                IRemoteInputConnection.Stub.asInterface(binding.getConnectionToken()),
+                mCancellationGroup);
         InputBinding nu = new InputBinding(ic, binding);
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_SET_INPUT_CONTEXT, nu));
     }
@@ -349,7 +351,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void startInput(IBinder startInputToken, IInputContext inputContext,
+    public void startInput(IBinder startInputToken, IRemoteInputConnection inputConnection,
             EditorInfo attribute, boolean restarting,
             @InputMethodNavButtonFlags int navButtonFlags,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
@@ -358,7 +360,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
             mCancellationGroup = new CancellationGroup();
         }
         SomeArgs args = SomeArgs.obtain();
-        args.arg1 = inputContext;
+        args.arg1 = inputConnection;
         args.arg2 = imeDispatcher;
         mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOII(DO_START_INPUT, startInputToken,
                 args, attribute, mCancellationGroup, restarting ? 1 : 0, navButtonFlags));
