@@ -26,10 +26,7 @@ import java.io.PrintWriter
 class PipelineDumper(pw: PrintWriter) {
     private val ipw = pw.asIndenting()
 
-    fun print(a: Any?) = ipw.print(a)
     fun println(a: Any?) = ipw.println(a)
-    fun withIncreasedIndent(b: () -> Unit) = ipw.withIncreasedIndent(b)
-    fun withIncreasedIndent(r: Runnable) = ipw.withIncreasedIndent(r)
 
     fun dump(label: String, value: Any?) {
         ipw.print("$label: ")
@@ -37,24 +34,26 @@ class PipelineDumper(pw: PrintWriter) {
     }
 
     private fun dump(value: Any?) = when (value) {
-        null, is String, is Int -> println(value)
+        null, is String, is Int -> ipw.println(value)
         is Collection<*> -> dumpCollection(value)
         else -> {
-            println(value.fullPipelineName)
-            withIncreasedIndent { (value as? PipelineDumpable)?.dumpPipeline(this) }
+            ipw.println(value.fullPipelineName)
+            (value as? PipelineDumpable)?.let {
+                ipw.withIncreasedIndent { it.dumpPipeline(this) }
+            }
         }
     }
 
     private fun dumpCollection(values: Collection<Any?>) {
-        println(values.size)
-        withIncreasedIndent { values.forEach { dump(it) } }
+        ipw.println(values.size)
+        ipw.withIncreasedIndent { values.forEach { dump(it) } }
     }
 }
 
 private val Any.bareClassName: String get() {
     val className = javaClass.name
-    val packageName = javaClass.`package`.name
-    return className.substring(packageName.length + 1)
+    val packagePrefixLength = javaClass.`package`?.name?.length?.plus(1) ?: 0
+    return className.substring(packagePrefixLength)
 }
 
 private val Any.barePipelineName: String? get() = when (this) {

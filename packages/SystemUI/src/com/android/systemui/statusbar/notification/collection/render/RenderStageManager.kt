@@ -78,10 +78,10 @@ class RenderStageManager @Inject constructor() : PipelineDumpable {
     }
 
     override fun dumpPipeline(d: PipelineDumper) = with(d) {
-        dump("ViewRenderer", viewRenderer)
-        dump("OnAfterRenderListListeners", onAfterRenderListListeners)
-        dump("OnAfterRenderGroupListeners", onAfterRenderGroupListeners)
-        dump("OnAfterRenderEntryListeners", onAfterRenderEntryListeners)
+        dump("viewRenderer", viewRenderer)
+        dump("onAfterRenderListListeners", onAfterRenderListListeners)
+        dump("onAfterRenderGroupListeners", onAfterRenderGroupListeners)
+        dump("onAfterRenderEntryListeners", onAfterRenderEntryListeners)
     }
 
     private fun dispatchOnAfterRenderList(
