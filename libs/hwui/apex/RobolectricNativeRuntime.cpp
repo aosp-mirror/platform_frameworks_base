@@ -41,6 +41,7 @@ int register_android_graphics_RenderEffect(JNIEnv* env);
 
 namespace android {
 
+int register_android_animation_PropertyValuesHolder(JNIEnv* env);
 int register_android_graphics_Canvas(JNIEnv* env);
 int register_android_graphics_ColorFilter(JNIEnv* env);
 int register_android_graphics_ColorSpace(JNIEnv* env);
@@ -68,6 +69,7 @@ struct RegJNIRec {
 };
 
 static const RegJNIRec graphicsJNI[] = {
+        REG_JNI(register_android_animation_PropertyValuesHolder),
         REG_JNI(register_android_graphics_Bitmap),
         REG_JNI(register_android_graphics_BitmapFactory),
         REG_JNI(register_android_graphics_ByteBufferStreamAdaptor),
