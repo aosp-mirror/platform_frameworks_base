@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -121,6 +122,8 @@ import com.android.systemui.statusbar.notification.ConversationNotificationManag
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
@@ -568,6 +571,38 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onNotificationHeightChangeWhileOnKeyguardWillComputeMaxKeyguardNotifications() {
+        mStatusBarStateController.setState(KEYGUARD);
+        ArgumentCaptor<OnHeightChangedListener> captor =
+                ArgumentCaptor.forClass(OnHeightChangedListener.class);
+        verify(mNotificationStackScrollLayoutController)
+                .setOnHeightChangedListener(captor.capture());
+        OnHeightChangedListener listener = captor.getValue();
+
+        clearInvocations(mNotificationStackSizeCalculator);
+        listener.onHeightChanged(mock(ExpandableView.class), false);
+
+        verify(mNotificationStackSizeCalculator)
+                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void onNotificationHeightChangeWhileInShadeWillNotComputeMaxKeyguardNotifications() {
+        mStatusBarStateController.setState(SHADE);
+        ArgumentCaptor<OnHeightChangedListener> captor =
+                ArgumentCaptor.forClass(OnHeightChangedListener.class);
+        verify(mNotificationStackScrollLayoutController)
+                .setOnHeightChangedListener(captor.capture());
+        OnHeightChangedListener listener = captor.getValue();
+
+        clearInvocations(mNotificationStackSizeCalculator);
+        listener.onHeightChanged(mock(ExpandableView.class), false);
+
+        verify(mNotificationStackSizeCalculator, never())
+                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat());
+    }
+
+    @Test
     public void computeMaxKeyguardNotifications_lockscreenToShade_returnsExistingMax() {
         when(mAmbientState.getFractionToShade()).thenReturn(0.5f);
         mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
@@ -578,19 +613,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void computeMaxKeyguardNotifications_dozeAmountNotZero_returnsExistingMax() {
-        when(mAmbientState.getDozeAmount()).thenReturn(0.5f);
-        mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
-
-        // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
-        assertThat(mNotificationPanelViewController.computeMaxKeyguardNotifications())
-                .isEqualTo(-1);
-    }
-
-    @Test
     public void computeMaxKeyguardNotifications_noTransition_updatesMax() {
         when(mAmbientState.getFractionToShade()).thenReturn(0f);
-        when(mAmbientState.getDozeAmount()).thenReturn(0f);
         mNotificationPanelViewController.setMaxDisplayedNotifications(-1);
 
         // computeMaxKeyguardNotifications sets maxAllowed to 0 at minimum if it updates the value
@@ -1141,6 +1165,19 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 createMotionEvent(/* x= */ 0, /* y= */ 500, MotionEvent.ACTION_MOVE));
 
         assertThat(mNotificationPanelViewController.isQsTracking()).isFalse();
+    }
+
+    @Test
+    public void testOnAttachRefreshStatusBarState() {
+        mStatusBarStateController.setState(KEYGUARD);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(false);
+        for (View.OnAttachStateChangeListener listener : mOnAttachStateChangeListeners) {
+            listener.onViewAttachedToWindow(mView);
+        }
+        verify(mKeyguardStatusViewController).setKeyguardStatusViewVisibility(
+                KEYGUARD/*statusBarState*/,
+                false/*keyguardFadingAway*/,
+                false/*goingToFullShade*/, SHADE/*oldStatusBarState*/);
     }
 
     private static MotionEvent createMotionEvent(int x, int y, int action) {
