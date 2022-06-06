@@ -117,6 +117,14 @@ public class DraggableConstraintLayout extends ConstraintLayout
         mCallbacks = callbacks;
     }
 
+    @Override
+    public boolean onInterceptHoverEvent(MotionEvent event) {
+        if (mCallbacks != null) {
+            mCallbacks.onInteraction();
+        }
+        return super.onInterceptHoverEvent(event);
+    }
+
     @Override // View
     protected void onFinishInflate() {
         mActionsContainer = findViewById(R.id.actions_container);

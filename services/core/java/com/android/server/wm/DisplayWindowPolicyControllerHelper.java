@@ -152,6 +152,16 @@ class DisplayWindowPolicyControllerHelper {
         return mDisplayWindowPolicyController.isWindowingModeSupported(windowingMode);
     }
 
+    /**
+     * @see DisplayWindowPolicyController#canShowTasksInRecents()
+     */
+    public final boolean canShowTasksInRecents() {
+        if (mDisplayWindowPolicyController == null) {
+            return true;
+        }
+        return mDisplayWindowPolicyController.canShowTasksInRecents();
+    }
+
     void dump(String prefix, PrintWriter pw) {
         if (mDisplayWindowPolicyController != null) {
             pw.println();

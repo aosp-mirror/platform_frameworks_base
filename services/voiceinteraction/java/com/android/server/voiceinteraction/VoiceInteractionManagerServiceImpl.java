@@ -70,6 +70,7 @@ import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityAssistInfo;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -86,10 +87,14 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     final static String CLOSE_REASON_VOICE_INTERACTION = "voiceinteraction";
 
+    /** The delay time for retrying to request DirectActions. */
+    private static final long REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS = 200;
+
     final boolean mValid;
 
     final Context mContext;
     final Handler mHandler;
+    final Handler mDirectActionsHandler;
     final VoiceInteractionManagerService.VoiceInteractionManagerServiceStub mServiceStub;
     final int mUser;
     final ComponentName mComponent;
@@ -184,6 +189,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             int userHandle, ComponentName service) {
         mContext = context;
         mHandler = handler;
+        mDirectActionsHandler = new Handler(true);
         mServiceStub = stub;
         mUser = userHandle;
         mComponent = service;
@@ -343,7 +349,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 .getAttachedNonFinishingActivityForTask(taskId, null);
         if (tokens == null || tokens.getAssistToken() != assistToken) {
             Slog.w(TAG, "Unknown activity to query for direct actions");
-            callback.sendResult(null);
+            mDirectActionsHandler.sendMessageDelayed(PooledLambda.obtainMessage(
+                    VoiceInteractionManagerServiceImpl::retryRequestDirectActions,
+                    VoiceInteractionManagerServiceImpl.this, token, taskId, assistToken,
+                    cancellationCallback, callback), REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS);
         } else {
             try {
                 tokens.getApplicationThread().requestDirectActions(tokens.getActivityToken(),
@@ -351,6 +360,33 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             } catch (RemoteException e) {
                 Slog.w("Unexpected remote error", e);
                 callback.sendResult(null);
+            }
+        }
+    }
+
+    private void retryRequestDirectActions(@NonNull IBinder token, int taskId,
+            @NonNull IBinder assistToken,  @Nullable RemoteCallback cancellationCallback,
+            @NonNull RemoteCallback callback) {
+        synchronized (mServiceStub) {
+            if (mActiveSession == null || token != mActiveSession.mToken) {
+                Slog.w(TAG, "retryRequestDirectActions does not match active session");
+                callback.sendResult(null);
+                return;
+            }
+            final ActivityTokens tokens = LocalServices.getService(
+                            ActivityTaskManagerInternal.class)
+                    .getAttachedNonFinishingActivityForTask(taskId, null);
+            if (tokens == null || tokens.getAssistToken() != assistToken) {
+                Slog.w(TAG, "Unknown activity to query for direct actions during retrying");
+                callback.sendResult(null);
+            } else {
+                try {
+                    tokens.getApplicationThread().requestDirectActions(tokens.getActivityToken(),
+                            mActiveSession.mInteractor, cancellationCallback, callback);
+                } catch (RemoteException e) {
+                    Slog.w("Unexpected remote error", e);
+                    callback.sendResult(null);
+                }
             }
         }
     }

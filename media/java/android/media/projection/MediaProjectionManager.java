@@ -80,33 +80,48 @@ public final class MediaProjectionManager {
     }
 
     /**
-     * Retrieve the MediaProjection obtained from a succesful screen
-     * capture request. Will be null if the result from the
-     * startActivityForResult() is anything other than RESULT_OK.
+     * Retrieves the {@link MediaProjection} obtained from a successful screen
+     * capture request. The result code and data from the request are provided
+     * by overriding {@link Activity#onActivityResult(int, int, Intent)
+     * onActivityResult(int, int, Intent)}, which is called after starting an
+     * activity using {@link #createScreenCaptureIntent()}.
      *
-     * Starting from Android {@link android.os.Build.VERSION_CODES#R}, if your application requests
-     * the {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW} permission, and the
-     * user has not explicitly denied it, the permission will be automatically granted until the
-     * projection is stopped. This allows for user controls to be displayed on top of the screen
-     * being captured.
+     * <p>Starting from Android {@link android.os.Build.VERSION_CODES#R}, if
+     * your application requests the
+     * {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW
+     * SYSTEM_ALERT_WINDOW} permission, and the user has not explicitly denied
+     * it, the permission will be automatically granted until the projection is
+     * stopped. The permission allows your app to display user controls on top
+     * of the screen being captured.
      *
-     * <p>
-     * Apps targeting SDK version {@link android.os.Build.VERSION_CODES#Q} or later should specify
-     * the foreground service type using the attribute {@link android.R.attr#foregroundServiceType}
-     * in the service element of the app's manifest file.
-     * The {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION} attribute
-     * should be specified.
-     * </p>
+     * <p>Apps targeting SDK version {@link android.os.Build.VERSION_CODES#Q} or
+     * later must set the
+     * {@link android.R.attr#foregroundServiceType foregroundServiceType}
+     * attribute to {@code mediaProjection} in the
+     * <a href="/guide/topics/manifest/service-element">
+     * <code>&lt;service&gt;</code></a> element of the app's manifest file;
+     * {@code mediaProjection} is equivalent to
+     * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+     * FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION}.
      *
-     * @see <a href="https://developer.android.com/preview/privacy/foreground-service-types">
-     * Foregroud Service Types</a>
+     * @see <a href="/guide/components/foreground-services">
+     *      Foreground services developer guide</a>
+     * @see <a href="/guide/topics/large-screens/media-projection">
+     *      Media projection developer guide</a>
      *
-     * @param resultCode The result code from {@link android.app.Activity#onActivityResult(int,
-     * int, android.content.Intent)}
-     * @param resultData The resulting data from {@link android.app.Activity#onActivityResult(int,
-     * int, android.content.Intent)}
-     * @throws IllegalStateException on pre-Q devices if a previously gotten MediaProjection
-     * from the same {@code resultData} has not yet been stopped
+     * @param resultCode The result code from
+     *      {@link android.app.Activity#onActivityResult(int, int, android.content.Intent)
+     *      onActivityResult(int, int, Intent)}.
+     * @param resultData The result data from
+     *      {@link android.app.Activity#onActivityResult(int, int, android.content.Intent)
+     *      onActivityResult(int, int, Intent)}.
+     * @return The media projection obtained from a successful screen capture
+     *      request, or null if the result of the screen capture request is not
+     *      {@link Activity#RESULT_OK RESULT_OK}.
+     * @throws IllegalStateException On
+     *      pre-{@link android.os.Build.VERSION_CODES#Q Q} devices if a
+     *      previously obtained {@code MediaProjection} from the same
+     *      {@code resultData} has not yet been stopped.
      */
     public MediaProjection getMediaProjection(int resultCode, @NonNull Intent resultData) {
         if (resultCode != Activity.RESULT_OK || resultData == null) {

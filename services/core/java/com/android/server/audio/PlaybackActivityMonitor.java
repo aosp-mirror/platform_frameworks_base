@@ -1170,8 +1170,8 @@ public final class PlaybackActivityMonitor
         }
     }
 
-    void cancelMuteAwaitConnection() {
-        sEventLogger.loglogi("cancelMuteAwaitConnection()", TAG);
+    void cancelMuteAwaitConnection(String source) {
+        sEventLogger.loglogi("cancelMuteAwaitConnection() from:" + source, TAG);
         synchronized (mPlayerLock) {
             // cancel scheduled timeout, ignore device, only one expected device at a time
             mEventHandler.removeMessages(MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION);
@@ -1223,7 +1223,7 @@ public final class PlaybackActivityMonitor
                                     + " uid:" + apc.getClientUid())).printLog(TAG));
                     apc.getPlayerProxy().applyVolumeShaper(
                             MUTE_AWAIT_CONNECTION_VSHAPE,
-                            PLAY_CREATE_IF_NEEDED);
+                            PLAY_SKIP_RAMP);
                     mMutedPlayersAwaitingConnection.add(apc.getPlayerInterfaceId());
                 } catch (Exception e) {
                     Log.e(TAG, "awaiting connection: error muting player "

@@ -36,6 +36,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
@@ -61,7 +62,6 @@ import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
-import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
@@ -1089,12 +1089,6 @@ public class PackageManagerServiceUtils {
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
-        // Do not enforce filter matching when the caller is system or root.
-        // see ActivityManager#checkComponentPermission(String, int, int, boolean)
-        if (filterCallingUid == Process.ROOT_UID || filterCallingUid == Process.SYSTEM_UID) {
-            return;
-        }
-
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
@@ -1102,8 +1096,9 @@ public class PackageManagerServiceUtils {
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
 
-            // Do not enforce filter matching when the caller is the same app
-            if (info.applicationInfo.uid == filterCallingUid) {
+            // Do not enforce filter matching when the caller is system, root, or the same app
+            if (ActivityManager.checkComponentPermission(null, filterCallingUid,
+                    info.applicationInfo.uid, false) == PackageManager.PERMISSION_GRANTED) {
                 continue;
             }
 
@@ -1405,30 +1400,6 @@ public class PackageManagerServiceUtils {
                     }
                 }
             }
-        }
-    }
-
-    // TODO(b/231951809): remove this workaround after figuring out why apk_tmp_file labels stay
-    // on the installed apps instead of the correct apk_data_file ones
-
-    public static final String SELINUX_BUG = "b/231951809";
-
-    /**
-     * A workaround for b/231951809:
-     * Verifies the SELinux labels of the passed path, and tries to correct them if detects them
-     * wrong or missing.
-     */
-    public static void verifySelinuxLabels(String path) {
-        final String expectedCon = SELinux.fileSelabelLookup(path);
-        final String actualCon = SELinux.getFileContext(path);
-        Slog.i(TAG, SELINUX_BUG + ": checking selinux labels for " + path + " expected / actual: "
-                + expectedCon + " / " + actualCon);
-        if (expectedCon == null || !expectedCon.equals(actualCon)) {
-            Slog.w(TAG, SELINUX_BUG + ": labels don't match, reapplying for " + path);
-            if (!SELinux.restoreconRecursive(new File(path))) {
-                Slog.w(TAG, SELINUX_BUG + ": Failed to reapply restorecon");
-            }
-            // well, if it didn't work now after not working at first, not much else can be done
         }
     }
 }

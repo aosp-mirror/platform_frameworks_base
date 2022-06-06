@@ -35,6 +35,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ShortcutServiceInternal;
@@ -104,6 +105,7 @@ import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 import com.android.server.soundtrigger.SoundTriggerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal.ActivityTokens;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -126,6 +128,7 @@ public class VoiceInteractionManagerService extends SystemService {
     final ActivityManagerInternal mAmInternal;
     final ActivityTaskManagerInternal mAtmInternal;
     final UserManagerInternal mUserManagerInternal;
+    final PackageManagerInternal mPackageManagerInternal;
     final ArrayMap<Integer, VoiceInteractionManagerServiceStub.SoundTriggerSession>
             mLoadedKeyphraseIds = new ArrayMap<>();
     ShortcutServiceInternal mShortcutServiceInternal;
@@ -146,6 +149,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 LocalServices.getService(ActivityTaskManagerInternal.class));
         mUserManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(UserManagerInternal.class));
+        mPackageManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(PackageManagerInternal.class));
 
         LegacyPermissionManagerInternal permissionManagerInternal = LocalServices.getService(
                 LegacyPermissionManagerInternal.class);
@@ -369,6 +374,21 @@ public class VoiceInteractionManagerService extends SystemService {
             return new SoundTriggerSessionBinderProxy(session);
         }
 
+        @GuardedBy("this")
+        private void grantImplicitAccessLocked(int grantRecipientUid, @Nullable Intent intent) {
+            if (mImpl == null) {
+                Slog.w(TAG, "Cannot grant implicit access because mImpl is null.");
+                return;
+            }
+
+            final int grantRecipientAppId = UserHandle.getAppId(grantRecipientUid);
+            final int grantRecipientUserId = UserHandle.getUserId(grantRecipientUid);
+            final int voiceInteractionUid = mImpl.mInfo.getServiceInfo().applicationInfo.uid;
+            mPackageManagerInternal.grantImplicitAccess(
+                    grantRecipientUserId, intent, grantRecipientAppId, voiceInteractionUid,
+                    /* direct= */ true);
+        }
+
         private IVoiceInteractionSoundTriggerSession createSoundTriggerSessionForSelfIdentity(
                 IBinder client) {
             Identity identity = new Identity();
@@ -386,6 +406,7 @@ public class VoiceInteractionManagerService extends SystemService {
         void startLocalVoiceInteraction(final IBinder token, Bundle options) {
             if (mImpl == null) return;
 
+            final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
                 mImpl.showSessionLocked(options,
@@ -397,6 +418,11 @@ public class VoiceInteractionManagerService extends SystemService {
 
                             @Override
                             public void onShown() {
+                                synchronized (VoiceInteractionManagerServiceStub.this) {
+                                    VoiceInteractionManagerServiceStub.this
+                                            .grantImplicitAccessLocked(callingUid,
+                                                    /* intent= */ null);
+                                }
                                 mAtmInternal.onLocalVoiceInteractionStarted(token,
                                         mImpl.mActiveSession.mSession,
                                         mImpl.mActiveSession.mInteractor);
@@ -965,8 +991,16 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startVoiceActivityLocked(callingFeatureId, callingPid, callingUid,
-                            token, intent, resolvedType);
+                    final ActivityInfo activityInfo = intent.resolveActivityInfo(
+                            mContext.getPackageManager(), PackageManager.MATCH_ALL);
+                    if (activityInfo != null) {
+                        final int activityUid = activityInfo.applicationInfo.uid;
+                        grantImplicitAccessLocked(activityUid, intent);
+                    } else {
+                        Slog.w(TAG, "Cannot find ActivityInfo in startVoiceActivity.");
+                    }
+                    return mImpl.startVoiceActivityLocked(
+                            callingFeatureId, callingPid, callingUid, token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1005,6 +1039,15 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
+                    // Getting the UID corresponding to the taskId, and grant the visibility to it.
+                    final ActivityTokens tokens = mAtmInternal
+                            .getAttachedNonFinishingActivityForTask(taskId, /* token= */ null);
+                    final ComponentName componentName = mAtmInternal.getActivityName(
+                            tokens.getActivityToken());
+                    grantImplicitAccessLocked(mPackageManagerInternal.getPackageUid(
+                            componentName.getPackageName(), PackageManager.MATCH_ALL,
+                                    UserHandle.myUserId()), /* intent= */ null);
+
                     mImpl.requestDirectActionsLocked(token, taskId, assistToken,
                             cancellationCallback, resultCallback);
                 } finally {
