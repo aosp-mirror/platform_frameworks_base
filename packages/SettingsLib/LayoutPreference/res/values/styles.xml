@@ -17,7 +17,6 @@
 
 <resources>
     <style name="EntityHeader">
-        <item name="android:background">?android:attr/colorPrimaryDark</item>
         <item name="android:paddingTop">24dp</item>
         <item name="android:paddingBottom">16dp</item>
         <item name="android:paddingEnd">16dp</item>
