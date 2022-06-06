@@ -91,7 +91,7 @@
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"મોબાઇલ ડેટાની સ્થિતિ"</string>
-    <string name="notification_channel_sms" msgid="1243384981025535724">"SMS સંદેશા"</string>
+    <string name="notification_channel_sms" msgid="1243384981025535724">"SMS મેસેજ"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"વૉઇસમેઇલ સંદેશા"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"વાઇ-ફાઇ કૉલિંગ"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"સિમનું સ્ટેટસ"</string>
@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ચાલુ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"બંધ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"શું <xliff:g id="SERVICE">%1$s</xliff:g>ને તમારા ડિવાઇસના સંપૂર્ણ નિયંત્રણની મંજૂરી આપીએ?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"જો તમે <xliff:g id="SERVICE">%1$s</xliff:g> ચાલુ કરશો, તો તમારું ડિવાઇસ ડેટા એન્ક્રિપ્શનને બહેતર બનાવવા તમારા સ્ક્રીન લૉકનો ઉપયોગ કરશે નહીં."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ઍક્સેસિબિલિટી સંબંધિત આવશ્યકતા માટે સહાય કરતી ઍપ માટે સંપૂર્ણ નિયંત્રણ યોગ્ય છે, પણ મોટા ભાગની ઍપ માટે યોગ્ય નથી."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"જોવા અને નિયંત્રણ માટેની સ્ક્રીન"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"તે સ્ક્રીન પરનું બધું કન્ટેન્ટ વાંચી શકે છે અને કન્ટેન્ટને અન્ય ઍપ પર બતાવી શકે છે."</string>

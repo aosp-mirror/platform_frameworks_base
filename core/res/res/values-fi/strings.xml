@@ -1711,8 +1711,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"PÄÄLLÄ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"EI PÄÄLLÄ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Saako <xliff:g id="SERVICE">%1$s</xliff:g> laitteesi täyden käyttöoikeuden?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jos <xliff:g id="SERVICE">%1$s</xliff:g> otetaan käyttöön, laitteesi ei käytä näytön lukitusta tiedon salauksen parantamiseen."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täysi käyttöoikeus sopii esteettömyyssovelluksille, mutta ei useimmille sovelluksille."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täysi käyttöoikeus sopii saavutettavuussovelluksille, mutta ei useimmille sovelluksille."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Näytön katselu ja ohjaus"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Se voi lukea kaiken näytön sisällön ja näyttää sisältöä kaikista sovelluksista."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Toimintojen näkeminen ja suorittaminen"</string>
@@ -2157,7 +2156,7 @@
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Kuvakaappaus"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Näytöllä näkyvä esteettömyyspainike"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Näytöllä näkyvän esteettömyyspainikkeen valitsin"</string>
-    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Esteettömyyspainike"</string>
+    <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Saavutettavuuspainike"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Sulje ilmoitusalue"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Tekstityspalkki: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on nyt rajoitettujen ryhmässä"</string>

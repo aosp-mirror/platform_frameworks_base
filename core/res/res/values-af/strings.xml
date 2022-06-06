@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AAN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Gee <xliff:g id="SERVICE">%1$s</xliff:g> volle beheer oor jou toestel?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"As jy <xliff:g id="SERVICE">%1$s</xliff:g> aanskakel, sal jou toestel nie jou skermslot gebruik om data-enkripsie te verbeter nie."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volle beheer is gepas vir programme wat jou help met toeganklikheidsbehoeftes, maar nie vir die meeste programme nie."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bekyk en beheer skerm"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dit kan alle inhoud op die skerm lees en inhoud bo-oor ander programme vertoon."</string>

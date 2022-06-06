@@ -330,7 +330,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"קריאה וכתיבה של יומן השיחות של הטלפון"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"טלפון"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ביצוע וניהול של שיחות טלפון"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"חיישנים גופניים"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"חיישני גוף"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"גישה אל נתוני חיישנים של הסימנים החיוניים שלך"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"אחזור תוכן של חלון"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"בדיקת התוכן של חלון שאיתו מתבצעת אינטראקציה."</string>
@@ -355,7 +355,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"הצגת התראות כפעילויות במסך מלא במכשיר נעול"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"מאפשרת לאפליקציה להציג התראות כפעילויות במסך מלא במכשיר נעול"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"התקנה של קיצורי דרך"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"מאפשרת לאפליקציה להוסיף קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"מאפשרת לאפליקציה להוסיף קיצורי דרך במסך הבית ללא התערבות המשתמש."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"הסרת התקנה של קיצורי דרך"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"מאפשרת לאפליקציה להסיר קיצורי דרך במסך דף הבית ללא התערבות המשתמש."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"ניתוב מחדש של שיחות יוצאות"</string>
@@ -1755,7 +1755,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"מופעל"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"כבוי"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"להעניק לשירות <xliff:g id="SERVICE">%1$s</xliff:g> שליטה מלאה במכשיר?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"אם השירות <xliff:g id="SERVICE">%1$s</xliff:g> יופעל, המכשיר לא ישתמש בנעילת המסך כדי לשפר את הצפנת הנתונים."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"האפשרות לשליטה מלאה במכשיר לא מתאימה לכל האפליקציות, אלא רק לאפליקציות שעוזרות עם צורכי הנגישות שלך."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"הצגת המסך ושליטה בו"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"אפשרות לקריאת כל התוכן במסך ולהצגת התוכן מעל אפליקציות אחרות."</string>

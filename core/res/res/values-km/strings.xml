@@ -1175,7 +1175,7 @@
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"ការ​ជ្រើស​អត្ថបទ"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"បន្ថែម​ទៅ​វចនានុក្រម"</string>
     <string name="deleteText" msgid="4200807474529938112">"លុប"</string>
-    <string name="inputMethod" msgid="1784759500516314751">"វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="inputMethod" msgid="1784759500516314751">"វិធីបញ្ចូល"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"សកម្មភាព​អត្ថបទ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"អស់​ទំហំ​ផ្ទុក"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ​"</string>
@@ -1207,7 +1207,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ផ្តល់​សិទ្ធិ​ចូល​ប្រើ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"កែសម្រួល​ជាមួយ"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"កែសម្រួល​ជាមួយ​ %1$s"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"កែសម្រួល"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"កែ"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"ចែករំលែក"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"ចែករំលែក​ជាមួយ %1$s"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"ចែករំលែក"</string>
@@ -1405,7 +1405,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"ជ្រើស​វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="show_ime" msgid="6406112007347443383">"ទុកវានៅលើអេក្រង់ខណៈពេលក្តារចុចពិតប្រាកដកំពុងសកម្ម"</string>
     <string name="hardware" msgid="1800597768237606953">"បង្ហាញក្ដារចុចនិម្មិត"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"កំណត់រចនាសម្ព័ន្ធក្តារចុចពិតប្រាកដ"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"កំណត់រចនាសម្ព័ន្ធក្តារចុច​រូបវន្ត"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1497,7 +1497,7 @@
     <string name="permission_request_notification_for_app_with_subtitle" msgid="1298704005732851350">"ការអនុញ្ញាត​ដែលស្នើដោយ <xliff:g id="APP">%1$s</xliff:g>\nសម្រាប់គណនី <xliff:g id="ACCOUNT">%2$s</xliff:g>។"</string>
     <string name="forward_intent_to_owner" msgid="4620359037192871015">"អ្នក​កំពុង​ប្រើ​កម្មវិធី​នេះ​នៅ​ខាងក្រៅ​ប្រវត្តិរូប​​ការងារ​របស់​អ្នក"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"អ្នក​កំពុង​ប្រើ​កម្មវិធី​នេះ​ក្នុង​ប្រវត្តិរូប​ការងារ​របស់​អ្នក"</string>
-    <string name="input_method_binding_label" msgid="1166731601721983656">"វិធីសាស្ត្រ​បញ្ចូល"</string>
+    <string name="input_method_binding_label" msgid="1166731601721983656">"វិធីបញ្ចូល"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"ភាព​ងាយស្រួល"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"ផ្ទាំង​រូបភាព"</string>
@@ -1592,7 +1592,7 @@
     <string name="storage_usb_drive" msgid="448030813201444573">"ឧបករណ៍ផ្ទុក USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"ឧបករណ៍ផ្ទុក USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="2391213347883616886">"ឧបករណ៍​ផ្ទុក​យូអេសប៊ី"</string>
-    <string name="extract_edit_menu_button" msgid="63954536535863040">"កែសម្រួល​"</string>
+    <string name="extract_edit_menu_button" msgid="63954536535863040">"កែ"</string>
     <string name="data_usage_warning_title" msgid="9034893717078325845">"ការព្រមានពីការប្រើទិន្នន័យ"</string>
     <string name="data_usage_warning_body" msgid="1669325367188029454">"អ្នកបានប្រើ​ទិន្នន័យអស់ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="data_usage_mobile_limit_title" msgid="3911447354393775241">"បានឈានដល់ចំនួនកម្រិតនៃទិន្នន័យទូរសព្ទចល័តហើយ"</string>
@@ -1711,10 +1711,9 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"បើក"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"បិទ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"អនុញ្ញាតឱ្យ <xliff:g id="SERVICE">%1$s</xliff:g> មានសិទ្ធិគ្រប់គ្រងឧបករណ៍​របស់អ្នក​ទាំងស្រុងឬ?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"បើ​អ្នក​បើក <xliff:g id="SERVICE">%1$s</xliff:g> ឧបករណ៍របស់​អ្នកនឹង​មិន​ប្រើ​ការចាក់សោអេក្រង់របស់​អ្នក​ ដើម្បី​បង្កើន​ប្រសិទ្ធភាពការ​អ៊ីនគ្រីប​ទិន្នន័យ​ទេ។"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"ការគ្រប់គ្រង​ទាំងស្រុងមានលក្ខណៈ​សមស្របសម្រាប់​កម្មវិធី ដែលជួយអ្នក​ទាក់ទងនឹងការប្រើមុខងារភាពងាយស្រួល ប៉ុន្តែមិនសមស្របសម្រាប់​កម្មវិធីភាគច្រើនទេ។"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"មើល និង​គ្រប់គ្រងអេក្រង់"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ការគ្រប់គ្រងអេក្រង់​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"វា​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"មើល និង​ធ្វើសកម្មភាព"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬឧបករណ៍ចាប់​សញ្ញាហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"អនុញ្ញាត"</string>
@@ -1728,7 +1727,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"ការ​កែ​ពណ៌"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"ការ​កែតម្រូវ​ពណ៌"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ពន្លឺតិចខ្លាំង"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
@@ -1875,7 +1874,7 @@
     <string name="select_day" msgid="2060371240117403147">"ជ្រើស​ខែ និង​ថ្ងៃ"</string>
     <string name="select_year" msgid="1868350712095595393">"ជ្រើស​ឆ្នាំ"</string>
     <string name="deleted_key" msgid="9130083334943364001">"បាន​លុប <xliff:g id="KEY">%1$s</xliff:g>"</string>
-    <string name="managed_profile_label_badge" msgid="6762559569999499495">"កន្លែង​ធ្វើការ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>​ការងារ"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"សួរ​រក​កូដ PIN មុន​ពេលដកខ្ទាស់"</string>
@@ -1887,7 +1886,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"យល់ព្រម"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"មុខងារ​សន្សំថ្មបើករចនាប័ទ្មងងឹត និងដាក់កំហិត ឬបិទសកម្មភាពផ្ទៃខាងក្រោយ ឥទ្ធិពលរូបភាពមួយចំនួន មុខងារជាក់លាក់ និងការតភ្ជាប់បណ្ដាញមួយចំនួន។"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ មុខងារសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"បើក"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2087,7 +2086,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"មិន​អីទេ បើក​ចុះ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"បាន​រកឃើញ​កម្មវិធី​ដែលបង្ក​គ្រោះថ្នាក់"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ចង់​បង្ហាញ​ស្ថិតិ​ប្រើប្រាស់​របស់ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"កែសម្រួល"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"កែ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹងញ័រ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹង​បិទសំឡេង"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ការផ្លាស់ប្ដូរ​ប្រព័ន្ធ"</string>

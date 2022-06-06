@@ -893,7 +893,7 @@
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"螢幕已鎖定。"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"按選單鍵解鎖或撥打緊急電話。"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"按選單鍵解鎖。"</string>
-    <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"畫出解鎖圖形以解除鎖定螢幕"</string>
+    <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"畫出解鎖圖案來為螢幕解鎖"</string>
     <string name="lockscreen_emergency_call" msgid="7549683825868928636">"緊急電話"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"返回通話"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"正確！"</string>
@@ -935,7 +935,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"您已 <xliff:g id="NUMBER">%d</xliff:g> 次無法解鎖 Android TV 裝置，Android TV 裝置現在將回復原廠設定。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"您嘗試解除這部手機的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次。手機現在會重設為原廠預設值。"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"忘記圖形？"</string>
+    <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"忘記圖案？"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"帳戶解鎖"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"圖案嘗試次數過多"</string>
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"如要解鎖，請以 Google 帳戶登入。"</string>
@@ -1655,8 +1655,8 @@
     <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"重疊效果 #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">"(安全)"</string>
-    <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"忘記圖案"</string>
-    <string name="kg_wrong_pattern" msgid="1342812634464179931">"圖形不對"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"忘記了圖案"</string>
+    <string name="kg_wrong_pattern" msgid="1342812634464179931">"圖案錯誤"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN 錯誤"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
@@ -1710,9 +1710,8 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"不要開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置嗎？"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"如果您開啟 <xliff:g id="SERVICE">%1$s</xliff:g>，裝置將無法使用螢幕鎖定功能加強資料加密。"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"為您提供所需無障礙功能的應用程式有權完全控制您的裝置，但大部分應用程式均沒有此權限。"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"允許 <xliff:g id="SERVICE">%1$s</xliff:g> 完全控制您的裝置？"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"對於為您提供無障礙功能的應用程式，您可授予完整控制權，但大部分應用程式都不應獲授予此權限。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"這項功能可以讀出螢幕上的所有內容，並透過其他應用程式顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看和執行動作"</string>
@@ -1879,7 +1878,7 @@
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"第二個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"第三個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"取消固定時必須輸入 PIN"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定時必須提供解鎖圖形"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定時必須提供解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"取消固定時必須輸入密碼"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"已由您的管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"已由您的管理員更新"</string>

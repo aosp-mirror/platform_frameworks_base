@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"සක්‍රියයි"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"අක්‍රියයි"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> හට ඔබේ උපාංගයේ සම්පූර්ණ පාලනය තබා ගැනීමට ඉඩ දෙන්නද?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ඔබ <xliff:g id="SERVICE">%1$s</xliff:g> ක්‍රියාත්මක කරන්නේ නම්, දත්ත සංකේතනය වැඩිදියුණු කිරීමට ඔබේ උපාංගය ඔබේ තිර අගුල භාවිත නොකරනු ඇත."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"පූර්ණ පාලනය ඔබට ප්‍රවේශ්‍යතා අවශ්‍යතා සමඟ උදවු කරන යෙදුම් සඳහා සුදුසු වන නමුත් බොහෝ යෙදුම් සඳහා සුදුසු නොවේ."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"තිරය බලන්න සහ පාලන කරන්න"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"එයට තිරයේ සියලුම අන්තර්ගත කියවිය හැකි අතර අනෙකුත් යෙදුම් මත අන්තර්ගතය සංදර්ශන කළ හැක."</string>
