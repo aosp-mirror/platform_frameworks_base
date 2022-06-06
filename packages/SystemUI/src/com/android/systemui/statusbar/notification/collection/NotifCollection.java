@@ -137,7 +137,7 @@ import javax.inject.Inject;
  */
 @MainThread
 @SysUISingleton
-public class NotifCollection implements Dumpable {
+public class NotifCollection implements Dumpable, PipelineDumpable {
     private final IStatusBarService mStatusBarService;
     private final SystemClock mClock;
     private final NotifPipelineFlags mNotifPipelineFlags;
@@ -839,6 +839,14 @@ public class NotifCollection implements Dumpable {
                         entries,
                         true,
                         "\t\t"));
+    }
+
+    @Override
+    public void dumpPipeline(@NonNull PipelineDumper d) {
+        d.dump("notifCollectionListeners", mNotifCollectionListeners);
+        d.dump("lifetimeExtenders", mLifetimeExtenders);
+        d.dump("dismissInterceptors", mDismissInterceptors);
+        d.dump("buildListener", mBuildListener);
     }
 
     private final BatchableNotificationHandler mNotifHandler = new BatchableNotificationHandler() {

@@ -91,6 +91,8 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
+import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy.OnGroupChangeListener;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
@@ -1610,7 +1612,8 @@ public class NotificationStackScrollLayoutController {
         }
     }
 
-    private class NotificationListContainerImpl implements NotificationListContainer {
+    private class NotificationListContainerImpl implements NotificationListContainer,
+            PipelineDumpable {
 
         @Override
         public void setChildTransferInProgress(boolean childTransferInProgress) {
@@ -1755,6 +1758,12 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void setWillExpand(boolean willExpand) {
             mView.setWillExpand(willExpand);
+        }
+
+        @Override
+        public void dumpPipeline(@NonNull PipelineDumper d) {
+            d.dump("NotificationStackScrollLayoutController.this",
+                    NotificationStackScrollLayoutController.this);
         }
     }
 
