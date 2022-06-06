@@ -818,6 +818,8 @@
     <!-- Added in U -->
     <protected-broadcast android:name="android.intent.action.PROFILE_ADDED" />
     <protected-broadcast android:name="android.intent.action.PROFILE_REMOVED" />
+    <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_SENT_ACTION" />
+    <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_DELIVERY_ACTION" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
