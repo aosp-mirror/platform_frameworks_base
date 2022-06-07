@@ -57,7 +57,7 @@ public class ShellInitImpl {
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final Optional<FullscreenUnfoldController> mFullscreenUnfoldController;
     private final Optional<UnfoldTransitionHandler> mUnfoldTransitionHandler;
-    private final Optional<FreeformTaskListener> mFreeformTaskListenerOptional;
+    private final Optional<FreeformTaskListener<?>> mFreeformTaskListenerOptional;
     private final ShellExecutor mMainExecutor;
     private final Transitions mTransitions;
     private final StartingWindowController mStartingWindow;
@@ -78,7 +78,7 @@ public class ShellInitImpl {
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> fullscreenUnfoldTransitionController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
-            Optional<FreeformTaskListener> freeformTaskListenerOptional,
+            Optional<FreeformTaskListener<?>> freeformTaskListenerOptional,
             Optional<RecentTasksController> recentTasks,
             Transitions transitions,
             StartingWindowController startingWindow,
