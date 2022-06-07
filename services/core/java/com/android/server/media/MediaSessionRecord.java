@@ -26,9 +26,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaMetadata;
-import android.media.MediaRouter2Manager;
 import android.media.Rating;
-import android.media.RoutingSessionInfo;
 import android.media.VolumeProvider;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
@@ -463,29 +461,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
 
     @Override
     public boolean canHandleVolumeKey() {
-        if (isPlaybackTypeLocal() || mVolumeAdjustmentForRemoteGroupSessions) {
-            return true;
-        }
-        MediaRouter2Manager mRouter2Manager = MediaRouter2Manager.getInstance(mContext);
-        List<RoutingSessionInfo> sessions =
-                mRouter2Manager.getRoutingSessions(mPackageName);
-        boolean foundNonSystemSession = false;
-        boolean isGroup = false;
-        for (RoutingSessionInfo session : sessions) {
-            if (!session.isSystemSession()) {
-                foundNonSystemSession = true;
-                int selectedRouteCount = session.getSelectedRoutes().size();
-                if (selectedRouteCount > 1) {
-                    isGroup = true;
-                    break;
-                }
-            }
-        }
-        if (!foundNonSystemSession) {
-            Log.d(TAG, "No routing session for " + mPackageName);
-            return false;
-        }
-        return !isGroup;
+        return mVolumeControlType != VolumeProvider.VOLUME_CONTROL_FIXED;
     }
 
     @Override

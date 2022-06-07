@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -48,6 +49,9 @@ public final class RoutingSessionInfo implements Parcelable {
 
     private static final String TAG = "RoutingSessionInfo";
 
+    private static final String KEY_GROUP_ROUTE = "androidx.mediarouter.media.KEY_GROUP_ROUTE";
+    private static final String KEY_VOLUME_HANDLING = "volumeHandling";
+
     final String mId;
     final CharSequence mName;
     final String mOwnerPackageName;
@@ -67,6 +71,7 @@ public final class RoutingSessionInfo implements Parcelable {
     final Bundle mControlHints;
     final boolean mIsSystemSession;
 
+
     RoutingSessionInfo(@NonNull Builder builder) {
         Objects.requireNonNull(builder, "builder must not be null.");
 
@@ -85,12 +90,17 @@ public final class RoutingSessionInfo implements Parcelable {
         mTransferableRoutes = Collections.unmodifiableList(
                 convertToUniqueRouteIds(builder.mTransferableRoutes));
 
-        mVolumeHandling = builder.mVolumeHandling;
         mVolumeMax = builder.mVolumeMax;
         mVolume = builder.mVolume;
 
-        mControlHints = builder.mControlHints;
         mIsSystemSession = builder.mIsSystemSession;
+
+        boolean volumeAdjustmentForRemoteGroupSessions = Resources.getSystem().getBoolean(
+                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
+        mVolumeHandling = defineVolumeHandling(builder.mVolumeHandling, mSelectedRoutes,
+                volumeAdjustmentForRemoteGroupSessions);
+
+        mControlHints = updateVolumeHandlingInHints(builder.mControlHints, mVolumeHandling);
     }
 
     RoutingSessionInfo(@NonNull Parcel src) {
@@ -113,6 +123,34 @@ public final class RoutingSessionInfo implements Parcelable {
 
         mControlHints = src.readBundle();
         mIsSystemSession = src.readBoolean();
+    }
+
+    private static Bundle updateVolumeHandlingInHints(Bundle controlHints, int volumeHandling) {
+        // Workaround to preserve retro-compatibility with androidx.
+        // See b/228021646 for more details.
+        if (controlHints != null && controlHints.containsKey(KEY_GROUP_ROUTE)) {
+            Bundle groupRoute = controlHints.getBundle(KEY_GROUP_ROUTE);
+
+            if (groupRoute != null && groupRoute.containsKey(KEY_VOLUME_HANDLING)
+                    && volumeHandling != groupRoute.getInt(KEY_VOLUME_HANDLING)) {
+                //Creating copy of controlHints with updated value.
+                Bundle newGroupRoute = new Bundle(groupRoute);
+                newGroupRoute.putInt(KEY_VOLUME_HANDLING, volumeHandling);
+                Bundle newControlHints = new Bundle(controlHints);
+                newControlHints.putBundle(KEY_GROUP_ROUTE, newGroupRoute);
+                return newControlHints;
+            }
+        }
+        //Return same Bundle.
+        return controlHints;
+    }
+
+    private static int defineVolumeHandling(int volumeHandling, List<String> selectedRoutes,
+            boolean volumeAdjustmentForRemoteGroupSessions) {
+        if (!volumeAdjustmentForRemoteGroupSessions && selectedRoutes.size() > 1) {
+            return MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+        }
+        return volumeHandling;
     }
 
     private static String ensureString(String str) {
