@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Bildschirm automatisch drehen"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_DEVICE">%2$s</xliff:g> gewähren?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_DEVICE">%2$s</xliff:g> gewähren?\nDiese App hat noch nicht die Berechtigung zum Aufnehmen erhalten, könnte jedoch Audio über dieses USB-Gerät aufnehmen."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_DEVICE">%2$s</xliff:g> gewähren?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> für <xliff:g id="USB_DEVICE">%2$s</xliff:g> öffnen?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Diese App hat noch keine Berechtigung zum Aufnehmen erhalten, könnte aber Audioaufnahmen über dieses USB-Gerät machen. Wenn du <xliff:g id="APPLICATION">%1$s</xliff:g> mit diesem Gerät verwendest, hörst du möglicherweise keine Anrufe, Benachrichtigungen und Wecker mehr."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Wenn du <xliff:g id="APPLICATION">%1$s</xliff:g> mit diesem Gerät verwendest, hörst du möglicherweise keine Anrufe, Benachrichtigungen und Wecker mehr."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> den Zugriff auf <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> gewähren?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Für <xliff:g id="USB_DEVICE">%2$s</xliff:g> <xliff:g id="APPLICATION">%1$s</xliff:g> öffnen?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> öffnen, um <xliff:g id="USB_DEVICE">%2$s</xliff:g> zu bedienen?\nDiese App hat noch keine Berechtigung zum Aufnehmen erhalten, könnte aber Audioaufnahmen über dieses USB-Gerät machen."</string>
@@ -687,7 +691,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"Nachrichten"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Speicher"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Hinweise"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"Instant-Apps"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> wird ausgeführt"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"App wurde geöffnet, ohne vorher installiert zu werden."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"App wurde geöffnet, ohne vorher installiert zu werden. Tippe, um weitere Informationen zu erhalten."</string>

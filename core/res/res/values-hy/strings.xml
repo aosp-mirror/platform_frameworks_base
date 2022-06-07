@@ -537,7 +537,7 @@
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Թույլ է տալիս հավելվածին հայտնաբերել և զուգակցել մոտակա Bluetooth սարքերը"</string>
     <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"միանալ զուգակցված Bluetooth սարքերի"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Թույլ է տալիս հավելվածին միանալ զուգակցված Bluetooth սարքերի"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Գովազդ մոտակա Bluetooth սարքերում"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"գովազդել մոտակա Bluetooth սարքերին"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Թույլատրում է հավելվածին գովազդ փոխանցել մոտակա Bluetooth սարքերին"</string>
     <string name="permlab_uwb_ranging" msgid="8141915781475770665">"որոշել մոտակա UWB սարքերի միջև հարաբերական դիրքավորումը"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Թույլատրել հավելվածին որոշել գերլայնաշերտ կապի տեխնոլոգիան աջակցող մոտակա սարքերի միջև հարաբերական դիրքավորումը"</string>
@@ -909,7 +909,7 @@
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Հաջորդը"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Դադարեցնել"</string>
     <string name="lockscreen_transport_play_description" msgid="106868788691652733">"Նվագարկել"</string>
-    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Դադարեցնել"</string>
+    <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Կանգնեցնել"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Հետ փաթաթել"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Արագ առաջ անցնել"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Միայն շտապ կանչեր"</string>

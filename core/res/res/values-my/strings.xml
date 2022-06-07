@@ -324,7 +324,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ဖုန်းခေါ်ဆိုထားသော မှတ်တမ်း ဖတ်ပြီး ရေးရန်"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ဖုန်း"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ရန်နှင့် စီမံရန်"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"စက်၏ အာရုံခံစနစ်များ"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ခန္ဓာကိုယ် အာရုံခံကိရိယာများ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"သင်၏အရေးပြီးသော ကျန်းမာရေးလက္ခဏာဆိုင်ရာ အာရုံခံကိရိယာဒေတာကို ရယူရန်"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ဝင်းဒိုးတွင် ပါရှိသည်များကို ပြန်လည်ရယူရန်"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"သင်အသုံးပြုနေသော ဝင်းဒိုးတွင် ပါရှိသည်များကို ကြည့်ရှုစစ်ဆေးသည်။"</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"အပလီကေးရှင်းအား သင့်တက်ဘလက်၏ ဖုန်းခေါ်ဆိုမှု မှတ်တမ်း (အဝင်အထွက်ခေါ်ဆိုမှု အချက်အလက်များ) ကို ပြင်ဆင်ခွင့် ပေးခြင်း။ အန္တရာယ်ရှိ အပလီကေးရှင်းများမှ ဤအချက်ကို အသုံးပြု၍ သင့် ဖုန်းခေါ်ဆိုမှု မှတ်တမ်းကို ဖျက်ပစ်ခြင်း၊ ပြင်ဆင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်"</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"အဝင်နှင့် အထွက်ခေါ်ဆိုမှု အချက်အလက်များ အပါအဝင် သင့် Android TV စက်ပစ္စည်းပေါ်ရှိ ခေါ်ဆိုထားသော မှတ်တမ်းကို အက်ပ်အား မွမ်းမံခွင့်ပြုသည်။ သံသယဖြစ်နိုင်ဖွယ်ရှိသည့် အက်ပ်များသည် ၎င်းကို အသုံးပြုပြီး သင်၏ ခေါ်ဆိုထားသော မှတ်တမ်းကို ဖျက်နိုင်သည်။"</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"အပလီကေးရှင်းအား သင့်ဖုန်း၏ ဖုန်းခေါ်ဆိုမှု မှတ်တမ်း (အဝင်အထွက်ခေါ်ဆိုမှု အချက်အလက်များ) ကို ပြင်ဆင်ခွင့် ပေးခြင်း။ အန္တရာယ်ရှိ အပလီကေးရှင်းများမှ ဤအချက်ကို အသုံးပြု၍ သင့် ဖုန်းခေါ်ဆိုမှု မှတ်တမ်းကို ဖျက်ပစ်ခြင်း၊ ပြင်ဆင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်"</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"ခန္ဓာကိုယ် အာရုံကိရိယာများကို (နှလုံးခုန်နှုန်း မော်နီတာလို)ကို ရယူသုံးရန်"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"ခန္ဓာကိုယ် အာရုံခံကိရိယာများ (နှလုံးခုန်နှုန်း မော်နီတာကဲ့သို့) သို့ ဝင်ရောက်ခြင်း"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"သင်၏ နှလုံးခုန်နှုန်းလို ရုပ်ပိုင်း အခြေအနေကို စောင့်ကြပ်သည့် အာရုံခံစက်များထံမှ ဒေတာများကို အက်ပ်အား ရယူသုံးခွင့် ပြုပါ။"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ပြက္ခဒိန်ဖြစ်ရပ်များနှင့် အသေးစိတ်အချက်အလက်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ဤအက်ပ်သည် သင့်တက်ဘလက်တွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များကို ကြည့်ရှုနိုင်ပြီး သင့်ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်းနှင့် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်ပါသည်။"</string>
@@ -1195,7 +1195,7 @@
     <string name="whichApplicationLabel" msgid="7852182961472531728">"လုပ်ဆောင်ချက်ကို အပြီးသတ်ပါ"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"...ဖြင့် ဖွင့်မည်"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s ဖြင့် ဖွင့်မည်"</string>
-    <string name="whichViewApplicationLabel" msgid="7367556735684742409">"ဖွင့်ပါ"</string>
+    <string name="whichViewApplicationLabel" msgid="7367556735684742409">"ဖွင့်ရန်"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"<xliff:g id="HOST">%1$s</xliff:g> လင့်ခ်များကို အောက်ပါဖြင့် ဖွင့်ရန်−"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"လင့်ခ်များကို အောက်ပါဖြင့် ဖွင့်ရန်−"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"လင့်ခ်ကို <xliff:g id="APPLICATION">%1$s</xliff:g> ဖြင့် ဖွင့်ရန်"</string>
@@ -1637,7 +1637,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ကြိုးမဲ့ပြသခြင်း"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"သရုပ်ဆောင်​များ"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"စက်တစ်ခုကို ချိတ်ဆက်ရန်"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ဖန်သားပြင်ကို စက်ထံသို့ ပို့ပါ"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"ဖန်သားပြင်ကို စက်သို့ ကာစ်လုပ်ခြင်း"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"စက်များကို ရှာဖွေနေပါသည် ..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"ဆက်တင်များ"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"ချိတ်ဆက်မှုဖြုတ်ရန်"</string>
@@ -1648,7 +1648,7 @@
     <string name="media_route_status_in_use" msgid="6684112905244944724">"အသုံးပြုနေစဉ်"</string>
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"တခါတည်း ပါသော မြင်ကွင်း"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"HDMI မြင်ကွင်း"</string>
-    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"အပေါ်မှ ထပ်သောအရာ #<xliff:g id="ID">%1$d</xliff:g>"</string>
+    <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"ထပ်ပိုးလွှာ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g>  dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", လုံခြုံသော"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"ပုံဖော်မှုအား မေ့လျော့ခြင်း"</string>
@@ -1885,7 +1885,7 @@
     <string name="battery_saver_description" msgid="8518809702138617167">"‘ဘက်ထရီ အားထိန်း’ က ‘မှောင်သည့် အပြင်အဆင်’ ကို ဖွင့်ပြီး နောက်ခံလုပ်ဆောင်ချက်၊ ပြသမှုဆိုင်ရာ အထူးပြုလုပ်ချက်အချို့၊ ဝန်ဆောင်မှုအချို့နှင့် ကွန်ရက်ချိတ်ဆက်မှုအချို့တို့ကို ကန့်သတ်သည် သို့မဟုတ် ပိတ်သည်။"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
-    <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ပါ"</string>
+    <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ရန်"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>အထိ)</item>
       <item quantity="one">တစ်မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> အထိ)</item>
@@ -1987,7 +1987,7 @@
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"အက်ပ်ကို ခဏမရပ်တော့ရန်"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"အလုပ်သုံးအက်ပ်များ ဖွင့်မလား။"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"သင့်အလုပ်သုံးအက်ပ်နှင့် အကြောင်းကြားချက်များသုံးခွင့် ရယူပါ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ဖွင့်ပါ"</string>
+    <string name="work_mode_turn_on" msgid="3662561662475962285">"ဖွင့်ရန်"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"အက်ပ်ကို မရနိုင်ပါ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"ဤအက်ပ်ကို Android ဗားရှင်းဟောင်းအတွက် ပြုလုပ်ထားခြင်းဖြစ်ပြီး ပုံမှန်အလုပ်မလုပ်နိုင်ပါ။ အပ်ဒိတ်များအတွက် ရှာကြည့်ပါ သို့မဟုတ် ဆော့ဖ်ဝဲအင်ဂျင်နီယာကို ဆက်သွယ်ပါ။"</string>

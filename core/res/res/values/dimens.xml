@@ -39,14 +39,17 @@
     <!-- Elevation of toast view -->
     <dimen name="toast_elevation">2dp</dimen>
 
+    <!-- The default height of the status bar used in {@link SystemBarUtils#getStatusBarHeight} to
+         calculate the status bar height. -->
+    <dimen name="status_bar_height_default">24dp</dimen>
     <!-- Height of the status bar.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
-    <dimen name="status_bar_height">24dp</dimen>
+    <dimen name="status_bar_height">@dimen/status_bar_height_portrait</dimen>
     <!-- Height of the status bar in portrait.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->
-    <dimen name="status_bar_height_portrait">@dimen/status_bar_height</dimen>
+    <dimen name="status_bar_height_portrait">24dp</dimen>
     <!-- Height of the status bar in landscape.
          Do not read this dimen directly. Use {@link SystemBarUtils#getStatusBarHeight} instead.
          -->

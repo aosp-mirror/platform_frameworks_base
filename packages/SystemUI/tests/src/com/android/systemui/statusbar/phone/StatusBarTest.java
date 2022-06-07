@@ -351,6 +351,10 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarComponentFactory.create()).thenReturn(mStatusBarComponent);
         when(mStatusBarComponent.getNotificationShadeWindowViewController()).thenReturn(
                 mNotificationShadeWindowViewController);
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
 
         mShadeController = new ShadeControllerImpl(mCommandQueue,
                 mStatusBarStateController, mNotificationShadeWindowController,

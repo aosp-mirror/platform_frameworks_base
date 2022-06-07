@@ -35,7 +35,7 @@
     <string name="install_for_print_preview" msgid="6366303997385509332">"ప్రివ్యూ చేయడానికి PDF వ్యూయర్‌ను ఇన్‌స్టాల్ చేయండి"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"ముద్రణ యాప్ క్రాష్ అయ్యింది"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"ముద్రణ జాబ్‌ను ఉత్పన్నం చేస్తోంది"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"PDF వలె సేవ్ చేయి"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF లాగా సేవ్ చేయి"</string>
     <string name="all_printers" msgid="5018829726861876202">"అన్ని ప్రింటర్‌లు…"</string>
     <string name="print_dialog" msgid="32628687461331979">"ముద్రణ డైలాగ్"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
@@ -44,7 +44,7 @@
     <string name="expand_handle" msgid="7282974448109280522">"విస్తరణ హ్యాండిల్"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"కుదింపు హ్యాండిల్"</string>
     <string name="print_button" msgid="645164566271246268">"ముద్రించు"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"PDF వలె సేవ్ చేయి"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDF లాగా సేవ్ చేయి"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ముద్రణ ఎంపికలు విస్తరించబడ్డాయి"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ముద్రణ ఎంపికలు కుదించబడ్డాయి"</string>
     <string name="search" msgid="5421724265322228497">"సెర్చ్"</string>
@@ -88,7 +88,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"ప్రింటర్‌కు కనెక్షన్ లేదు"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"తెలియదు"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g>ని ఉపయోగించాలా?"</string>
-    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"మీ పత్రం ప్రింటర్‌కు వెళ్లే మార్గంలో ఒకటి లేదా అంతకంటే ఎక్కువ సర్వర్‌ల గుండా వెళ్లవచ్చు."</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"మీ డాక్యుమెంట్‌ ప్రింటర్‌కు వెళ్లే మార్గంలో ఒకటి లేదా అంతకంటే ఎక్కువ సర్వర్‌ల గుండా వెళ్లవచ్చు."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"నలుపు &amp; తెలుపు"</item>
     <item msgid="2762241247228983754">"రంగు"</item>

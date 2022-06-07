@@ -24,13 +24,17 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Zostáva <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Nedá sa nabíjať cez USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Použite nabíjačku dodanú so zariadením"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Zapnúť šetrič batérie?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Chcete zapnúť šetrič batérie?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Šetrič batérie"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Zapnúť"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Zapnúť šetrič batérie"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatické otočenie obrazovky"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> pristupovať k zariadeniu <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTejto aplikácii nebolo udelené povolenie na nahrávanie, môže však snímať zvuk cez toto zariadenie USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Povoliť apl. <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zar. <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Otvoriť <xliff:g id="APPLICATION">%1$s</xliff:g> na spravovanie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Tejto aplikácii nebolo udelené povolenie na nahrávanie, ale môže nahrávať zvuk cez toto zariadenie USB. Ak budete s týmto zariadením používať aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g>, nemusíte počuť hovory, upozornenia ani budíky."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ak budete s týmto zariadením používať aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g>, nemusíte počuť hovory, upozornenia ani budíky."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Povoliť aplikácii <xliff:g id="APPLICATION">%1$s</xliff:g> prístup k zariadeniu <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otvoriť aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g> na použitie zariadenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Chcete otvoriť aplikáciu <xliff:g id="APPLICATION">%1$s</xliff:g> na správu zariadenia <xliff:g id="USB_DEVICE">%2$s</xliff:g> ?\nTejto aplikácii nebolo udelené povolenie na nahrávanie, ale môže nasnímať zvuk cez toto zariadenie USB."</string>
@@ -233,7 +237,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatické otáčanie"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otáčanie obrazovky"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Prístup k fotoaparátu"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Prístup ku kamere"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Prístup k mikrofónu"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"K dispozícii"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Blokované"</string>
@@ -727,7 +731,7 @@
     <string name="auto_saver_title" msgid="6873691178754086596">"Klepnutím naplánujete aktivovanie Šetriča batérie"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Zapnite, keď je batéria takmer vybitá"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"Nie, vďaka"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"V7pis haldy SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Výpis haldy SysUI"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikácie používajú zoznam <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" a "</string>
@@ -778,7 +782,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstránite z obľúbených"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Presunúť na pozíciu <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládacie prvky"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládanie, ku ktorému chcete mať prístup z rýchlych nastavení"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Vyberte ovládače, ku ktorému chcete mať prístup z rýchlych nastavení"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Polohu každého ovládača môžete zmeniť jeho pridržaním a presunutím"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všetky ovládače boli odstránené"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmeny neboli uložené"</string>

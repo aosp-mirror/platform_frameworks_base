@@ -188,6 +188,7 @@ public class DisplayPolicy {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayPolicy" : TAG_WM;
 
     private static final boolean ALTERNATE_CAR_MODE_NAV_SIZE = false;
+    private static final boolean LEGACY_TASKBAR_GESTURE_INSETS = false;
 
     // The panic gesture may become active only after the keyguard is dismissed and the immersive
     // app shows again. If that doesn't happen for 30s we drop the gesture.
@@ -967,6 +968,26 @@ public class DisplayPolicy {
                 break;
         }
 
+        if (LayoutParams.isSystemAlertWindowType(attrs.type)) {
+            float maxOpacity = mService.mMaximumObscuringOpacityForTouch;
+            if (attrs.alpha > maxOpacity
+                    && (attrs.flags & FLAG_NOT_TOUCHABLE) != 0
+                    && (attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) == 0) {
+                // The app is posting a SAW with the intent of letting touches pass through, but
+                // they are going to be deemed untrusted and will be blocked. Try to honor the
+                // intent of letting touches pass through at the cost of 0.2 opacity for app
+                // compatibility reasons. More details on b/218777508.
+                Slog.w(TAG, String.format(
+                        "App %s has a system alert window (type = %d) with FLAG_NOT_TOUCHABLE and "
+                                + "LayoutParams.alpha = %.2f > %.2f, setting alpha to %.2f to "
+                                + "let touches pass through (if this is isn't desirable, remove "
+                                + "flag FLAG_NOT_TOUCHABLE).",
+                        attrs.packageName, attrs.type, attrs.alpha, maxOpacity, maxOpacity));
+                attrs.alpha = maxOpacity;
+                win.mWinAnimator.mAlpha = maxOpacity;
+            }
+        }
+
         // Check if alternate bars positions were updated.
         if (mStatusBarAlt == win) {
             mStatusBarAltPosition = getAltBarPosition(attrs);
@@ -1255,6 +1276,35 @@ public class DisplayPolicy {
                         if (!INSETS_LAYOUT_GENERALIZATION) {
                             mDisplayContent.setInsetProvider(insetsType, win, null,
                                     imeFrameProvider);
+                            if (LEGACY_TASKBAR_GESTURE_INSETS) {
+                                if (mNavigationBar == null && (insetsType == ITYPE_NAVIGATION_BAR
+                                        || insetsType == ITYPE_EXTRA_NAVIGATION_BAR)) {
+                                    mDisplayContent.setInsetProvider(ITYPE_LEFT_GESTURES, win,
+                                            (displayFrames, windowState, inOutFrame) -> {
+                                                final int leftSafeInset =
+                                                        Math.max(displayFrames.mDisplayCutoutSafe
+                                                                .left,
+                                                                0);
+                                                inOutFrame.left = 0;
+                                                inOutFrame.top = 0;
+                                                inOutFrame.bottom = displayFrames.mDisplayHeight;
+                                                inOutFrame.right =
+                                                        leftSafeInset + mLeftGestureInset;
+                                            });
+                                    mDisplayContent.setInsetProvider(ITYPE_RIGHT_GESTURES, win,
+                                            (displayFrames, windowState, inOutFrame) -> {
+                                                final int rightSafeInset =
+                                                        Math.min(displayFrames.mDisplayCutoutSafe
+                                                                .right,
+                                                                displayFrames.mUnrestricted.right);
+                                                inOutFrame.left =
+                                                        rightSafeInset - mRightGestureInset;
+                                                inOutFrame.top = 0;
+                                                inOutFrame.bottom = displayFrames.mDisplayHeight;
+                                                inOutFrame.right = displayFrames.mDisplayWidth;
+                                            });
+                                }
+                            }
                         } else {
                             mDisplayContent.setInsetProvider(insetsType, win, (displayFrames,
                                     windowState, inOutFrame) -> inOutFrame.inset(

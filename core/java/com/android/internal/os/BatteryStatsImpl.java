@@ -4664,7 +4664,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void noteLongPartialWakelockStart(String name, String historyName, int uid,
             long elapsedRealtimeMs, long uptimeMs) {
-        uid = mapUid(uid);
         noteLongPartialWakeLockStartInternal(name, historyName, uid, elapsedRealtimeMs, uptimeMs);
     }
 
@@ -4696,15 +4695,21 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private void noteLongPartialWakeLockStartInternal(String name, String historyName, int uid,
             long elapsedRealtimeMs, long uptimeMs) {
+        final int mappedUid = mapUid(uid);
         if (historyName == null) {
             historyName = name;
         }
-        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_START, historyName, uid,
-                0)) {
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_START, historyName,
+                mappedUid, 0)) {
             return;
         }
         addHistoryEventLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.EVENT_LONG_WAKE_LOCK_START,
-                historyName, uid);
+                historyName, mappedUid);
+        if (mappedUid != uid) {
+            // Prevent the isolated uid mapping from being removed while the wakelock is
+            // being held.
+            incrementIsolatedUidRefCount(uid);
+        }
     }
 
     public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
@@ -4714,7 +4719,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void noteLongPartialWakelockFinish(String name, String historyName, int uid,
             long elapsedRealtimeMs, long uptimeMs) {
-        uid = mapUid(uid);
         noteLongPartialWakeLockFinishInternal(name, historyName, uid, elapsedRealtimeMs, uptimeMs);
     }
 
@@ -4746,15 +4750,20 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private void noteLongPartialWakeLockFinishInternal(String name, String historyName, int uid,
             long elapsedRealtimeMs, long uptimeMs) {
+        final int mappedUid = mapUid(uid);
         if (historyName == null) {
             historyName = name;
         }
-        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH, historyName, uid,
-                0)) {
+        if (!mActiveEvents.updateState(HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH, historyName,
+                mappedUid, 0)) {
             return;
         }
         addHistoryEventLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH,
-                historyName, uid);
+                historyName, mappedUid);
+        if (mappedUid != uid) {
+            // Decrement the ref count for the isolated uid and delete the mapping if uneeded.
+            maybeRemoveIsolatedUidLocked(uid, elapsedRealtimeMs, uptimeMs);
+        }
     }
 
     void aggregateLastWakeupUptimeLocked(long elapsedRealtimeMs, long uptimeMs) {

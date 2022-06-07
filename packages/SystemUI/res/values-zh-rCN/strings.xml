@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"自动旋转屏幕"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"要允许<xliff:g id="APPLICATION">%1$s</xliff:g>访问<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"是否允许<xliff:g id="APPLICATION">%1$s</xliff:g>访问<xliff:g id="USB_DEVICE">%2$s</xliff:g>？\n此应用未获得录音权限，但能通过此 USB 设备录制音频。"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"允许“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"打开“<xliff:g id="APPLICATION">%1$s</xliff:g>”来处理<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"此应用未获得录音权限，但能通过此 USB 设备录制音频。在此设备上使用“<xliff:g id="APPLICATION">%1$s</xliff:g>”可能会将来电、通知和闹钟静音。"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"在此设备上使用“<xliff:g id="APPLICATION">%1$s</xliff:g>”可能会将来电、通知和闹钟静音。"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"要允许<xliff:g id="APPLICATION">%1$s</xliff:g>访问<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>吗？"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"要打开<xliff:g id="APPLICATION">%1$s</xliff:g>来处理<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"要打开<xliff:g id="APPLICATION">%1$s</xliff:g>来使用<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？\n此应用未获得录音权限，但能通过此 USB 设备录制音频。"</string>

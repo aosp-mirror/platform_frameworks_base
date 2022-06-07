@@ -1249,7 +1249,7 @@
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Para volver a habilitar esta opción, accede a Ajustes &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite el tamaño de pantalla actual y es posible que funcione de forma inesperada."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostrar siempre"</string>
-    <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> se diseñó para una versión incompatible de Android OS y puede que funcione de forma inesperada. Es posible que haya una versión actualizada de la aplicación."</string>
+    <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> se diseñó para una versión incompatible del SO Android y puede que funcione de forma inesperada. Es posible que haya una versión actualizada de la aplicación."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostrar siempre"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Buscar actualizaciones"</string>
     <string name="smv_application" msgid="3775183542777792638">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode autoaplicable."</string>

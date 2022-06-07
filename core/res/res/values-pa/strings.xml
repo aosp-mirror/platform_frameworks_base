@@ -174,7 +174,7 @@
     <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਬੇਨਤੀਆਂ ਦੀ ਪ੍ਰਕਿਰਿਆ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g> ਲਈ ਸਾਈਨਇਨ ਅਸ਼ੁੱਧੀ"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"ਸਿੰਕ ਕਰੋ"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"ਸਮਕਾਲੀਕਿਰਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
+    <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"ਸਿੰਕ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"ਬਹੁਤ ਸਾਰੀਆਂ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ਨੂੰ ਮਿਟਾਉਣ ਦੀ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਗਈ।"</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"ਟੈਬਲੈੱਟ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"ਘੜੀ ਸਟੋਰੇਜ ਪੂਰੀ ਭਰੀ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰਨ ਲਈ ਕੁਝ ਫ਼ਾਈਲਾਂ ਮਿਟਾਓ।"</string>
@@ -246,7 +246,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"ਫ਼ੋਨ ਬੰਦ ਕਰੋ"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"ਪਾਵਰ"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"ਸੰਕਟਕਾਲ"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"ਐਮਰਜੈਂਸੀ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ਬਗ ਰਿਪੋਰਟ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਵੋ"</string>
@@ -666,11 +666,11 @@
     <string name="face_error_vendor_unknown" msgid="7387005932083302070">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"ਚਿਹਰਾ ਪ੍ਰਤੀਕ"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਪਤਾ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਦਾ ਕਿਸੇ ਖਾਤੇ ਨਾਲ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
+    <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਪਤਾ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਨਾਲ ਸਿੰਕ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
     <string name="permlab_writeSyncSettings" msgid="6583154300780427399">"ਸਿੰਕ ਚਾਲੂ ਅਤੇ ਬੰਦ ਨੂੰ ਟੌਗਲ ਕਰੋ"</string>
     <string name="permdesc_writeSyncSettings" msgid="6029151549667182687">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਸੋਧਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸਦੀ ਵਰਤੋਂ ਕਿਸੇ ਖਾਤੇ ਨਾਲ People ਐਪ ਦਾ ਸਿੰਕ ਚਾਲੂ ਕਰਨ ਲਈ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_readSyncStats" msgid="3747407238320105332">"ਸਿੰਕ ਅੰਕੜੇ ਪੜ੍ਹੋ"</string>
-    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸਥਿਤੀ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਇਸ ਵਿੱਚ ਸਿੰਕ ਵਰਤਾਰਿਆਂ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਕਿੰਨੇ ਡਾਟਾ ਦਾ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਵੀ ਸ਼ਾਮਲ ਹੈ।"</string>
+    <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ਐਪ ਨੂੰ ਇੱਕ ਖਾਤੇ ਲਈ ਸਿੰਕ ਸਥਿਤੀ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਇਸ ਵਿੱਚ ਸਿੰਕ ਇਵੈਂਟਾਂ ਦਾ ਇਤਿਹਾਸ ਅਤੇ ਕਿੰਨਾ ਡਾਟਾ ਸਿੰਕ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਇਹ ਵੀ ਸ਼ਾਮਲ ਹੈ।"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"ਸਮੱਗਰੀਆਂ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"ਐਪ ਨੂੰ ਸਮੱਗਰੀਆਂ ਪੜ੍ਹਨ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ਸਮੱਗਰੀਆਂ ਦਾ ਸੰਸ਼ੋਧਨ ਕਰੋ ਜਾਂ ਮਿਟਾਓ"</string>
@@ -912,7 +912,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"ਰੋਕੋ"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ਰੀਵਾਈਂਡ ਕਰੋ"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ਤੇਜ਼ੀ ਨਾਲ ਅੱਗੇ ਭੇਜੋ"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"ਸਿਰਫ਼ ਸੰਕਟਕਾਲੀਨ ਕਾਲਾਂ"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"ਸਿਰਫ਼ ਐਮਰਜੈਂਸੀ ਕਾਲਾਂ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ਨੈੱਟਵਰਕ  ਲਾਕ  ਕੀਤਾ"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM ਕਾਰਡ PUK-ਲੌਕਡ ਹੈ।"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"ਵਰਤੋਂਕਾਰ ਗਾਈਡ ਦੇਖੋ ਜਾਂ ਗਾਹਕ ਸੇਵਾ ਨੂੰ ਫ਼ੋਨ ਕਰੋ।"</string>
@@ -1883,7 +1883,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ਠੀਕ ਹੈ"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"ਬੈਟਰੀ ਸੇਵਰ ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਕੁਝ ਖਾਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਕੁਝ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨਾਂ ਨੂੰ ਸੀਮਤ ਜਾਂ ਬੰਦ ਕਰਦਾ ਹੈ।"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"ਬੈਟਰੀ ਸੇਵਰ ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ ਚਾਲੂ ਕਰਦਾ ਹੈ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਸਰਗਰਮੀ, ਕੁਝ ਦ੍ਰਿਸ਼ਟੀਗਤ ਪ੍ਰਭਾਵਾਂ, ਕੁਝ ਖਾਸ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਅਤੇ ਕੁਝ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨਾਂ ਨੂੰ ਸੀਮਤ ਜਾਂ ਬੰਦ ਕਰਦਾ ਹੈ।"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਕਰਨ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਉਦੋਂ ਤੱਕ ਨਹੀਂ ਦਿਖਾਏ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਨ੍ਹਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ਚਾਲੂ ਕਰੋ"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

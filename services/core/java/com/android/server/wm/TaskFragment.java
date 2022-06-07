@@ -822,11 +822,17 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 if (!adjacentTaskFragments.isEmpty() && !gotTranslucentAdjacent) {
                     // The z-order of this TaskFragment is in middle of two adjacent TaskFragments
                     // and it cannot be visible if the TaskFragment on top is not translucent and
-                    // is fully occluding this one.
+                    // is occluding this one.
+                    mTmpRect.set(getBounds());
                     for (int j = adjacentTaskFragments.size() - 1; j >= 0; --j) {
                         final TaskFragment taskFragment = adjacentTaskFragments.get(j);
-                        if (!taskFragment.isTranslucent(starting)
-                                && taskFragment.getBounds().contains(this.getBounds())) {
+                        final TaskFragment adjacentTaskFragment =
+                                taskFragment.mAdjacentTaskFragment;
+                        if (adjacentTaskFragment == this) {
+                            continue;
+                        }
+                        if (mTmpRect.intersect(taskFragment.getBounds())
+                                || mTmpRect.intersect(adjacentTaskFragment.getBounds())) {
                             return TASK_FRAGMENT_VISIBILITY_INVISIBLE;
                         }
                     }

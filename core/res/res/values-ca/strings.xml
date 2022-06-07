@@ -389,7 +389,7 @@
     <string name="permlab_systemAlertWindow" msgid="5757218350944719065">"Aquesta aplicació pot mostrar-se a sobre d\'altres aplicacions"</string>
     <string name="permdesc_systemAlertWindow" msgid="1145660714855738308">"Aquesta aplicació pot mostrar-se a sobre d\'altres aplicacions o d\'altres parts de la pantalla. Això pot interferir en l\'ús normal de les aplicacions i alterar la manera en què es mostren."</string>
     <string name="permlab_runInBackground" msgid="541863968571682785">"Executar en segon pla"</string>
-    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Aquesta aplicació es pot executar en segon pla. Això consumeix la bateria més ràpidament."</string>
+    <string name="permdesc_runInBackground" msgid="4344539472115495141">"Aquesta aplicació es pot executar en segon pla. Això pot exhaurir la bateria més ràpidament."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"Utilitzar dades en segon pla"</string>
     <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aquesta aplicació utilitza dades en segon pla. Això incrementa l\'ús de dades."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"fes que l\'aplicació s\'executi sempre"</string>

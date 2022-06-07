@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Колдонмого планшетиңиздин чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Колдонмого Android TV түзмөгүңүздүн чалуулар тизмесин, анын ичинде кирүүчү жана чыгуучу чалуулар тууралуу маалыматтарды өзгөртүүгө уруксат берет. Зыянкеч колдонмолор ал уруксатты колдонуп чалуулар тизмеңизди тазалап же өзгөртүп коюшу мүмкүн."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Колдонмого телефонуңуздун чалуулар тизмегин, анын ичинде, чыгыш жана кириш чалууларына тиешелүү берилиштерди өзгөртүү уруксатын берет. Зыяндуу колдонмолор муну колдонуп чалуулар тизмегин өзгөртө же жок кыла алышат."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"дене-бой сенсорлоруна (жүрөктүн кагышын өлчөгүчтөр сыяктуу) уруксат"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"Дене-бой сенсорлоруна (жүрөктүн кагышын өлчөгүчтөр сыяктуу) уруксат"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Колдонмого жүрөгүңүздүн согушу сыяктуу дене-бой абалыңызды көзөмөлдөгөн сенсорлордогу маалыматтарды көрүп туруу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Жылнаамадагы иш-чараларды жана алардын чоо-жайын окуу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Бул колдонмо планшетиңизде сакталган жылнаамадагы иш-чаралардын баарын окуп жана андагы маалыматтарды бөлүшүп же сактай алат."</string>
@@ -450,9 +450,9 @@
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Бул колдонмо каалаган убакта микрофон менен аудио файлдарды жаздыра алат."</string>
     <string name="permlab_sim_communication" msgid="176788115994050692">"SIM-картага буйруктарды жөнөтүү"</string>
     <string name="permdesc_sim_communication" msgid="4179799296415957960">"Колдонмого SIM-картага буйруктарды жөнөтүү мүмкүнчүлүгүн берет. Бул абдан кооптуу."</string>
-    <string name="permlab_activityRecognition" msgid="1782303296053990884">"кыймыл-аракетти аныктоо"</string>
+    <string name="permlab_activityRecognition" msgid="1782303296053990884">"Кыймыл-аракетти аныктоо"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Бул колдонмо кыймыл-аракетиңизди аныктап турат."</string>
-    <string name="permlab_camera" msgid="6320282492904119413">"сүрөт жана видео тартуу"</string>
+    <string name="permlab_camera" msgid="6320282492904119413">"Сүрөт жана видео тартуу"</string>
     <string name="permdesc_camera" msgid="5240801376168647151">"Бул колдонмо иштеп жатканда камера менен сүрөт же видеолорду тарта алат."</string>
     <string name="permlab_backgroundCamera" msgid="7549917926079731681">"Фондо сүрөткө жана видеого тартат"</string>
     <string name="permdesc_backgroundCamera" msgid="1615291686191138250">"Бул колдонмо каалаган убакта камера менен сүрөт же видеолорду тарта алат."</string>
@@ -533,13 +533,13 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Колдонмого планшеттин Bluetooth конфигурацияларын көрүү, жупталган түзмөктөр менен байланыш түзүү жана кабыл алуу уруксатын берет."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Android TV түзмөгүңүздөгү Bluetooth конфигурациясын көрүп, жупташтырылган түзмөктөргө туташууга жана туташуу сурамын кабыл алууга колдонмого уруксат берет."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Колдонмого телефондун Bluetooth конфигурацияларын көрүү, жупташкан түзмөктөр менен туташуу түзүү жана кабыл алуу уруксатын берет."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"жакын жердеги Bluetooth түзмөктөрүн аныктоо жана жупташтыруу"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Жакын жердеги Bluetooth түзмөктөрүн таап, туташуу"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Колдонмого жакын жердеги Bluetooth түзмөктөрүн аныктап, жупташтырууга уруксат берет"</string>
-    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"жупташтырылган Bluetooth түзмөктөрү"</string>
-    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Колдонмого жупташтырылган Bluetooth түзмөктөрү менен байланышууга уруксат берет"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Туташып турган Bluetooth түзмөктөрүнө байланышуу"</string>
+    <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Колдонмого туташкан Bluetooth түзмөктөрүнө байланышканга уруксат берет"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"жакын жердеги Bluetooth түзмөктөрүнө жарнамалоо"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Колдонмого жакын жердеги Bluetooth түзмөктөрүнө жарнама көрсөтүүгө мүмкүндүк берет"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктоо"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктоо"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Колдонмо кең тилкелүү тармак аркылуу туташа турган жакын жердеги түзмөктөрдү аныктай алат"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Тандалган NFC төлөм кызматы жөнүндө маалымат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Колдонмого катталган жардам же көздөлгөн жерге маршрут сыяктуу тандалган nfc төлөм кызматы жөнүндө маалыматты алууга уруксат берүү."</string>

@@ -271,7 +271,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Paramètres"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Assistance vocale"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Verrouillé"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Verrouiller"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"&gt;999"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Nouvelle notification"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Clavier virtuel"</string>
@@ -1883,7 +1883,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé pas dessus."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'Économiseur de données ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activer"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2016,7 +2016,7 @@
     <string name="app_category_image" msgid="7307840291864213007">"Photos et images"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Réseaux sociaux et communication"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Actualités et magazines"</string>
-    <string name="app_category_maps" msgid="6395725487922533156">"Plans et navigation"</string>
+    <string name="app_category_maps" msgid="6395725487922533156">"Cartes et navigation"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productivité"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Accessibilité"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Mémoire de l\'appareil"</string>

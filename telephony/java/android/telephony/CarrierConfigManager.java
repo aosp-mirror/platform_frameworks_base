@@ -3790,101 +3790,242 @@ public class CarrierConfigManager {
     public static final String KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG =
             "opportunistic_network_max_backoff_time_long";
 
-    /**
-    * Controls SS-RSRP threshold in dBm at which 5G opportunistic network will be considered good
-    * enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRP_INT =
-            "opportunistic_network_entry_threshold_ss_rsrp_int";
+    /** @hide */
+    public static class OpportunisticNetwork {
+        /**
+         * Prefix of all {@code OpportunisticNetwork.KEY_*} constants.
+         *
+         * @hide
+         */
+        public static final String PREFIX = "opportunistic.";
 
-    /**
-    * Controls SS-RSRQ threshold in dB at which 5G opportunistic network will be considered good
-    * enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE =
-            "opportunistic_network_entry_threshold_ss_rsrq_double";
+        /**
+         * Controls SS-RSRP threshold in dBm at which 5G opportunistic network will be considered
+         * good enough for internet data. Note other factors may be considered for the final
+         * decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrp} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRP_INT =
+                PREFIX + "entry_threshold_ss_rsrp_int";
 
-    /**
-    * Controls SS-RSRP threshold in dBm below which 5G opportunistic network available will not
-    * be considered good enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT =
-            "opportunistic_network_exit_threshold_ss_rsrp_int";
+        /**
+         * Similar to {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the threshold in int.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE =
+                PREFIX + "entry_threshold_ss_rsrp_int_bundle";
 
-    /**
-    * Controls SS-RSRQ threshold in dB below which 5G opportunistic network available will not
-    * be considered good enough for internet data.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_DOUBLE =
-            "opportunistic_network_exit_threshold_ss_rsrq_double";
+        /**
+         * Controls SS-RSRQ threshold in dB at which 5G opportunistic network will be considered
+         * good enough for internet data. Note other factors may be considered for the final
+         * decision.
+         *
+         * <p>The value of {@link CellSignalStrengthNr#getSsRsrq} will be compared with this
+         * threshold.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE =
+                PREFIX + "entry_threshold_ss_rsrq_double";
 
-    /**
-     * Controls back off time in milliseconds for switching back to
-     * 5G opportunistic subscription. This time will be added to
-     * {@link CarrierConfigManager#KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} to
-     * determine hysteresis time if there is ping pong situation
-     * (determined by system app or 1st party app) between primary and 5G opportunistic
-     * subscription. Ping ping situation is defined in
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG.
-     * If ping pong situation continuous #KEY_OPPORTUNISTIC_5G_NETWORK_BACKOFF_TIME_LONG
-     * will be added to previously determined hysteresis time.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG =
-            "opportunistic_network_5g_backoff_time_long";
+        /**
+         * Similar to {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the threshold in double.
+         *
+         * @hide
+         */
+        public static final String KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE =
+                PREFIX + "entry_threshold_ss_rsrq_double_bundle";
 
-    /**
-     * Controls the max back off time in milliseconds for switching back to
-     * 5G opportunistic subscription.
-     * This time will be the max hysteresis that can be determined irrespective of there is
-     * continuous ping pong situation or not as described in
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG and
-     * #KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_MAX_BACKOFF_TIME_LONG =
-            "opportunistic_network_5g_max_backoff_time_long";
+        /**
+         * Controls SS-RSRP threshold in dBm below which 5G opportunistic network available will not
+         * be considered good enough for internet data. Note other factors may be considered
+         * for the final decision.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRP_INT =
+                PREFIX + "exit_threshold_ss_rsrp_int";
 
-    /**
-    * Controls the ping pong determination of 5G opportunistic network.
-    * If opportunistic network is determined as out of service or below
-    * #KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT or
-    * #KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_INT within
-    * #KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG of switching to opportunistic network,
-    * it will be determined as ping pong situation by system app or 1st party app.
-    *
-    * @hide
-    */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG =
-            "opportunistic_network_5g_ping_pong_time_long";
+        /**
+         * Similar to {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT}.
+         *
+         * <p>The syntax of its value is similar to
+         * {@link #KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRP_INT_BUNDLE =
+                PREFIX + "exit_threshold_ss_rsrp_int_bundle";
 
-    /**
-     * Controls hysteresis time in milliseconds for which will be waited before switching
-     * data to a 5G opportunistic network.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG =
-            "opportunistic_network_5g_data_switch_hysteresis_time_long";
+        /**
+         * Controls SS-RSRQ threshold in dB below which 5G opportunistic network available will not
+         * be considered good enough for internet data. Note other factors may be considered
+         * for the final decision.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE =
+                PREFIX + "exit_threshold_ss_rsrq_double";
 
-    /**
-     * Controls hysteresis time in milliseconds for which will be waited before switching from
-     * 5G opportunistic network to primary network.
-     *
-     * @hide
-     */
-    public static final String KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG =
-            "opportunistic_network_5g_data_switch_exit_hysteresis_time_long";
+        /**
+         * Similar to {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE} but supports different
+         * thresholds for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE}.
+         *
+         * <p>The syntax of its value is similar to
+         * {@link #KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE =
+                PREFIX + "exit_threshold_ss_rsrq_double_bundle";
+
+        /**
+         * Controls hysteresis time in milliseconds for which will be waited before switching
+         * data to a 5G opportunistic network.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG =
+                PREFIX + "5g_data_switch_hysteresis_time_long";
+
+        /**
+         * Similar to {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} but supports
+         * different values for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG}.
+         *
+         * <p>For each key-value in the bundle: the key is the band number in string, which
+         * shall be a decimal integer as defined in {@code NgranBands.BAND_*} constants;
+         * the value is the time in long.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE =
+                PREFIX + "5g_data_switch_hysteresis_time_long_bundle";
+
+        /**
+         * Controls hysteresis time in milliseconds for which will be waited before switching from
+         * 5G opportunistic network to primary network.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG =
+                PREFIX + "5g_data_switch_exit_hysteresis_time_long";
+
+        /**
+         * Similar to {@link #KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG} but supports
+         * different values for different 5G bands. For bands not specified here, the threshold
+         * will be {@link #KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG}.
+         *
+         * <p>The syntax is similar to
+         * {@link KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE}.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG_BUNDLE =
+                PREFIX + "5g_data_switch_exit_hysteresis_time_long_bundle";
+
+        /**
+         * Controls back off time in milliseconds for switching back to
+         * 5G opportunistic subscription. This time will be added to
+         * {@link #KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG} to
+         * determine hysteresis time if there is ping pong situation
+         * (determined by system app or 1st party app) between primary and 5G opportunistic
+         * subscription. Ping ping situation is defined in
+         * {@link #KEY_5G_PING_PONG_TIME_LONG}.
+         * If ping pong situation continuous {@link #KEY_5G_NETWORK_BACKOFF_TIME_LONG}
+         * will be added to previously determined hysteresis time.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_BACKOFF_TIME_LONG =
+                PREFIX + "5g_backoff_time_long";
+
+        /**
+         * Controls the max back off time in milliseconds for switching back to
+         * 5G opportunistic subscription.
+         * This time will be the max hysteresis that can be determined irrespective of there is
+         * continuous ping pong situation or not as described in
+         * {@link #KEY_5G_PING_PONG_TIME_LONG} and
+         * {@link #KEY_5G_BACKOFF_TIME_LONG}.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_MAX_BACKOFF_TIME_LONG =
+                PREFIX + "5g_max_backoff_time_long";
+
+        /**
+         * Controls the ping pong determination of 5G opportunistic network.
+         * If opportunistic network is determined as out of service or below
+         * {@link #KEY_EXIT_THRESHOLD_SS_RSRP_INT} or
+         * {@link #KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE} within
+         * {@link #KEY_5G_PING_PONG_TIME_LONG} of switching to opportunistic network,
+         * it will be determined as ping pong situation by system app or 1st party app.
+         *
+         * @hide
+         */
+        public static final String KEY_5G_PING_PONG_TIME_LONG =
+                PREFIX + "5g_ping_pong_time_long";
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            // Default value is -111 dBm for all bands.
+            sDefaults.putInt(KEY_ENTRY_THRESHOLD_SS_RSRP_INT, -111);
+            sDefaults.putPersistableBundle(KEY_ENTRY_THRESHOLD_SS_RSRP_INT_BUNDLE,
+                                           PersistableBundle.EMPTY);
+            // Default value is -18.5 dB for all bands.
+            sDefaults.putDouble(KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
+            sDefaults.putPersistableBundle(
+                    KEY_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is -120 dBm for all bands.
+            sDefaults.putInt(KEY_EXIT_THRESHOLD_SS_RSRP_INT, -120);
+            sDefaults.putPersistableBundle(KEY_EXIT_THRESHOLD_SS_RSRP_INT_BUNDLE,
+                                           PersistableBundle.EMPTY);
+            // Default value is -18.5 dB for all bands.
+            sDefaults.putDouble(KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
+            sDefaults.putPersistableBundle(
+                    KEY_EXIT_THRESHOLD_SS_RSRQ_DOUBLE_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 2 seconds for all bands.
+            defaults.putLong(KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG, 2000);
+            defaults.putPersistableBundle(
+                    KEY_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 2 seconds for all bands.
+            defaults.putLong(KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
+            defaults.putPersistableBundle(
+                    KEY_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG_BUNDLE,
+                    PersistableBundle.EMPTY);
+            // Default value is 10 seconds.
+            sDefaults.putLong(KEY_5G_BACKOFF_TIME_LONG, 10000);
+            // Default value is 60 seconds.
+            sDefaults.putLong(KEY_5G_MAX_BACKOFF_TIME_LONG, 60000);
+            // Default value is 60 seconds.
+            sDefaults.putLong(KEY_5G_PING_PONG_TIME_LONG, 60000);
+            return defaults;
+        }
+    }
+
     /**
      * Controls whether 4G opportunistic networks should be scanned for possible data switch.
      *
@@ -5763,6 +5904,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG, 10000);
         /* Default value is 3 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 3000);
+        sDefaults.putAll(OpportunisticNetwork.getDefaults());
         sDefaults.putBoolean(KEY_PING_TEST_BEFORE_DATA_SWITCH_BOOL, true);
         sDefaults.putBoolean(KEY_SWITCH_DATA_TO_PRIMARY_IF_PRIMARY_IS_OOS_BOOL, true);
         /* Default value is 60 seconds. */
@@ -5771,29 +5913,11 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG, 10000);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG, 60000);
-        /* Default value is -111 dBm. */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRP_INT, -111);
-        /* Default value is -18.5 dB. */
-        sDefaults.putDouble(KEY_OPPORTUNISTIC_NETWORK_ENTRY_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
-        /* Default value is -120 dBm. */
-        sDefaults.putInt(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRP_INT, -120);
-        /* Default value is -18.5 dB. */
-        sDefaults.putDouble(KEY_OPPORTUNISTIC_NETWORK_EXIT_THRESHOLD_SS_RSRQ_DOUBLE, -18.5);
-        /* Default value is 10 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_BACKOFF_TIME_LONG, 10000);
-        /* Default value is 60 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_MAX_BACKOFF_TIME_LONG, 60000);
-        /* Default value is 60 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_PING_PONG_TIME_LONG, 60000);
-        /* Default value is 2 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_HYSTERESIS_TIME_LONG, 2000);
-        /* Default value is 2 seconds. */
-        sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_5G_DATA_SWITCH_EXIT_HYSTERESIS_TIME_LONG, 2000);
         sDefaults.putBoolean(KEY_ENABLE_4G_OPPORTUNISTIC_NETWORK_SCAN_BOOL, true);
-        sDefaults.putInt(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000);
-        sDefaults.putInt(
+        sDefaults.putLong(KEY_TIME_TO_SWITCH_BACK_TO_PRIMARY_IF_OPPORTUNISTIC_OOS_LONG, 60000L);
+        sDefaults.putLong(
                 KEY_OPPORTUNISTIC_TIME_TO_SCAN_AFTER_CAPABILITY_SWITCH_TO_PRIMARY_LONG,
-                120000);
+                120000L);
         sDefaults.putAll(ImsServiceEntitlement.getDefaults());
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
