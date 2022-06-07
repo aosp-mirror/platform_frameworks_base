@@ -1042,6 +1042,11 @@ package android.graphics.drawable {
     method public android.graphics.Xfermode getXfermode();
   }
 
+  public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
+    method public float getTargetBackgroundOpacity();
+    method public void setBackgroundActive(boolean, boolean, boolean, boolean);
+  }
+
   public class ShapeDrawable extends android.graphics.drawable.Drawable {
     method public void setXfermode(@Nullable android.graphics.Xfermode);
   }
