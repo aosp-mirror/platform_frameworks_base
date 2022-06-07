@@ -5055,6 +5055,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 .append(" isCurrentUserSetup=").append(mIsCurrentUserSetup)
                 .append(" hideAmount=").append(mAmbientState.getHideAmount())
                 .append(" ambientStateSwipingUp=").append(mAmbientState.isSwipingUp())
+                .append(" maxDisplayedNotifications=").append(mMaxDisplayedNotifications)
+                .append(" intrinsicContentHeight=").append(mIntrinsicContentHeight)
+                .append(" contentHeight=").append(mContentHeight)
+                .append(" intrinsicPadding=").append(mIntrinsicPadding)
+                .append(" topPadding=").append(mTopPadding)
+                .append(" bottomPadding=").append(mBottomPadding)
                 .append("]");
         pw.println(sb.toString());
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
