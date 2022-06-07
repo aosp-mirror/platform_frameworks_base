@@ -111,7 +111,7 @@ import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreen.StageType;
 import com.android.wm.shell.splitscreen.SplitScreenController.ExitReason;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.util.StagedSplitBounds;
+import com.android.wm.shell.util.SplitBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -927,7 +927,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 leftTopTaskId = mainStageTopTaskId;
                 rightBottomTaskId = sideStageTopTaskId;
             }
-            StagedSplitBounds splitBounds = new StagedSplitBounds(topLeftBounds, bottomRightBounds,
+            SplitBounds splitBounds = new SplitBounds(topLeftBounds, bottomRightBounds,
                     leftTopTaskId, rightBottomTaskId);
             if (mainStageTopTaskId != INVALID_TASK_ID && sideStageTopTaskId != INVALID_TASK_ID) {
                 // Update the pair for the top tasks

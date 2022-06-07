@@ -25,7 +25,7 @@ import java.util.Objects;
  * Container of various information needed to display split screen
  * tasks/leashes/etc in Launcher
  */
-public class StagedSplitBounds implements Parcelable {
+public class SplitBounds implements Parcelable {
     public final Rect leftTopBounds;
     public final Rect rightBottomBounds;
     /** This rect represents the actual gap between the two apps */
@@ -43,7 +43,7 @@ public class StagedSplitBounds implements Parcelable {
     public final int leftTopTaskId;
     public final int rightBottomTaskId;
 
-    public StagedSplitBounds(Rect leftTopBounds, Rect rightBottomBounds,
+    public SplitBounds(Rect leftTopBounds, Rect rightBottomBounds,
             int leftTopTaskId, int rightBottomTaskId) {
         this.leftTopBounds = leftTopBounds;
         this.rightBottomBounds = rightBottomBounds;
@@ -66,7 +66,7 @@ public class StagedSplitBounds implements Parcelable {
         topTaskPercent = this.leftTopBounds.height() / (float) rightBottomBounds.bottom;
     }
 
-    public StagedSplitBounds(Parcel parcel) {
+    public SplitBounds(Parcel parcel) {
         leftTopBounds = parcel.readTypedObject(Rect.CREATOR);
         rightBottomBounds = parcel.readTypedObject(Rect.CREATOR);
         visualDividerBounds = parcel.readTypedObject(Rect.CREATOR);
@@ -96,11 +96,11 @@ public class StagedSplitBounds implements Parcelable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof StagedSplitBounds)) {
+        if (!(obj instanceof SplitBounds)) {
             return false;
         }
         // Only need to check the base fields (the other fields are derived from these)
-        final StagedSplitBounds other = (StagedSplitBounds) obj;
+        final SplitBounds other = (SplitBounds) obj;
         return Objects.equals(leftTopBounds, other.leftTopBounds)
                 && Objects.equals(rightBottomBounds, other.rightBottomBounds)
                 && leftTopTaskId == other.leftTopTaskId
@@ -120,15 +120,15 @@ public class StagedSplitBounds implements Parcelable {
                 + "AppsVertical? " + appsStackedVertically;
     }
 
-    public static final Creator<StagedSplitBounds> CREATOR = new Creator<StagedSplitBounds>() {
+    public static final Creator<SplitBounds> CREATOR = new Creator<SplitBounds>() {
         @Override
-        public StagedSplitBounds createFromParcel(Parcel in) {
-            return new StagedSplitBounds(in);
+        public SplitBounds createFromParcel(Parcel in) {
+            return new SplitBounds(in);
         }
 
         @Override
-        public StagedSplitBounds[] newArray(int size) {
-            return new StagedSplitBounds[size];
+        public SplitBounds[] newArray(int size) {
+            return new SplitBounds[size];
         }
     };
 }
