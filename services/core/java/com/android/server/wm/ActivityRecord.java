@@ -5228,17 +5228,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean delayed = isAnimating(PARENTS | CHILDREN,
                 ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION
                         | ANIMATION_TYPE_RECENTS);
-        if (!delayed && !usingShellTransitions) {
+        if (!delayed) {
             // We aren't delayed anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be delayed,
             // which we might have done because we were in closing/opening apps list.
-            onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION, null /* AnimationAdapter */);
-            if (visible) {
-                // The token was made immediately visible, there will be no entrance animation.
-                // We need to inform the client the enter animation was finished.
-                mEnteringAnimation = true;
-                mWmService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(
-                        token);
+            if (!usingShellTransitions) {
+                onAnimationFinished(ANIMATION_TYPE_APP_TRANSITION, null /* AnimationAdapter */);
+                if (visible) {
+                    // The token was made immediately visible, there will be no entrance animation.
+                    // We need to inform the client the enter animation was finished.
+                    mEnteringAnimation = true;
+                    mWmService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(
+                            token);
+                }
+            } else {
+                // update wallpaper target
+                setAppLayoutChanges(FINISH_LAYOUT_REDO_WALLPAPER, "ActivityRecord");
             }
         }
 
