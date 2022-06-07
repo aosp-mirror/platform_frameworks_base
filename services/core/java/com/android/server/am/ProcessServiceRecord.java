@@ -46,6 +46,11 @@ final class ProcessServiceRecord {
     private boolean mHasForegroundServices;
 
     /**
+     * Last reported state of whether it's running any services that are foreground.
+     */
+    private boolean mRepHasForegroundServices;
+
+    /**
      * Running any services that are almost perceptible (started with
      * {@link Context#BIND_ALMOST_PERCEPTIBLE} while the app was on TOP)?
      */
@@ -153,6 +158,14 @@ final class ProcessServiceRecord {
 
     boolean hasForegroundServices() {
         return mHasForegroundServices;
+    }
+
+    void setHasReportedForegroundServices(boolean hasForegroundServices) {
+        mRepHasForegroundServices = hasForegroundServices;
+    }
+
+    boolean hasReportedForegroundServices() {
+        return mRepHasForegroundServices;
     }
 
     int getForegroundServiceTypes() {
