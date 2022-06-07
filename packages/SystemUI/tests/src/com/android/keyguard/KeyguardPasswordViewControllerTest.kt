@@ -73,25 +73,25 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        Mockito.`when`(keyguardPasswordView
-                .findViewById<KeyguardMessageArea>(R.id.keyguard_message_area))
-                .thenReturn(mKeyguardMessageArea)
+        Mockito.`when`(
+            keyguardPasswordView.findViewById<KeyguardMessageArea>(R.id.keyguard_message_area)
+        ).thenReturn(mKeyguardMessageArea)
         Mockito.`when`(messageAreaControllerFactory.create(mKeyguardMessageArea))
-                .thenReturn(mKeyguardMessageAreaController)
+            .thenReturn(mKeyguardMessageAreaController)
         keyguardPasswordViewController = KeyguardPasswordViewController(
-                keyguardPasswordView,
-                keyguardUpdateMonitor,
-                securityMode,
-                lockPatternUtils,
-                keyguardSecurityCallback,
-                messageAreaControllerFactory,
-                latencyTracker,
-                inputMethodManager,
-                emergencyButtonController,
-                mainExecutor,
-                mContext.resources,
-                falsingCollector,
-                keyguardViewController
+            keyguardPasswordView,
+            keyguardUpdateMonitor,
+            securityMode,
+            lockPatternUtils,
+            keyguardSecurityCallback,
+            messageAreaControllerFactory,
+            latencyTracker,
+            inputMethodManager,
+            emergencyButtonController,
+            mainExecutor,
+            mContext.resources,
+            falsingCollector,
+            keyguardViewController
         )
     }
 
@@ -109,5 +109,12 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
         Mockito.`when`(keyguardPasswordView.isShown).thenReturn(true)
         keyguardPasswordViewController.onResume(KeyguardSecurityView.VIEW_REVEALED)
         verify(keyguardPasswordView, never()).requestFocus()
+    }
+
+    @Test
+    fun onResume_testSetInitialText() {
+        keyguardPasswordViewController.onResume(KeyguardSecurityView.SCREEN_ON)
+        verify(mKeyguardMessageAreaController)
+            .setMessageIfEmpty(R.string.keyguard_enter_your_password)
     }
 }
