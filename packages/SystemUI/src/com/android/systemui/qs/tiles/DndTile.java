@@ -175,7 +175,9 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     mUiHandler.post(() -> {
                         Dialog dialog = makeZenModeDialog();
                         if (view != null) {
-                            mDialogLaunchAnimator.showFromView(dialog, view, false);
+                            mDialogLaunchAnimator.showFromView(dialog, view,
+                                    /* cuj= */ null,
+                                    /* animateBackgroundBoundsChange= */ false);
                         } else {
                             dialog.show();
                         }
