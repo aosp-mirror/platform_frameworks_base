@@ -1551,12 +1551,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return mContext.getSystemService(UsbManager.class);
         }
 
-        @SuppressWarnings("AndroidFrameworkBinderIdentity")
+        @SuppressWarnings("ResultOfClearIdentityCallNotStoredInVariable")
         long binderClearCallingIdentity() {
             return Binder.clearCallingIdentity();
         }
 
-        @SuppressWarnings("AndroidFrameworkBinderIdentity")
         void binderRestoreCallingIdentity(long token) {
             Binder.restoreCallingIdentity(token);
         }

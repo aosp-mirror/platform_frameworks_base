@@ -406,10 +406,18 @@ java_library {
     lint: {
         extra_check_modules: ["AndroidFrameworkLintChecker"],
         disabled_checks: ["ApiMightLeakAppVisibility"],
+        error_checks: [
+            "ClearIdentityCallNotFollowedByTryFinally",
+            "NestedClearCallingIdentityCalls",
+            "NonFinalTokenOfOriginalCallingIdentity",
+            "RestoreIdentityCallNotInFinallyBlock",
+            "ResultOfClearIdentityCallNotStoredInVariable",
+            "UnusedTokenOfOriginalCallingIdentity",
+            "UseOfCallerAwareMethodsWithClearedIdentity",
+        ],
     },
     errorprone: {
         javacflags: [
-            "-Xep:AndroidFrameworkBinderIdentity:ERROR",
             "-Xep:AndroidFrameworkCompatChange:ERROR",
             "-Xep:AndroidFrameworkUid:ERROR",
         ],
