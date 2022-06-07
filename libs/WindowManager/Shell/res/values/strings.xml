@@ -186,4 +186,12 @@
     <!-- Button text for dismissing the letterbox education dialog. [CHAR LIMIT=20] -->
     <string name="letterbox_education_got_it">Got it</string>
 
+    <!-- Accessibility description of the letterbox education toast expand to dialog button. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_expand_button_description">Expand for more information.</string>
+
+    <!-- Freeform window caption strings -->
+    <!-- Accessibility text for the maximize window button [CHAR LIMIT=NONE] -->
+    <string name="maximize_button_text">Maximize</string>
+    <!-- Accessibility text for the close window button [CHAR LIMIT=NONE] -->
+    <string name="close_button_text">Close</string>
 </resources>
