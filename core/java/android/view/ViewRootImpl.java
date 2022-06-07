@@ -3496,7 +3496,9 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-            performDraw();
+            if (!performDraw() && mSyncBufferCallback != null) {
+                mSyncBufferCallback.onBufferReady(null);
+            }
         }
 
         if (mAttachInfo.mContentCaptureEvents != null) {
@@ -4239,11 +4241,11 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    private void performDraw() {
+    private boolean performDraw() {
         if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
-            return;
+            return false;
         } else if (mView == null) {
-            return;
+            return false;
         }
 
         final boolean fullRedrawNeeded = mFullRedrawNeeded || mSyncBufferCallback != null;
@@ -4327,6 +4329,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
         }
+        return true;
     }
 
     /**
