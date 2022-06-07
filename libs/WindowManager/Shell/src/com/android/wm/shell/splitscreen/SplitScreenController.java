@@ -86,6 +86,8 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
+import javax.inject.Provider;
+
 /**
  * Class manages split-screen multitasking mode and implements the main interface
  * {@link SplitScreen}.
@@ -136,6 +138,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final SplitscreenEventLogger mLogger;
     private final IconProvider mIconProvider;
     private final Optional<RecentTasksController> mRecentTasksOptional;
+    private final Provider<Optional<StageTaskUnfoldController>> mUnfoldControllerProvider;
 
     private StageCoordinator mStageCoordinator;
     // Only used for the legacy recents animation from splitscreen to allow the tasks to be animated
@@ -149,7 +152,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
             Transitions transitions, TransactionPool transactionPool, IconProvider iconProvider,
-            Optional<RecentTasksController> recentTasks) {
+            Optional<RecentTasksController> recentTasks,
+            Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
@@ -160,6 +164,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mDisplayInsetsController = displayInsetsController;
         mTransitions = transitions;
         mTransactionPool = transactionPool;
+        mUnfoldControllerProvider = unfoldControllerProvider;
         mLogger = new SplitscreenEventLogger();
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
@@ -185,7 +190,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                     mTaskOrganizer, mDisplayController, mDisplayImeController,
                     mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
-                    mIconProvider, mMainExecutor, mRecentTasksOptional);
+                    mIconProvider, mMainExecutor, mRecentTasksOptional, mUnfoldControllerProvider);
         }
     }
 
@@ -219,14 +224,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public boolean moveToSideStage(int taskId, @SplitPosition int sideStagePosition) {
         return moveToStage(taskId, STAGE_TYPE_SIDE, sideStagePosition,
                 new WindowContainerTransaction());
-    }
-
-    /**
-     * Update surfaces of the split screen layout based on the current state
-     * @param transaction to write the updates to
-     */
-    public void updateSplitScreenSurfaces(SurfaceControl.Transaction transaction) {
-        mStageCoordinator.updateSurfaces(transaction);
     }
 
     private boolean moveToStage(int taskId, @StageType int stageType,
@@ -537,17 +534,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     final int index = i;
                     mExecutors.valueAt(index).execute(() -> {
                         mExecutors.keyAt(index).onTaskStageChanged(taskId, stage, visible);
-                    });
-                }
-            }
-
-            @Override
-            public void onSplitBoundsChanged(Rect rootBounds, Rect mainBounds, Rect sideBounds) {
-                for (int i = 0; i < mExecutors.size(); i++) {
-                    final int index = i;
-                    mExecutors.valueAt(index).execute(() -> {
-                        mExecutors.keyAt(index).onSplitBoundsChanged(rootBounds, mainBounds,
-                                sideBounds);
                     });
                 }
             }
