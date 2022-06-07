@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.splitscreen;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -37,9 +38,10 @@ class MainStage extends StageTaskListener {
 
     MainStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider) {
-        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession,
-                iconProvider);
+            SurfaceSession surfaceSession, IconProvider iconProvider,
+            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
+        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession, iconProvider,
+                stageTaskUnfoldController);
     }
 
     boolean isActive() {

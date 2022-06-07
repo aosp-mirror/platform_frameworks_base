@@ -118,6 +118,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.inject.Provider;
+
 /**
  * Coordinates the staging (visibility, sizing, ...) of the split-screen {@link MainStage} and
  * {@link SideStage} stages.
@@ -144,8 +146,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private final MainStage mMainStage;
     private final StageListenerImpl mMainStageListener = new StageListenerImpl();
+    private final StageTaskUnfoldController mMainUnfoldController;
     private final SideStage mSideStage;
     private final StageListenerImpl mSideStageListener = new StageListenerImpl();
+    private final StageTaskUnfoldController mSideUnfoldController;
     private final DisplayLayout mDisplayLayout;
     @SplitPosition
     private int mSideStagePosition = SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -206,7 +210,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayInsetsController displayInsetsController, Transitions transitions,
             TransactionPool transactionPool, SplitscreenEventLogger logger,
             IconProvider iconProvider, ShellExecutor mainExecutor,
-            Optional<RecentTasksController> recentTasks) {
+            Optional<RecentTasksController> recentTasks,
+            Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
@@ -214,7 +219,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mLogger = logger;
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
-
+        mMainUnfoldController = unfoldControllerProvider.get().orElse(null);
+        mSideUnfoldController = unfoldControllerProvider.get().orElse(null);
         taskOrganizer.createRootTask(displayId, WINDOWING_MODE_FULLSCREEN, this /* listener */);
 
         mMainStage = new MainStage(
@@ -224,7 +230,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mMainStageListener,
                 mSyncQueue,
                 mSurfaceSession,
-                iconProvider);
+                iconProvider,
+                mMainUnfoldController);
         mSideStage = new SideStage(
                 mContext,
                 mTaskOrganizer,
@@ -232,7 +239,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSideStageListener,
                 mSyncQueue,
                 mSurfaceSession,
-                iconProvider);
+                iconProvider,
+                mSideUnfoldController);
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
@@ -255,7 +263,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             DisplayInsetsController displayInsetsController, SplitLayout splitLayout,
             Transitions transitions, TransactionPool transactionPool,
             SplitscreenEventLogger logger, ShellExecutor mainExecutor,
-            Optional<RecentTasksController> recentTasks) {
+            Optional<RecentTasksController> recentTasks,
+            Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
         mContext = context;
         mDisplayId = displayId;
         mSyncQueue = syncQueue;
@@ -269,6 +278,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitLayout = splitLayout;
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
                 this::onTransitionAnimationComplete, this);
+        mMainUnfoldController = unfoldControllerProvider.get().orElse(null);
+        mSideUnfoldController = unfoldControllerProvider.get().orElse(null);
         mLogger = logger;
         mMainExecutor = mainExecutor;
         mRecentTasks = recentTasks;
@@ -625,7 +636,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 onLayoutSizeChanged(mSplitLayout);
             } else {
                 updateWindowBounds(mSplitLayout, wct);
-                sendOnBoundsChanged();
+                updateUnfoldBounds();
             }
         }
     }
@@ -855,10 +866,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         listener.onStagePositionChanged(STAGE_TYPE_MAIN, getMainStagePosition());
         listener.onStagePositionChanged(STAGE_TYPE_SIDE, getSideStagePosition());
         listener.onSplitVisibilityChanged(isSplitScreenVisible());
-        if (mSplitLayout != null) {
-            listener.onSplitBoundsChanged(mSplitLayout.getRootBounds(), getMainStageBounds(),
-                    getSideStageBounds());
-        }
         mSideStage.onSplitScreenListenerRegistered(listener, STAGE_TYPE_SIDE);
         mMainStage.onSplitScreenListenerRegistered(listener, STAGE_TYPE_MAIN);
     }
@@ -868,14 +875,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final SplitScreen.SplitScreenListener l = mListeners.get(i);
             l.onStagePositionChanged(STAGE_TYPE_MAIN, getMainStagePosition());
             l.onStagePositionChanged(STAGE_TYPE_SIDE, getSideStagePosition());
-        }
-    }
-
-    private void sendOnBoundsChanged() {
-        if (mSplitLayout == null) return;
-        for (int i = mListeners.size() - 1; i >= 0; --i) {
-            mListeners.get(i).onSplitBoundsChanged(mSplitLayout.getRootBounds(),
-                    getMainStageBounds(), getSideStageBounds());
         }
     }
 
@@ -942,7 +941,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final SplitScreen.SplitScreenListener l = mListeners.get(i);
             l.onSplitVisibilityChanged(mDividerVisible);
         }
-        sendOnBoundsChanged();
+
+        if (mMainUnfoldController != null && mSideUnfoldController != null) {
+            mMainUnfoldController.onSplitVisibilityChanged(mDividerVisible);
+            mSideUnfoldController.onSplitVisibilityChanged(mDividerVisible);
+            updateUnfoldBounds();
+        }
     }
 
     @Override
@@ -963,6 +967,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
         }
 
+        if (mMainUnfoldController != null && mSideUnfoldController != null) {
+            mMainUnfoldController.init();
+            mSideUnfoldController.init();
+        }
+
         onRootTaskAppeared();
     }
 
@@ -976,8 +985,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mRootTaskInfo = taskInfo;
         if (mSplitLayout != null
                 && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)
-                && mMainStage.isActive()
-                && !ENABLE_SHELL_TRANSITIONS) {
+                && mMainStage.isActive()) {
+            // TODO(b/204925795): With Shell transition, We are handling split bounds rotation at
+            //  onRotateDisplay. But still need to handle unfold case.
+            if (ENABLE_SHELL_TRANSITIONS) {
+                updateUnfoldBounds();
+                return;
+            }
             // Clear the divider remote animating flag as the divider will be re-rendered to apply
             // the new rotation config.
             mIsDividerRemoteAnimating = false;
@@ -1227,7 +1241,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     public void onLayoutSizeChanged(SplitLayout layout) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         updateWindowBounds(layout, wct);
-        sendOnBoundsChanged();
+        updateUnfoldBounds();
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t -> {
             setResizingSplits(false /* resizing */);
@@ -1236,6 +1250,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSideStage.onResized(t);
         });
         mLogger.logResize(mSplitLayout.getDividerPositionAsFraction());
+    }
+
+    private void updateUnfoldBounds() {
+        if (mMainUnfoldController != null && mSideUnfoldController != null) {
+            mMainUnfoldController.onLayoutChanged(getMainStageBounds(), getMainStagePosition(),
+                    isLandscape());
+            mSideUnfoldController.onLayoutChanged(getSideStageBounds(), getSideStagePosition(),
+                    isLandscape());
+        }
     }
 
     private boolean isLandscape() {
@@ -1317,11 +1340,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDisplayLayout.set(mDisplayController.getDisplayLayout(displayId));
     }
 
-    void updateSurfaces(SurfaceControl.Transaction transaction) {
-        updateSurfaceBounds(mSplitLayout, transaction, /* applyResizingOffset */ false);
-        mSplitLayout.update(transaction);
-    }
-
     private void onDisplayChange(int displayId, int fromRotation, int toRotation,
             @Nullable DisplayAreaInfo newDisplayAreaInfo, WindowContainerTransaction wct) {
         if (!mMainStage.isActive()) return;
@@ -1334,7 +1352,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.updateConfiguration(newDisplayAreaInfo.configuration);
         }
         updateWindowBounds(mSplitLayout, wct);
-        sendOnBoundsChanged();
+        updateUnfoldBounds();
     }
 
     private void onFoldedStateChanged(boolean folded) {

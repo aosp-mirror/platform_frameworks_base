@@ -51,7 +51,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
-import com.android.wm.shell.unfold.UnfoldAnimationController;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -147,11 +146,9 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
-            Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
             KidsModeSettingsObserver kidsModeSettingsObserver) {
-        super(taskOrganizerController, mainExecutor, context, /* compatUI= */ null,
-                unfoldAnimationController, recentTasks);
+        super(taskOrganizerController, mainExecutor, context, /* compatUI= */ null, recentTasks);
         mContext = context;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
@@ -167,9 +164,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
-            Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks) {
-        super(mainExecutor, context, /* compatUI= */ null, unfoldAnimationController, recentTasks);
+        super(mainExecutor, context, /* compatUI= */ null, recentTasks);
         mContext = context;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
