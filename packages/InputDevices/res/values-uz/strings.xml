@@ -10,11 +10,11 @@
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Ingliz (AQSH), Dvorak"</string>
     <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"Ingliz (AQSH), ishchi uslubda"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Nemis"</string>
-    <string name="keyboard_layout_french_label" msgid="813450119589383723">"Fransuzcha"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"Fransuz"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Fransuzcha (Kanada)"</string>
     <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"Ruscha"</string>
     <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"Ruscha, Mac uslubida"</string>
-    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"Ispancha"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"Ispan"</string>
     <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"Shveytsar fransuzcha"</string>
     <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"Nemis (Shveytsariya)"</string>
     <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Belgiyancha"</string>

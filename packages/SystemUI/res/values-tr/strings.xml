@@ -39,7 +39,7 @@
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB aksesuarı"</string>
     <string name="label_view" msgid="6815442985276363364">"Görüntüle"</string>
     <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> bağlandığında <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasını her zaman aç"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> bağlandığında <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasını her zaman aç"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> bağlandığında her zaman <xliff:g id="APPLICATION">%1$s</xliff:g> uygulamasını aç"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB hata ayıklamasına izin verilsin mi?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Bilgisayarın RSA anahtarı parmak izi:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Bu bilgisayardan her zaman izin ver"</string>
@@ -70,7 +70,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Düzenle"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Ekran görüntüsünü düzenle"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Ekranı paylaş"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Daha fazla ekran görüntüsü al"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Alanı genişlet"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Ekran görüntüsünü kapat"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Ekran görüntüsü önizlemesi"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Üst sınır yüzde <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -80,7 +80,7 @@
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Kaydedicisi"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran kaydı işleniyor"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Kayıt Başlatılsın mı?"</string>
+    <string name="screenrecord_start_label" msgid="1750350278888217473">"Kayıt başlatılsın mı?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Kayıt sırasında Android Sistemi, ekranınızda görünen veya cihazınızda oynatılan hassas bilgileri yakalayabilir. Buna şifreler, ödeme bilgileri, fotoğraflar, mesajlar ve sesler dahildir."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Ses kaydet"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Cihaz sesi"</string>
@@ -411,14 +411,14 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Altyazı yer paylaşımı"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"etkinleştir"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"devre dışı bırak"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"Uygulama sabitlenmiştir"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Uygulama sabitlendi"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Geri\'ye ve Genel Bakış\'a dokunup basılı tutun."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Geri\'ye ve Ana sayfaya dokunup basılı tutun."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Bu, sabitleme kaldırılana kadar öğenin görünmesini sağlar. Sabitlemeyi kaldırmak için yukarı kaydırıp basılı tutun."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Genel bakış\'a dokunup basılı tutun."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Bu işlem, siz sabitlemeyi kaldırana kadar ekranı görünür durumda tutar. Sabitlemeyi kaldırmak için Ana sayfaya dokunup basılı tutun."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Kişisel verilere erişilebilir (ör. kişiler ve e-posta içerikleri)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Sabitlenmiş uygulama diğer uygulamaları açabilir."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Sabitlenen uygulama diğer uygulamaları açabilir."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Bu uygulamanın sabitlemesini kaldırmak için Geri ve Genel Bakış düğmelerine dokunup basılı tutun"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu uygulamanın sabitlemesini kaldırmak için Geri ve Ana sayfa düğmelerine dokunup basılı tutun"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu uygulamanın sabitlemesini kaldırmak için yukarı kaydırıp tutun"</string>
@@ -491,7 +491,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Varsayılan"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Otomatik"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sessiz veya titreşim yok"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sessizdir veya titreşim yoktur ve görüşme bölümünün altında görünür"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ses veya titreşim yok, görüşme bölümünün altında görünür"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Telefon ayarlarına bağlı olarak zili çalabilir veya titreyebilir"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Telefon ayarlarına bağlı olarak zili çalabilir veya titreyebilir <xliff:g id="APP_NAME">%1$s</xliff:g> adlı uygulamadan görüşmeler varsayılan olarak baloncukla gösterilir."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Bu bildirimin ses çıkarması veya titreşmesi gerekip gerekmediğine sistem karar versin"</string>
@@ -818,7 +818,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"Derleme numarası panoya kopyalandı."</string>
     <string name="basic_status" msgid="2315371112182658176">"Görüşmeyi aç"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Görüşme widget\'ları"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Ana ekranınıza eklemek için bir ileti dizisine dokunun"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Ana ekranınıza eklemek için bir görüşmeye dokunun"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Son görüşmeleriniz burada gösterilir"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Öncelikli görüşmeler"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Son görüşmeler"</string>
@@ -876,7 +876,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Şu anda kablosuz ağa otomatik olarak bağlanılamıyor"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Tümünü göster"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Ağ değiştirmek için ethernet bağlantısını kesin"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Uygulamalar ve hizmetler, cihaz deneyimini iyileştirmek için Kablosuz özelliği kapalı bile olsa kablosuz ağlar herhangi bir zamanda tarayabilir. Bunu kablosuz ağ taraması ayarlarından değiştirebilirsiniz. "<annotation id="link">"Değiştir"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Uygulamalar ve hizmetler, cihaz deneyimini iyileştirmek için Kablosuz özelliği kapalı bile olsa kablosuz ağları herhangi bir zamanda tarayabilir. Bunu kablosuz ağ taraması ayarlarından değiştirebilirsiniz. "<annotation id="link">"Değiştir"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Uçak modunu kapat"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Kullanıcı seçin"</string>
 </resources>

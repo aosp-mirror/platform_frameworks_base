@@ -354,8 +354,8 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Umožňuje aplikácii rozbaliť alebo zbaliť stavový riadok."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"zobrazovanie upozornení ako aktivít na celej obrazovke v uzamknutom zariadení"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Táto možnosť umožňuje aplikácii zobrazovať upozornenia ako aktivity na celej obrazovke v uzamknutom zariadení"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"inštalovať odkazy"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Povoľuje aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Inštalovať odkazy"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"povoliť aplikácii pridať odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"odinštalovať odkazy"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Povoľuje aplikácii odstrániť odkazy na ploche bez zásahu používateľa."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"presmerovať odchádzajúce hovory"</string>
@@ -1755,7 +1755,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ZAP."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"VYP."</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Chcete povoliť službe <xliff:g id="SERVICE">%1$s</xliff:g> úplnú kontrolu nad zariadením?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ak zapnete službu <xliff:g id="SERVICE">%1$s</xliff:g>, vaše zariadenie nezvýši úroveň šifrovania údajov zámkou obrazovky."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Úplná kontrola je vhodná pre aplikácie, ktoré vám pomáhajú s dostupnosťou, ale nie pre väčšinu aplikácií."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Zobrazenie a ovládanie obrazovky"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Môže čítať všetok obsah na obrazovke a zobrazovať obsah cez ďalšie aplikácie."</string>
@@ -1774,7 +1773,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzia farieb"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Úprava farieb"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Režim jednej ruky"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Veľmi tmavé"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mimoriadne stmavenie"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vypnutá."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Ak chcete používať službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, pridržte tri sekundy oba klávesy hlasitosti"</string>
@@ -1926,7 +1925,7 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Pred odopnutím požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pred uvoľnením požiadať o heslo"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pred odopnutím požiadať o heslo"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Nainštaloval správca"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aktualizoval správca"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Odstránil správca"</string>

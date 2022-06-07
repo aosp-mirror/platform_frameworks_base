@@ -56,7 +56,7 @@
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
-    <string name="ClipMmi" msgid="4110549342447630629">"Nomor Penelepon Masuk"</string>
+    <string name="ClipMmi" msgid="4110549342447630629">"ID Penelepon Masuk"</string>
     <string name="ClirMmi" msgid="6752346475055446417">"Menyembunyikan ID Penelepon untuk Panggilan Keluar"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ID Saluran yang Terhubung"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Batasan ID Saluran yang Terhubung"</string>
@@ -71,12 +71,12 @@
     <string name="RuacMmi" msgid="1876047385848991110">"Penolakan panggilan yang tidak diinginkan"</string>
     <string name="CndMmi" msgid="185136449405618437">"Pengiriman nomor panggilan"</string>
     <string name="DndMmi" msgid="8797375819689129800">"Jangan ganggu"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Nomor penelepon default \"dibatasi\". Panggilan selanjutnya: Dibatasi"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nomor pengguna default \"dibatasi\". Panggilan selanjutnya: Tidak dibatasi."</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Nomor penelepon default tidak dibatasi. Panggilan selanjutnya: Dibatasi"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Nomor penelepon default tidak dibatasi. Panggilan selanjutnya: Tidak dibatasi"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID penelepon diatur default ke \"dibatasi\". Panggilan selanjutnya: Dibatasi"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID penelepon diatur default ke \"dibatasi\". Panggilan selanjutnya: Tidak dibatasi."</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID penelepon diatur default ke tidak dibatasi. Panggilan selanjutnya: Dibatasi"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID penelepon diatur default ke tidak dibatasi. Panggilan selanjutnya: Tidak dibatasi"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Layanan tidak diperlengkapi."</string>
-    <string name="CLIRPermanent" msgid="166443681876381118">"Anda tidak dapat mengubah setelan nomor penelepon."</string>
+    <string name="CLIRPermanent" msgid="166443681876381118">"Anda tidak dapat mengubah setelan ID penelepon."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Tidak ada layanan data seluler"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Panggilan darurat tidak tersedia"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Tidak ada layanan panggilan suara"</string>
@@ -348,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Mengizinkan apl memperluas atau menciutkan bilah status."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Tampilkan notifikasi sebagai aktivitas layar penuh di perangkat terkunci"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Mengizinkan aplikasi untuk menampilkan notifikasi sebagai aktivitas layar penuh di perangkat terkunci"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"memasang pintasan"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Memasang pintasan"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Mengizinkan aplikasi menambahkan pintasan Layar Utama tanpa tindakan dari pengguna."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"meng-uninstal pintasan"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Mengizinkan aplikasi menghapus pintasan Layar Utama tanpa tindakan dari pengguna."</string>
@@ -631,12 +631,12 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Terlalu gelap. Coba pencahayaan yang lebih cerah."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Gerakkan ponsel menjauh."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Gerakkan ponsel mendekat."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Gerakkan ponsel ke atas."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Gerakkan ponsel ke bawah."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Geser ponsel ke atas."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Geser ponsel ke bawah."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Gerakkan ponsel ke kiri."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Gerakkan ponsel ke kanan."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lihat langsung ke perangkat."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Posisikan wajah Anda langsung di depan ponsel."</string>
+    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Posisikan wajah Anda tepat di depan ponsel."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu banyak gerakan. Stabilkan ponsel."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Daftarkan ulang wajah Anda."</string>
     <string name="face_acquired_too_different" msgid="4699657338753282542">"Tidak lagi dapat mengenali wajah. Coba lagi."</string>
@@ -996,9 +996,9 @@
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nYakin ingin beranjak dari halaman ini?"</string>
     <string name="save_password_label" msgid="9161712335355510035">"Konfirmasi"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"Kiat: Ketuk dua kali untuk memperbesar dan memperkecil."</string>
-    <string name="autofill_this_form" msgid="3187132440451621492">"IsiOtomatis"</string>
-    <string name="setup_autofill" msgid="5431369130866618567">"Siapkan Pengisian Otomatis"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"IsiOtomatis dengan <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
+    <string name="autofill_this_form" msgid="3187132440451621492">"Isi Otomatis"</string>
+    <string name="setup_autofill" msgid="5431369130866618567">"Siapkan Isi otomatis"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"Isi otomatis dengan <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>
     <string name="autofill_address_name_separator" msgid="8190155636149596125">"  "</string>
     <string name="autofill_address_summary_name_format" msgid="3402882515222673691">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="760522655085707045">", "</string>
@@ -1171,7 +1171,7 @@
     <string name="selectTextMode" msgid="3225108910999318778">"Pilih teks"</string>
     <string name="undo" msgid="3175318090002654673">"Urungkan"</string>
     <string name="redo" msgid="7231448494008532233">"Ulangi"</string>
-    <string name="autofill" msgid="511224882647795296">"IsiOtomatis"</string>
+    <string name="autofill" msgid="511224882647795296">"Isi Otomatis"</string>
     <string name="textSelectionCABTitle" msgid="5151441579532476940">"Pemilihan teks"</string>
     <string name="addToDictionary" msgid="8041821113480950096">"Tambahkan ke kamus"</string>
     <string name="deleteText" msgid="4200807474529938112">"Hapus"</string>
@@ -1403,7 +1403,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"BAGIKAN"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"TOLAK"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Pilih metode masukan"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Pertahankan di layar jika keyboard fisik masih aktif"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Biarkan di layar meski keyboard fisik aktif"</string>
     <string name="hardware" msgid="1800597768237606953">"Tampilkan keyboard virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Mengonfigurasi keyboard fisik"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Ketuk untuk memilih bahasa dan tata letak"</string>
@@ -1711,12 +1711,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AKTIF"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"NONAKTIF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> memiliki kontrol penuh atas perangkat Anda?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jika Anda mengaktifkan <xliff:g id="SERVICE">%1$s</xliff:g>, perangkat tidak akan menggunakan kunci layar untuk meningkatkan enkripsi data."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang membantu Anda terkait kebutuhan aksesibilitas, tetapi tidak untuk sebagian besar aplikasi."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang mendukung kebutuhan aksesibilitas Anda, tetapi tidak untuk sebagian besar aplikasi."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengontrol layar"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Aplikasi dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Voice Access dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Menampilkan dan melakukan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Aplikasi dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan melakukan interaksi dengan aplikasi untuk Anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Voice Access dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi untuk Anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Izinkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketuk fitur untuk mulai menggunakannya:"</string>
@@ -2032,13 +2031,13 @@
     <string name="time_picker_prompt_label" msgid="303588544656363889">"Ketikkan waktu"</string>
     <string name="time_picker_text_input_mode_description" msgid="4761160667516611576">"Beralih ke mode masukan teks untuk masukan waktu."</string>
     <string name="time_picker_radial_mode_description" msgid="1222342577115016953">"Beralih ke mode jam untuk masukan waktu."</string>
-    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Opsi IsiOtomatis"</string>
-    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Simpan untuk IsiOtomatis"</string>
+    <string name="autofill_picker_accessibility_title" msgid="4425806874792196599">"Opsi isi otomatis"</string>
+    <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Simpan untuk Isi otomatis"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Konten tidak dapat diisi otomatis"</string>
-    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Tidak ada saran IsiOtomatis"</string>
+    <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Tidak ada saran isi otomatis"</string>
     <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> saran IsiOtomatis</item>
-      <item quantity="one">1 saran IsiOtomatis</item>
+      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> saran isi otomatis</item>
+      <item quantity="one">1 saran isi otomatis</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Simpan ke "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Simpan <xliff:g id="TYPE">%1$s</xliff:g> ke "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>

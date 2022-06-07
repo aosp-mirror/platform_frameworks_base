@@ -348,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Tillåter att appen expanderar eller komprimerar statusfältet."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"visa aviseringar som aktiviteter i helskärm på en låst enhet"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Tillåter att appen visar aviseringar som aktiviteter i helskärm på en låst enhet"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"installera genvägar"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"Installera genvägar"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Tillåter att en app lägger till genvägar på startskärmen utan åtgärd från användaren."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"avinstallera genvägar"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Tillåter att appen tar bort genvägar på startskärmen utan åtgärd från användaren."</string>
@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"PÅ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AV"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vill du tillåta att <xliff:g id="SERVICE">%1$s</xliff:g> får fullständig kontroll över enheten?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Om du aktiverar <xliff:g id="SERVICE">%1$s</xliff:g> används inte skärmlåset för att förbättra datakryptering på enheten."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Fullständig kontroll lämpar sig för appar med tillgänglighetsfunktioner, men är inte lämplig för de flesta appar."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visa och styra skärmen"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan läsa allt innehåll på skärmen och visa innehåll över andra appar."</string>

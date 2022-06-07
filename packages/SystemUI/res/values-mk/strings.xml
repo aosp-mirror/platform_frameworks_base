@@ -251,7 +251,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Осветленост"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инверзија на боите"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Повеќе поставки"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Поставки на корисникот"</string>
+    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Кориснички поставки"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Затвори"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Поврзано"</string>
@@ -347,8 +347,8 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Да се отстрани корисникот?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Сите апликации и податоци од овој корисник ќе се избришат."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Отстрани"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинки, детали за плаќање, фотографии, пораки, аудио што го пуштате итн."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинките, деталите за плаќање, фотографиите, пораките и аудиото што го пуштате."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Услугата што ја обезбедува функцијава ќе има пристап до сите податоци што се видливи на екранот или пуштени од вашиот уред додека се снима или емитува. Ова вклучува податоци како лозинките, деталите за плаќање, фотографиите, пораките и аудиото што го пуштате."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Да почне снимање или емитување?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да почне снимање или емитување со <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Избриши сѐ"</string>
@@ -564,7 +564,7 @@
     <string name="keyboard_key_numpad_template" msgid="7316338238459991821">"Numpad <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Отстрани го прилогот"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Систем"</string>
-    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Почетна страница"</string>
+    <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Почетен екран"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Неодамнешни"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Назад"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Известувања"</string>
@@ -864,7 +864,7 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобилен интернет"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Поврзано"</string>
-    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мобилниот интернет не може автоматски да се поврзе"</string>
+    <string name="mobile_data_off_summary" msgid="3663995422004150567">"Мобилниот интернет не може да се поврзе автоматски"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Нема интернет-врска"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Нема други достапни мрежи"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"Нема достапни мрежи"</string>

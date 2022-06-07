@@ -118,7 +118,7 @@
     <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Bekreft"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Prøv på nytt"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Trykk for å avbryte autentiseringen"</string>
-    <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Prøv igjen"</string>
+    <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Prøv på nytt"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"Ser etter ansiktet ditt"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Ansiktet er autentisert"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Bekreftet"</string>
@@ -331,7 +331,7 @@
     <string name="user_add_user" msgid="4336657383006913022">"Legg til brukere"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Ny bruker"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Vil du fjerne gjesten?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle appene og all informasjon i denne økten slettes."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle apper og data i denne økten blir slettet."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Fjern"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Velkommen tilbake, gjest!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Vil du fortsette økten?"</string>
@@ -462,7 +462,7 @@
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Legg til et kort"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Oppdaterer"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås opp for å bruke"</string>
-    <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv igjen senere"</string>
+    <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv på nytt senere"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Innstillinger for låseskjermen"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flymodus"</string>
@@ -862,7 +862,7 @@
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autentisering kreves. Trykk på fingeravtrykkssensoren for å autentisere."</string>
     <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Pågående telefonsamtale"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
-    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
+    <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Tilkoblet"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobildata kobler ikke til automatisk"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Ingen tilkobling"</string>
@@ -876,7 +876,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi kobles ikke til automatisk inntil videre"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Se alle"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"For å bytte nettverk, koble fra Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wi-Fi-nettverk når som helst – også når Wi-Fi er slått av. Du kan endre dette i innstillingene for Wi-Fi-skanning. "<annotation id="link">"Bytt"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wi-Fi-nettverk når som helst – også når Wi-Fi er slått av. Du kan endre dette i innstillingene for Wi-Fi-skanning. "<annotation id="link">"Endre"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Slå av flymodus"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Velg bruker"</string>
 </resources>

@@ -29,9 +29,9 @@
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Włącz"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Włączyć Oszczędzanie baterii?"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Autoobracanie ekranu"</string>
-    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do urządzenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do urządzenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacja nie ma uprawnień do nagrywania, ale może rejestrować dźwięk za pomocą tego urządzenia USB."</string>
-    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do urządzenia <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na dostęp do: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otworzyć aplikację <xliff:g id="APPLICATION">%1$s</xliff:g> do obsługi urządzenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Zezwolić aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g> na obsługę urządzenia <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacja nie ma uprawnień do nagrywania, ale może rejestrować dźwięk za pomocą tego urządzenia USB."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Otworzyć aplikację <xliff:g id="APPLICATION">%1$s</xliff:g> do obsługi urządzenia <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -86,7 +86,7 @@
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Dźwięki z urządzenia"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Dźwięki odtwarzane na urządzeniu, na przykład muzyka, połączenia i dzwonki"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
-    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Mikrofon i dźwięki odtwarzane na urządzeniu"</string>
+    <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Mikrofon i dźwięki z urządzenia"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Rozpocznij"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Rejestruję zawartość ekranu"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Rejestruje zawartość ekranu i dźwięki odtwarzane na urządzeniu"</string>
@@ -235,7 +235,7 @@
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokalizacja"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Dostęp do aparatu"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Dostęp do mikrofonu"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Dostępny"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Odblokowany"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Zablokowany"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Urządzenie multimedialne"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Użytkownik"</string>
@@ -423,7 +423,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ekran będzie widoczny, dopóki go nie odepniesz. Przesuń palcem w górę i przytrzymaj, by odpiąć."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, kliknij i przytrzymaj Przegląd."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ekran będzie widoczny, dopóki go nie odepniesz. Aby to zrobić, naciśnij i przytrzymaj Ekran główny."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dostępne mogą być dane osobiste (np. kontakty czy treść e-maili)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dostępne mogą być dane prywatne (np. kontakty czy treść e-maili)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Przypięta aplikacja może otwierać inne aplikacje."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Aby odpiąć tę aplikację, naciśnij i przytrzymaj przyciski Wstecz oraz Przegląd"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Aby odpiąć tę aplikację, naciśnij i przytrzymaj przyciski Wstecz oraz Ekran główny"</string>
@@ -496,10 +496,10 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Ciche"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Domyślne"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automatycznie"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Brak dźwięku i wibracji"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Bez dźwięku i wibracji"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Brak dźwięku i wibracji, wyświetla się niżej w sekcji rozmów"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Może włączyć dzwonek lub wibracje w zależności od ustawień telefonu"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Może włączyć dzwonek lub wibracje w zależności od ustawień telefonu. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Może włączać dzwonek lub wibracje w zależności od ustawień telefonu"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Może włączać dzwonek lub wibracje w zależności od ustawień telefonu. Rozmowy z aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> są domyślnie wyświetlane jako dymki."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Pozwól systemowi decydować, czy o powiadomieniu powinien informować dźwięk czy wibracja"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Stan:&lt;/b&gt; zmieniony na Domyślny"</string>
     <string name="notification_channel_summary_automatic_silenced" msgid="7403004439649872047">"&lt;b&gt;Stan:&lt;/b&gt; zmieniono na Ciche"</string>
