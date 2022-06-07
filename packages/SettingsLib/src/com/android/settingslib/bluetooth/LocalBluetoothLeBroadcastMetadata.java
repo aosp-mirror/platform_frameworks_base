@@ -83,6 +83,9 @@ public class LocalBluetoothLeBroadcastMetadata {
         mSubgroupList = metadata.getSubgroups();
     }
 
+    public LocalBluetoothLeBroadcastMetadata() {
+    }
+
     public void setBroadcastCode(byte[] code) {
         mBroadcastCode = code;
     }

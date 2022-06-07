@@ -275,7 +275,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"การแจ้งเตือนใหม่"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"แป้นพิมพ์เสมือน"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"แป้นพิมพ์บนเครื่อง"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"แป้นพิมพ์จริง"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"ความปลอดภัย"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"โหมดรถยนต์"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"สถานะบัญชี"</string>
@@ -1711,12 +1711,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"เปิด"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ปิด"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"อนุญาตให้ <xliff:g id="SERVICE">%1$s</xliff:g> ควบคุมอุปกรณ์อย่างเต็มที่ไหม"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"หากคุณเปิด <xliff:g id="SERVICE">%1$s</xliff:g> อุปกรณ์ของคุณจะไม่ใช้ล็อกหน้าจอเพื่อปรับปรุงการเข้ารหัสข้อมูล"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปที่ช่วยคุณในเรื่องความต้องการความช่วยเหลือพิเศษแต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปเกี่ยวกับความช่วยเหลือพิเศษ แต่ไม่เหมาะสำหรับ​แอปส่วนใหญ่"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ดูและควบคุมหน้าจอ"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้อ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้สามารถอ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ดูและดำเนินการ"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"การกระทำนี้ติดตามการโต้ตอบของคุณกับแอปหรือกับเซ็นเซอร์ของฮาร์ดแวร์ และจะโต้ตอบกับแอปต่างๆ แทนคุณ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"การควบคุมนี้สามารถติดตามการโต้ตอบของคุณกับแอปหรือกับเซ็นเซอร์ของฮาร์ดแวร์ และโต้ตอบกับแอปต่างๆ แทนคุณ"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"อนุญาต"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ปฏิเสธ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"แตะฟีเจอร์เพื่อเริ่มใช้"</string>
@@ -1887,7 +1886,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ตกลง"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย"</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"โหมดประหยัดแบตเตอรี่จะเปิดธีมมืดและจำกัดหรือปิดกิจกรรมในเบื้องหลัง เอฟเฟกต์ภาพบางอย่าง ฟีเจอร์บางส่วน และการเชื่อมต่อบางเครือข่าย"</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต การประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"เปิด"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -2004,7 +2003,7 @@
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"เชื่อมต่อ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"แตะเพื่อดูไฟล์"</string>
     <string name="pin_target" msgid="8036028973110156895">"ปักหมุด"</string>
-    <string name="pin_specific_target" msgid="7824671240625957415">"ตรึง <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="pin_specific_target" msgid="7824671240625957415">"ปักหมุด <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="unpin_target" msgid="3963318576590204447">"เลิกปักหมุด"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"เลิกปักหมุด <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"ข้อมูลแอป"</string>
@@ -2146,7 +2145,7 @@
     </plurals>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ไม่พบใครที่แนะนำให้แชร์ด้วย"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"รายชื่อแอป"</string>
-    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่จะบันทึกเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
+    <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่อาจเก็บเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"หน้าแรก"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"กลับ"</string>
     <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"แอปล่าสุด"</string>

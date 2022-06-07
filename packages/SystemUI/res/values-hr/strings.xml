@@ -24,15 +24,15 @@
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Preostalo <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="invalid_charger_title" msgid="938685362320735167">"Punjenje putem USB-a nije moguće"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Koristite punjač koji ste dobili s uređajem"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Uključiti Štednju baterije?"</string>
-    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"O Štednji baterije"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Uključiti štednju baterije?"</string>
+    <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"O štednji baterije"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Uključi"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Uključite Štednju baterije"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Automatski zakreni zaslon"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Želite li dopustiti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Želite li dopustiti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> da pristupa uređaju <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nTa aplikacija nema dopuštenje za snimanje, no mogla bi primati zvuk putem tog USB uređaja."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Želite li dopustiti aplikaciji <xliff:g id="APPLICATION">%1$s</xliff:g> pristup uređaju <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Želite li otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> radi upravljanja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> radi upravljanja uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Želite li upravljati uređajem <xliff:g id="USB_DEVICE">%2$s</xliff:g> putem aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>?\nTa aplikacija nema dopuštenje za snimanje, no mogla bi primati zvuk putem tog USB uređaja."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Želite li otvoriti aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> radi upravljanja uređajem <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Nijedna instalirana aplikacija ne radi s ovim USB dodatkom. Saznajte više na <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -333,7 +333,7 @@
     <string name="user_add_user" msgid="4336657383006913022">"Dodavanje korisnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Ukloniti gosta?"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci u ovoj sesiji bit će izbrisani."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Izbrisat će se sve aplikacije i podaci u ovoj sesiji."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Ukloni"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Dobro došli natrag, gostu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Želite li nastaviti sesiju?"</string>
@@ -352,8 +352,8 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Ukloni"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> imat će pristup svim podacima koji su vidljivi na vašem zaslonu ili koji se reproduciraju s vašeg uređaja tijekom snimanja ili emitiranja. To uključuje podatke kao što su zaporke, podaci o plaćanju, fotografije, poruke i audiozapisi koje reproducirate."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Usluga koja pruža ovu funkcionalnost imat će pristup svim podacima koji su vidljivi na vašem zaslonu ili koji se reproduciraju s vašeg uređaja tijekom snimanja ili emitiranja. To uključuje podatke kao što su zaporke, podaci o plaćanju, fotografije, poruke i audiozapisi koje reproducirate."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Započeti snimanje ili emitiranje?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Započeti snimanje ili emitiranje pomoću aplikacije <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Želite li započeti snimanje ili emitiranje?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"Želite li započeti snimanje ili emitiranje pomoću aplikacije <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši sve"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljajte"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Povijest"</string>
@@ -570,7 +570,7 @@
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Ukloni privitak"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sustav"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Početni zaslon"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Najnovije"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Nedavno"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Natrag"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Obavijesti"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Tipkovni prečaci"</string>
@@ -847,7 +847,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Slušanje"</string>
     <string name="game_status" msgid="1340694320630973259">"Igranje"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Prijatelji"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Može chat večeras?"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Čujemo se večeras?"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Sadržaj će se uskoro prikazati"</string>
     <string name="missed_call" msgid="4228016077700161689">"Propušteni poziv"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

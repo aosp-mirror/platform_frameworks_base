@@ -221,7 +221,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"Укључи бежични сигнал"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Искључи бежични сигнал"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Закључај екран"</string>
-    <string name="power_off" msgid="4111692782492232778">"Искључи"</string>
+    <string name="power_off" msgid="4111692782492232778">"Угаси"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Звоно је искључено"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Вибрација звона"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Звоно је укључено"</string>
@@ -245,7 +245,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Опције Android TV-а"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Опције телефона"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Закључај екран"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"Искључи"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"Угаси"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Напајање"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Рестартуј"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Хитан позив"</string>
@@ -352,7 +352,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"приказује обавештења као активности преко целог екрана на закључаном уређају"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Омогућава апликацији да на закључаном уређају приказује обавештења као активности преко целог екрана."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Инсталирање пречица"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Омогућава апликацији да додаје пречице на почетни екран без интервенције корисника."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"да додају пречице на почетни екран без интервенције корисника."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталирање пречица"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Омогућава апликацији да уклања пречице са почетног екрана без интервенције корисника."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"преусмеравање одлазних позива"</string>
@@ -591,7 +591,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Пробајте са другим отиском прста"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Превише је светло"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Пробајте да прилагодите"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Сваки пут лагано промените положај прста"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Сваки пут помало промените положај прста"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Отисак прста је потврђен"</string>
@@ -1733,7 +1733,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"УКЉУЧЕНО"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИСКЉУЧЕНО"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Желите ли да дозволите да услуга <xliff:g id="SERVICE">%1$s</xliff:g> има потпуну контролу над уређајем?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако укључите услугу <xliff:g id="SERVICE">%1$s</xliff:g>, уређај неће користити закључавање екрана да би побољшао шифровање података."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Потпуна контрола је примерена за апликације које вам помажу код услуга приступачности, али не и за већину апликација."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Прегледај и контролиши екран"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да чита сав садржај на екрану и приказује га у другим апликацијама."</string>

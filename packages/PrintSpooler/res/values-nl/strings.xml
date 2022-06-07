@@ -106,6 +106,6 @@
     <string name="print_error_default_message" msgid="8602678405502922346">"Dat werkte niet. Probeer het opnieuw."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Opnieuw proberen"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Deze printer is momenteel niet beschikbaar."</string>
-    <string name="print_cannot_load_page" msgid="6179560924492912009">"Kan voorbeeld niet weergeven"</string>
+    <string name="print_cannot_load_page" msgid="6179560924492912009">"Kan voorbeeld niet bekijken"</string>
     <string name="print_preparing_preview" msgid="3939930735671364712">"Voorbeeld voorbereiden…"</string>
 </resources>

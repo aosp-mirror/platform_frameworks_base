@@ -324,7 +324,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefon chaqiruvlari jurnalini o‘qish va unga yozish"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefon qo‘ng‘iroqlarini amalga oshirish va boshqarish"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tana sezgichlari"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tana sensorlari"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"organizm holati haqidagi sezgich ma’lumotlariga kirish"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Oynadagi kontentni o‘qiydi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Ilovaga planshetingizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Ilovaga Android TV qurilmangizdagi chaqiruvlar jurnali, kirish va chiqish chaqiruvlari haqidagi axborotni oʻzgartirish huquqini beradi. Zararli ilovalar undan chaqiruvlar jurnalini oʻzgartirish yoki oʻchirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Ilovaga telefoningizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"tana sezgichlari (m-n, yurak urishi sensori) ma’lumotlaridan foydalanishga ruxsat"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"Tana sensorlari (m-n, yurak urishi sensori) axborotlaridan foydalanishga ruxsat"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Ilovaga sezgichlardan olingan jismoniy holatingiz haqidagi ma’lumotlarni, masalan, yurak urishini kuzatish uchun ruxsat beradi."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Taqvim tadbirlari va tafsilotlarini o‘qish"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu ilova planshetdagi barcha taqvim tadbirlarini o‘qiy olishi hamda taqvim ma’lumotlarini ulashishi yoki saqlashi mumkin."</string>
@@ -1403,7 +1403,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"BAHAM KO‘RISH"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RAD ETISH"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Matn kiritish usulini tanlang"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Jismoniy klaviatura ulanganida ekranda chiqib turadi"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Tashqi klaviatura ulanganida ekranda chiqib turadi"</string>
     <string name="hardware" msgid="1800597768237606953">"Virtual klaviatura"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Tashqi klaviaturani sozlash"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Til va sxemani belgilash uchun bosing"</string>
@@ -1641,7 +1641,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Simsiz monitor"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Translatsiya qilish"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Qurilmaga ulanish"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Ekran translatsiyasi"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Ekranni qurilmaga translatsiya qilish"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Qurilmalar qidirilmoqda..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Sozlamalar"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Uzish"</string>
@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"YONIQ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"YOQILMAGAN"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> xizmatiga qurilmangizni boshqarish uchun toʻliq ruxsat berilsinmi?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Agar <xliff:g id="SERVICE">%1$s</xliff:g> xizmatini yoqsangiz, qurilmangiz maʼlumotlarni shifrlashni kuchaytirish uchun ekran qulfidan foydalanmaydi."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Toʻliq nazorat maxsus imkoniyatlar bilan ishlovchi ilovalar uchun mos, lekin barcha ilovalar uchun emas."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekranni ochish va boshqarish"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandagi barcha kontentni oʻqishi va kontentni boshqa ilovalar ustida ochishi mumkin."</string>
@@ -1887,8 +1886,8 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Quvvat tejash funksiyasi Tungi mavzuni va cheklovlarni yoqadi hamda fondagi harakatlar, vizual effektlar, ayrim funksiyalar va tarmoq aloqalari kabi boshqa funksiyalarni faolsizlantiradi yoki cheklaydi."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
-    <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash yoqilsinmi?"</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Trafik tejash rejimida ayrim ilovalar uchun orqa fonda Internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizga qadar yuklanmaydi."</string>
+    <string name="data_saver_enable_title" msgid="7080620065745260137">"Trafik tejash rejimi yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Yoqish"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
       <item quantity="other">%1$d daqiqa (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> gacha)</item>

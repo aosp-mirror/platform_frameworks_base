@@ -631,8 +631,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"暗すぎます。もっと明るい場所でお試しください。"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"スマートフォンをもっと離してください。"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"スマートフォンをもっと近づけてください。"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンをもっと高い位置に上げてください。"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンをもっと低い位置に下げてください。"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"スマートフォンを上に動かしてください。"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"スマートフォンを下に動かしてください。"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"スマートフォンを左に動かしてください。"</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"スマートフォンを右に動かしてください。"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"もっとまっすぐデバイスに顔を向けてください。"</string>
@@ -816,7 +816,7 @@
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"FAX（自宅）"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ポケベル"</string>
     <string name="phoneTypeOther" msgid="6918196243648754715">"その他"</string>
-    <string name="phoneTypeCallback" msgid="3455781500844157767">"かけ直す"</string>
+    <string name="phoneTypeCallback" msgid="3455781500844157767">"コールバック"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"クルマ"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"会社代表番号"</string>
     <string name="phoneTypeIsdn" msgid="2496238954533998512">"ISDN"</string>
@@ -1711,10 +1711,9 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ON"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"OFF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能が必要な場合には適していますが、その他の多くのアプリには不要です。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリ上にコンテンツを表示することができます。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"アプリやハードウェア センサーの操作を記録したり、自動的にアプリを操作したりできます。"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"許可"</string>
@@ -1858,7 +1857,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"新しいPINの確認"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"制限を変更するためのPINを作成してください"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN が一致しません。もう一度お試しください。"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で作成してください。"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PINが短すぎます。4桁以上で設定してください。"</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください</item>
       <item quantity="one">1秒後にもう一度お試しください</item>
@@ -1885,8 +1884,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"バッテリー セーバーを有効にすると、ダークモードが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"バッテリー セーバーを有効にすると、ダークモードが ON になり、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"バッテリー セーバーを ON にすると、ダークモードが ON になります。また、バックグラウンド アクティビティ、一部の視覚効果、特定の機能、一部のネットワーク接続が制限されるか OFF になります。"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータを送受信することはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
@@ -2176,7 +2175,7 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"このコンテンツを個人用アプリと共有することはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"このコンテンツを個人用アプリで開くことはできません"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップすると有効になります"</string>
+    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップして有効化"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"個人用アプリはありません"</string>
     <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"個人用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>

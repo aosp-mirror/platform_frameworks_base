@@ -250,7 +250,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"La Wi‑Fi no està connectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillantor"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Inversió de colors"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Més opcions"</string>
+    <string name="quick_settings_more_settings" msgid="2878235926753776694">"Més opcions de configuració"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Configuració d\'usuari"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Fet"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Tanca"</string>
@@ -338,7 +338,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Torna a començar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continua"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Vols afegir un usuari nou?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Quan s\'afegeix un usuari nou, aquesta persona ha de configurar el seu espai.\n\nQualsevol usuari pot actualitzar les aplicacions dels altres usuaris."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"S\'ha assolit el límit d\'usuaris"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Pots afegir fins a <xliff:g id="COUNT">%d</xliff:g> usuaris.</item>
@@ -517,7 +517,7 @@
     <string name="feedback_prompt" msgid="3656728972307896379">"Fes saber els teus suggeriments al desenvolupador. La informació ha estat correcta?"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"S\'han obert els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"S\'han tancat els controls de notificació per a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="notification_more_settings" msgid="4936228656989201793">"Més opcions"</string>
+    <string name="notification_more_settings" msgid="4936228656989201793">"Més opcions de configuració"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Personalitza"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Mostra com a bombolla"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Suprimeix les bombolles"</string>
@@ -869,7 +869,7 @@
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"No hi ha cap altra xarxa disponible"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"No hi ha cap xarxa disponible"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi‑Fi"</string>
-    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Toca una xarxa per connectar-te"</string>
+    <string name="tap_a_network_to_connect" msgid="1565073330852369558">"Toca una xarxa per connectar-t\'hi"</string>
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Desbloqueja per veure xarxes"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"S\'estan cercant xarxes…"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"No s\'ha pogut connectar a la xarxa"</string>

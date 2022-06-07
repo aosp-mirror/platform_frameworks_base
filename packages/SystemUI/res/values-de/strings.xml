@@ -87,7 +87,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Audioinhalte auf deinem Gerät, wie Musik, Anrufe und Klingeltöne"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio des Geräts und über Mikrofon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Start"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Starten"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Bildschirm wird aufgezeichnet"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Bildschirm und Ton werden aufgezeichnet"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Berührungen des Bildschirms anzeigen"</string>
@@ -228,7 +228,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Eingabe"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hörhilfen"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Wird aktiviert…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatisch drehen"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. drehen"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Bildschirm automatisch drehen"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Standort"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Kamerazugriff"</string>

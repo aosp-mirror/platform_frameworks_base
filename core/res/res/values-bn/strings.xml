@@ -348,7 +348,7 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"অ্যাপ্লিকেশনটিকে স্ট্যাটাস বার প্রসারিত বা সঙ্কুচিত করতে দেয়৷"</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"লক করা ডিভাইসে ফুল স্ক্রিন অ্যাক্টিভিটি হিসাবে বিজ্ঞপ্তি দেখায়"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"এই অ্যাপকে লক করা ডিভাইসে ফুল স্ক্রিন অ্যাক্টিভিটি হিসাবে বিজ্ঞপ্তি দেখানোর অনুমতি দেয়"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"শর্টকাটগুলি ইনস্টল করে"</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"শর্টকাট ইনস্টল করা"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"একটি অ্যাপ্লিকেশানকে ব্যবহারকারীর হস্তক্ষেপ ছাড়াই হোমস্ক্রীণে শর্টকাটগুলি যোগ করার অনুমতি দেয়৷"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"শর্টকাটগুলি আনইনস্টল করে"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"অ্যাপ্লিকেশানটিকে ব্যবহারকারীর হস্তক্ষেপ ছাড়াই হোমস্ক্রীণের শর্টকাটগুলি সরানোর অনুমতি দেয়৷"</string>
@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"চালু"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"বন্ধ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> অ্যাপটিকে আপনার ডিভাইসে সম্পূর্ণ নিয়ন্ত্রণের অনুমতি দিতে চান?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> চালু করলে, ডেটা এনক্রিপশন উন্নত করার উদ্দেশ্যে আপনার ডিভাইস স্ক্রিন লক ব্যবহার করবে না।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"যে অ্যাপগুলি আপনাকে অ্যাক্সেসিবিলিটির প্রয়োজন মেটাতে সাহায্য করে সেই অ্যাপগুলির জন্য সম্পূর্ণ নিয়ন্ত্রণের বিষয়টি উপযুক্ত, কিন্তু তা বলে সমস্ত অ্যাপের জন্য নয়।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"স্ক্রিন দেখে নিয়ন্ত্রণ করা"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"এটি স্ক্রিনের সমস্ত কন্টেন্ট পড়তে এবং অন্য অ্যাপেও কন্টেন্ট ডিসপ্লে করতে পারে।"</string>

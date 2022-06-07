@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ჩართულია"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"გამორთულია"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"დართავთ ნებას <xliff:g id="SERVICE">%1$s</xliff:g>-ს, სრულად მართოს თქვენი მოწყობილობა?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g>-ს თუ ჩართავთ, მონაცემთა დაშიფვრის გასაძლიერებლად თქვენი მოწყობილობა ეკრანის დაბლოკვას არ გამოიყენებს."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"სრული კონტროლი გამოსადეგია აპებისთვის, რომლებიც მარტივი წვდომის საჭიროებისას გეხმარებათ, მაგრამ არა აპების უმრავლესობისთვის."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ეკრანის ნახვა და მართვა"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"მას შეუძლია წაიკითხოს ეკრანზე არსებული მთელი კონტენტი და აჩვენოს კონტენტი სხვა აპებში."</string>

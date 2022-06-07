@@ -38,8 +38,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Er werken geen geïnstalleerde apps met dit USB-accessoire. Meer informatie op: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-accessoire"</string>
     <string name="label_view" msgid="6815442985276363364">"Bekijken"</string>
-    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_DEVICE">%2$s</xliff:g> is verbonden"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> is verbonden"</string>
+    <string name="always_use_device" msgid="210535878779644679">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_DEVICE">%2$s</xliff:g> verbonden is"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"<xliff:g id="APPLICATION">%1$s</xliff:g> altijd openen wanneer <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> verbonden is"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"USB-foutopsporing toestaan?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Altijd toestaan vanaf deze computer"</string>
@@ -348,7 +348,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Alle apps en gegevens van deze gebruiker worden verwijderd."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Verwijderen"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"De service die deze functie levert, krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"De service die deze functie levert, krijgt tijdens het opnemen of casten toegang tot alle informatie die op je scherm te zien is of op je apparaat wordt afgespeeld. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Beginnen met opnemen of casten?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Beginnen met opnemen of casten met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Alles wissen"</string>
@@ -414,10 +414,10 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"App is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Home en houd deze vast om het scherm los te maken."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je dit losmaakt. Swipe omhoog en houd vast om los te maken."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je het losmaakt. Swipe omhoog en houd vast om los te maken."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Overzicht en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Home en houd dit vast om het scherm los te maken."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonlijke informatie kan toegankelijk zijn (zoals contacten en e-mailcontent)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonsgegevens kunnen toegankelijk zijn (zoals contacten en e-mails)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"De vastgezette app kan andere apps openen."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Tik op Terug en Overzicht en houd de knoppen vast om deze app los te maken"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Tik op Terug en Home en houd de knoppen vast om deze app los te maken"</string>
@@ -448,7 +448,7 @@
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"geluid aanzetten"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"trillen"</string>
     <string name="volume_dialog_title" msgid="6502703403483577940">"%s-volumeknoppen"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Gesprekken en meldingen gaan over (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Geluid bij gesprekken en meldingen (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Systeem-UI-tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusbalk"</string>
     <string name="demo_mode" msgid="263484519766901593">"Demomodus voor systeemgebruikersinterface"</string>
@@ -569,7 +569,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Terug"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Meldingen"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Sneltoetsen"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Toetsenbordindeling schakelen"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Toetsenbordindeling wisselen"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apps"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assistentie"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Browser"</string>
@@ -716,7 +716,7 @@
     <string name="slice_permission_deny" msgid="6870256451658176895">"Weigeren"</string>
     <string name="auto_saver_title" msgid="6873691178754086596">"Tikken om Batterijbesparing aan te zetten"</string>
     <string name="auto_saver_text" msgid="3214960308353838764">"Aanzetten als de batterij waarschijnlijk leeg raakt"</string>
-    <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee"</string>
+    <string name="no_auto_saver_action" msgid="7467924389609773835">"Nee, bedankt"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Apps gebruiken je <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
@@ -766,7 +766,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"als favoriet verwijderen"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Verplaatsen naar positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Kies welke bedieningselementen je in Snelle instellingen wilt zien"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Kies welke bedieningselementen je wilt zien in Snelle instellingen"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Wijzigingen zijn niet opgeslagen"</string>

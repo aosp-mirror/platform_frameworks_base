@@ -344,7 +344,7 @@
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"显示视图更新"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"绘图时闪烁显示窗口中的视图"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"显示硬件层更新"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Flash 硬件层在进行更新时会显示为绿色"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Flash 硬件层在更新时会显示为绿色"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"调试 GPU 过度绘制"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"停用 HW 叠加层"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"始终使用 GPU 进行屏幕合成"</string>
@@ -544,7 +544,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"受限个人资料"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"要添加新用户吗？"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"创建新用户后，您就能够与其他人共用此设备。每位用户都有自己的专属空间，而且在自己的个人空间内还可以自行安装自己想要的应用、设置壁纸等。此外，用户还可以调整会影响所有用户的设备设置（例如 WLAN 设置）。\n\n当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。无障碍功能设置和服务可能无法转移给新用户。"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"您添加新用户后，该用户必须设置自己的空间。\n\n任何用户均可为其他所有用户更新应用。"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"要现在设置该用户吗？"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"请让相应用户操作设备并设置他们自己的空间。"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"要立即设置个人资料吗？"</string>
@@ -605,4 +605,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"以太网已断开连接。"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"以太网。"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"不启用通话。"</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"扫描二维码"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"将取景框对准二维码，即可开始收听"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"二维码的格式无效"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"要停止广播“<xliff:g id="APP_NAME">%1$s</xliff:g>”的内容吗？"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"如果广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容或更改输出来源，当前的广播就会停止"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"广播“<xliff:g id="SWITCHAPP">%1$s</xliff:g>”的内容"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"更改输出来源"</string>
 </resources>

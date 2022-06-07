@@ -84,7 +84,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"錄製螢幕畫面時，Android 系統可擷取螢幕上顯示或裝置播放的任何機密資訊，包括密碼、付款資訊、相片、訊息和音訊。"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"錄音"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"裝置音訊"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"裝置播放的音效，例如音樂、通話和鈴聲"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"裝置所播放的音效，例如音樂、通話和鈴聲等等"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"麥克風"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"裝置音訊和麥克風"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"開始"</string>
@@ -414,7 +414,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"應用程式已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主畫面按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"這會讓目前的螢幕畫面保持顯示，直到取消固定為止。向上滑動並按住即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"這會讓應用程式一直顯示在螢幕畫面上，直到你取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主畫面按鈕即可取消固定。"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"該應用程式或許可存取個人資料 (例如聯絡人和電子郵件內容)。"</string>

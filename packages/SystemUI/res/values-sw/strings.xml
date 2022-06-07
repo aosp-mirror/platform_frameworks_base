@@ -38,8 +38,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Hakuna programu zilizosakinishwa zinazofanya kazi na kifaa hiki cha USB. Pata maelezo zaidi kuhusu kifaa hiki kwenye <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Kifaa cha Usb"</string>
     <string name="label_view" msgid="6815442985276363364">"Ona"</string>
-    <string name="always_use_device" msgid="210535878779644679">"Fungua <xliff:g id="APPLICATION">%1$s</xliff:g> kila wakati <xliff:g id="USB_DEVICE">%2$s</xliff:g> inaunganishwa"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"Fungua <xliff:g id="APPLICATION">%1$s</xliff:g> kila wakati <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> inaunganishwa"</string>
+    <string name="always_use_device" msgid="210535878779644679">"Fungua <xliff:g id="APPLICATION">%1$s</xliff:g> kila wakati <xliff:g id="USB_DEVICE">%2$s</xliff:g> imeunganishwa"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"Fungua <xliff:g id="APPLICATION">%1$s</xliff:g> kila wakati <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> imeunganishwa"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Ruhusu utatuaji wa USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Kitambulisho dijitali cha kifunguo cha RSA cha kompyuta ni:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Ruhusu kutoka kwenye kompyuta hii kila wakati"</string>
@@ -338,7 +338,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Anza upya"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Ndiyo, endelea"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Ungependa kuongeza mtumiaji?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Mtumiaji mpya utakayemwongeza atahitaji kujitayarishia nafasi yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Umefikia kima cha juu cha watumiaji"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">Unaruhusiwa kuongeza hadi watumiaji <xliff:g id="COUNT">%d</xliff:g>.</item>
