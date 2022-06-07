@@ -2269,7 +2269,7 @@ public class StatsPullAtomService extends SystemService {
                     managedProcess.processName, managedProcess.pid, managedProcess.oomScore,
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
                     snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
-                    gpuMemPerPid.get(managedProcess.pid)));
+                    gpuMemPerPid.get(managedProcess.pid), managedProcess.hasForegroundServices));
         }
         // Complement the data with native system processes. Given these measurements can be taken
         // in response to LMKs happening, we want to first collect the managed app stats (to
@@ -2288,7 +2288,7 @@ public class StatsPullAtomService extends SystemService {
                     -1001 /*Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.*/,
                     snapshot.rssInKilobytes, snapshot.anonRssInKilobytes, snapshot.swapInKilobytes,
                     snapshot.anonRssInKilobytes + snapshot.swapInKilobytes,
-                    gpuMemPerPid.get(pid)));
+                    gpuMemPerPid.get(pid), false /* has_foreground_services */));
         }
         return StatsManager.PULL_SUCCESS;
     }
