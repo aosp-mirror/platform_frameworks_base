@@ -42,12 +42,14 @@ import static org.mockito.Mockito.when;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
@@ -443,5 +445,21 @@ public class DozeMachineTest extends SysuiTestCase {
         mMachine.wakeUp();
 
         assertTrue(mServiceFake.requestedWakeup);
+    }
+
+    @Test
+    public void testDozePulsing_displayRequiresBlanking_screenState() {
+        DozeParameters dozeParameters = mock(DozeParameters.class);
+        when(dozeParameters.getDisplayNeedsBlanking()).thenReturn(true);
+
+        assertEquals(Display.STATE_OFF, DOZE_REQUEST_PULSE.screenState(dozeParameters));
+    }
+
+    @Test
+    public void testDozePulsing_displayDoesNotRequireBlanking_screenState() {
+        DozeParameters dozeParameters = mock(DozeParameters.class);
+        when(dozeParameters.getDisplayNeedsBlanking()).thenReturn(false);
+
+        assertEquals(Display.STATE_ON, DOZE_REQUEST_PULSE.screenState(dozeParameters));
     }
 }

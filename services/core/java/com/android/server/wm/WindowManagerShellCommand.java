@@ -513,9 +513,14 @@ public class WindowManagerShellCommand extends ShellCommand {
         try (ZipOutputStream out = new ZipOutputStream(getRawOutputStream())) {
             ArrayList<Pair<String, ByteTransferPipe>> requestList = new ArrayList<>();
             synchronized (mInternal.mGlobalLock) {
+                final RecentTasks recentTasks = mInternal.mAtmService.getRecentTasks();
+                final int recentsComponentUid = recentTasks != null
+                        ? recentTasks.getRecentsComponentUid()
+                        : -1;
                 // Request dump from all windows parallelly before writing to disk.
                 mInternal.mRoot.forAllWindows(w -> {
-                    if (w.isVisible()) {
+                    final boolean isRecents = (w.mSession.mUid == recentsComponentUid);
+                    if (w.isVisible() || isRecents) {
                         ByteTransferPipe pipe = null;
                         try {
                             pipe = new ByteTransferPipe();

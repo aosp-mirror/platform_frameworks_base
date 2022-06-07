@@ -229,7 +229,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"กำลังรีสตาร์ท…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"รีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"กำลังรีสตาร์ท…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"กำลังปิด..."</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"กำลังปิดเครื่อง..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"แท็บเล็ตของคุณจะปิดการทำงาน"</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"อุปกรณ์ Android TV จะปิดเครื่อง"</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"นาฬิกาจะปิดการทำงาน"</string>

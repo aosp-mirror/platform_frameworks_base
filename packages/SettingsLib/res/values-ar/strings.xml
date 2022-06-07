@@ -530,7 +530,7 @@
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"هذا الهاتف"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"حدثت مشكلة أثناء الاتصال. يُرجى إيقاف الجهاز ثم إعادة تشغيله."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"جهاز سماعي سلكي"</string>
-    <string name="help_label" msgid="3528360748637781274">"المساعدة والملاحظات والآراء"</string>
+    <string name="help_label" msgid="3528360748637781274">"المساعدة والملاحظات"</string>
     <string name="storage_category" msgid="2287342585424631813">"مساحة التخزين"</string>
     <string name="shared_data_title" msgid="1017034836800864953">"البيانات المشتركة"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"عرض البيانات المشتركة وتعديلها"</string>

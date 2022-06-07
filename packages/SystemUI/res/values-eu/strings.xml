@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Biratu pantaila automatikoki"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> atzitzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> erabiltzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?\nAplikazioak ez du grabatzeko baimenik, baina baliteke USB bidezko gailu horren bidez audioa grabatzea."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> atzitzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> ireki nahi duzu <xliff:g id="USB_DEVICE">%2$s</xliff:g> kudeatzeko?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Aplikazioak ez du grabatzeko baimenik, baina baliteke USB bidezko gailu honen bidez audioa grabatzea. <xliff:g id="APPLICATION">%1$s</xliff:g> gailu honekin erabiliz gero, baliteke deiak, jakinarazpenak eta alarmak ez entzutea."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"<xliff:g id="APPLICATION">%1$s</xliff:g> gailu honekin erabiliz gero, baliteke deiak, jakinarazpenak eta alarmak ez entzutea."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> atzitzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="APPLICATION">%1$s</xliff:g> ireki nahi duzu <xliff:g id="USB_DEVICE">%2$s</xliff:g> kudeatzeko?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> ireki nahi duzu <xliff:g id="USB_DEVICE">%2$s</xliff:g> erabiltzeko?\nAplikazioak ez du grabatzeko baimenik, baina baliteke audioa grabatzea USB bidezko gailu horren bidez."</string>
@@ -81,7 +85,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pantaila-grabaketa prozesatzen"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pantailaren grabaketa-saioaren jakinarazpen jarraitua"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Grabatzen hasi nahi duzu?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Pantaila grabatzen duzun bitartean, Android sistemak detektatu egin dezake pantailan agertzen den edo gailuak erreproduzitzen duen kontuzko informazioa; besteak beste, pasahitzak, ordainketa-informazioa, argazkiak, mezuak eta audioa."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Pantaila grabatzen duzun bitartean, baliteke Android sistemak pantailan agertzen den edo gailuak erreproduzitzen duen kontuzko informazioa detektatzea; besteak beste, pasahitzak, ordainketa-informazioa, argazkiak, mezuak eta audioa."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabatu audioa"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Gailuaren audioa"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Gailuko soinuak; adibidez, musika, deiak eta tonuak"</string>
@@ -203,7 +207,7 @@
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Aktibatuta dago datu-aurrezlea."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Bistaratu distira"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="2286843518689837719">"Datu-konexioa pausatu egin da"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Datuen erabilera pausatu da"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="9131615296036724838">"Datu-erabilera pausatu da"</string>
     <string name="data_usage_disabled_dialog" msgid="7933201635215099780">"Iritsi zara ezarri zenuen datu-mugara. Datu-konexioa erabiltzeari utzi diozu.\n\nDatu-konexioa erabiltzeari berrekiten badiozu, baliteke zerbait ordaindu behar izatea datuak erabiltzeagatik."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="2796648546086408937">"Jarraitu erabiltzen"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Aplikazioen kokapen-eskaerak aktibo daude"</string>
@@ -267,7 +271,7 @@
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Linterna"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera abian da"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Datu-konexioa"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Datuen erabilera"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Datu-erabilera"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="1136599216568805644">"Geratzen diren datuak"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="4561921367680636235">"Mugaren gainetik"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="6798849610647988987">"<xliff:g id="DATA_USED">%s</xliff:g> erabilita"</string>
@@ -696,14 +700,14 @@
     <string name="mobile_data" msgid="4564407557775397216">"Datu-konexioa"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g> (<xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>)"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi konexioa desaktibatuta dago"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wifi-konexioa desaktibatuta dago"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth bidezko konexioa desaktibatuta dago"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Ez molestatzeko modua desaktibatuta dago"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Ez molestatzeko modua aktibatu du arau automatiko batek (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Ez molestatzeko modua aktibatu du aplikazio batek (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Ez molestatzeko modua aktibatu du arau automatiko edo aplikazio batek."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikazioak abian dira atzeko planoan"</string>
-    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
+    <string name="running_foreground_services_msg" msgid="3009459259222695385">"Sakatu bateria eta datu-erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Datu-konexioa desaktibatu nahi duzu?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"<xliff:g id="CARRIER">%s</xliff:g> erabilita ezingo dituzu erabili datuak edo Internet. Wifi-sare baten bidez soilik konektatu ahal izango zara Internetera."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"Zure operadorea"</string>
@@ -766,7 +770,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"kendu gogokoetatik"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Eraman <xliff:g id="NUMBER">%d</xliff:g>garren postura"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Aukeratu atzitu nahi dituzunak Ezarpen bizkorrak menutik"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Aukeratu Ezarpen bizkorrak menutik atzitu nahi dituzunak"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolatzeko aukerak antolatzeko, eduki itzazu sakatuta, eta arrastatu"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Kendu dira kontrolatzeko aukera guztiak"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ez dira gorde aldaketak"</string>

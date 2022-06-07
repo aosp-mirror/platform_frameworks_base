@@ -508,7 +508,7 @@
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Να επιτρέπεται ο ορισμός ξυπνητ. και υπενθυμίσεων"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Ξυπνητήρια και υπενθυμίσεις"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Επιτρέψτε σε αυτήν την εφαρμογή να ορίζει ξυπνητήρια και να προγραμματίζει ενέργειες που εξαρτώνται από τον χρόνο. Αυτό επιτρέπει στην εφαρμογή να εκτελείται στο παρασκήνιο και, ως εκ τούτου, μπορεί να καταναλώνει περισσότερη μπαταρία.\n\nΑν αυτή η άδεια δεν είναι ενεργή, τα υπάρχοντα ξυπνητήρια και συμβάντα βάσει χρόνου που έχουν προγραμματιστεί από αυτήν την εφαρμογή δεν θα λειτουργούν."</string>
-    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"χρονοδιάγραμμα, ξυπνητήρι, υπενθύμιση, ρολόι"</string>
+    <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"πρόγραμμα, ξυπνητήρι, υπενθύμιση, ρολόι"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ενεργοποίηση"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Ενεργοποίηση λειτουργίας \"Μην ενοχλείτε\""</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Ποτέ"</string>

@@ -345,7 +345,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Регистрировать жесты на сканере отпечатков пальцев"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Использовать сканер отпечатков пальцев для дополнительных жестов."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Создавать скриншоты"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Создавать скриншоты экрана."</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Создавать снимки экрана."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Отключение/изменение строки состояния"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Приложение сможет отключать строку состояния, а также добавлять и удалять системные значки."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Замена строки состояния"</string>

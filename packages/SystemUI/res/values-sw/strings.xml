@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Skrini ijizungushe kiotomatiki"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nProgramu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Ungependa kufungua <xliff:g id="APPLICATION">%1$s</xliff:g> ishughulikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Programu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB. Ukitumia <xliff:g id="APPLICATION">%1$s</xliff:g> kwenye kifaa hiki kunaweza kuzuia kusikia simu, arifa na kengele."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Ukitumia <xliff:g id="APPLICATION">%1$s</xliff:g> kwenye kifaa hiki kunaweza kuzuia kusikia simu, arifa na kengele."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Ungependa kuruhusu <xliff:g id="APPLICATION">%1$s</xliff:g> ifikie <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Ungependa kufungua <xliff:g id="APPLICATION">%1$s</xliff:g> ili itumie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Ungependa kufungua <xliff:g id="APPLICATION">%1$s</xliff:g> ishughulikie <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nProgramu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB."</string>
@@ -38,8 +42,8 @@
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Hakuna programu zilizosakinishwa zinazofanya kazi na kifaa hiki cha USB. Pata maelezo zaidi kuhusu kifaa hiki kwenye <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"Kifaa cha Usb"</string>
     <string name="label_view" msgid="6815442985276363364">"Ona"</string>
-    <string name="always_use_device" msgid="210535878779644679">"Fungua <xliff:g id="APPLICATION">%1$s</xliff:g> kila wakati <xliff:g id="USB_DEVICE">%2$s</xliff:g> inaunganishwa"</string>
-    <string name="always_use_accessory" msgid="1977225429341838444">"Fungua <xliff:g id="APPLICATION">%1$s</xliff:g> kila wakati <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> inaunganishwa"</string>
+    <string name="always_use_device" msgid="210535878779644679">"Fungua <xliff:g id="APPLICATION">%1$s</xliff:g> kila wakati <xliff:g id="USB_DEVICE">%2$s</xliff:g> imeunganishwa"</string>
+    <string name="always_use_accessory" msgid="1977225429341838444">"Fungua <xliff:g id="APPLICATION">%1$s</xliff:g> kila wakati <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> imeunganishwa"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Ruhusu utatuaji wa USB?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"Kitambulisho dijitali cha kifunguo cha RSA cha kompyuta ni:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Ruhusu kutoka kwenye kompyuta hii kila wakati"</string>

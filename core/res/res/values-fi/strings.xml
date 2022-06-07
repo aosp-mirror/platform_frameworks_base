@@ -1626,7 +1626,7 @@
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Vain kerran"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ei tue työprofiilia"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tabletti"</string>
-    <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televisio"</string>
+    <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Puhelin"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Telineen kaiuttimet"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
@@ -2009,7 +2009,7 @@
     <string name="demo_restarting_message" msgid="1160053183701746766">"Palautetaan asetuksia…"</string>
     <string name="suspended_widget_accessibility" msgid="6331451091851326101">"<xliff:g id="LABEL">%1$s</xliff:g> ei ole käytössä."</string>
     <string name="conference_call" msgid="5731633152336490471">"Puhelinneuvottelu"</string>
-    <string name="tooltip_popup_title" msgid="7863719020269945722">"Työkaluvinkki"</string>
+    <string name="tooltip_popup_title" msgid="7863719020269945722">"Vihjeteksti"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Pelit"</string>
     <string name="app_category_audio" msgid="8296029904794676222">"Musiikki ja ääni"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Elokuvat ja videot"</string>

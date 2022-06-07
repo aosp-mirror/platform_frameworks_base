@@ -31,10 +31,14 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Näytön automaattinen kääntö"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> käyttöoikeuden (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> tämän pääsyoikeuden: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nSovellus ei ole saanut tallennuslupaa, mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> pääsyn (<xliff:g id="USB_DEVICE">%2$s</xliff:g>)?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Sovellus ei ole saanut tallennuslupaa mutta voi tallentaa audiota tämän USB-laitteen avulla. Jos <xliff:g id="APPLICATION">%1$s</xliff:g> on käytössä laitteella, puheluita, ilmoituksia ja herätyksiä ei välttämättä kuulu."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Jos <xliff:g id="APPLICATION">%1$s</xliff:g> on käytössä laitteella, puheluita, ilmoituksia ja herätyksiä ei välttämättä kuulu."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Saako <xliff:g id="APPLICATION">%1$s</xliff:g> käyttöoikeuden (<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>)?"</string>
-    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_DEVICE">%2$s</xliff:g> voidaan ottaa käyttöön?\nSovellus ei ole saanut tallennuslupaa, mutta voi tallentaa ääntä tämän USB-laitteen avulla."</string>
-    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Avataanko <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"Avaa <xliff:g id="APPLICATION">%1$s</xliff:g>, jotta <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> voidaan ottaa käyttöön?"</string>
     <string name="usb_accessory_uri_prompt" msgid="6756649383432542382">"Asennetut sov. eivät toimi tämän USB-laitteen kanssa. Lisätietoja laitteesta: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="1236358027511638648">"USB-lisälaite"</string>
     <string name="label_view" msgid="6815442985276363364">"Näytä"</string>
@@ -693,7 +697,7 @@
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Sovellus avattiin ilman asennusta. Katso lisätietoja napauttamalla."</string>
     <string name="app_info" msgid="5153758994129963243">"Sovelluksen tiedot"</string>
     <string name="go_to_web" msgid="636673528981366511">"Siirry selaimeen"</string>
-    <string name="mobile_data" msgid="4564407557775397216">"Mobiilitiedonsiirto"</string>
+    <string name="mobile_data" msgid="4564407557775397216">"Mobiilidata"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi on pois päältä"</string>

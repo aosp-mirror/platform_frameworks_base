@@ -324,7 +324,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"telefon chaqiruvlari jurnalini o‘qish va unga yozish"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"telefon qo‘ng‘iroqlarini amalga oshirish va boshqarish"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tana sezgichlari"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tana sensorlari"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"organizm holati haqidagi sezgich ma’lumotlariga kirish"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Oynadagi kontentni o‘qiydi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Ilovaga planshetingizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Ilovaga Android TV qurilmangizdagi chaqiruvlar jurnali, kirish va chiqish chaqiruvlari haqidagi axborotni oʻzgartirish huquqini beradi. Zararli ilovalar undan chaqiruvlar jurnalini oʻzgartirish yoki oʻchirish uchun foydalanishi mumkin."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Ilovaga telefoningizdagi qo‘ng‘iroq jurnallari, kiruvchi va chiquvchi qo‘ng‘rioqlar haqidagi ma’lumotlarni o‘zgartirishga ruxsat beradi. Zararli ilovalar bundan qo‘ng‘iroqlar jurnalini o‘zgartirish yoki o‘chirish uchun foydalanishi mumkin."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"tana sezgichlari (m-n, yurak urishi sensori) ma’lumotlaridan foydalanishga ruxsat"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"Tana sensorlari (m-n, yurak urishi sensori) axborotlaridan foydalanishga ruxsat"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Ilovaga sezgichlardan olingan jismoniy holatingiz haqidagi ma’lumotlarni, masalan, yurak urishini kuzatish uchun ruxsat beradi."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Taqvim tadbirlari va tafsilotlarini o‘qish"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu ilova planshetdagi barcha taqvim tadbirlarini o‘qiy olishi hamda taqvim ma’lumotlarini ulashishi yoki saqlashi mumkin."</string>
@@ -533,13 +533,13 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Ilovaga planshetdagi Bluetooth‘ning sozlamasini ko‘rishga va bog‘langan qurilmalarga ulanish va ulardan ulanish so‘rovlarini qabul qulishga imkon beradi."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="8851534496561034998">"Ilovaga Android TV qurilmangizdagi Bluetooth sozlamasini koʻrishga va bogʻlangan qurilmalarga ulanish va ulardan ulanish talablarni qabul qilishga imkon beradi."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Ilovaga telefondagi Bluetooth‘ning sozlamasini ko‘rishga va bog‘langan qurilmalarga ulanish va ulardan ulanish so‘rovlarini qabul qulishga imkon beradi."</string>
-    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Bluetooth qurilmalarini topish va juftlashish"</string>
+    <string name="permlab_bluetooth_scan" msgid="5402587142833124594">"Bluetooth qurilmalarni topish va juftlash"</string>
     <string name="permdesc_bluetooth_scan" product="default" msgid="6540723536925289276">"Ilovaga yaqin-atrofdagi Bluetooth qurilmalarini topish va juftlashish uchun ruxsat beradi"</string>
-    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"juftlangan Bluetooth qurilmalariga ulanish"</string>
+    <string name="permlab_bluetooth_connect" msgid="6657463246355003528">"Juftlangan Bluetooth qurilmalarga ulanish"</string>
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"Ilovaga juftlangan Bluetooth qurilmalariga ulanish uchun ruxsat beradi"</string>
-    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"atrofdagi Bluetooth qurilmalariga reklama berish"</string>
+    <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"Atrofdagi Bluetooth qurilmalarga reklama yuborish"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"Ilovaga yaqin-atrofdagi Bluetooth qurilmalariga reklama yuborish imkonini beradi"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"yaqin atrofdagi ultra keng polosali qurilmalarining nisbiy joylashishini aniqlash"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"Atrofdagi ultra-keng aloqa kanalli qurilmalarning nisbiy joylashuvini aniqlash"</string>
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Ilovaga yaqin atrofdagi ultra keng polosali qurilmalarining nisbiy joylashishini aniqlashga ruxsat beradi"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Asosiy NFC toʻlov xizmati haqidagi axborot"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Bu ilovaga asosiy NFC toʻlov xizmati haqidagi axborotni olish imkonini beradi (masalan, qayd qilingan AID identifikatorlari va marshrutning yakuniy manzili)."</string>
@@ -891,7 +891,7 @@
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Qulfni ochish uchun \"Menyu\"ga bosing."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Qulfni ochish uchun grafik kalitni chizing"</string>
     <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Favqulodda chaqiruv"</string>
-    <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Qo‘ng‘iroqni qaytarish"</string>
+    <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Chaqiruvga qaytish"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"To‘g‘ri!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Qaytadan urining"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Qaytadan urining"</string>

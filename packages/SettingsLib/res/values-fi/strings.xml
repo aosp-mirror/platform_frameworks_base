@@ -167,7 +167,7 @@
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Asettaa puhutulle tekstille kielikohtaisen äänen"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Kuuntele esimerkki"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"Toista lyhyt esittely puhesynteesistä"</string>
-    <string name="tts_install_data_title" msgid="1829942496472751703">"Asenna äänitiedot"</string>
+    <string name="tts_install_data_title" msgid="1829942496472751703">"Asenna äänidata"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Asenna puhesynteesiin tarvittavat äänitiedot"</string>
     <string name="tts_engine_security_warning" msgid="3372432853837988146">"Tämä puhesynteesimoottori saattaa kerätä kaiken puhutun tekstin, mukaan lukien henkilökohtaiset tiedot kuten salasanat ja luottokorttinumerot. Se on lähtöisin moottorista <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Haluatko ottaa tämän puhesynteesimoottorin käyttöön?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"Tämä kieli vaatii verkkoyhteyden, jotta tekstistä puheeksi muuntaminen toimii."</string>
@@ -179,7 +179,7 @@
     <string name="tts_status_checking" msgid="8026559918948285013">"Tarkistetaan…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"Asetukset: <xliff:g id="TTS_ENGINE_NAME">%s</xliff:g>"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Käynnistä moottorin asetukset"</string>
-    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Ensisijainen kone"</string>
+    <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Ensisijainen moottori"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Yleiset"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Palauta äänenkorkeus"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Palauta tekstin lukemisen oletusäänenkorkeus"</string>
@@ -190,8 +190,8 @@
     <item msgid="1158955023692670059">"Nopea"</item>
     <item msgid="5664310435707146591">"Nopeampi"</item>
     <item msgid="5491266922147715962">"Hyvin nopea"</item>
-    <item msgid="7659240015901486196">"Nopea"</item>
-    <item msgid="7147051179282410945">"Erittäin nopea"</item>
+    <item msgid="7659240015901486196">"Vauhdikas"</item>
+    <item msgid="7147051179282410945">"Erittäin vauhdikas"</item>
     <item msgid="581904787661470707">"Nopein"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Valitse profiili"</string>

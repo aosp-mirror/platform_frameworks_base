@@ -1391,7 +1391,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Punjenje povezanog uređaja putem USB-a"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Uključen je način rada Prijenos fajlova putem USB-a"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Uključen je način rada PTP putem USB-a"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Uključen je način rada Povezivanje mobitela putem USB-a"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Dijeljenje internetske veze putem USB-a je uključeno"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Uključen je način rada MIDI putem USB-a"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Povezan je USB periferni uređaj"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Dodirnite za više opcija."</string>

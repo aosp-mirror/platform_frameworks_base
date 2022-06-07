@@ -3065,11 +3065,11 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Simulate app re-start input or turning screen off/on then unlocked by un-secure
         // keyguard to back to the app, expect IME insets is not frozen
+        mDisplayContent.updateImeInputAndControlTarget(app);
+        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
         imeSource.setFrame(new Rect(100, 400, 500, 500));
         app.getInsetsState().addSource(imeSource);
         app.getInsetsState().setSourceVisible(ITYPE_IME, true);
-        mDisplayContent.updateImeInputAndControlTarget(app);
-        assertFalse(app.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);
