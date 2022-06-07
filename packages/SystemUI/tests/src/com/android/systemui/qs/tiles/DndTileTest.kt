@@ -38,9 +38,11 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import java.io.File
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -49,9 +51,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import java.io.File
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -173,7 +174,7 @@ class DndTileTest : SysuiTestCase() {
         tile.handleClick(view)
         testableLooper.processAllMessages()
 
-        verify(dialogLaunchAnimator).showFromView(any(), eq(view), anyBoolean())
+        verify(dialogLaunchAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
     }
 
     @Test
@@ -187,6 +188,6 @@ class DndTileTest : SysuiTestCase() {
         tile.handleClick(view)
         testableLooper.processAllMessages()
 
-        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), anyBoolean())
+        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), nullable(), anyBoolean())
     }
 }

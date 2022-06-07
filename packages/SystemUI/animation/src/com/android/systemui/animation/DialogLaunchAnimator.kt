@@ -34,6 +34,9 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import android.widget.FrameLayout
+import com.android.internal.jank.InteractionJankMonitor
+import com.android.internal.jank.InteractionJankMonitor.Configuration
+import com.android.internal.jank.InteractionJankMonitor.CujType
 import kotlin.math.roundToInt
 
 private const val TAG = "DialogLaunchAnimator"
@@ -50,6 +53,7 @@ private const val TAG = "DialogLaunchAnimator"
  */
 class DialogLaunchAnimator @JvmOverloads constructor(
     private val dreamManager: IDreamManager,
+    private val interactionJankMonitor: InteractionJankMonitor,
     private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
     private val isForTesting: Boolean = false
 ) {
@@ -89,12 +93,14 @@ class DialogLaunchAnimator @JvmOverloads constructor(
     fun showFromView(
         dialog: Dialog,
         view: View,
-        animateBackgroundBoundsChange: Boolean = false
+        cuj: DialogCuj? = null,
+        animateBackgroundBoundsChange: Boolean = false,
     ) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw IllegalStateException(
                 "showFromView must be called from the main thread and dialog must be created in " +
-                    "the main thread")
+                    "the main thread"
+            )
         }
 
         // If the view we are launching from belongs to another dialog, then this means the caller
@@ -113,14 +119,16 @@ class DialogLaunchAnimator @JvmOverloads constructor(
         animateFrom.setTag(TAG_LAUNCH_ANIMATION_RUNNING, true)
 
         val animatedDialog = AnimatedDialog(
-                launchAnimator,
-                dreamManager,
-                animateFrom,
-                onDialogDismissed = { openedDialogs.remove(it) },
-                dialog = dialog,
-                animateBackgroundBoundsChange,
-                animatedParent,
-                isForTesting
+            launchAnimator,
+            dreamManager,
+            interactionJankMonitor,
+            animateFrom,
+            onDialogDismissed = { openedDialogs.remove(it) },
+            dialog = dialog,
+            animateBackgroundBoundsChange,
+            animatedParent,
+            isForTesting,
+            cuj
         )
 
         openedDialogs.add(animatedDialog)
@@ -143,8 +151,9 @@ class DialogLaunchAnimator @JvmOverloads constructor(
             ?.dialogContentWithBackground
             ?: throw IllegalStateException(
                 "The animateFrom dialog was not animated using " +
-                    "DialogLaunchAnimator.showFrom(View|Dialog)")
-        showFromView(dialog, view, animateBackgroundBoundsChange)
+                    "DialogLaunchAnimator.showFrom(View|Dialog)"
+            )
+        showFromView(dialog, view, animateBackgroundBoundsChange = animateBackgroundBoundsChange)
     }
 
     /**
@@ -270,9 +279,17 @@ class DialogLaunchAnimator @JvmOverloads constructor(
     }
 }
 
+/**
+ * The CUJ interaction associated with opening the dialog.
+ *
+ * The optional tag indicates the specific dialog being opened.
+ */
+data class DialogCuj(@CujType val cujType: Int, val tag: String? = null)
+
 private class AnimatedDialog(
     private val launchAnimator: LaunchAnimator,
     private val dreamManager: IDreamManager,
+    private val interactionJankMonitor: InteractionJankMonitor,
 
     /** The view that triggered the dialog after being tapped. */
     var touchSurface: View,
@@ -295,14 +312,17 @@ private class AnimatedDialog(
     /**
      * Whether synchronization should be disabled, which can be useful if we are running in a test.
      */
-    private val forceDisableSynchronization: Boolean
+    private val forceDisableSynchronization: Boolean,
+
+    /** Interaction to which the dialog animation is associated. */
+    private val cuj: DialogCuj? = null
 ) {
     /**
      * The DecorView of this dialog window.
      *
      * Note that we access this DecorView lazily to avoid accessing it before the dialog is created,
      * which can sometimes cause crashes (e.g. with the Cast dialog).
-      */
+     */
     private val decorView by lazy { dialog.window!!.decorView as ViewGroup }
 
     /**
@@ -346,6 +366,14 @@ private class AnimatedDialog(
     private var decorViewLayoutListener: View.OnLayoutChangeListener? = null
 
     fun start() {
+        if (cuj != null) {
+            val config = Configuration.Builder.withView(cuj.cujType, touchSurface)
+            if (cuj.tag != null) {
+                config.setTag(cuj.tag)
+            }
+            interactionJankMonitor.begin(config)
+        }
+
         // Create the dialog so that its onCreate() method is called, which usually sets the dialog
         // content.
         dialog.create()
@@ -430,9 +458,10 @@ private class AnimatedDialog(
             // Make the window fullscreen and add a layout listener to ensure it stays fullscreen.
             window.setLayout(MATCH_PARENT, MATCH_PARENT)
             decorViewLayoutListener = View.OnLayoutChangeListener {
-                v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+                    v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
                 if (window.attributes.width != MATCH_PARENT ||
-                    window.attributes.height != MATCH_PARENT) {
+                    window.attributes.height != MATCH_PARENT
+                ) {
                     // The dialog size changed, copy its size to dialogContentWithBackground and
                     // make the dialog window full screen again.
                     val layoutParams = dialogContentWithBackground.layoutParams
@@ -606,6 +635,7 @@ private class AnimatedDialog(
                     dialogContentWithBackground!!
                         .addOnLayoutChangeListener(backgroundLayoutListener)
                 }
+                cuj?.run { interactionJankMonitor.end(cujType) }
             }
         )
     }
