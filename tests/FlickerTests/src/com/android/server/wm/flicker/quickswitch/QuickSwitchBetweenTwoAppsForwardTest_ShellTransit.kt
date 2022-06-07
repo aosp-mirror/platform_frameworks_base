@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.quickswitch
 
 import android.platform.test.annotations.RequiresDevice
-import androidx.test.filters.FlakyTest
+import android.platform.test.annotations.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group1

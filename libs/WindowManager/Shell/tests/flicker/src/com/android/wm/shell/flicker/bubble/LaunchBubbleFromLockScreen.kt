@@ -19,7 +19,7 @@ package com.android.wm.shell.flicker.bubble
 import android.platform.test.annotations.Presubmit
 import android.view.WindowInsets
 import android.view.WindowManager
-import androidx.test.filters.FlakyTest
+import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
