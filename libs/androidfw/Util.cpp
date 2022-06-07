@@ -151,8 +151,9 @@ std::string ModifiedUtf8ToUtf8(const std::string& modified_utf8) {
         }
 
         // Encode the UTF-8 representation of the codepoint into the string
-        char* start = &output[output.size()];
-        output.resize(output.size() + utf8_length);
+        const size_t start_index = output.size();
+        output.resize(start_index + utf8_length);
+        char* start = &output[start_index];
         utf32_to_utf8((char32_t*)&codepoint, 1, start, utf8_length + 1);
 
         index = next_index;
