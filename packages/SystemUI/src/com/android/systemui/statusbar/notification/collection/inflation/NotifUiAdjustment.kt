@@ -31,7 +31,8 @@ class NotifUiAdjustment internal constructor(
     val smartActions: List<Notification.Action>,
     val smartReplies: List<CharSequence>,
     val isConversation: Boolean,
-    val isMinimized: Boolean
+    val isMinimized: Boolean,
+    val needsRedaction: Boolean,
 ) {
     companion object {
         @JvmStatic
@@ -42,6 +43,7 @@ class NotifUiAdjustment internal constructor(
             oldAdjustment === newAdjustment -> false
             oldAdjustment.isConversation != newAdjustment.isConversation -> true
             oldAdjustment.isMinimized != newAdjustment.isMinimized -> true
+            oldAdjustment.needsRedaction != newAdjustment.needsRedaction -> true
             areDifferent(oldAdjustment.smartActions, newAdjustment.smartActions) -> true
             newAdjustment.smartReplies != oldAdjustment.smartReplies -> true
             else -> false
