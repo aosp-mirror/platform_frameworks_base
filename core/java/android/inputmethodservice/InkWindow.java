@@ -99,7 +99,6 @@ final class InkWindow extends PhoneWindow {
         if (getDecorView() != null) {
             getDecorView().setVisibility(remove ? View.GONE : View.INVISIBLE);
         }
-        //TODO(b/210039666): remove window from WM after a delay. Delay amount TBD.
     }
 
     void setToken(@NonNull IBinder token) {
