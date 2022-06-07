@@ -75,22 +75,22 @@ public @interface StartInputReason {
     int CHECK_FOCUS = 5;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
-     * {@link com.android.internal.view.IInputMethodClient#onBindMethod}.
+     * {@link com.android.internal.inputmethod.IInputMethodClient#onBindMethod}.
      */
     int BOUND_TO_IMMS = 6;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
-     * {@link com.android.internal.view.IInputMethodClient#onUnbindMethod}.
+     * {@link com.android.internal.inputmethod.IInputMethodClient#onUnbindMethod}.
      */
     int UNBOUND_FROM_IMMS = 7;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
-     * {@link com.android.internal.view.IInputMethodClient#setActive}.
+     * {@link com.android.internal.inputmethod.IInputMethodClient#setActive}.
      */
     int ACTIVATED_BY_IMMS = 8;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
-     * {@link com.android.internal.view.IInputMethodClient#setActive}.
+     * {@link com.android.internal.inputmethod.IInputMethodClient#setActive}.
      */
     int DEACTIVATED_BY_IMMS = 9;
     /**
@@ -105,7 +105,8 @@ public @interface StartInputReason {
     int SESSION_CREATED_BY_ACCESSIBILITY = 11;
     /**
      * {@link android.view.inputmethod.InputMethodManager} is responding to
-     * {@link com.android.internal.view.IInputMethodClient#onBindAccessibilityService(InputBindResult, int)}.
+     * {@link com.android.internal.inputmethod.IInputMethodClient#onBindAccessibilityService(
+     * InputBindResult, int)}.
      */
     int BOUND_ACCESSIBILITY_SESSION_TO_IMMS = 12;
 }

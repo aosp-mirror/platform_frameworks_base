@@ -24,7 +24,7 @@ import java.lang.annotation.Retention;
 
 /**
  * Describes the reason why {@link com.android.server.inputmethod.InputMethodManagerService} is
- * calling {@link com.android.internal.view.IInputMethodClient#onUnbindMethod}.
+ * calling {@link com.android.internal.inputmethod.IInputMethodClient#onUnbindMethod}.
  */
 @Retention(SOURCE)
 @IntDef(value = {

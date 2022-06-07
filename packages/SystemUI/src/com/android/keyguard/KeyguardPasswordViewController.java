@@ -205,6 +205,7 @@ public class KeyguardPasswordViewController
         if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
             showInput();
         }
+        mMessageAreaController.setMessageIfEmpty(R.string.keyguard_enter_your_password);
     }
 
     private void showInput() {

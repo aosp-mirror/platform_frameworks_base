@@ -4407,8 +4407,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             boolean imeLayeringTargetMayUseIme =
                     LayoutParams.mayUseInputMethod(mImeLayeringTarget.mAttrs.flags)
                     || mImeLayeringTarget.mAttrs.type == TYPE_APPLICATION_STARTING;
-            if (imeLayeringTargetMayUseIme && mImeInputTarget != null
-                    && mImeLayeringTarget.mActivityRecord != mImeInputTarget.getActivityRecord()) {
+            if (imeLayeringTargetMayUseIme && (mImeInputTarget == null
+                    || mImeLayeringTarget.mActivityRecord != mImeInputTarget.getActivityRecord())) {
                 // Do not change parent if the window hasn't requested IME.
                 return null;
             }

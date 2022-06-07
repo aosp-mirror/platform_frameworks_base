@@ -289,7 +289,7 @@ public final class BackgroundDexOptService {
 
     /**
      * Cancels currently running any idle optimization tasks started from JobScheduler
-     * or runIdleOptimizationsNow call.
+     * or runIdleOptimization call.
      *
      * <p>This is only for shell command and only root or shell user can use this.
      */

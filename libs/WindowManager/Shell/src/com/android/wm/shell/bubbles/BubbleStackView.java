@@ -96,6 +96,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -1079,7 +1080,7 @@ public class BubbleStackView extends FrameLayout
             if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
                 float alpha = (float) valueAnimator.getAnimatedValue();
                 mExpandedBubble.getExpandedView().setContentAlpha(alpha);
-                mExpandedBubble.getExpandedView().setAlpha(alpha);
+                mExpandedBubble.getExpandedView().setBackgroundAlpha(alpha);
             }
         });
 
@@ -2215,7 +2216,7 @@ public class BubbleStackView extends FrameLayout
 
         if (mExpandedBubble.getExpandedView() != null) {
             mExpandedBubble.getExpandedView().setContentAlpha(0f);
-            mExpandedBubble.getExpandedView().setAlpha(0f);
+            mExpandedBubble.getExpandedView().setBackgroundAlpha(0f);
 
             // We'll be starting the alpha animation after a slight delay, so set this flag early
             // here.
@@ -2744,8 +2745,10 @@ public class BubbleStackView extends FrameLayout
 
     private void dismissBubbleIfExists(@Nullable BubbleViewProvider bubble) {
         if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
-            if (mIsExpanded && mBubbleData.getBubbles().size() > 1) {
-                // If we have more than 1 bubble we will perform the switch animation
+            if (mIsExpanded && mBubbleData.getBubbles().size() > 1
+                    && Objects.equals(bubble, mExpandedBubble)) {
+                // If we have more than 1 bubble and it's the current bubble being dismissed,
+                // we will perform the switch animation
                 mIsBubbleSwitchAnimating = true;
             }
             mBubbleData.dismissBubbleWithKey(bubble.getKey(), Bubbles.DISMISS_USER_GESTURE);

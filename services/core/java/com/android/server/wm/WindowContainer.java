@@ -2639,7 +2639,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void applyMagnificationSpec(Transaction t, MagnificationSpec spec) {
         if (shouldMagnify()) {
             t.setMatrix(mSurfaceControl, spec.scale, 0, 0, spec.scale)
-                    .setPosition(mSurfaceControl, spec.offsetX, spec.offsetY);
+                    .setPosition(mSurfaceControl, spec.offsetX + mLastSurfacePosition.x,
+                            spec.offsetY + mLastSurfacePosition.y);
             mLastMagnificationSpec = spec;
         } else {
             clearMagnificationSpec(t);
@@ -2652,7 +2653,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void clearMagnificationSpec(Transaction t) {
         if (mLastMagnificationSpec != null) {
             t.setMatrix(mSurfaceControl, 1, 0, 0, 1)
-                .setPosition(mSurfaceControl, 0, 0);
+                .setPosition(mSurfaceControl, mLastSurfacePosition.x, mLastSurfacePosition.y);
         }
         mLastMagnificationSpec = null;
         for (int i = 0; i < mChildren.size(); i++) {

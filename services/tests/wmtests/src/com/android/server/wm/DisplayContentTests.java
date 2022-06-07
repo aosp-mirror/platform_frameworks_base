@@ -643,6 +643,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = mDisplayContent;
         final WindowState ws = createWindow(null, TYPE_APPLICATION, dc, "app window");
         dc.setImeLayeringTarget(ws);
+        dc.setImeInputTarget(ws);
 
         // Adjust bounds so that matchesRootDisplayAreaBounds() returns false.
         final Rect bounds = new Rect(dc.getBounds());
@@ -1154,6 +1155,7 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.setImeLayeringTarget(createWindow(null, TYPE_STATUS_BAR, "app"));
         dc.getImeTarget(IME_TARGET_LAYERING).getWindow().setWindowingMode(
                 WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+        dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
         assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
     }
 
@@ -1172,6 +1174,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testComputeImeParent_noApp() throws Exception {
         final DisplayContent dc = createNewDisplay();
         dc.setImeLayeringTarget(createWindow(null, TYPE_STATUS_BAR, "statusBar"));
+        dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
         assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
     }
 

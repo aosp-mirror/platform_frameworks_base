@@ -185,7 +185,8 @@ public @interface SoftInputShowHideReason {
     int HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR = 20;
 
     /**
-     * Hide soft input when a {@link com.android.internal.view.IInputMethodClient} is removed.
+     * Hide soft input when a {@link com.android.internal.inputmethod.IInputMethodClient} is
+     * removed.
      */
     int HIDE_REMOVE_CLIENT = 21;
 

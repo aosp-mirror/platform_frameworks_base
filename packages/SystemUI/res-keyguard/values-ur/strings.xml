@@ -68,15 +68,11 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"آپ نے اپنا پاس ورڈ <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ٹائپ کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%1$d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"‏غلط SIM PIN کوڈ، اب آپ کو اپنا آلہ غیر مقفل کرنے کیلئے اپنے کیریئر سے رابطہ کرنا ہوگا۔"</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
-      <item quantity="other">‏غلط SIM PIN کوڈ، آپ کے پاس <xliff:g id="NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔</item>
-      <item quantity="one">‏غلط SIM PIN کوڈ، آپ کے پاس <xliff:g id="NUMBER_0">%d</xliff:g> کوشش بچی ہے، اس کے بعد آپ کو اپنا آلہ غیر مقفل کرنے کیلئے اپنے کیریئر سے رابطہ کرنا ہوگا۔</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
+    <skip />
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"‏SIM ناقابل استعمال ہے۔ اپنے کیریئر سے رابطہ کریں۔"</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
-      <item quantity="other">‏غلط SIM PUK کوڈ، آپ کے پاس <xliff:g id="NUMBER_1">%d</xliff:g> کوششیں بچی ہیں، اس کے بعد SIM مستقل طور پر ناقابل استعمال ہو جائے گا۔</item>
-      <item quantity="one">‏غلط SIM PUK کوڈ، آپ کے پاس <xliff:g id="NUMBER_0">%d</xliff:g> کوشش بچی ہے، اس کے بعد SIM مستقل طور پر ناقابل استعمال ہو جائے گا۔</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
+    <skip />
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"‏SIM PIN کی کارروائی ناکام ہوگئی!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"‏SIM PUK کارروائی ناکام ہو گئی!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"اندراج کا طریقہ سوئچ کریں"</string>
@@ -90,15 +86,12 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"آلہ منتظم کی جانب سے مقفل ہے"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"آلہ کو دستی طور پر مقفل کیا گیا تھا"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"تسلیم شدہ نہیں ہے"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"فیس اَنلاک کا استعمال کرنے کے لیے، ترتیبات اور رازداری میں "<b>"کیمرے تک رسائی"</b>" کو آن کریں"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="other">‏SIM کا PIN درج کریں، آپ کے پاس <xliff:g id="NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔</item>
-      <item quantity="one">‏SIM کا PIN درج کریں، آپ کے پاس <xliff:g id="NUMBER_0">%d</xliff:g> کوشش بچی ہے، اس کے بعد آپ کو اپنا آلہ غیر مقفل کرنے کے لیے اپنے کیریئر سے رابطہ کرنا ہوگا۔</item>
-    </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="other">‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس <xliff:g id="_NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔</item>
-      <item quantity="one">‏SIM اب غیر فعال ہے۔ جاری رکھنے کیلئے PUK کوڈ درج کریں۔ SIM کے مستقل طور پر ناقابل استعمال ہونے سے پہلے آپ کے پاس <xliff:g id="_NUMBER_0">%d</xliff:g> کوشش بچی ہے۔ تفصیلات کیلئے کیریئر سے رابطہ کریں۔</item>
-    </plurals>
+    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
+    <skip />
+    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
+    <skip />
+    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
+    <skip />
     <string name="clock_title_default" msgid="6342735240617459864">"ڈیفالٹ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"بلبلہ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"اینالاگ"</string>
