@@ -206,6 +206,7 @@ void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsRepo
         frame.set(FrameInfoIndex::FrameDeadline) = deadline;
     }
 
+    bool computeNextFrameStartUnstuffed = false;
     // If we hit the deadline, cool!
     if (frame[FrameInfoIndex::GpuCompleted] < deadline) {
         if (isTripleBuffered) {
@@ -213,7 +214,8 @@ void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsRepo
             (*mGlobalData)->reportJankType(JankType::kHighInputLatency);
 
             // Buffer stuffing state gets carried over to next frame, unless there is a "pause"
-            mNextFrameStartUnstuffed += frameInterval;
+            // Instead of increase by frameInterval, recompute to catch up the drifting vsync
+            computeNextFrameStartUnstuffed = true;
         }
     } else {
         mData->reportJankType(JankType::kMissedDeadline);
@@ -222,14 +224,7 @@ void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsRepo
         (*mGlobalData)->reportJank();
 
         // Janked, store the adjust deadline to detect triple buffering in next frame correctly.
-        nsecs_t jitterNanos = frame[FrameInfoIndex::GpuCompleted]
-                - frame[FrameInfoIndex::Vsync];
-        nsecs_t lastFrameOffset = jitterNanos % frameInterval;
-
-        // Note the time when the next frame would start in an unstuffed situation. If it starts
-        // earlier, we are in a stuffed situation.
-        mNextFrameStartUnstuffed = frame[FrameInfoIndex::GpuCompleted]
-                - lastFrameOffset + frameInterval;
+        computeNextFrameStartUnstuffed = true;
 
         recomputeThresholds(frameInterval);
         for (auto& comparison : COMPARISONS) {
@@ -252,6 +247,16 @@ void JankTracker::finishFrame(FrameInfo& frame, std::unique_ptr<FrameMetricsRepo
             // Just so we have something that counts up, the value is largely irrelevant
             ATRACE_INT(ss.str().c_str(), ++sDaveyCount);
         }
+    }
+
+    if (computeNextFrameStartUnstuffed) {
+        nsecs_t jitterNanos = frame[FrameInfoIndex::GpuCompleted] - frame[FrameInfoIndex::Vsync];
+        nsecs_t lastFrameOffset = jitterNanos % frameInterval;
+
+        // Note the time when the next frame would start in an unstuffed situation. If it starts
+        // earlier, we are in a stuffed situation.
+        mNextFrameStartUnstuffed =
+                frame[FrameInfoIndex::GpuCompleted] - lastFrameOffset + frameInterval;
     }
 
     int64_t totalGPUDrawTime = frame.gpuDrawTime();
