@@ -1099,4 +1099,41 @@ public class EditorInfo implements InputType, Parcelable {
     public int describeContents() {
         return 0;
     }
+
+    /**
+     * Performs a loose equality check, which means there can be false negatives, but if the method
+     * returns {@code true}, then both objects are guaranteed to be equal.
+     * <ul>
+     *     <li>{@link #extras} is compared with {@link Bundle#kindofEquals}</li>
+     *     <li>{@link #actionLabel}, {@link #hintText}, and {@link #label} are compared with
+     *     {@link TextUtils#equals}, which does not account for Spans. </li>
+     * </ul>
+     * @hide
+     */
+    public boolean kindofEquals(@Nullable EditorInfo that) {
+        if (that == null) return false;
+        if (this == that) return true;
+        return inputType == that.inputType
+                && imeOptions == that.imeOptions
+                && internalImeOptions == that.internalImeOptions
+                && actionId == that.actionId
+                && initialSelStart == that.initialSelStart
+                && initialSelEnd == that.initialSelEnd
+                && initialCapsMode == that.initialCapsMode
+                && fieldId == that.fieldId
+                && Objects.equals(autofillId, that.autofillId)
+                && Objects.equals(privateImeOptions, that.privateImeOptions)
+                && Objects.equals(packageName, that.packageName)
+                && Objects.equals(fieldName, that.fieldName)
+                && Objects.equals(hintLocales, that.hintLocales)
+                && Objects.equals(targetInputMethodUser, that.targetInputMethodUser)
+                && Arrays.equals(contentMimeTypes, that.contentMimeTypes)
+                && TextUtils.equals(actionLabel, that.actionLabel)
+                && TextUtils.equals(hintText, that.hintText)
+                && TextUtils.equals(label, that.label)
+                && (extras == that.extras || (extras != null && extras.kindofEquals(that.extras)))
+                && (mInitialSurroundingText == that.mInitialSurroundingText
+                    || (mInitialSurroundingText != null
+                    && mInitialSurroundingText.isEqualTo(that.mInitialSurroundingText)));
+    }
 }
