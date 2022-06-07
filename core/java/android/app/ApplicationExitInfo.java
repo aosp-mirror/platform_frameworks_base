@@ -524,6 +524,13 @@ public final class ApplicationExitInfo implements Parcelable {
      */
     private boolean mLoggedInStatsd;
 
+    /**
+     * Whether or not this process hosts one or more foreground services.
+     *
+     * for system internal use only, will not retain across processes.
+     */
+    private boolean mHasForegroundServices;
+
     /** @hide */
     @IntDef(prefix = { "REASON_" }, value = {
         REASON_UNKNOWN,
@@ -996,6 +1003,24 @@ public final class ApplicationExitInfo implements Parcelable {
         mLoggedInStatsd = loggedInStatsd;
     }
 
+    /**
+     * @see #mHasForegroundServices
+     *
+     * @hide
+     */
+    public boolean hasForegroundServices() {
+        return mHasForegroundServices;
+    }
+
+    /**
+     * @see #mHasForegroundServices
+     *
+     * @hide
+     */
+    public void setHasForegroundServices(boolean hasForegroundServices) {
+        mHasForegroundServices = hasForegroundServices;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -1060,6 +1085,8 @@ public final class ApplicationExitInfo implements Parcelable {
         mTraceFile = other.mTraceFile;
         mAppTraceRetriever = other.mAppTraceRetriever;
         mNativeTombstoneRetriever = other.mNativeTombstoneRetriever;
+        mLoggedInStatsd = other.mLoggedInStatsd;
+        mHasForegroundServices = other.mHasForegroundServices;
     }
 
     private ApplicationExitInfo(@NonNull Parcel in) {
