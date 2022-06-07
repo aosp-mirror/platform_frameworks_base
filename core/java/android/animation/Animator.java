@@ -104,6 +104,7 @@ public abstract class Animator implements Cloneable {
     @TestApi
     public static void setAnimatorPausingEnabled(boolean enable) {
         AnimationHandler.setAnimatorPausingEnabled(enable);
+        AnimationHandler.setOverrideAnimatorPausingSystemProperty(!enable);
     }
 
     /**
