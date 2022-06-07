@@ -845,8 +845,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"不明應用程式"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"停止投放"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"可用作音訊輸出的裝置"</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"音量"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播運作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"廣播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"附近有兼容藍牙裝置的人可收聽您正在廣播的媒體內容"</string>
