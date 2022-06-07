@@ -608,10 +608,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         assertFalse(mStackScroller.isInsideQsHeader(event1));
 
         MotionEvent event2 = transformEventForView(createMotionEvent(150f, 150f), mStackScroller);
-        assertTrue(mStackScroller.isInsideQsHeader(event2));
+        assertFalse(mStackScroller.isInsideQsHeader(event2));
 
         MotionEvent event3 = transformEventForView(createMotionEvent(250f, 250f), mStackScroller);
-        assertTrue(mStackScroller.isInsideQsHeader(event2));
+        assertTrue(mStackScroller.isInsideQsHeader(event3));
     }
 
     @Test
