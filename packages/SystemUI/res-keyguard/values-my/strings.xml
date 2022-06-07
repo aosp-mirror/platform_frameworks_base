@@ -90,7 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"စက်ပစ္စည်းကို စီမံခန့်ခွဲသူက လော့ခ်ချထားပါသည်"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"စက်ပစ္စည်းကို ကိုယ်တိုင်ကိုယ်ကျ လော့ခ်ချထားခဲ့သည်"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"မသိ"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"မျက်နှာပြ လော့ခ်ဖွင့်ခြင်းကို သုံးရန် "<b>"ကင်မရာ သုံးခွင့်"</b>" ကို ‘ဆက်တင်များ &gt; ကန့်သတ်ဆက်တင်’ တွင်ဖွင့်ပါ"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ သုံးရန် ‘ဆက်တင်များ’ တွင်ကင်မရာသုံးခွင့်ကိုဖွင့်ပါ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">ဆင်းမ်ကတ် ပင်နံပါတ် ထည့်ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
       <item quantity="one">ဆင်းမ်ကတ် ပင်နံပါတ် ထည့်ပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ပေးရန်အတွက် ဝန်ဆောင်မှုပေးသူသို့ မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>

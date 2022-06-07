@@ -136,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Επιβεβαιώθηκε"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Πατήστε Επιβεβαίωση για ολοκλήρωση"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ξεκλ. με αναγν. προσώπου. Πατ. το εικον. ξεκλ. για συνέχεια."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Ξεκλείδωμα με πρόσωπο. Πατήστε το εικονίδιο ξεκλειδώματος."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Ξεκλείδωμα με αναγνώριση προσώπου. Πατήστε για συνέχεια."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Το πρόσωπο αναγνωρίστηκε. Πατήστε για συνέχεια."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Το πρόσωπο αναγνωρ. Πατήστε το εικον. ξεκλειδ. για συνέχεια."</string>
@@ -315,7 +315,7 @@
     <string name="tap_again" msgid="1315420114387908655">"Πατήστε ξανά"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Σύρετε προς τα επάνω για άνοιγμα"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Πατήστε το εικονίδιο ξεκλειδώματος για άνοιγμα"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ξεκλ. με αναγν. προσώπου. Πατ. το εικον. ξεκλ. για άνοιγμα."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Ξεκλείδωμα με πρόσωπο. Πατήστε το εικονίδιο ξεκλειδώματος."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Ξεκλείδωμα με αναγνώριση προσώπου. Πατήστε για άνοιγμα."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Το πρόσωπο αναγνωρίστηκε. Πατήστε για άνοιγμα."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Το πρόσωπο αναγνωρ. Πατήστ. το εικον. ξεκλειδ. για άνοιγμα."</string>
@@ -851,8 +851,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Άγνωστη εφαρμογή"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Διακοπή μετάδοσης"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Διαθέσιμες συσκευές για έξοδο ήχου."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Ένταση ήχου"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Πώς λειτουργεί η μετάδοση"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Μετάδοση"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Οι άνθρωποι με συμβατές συσκευές Bluetooth που βρίσκονται κοντά σας μπορούν να ακούσουν το μέσο που μεταδίδετε."</string>
@@ -938,7 +937,8 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Νέες πληροφορίες"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ενεργές εφαρμογές"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Ακόμη και αν δεν χρησιμοποιείτε αυτές τις εφαρμογές, εξακολουθούν να είναι ενεργές και ενδέχεται να επηρεάζουν τη διάρκεια ζωής της μπαταρίας"</string>
+    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
+    <skip />
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Διακοπή"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Διακόπηκε"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Τέλος"</string>
@@ -952,6 +952,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Το κείμενο αντιγράφηκε"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Η εικόνα αντιγράφηκε"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Το περιεχόμενο αντιγράφηκε"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Προσθήκη"</string>
     <string name="manage_users" msgid="1823875311934643849">"Διαχείριση χρηστών"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Αυτή η ειδοποίηση δεν υποστηρίζει τη μεταφορά με σύρσιμο για χρήση του διαχωρισμού οθόνης."</string>
