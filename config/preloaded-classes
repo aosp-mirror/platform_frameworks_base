@@ -220,7 +220,6 @@ android.app.ActivityThread$$ExternalSyntheticLambda1
 android.app.ActivityThread$$ExternalSyntheticLambda2
 android.app.ActivityThread$1$$ExternalSyntheticLambda0
 android.app.ActivityThread$1
-android.app.ActivityThread$2
 android.app.ActivityThread$3
 android.app.ActivityThread$ActivityClientRecord
 android.app.ActivityThread$AndroidOs
@@ -441,7 +440,6 @@ android.app.IBackupAgent$Stub
 android.app.IBackupAgent
 android.app.IForegroundServiceObserver$Stub
 android.app.IForegroundServiceObserver
-android.app.IGameManagerService$Stub$Proxy
 android.app.IGameManagerService$Stub
 android.app.IGameManagerService
 android.app.IInstantAppResolver$Stub$Proxy
@@ -7951,11 +7949,6 @@ android.view.IDisplayWindowInsetsController
 android.view.IDisplayWindowListener$Stub$Proxy
 android.view.IDisplayWindowListener$Stub
 android.view.IDisplayWindowListener
-android.view.IDisplayWindowRotationCallback$Stub
-android.view.IDisplayWindowRotationCallback
-android.view.IDisplayWindowRotationController$Stub$Proxy
-android.view.IDisplayWindowRotationController$Stub
-android.view.IDisplayWindowRotationController
 android.view.IDockedStackListener$Stub$Proxy
 android.view.IDockedStackListener$Stub
 android.view.IDockedStackListener
@@ -14786,6 +14779,7 @@ java.util.stream.DistinctOps$1$1
 java.util.stream.DistinctOps$1$2
 java.util.stream.DistinctOps$1
 java.util.stream.DistinctOps
+java.util.stream.DoublePipeline$$ExternalSyntheticLambda0
 java.util.stream.DoublePipeline$$ExternalSyntheticLambda4
 java.util.stream.DoublePipeline$$ExternalSyntheticLambda9
 java.util.stream.DoublePipeline$StatelessOp
