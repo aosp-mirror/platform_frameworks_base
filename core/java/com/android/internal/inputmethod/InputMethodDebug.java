@@ -93,8 +93,6 @@ public final class InputMethodDebug {
                 return "SWITCH_IME_FAILED";
             case UnbindReason.SWITCH_USER:
                 return "SWITCH_USER";
-            case UnbindReason.ACCESSIBILITY_SERVICE_DISABLED:
-                return "ACCESSIBILITY_SERVICE_DISABLED";
             default:
                 return "Unknown=" + reason;
         }
