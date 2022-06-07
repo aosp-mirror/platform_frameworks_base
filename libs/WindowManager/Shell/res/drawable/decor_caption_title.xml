@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2022 The Android Open Source Project
   ~
@@ -13,14 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<resources>
-    <declare-styleable name="LetterboxEduDialogActionLayout">
-        <attr name="icon" format="reference" />
-        <attr name="text" format="string" />
-    </declare-styleable>
-
-    <declare-styleable name="MessageState">
-        <attr name="state_task_focused" format="boolean"/>
-    </declare-styleable>
-</resources>
+<shape android:shape="rectangle"
+       android:tintMode="multiply"
+       android:tint="@color/decor_caption_title_color"
+       xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="?android:attr/colorPrimary" />
+</shape>

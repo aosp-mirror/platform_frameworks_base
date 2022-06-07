@@ -347,12 +347,12 @@ public abstract class WMShellBaseModule {
     // Workaround for dynamic overriding with a default implementation, see {@link DynamicOverride}
     @BindsOptionalOf
     @DynamicOverride
-    abstract FreeformTaskListener optionalFreeformTaskListener();
+    abstract FreeformTaskListener<?> optionalFreeformTaskListener();
 
     @WMSingleton
     @Provides
-    static Optional<FreeformTaskListener> provideFreeformTaskListener(
-            @DynamicOverride Optional<FreeformTaskListener> freeformTaskListener,
+    static Optional<FreeformTaskListener<?>> provideFreeformTaskListener(
+            @DynamicOverride Optional<FreeformTaskListener<?>> freeformTaskListener,
             Context context) {
         if (FreeformTaskListener.isFreeformEnabled(context)) {
             return freeformTaskListener;
@@ -642,7 +642,7 @@ public abstract class WMShellBaseModule {
             FullscreenTaskListener fullscreenTaskListener,
             Optional<FullscreenUnfoldController> appUnfoldTransitionController,
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
-            Optional<FreeformTaskListener> freeformTaskListener,
+            Optional<FreeformTaskListener<?>> freeformTaskListener,
             Optional<RecentTasksController> recentTasksOptional,
             Transitions transitions,
             StartingWindowController startingWindow,
