@@ -616,6 +616,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         // one above as finishing.
         final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+        task.effectiveUid = activity0.getUid();
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
         activity1.finishing = true;
         new ActivityBuilder(mService).setTask(task).build();
@@ -650,6 +651,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Set relinquishTaskIdentity for all activities in the task
         final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+        task.effectiveUid = activity0.getUid();
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
         activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
 
@@ -802,6 +804,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Make the current root activity relinquish task identity
         final ActivityRecord activity0 = task.getBottomMostActivity();
         activity0.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+        task.effectiveUid = activity0.getUid();
         // Add an extra activity on top - this will be the new root
         final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
         // Add one more on top
@@ -894,6 +897,47 @@ public class TaskRecordTests extends ActivityTestsBase {
         spyOn(task);
         task.updateEffectiveIntent();
         verify(task).setIntent(eq(activity0));
+    }
+
+    /**
+     * Test {@link Task#updateEffectiveIntent()} when activity with relinquishTaskIdentity but
+     * another with different uid. This should make the task use the root activity when updating the
+     * intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_relinquishingWithDifferentUid() {
+        final ActivityRecord activity0 = new ActivityBuilder(mService)
+                .setActivityFlags(FLAG_RELINQUISH_TASK_IDENTITY).setCreateTask(true).build();
+        final Task task = activity0.getTask();
+
+        // Add an extra activity on top
+        new ActivityBuilder(mService).setUid(11).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity0));
+    }
+
+    /**
+     * Test {@link Task#updateEffectiveIntent()} with activities set as relinquishTaskIdentity.
+     * This should make the task use the topmost activity when updating the intent.
+     */
+    @Test
+    public void testUpdateEffectiveIntent_relinquishingMultipleActivities() {
+        final ActivityRecord activity0 = new ActivityBuilder(mService)
+                .setActivityFlags(FLAG_RELINQUISH_TASK_IDENTITY).setCreateTask(true).build();
+        final Task task = activity0.getTask();
+        task.effectiveUid = activity0.getUid();
+        // Add an extra activity on top
+        final ActivityRecord activity1 = new ActivityBuilder(mService).setTask(task).build();
+        activity1.info.flags |= FLAG_RELINQUISH_TASK_IDENTITY;
+
+        // Add an extra activity on top
+        final ActivityRecord activity2 = new ActivityBuilder(mService).setTask(task).build();
+
+        spyOn(task);
+        task.updateEffectiveIntent();
+        verify(task).setIntent(eq(activity2));
     }
 
     @Test

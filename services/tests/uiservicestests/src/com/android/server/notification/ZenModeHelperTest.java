@@ -41,9 +41,11 @@ import static com.android.os.AtomsProto.DNDModeProto.ENABLED_FIELD_NUMBER;
 import static com.android.os.AtomsProto.DNDModeProto.ID_FIELD_NUMBER;
 import static com.android.os.AtomsProto.DNDModeProto.UID_FIELD_NUMBER;
 import static com.android.os.AtomsProto.DNDModeProto.ZEN_MODE_FIELD_NUMBER;
+import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static junit.framework.TestCase.fail;
 
@@ -70,7 +72,9 @@ import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.media.AudioAttributes;
@@ -102,6 +106,8 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.ManagedServices.UserProfiles;
 
+import com.google.common.collect.ImmutableList;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -131,9 +137,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private static final String EVENTS_DEFAULT_RULE_ID = "EVENTS_DEFAULT_RULE";
     private static final String SCHEDULE_DEFAULT_RULE_ID = "EVERY_NIGHT_DEFAULT_RULE";
     private static final int ZEN_MODE_FOR_TESTING = 99;
+    private static final String CUSTOM_PKG_NAME = "not.android";
+    private static final int CUSTOM_PKG_UID = 1;
 
     ConditionProviders mConditionProviders;
     @Mock NotificationManager mNotificationManager;
+    @Mock PackageManager mPackageManager;
     private Resources mResources;
     private TestableLooper mTestableLooper;
     private ZenModeHelper mZenModeHelperSpy;
@@ -143,7 +152,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private WrappedSysUiStatsEvent.WrappedBuilderFactory mStatsEventBuilderFactory;
 
     @Before
-    public void setUp() {
+    public void setUp() throws PackageManager.NameNotFoundException {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
@@ -166,6 +175,16 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mConditionProviders.addSystemProvider(new CountdownConditionProvider());
         mZenModeHelperSpy = spy(new ZenModeHelper(mContext, mTestableLooper.getLooper(),
                 mConditionProviders, mStatsEventBuilderFactory));
+
+        ResolveInfo ri = new ResolveInfo();
+        ri.activityInfo = new ActivityInfo();
+        when(mPackageManager.queryIntentActivitiesAsUser(any(), anyInt(), anyInt())).thenReturn(
+                ImmutableList.of(ri));
+        when(mPackageManager.getPackageUidAsUser(eq(CUSTOM_PKG_NAME), anyInt()))
+                .thenReturn(CUSTOM_PKG_UID);
+        when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
+                new String[] {getContext().getPackageName()});
+        mZenModeHelperSpy.mPm = mPackageManager;
     }
 
     private XmlResourceParser getDefaultConfigParser() throws IOException, XmlPullParserException {
@@ -1554,6 +1573,34 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(NotificationManager.zenModeFromInterruptionFilter(
                 zenRule.getInterruptionFilter(), -1), ruleInConfig.zenMode);
         assertEquals(zenRule.getName(), ruleInConfig.name);
+    }
+
+    @Test
+    public void testAddAutomaticZenRule_beyondSystemLimit() {
+        for (int i = 0; i < RULE_LIMIT_PER_PACKAGE; i++) {
+            ScheduleInfo si = new ScheduleInfo();
+            si.startHour = i;
+            AutomaticZenRule zenRule = new AutomaticZenRule("name" + i,
+                    null,
+                    new ComponentName("android", "ScheduleConditionProvider"),
+                    ZenModeConfig.toScheduleConditionId(si),
+                    new ZenPolicy.Builder().build(),
+                    NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+            String id = mZenModeHelperSpy.addAutomaticZenRule(zenRule, "test");
+            assertNotNull(id);
+        }
+        try {
+            AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                    null,
+                    new ComponentName("android", "ScheduleConditionProvider"),
+                    ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                    new ZenPolicy.Builder().build(),
+                    NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+            String id = mZenModeHelperSpy.addAutomaticZenRule(zenRule, "test");
+            fail("allowed too many rules to be created");
+        } catch (IllegalArgumentException e) {
+            // yay
+        }
     }
 
     private void setupZenConfig() {
