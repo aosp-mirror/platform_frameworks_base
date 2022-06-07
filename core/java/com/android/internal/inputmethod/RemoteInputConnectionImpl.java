@@ -49,7 +49,6 @@ import android.view.inputmethod.TextSnapshot;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
-import com.android.internal.view.IInputContext;
 
 import java.lang.annotation.Retention;
 import java.lang.ref.WeakReference;
@@ -62,10 +61,10 @@ import java.util.function.Supplier;
  * Takes care of remote method invocations of {@link InputConnection} in the IME client side.
  *
  * <p>{@link android.inputmethodservice.RemoteInputConnection} code is executed in the IME process.
- * It makes IInputContext binder calls under the hood. {@link RemoteInputConnectionImpl} receives
- * {@link IInputContext} binder calls in the IME client (editor app) process, and forwards them to
- * {@link InputConnection} that the IME client provided, on the {@link Looper} associated to the
- * {@link InputConnection}.</p>
+ * It makes {@link IRemoteInputConnection} binder calls under the hood.
+ * {@link RemoteInputConnectionImpl} receives {@link IRemoteInputConnection} binder calls in the IME
+ * client (editor app) process, and forwards them to {@link InputConnection} that the IME client
+ * provided, on the {@link Looper} associated to the {@link InputConnection}.</p>
  *
  * <p>{@link com.android.internal.inputmethod.RemoteAccessibilityInputConnection} code is executed
  * in the {@link android.accessibilityservice.AccessibilityService} process. It makes
@@ -74,7 +73,7 @@ import java.util.function.Supplier;
  * (editor app) process, and forwards them to {@link InputConnection} that the IME client provided,
  * on the {@link Looper} associated to the {@link InputConnection}.</p>
  */
-public final class RemoteInputConnectionImpl extends IInputContext.Stub {
+public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub {
     private static final String TAG = "RemoteInputConnectionImpl";
     private static final boolean DEBUG = false;
 

@@ -25,8 +25,8 @@ import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
@@ -47,7 +47,7 @@ oneway interface IInputMethod {
 
     void unbindInput();
 
-    void startInput(in IBinder startInputToken, in IInputContext inputContext,
+    void startInput(in IBinder startInputToken, in IRemoteInputConnection inputConnection,
             in EditorInfo attribute, boolean restarting, int navigationBarFlags,
             in ImeOnBackInvokedDispatcher imeDispatcher);
 

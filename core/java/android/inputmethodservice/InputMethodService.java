@@ -143,6 +143,7 @@ import android.window.WindowMetricsHelper;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
@@ -150,7 +151,6 @@ import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputContext;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.io.FileDescriptor;
@@ -1255,10 +1255,10 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @Override
         public final void invalidateInputInternal(@NonNull EditorInfo editorInfo,
-                @NonNull IInputContext inputContext, int sessionId) {
+                @NonNull IRemoteInputConnection inputConnection, int sessionId) {
             if (mStartedInputConnection instanceof RemoteInputConnection) {
                 final RemoteInputConnection ric = (RemoteInputConnection) mStartedInputConnection;
-                if (!ric.isSameConnection(inputContext)) {
+                if (!ric.isSameConnection(inputConnection)) {
                     // This is not an error, and can be safely ignored.
                     if (DEBUG) {
                         Log.d(TAG, "ignoring invalidateInput() due to context mismatch.");

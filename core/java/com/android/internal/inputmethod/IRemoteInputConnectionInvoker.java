@@ -31,58 +31,60 @@ import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
 
 import com.android.internal.infra.AndroidFuture;
-import com.android.internal.view.IInputContext;
 
 import java.util.Objects;
 
 /**
- * A stateless wrapper of {@link com.android.internal.view.IInputContext} to encapsulate boilerplate
- * code around {@link AndroidFuture} and {@link RemoteException}.
+ * A stateless wrapper of {@link com.android.internal.inputmethod.IRemoteInputConnection} to
+ * encapsulate boilerplate code around {@link AndroidFuture} and {@link RemoteException}.
  */
-public final class IInputContextInvoker {
+public final class IRemoteInputConnectionInvoker {
 
     @NonNull
-    private final IInputContext mIInputContext;
+    private final IRemoteInputConnection mConnection;
     private final int mSessionId;
 
-    private IInputContextInvoker(@NonNull IInputContext inputContext, int sessionId) {
-        mIInputContext = inputContext;
+    private IRemoteInputConnectionInvoker(@NonNull IRemoteInputConnection inputConnection,
+            int sessionId) {
+        mConnection = inputConnection;
         mSessionId = sessionId;
     }
 
     /**
-     * Creates a new instance of {@link IInputContextInvoker} for the given {@link IInputContext}.
+     * Creates a new instance of {@link IRemoteInputConnectionInvoker} for the given
+     * {@link IRemoteInputConnection}.
      *
-     * @param inputContext {@link IInputContext} to be wrapped.
-     * @return A new instance of {@link IInputContextInvoker}.
+     * @param connection {@link IRemoteInputConnection} to be wrapped.
+     * @return A new instance of {@link IRemoteInputConnectionInvoker}.
      */
-    public static IInputContextInvoker create(@NonNull IInputContext inputContext) {
-        Objects.requireNonNull(inputContext);
-        return new IInputContextInvoker(inputContext, 0);
+    public static IRemoteInputConnectionInvoker create(@NonNull IRemoteInputConnection connection) {
+        Objects.requireNonNull(connection);
+        return new IRemoteInputConnectionInvoker(connection, 0);
     }
 
     /**
-     * Creates a new instance of {@link IInputContextInvoker} with the given {@code sessionId}.
+     * Creates a new instance of {@link IRemoteInputConnectionInvoker} with the given
+     * {@code sessionId}.
      *
      * @param sessionId the new session ID to be used.
-     * @return A new instance of {@link IInputContextInvoker}.
+     * @return A new instance of {@link IRemoteInputConnectionInvoker}.
      */
     @NonNull
-    public IInputContextInvoker cloneWithSessionId(int sessionId) {
-        return new IInputContextInvoker(mIInputContext, sessionId);
+    public IRemoteInputConnectionInvoker cloneWithSessionId(int sessionId) {
+        return new IRemoteInputConnectionInvoker(mConnection, sessionId);
     }
 
     /**
-     * @param inputContext {@code IInputContext} to be compared with
-     * @return {@code true} if the underlying {@code IInputContext} is the same. {@code false} if
-     *         {@code inputContext} is {@code null}.
+     * @param connection {@code IRemoteInputConnection} to be compared with
+     * @return {@code true} if the underlying {@code IRemoteInputConnection} is the same.
+     *         {@code false} if {@code inputContext} is {@code null}.
      */
     @AnyThread
-    public boolean isSameConnection(@NonNull IInputContext inputContext) {
-        if (inputContext == null) {
+    public boolean isSameConnection(@NonNull IRemoteInputConnection connection) {
+        if (connection == null) {
             return false;
         }
-        return mIInputContext.asBinder() == inputContext.asBinder();
+        return mConnection.asBinder() == connection.asBinder();
     }
 
     @NonNull
@@ -91,8 +93,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#getTextAfterCursor(InputConnectionCommandHeader, int, int,
-     * AndroidFuture)}.
+     * Invokes {@link IRemoteInputConnection#getTextAfterCursor(InputConnectionCommandHeader, int,
+     * int, AndroidFuture)}.
      *
      * @param length {@code length} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
@@ -104,7 +106,7 @@ public final class IInputContextInvoker {
     public AndroidFuture<CharSequence> getTextAfterCursor(int length, int flags) {
         final AndroidFuture<CharSequence> future = new AndroidFuture<>();
         try {
-            mIInputContext.getTextAfterCursor(createHeader(), length, flags, future);
+            mConnection.getTextAfterCursor(createHeader(), length, flags, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -112,8 +114,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#getTextBeforeCursor(InputConnectionCommandHeader, int, int,
-     * AndroidFuture)}.
+     * Invokes {@link IRemoteInputConnection#getTextBeforeCursor(InputConnectionCommandHeader, int,
+     * int, AndroidFuture)}.
      *
      * @param length {@code length} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
@@ -125,7 +127,7 @@ public final class IInputContextInvoker {
     public AndroidFuture<CharSequence> getTextBeforeCursor(int length, int flags) {
         final AndroidFuture<CharSequence> future = new AndroidFuture<>();
         try {
-            mIInputContext.getTextBeforeCursor(createHeader(), length, flags, future);
+            mConnection.getTextBeforeCursor(createHeader(), length, flags, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -133,8 +135,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes
-     * {@link IInputContext#getSelectedText(InputConnectionCommandHeader, int, AndroidFuture)}.
+     * Invokes {@link IRemoteInputConnection#getSelectedText(InputConnectionCommandHeader, int,
+     * AndroidFuture)}.
      *
      * @param flags {@code flags} parameter to be passed.
      * @return {@link AndroidFuture<CharSequence>} that can be used to retrieve the invocation
@@ -145,7 +147,7 @@ public final class IInputContextInvoker {
     public AndroidFuture<CharSequence> getSelectedText(int flags) {
         final AndroidFuture<CharSequence> future = new AndroidFuture<>();
         try {
-            mIInputContext.getSelectedText(createHeader(), flags, future);
+            mConnection.getSelectedText(createHeader(), flags, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -154,7 +156,7 @@ public final class IInputContextInvoker {
 
     /**
      * Invokes
-     * {@link IInputContext#getSurroundingText(InputConnectionCommandHeader, int, int, int,
+     * {@link IRemoteInputConnection#getSurroundingText(InputConnectionCommandHeader, int, int, int,
      * AndroidFuture)}.
      *
      * @param beforeLength {@code beforeLength} parameter to be passed.
@@ -169,7 +171,7 @@ public final class IInputContextInvoker {
             int flags) {
         final AndroidFuture<SurroundingText> future = new AndroidFuture<>();
         try {
-            mIInputContext.getSurroundingText(createHeader(), beforeLength, afterLength, flags,
+            mConnection.getSurroundingText(createHeader(), beforeLength, afterLength, flags,
                     future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
@@ -178,8 +180,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes
-     * {@link IInputContext#getCursorCapsMode(InputConnectionCommandHeader, int, AndroidFuture)}.
+     * Invokes {@link IRemoteInputConnection#getCursorCapsMode(InputConnectionCommandHeader, int,
+     * AndroidFuture)}.
      *
      * @param reqModes {@code reqModes} parameter to be passed.
      * @return {@link AndroidFuture<Integer>} that can be used to retrieve the invocation
@@ -190,7 +192,7 @@ public final class IInputContextInvoker {
     public AndroidFuture<Integer> getCursorCapsMode(int reqModes) {
         final AndroidFuture<Integer> future = new AndroidFuture<>();
         try {
-            mIInputContext.getCursorCapsMode(createHeader(), reqModes, future);
+            mConnection.getCursorCapsMode(createHeader(), reqModes, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -198,7 +200,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#getExtractedText(InputConnectionCommandHeader,
+     * Invokes {@link IRemoteInputConnection#getExtractedText(InputConnectionCommandHeader,
      * ExtractedTextRequest, int, AndroidFuture)}.
      *
      * @param request {@code request} parameter to be passed.
@@ -212,7 +214,7 @@ public final class IInputContextInvoker {
             int flags) {
         final AndroidFuture<ExtractedText> future = new AndroidFuture<>();
         try {
-            mIInputContext.getExtractedText(createHeader(), request, flags, future);
+            mConnection.getExtractedText(createHeader(), request, flags, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -220,7 +222,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#commitText(InputConnectionCommandHeader, CharSequence, int)}.
+     * Invokes
+     * {@link IRemoteInputConnection#commitText(InputConnectionCommandHeader, CharSequence, int)}.
      *
      * @param text {@code text} parameter to be passed.
      * @param newCursorPosition {@code newCursorPosition} parameter to be passed.
@@ -230,7 +233,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean commitText(CharSequence text, int newCursorPosition) {
         try {
-            mIInputContext.commitText(createHeader(), text, newCursorPosition);
+            mConnection.commitText(createHeader(), text, newCursorPosition);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -238,8 +241,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#commitTextWithTextAttribute(InputConnectionCommandHeader, int,
-     * CharSequence)}.
+     * Invokes {@link IRemoteInputConnection#commitTextWithTextAttribute(
+     * InputConnectionCommandHeader, int, CharSequence)}.
      *
      * @param text {@code text} parameter to be passed.
      * @param newCursorPosition {@code newCursorPosition} parameter to be passed.
@@ -251,7 +254,7 @@ public final class IInputContextInvoker {
     public boolean commitText(CharSequence text, int newCursorPosition,
             @Nullable TextAttribute textAttribute) {
         try {
-            mIInputContext.commitTextWithTextAttribute(
+            mConnection.commitTextWithTextAttribute(
                     createHeader(), text, newCursorPosition, textAttribute);
             return true;
         } catch (RemoteException e) {
@@ -260,7 +263,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#commitCompletion(InputConnectionCommandHeader, CompletionInfo)}.
+     * Invokes {@link IRemoteInputConnection#commitCompletion(InputConnectionCommandHeader,
+     * CompletionInfo)}.
      *
      * @param text {@code text} parameter to be passed.
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
@@ -269,7 +273,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean commitCompletion(CompletionInfo text) {
         try {
-            mIInputContext.commitCompletion(createHeader(), text);
+            mConnection.commitCompletion(createHeader(), text);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -277,7 +281,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#commitCorrection(InputConnectionCommandHeader, CorrectionInfo)}.
+     * Invokes {@link IRemoteInputConnection#commitCorrection(InputConnectionCommandHeader,
+     * CorrectionInfo)}.
      *
      * @param correctionInfo {@code correctionInfo} parameter to be passed.
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
@@ -286,7 +291,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean commitCorrection(CorrectionInfo correctionInfo) {
         try {
-            mIInputContext.commitCorrection(createHeader(), correctionInfo);
+            mConnection.commitCorrection(createHeader(), correctionInfo);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -294,7 +299,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#setSelection(InputConnectionCommandHeader, int, int)}.
+     * Invokes {@link IRemoteInputConnection#setSelection(InputConnectionCommandHeader, int, int)}.
      *
      * @param start {@code start} parameter to be passed.
      * @param end {@code start} parameter to be passed.
@@ -304,7 +309,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean setSelection(int start, int end) {
         try {
-            mIInputContext.setSelection(createHeader(), start, end);
+            mConnection.setSelection(createHeader(), start, end);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -312,7 +317,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#performEditorAction(InputConnectionCommandHeader, int)}.
+     * Invokes
+     * {@link IRemoteInputConnection#performEditorAction(InputConnectionCommandHeader, int)}.
      *
      * @param actionCode {@code start} parameter to be passed.
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
@@ -321,7 +327,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean performEditorAction(int actionCode) {
         try {
-            mIInputContext.performEditorAction(createHeader(), actionCode);
+            mConnection.performEditorAction(createHeader(), actionCode);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -329,7 +335,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#performContextMenuAction(InputConnectionCommandHeader, int)}.
+     * Invokes
+     * {@link IRemoteInputConnection#performContextMenuAction(InputConnectionCommandHeader, int)}.
      *
      * @param id {@code id} parameter to be passed.
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
@@ -338,7 +345,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean performContextMenuAction(int id) {
         try {
-            mIInputContext.performContextMenuAction(createHeader(), id);
+            mConnection.performContextMenuAction(createHeader(), id);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -346,7 +353,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#setComposingRegion(InputConnectionCommandHeader, int, int)}.
+     * Invokes
+     * {@link IRemoteInputConnection#setComposingRegion(InputConnectionCommandHeader, int, int)}.
      *
      * @param start {@code id} parameter to be passed.
      * @param end {@code id} parameter to be passed.
@@ -356,7 +364,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean setComposingRegion(int start, int end) {
         try {
-            mIInputContext.setComposingRegion(createHeader(), start, end);
+            mConnection.setComposingRegion(createHeader(), start, end);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -364,7 +372,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#setComposingRegionWithTextAttribute(
+     * Invokes {@link IRemoteInputConnection#setComposingRegionWithTextAttribute(
      * InputConnectionCommandHeader, int, int, TextAttribute)}.
      *
      * @param start {@code id} parameter to be passed.
@@ -376,7 +384,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean setComposingRegion(int start, int end, @Nullable TextAttribute textAttribute) {
         try {
-            mIInputContext.setComposingRegionWithTextAttribute(
+            mConnection.setComposingRegionWithTextAttribute(
                     createHeader(), start, end, textAttribute);
             return true;
         } catch (RemoteException e) {
@@ -385,8 +393,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes
-     * {@link IInputContext#setComposingText(InputConnectionCommandHeader, CharSequence, int)}.
+     * Invokes {@link IRemoteInputConnection#setComposingText(InputConnectionCommandHeader,
+     * CharSequence, int)}.
      *
      * @param text {@code text} parameter to be passed.
      * @param newCursorPosition {@code newCursorPosition} parameter to be passed.
@@ -396,7 +404,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         try {
-            mIInputContext.setComposingText(createHeader(), text, newCursorPosition);
+            mConnection.setComposingText(createHeader(), text, newCursorPosition);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -404,8 +412,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#setComposingTextWithTextAttribute(InputConnectionCommandHeader,
-     * CharSequence, int, TextAttribute)}.
+     * Invokes {@link IRemoteInputConnection#setComposingTextWithTextAttribute(
+     * InputConnectionCommandHeader, CharSequence, int, TextAttribute)}.
      *
      * @param text {@code text} parameter to be passed.
      * @param newCursorPosition {@code newCursorPosition} parameter to be passed.
@@ -417,7 +425,7 @@ public final class IInputContextInvoker {
     public boolean setComposingText(CharSequence text, int newCursorPosition,
             @Nullable TextAttribute textAttribute) {
         try {
-            mIInputContext.setComposingTextWithTextAttribute(
+            mConnection.setComposingTextWithTextAttribute(
                     createHeader(), text, newCursorPosition, textAttribute);
             return true;
         } catch (RemoteException e) {
@@ -426,7 +434,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#finishComposingText(InputConnectionCommandHeader)}.
+     * Invokes {@link IRemoteInputConnection#finishComposingText(InputConnectionCommandHeader)}.
      *
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
      *         {@code false} otherwise.
@@ -434,7 +442,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean finishComposingText() {
         try {
-            mIInputContext.finishComposingText(createHeader());
+            mConnection.finishComposingText(createHeader());
             return true;
         } catch (RemoteException e) {
             return false;
@@ -442,7 +450,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#beginBatchEdit(InputConnectionCommandHeader)}.
+     * Invokes {@link IRemoteInputConnection#beginBatchEdit(InputConnectionCommandHeader)}.
      *
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
      *         {@code false} otherwise.
@@ -450,7 +458,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean beginBatchEdit() {
         try {
-            mIInputContext.beginBatchEdit(createHeader());
+            mConnection.beginBatchEdit(createHeader());
             return true;
         } catch (RemoteException e) {
             return false;
@@ -458,7 +466,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#endBatchEdit(InputConnectionCommandHeader)}.
+     * Invokes {@link IRemoteInputConnection#endBatchEdit(InputConnectionCommandHeader)}.
      *
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
      *         {@code false} otherwise.
@@ -466,7 +474,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean endBatchEdit() {
         try {
-            mIInputContext.endBatchEdit(createHeader());
+            mConnection.endBatchEdit(createHeader());
             return true;
         } catch (RemoteException e) {
             return false;
@@ -474,7 +482,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#sendKeyEvent(InputConnectionCommandHeader, KeyEvent)}.
+     * Invokes {@link IRemoteInputConnection#sendKeyEvent(InputConnectionCommandHeader, KeyEvent)}.
      *
      * @param event {@code event} parameter to be passed.
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
@@ -483,7 +491,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean sendKeyEvent(KeyEvent event) {
         try {
-            mIInputContext.sendKeyEvent(createHeader(), event);
+            mConnection.sendKeyEvent(createHeader(), event);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -491,7 +499,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#clearMetaKeyStates(InputConnectionCommandHeader, int)}.
+     * Invokes {@link IRemoteInputConnection#clearMetaKeyStates(InputConnectionCommandHeader, int)}.
      *
      * @param states {@code states} parameter to be passed.
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
@@ -500,7 +508,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean clearMetaKeyStates(int states) {
         try {
-            mIInputContext.clearMetaKeyStates(createHeader(), states);
+            mConnection.clearMetaKeyStates(createHeader(), states);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -508,7 +516,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#deleteSurroundingText(InputConnectionCommandHeader, int, int)}.
+     * Invokes
+     * {@link IRemoteInputConnection#deleteSurroundingText(InputConnectionCommandHeader, int, int)}.
      *
      * @param beforeLength {@code beforeLength} parameter to be passed.
      * @param afterLength {@code afterLength} parameter to be passed.
@@ -518,7 +527,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         try {
-            mIInputContext.deleteSurroundingText(createHeader(), beforeLength, afterLength);
+            mConnection.deleteSurroundingText(createHeader(), beforeLength, afterLength);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -526,8 +535,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#deleteSurroundingTextInCodePoints(InputConnectionCommandHeader,
-     * int, int)}.
+     * Invokes {@link IRemoteInputConnection#deleteSurroundingTextInCodePoints(
+     * InputConnectionCommandHeader, int, int)}.
      *
      * @param beforeLength {@code beforeLength} parameter to be passed.
      * @param afterLength {@code afterLength} parameter to be passed.
@@ -537,7 +546,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean deleteSurroundingTextInCodePoints(int beforeLength, int afterLength) {
         try {
-            mIInputContext.deleteSurroundingTextInCodePoints(createHeader(), beforeLength,
+            mConnection.deleteSurroundingTextInCodePoints(createHeader(), beforeLength,
                     afterLength);
             return true;
         } catch (RemoteException e) {
@@ -546,7 +555,7 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#performSpellCheck(InputConnectionCommandHeader)}.
+     * Invokes {@link IRemoteInputConnection#performSpellCheck(InputConnectionCommandHeader)}.
      *
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
      *         {@code false} otherwise.
@@ -554,7 +563,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean performSpellCheck() {
         try {
-            mIInputContext.performSpellCheck(createHeader());
+            mConnection.performSpellCheck(createHeader());
             return true;
         } catch (RemoteException e) {
             return false;
@@ -562,8 +571,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes
-     * {@link IInputContext#performPrivateCommand(InputConnectionCommandHeader, String, Bundle)}.
+     * Invokes {@link IRemoteInputConnection#performPrivateCommand(InputConnectionCommandHeader,
+     * String, Bundle)}.
      *
      * @param action {@code action} parameter to be passed.
      * @param data {@code data} parameter to be passed.
@@ -573,7 +582,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean performPrivateCommand(String action, Bundle data) {
         try {
-            mIInputContext.performPrivateCommand(createHeader(), action, data);
+            mConnection.performPrivateCommand(createHeader(), action, data);
             return true;
         } catch (RemoteException e) {
             return false;
@@ -581,8 +590,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#requestCursorUpdates(InputConnectionCommandHeader, int, int,
-     * AndroidFuture)}.
+     * Invokes {@link IRemoteInputConnection#requestCursorUpdates(InputConnectionCommandHeader, int,
+     * int, AndroidFuture)}.
      *
      * @param cursorUpdateMode {@code cursorUpdateMode} parameter to be passed.
      * @param imeDisplayId the display ID that is associated with the IME.
@@ -594,7 +603,7 @@ public final class IInputContextInvoker {
     public AndroidFuture<Boolean> requestCursorUpdates(int cursorUpdateMode, int imeDisplayId) {
         final AndroidFuture<Boolean> future = new AndroidFuture<>();
         try {
-            mIInputContext.requestCursorUpdates(createHeader(), cursorUpdateMode, imeDisplayId,
+            mConnection.requestCursorUpdates(createHeader(), cursorUpdateMode, imeDisplayId,
                     future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
@@ -603,8 +612,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#requestCursorUpdatesWithFilter(InputConnectionCommandHeader,
-     * int, int, int, AndroidFuture)}.
+     * Invokes {@link IRemoteInputConnection#requestCursorUpdatesWithFilter(
+     * InputConnectionCommandHeader, int, int, int, AndroidFuture)}.
      *
      * @param cursorUpdateMode {@code cursorUpdateMode} parameter to be passed.
      * @param cursorUpdateFilter {@code cursorUpdateFilter} parameter to be passed.
@@ -618,7 +627,7 @@ public final class IInputContextInvoker {
             int imeDisplayId) {
         final AndroidFuture<Boolean> future = new AndroidFuture<>();
         try {
-            mIInputContext.requestCursorUpdatesWithFilter(createHeader(), cursorUpdateMode,
+            mConnection.requestCursorUpdatesWithFilter(createHeader(), cursorUpdateMode,
                     cursorUpdateFilter, imeDisplayId, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
@@ -627,8 +636,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#commitContent(InputConnectionCommandHeader, InputContentInfo,
-     * int, Bundle, AndroidFuture)}.
+     * Invokes {@link IRemoteInputConnection#commitContent(InputConnectionCommandHeader,
+     * InputContentInfo, int, Bundle, AndroidFuture)}.
      *
      * @param inputContentInfo {@code inputContentInfo} parameter to be passed.
      * @param flags {@code flags} parameter to be passed.
@@ -642,7 +651,7 @@ public final class IInputContextInvoker {
             Bundle opts) {
         final AndroidFuture<Boolean> future = new AndroidFuture<>();
         try {
-            mIInputContext.commitContent(createHeader(), inputContentInfo, flags, opts, future);
+            mConnection.commitContent(createHeader(), inputContentInfo, flags, opts, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
@@ -650,7 +659,8 @@ public final class IInputContextInvoker {
     }
 
     /**
-     * Invokes {@link IInputContext#setImeConsumesInput(InputConnectionCommandHeader, boolean)}.
+     * Invokes
+     * {@link IRemoteInputConnection#setImeConsumesInput(InputConnectionCommandHeader, boolean)}.
      *
      * @param imeConsumesInput {@code imeConsumesInput} parameter to be passed.
      * @return {@code true} if the invocation is completed without {@link RemoteException}.
@@ -659,7 +669,7 @@ public final class IInputContextInvoker {
     @AnyThread
     public boolean setImeConsumesInput(boolean imeConsumesInput) {
         try {
-            mIInputContext.setImeConsumesInput(createHeader(), imeConsumesInput);
+            mConnection.setImeConsumesInput(createHeader(), imeConsumesInput);
             return true;
         } catch (RemoteException e) {
             return false;

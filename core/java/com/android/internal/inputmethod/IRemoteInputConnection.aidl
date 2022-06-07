@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -30,9 +30,8 @@ import com.android.internal.inputmethod.InputConnectionCommandHeader;
 /**
  * Interface from an input method to the application, allowing it to perform
  * edits on the current input field and other interactions with the application.
- * {@hide}
  */
- oneway interface IInputContext {
+ oneway interface IRemoteInputConnection {
     void getTextBeforeCursor(in InputConnectionCommandHeader header, int length, int flags,
             in AndroidFuture future /* T=CharSequence */);
 

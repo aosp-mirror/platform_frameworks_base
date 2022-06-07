@@ -25,7 +25,7 @@ import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 
-import com.android.internal.view.IInputContext;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 
 /**
  * Sub-interface of IInputMethod which is safe to give to client applications.
@@ -54,5 +54,6 @@ oneway interface IInputMethodSession {
 
     void finishInput();
 
-    void invalidateInput(in EditorInfo editorInfo, in IInputContext inputContext, int sessionId);
+    void invalidateInput(in EditorInfo editorInfo, in IRemoteInputConnection inputConnection,
+            int sessionId);
 }

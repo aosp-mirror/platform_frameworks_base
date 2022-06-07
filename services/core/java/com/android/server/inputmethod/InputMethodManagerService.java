@@ -161,6 +161,7 @@ import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.InputMethodDebug;
@@ -177,7 +178,6 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
-import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
@@ -470,7 +470,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     static final class ClientState {
         final IInputMethodClient client;
-        final IInputContext inputContext;
+        final IRemoteInputConnection fallbackInputConnection;
         final int uid;
         final int pid;
         final int selfReportedDisplayId;
@@ -489,15 +489,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + " pid=" + pid + " displayId=" + selfReportedDisplayId + "}";
         }
 
-        ClientState(IInputMethodClient _client, IInputContext _inputContext,
+        ClientState(IInputMethodClient _client, IRemoteInputConnection _fallbackInputConnection,
                 int _uid, int _pid, int _selfReportedDisplayId,
                 ClientDeathRecipient _clientDeathRecipient) {
             client = _client;
-            inputContext = _inputContext;
+            fallbackInputConnection = _fallbackInputConnection;
             uid = _uid;
             pid = _pid;
             selfReportedDisplayId = _selfReportedDisplayId;
-            binding = new InputBinding(null, inputContext.asBinder(), uid, pid);
+            binding = new InputBinding(null, fallbackInputConnection.asBinder(), uid, pid);
             clientDeathRecipient = _clientDeathRecipient;
         }
     }
@@ -621,9 +621,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     ClientState mCurFocusedWindowClient;
 
     /**
-     * The input context last provided by the current client.
+     * The {@link IRemoteInputConnection} last provided by the current client.
      */
-    IInputContext mCurInputContext;
+    IRemoteInputConnection mCurInputConnection;
 
     /**
      * The {@link ImeOnBackInvokedDispatcher} last provided by the current client to
@@ -847,7 +847,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     /**
      * Internal state snapshot when
-     * {@link com.android.internal.view.IInputMethod#startInput(IBinder, IInputContext, EditorInfo,
+     * {@link com.android.internal.view.IInputMethod#startInput(IBinder, IRemoteInputConnection, EditorInfo,
      * boolean)} is about to be called.
      *
      * <p>Calling that IPC endpoint basically means that
@@ -2412,14 +2412,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
      *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
      *               process
-     * @param inputContext communication channel for the fallback {@link InputConnection}
+     * @param inputConnection communication channel for the fallback {@link InputConnection}
      * @param selfReportedDisplayId self-reported display ID to which the client is associated.
      *                              Whether the client is still allowed to access to this display
      *                              or not needs to be evaluated every time the client interacts
      *                              with the display
      */
     @Override
-    public void addClient(IInputMethodClient client, IInputContext inputContext,
+    public void addClient(IInputMethodClient client, IRemoteInputConnection inputConnection,
             int selfReportedDisplayId) {
         // Here there are two scenarios where this method is called:
         // A. IMM is being instantiated in a different process and this is an IPC from that process
@@ -2456,7 +2456,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // have the client crash.  Thus we do not verify the display ID at all here.  Instead we
             // later check the display ID every time the client needs to interact with the specified
             // display.
-            mClients.put(client.asBinder(), new ClientState(client, inputContext, callerUid,
+            mClients.put(client.asBinder(), new ClientState(client, inputConnection, callerUid,
                     callerPid, selfReportedDisplayId, deathRecipient));
         }
     }
@@ -2646,7 +2646,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final int navButtonFlags = getInputMethodNavButtonFlagsLocked();
         final SessionState session = mCurClient.curSession;
         setEnabledSessionLocked(session);
-        session.method.startInput(startInputToken, mCurInputContext, mCurAttribute, restarting,
+        session.method.startInput(startInputToken, mCurInputConnection, mCurAttribute, restarting,
                 navButtonFlags, mCurImeDispatcher);
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
@@ -2753,7 +2753,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     @NonNull
     private InputBindResult startInputUncheckedLocked(@NonNull ClientState cs,
-            IInputContext inputContext,
+            IRemoteInputConnection inputConnection,
             @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             @NonNull EditorInfo attribute, @StartInputFlags int startInputFlags,
             @StartInputReason int startInputReason,
@@ -2800,7 +2800,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // Bump up the sequence for this client and attach it.
         advanceSequenceNumberLocked();
         mCurClient = cs;
-        mCurInputContext = inputContext;
+        mCurInputConnection = inputConnection;
         mCurRemoteAccessibilityInputConnection = remoteAccessibilityInputConnection;
         mCurImeDispatcher = imeDispatcher;
         mCurVirtualDisplayToScreenMatrix =
@@ -3817,12 +3817,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     public InputBindResult startInputOrWindowGainedFocus(
             @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
             @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
-            int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
+            int windowFlags, @Nullable EditorInfo attribute, IRemoteInputConnection inputConnection,
             IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         return startInputOrWindowGainedFocusInternal(startInputReason, client, windowToken,
-                startInputFlags, softInputMode, windowFlags, attribute, inputContext,
+                startInputFlags, softInputMode, windowFlags, attribute, inputConnection,
                 remoteAccessibilityInputConnection, unverifiedTargetSdkVersion,
                 imeDispatcher);
     }
@@ -3831,7 +3831,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private InputBindResult startInputOrWindowGainedFocusInternal(
             @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
             @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
-            int windowFlags, @Nullable EditorInfo attribute, @Nullable IInputContext inputContext,
+            int windowFlags, @Nullable EditorInfo attribute,
+            @Nullable IRemoteInputConnection inputConnection,
             @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
@@ -3870,7 +3871,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     result = startInputOrWindowGainedFocusInternalLocked(startInputReason,
                             client, windowToken, startInputFlags, softInputMode, windowFlags,
-                            attribute, inputContext, remoteAccessibilityInputConnection,
+                            attribute, inputConnection, remoteAccessibilityInputConnection,
                             unverifiedTargetSdkVersion, userId, imeDispatcher);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -3897,7 +3898,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @StartInputReason int startInputReason, IInputMethodClient client,
             @NonNull IBinder windowToken, @StartInputFlags int startInputFlags,
             @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
-            IInputContext inputContext,
+            IRemoteInputConnection inputContext,
             @Nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, @UserIdInt int userId,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
@@ -5998,7 +5999,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final ClientState ci = mClients.valueAt(i);
                 p.println("  Client " + ci + ":");
                 p.println("    client=" + ci.client);
-                p.println("    inputContext=" + ci.inputContext);
+                p.println("    fallbackInputConnection=" + ci.fallbackInputConnection);
                 p.println("    sessionRequested=" + ci.sessionRequested);
                 p.println("    sessionRequestedForAccessibility="
                         + ci.mSessionRequestedForAccessibility);
