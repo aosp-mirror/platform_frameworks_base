@@ -548,7 +548,8 @@ public class InsetsState implements Parcelable {
     }
 
     public void getDisplayCutoutSafe(Rect outBounds) {
-        outBounds.set(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+        outBounds.set(
+                WindowLayout.MIN_X, WindowLayout.MIN_Y, WindowLayout.MAX_X, WindowLayout.MAX_Y);
         final DisplayCutout cutout = mDisplayCutout.get();
         final Rect displayFrame = mDisplayFrame;
         if (!cutout.isEmpty()) {
