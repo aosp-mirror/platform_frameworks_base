@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Presubmit
-import androidx.test.filters.FlakyTest
+import android.platform.test.annotations.FlakyTest
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.navBarLayerPositionEnd
