@@ -17,6 +17,7 @@
 package android.animation;
 
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -54,7 +55,10 @@ public class AnimationHandler {
     private AnimationFrameCallbackProvider mProvider;
 
     // Static flag which allows the pausing behavior to be globally disabled/enabled.
-    private static boolean sAnimatorPausingEnabled = true;
+    private static boolean sAnimatorPausingEnabled = isPauseBgAnimationsEnabledInSystemProperties();
+
+    // Static flag which prevents the system property from overriding sAnimatorPausingEnabled field.
+    private static boolean sOverrideAnimatorPausingSystemProperty = false;
 
     /**
      * This paused list is used to store animators forcibly paused when the activity
@@ -97,6 +101,18 @@ public class AnimationHandler {
     }
 
     /**
+     * System property that controls the behavior of pausing infinite animators when an app
+     * is moved to the background.
+     *
+     * @return the value of 'framework.pause_bg_animations.enabled' system property
+     */
+    private static boolean isPauseBgAnimationsEnabledInSystemProperties() {
+        if (sOverrideAnimatorPausingSystemProperty) return sAnimatorPausingEnabled;
+        return SystemProperties
+                .getBoolean("framework.pause_bg_animations.enabled", true);
+    }
+
+    /**
      * Disable the default behavior of pausing infinite animators when
      * apps go into the background.
      *
@@ -104,6 +120,19 @@ public class AnimationHandler {
      */
     public static void setAnimatorPausingEnabled(boolean enable) {
         sAnimatorPausingEnabled = enable;
+    }
+
+    /**
+     * Prevents the setAnimatorPausingEnabled behavior from being overridden
+     * by the 'framework.pause_bg_animations.enabled' system property value.
+     *
+     * This is for testing purposes only.
+     *
+     * @param enable Enable or disable (default behavior) overriding the system
+     *               property.
+     */
+    public static void setOverrideAnimatorPausingSystemProperty(boolean enable) {
+        sOverrideAnimatorPausingSystemProperty = enable;
     }
 
     /**
@@ -143,6 +172,7 @@ public class AnimationHandler {
 
     private void requestAnimatorsEnabledImpl(boolean enable, Object requestor) {
         boolean wasEmpty = mAnimatorRequestors.isEmpty();
+        setAnimatorPausingEnabled(isPauseBgAnimationsEnabledInSystemProperties());
         if (enable) {
             mAnimatorRequestors.add(requestor);
         } else {
