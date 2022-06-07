@@ -68,15 +68,11 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah mengetik sandi. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. \n\nCoba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> detik."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Kode PIN SIM salah. Hubungi operator untuk membuka kunci perangkat."</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
-      <item quantity="other">Kode PIN SIM salah, sisa, sisa <xliff:g id="NUMBER_1">%d</xliff:g> percobaan.</item>
-      <item quantity="one">Kode PIN SIM salah, sisa <xliff:g id="NUMBER_0">%d</xliff:g> percobaan sebelum Anda harus menghubungi operator untuk membuka kunci perangkat.</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
+    <skip />
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM tidak dapat digunakan. Hubungi operator Anda."</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
-      <item quantity="other">Kode PUK SIM salah, sisa <xliff:g id="NUMBER_1">%d</xliff:g> percobaan sebelum SIM tidak dapat digunakan selamanya.</item>
-      <item quantity="one">Kode PUK SIM salah, sisa <xliff:g id="NUMBER_0">%d</xliff:g> percobaan sebelum SIM tidak dapat digunakan selamanya.</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
+    <skip />
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Operasi PIN SIM gagal!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Operasi PUK SIM gagal!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Beralih metode input"</string>
@@ -90,15 +86,12 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Perangkat dikunci oleh admin"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Perangkat dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Untuk menggunakan Face Unlock, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="other">Masukkan PIN SIM. Tersisa <xliff:g id="NUMBER_1">%d</xliff:g> percobaan.</item>
-      <item quantity="one">Masukkan PIN SIM. Tersisa <xliff:g id="NUMBER_0">%d</xliff:g> percobaan sebelum Anda harus menghubungi operator untuk membuka kunci perangkat.</item>
-    </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="other">SIM kini dinonaktifkan. Masukkan kode PUK untuk melanjutkan. Tersisa <xliff:g id="_NUMBER_1">%d</xliff:g> percobaan sebelum SIM tidak dapat digunakan secara permanen. Hubungi operator untuk mengetahui detailnya.</item>
-      <item quantity="one">SIM kini dinonaktifkan. Masukkan kode PUK untuk melanjutkan. Tersisa <xliff:g id="_NUMBER_0">%d</xliff:g> percobaan sebelum SIM tidak dapat digunakan secara permanen. Hubungi operator untuk mengetahui detailnya.</item>
-    </plurals>
+    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
+    <skip />
+    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
+    <skip />
+    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
+    <skip />
     <string name="clock_title_default" msgid="6342735240617459864">"Default"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Balon"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>

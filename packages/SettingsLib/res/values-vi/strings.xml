@@ -396,7 +396,7 @@
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Mô phỏng màn hình phụ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Ứng dụng"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Không lưu hoạt động"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Hủy mọi hoạt động ngay khi người dùng rời khỏi"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Xoá mọi hoạt động ngay khi người dùng rời khỏi"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Giới hạn quá trình nền"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Hiển thị ANR nền"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Hiện hộp thoại Ứng dụng không phản hồi cho các ứng dụng nền"</string>
