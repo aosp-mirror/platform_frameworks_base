@@ -23,8 +23,10 @@ import static com.android.server.wm.shell.ChangeInfo.HAS_CHANGED;
 import static com.android.server.wm.shell.ChangeInfo.TRANSIT_MODE;
 import static com.android.server.wm.shell.ChangeInfo.WINDOW_IDENTIFIER;
 import static com.android.server.wm.shell.Transition.CHANGE;
+import static com.android.server.wm.shell.Transition.FINISH_TRANSACTION_ID;
 import static com.android.server.wm.shell.Transition.FLAGS;
 import static com.android.server.wm.shell.Transition.ID;
+import static com.android.server.wm.shell.Transition.START_TRANSACTION_ID;
 import static com.android.server.wm.shell.Transition.STATE;
 import static com.android.server.wm.shell.Transition.TIMESTAMP;
 import static com.android.server.wm.shell.Transition.TRANSITION_TYPE;
@@ -82,6 +84,13 @@ public class TransitionTracer {
             outputStream.write(TRANSITION_TYPE, transition.mType);
             outputStream.write(STATE, transition.getState());
             outputStream.write(FLAGS, transition.getFlags());
+            if (transition.getStartTransaction() != null) {
+                outputStream.write(START_TRANSACTION_ID, transition.getStartTransaction().getId());
+            }
+            if (transition.getFinishTransaction() != null) {
+                outputStream.write(FINISH_TRANSACTION_ID,
+                        transition.getFinishTransaction().getId());
+            }
 
             for (int i = 0; i < transition.mChanges.size(); ++i) {
                 final WindowContainer window = transition.mChanges.keyAt(i);
