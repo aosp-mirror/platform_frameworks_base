@@ -80,7 +80,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         mRecentTasksController = spy(new RecentTasksController(mContext, mTaskStackListener,
                 mMainExecutor));
         mShellTaskOrganizer = new ShellTaskOrganizer(mMainExecutor, mContext,
-                null /* sizeCompatUI */, Optional.of(mRecentTasksController));
+                null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController));
     }
 
     @Test

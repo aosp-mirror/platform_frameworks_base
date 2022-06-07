@@ -68,15 +68,11 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"আপুনি আপোনাৰ পাছৱৰ্ড <xliff:g id="NUMBER_0">%1$d</xliff:g>বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ছেকেণ্ডৰ পাছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"আপুনি আপোনাৰ আনলক আৰ্হি <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ছিমৰ ভুল পিন ক\'ড, আপোনাৰ ডিভাইচটো আনলক কৰিবলৈ আপুনি এতিয়া আপোনাৰ বাহকৰ সৈতে যোগাযোগ কৰিবই লাগিব।"</string>
-    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
-      <item quantity="one">ছিমৰ ভুল পিন ক’ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ প্ৰয়াস কৰিব পাৰিব।</item>
-      <item quantity="other">ছিমৰ ভুল পিন ক’ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ প্ৰয়াস কৰিব পাৰিব।</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
+    <skip />
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"ছিম ব্যৱহাৰযোগ্য নহয়। আপোনাৰ বাহকৰ সৈতে যোগাযোগ কৰক।"</string>
-    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
-      <item quantity="one">ছিমৰ ভুল PUK ক\'ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ ভুল ক’ড দিলে আপোনাৰ ছিম চিৰকালৰ বাবে ব্যৱহাৰৰ অনুপযোগী হ’ব।</item>
-      <item quantity="other">ছিমৰ ভুল PUK ক\'ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ ভুল ক’ড দিলে আপোনাৰ ছিম চিৰকালৰ বাবে ব্যৱহাৰৰ অনুপযোগী হ’ব।</item>
-    </plurals>
+    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
+    <skip />
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"ছিম পিনৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"ছিম PUKৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ইনপুট পদ্ধতি সলনি কৰক"</string>
@@ -90,15 +86,12 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"প্ৰশাসকে ডিভাইচ লক কৰি ৰাখিছে"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ডিভাইচটো মেনুৱেলভাৱে লক কৰা হৈছিল"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"চিনাক্ত কৰিব পৰা নাই"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ফেচ আনলক সুবিধাটো ব্যৱহাৰ কৰিবলৈ ছেটিং &gt; গোপনীয়তাত "<b>"কেমেৰাৰ এক্সেছ"</b>" অন কৰক"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
-      <item quantity="one">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>
-      <item quantity="other">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>
-    </plurals>
-    <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="one">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
-      <item quantity="other">ছিমখন অক্ষম হ’ল। অব্যাহত ৰাখিবলৈ PUK দিয়ক। ছিমখন স্থায়ীভাৱে ব্যৱহাৰৰ অনুপযোগী হোৱাৰ পূৰ্বে আপোনাৰ হাতত <xliff:g id="_NUMBER_1">%d</xliff:g>টা প্ৰয়াস বাকী আছে। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।</item>
-    </plurals>
+    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
+    <skip />
+    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
+    <skip />
+    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
+    <skip />
     <string name="clock_title_default" msgid="6342735240617459864">"ডিফ’ল্ট"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"বাবল"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"এনাল’গ"</string>

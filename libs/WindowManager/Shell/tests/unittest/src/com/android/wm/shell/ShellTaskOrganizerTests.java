@@ -133,7 +133,7 @@ public class ShellTaskOrganizerTests {
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
         mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext,
-                mCompatUI, Optional.empty()));
+                mCompatUI, Optional.empty(), Optional.empty()));
     }
 
     @Test

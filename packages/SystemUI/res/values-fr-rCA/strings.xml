@@ -136,8 +136,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Visage authentifié"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Confirmé"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Touchez Confirmer pour terminer"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Déverrouillé avec le visage. Appuyez Déverrouiller pour cont."</string>
-    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Déverrouillé avec le visage. Appuyez pour continuer."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Déverr. par reconn. faciale. App. sur l\'icône pour continuer."</string>
+    <string name="biometric_dialog_tap_confirm_with_face_alt_1" msgid="439152621640507113">"Déverr. par reconnaissance faciale. Appuyez pour continuer."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_2" msgid="8586608186457385108">"Visage reconnu. Appuyez pour continuer."</string>
     <string name="biometric_dialog_tap_confirm_with_face_alt_3" msgid="2192670471930606539">"Visage reconnu. Appuyez sur Déverrouiller pour continuer."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Authentifié"</string>
@@ -205,10 +205,8 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Option « Capteurs désactivés » active"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Supprimer toutes les notifications"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> autre notification à l\'intérieur.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> autres notifications à l\'intérieur.</item>
-    </plurals>
+    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
+    <skip />
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"L\'écran est verrouillé en mode paysage."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"L\'écran est verrouillé en mode portrait."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Vitrine des desserts"</string>
@@ -256,10 +254,8 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Point d\'accès sans fil"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activation en cours…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Écon. données activé"</string>
-    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="one">%d appareil</item>
-      <item quantity="other">%d appareils</item>
-    </plurals>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
+    <skip />
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampe de poche"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"L\'appareil photo est en cours d\'utilisation"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Données cellulaires"</string>
@@ -286,7 +282,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"CCP"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"CCP désactivée"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"CCP activée"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Enregistrement de l\'écran"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"Enregistrement d\'écran"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Démarrer"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode Une main"</string>
@@ -316,8 +312,8 @@
     <string name="tap_again" msgid="1315420114387908655">"Toucher de nouveau"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Balayez l\'écran vers le haut pour ouvrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Appuyez sur l\'icône Déverrouiller pour ouvrir"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Déverrouillé avec le visage. Appuyez Déverrouiller pour ouvrir"</string>
-    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Déverrouillé avec le visage. Appuyez pour ouvrir."</string>
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Déverr. par reconn. faciale. App. sur l\'icône pour ouvrir."</string>
+    <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Déverr. par reconnaissance faciale. Appuyez pour ouvrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Visage reconnu. Appuyez pour ouvrir."</string>
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Visage reconnu. Appuyez sur Déverrouiller pour ouvrir."</string>
   <string-array name="udfps_accessibility_touch_hints">
@@ -356,10 +352,8 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Vous êtes en mode Invité"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Si vous ajoutez un nouvel utilisateur, vous quitterez le mode Invité, et toutes les applications et données de la session d\'invité en cours seront supprimées."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite d\'utilisateurs atteinte"</string>
-    <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="one">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> utilisateur.</item>
-      <item quantity="other">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> utilisateurs.</item>
-    </plurals>
+    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
+    <skip />
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toutes les applications et les données de cet utilisateur seront supprimées."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Supprimer"</string>
@@ -545,14 +539,10 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Me rappeler"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Annuler"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Reporté pour <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="one">%d heure</item>
-      <item quantity="other">%d heures</item>
-    </plurals>
-    <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="one">%d minute</item>
-      <item quantity="other">%d minutes</item>
-    </plurals>
+    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
+    <skip />
+    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
+    <skip />
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Économiseur de pile"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Bouton <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Accueil"</string>
@@ -776,10 +766,8 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"basculer"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Commandes des appareils"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'application pour laquelle ajouter des commandes"</string>
-    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> commande ajoutée.</item>
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
-    </plurals>
+    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
+    <skip />
     <string name="controls_removed" msgid="3731789252222856959">"Supprimé"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ajouté aux favoris"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ajouté aux favoris, en position <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -856,8 +844,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Application inconnue"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Arrêter la diffusion"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Appareils disponibles pour la sortie audio."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Fonctionnement de la diffusion"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Diffusion"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les personnes à proximité disposant d\'appareils Bluetooth compatibles peuvent écouter le contenu multimédia que vous diffusez"</string>
@@ -937,13 +924,11 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Ajouter la tuile"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne pas ajouter de tuile"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Choisir l\'utilisateur"</string>
-    <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> application est active</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> applications sont actives</item>
-    </plurals>
+    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
+    <skip />
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nouvelle information"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Applications actives"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Même si vous n\'utilisez pas ces applications, elles sont toujours actives et peuvent réduire l\'autonomie de la pile"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ces applications sont actives et s\'exécutent même lorsque vous ne les utilisez pas. Cela améliore leur fonctionnalité, mais peut également affecter l\'autonomie de la pile."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Arrêter"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Arrêtée"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"OK"</string>
@@ -957,6 +942,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Texte copié"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Image copiée"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Contenu copié"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Ajouter"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gérer les utilisateurs"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Cette notification ne prend pas en charge le partage d\'écran par glissement."</string>

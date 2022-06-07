@@ -25,7 +25,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -72,8 +71,6 @@ public final class StageTaskListenerTests extends ShellTestCase {
     private SyncTransactionQueue mSyncQueue;
     @Mock
     private IconProvider mIconProvider;
-    @Mock
-    private StageTaskUnfoldController mStageTaskUnfoldController;
     @Captor
     private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
     private SurfaceSession mSurfaceSession = new SurfaceSession();
@@ -92,8 +89,7 @@ public final class StageTaskListenerTests extends ShellTestCase {
                 mCallbacks,
                 mSyncQueue,
                 mSurfaceSession,
-                mIconProvider,
-                mStageTaskUnfoldController);
+                mIconProvider);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
         mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
@@ -128,30 +124,6 @@ public final class StageTaskListenerTests extends ShellTestCase {
 
         assertThat(mStageTaskListener.mChildrenTaskInfo.contains(childTask.taskId)).isTrue();
         verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(true));
-    }
-
-    @Test
-    public void testTaskAppeared_notifiesUnfoldListener() {
-        assumeFalse(ENABLE_SHELL_TRANSITIONS);
-        final ActivityManager.RunningTaskInfo task =
-                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
-
-        mStageTaskListener.onTaskAppeared(task, mSurfaceControl);
-
-        verify(mStageTaskUnfoldController).onTaskAppeared(eq(task), eq(mSurfaceControl));
-    }
-
-    @Test
-    public void testTaskVanished_notifiesUnfoldListener() {
-        assumeFalse(ENABLE_SHELL_TRANSITIONS);
-        final ActivityManager.RunningTaskInfo task =
-                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
-        mStageTaskListener.onTaskAppeared(task, mSurfaceControl);
-        clearInvocations(mStageTaskUnfoldController);
-
-        mStageTaskListener.onTaskVanished(task);
-
-        verify(mStageTaskUnfoldController).onTaskVanished(eq(task));
     }
 
     @Test(expected = IllegalArgumentException.class)
