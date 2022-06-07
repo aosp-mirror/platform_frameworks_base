@@ -264,6 +264,13 @@ public class RecoveryController {
      */
     public static final int ERROR_DOWNGRADE_CERTIFICATE = 29;
 
+    /**
+     * Requested key is not available in AndroidKeyStore.
+     *
+     * @hide
+     */
+    public static final int ERROR_KEY_NOT_FOUND = 30;
+
     private final ILockSettings mBinder;
     private final KeyStore mKeyStore;
 
@@ -703,6 +710,9 @@ public class RecoveryController {
         } catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e) {
             throw new UnrecoverableKeyException(e.getMessage());
         } catch (ServiceSpecificException e) {
+            if (e.errorCode == ERROR_KEY_NOT_FOUND) {
+                throw new UnrecoverableKeyException(e.getMessage());
+            }
             throw wrapUnexpectedServiceSpecificException(e);
         }
     }
