@@ -27,9 +27,6 @@ import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.containsType;
-import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
@@ -39,6 +36,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NAV_BAR_HANDLE_FORCE_OPAQUE;
+import static com.android.systemui.navigationbar.NavBarHelper.transitionMode;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.recents.utilities.Utilities.isTablet;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
@@ -48,11 +46,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_I
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG_WINDOW_STATE;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.dumpBarTransitions;
@@ -1150,23 +1144,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             return true;
         }
         return false;
-    }
-
-    private static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
-        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_NAVIGATION_BARS;
-        if (isTransient) {
-            return MODE_SEMI_TRANSPARENT;
-        } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
-            return MODE_LIGHTS_OUT;
-        } else if ((appearance & APPEARANCE_LOW_PROFILE_BARS) != 0) {
-            return MODE_LIGHTS_OUT_TRANSPARENT;
-        } else if ((appearance & APPEARANCE_OPAQUE_NAVIGATION_BARS) != 0) {
-            return MODE_OPAQUE;
-        } else if ((appearance & APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS) != 0) {
-            return MODE_SEMI_TRANSPARENT;
-        } else {
-            return MODE_TRANSPARENT;
-        }
     }
 
     @Override
