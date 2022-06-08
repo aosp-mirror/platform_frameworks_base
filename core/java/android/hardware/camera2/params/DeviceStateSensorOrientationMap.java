@@ -17,6 +17,7 @@
 package android.hardware.camera2.params;
 
 import android.annotation.LongDef;
+import android.annotation.NonNull;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.utils.HashCodeHelpers;
 
@@ -72,7 +73,18 @@ public final class DeviceStateSensorOrientationMap {
     /**
      * Create a new immutable DeviceStateOrientationMap instance.
      *
+     * <p>The array is a list of pairs of elements (angle, deviceState):</p>
+     *
+     * <code>[angle0, state0, angle1, state1,..., angleN, stateN]</code>
+     *
+     * <p>Each pair describes the camera sensor orientation when the device is in the
+     * matching deviceState. The angle is in degrees, and must be a multiple of 90.</p>
+     *
      * <p>This constructor takes over the array; do not write to the array afterwards.</p>
+     *
+     * <p>This constructor is public to allow for easier application testing by
+     * creating custom object instances. It's not necessary to construct these
+     * objects during normal use of the camera API.</p>
      *
      * @param elements
      *          An array of elements describing the map
@@ -82,10 +94,8 @@ public final class DeviceStateSensorOrientationMap {
      *            invalid element values
      * @throws NullPointerException
      *            if {@code elements} is {@code null}
-     *
-     * @hide
      */
-    public DeviceStateSensorOrientationMap(final long[] elements) {
+    public DeviceStateSensorOrientationMap(@NonNull final long[] elements) {
         mElements = Objects.requireNonNull(elements, "elements must not be null");
         if ((elements.length % 2) != 0) {
             throw new IllegalArgumentException("Device state sensor orientation map length " +
