@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import android.app.ActivityManager;
 import android.app.IStopUserCallback;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserManager;
@@ -35,6 +36,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.compatibility.common.util.BlockingBroadcastReceiver;
+import com.android.compatibility.common.util.ShellUtils;
 import com.android.internal.util.FunctionalUtils;
 
 import org.junit.After;
@@ -46,6 +49,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * To run the test:
@@ -58,8 +62,13 @@ public class UserLifecycleStressTest {
     private static final String TAG = "UserLifecycleStressTest";
     // TODO: Make this smaller once we have improved it.
     private static final int TIMEOUT_IN_SECOND = 40;
+    private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
+
     private static final int NUM_ITERATIONS = 8;
     private static final int WAIT_BEFORE_STOP_USER_IN_SECOND = 3;
+
+    /** Name of users/profiles in the test. Users with this name may be freely removed. */
+    private static final String TEST_USER_NAME = "UserLifecycleStressTest_test_user";
 
     private Context mContext;
     private UserManager mUserManager;
@@ -75,6 +84,7 @@ public class UserLifecycleStressTest {
         mUserSwitchWaiter = new UserSwitchWaiter(TAG, TIMEOUT_IN_SECOND);
         mRemoveGuestOnExitOriginalValue = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.REMOVE_GUEST_ON_EXIT);
+        waitForBroadcastBarrier(); // isolate tests from each other
     }
 
     @After
@@ -82,6 +92,7 @@ public class UserLifecycleStressTest {
         mUserSwitchWaiter.close();
         Settings.Global.putString(mContext.getContentResolver(),
                 Settings.Global.REMOVE_GUEST_ON_EXIT, mRemoveGuestOnExitOriginalValue);
+        waitForBroadcastBarrier(); // isolate tests from each other
     }
 
     /**
@@ -91,8 +102,10 @@ public class UserLifecycleStressTest {
     @Test
     public void stopManagedProfileStressTest() throws RemoteException, InterruptedException {
         for (int i = 0; i < NUM_ITERATIONS; i++) {
-            final UserInfo userInfo = mUserManager.createProfileForUser("TestUser",
-                    UserManager.USER_TYPE_PROFILE_MANAGED, 0, mActivityManager.getCurrentUser());
+            logIteration(i, "stopManagedProfileStressTest");
+
+            final UserInfo userInfo = mUserManager.createProfileForUser(TEST_USER_NAME,
+                    UserManager.USER_TYPE_PROFILE_MANAGED, 0, ActivityManager.getCurrentUser());
             assertThat(userInfo).isNotNull();
             try {
                 assertWithMessage("Failed to start the profile")
@@ -104,6 +117,35 @@ public class UserLifecycleStressTest {
                 stopUser(userInfo.id);
             } finally {
                 mUserManager.removeUser(userInfo.id);
+            }
+        }
+    }
+
+    /**
+     * Create a user, and then remove it immediately after starting it in background
+     * {@link #NUM_ITERATIONS} times in a row.
+     * Check device is not crashed when user data directory is deleted while some other processes
+     * might still be trying to access those deleted files.
+     */
+    @Test
+    public void removeRecentlyStartedUserStressTest() throws RemoteException, InterruptedException {
+        for (int i = 0; i < NUM_ITERATIONS; i++) {
+            logIteration(i, "removeRecentlyStartedUserStressTest");
+
+            Log.d(TAG, "Creating a new user");
+            final UserInfo userInfo = mUserManager.createUser(TEST_USER_NAME,
+                    UserManager.USER_TYPE_FULL_SECONDARY, 0);
+            assertWithMessage("Failed to create the user")
+                    .that(userInfo)
+                    .isNotNull();
+            try {
+                Log.d(TAG, "Starting user " + userInfo.id);
+                startUserInBackgroundAndWaitForUserStartedBroadcast(userInfo.id);
+            } finally {
+                Log.d(TAG, "Removing user " + userInfo.id);
+                assertWithMessage("Failed to remove the user " + userInfo.id)
+                        .that(removeUser(userInfo.id))
+                        .isTrue();
             }
         }
     }
@@ -130,10 +172,9 @@ public class UserLifecycleStressTest {
         int nextGuestId = guestUsers.isEmpty() ? USER_NULL : guestUsers.get(0).id;
 
         for (int i = 0; i < NUM_ITERATIONS; i++) {
-            final int currentGuestId = nextGuestId;
+            logIteration(i, "switchToExistingGuestAndStartOverStressTest");
 
-            Log.d(TAG, "switchToExistingGuestAndStartOverStressTest"
-                    + " - Run " + (i + 1) + " / " + NUM_ITERATIONS);
+            final int currentGuestId = nextGuestId;
 
             if (currentGuestId != USER_NULL) {
                 Log.d(TAG, "Switching to the existing guest");
@@ -173,6 +214,25 @@ public class UserLifecycleStressTest {
         Log.d(TAG, "testSwitchToExistingGuestAndStartOver - End");
     }
 
+    private boolean removeUser(int userId) {
+        if (!mUserManager.removeUser(userId)) {
+            return false;
+        }
+        try {
+            final long startTime = System.currentTimeMillis();
+            final long timeoutInMs = TIMEOUT_IN_SECOND * 1000;
+            while (mUserManager.getUserInfo(userId) != null
+                    && System.currentTimeMillis() - startTime < timeoutInMs) {
+                TimeUnit.MILLISECONDS.sleep(CHECK_USER_REMOVED_INTERVAL_MS);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            // Ignore
+        }
+        return mUserManager.getUserInfo(userId) == null;
+    }
+
     /** Stops the given user and waits for the stop to finish. */
     private void stopUser(int userId) throws RemoteException, InterruptedException {
         runWithLatch("stop user", countDownLatch -> {
@@ -204,6 +264,40 @@ public class UserLifecycleStressTest {
     }
 
     /**
+     * Start user in background and wait for {@link Intent#ACTION_USER_STARTED} broadcast.
+     * <p> To start in foreground instead, see {@link #switchUser(int)}.
+     * <p> This should always be used for profiles since profiles cannot be started in foreground.
+     */
+    private void startUserInBackgroundAndWaitForUserStartedBroadcast(int userId) {
+        runWithBlockingBroadcastReceiver("start user and wait for ACTION_USER_STARTED broadcast",
+                userId, Intent.ACTION_USER_STARTED,
+                () -> ActivityManager.getService().startUserInBackground(userId));
+    }
+
+    /**
+     * Calls the given runnable and expects the given broadcast to be received before timeout,
+     * or fails the test otherwise.
+     * @param tag tag for logging
+     * @param userId id of the user to register the broadcast receiver with
+     *               see {@link Context#registerReceiverAsUser}
+     * @param action action of the broadcast intent filter i.e. {@link Intent#ACTION_USER_STARTED}
+     * @param runnable this will be called after registering the broadcast receiver
+     */
+    private void runWithBlockingBroadcastReceiver(String tag, int userId, String action,
+            FunctionalUtils.ThrowingRunnable runnable) {
+        try (BlockingBroadcastReceiver blockingBroadcastReceiver = new BlockingBroadcastReceiver(
+                mContext, action,
+                intent -> intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL) == userId)) {
+            blockingBroadcastReceiver.setTimeout(TIMEOUT_IN_SECOND);
+            blockingBroadcastReceiver.registerForAllUsers();
+            runnable.run();
+            assertWithMessage("Took more than " + TIMEOUT_IN_SECOND + "s to " + tag)
+                    .that(blockingBroadcastReceiver.awaitForBroadcast())
+                    .isNotNull();
+        }
+    }
+
+    /**
      * Calls the given consumer with a CountDownLatch parameter, and expects it's countDown() method
      * to be called before timeout, or fails the test otherwise.
      */
@@ -221,6 +315,21 @@ public class UserLifecycleStressTest {
 
         final long elapsedTime = System.currentTimeMillis() - startTime;
         Log.d(TAG, tag + " takes " + elapsedTime + " ms");
+    }
+
+    private void logIteration(int iteration, String testMethodName) {
+        Log.d(TAG, testMethodName + " - Iteration " + (iteration + 1) + " / " + NUM_ITERATIONS);
+    }
+
+    private static void waitForBroadcastBarrier() {
+        try {
+            Log.d(TAG, "Starting to waitForBroadcastBarrier");
+            ShellUtils.runShellCommandWithTimeout("am wait-for-broadcast-barrier",
+                    TIMEOUT_IN_SECOND);
+            Log.d(TAG, "waitForBroadcastBarrier is finished");
+        } catch (TimeoutException e) {
+            Log.e(TAG, "Timeout while running waitForBroadcastBarrier", e);
+        }
     }
 }
 
