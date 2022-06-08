@@ -43,6 +43,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
 
+import android.Manifest;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -462,8 +463,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
-                    r.finishIfPossible(resultCode, resultData, resultGrants,
-                            "app-request", true /* oomAdj */);
+                    r.finishIfPossible(resultCode, resultData, resultGrants, "app-request",
+                            true /* oomAdj */);
                     res = r.finishing;
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");
@@ -521,6 +522,23 @@ class ActivityClientController extends IActivityClientController.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void setForceSendResultForMediaProjection(IBinder token) {
+        // Require that this is invoked only during MediaProjection setup.
+        mService.mAmInternal.enforceCallingPermission(
+                Manifest.permission.MANAGE_MEDIA_PROJECTION,
+                "setForceSendResultForMediaProjection");
+
+        final ActivityRecord r;
+        synchronized (mGlobalLock) {
+            r = ActivityRecord.isInRootTaskLocked(token);
+            if (r == null || !r.isInHistory()) {
+                return;
+            }
+            r.setForceSendResultForMediaProjection();
         }
     }
 
