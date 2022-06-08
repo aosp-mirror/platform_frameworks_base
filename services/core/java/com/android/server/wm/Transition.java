@@ -95,7 +95,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -656,6 +655,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 mController.dispatchLegacyAppTransitionFinished(ar);
             }
         }
+
+        // Update the input-sink (touch-blocking) state now that the animation is finished.
+        SurfaceControl.Transaction inputSinkTransaction = null;
+        for (int i = 0; i < mParticipants.size(); ++i) {
+            final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
+            if (ar == null || !ar.isVisible()) continue;
+            if (inputSinkTransaction == null) {
+                inputSinkTransaction = new SurfaceControl.Transaction();
+            }
+            ar.mActivityRecordInputSink.applyChangesToSurfaceIfChanged(inputSinkTransaction);
+        }
+        if (inputSinkTransaction != null) inputSinkTransaction.apply();
+
         // Always schedule stop processing when transition finishes because activities don't
         // stop while they are in a transition thus their stop could still be pending.
         mController.mAtm.mTaskSupervisor
