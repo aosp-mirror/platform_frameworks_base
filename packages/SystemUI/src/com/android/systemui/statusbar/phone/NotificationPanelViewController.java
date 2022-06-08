@@ -958,14 +958,16 @@ public class NotificationPanelViewController extends PanelViewController {
                 });
     }
 
-    private void onFinishInflate() {
+    @VisibleForTesting
+    void onFinishInflate() {
         loadDimens();
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
 
         FrameLayout userAvatarContainer = null;
         KeyguardUserSwitcherView keyguardUserSwitcherView = null;
 
-        if (mKeyguardUserSwitcherEnabled && mUserManager.isUserSwitcherEnabled()) {
+        if (mKeyguardUserSwitcherEnabled && mUserManager.isUserSwitcherEnabled(
+                mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user))) {
             if (mKeyguardQsUserSwitchEnabled) {
                 ViewStub stub = mView.findViewById(R.id.keyguard_qs_user_switch_stub);
                 userAvatarContainer = (FrameLayout) stub.inflate();
@@ -1191,7 +1193,8 @@ public class NotificationPanelViewController extends PanelViewController {
         return view;
     }
 
-    private void reInflateViews() {
+    @VisibleForTesting
+    void reInflateViews() {
         if (DEBUG_LOGCAT) Log.d(TAG, "reInflateViews");
         // Re-inflate the status view group.
         KeyguardStatusView keyguardStatusView =
@@ -1212,7 +1215,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
         // Re-inflate the keyguard user switcher group.
         updateUserSwitcherFlags();
-        boolean isUserSwitcherEnabled = mUserManager.isUserSwitcherEnabled();
+        boolean isUserSwitcherEnabled = mUserManager.isUserSwitcherEnabled(
+                mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user));
         boolean showQsUserSwitch = mKeyguardQsUserSwitchEnabled && isUserSwitcherEnabled;
         boolean showKeyguardUserSwitcher =
                 !mKeyguardQsUserSwitchEnabled
