@@ -4880,9 +4880,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 return true;
             }
 
-            // TODO(b/165794880): Freeform task organizer doesn't support drag-resize yet. Remove
-            // the special case when it does.
-            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+            if (task.isOrganized()) {
                 return true;
             }
 
@@ -5412,6 +5410,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     SurfaceControl getOverlayLayer() {
         return mOverlayLayer;
+    }
+
+    SurfaceControl[] findRoundedCornerOverlays() {
+        List<SurfaceControl> roundedCornerOverlays = new ArrayList<>();
+        for (WindowToken token : mTokenMap.values()) {
+            if (token.mRoundedCornerOverlay) {
+                roundedCornerOverlays.add(token.mSurfaceControl);
+            }
+        }
+        return roundedCornerOverlays.toArray(new SurfaceControl[0]);
     }
 
     /**
