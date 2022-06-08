@@ -88,7 +88,7 @@ public class KidsModeTaskOrganizerTest {
         // NOTE: KidsModeTaskOrganizer should have a null CompatUIController.
         mOrganizer = spy(new KidsModeTaskOrganizer(mTaskOrganizerController, mTestExecutor,
                 mHandler, mContext, mSyncTransactionQueue, mDisplayController,
-                mDisplayInsetsController, Optional.empty(), mObserver));
+                mDisplayInsetsController, Optional.empty(), Optional.empty(), mObserver));
         mOrganizer.initialize(mStartingWindowController);
         doReturn(mTransaction).when(mOrganizer).getWindowContainerTransaction();
         doReturn(new InsetsState()).when(mDisplayController).getInsetsState(DEFAULT_DISPLAY);
