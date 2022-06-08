@@ -104,10 +104,14 @@ class DebugModeFilterProvider @Inject constructor(
         override fun onReceive(context: Context, intent: Intent?) {
             val action = intent?.action
             if (ACTION_SET_NOTIF_DEBUG_MODE == action) {
+                // TODO(b/235268992) remove
+                Log.d(TAG, "ACTION_SET_NOTIF_DEBUG_MODE enter")
                 allowedPackages = intent.extras?.getStringArrayList(EXTRA_ALLOWED_PACKAGES)
                     ?: emptyList()
                 Log.d(TAG, "Updated allowedPackages: $allowedPackages")
                 listeners.forEach(Runnable::run)
+                // TODO(b/235268992) remove
+                Log.d(TAG, "ACTION_SET_NOTIF_DEBUG_MODE leave")
             } else {
                 Log.d(TAG, "Malformed intent: $intent")
             }
