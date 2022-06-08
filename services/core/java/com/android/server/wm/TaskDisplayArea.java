@@ -451,6 +451,14 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         if (!toTop) {
             if (t.mTaskId == mLastLeafTaskToFrontId) {
                 mLastLeafTaskToFrontId = INVALID_TASK_ID;
+
+                // If the previous front-most task is moved to the back, then notify of the new
+                // front-most task.
+                final ActivityRecord topMost = getTopMostActivity();
+                if (topMost != null) {
+                    mAtmService.getTaskChangeNotificationController().notifyTaskMovedToFront(
+                            topMost.getTask().getTaskInfo());
+                }
             }
             return;
         }
