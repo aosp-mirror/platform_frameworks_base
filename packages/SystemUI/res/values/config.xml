@@ -689,9 +689,6 @@
     <!-- Flag to enable privacy dot views, it shall be true for normal case -->
     <bool name="config_enablePrivacyDot">true</bool>
 
-    <!-- Flag to enable dream overlay service and its registration -->
-    <bool name="config_dreamOverlayServiceEnabled">false</bool>
-
     <!-- Class for the communal source connector to be used -->
     <string name="config_communalSourceConnector" translatable="false"></string>
 
