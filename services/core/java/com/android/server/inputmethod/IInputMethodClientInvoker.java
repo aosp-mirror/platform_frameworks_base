@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.DeadObjectException;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -30,6 +31,17 @@ import com.android.internal.inputmethod.InputBindResult;
 
 /**
  * A stateless thin wrapper for {@link IInputMethodClient}.
+ *
+ * <p>This class also takes care of a special case when system_server is also an IME client. In this
+ * scenario methods defined in {@link IInputMethodClient} are invoked as an direct (sync) invocation
+ * despite the fact that all of them are marked {@code oneway}. This can easily cause dead lock
+ * because {@link InputMethodManagerService} assumes that it's safe to make one-way IPCs while
+ * holding the lock. This assumption becomes invalid when {@link IInputMethodClient} is not a
+ * {@link android.os.BinderProxy}.</p>
+ *
+ * <p>To work around such a special scenario, this wrapper re-dispatch the method invocation into
+ * the given {@link Handler} thread if {@link IInputMethodClient} is not a proxy object. Be careful
+ * about its call ordering characteristics.</p>
  */
 final class IInputMethodClientInvoker {
     private static final String TAG = InputMethodManagerService.TAG;
@@ -38,19 +50,25 @@ final class IInputMethodClientInvoker {
     @NonNull
     private final IInputMethodClient mTarget;
     private final boolean mIsProxy;
+    @Nullable
+    private final Handler mHandler;
 
     @AnyThread
     @Nullable
-    static IInputMethodClientInvoker create(@Nullable IInputMethodClient inputMethodClient) {
+    static IInputMethodClientInvoker create(@Nullable IInputMethodClient inputMethodClient,
+            @NonNull Handler handler) {
         if (inputMethodClient == null) {
             return null;
         }
-        return new IInputMethodClientInvoker(inputMethodClient);
+        final boolean isProxy = Binder.isProxy(inputMethodClient);
+        return new IInputMethodClientInvoker(inputMethodClient, isProxy, isProxy ? null : handler);
     }
 
-    private IInputMethodClientInvoker(@NonNull IInputMethodClient target) {
+    private IInputMethodClientInvoker(@NonNull IInputMethodClient target,
+            boolean isProxy, @Nullable Handler handler) {
         mTarget = target;
-        mIsProxy = Binder.isProxy(mTarget);
+        mIsProxy = isProxy;
+        mHandler = handler;
     }
 
     /**
@@ -76,6 +94,15 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void onBindMethod(@NonNull InputBindResult res) {
+        if (mIsProxy) {
+            onBindMethodInternal(res);
+        } else {
+            mHandler.post(() -> onBindMethodInternal(res));
+        }
+    }
+
+    @AnyThread
+    private void onBindMethodInternal(@NonNull InputBindResult res) {
         try {
             mTarget.onBindMethod(res);
         } catch (RemoteException e) {
@@ -91,6 +118,15 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void onBindAccessibilityService(@NonNull InputBindResult res, int id) {
+        if (mIsProxy) {
+            onBindAccessibilityServiceInternal(res, id);
+        } else {
+            mHandler.post(() -> onBindAccessibilityServiceInternal(res, id));
+        }
+    }
+
+    @AnyThread
+    private void onBindAccessibilityServiceInternal(@NonNull InputBindResult res, int id) {
         try {
             mTarget.onBindAccessibilityService(res, id);
         } catch (RemoteException e) {
@@ -106,6 +142,15 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void onUnbindMethod(int sequence, int unbindReason) {
+        if (mIsProxy) {
+            onUnbindMethodInternal(sequence, unbindReason);
+        } else {
+            mHandler.post(() -> onUnbindMethodInternal(sequence, unbindReason));
+        }
+    }
+
+    @AnyThread
+    private void onUnbindMethodInternal(int sequence, int unbindReason) {
         try {
             mTarget.onUnbindMethod(sequence, unbindReason);
         } catch (RemoteException e) {
@@ -115,6 +160,15 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void onUnbindAccessibilityService(int sequence, int id) {
+        if (mIsProxy) {
+            onUnbindAccessibilityServiceInternal(sequence, id);
+        } else {
+            mHandler.post(() -> onUnbindAccessibilityServiceInternal(sequence, id));
+        }
+    }
+
+    @AnyThread
+    private void onUnbindAccessibilityServiceInternal(int sequence, int id) {
         try {
             mTarget.onUnbindAccessibilityService(sequence, id);
         } catch (RemoteException e) {
@@ -124,6 +178,16 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void setActive(boolean active, boolean fullscreen, boolean reportToImeController) {
+        if (mIsProxy) {
+            setActiveInternal(active, fullscreen, reportToImeController);
+        } else {
+            mHandler.post(() -> setActiveInternal(active, fullscreen, reportToImeController));
+        }
+    }
+
+    @AnyThread
+    private void setActiveInternal(boolean active, boolean fullscreen,
+            boolean reportToImeController) {
         try {
             mTarget.setActive(active, fullscreen, reportToImeController);
         } catch (RemoteException e) {
@@ -133,6 +197,15 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void scheduleStartInputIfNecessary(boolean fullscreen) {
+        if (mIsProxy) {
+            scheduleStartInputIfNecessaryInternal(fullscreen);
+        } else {
+            mHandler.post(() -> scheduleStartInputIfNecessaryInternal(fullscreen));
+        }
+    }
+
+    @AnyThread
+    private void scheduleStartInputIfNecessaryInternal(boolean fullscreen) {
         try {
             mTarget.scheduleStartInputIfNecessary(fullscreen);
         } catch (RemoteException e) {
@@ -142,6 +215,15 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void reportFullscreenMode(boolean fullscreen) {
+        if (mIsProxy) {
+            reportFullscreenModeInternal(fullscreen);
+        } else {
+            mHandler.post(() -> reportFullscreenModeInternal(fullscreen));
+        }
+    }
+
+    @AnyThread
+    private void reportFullscreenModeInternal(boolean fullscreen) {
         try {
             mTarget.reportFullscreenMode(fullscreen);
         } catch (RemoteException e) {
@@ -151,6 +233,17 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void updateVirtualDisplayToScreenMatrix(int bindSequence, float[] matrixValues) {
+        if (mIsProxy) {
+            updateVirtualDisplayToScreenMatrixInternal(bindSequence, matrixValues);
+        } else {
+            mHandler.post(() ->
+                    updateVirtualDisplayToScreenMatrixInternal(bindSequence, matrixValues));
+        }
+    }
+
+    @AnyThread
+    private void updateVirtualDisplayToScreenMatrixInternal(int bindSequence,
+            float[] matrixValues) {
         try {
             mTarget.updateVirtualDisplayToScreenMatrix(bindSequence, matrixValues);
         } catch (RemoteException e) {
@@ -160,6 +253,15 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void setImeTraceEnabled(boolean enabled) {
+        if (mIsProxy) {
+            setImeTraceEnabledInternal(enabled);
+        } else {
+            mHandler.post(() -> setImeTraceEnabledInternal(enabled));
+        }
+    }
+
+    @AnyThread
+    private void setImeTraceEnabledInternal(boolean enabled) {
         try {
             mTarget.setImeTraceEnabled(enabled);
         } catch (RemoteException e) {
@@ -169,6 +271,15 @@ final class IInputMethodClientInvoker {
 
     @AnyThread
     void throwExceptionFromSystem(String message) {
+        if (mIsProxy) {
+            throwExceptionFromSystemInternal(message);
+        } else {
+            mHandler.post(() -> throwExceptionFromSystemInternal(message));
+        }
+    }
+
+    @AnyThread
+    private void throwExceptionFromSystemInternal(String message) {
         try {
             mTarget.throwExceptionFromSystem(message);
         } catch (RemoteException e) {
