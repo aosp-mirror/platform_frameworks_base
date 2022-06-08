@@ -854,7 +854,7 @@ public final class CameraExtensionCharacteristics {
                 Class<CaptureRequest.Key<?>> crKeyTyped = (Class<CaptureRequest.Key<?>>) crKey;
 
                 ret.addAll(requestChars.getAvailableKeyList(CaptureRequest.class, crKeyTyped,
-                        requestKeys, /*includeSynthetic*/ false));
+                        requestKeys, /*includeSynthetic*/ true));
             }
 
             // Jpeg quality and orientation must always be supported
@@ -929,7 +929,7 @@ public final class CameraExtensionCharacteristics {
                 Class<CaptureResult.Key<?>> crKeyTyped = (Class<CaptureResult.Key<?>>)crKey;
 
                 ret.addAll(resultChars.getAvailableKeyList(CaptureResult.class, crKeyTyped,
-                        resultKeys, /*includeSynthetic*/ false));
+                        resultKeys, /*includeSynthetic*/ true));
 
                 // Jpeg quality, orientation and sensor timestamp must always be supported
                 if (!ret.contains(CaptureResult.JPEG_QUALITY)) {
