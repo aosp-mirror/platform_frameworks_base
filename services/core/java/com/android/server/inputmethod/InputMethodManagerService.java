@@ -100,6 +100,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
 import android.view.DisplayInfo;
 import android.view.IWindowManager;
@@ -303,6 +304,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final InputMethodSettings mSettings;
     final SettingsObserver mSettingsObserver;
     final IWindowManager mIWindowManager;
+    private final SparseBooleanArray mLoggedDeniedGetInputMethodWindowVisibleHeightForUid =
+            new SparseBooleanArray(0);
     final WindowManagerInternal mWindowManagerInternal;
     private final DisplayManagerInternal mDisplayManagerInternal;
     final HandlerCaller mCaller;
@@ -1217,6 +1220,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void onFinishPackageChanges() {
             onFinishPackageChangesInternal();
             clearPackageChangeState();
+        }
+
+        @Override
+        public void onUidRemoved(int uid) {
+            synchronized (mMethodMap) {
+                mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.delete(uid);
+            }
         }
 
         private void clearPackageChangeState() {
@@ -2754,20 +2764,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                if (mCurClient == null || client == null
-                        || mCurClient.client.asBinder() != client.asBinder()) {
-                    // We need to check if this is the current client with
-                    // focus in the window manager, to allow this call to
-                    // be made before input is started in it.
-                    final ClientState cs = mClients.get(client.asBinder());
-                    if (cs == null) {
-                        throw new IllegalArgumentException("unknown client " + client.asBinder());
-                    }
-                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                            cs.selfReportedDisplayId)) {
-                        Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
-                        return false;
-                    }
+                if (!canInteractWithImeLocked(uid, client, "showSoftInput")) {
+                    return false;
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(flags, resultReceiver);
@@ -3462,9 +3460,46 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * @return {@link WindowManagerInternal#getInputMethodWindowVisibleHeight()}
      */
     @Override
-    public int getInputMethodWindowVisibleHeight() {
-        // TODO(yukawa): Should we verify the display ID?
-        return mWindowManagerInternal.getInputMethodWindowVisibleHeight(mCurTokenDisplayId);
+    @Deprecated
+    public int getInputMethodWindowVisibleHeight(@NonNull IInputMethodClient client) {
+        int callingUid = Binder.getCallingUid();
+        return Binder.withCleanCallingIdentity(() -> {
+            final int curTokenDisplayId;
+            synchronized (mMethodMap) {
+                if (!canInteractWithImeLocked(callingUid, client,
+                        "getInputMethodWindowVisibleHeight")) {
+                    if (!mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.get(callingUid)) {
+                        EventLog.writeEvent(0x534e4554, "204906124", callingUid, "");
+                        mLoggedDeniedGetInputMethodWindowVisibleHeightForUid.put(callingUid, true);
+                    }
+                    return 0;
+                }
+                // This should probably use the caller's display id, but because this is unsupported
+                // and maintained only for compatibility, there's no point in fixing it.
+                curTokenDisplayId = mCurTokenDisplayId;
+            }
+            return mWindowManagerInternal.getInputMethodWindowVisibleHeight(curTokenDisplayId);
+        });
+    }
+
+    private boolean canInteractWithImeLocked(int callingUid, IInputMethodClient client,
+            String method) {
+        if (mCurClient == null || client == null
+                || mCurClient.client.asBinder() != client.asBinder()) {
+            // We need to check if this is the current client with
+            // focus in the window manager, to allow this call to
+            // be made before input is started in it.
+            final ClientState cs = mClients.get(client.asBinder());
+            if (cs == null) {
+                throw new IllegalArgumentException("unknown client " + client.asBinder());
+            }
+            if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
+                    cs.selfReportedDisplayId)) {
+                Slog.w(TAG, "Ignoring " + method + " of uid " + callingUid + ": " + client);
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
