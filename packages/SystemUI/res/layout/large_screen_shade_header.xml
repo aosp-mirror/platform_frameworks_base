@@ -22,7 +22,7 @@
     android:minHeight="@dimen/large_screen_shade_header_min_height"
     android:clickable="false"
     android:focusable="true"
-    android:paddingLeft="@dimen/qs_panel_padding"
+    android:paddingLeft="@dimen/large_screen_shade_header_left_padding"
     android:paddingRight="@dimen/qs_panel_padding"
     android:visibility="gone"
     android:theme="@style/Theme.SystemUI.QuickSettings.Header">
