@@ -6474,9 +6474,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onHandleAppCrash(WindowProcessController wpc) {
+        public void onHandleAppCrash(@NonNull WindowProcessController wpc) {
             synchronized (mGlobalLock) {
-                mRootWindowContainer.handleAppCrash(wpc);
+                wpc.handleAppCrash();
             }
         }
 
