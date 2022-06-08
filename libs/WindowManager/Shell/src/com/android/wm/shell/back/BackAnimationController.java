@@ -210,19 +210,19 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         @Override
         public void setBackToLauncherCallback(IOnBackInvokedCallback callback) {
             executeRemoteCallWithTaskPermission(mController, "setBackToLauncherCallback",
-                    (controller) -> mController.setBackToLauncherCallback(callback));
+                    (controller) -> controller.setBackToLauncherCallback(callback));
         }
 
         @Override
         public void clearBackToLauncherCallback() {
             executeRemoteCallWithTaskPermission(mController, "clearBackToLauncherCallback",
-                    (controller) -> mController.clearBackToLauncherCallback());
+                    (controller) -> controller.clearBackToLauncherCallback());
         }
 
         @Override
         public void onBackToLauncherAnimationFinished() {
             executeRemoteCallWithTaskPermission(mController, "onBackToLauncherAnimationFinished",
-                    (controller) -> mController.onBackToLauncherAnimationFinished());
+                    (controller) -> controller.onBackToLauncherAnimationFinished());
         }
 
         void invalidate() {
