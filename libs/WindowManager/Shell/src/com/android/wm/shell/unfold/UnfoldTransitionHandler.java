@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.unfold;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import android.os.IBinder;
@@ -33,22 +35,19 @@ import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
 import com.android.wm.shell.transition.Transitions.TransitionHandler;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
-import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
-import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
  * Transition handler that is responsible for animating app surfaces when unfolding of foldable
  * devices. It does not handle the folding animation, which is done in
- * {@link UnfoldAnimationController}.
+ * {@link com.android.wm.shell.fullscreen.FullscreenUnfoldController}.
  */
 public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListener {
 
     private final ShellUnfoldProgressProvider mUnfoldProgressProvider;
     private final Transitions mTransitions;
+    private final UnfoldBackgroundController mUnfoldBackgroundController;
     private final Executor mExecutor;
     private final TransactionPool mTransactionPool;
 
@@ -57,26 +56,22 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     @Nullable
     private IBinder mTransition;
 
-    private final List<UnfoldTaskAnimator> mAnimators = new ArrayList<>();
+    private final FullscreenUnfoldTaskAnimator mFullscreenAnimator;
 
     public UnfoldTransitionHandler(ShellUnfoldProgressProvider unfoldProgressProvider,
-            FullscreenUnfoldTaskAnimator fullscreenUnfoldAnimator,
-            SplitTaskUnfoldAnimator splitUnfoldTaskAnimator,
-            TransactionPool transactionPool,
+            FullscreenUnfoldTaskAnimator animator, TransactionPool transactionPool,
+            UnfoldBackgroundController unfoldBackgroundController,
             Executor executor, Transitions transitions) {
         mUnfoldProgressProvider = unfoldProgressProvider;
+        mFullscreenAnimator = animator;
         mTransactionPool = transactionPool;
+        mUnfoldBackgroundController = unfoldBackgroundController;
         mExecutor = executor;
         mTransitions = transitions;
-
-        mAnimators.add(splitUnfoldTaskAnimator);
-        mAnimators.add(fullscreenUnfoldAnimator);
     }
 
     public void init() {
-        for (int i = 0; i < mAnimators.size(); i++) {
-            mAnimators.get(i).init();
-        }
+        mFullscreenAnimator.init();
         mTransitions.addHandler(this);
         mUnfoldProgressProvider.addListener(mExecutor, this);
     }
@@ -88,67 +83,44 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             @NonNull TransitionFinishCallback finishCallback) {
         if (transition != mTransition) return false;
 
-        for (int i = 0; i < mAnimators.size(); i++) {
-            final UnfoldTaskAnimator animator = mAnimators.get(i);
-            animator.clearTasks();
-
-            info.getChanges().forEach(change -> {
-                if (change.getTaskInfo() != null
-                        && change.getMode() == TRANSIT_CHANGE
-                        && animator.isApplicableTask(change.getTaskInfo())) {
-                    animator.onTaskAppeared(change.getTaskInfo(), change.getLeash());
-                }
-            });
-
-            if (animator.hasActiveTasks()) {
-                animator.prepareStartTransaction(startTransaction);
-                animator.prepareFinishTransaction(finishTransaction);
-                animator.start();
-            }
-        }
-
+        mUnfoldBackgroundController.ensureBackground(startTransaction);
         startTransaction.apply();
+
+        mFullscreenAnimator.clearTasks();
+        info.getChanges().forEach(change -> {
+            final boolean allowedToAnimate = change.getTaskInfo() != null
+                    && change.getTaskInfo().isVisible()
+                    && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                    && change.getTaskInfo().getActivityType() != ACTIVITY_TYPE_HOME
+                    && change.getMode() == TRANSIT_CHANGE;
+
+            if (allowedToAnimate) {
+                mFullscreenAnimator.addTask(change.getTaskInfo(), change.getLeash());
+            }
+        });
+
+        mFullscreenAnimator.resetAllSurfaces(finishTransaction);
+        mUnfoldBackgroundController.removeBackground(finishTransaction);
         mFinishCallback = finishCallback;
         return true;
     }
 
     @Override
     public void onStateChangeProgress(float progress) {
-        if (mTransition == null) return;
-
-        SurfaceControl.Transaction transaction = null;
-
-        for (int i = 0; i < mAnimators.size(); i++) {
-            final UnfoldTaskAnimator animator = mAnimators.get(i);
-
-            if (animator.hasActiveTasks()) {
-                if (transaction == null) {
-                    transaction = mTransactionPool.acquire();
-                }
-
-                animator.applyAnimationProgress(progress, transaction);
-            }
-        }
-
-        if (transaction != null) {
-            transaction.apply();
-            mTransactionPool.release(transaction);
-        }
+        final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
+        mFullscreenAnimator.applyAnimationProgress(progress, transaction);
+        transaction.apply();
+        mTransactionPool.release(transaction);
     }
 
     @Override
     public void onStateChangeFinished() {
-        if (mFinishCallback == null) return;
-
-        for (int i = 0; i < mAnimators.size(); i++) {
-            final UnfoldTaskAnimator animator = mAnimators.get(i);
-            animator.clearTasks();
-            animator.stop();
+        if (mFinishCallback != null) {
+            mFinishCallback.onTransitionFinished(null, null);
+            mFinishCallback = null;
+            mTransition = null;
+            mFullscreenAnimator.clearTasks();
         }
-
-        mFinishCallback.onTransitionFinished(null, null);
-        mFinishCallback = null;
-        mTransition = null;
     }
 
     @Nullable

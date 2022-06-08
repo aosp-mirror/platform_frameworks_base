@@ -19,7 +19,9 @@ import android.content.Context
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -45,6 +47,7 @@ class InternetDialogFactory @Inject constructor(
     private val keyguardStateController: KeyguardStateController
 ) {
     companion object {
+        private const val INTERACTION_JANK_TAG = "internet"
         var internetDialog: InternetDialog? = null
     }
 
@@ -61,12 +64,20 @@ class InternetDialogFactory @Inject constructor(
             }
             return
         } else {
-            internetDialog = InternetDialog(context, this, internetDialogController,
-                    canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger, handler,
-                    executor, keyguardStateController)
+            internetDialog = InternetDialog(
+                context, this, internetDialogController,
+                canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger, handler,
+                executor, keyguardStateController
+            )
             if (view != null) {
-                dialogLaunchAnimator.showFromView(internetDialog!!, view,
-                    animateBackgroundBoundsChange = true)
+                dialogLaunchAnimator.showFromView(
+                    internetDialog!!, view,
+                    animateBackgroundBoundsChange = true,
+                    cuj = DialogCuj(
+                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                        INTERACTION_JANK_TAG
+                    )
+                )
             } else {
                 internetDialog?.show()
             }

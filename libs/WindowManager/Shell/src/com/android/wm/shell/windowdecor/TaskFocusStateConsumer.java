@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.unfold.qualifier;
+package com.android.wm.shell.windowdecor;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import javax.inject.Qualifier;
-
-/**
- * Indicates that this class is used for the shell unfold transition
- */
-@Qualifier
-@Retention(RetentionPolicy.RUNTIME)
-public @interface UnfoldShellTransition {}
+interface TaskFocusStateConsumer {
+    void setTaskFocusState(boolean focused);
+}

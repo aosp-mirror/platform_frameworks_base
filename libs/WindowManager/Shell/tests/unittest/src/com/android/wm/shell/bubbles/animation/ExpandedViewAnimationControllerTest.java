@@ -156,7 +156,7 @@ public class ExpandedViewAnimationControllerTest extends ShellTestCase {
         mController.reset();
         verify(mMockExpandedView, atLeastOnce()).setAnimating(false);
         verify(mMockExpandedView).setContentAlpha(1);
-        verify(mMockExpandedView).setAlpha(1);
+        verify(mMockExpandedView).setBackgroundAlpha(1);
         verify(mMockExpandedView).setManageButtonAlpha(1);
         verify(mMockExpandedView).setManageButtonAlpha(1);
         verify(mMockExpandedView).setTopClip(0);

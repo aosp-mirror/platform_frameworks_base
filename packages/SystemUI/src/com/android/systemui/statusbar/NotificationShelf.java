@@ -229,6 +229,17 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mActualWidth = actualWidth;
     }
 
+    @Override
+    public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
+        super.getBoundsOnScreen(outRect, clipToParent);
+        final int actualWidth = getActualWidth();
+        if (isLayoutRtl()) {
+            outRect.left = outRect.right - actualWidth;
+        } else {
+            outRect.right = outRect.left + actualWidth;
+        }
+    }
+
     /**
      * @return Actual width of shelf, accounting for possible ongoing width animation
      */
