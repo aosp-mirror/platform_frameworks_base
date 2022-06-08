@@ -754,6 +754,13 @@ public final class DeviceConfig {
      */
     public static final String NAMESPACE_VENDOR_SYSTEM_NATIVE = "vendor_system_native";
 
+    /**
+     * Namespace for memory safety related features (e.g. MTE)
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_MEMORY_SAFETY_NATIVE = "memory_safety_native";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
