@@ -392,6 +392,19 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * This is temp function for compatible with old cts tests suite and it equal to
+     * {@link #setAdjacentRoots(WindowContainerToken, WindowContainerToken).
+     * @deprecated should use {@link #setAdjacentRoots(WindowContainerToken, WindowContainerToken)}
+     */
+    @Deprecated
+    @NonNull
+    public WindowContainerTransaction setAdjacentRoots(
+            @NonNull WindowContainerToken root1, @NonNull WindowContainerToken root2,
+            boolean moveTogether) {
+        return setAdjacentRoots(root1, root2);
+    }
+
+    /**
      * Sets the container as launch adjacent flag root. Task starting with
      * {@link FLAG_ACTIVITY_LAUNCH_ADJACENT} will be launching to.
      */
