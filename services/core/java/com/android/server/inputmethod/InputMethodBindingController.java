@@ -89,7 +89,8 @@ final class InputMethodBindingController {
             Context.BIND_AUTO_CREATE
                     | Context.BIND_NOT_VISIBLE
                     | Context.BIND_NOT_FOREGROUND
-                    | Context.BIND_IMPORTANT_BACKGROUND;
+                    | Context.BIND_IMPORTANT_BACKGROUND
+                    | Context.BIND_SCHEDULE_LIKE_TOP_APP;
     /**
      * Binding flags used only while the {@link InputMethodService} is showing window.
      */
@@ -98,8 +99,7 @@ final class InputMethodBindingController {
                     | Context.BIND_TREAT_LIKE_ACTIVITY
                     | Context.BIND_FOREGROUND_SERVICE
                     | Context.BIND_INCLUDE_CAPABILITIES
-                    | Context.BIND_SHOWING_UI
-                    | Context.BIND_SCHEDULE_LIKE_TOP_APP;
+                    | Context.BIND_SHOWING_UI;
 
     InputMethodBindingController(@NonNull InputMethodManagerService service) {
         mService = service;
