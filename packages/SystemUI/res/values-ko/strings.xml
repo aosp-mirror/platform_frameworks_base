@@ -573,7 +573,7 @@
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"자세히 알아보기"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"<xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"공개 VPN 설정"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN 설정 열기"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"신뢰할 수 있는 사용자 인증 정보 열기"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"관리자가 기기에서 발생하는 트래픽을 모니터링하는 네트워크 로깅을 사용 설정했습니다.\n\n자세한 정보는 관리자에게 문의하세요."</string>

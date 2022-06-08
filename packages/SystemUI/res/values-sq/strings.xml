@@ -333,7 +333,7 @@
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"Vetëm me prioritet"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Vetëm alarmet"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Heshtje e plotë"</string>
-    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
+    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth-i"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"\"Bluetooth-i\" (<xliff:g id="NUMBER">%d</xliff:g> pajisje)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"\"Bluetooth-i\" është i çaktivizuar"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nuk ofrohet për përdorim asnjë pajisje e çiftuar"</string>
@@ -366,7 +366,7 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Përdoruesi"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Përdorues i ri"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Interneti"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Ofrohen rrjete"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Rrjetet nuk ofrohen"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Nuk është i lidhur"</string>
@@ -628,7 +628,7 @@
     <string name="stream_music" msgid="2188224742361847580">"Media"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarmi"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Njoftimi"</string>
-    <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
+    <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth-i"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Frekuenca e dyfishtë me shumë tone"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Qasshmëria"</string>
     <string name="ring_toggle_title" msgid="5973120187287633224">"Telefonatat"</string>
@@ -652,7 +652,7 @@
     <string name="output_calls_title" msgid="7085583034267889109">"Dalja e telefonatës"</string>
     <string name="output_none_found" msgid="5488087293120982770">"Nuk u gjet asnjë pajisje"</string>
     <string name="output_none_found_service_off" msgid="935667567681386368">"Nuk u gjet asnjë pajisje. Provo të aktivizosh <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
-    <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth"</string>
+    <string name="output_service_bt" msgid="4315362133973911687">"Bluetooth-i"</string>
     <string name="output_service_wifi" msgid="9003667810868222134">"Wi-Fi"</string>
     <string name="output_service_bt_wifi" msgid="7186882540475524124">"Bluetooth dhe Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sintonizuesi i Sistemit të Ndërfaqes së Përdoruesit"</string>
@@ -819,7 +819,7 @@
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Kthim prapa"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Luaj/pauzë"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Ndalo"</string>
-    <string name="keyboard_key_media_next" msgid="8502476691227914952">"Përpara"</string>
+    <string name="keyboard_key_media_next" msgid="8502476691227914952">"Para"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Prapa"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rikthe me shpejtësi"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Përparo me shpejtësi"</string>
