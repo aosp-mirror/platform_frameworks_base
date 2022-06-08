@@ -13,7 +13,6 @@ java_defaults {
     plugins: ["error_prone_android_framework"],
     errorprone: {
         javacflags: [
-            // "-Xep:AndroidFrameworkBinderIdentity:ERROR",
             "-Xep:AndroidFrameworkCompatChange:ERROR",
             // "-Xep:AndroidFrameworkUid:ERROR",
             "-Xep:SelfEquals:ERROR",

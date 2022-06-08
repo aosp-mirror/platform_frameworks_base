@@ -33,9 +33,9 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
@@ -148,11 +148,11 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void startInput(IBinder startInputToken, IInputContext inputContext, EditorInfo attribute,
-            boolean restarting, @InputMethodNavButtonFlags int navButtonFlags,
+    void startInput(IBinder startInputToken, IRemoteInputConnection inputConnection,
+            EditorInfo attribute, boolean restarting, @InputMethodNavButtonFlags int navButtonFlags,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         try {
-            mTarget.startInput(startInputToken, inputContext, attribute, restarting,
+            mTarget.startInput(startInputToken, inputConnection, attribute, restarting,
                     navButtonFlags, imeDispatcher);
         } catch (RemoteException e) {
             logRemoteException(e);

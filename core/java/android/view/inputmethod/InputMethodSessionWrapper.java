@@ -24,7 +24,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.view.IInputContext;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.view.IInputMethodSession;
 
 /**
@@ -135,9 +135,10 @@ final class InputMethodSessionWrapper {
     }
 
     @AnyThread
-    void invalidateInput(EditorInfo editorInfo, IInputContext inputContext, int sessionId) {
+    void invalidateInput(EditorInfo editorInfo, IRemoteInputConnection inputConnection,
+            int sessionId) {
         try {
-            mSession.invalidateInput(editorInfo, inputContext, sessionId);
+            mSession.invalidateInput(editorInfo, inputConnection, sessionId);
         } catch (RemoteException e) {
             Log.w(TAG, "IME died", e);
         }

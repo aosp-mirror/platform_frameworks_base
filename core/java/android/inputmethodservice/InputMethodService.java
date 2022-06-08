@@ -143,6 +143,7 @@ import android.window.WindowMetricsHelper;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperations;
@@ -150,7 +151,6 @@ import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputContext;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.io.FileDescriptor;
@@ -346,6 +346,14 @@ public class InputMethodService extends AbstractInputMethodService {
     private static final int MAX_EVENTS_BUFFER = 500;
 
     /**
+     * When IME doesn't receive stylus input for these many milliseconds, Handwriting session
+     * will be finished by calling {@link #finishStylusHandwriting()}.
+     * @see #onStartStylusHandwriting()
+     * @see #onFinishStylusHandwriting()
+     */
+    private static final int STYLUS_HANDWRITING_IDLE_TIMEOUT_MS = 10000;
+
+    /**
      * A circular buffer of size MAX_EVENTS_BUFFER in case IME is taking too long to add ink view.
      **/
     private RingBuffer<MotionEvent> mPendingEvents;
@@ -353,6 +361,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private Boolean mBackCallbackRegistered = false;
     private final OnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
     private Runnable mImeSurfaceRemoverRunnable;
+    private Runnable mFinishHwRunnable;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -996,8 +1005,10 @@ public class InputMethodService extends AbstractInputMethodService {
                             return false;
                         }
                         onStylusHandwritingMotionEvent((MotionEvent) event);
+                        scheduleHandwritingSessionTimeout();
                         return true;
                     });
+            scheduleHandwritingSessionTimeout();
         }
 
         /**
@@ -1255,10 +1266,10 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @Override
         public final void invalidateInputInternal(@NonNull EditorInfo editorInfo,
-                @NonNull IInputContext inputContext, int sessionId) {
+                @NonNull IRemoteInputConnection inputConnection, int sessionId) {
             if (mStartedInputConnection instanceof RemoteInputConnection) {
                 final RemoteInputConnection ric = (RemoteInputConnection) mStartedInputConnection;
-                if (!ric.isSameConnection(inputContext)) {
+                if (!ric.isSameConnection(inputConnection)) {
                     // This is not an error, and can be safely ignored.
                     if (DEBUG) {
                         Log.d(TAG, "ignoring invalidateInput() due to context mismatch.");
@@ -2475,6 +2486,10 @@ public class InputMethodService extends AbstractInputMethodService {
         if (!mHandwritingRequestId.isPresent()) {
             return;
         }
+        if (mHandler != null && mFinishHwRunnable != null) {
+            mHandler.removeCallbacks(mFinishHwRunnable);
+        }
+        mFinishHwRunnable = null;
 
         final int requestId = mHandwritingRequestId.getAsInt();
         mHandwritingRequestId = OptionalInt.empty();
@@ -2486,6 +2501,30 @@ public class InputMethodService extends AbstractInputMethodService {
         mPrivOps.resetStylusHandwriting(requestId);
         mOnPreparedStylusHwCalled = false;
         onFinishStylusHandwriting();
+    }
+
+    private Runnable getFinishHandwritingRunnable() {
+        if (mFinishHwRunnable != null) {
+            return mFinishHwRunnable;
+        }
+        return mFinishHwRunnable = () -> {
+            if (mHandler != null) {
+                mHandler.removeCallbacks(mFinishHwRunnable);
+            }
+            Log.d(TAG, "Stylus handwriting idle timed-out. calling finishStylusHandwriting()");
+            mFinishHwRunnable = null;
+            finishStylusHandwriting();
+        };
+    }
+
+    private void scheduleHandwritingSessionTimeout() {
+        if (mHandler == null) {
+            mHandler = new Handler(getMainLooper());
+        }
+        if (mFinishHwRunnable != null) {
+            mHandler.removeCallbacks(mFinishHwRunnable);
+        }
+        mHandler.postDelayed(getFinishHandwritingRunnable(), STYLUS_HANDWRITING_IDLE_TIMEOUT_MS);
     }
 
     /**

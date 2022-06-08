@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import com.android.internal.view.IInputContext;
+import com.android.internal.inputmethod.IRemoteInputConnection;
 
 /**
  * The InputMethodSession interface provides the per-client functionality
@@ -207,12 +207,12 @@ public interface InputMethodSession {
      * {@link InputConnection} due to a stale callback.</p>
      *
      * @param editorInfo {@link EditorInfo} to be used
-     * @param inputContext specifies which {@link InputConnection} is being updated.
+     * @param inputConnection specifies which {@link InputConnection} is being updated.
      * @param sessionId the ID to be specified to
      *                       {@link com.android.internal.inputmethod.InputConnectionCommandHeader}.
      * @hide
      */
-    default void invalidateInputInternal(EditorInfo editorInfo, IInputContext inputContext,
-            int sessionId) {
+    default void invalidateInputInternal(EditorInfo editorInfo,
+            IRemoteInputConnection inputConnection, int sessionId) {
     }
 }

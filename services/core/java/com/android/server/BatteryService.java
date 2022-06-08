@@ -1302,36 +1302,26 @@ public final class BatteryService extends SystemService {
 
         @Override
         public void setChargerAcOnline(boolean online, boolean forceUpdate) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
             BatteryService.this.setChargerAcOnline(online, forceUpdate);
         }
 
         @Override
         public void setBatteryLevel(int level, boolean forceUpdate) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
             BatteryService.this.setBatteryLevel(level, forceUpdate);
         }
 
         @Override
         public void unplugBattery(boolean forceUpdate) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
             BatteryService.this.unplugBattery(forceUpdate, /* printWriter= */ null);
         }
 
         @Override
         public void resetBattery(boolean forceUpdate) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
             BatteryService.this.resetBattery(forceUpdate, /* printWriter= */ null);
         }
 
         @Override
         public void suspendBatteryInput() {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, /* message= */ null);
             BatteryService.this.suspendBatteryInput();
         }
     }
