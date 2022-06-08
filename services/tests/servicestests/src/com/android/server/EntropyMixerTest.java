@@ -17,11 +17,18 @@
 package com.android.server;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
-import android.test.AndroidTestCase;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -30,25 +37,26 @@ import java.util.Arrays;
 /**
  * Tests for {@link com.android.server.EntropyMixer}
  */
-public class EntropyMixerTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class EntropyMixerTest {
 
     private static final int SEED_FILE_SIZE = EntropyMixer.SEED_FILE_SIZE;
 
-    private File dir;
+    private Context context;
     private File seedFile;
     private File randomReadDevice;
     private File randomWriteDevice;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        dir = getContext().getDir("test", Context.MODE_PRIVATE);
-        seedFile = createTempFile(dir, "entropy.dat");
-        randomReadDevice = createTempFile(dir, "urandomRead");
-        randomWriteDevice = createTempFile(dir, "urandomWrite");
+        context = InstrumentationRegistry.getTargetContext();
+        seedFile = createTempFile("entropy.dat");
+        randomReadDevice = createTempFile("urandomRead");
+        randomWriteDevice = createTempFile("urandomWrite");
     }
 
-    private File createTempFile(File dir, String prefix) throws Exception {
-        File file = File.createTempFile(prefix, null, dir);
+    private File createTempFile(String prefix) throws Exception {
+        File file = File.createTempFile(prefix, null);
         file.deleteOnExit();
         return file;
     }
@@ -69,7 +77,7 @@ public class EntropyMixerTest extends AndroidTestCase {
 
         // The constructor should have the side effect of writing to
         // randomWriteDevice and creating seedFile.
-        new EntropyMixer(getContext(), seedFile, randomReadDevice, randomWriteDevice);
+        new EntropyMixer(context, seedFile, randomReadDevice, randomWriteDevice);
 
         // Since there was no old seed file, the data that was written to
         // randomWriteDevice should contain only device-specific information.
@@ -90,7 +98,7 @@ public class EntropyMixerTest extends AndroidTestCase {
 
         // The constructor should have the side effect of writing to
         // randomWriteDevice and updating seedFile.
-        new EntropyMixer(getContext(), seedFile, randomReadDevice, randomWriteDevice);
+        new EntropyMixer(context, seedFile, randomReadDevice, randomWriteDevice);
 
         // The data that was written to randomWriteDevice should consist of the
         // previous seed followed by the device-specific information.
