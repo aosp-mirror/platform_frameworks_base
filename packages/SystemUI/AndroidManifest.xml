@@ -713,7 +713,7 @@
 
         <service
             android:name=".dreams.DreamOverlayService"
-            android:enabled="@bool/config_dreamOverlayServiceEnabled"
+            android:enabled="false"
             android:exported="true" />
 
         <activity android:name=".keyguard.WorkLockActivity"
