@@ -34,16 +34,23 @@ import javax.inject.Inject
 
 private val TAG = ClockRegistry::class.simpleName
 private val DEBUG = true
-const val DEFAULT_CLOCK_ID = "DEFAULT"
 
 typealias ClockChangeListener = () -> Unit
 
 /** ClockRegistry aggregates providers and plugins */
-open class ClockRegistry @Inject constructor(
+open class ClockRegistry(
     val context: Context,
     val pluginManager: PluginManager,
-    @Main val handler: Handler
+    val handler: Handler,
+    defaultClockProvider: ClockProvider
 ) {
+    @Inject constructor(
+        context: Context,
+        pluginManager: PluginManager,
+        @Main handler: Handler,
+        defaultClockProvider: DefaultClockProvider
+    ) : this(context, pluginManager, handler, defaultClockProvider as ClockProvider) { }
+
     private val gson = Gson()
     private val availableClocks = mutableMapOf<ClockId, ClockInfo>()
     private val clockChangeListeners = mutableListOf<ClockChangeListener>()
@@ -53,60 +60,71 @@ open class ClockRegistry @Inject constructor(
     }
 
     private val pluginListener = object : PluginListener<ClockProviderPlugin> {
-        override fun onPluginConnected(plugin: ClockProviderPlugin, context: Context) {
-            val currentId = currentClockId
-            for (clock in plugin.getClocks()) {
-                val id = clock.clockId
-                val current = availableClocks[id]
-                if (current != null) {
-                    Log.e(TAG, "Clock Id conflict: $id is registered by both " +
-                            "${plugin::class.simpleName} and ${current.provider::class.simpleName}")
-                    return
-                }
+        override fun onPluginConnected(plugin: ClockProviderPlugin, context: Context) =
+            connectClocks(plugin)
 
-                availableClocks[id] = ClockInfo(clock, plugin)
-
-                if (currentId == id) {
-                    if (DEBUG) {
-                        Log.i(TAG, "Current clock ($currentId) was connected")
-                    }
-                    clockChangeListeners.forEach { it() }
-                }
-            }
-        }
-
-        override fun onPluginDisconnected(plugin: ClockProviderPlugin) {
-            val currentId = currentClockId
-            for (clock in plugin.getClocks()) {
-                availableClocks.remove(clock.clockId)
-
-                if (currentId == clock.clockId) {
-                    Log.w(TAG, "Current clock ($currentId) was disconnected")
-                    clockChangeListeners.forEach { it() }
-                }
-            }
-        }
+        override fun onPluginDisconnected(plugin: ClockProviderPlugin) =
+            disconnectClocks(plugin)
     }
 
     open var currentClockId: ClockId
         get() {
-            val json = Settings.Secure.getString(context.contentResolver,
-                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE)
+            val json = Settings.Secure.getString(
+                context.contentResolver,
+                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE
+            )
             return gson.fromJson(json, ClockSetting::class.java).clockId
         }
         set(value) {
             val json = gson.toJson(ClockSetting(value, System.currentTimeMillis()))
-            Settings.Secure.putString(context.contentResolver,
-                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE, json)
+            Settings.Secure.putString(
+                context.contentResolver,
+                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE, json
+            )
         }
 
     init {
+        connectClocks(defaultClockProvider)
         pluginManager.addPluginListener(pluginListener, ClockProviderPlugin::class.java)
         context.contentResolver.registerContentObserver(
             Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
             false,
             settingObserver,
-            UserHandle.USER_ALL)
+            UserHandle.USER_ALL
+        )
+    }
+
+    private fun connectClocks(provider: ClockProvider) {
+        val currentId = currentClockId
+        for (clock in provider.getClocks()) {
+            val id = clock.clockId
+            val current = availableClocks[id]
+            if (current != null) {
+                Log.e(TAG, "Clock Id conflict: $id is registered by both " +
+                    "${provider::class.simpleName} and ${current.provider::class.simpleName}")
+                return
+            }
+
+            availableClocks[id] = ClockInfo(clock, provider)
+            if (currentId == id) {
+                if (DEBUG) {
+                    Log.i(TAG, "Current clock ($currentId) was connected")
+                }
+                clockChangeListeners.forEach { it() }
+            }
+        }
+    }
+
+    private fun disconnectClocks(provider: ClockProvider) {
+        val currentId = currentClockId
+        for (clock in provider.getClocks()) {
+            availableClocks.remove(clock.clockId)
+
+            if (currentId == clock.clockId) {
+                Log.w(TAG, "Current clock ($currentId) was disconnected")
+                clockChangeListeners.forEach { it() }
+            }
+        }
     }
 
     fun getClocks(): List<ClockMetadata> = availableClocks.map { (_, clock) -> clock.metadata }
