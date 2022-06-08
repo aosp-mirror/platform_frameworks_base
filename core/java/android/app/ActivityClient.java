@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -181,6 +182,15 @@ public class ActivityClient {
             getActivityClientController().finishSubActivity(token, resultWho, requestCode);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    @RequiresPermission(android.Manifest.permission.MANAGE_MEDIA_PROJECTION)
+    void setForceSendResultForMediaProjection(IBinder token) {
+        try {
+            getActivityClientController().setForceSendResultForMediaProjection(token);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
