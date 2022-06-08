@@ -470,6 +470,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 .setException(exception)
                 .build();
         mPendingTaskFragmentEvents.add(pendingEvent);
+        // Make sure the error event will be dispatched if there are no other changes.
+        mAtmService.mWindowManager.mWindowPlacerLocked.requestTraversal();
     }
 
     void onActivityReparentToTask(ActivityRecord activity) {
