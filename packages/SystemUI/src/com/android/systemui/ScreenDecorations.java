@@ -971,6 +971,10 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ScreenDecorations state:");
         pw.println("  DEBUG_DISABLE_SCREEN_DECORATIONS:" + DEBUG_DISABLE_SCREEN_DECORATIONS);
+        if (DEBUG_DISABLE_SCREEN_DECORATIONS) {
+            return;
+        }
+
         pw.println("  mIsPrivacyDotEnabled:" + isPrivacyDotEnabled());
         pw.println("  isOnlyPrivacyDotInSwLayer:" + isOnlyPrivacyDotInSwLayer());
         pw.println("  mPendingConfigChange:" + mPendingConfigChange);

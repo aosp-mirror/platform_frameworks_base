@@ -21,8 +21,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDO
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -32,26 +30,35 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import java.io.PrintWriter;
 
 /**
  * {@link ShellTaskOrganizer.TaskListener} for {@link
  * ShellTaskOrganizer#TASK_LISTENER_TYPE_FREEFORM}.
+ *
+ * @param <T> the type of window decoration instance
  */
-public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
+public class FreeformTaskListener<T extends AutoCloseable>
+        implements ShellTaskOrganizer.TaskListener {
     private static final String TAG = "FreeformTaskListener";
 
+    private final WindowDecorViewModel<T> mWindowDecorationViewModel;
     private final SyncTransactionQueue mSyncQueue;
 
-    private final SparseArray<State> mTasks = new SparseArray<>();
+    private final SparseArray<State<T>> mTasks = new SparseArray<>();
 
-    private static class State {
+    private static class State<T extends AutoCloseable> {
         RunningTaskInfo mTaskInfo;
         SurfaceControl mLeash;
+        T mWindowDecoration;
     }
 
-    public FreeformTaskListener(SyncTransactionQueue syncQueue) {
+    public FreeformTaskListener(
+            WindowDecorViewModel<T> windowDecorationViewModel,
+            SyncTransactionQueue syncQueue) {
+        mWindowDecorationViewModel = windowDecorationViewModel;
         mSyncQueue = syncQueue;
     }
 
@@ -62,23 +69,17 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Appeared: #%d",
                 taskInfo.taskId);
-        final State state = new State();
+        final State<T> state = new State<>();
         state.mTaskInfo = taskInfo;
         state.mLeash = leash;
+        state.mWindowDecoration =
+                mWindowDecorationViewModel.createWindowDecoration(taskInfo, leash);
         mTasks.put(taskInfo.taskId, state);
-
-        final Rect taskBounds = taskInfo.configuration.windowConfiguration.getBounds();
-        mSyncQueue.runInSync(t -> {
-            Point taskPosition = taskInfo.positionInParent;
-            t.setPosition(leash, taskPosition.x, taskPosition.y)
-                    .setWindowCrop(leash, taskBounds.width(), taskBounds.height())
-                    .show(leash);
-        });
     }
 
     @Override
     public void onTaskVanished(RunningTaskInfo taskInfo) {
-        State state = mTasks.get(taskInfo.taskId);
+        State<T> state = mTasks.get(taskInfo.taskId);
         if (state == null) {
             Slog.e(TAG, "Task already vanished: #" + taskInfo.taskId);
             return;
@@ -86,11 +87,17 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Vanished: #%d",
                 taskInfo.taskId);
         mTasks.remove(taskInfo.taskId);
+
+        try {
+            state.mWindowDecoration.close();
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to release window decoration.", e);
+        }
     }
 
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
-        State state = mTasks.get(taskInfo.taskId);
+        State<T> state = mTasks.get(taskInfo.taskId);
         if (state == null) {
             throw new RuntimeException(
                     "Task info changed before appearing: #" + taskInfo.taskId);
@@ -98,15 +105,9 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Info Changed: #%d",
                 taskInfo.taskId);
         state.mTaskInfo = taskInfo;
-
-        final Rect taskBounds = taskInfo.configuration.windowConfiguration.getBounds();
-        final SurfaceControl leash = state.mLeash;
-        mSyncQueue.runInSync(t -> {
-            Point taskPosition = taskInfo.positionInParent;
-            t.setPosition(leash, taskPosition.x, taskPosition.y)
-                    .setWindowCrop(leash, taskBounds.width(), taskBounds.height())
-                    .show(leash);
-        });
+        mWindowDecorationViewModel.onTaskInfoChanged(state.mTaskInfo, state.mWindowDecoration);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Info Changed: #%d",
+                taskInfo.taskId);
     }
 
     @Override
