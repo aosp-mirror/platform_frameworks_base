@@ -1668,7 +1668,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 continue;
             }
             float childTop = slidingChild.getTranslationY();
-            float top = childTop + slidingChild.getClipTopAmount();
+            float top = childTop + Math.max(0, slidingChild.getClipTopAmount());
             float bottom = childTop + slidingChild.getActualHeight()
                     - slidingChild.getClipBottomAmount();
 
@@ -3642,6 +3642,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.INPUT)
     protected boolean isInsideQsHeader(MotionEvent ev) {
         mQsHeader.getBoundsOnScreen(mQsHeaderBound);
+        /**
+         * One-handed mode defines a feature FEATURE_ONE_HANDED of DisplayArea {@link DisplayArea}
+         * that will translate down the Y-coordinate whole window screen type except for
+         * TYPE_NAVIGATION_BAR and TYPE_NAVIGATION_BAR_PANEL .{@link DisplayAreaPolicy}.
+         *
+         * So, to consider triggered One-handed mode would translate down the absolute Y-coordinate
+         * of DisplayArea into relative coordinates for all windows, we need to correct the
+         * QS Head bounds here.
+         */
+        final int xOffset = Math.round(ev.getRawX() - ev.getX());
+        final int yOffset = Math.round(ev.getRawY() - ev.getY());
+        mQsHeaderBound.offsetTo(xOffset, yOffset);
         return mQsHeaderBound.contains((int) ev.getRawX(), (int) ev.getRawY());
     }
 
@@ -5055,6 +5067,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 .append(" isCurrentUserSetup=").append(mIsCurrentUserSetup)
                 .append(" hideAmount=").append(mAmbientState.getHideAmount())
                 .append(" ambientStateSwipingUp=").append(mAmbientState.isSwipingUp())
+                .append(" maxDisplayedNotifications=").append(mMaxDisplayedNotifications)
+                .append(" intrinsicContentHeight=").append(mIntrinsicContentHeight)
+                .append(" contentHeight=").append(mContentHeight)
+                .append(" intrinsicPadding=").append(mIntrinsicPadding)
+                .append(" topPadding=").append(mTopPadding)
+                .append(" bottomPadding=").append(mBottomPadding)
                 .append("]");
         pw.println(sb.toString());
         DumpUtilsKt.withIncreasedIndent(pw, () -> {

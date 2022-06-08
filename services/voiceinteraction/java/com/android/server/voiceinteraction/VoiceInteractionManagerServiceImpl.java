@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
@@ -80,6 +81,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
@@ -100,6 +102,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final ComponentName mComponent;
     final IActivityManager mAm;
     final IActivityTaskManager mAtm;
+    final PackageManagerInternal mPackageManagerInternal;
     final VoiceInteractionServiceInfo mInfo;
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
@@ -195,6 +198,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mComponent = service;
         mAm = ActivityManager.getService();
         mAtm = ActivityTaskManager.getService();
+        mPackageManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(PackageManagerInternal.class));
         VoiceInteractionServiceInfo info;
         try {
             info = new VoiceInteractionServiceInfo(context.getPackageManager(), service, mUser);
@@ -228,6 +233,15 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mContext.registerReceiver(mBroadcastReceiver, filter, null, handler,
                 Context.RECEIVER_EXPORTED);
+    }
+
+    public void grantImplicitAccessLocked(int grantRecipientUid, @Nullable Intent intent) {
+        final int grantRecipientAppId = UserHandle.getAppId(grantRecipientUid);
+        final int grantRecipientUserId = UserHandle.getUserId(grantRecipientUid);
+        final int voiceInteractionUid = mInfo.getServiceInfo().applicationInfo.uid;
+        mPackageManagerInternal.grantImplicitAccess(
+                grantRecipientUserId, intent, grantRecipientAppId, voiceInteractionUid,
+                /* direct= */ true);
     }
 
     public boolean showSessionLocked(Bundle args, int flags,
@@ -354,6 +368,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                     VoiceInteractionManagerServiceImpl.this, token, taskId, assistToken,
                     cancellationCallback, callback), REQUEST_DIRECT_ACTIONS_RETRY_TIME_MS);
         } else {
+            grantImplicitAccessLocked(tokens.getUid(), /* intent= */ null);
             try {
                 tokens.getApplicationThread().requestDirectActions(tokens.getActivityToken(),
                         mActiveSession.mInteractor, cancellationCallback, callback);
