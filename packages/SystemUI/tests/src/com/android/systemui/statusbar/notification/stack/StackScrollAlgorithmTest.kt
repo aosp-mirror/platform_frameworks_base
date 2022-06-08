@@ -5,6 +5,7 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.EmptyShadeView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -26,10 +27,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val stackScrollAlgorithm = StackScrollAlgorithm(context, hostView)
     private val expandableViewState = ExpandableViewState()
     private val notificationRow = mock(ExpandableNotificationRow::class.java)
+    private val dumpManager = mock(DumpManager::class.java)
     private val mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager::class.java)
 
     private val ambientState = AmbientState(
         context,
+        dumpManager,
         SectionProvider { _, _ -> false },
         BypassController { false },
         mStatusBarKeyguardViewManager
@@ -126,7 +129,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val expandableViewState = ExpandableViewState()
         expandableViewState.yTranslation = viewStart
 
-        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart);
+        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
         assertFalse(expandableViewState.hidden)
     }
 
@@ -142,7 +145,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val expandableViewState = ExpandableViewState()
         expandableViewState.yTranslation = viewStart
 
-        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart);
+        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
         assertTrue(expandableViewState.hidden)
     }
 
@@ -158,7 +161,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val expandableViewState = ExpandableViewState()
         expandableViewState.yTranslation = viewStart
 
-        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart);
+        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
         assertFalse(expandableViewState.hidden)
     }
 }
