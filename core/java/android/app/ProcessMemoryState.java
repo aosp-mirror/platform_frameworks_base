@@ -28,12 +28,15 @@ public final class ProcessMemoryState implements Parcelable {
     public final int pid;
     public final String processName;
     public final int oomScore;
+    public final boolean hasForegroundServices;
 
-    public ProcessMemoryState(int uid, int pid, String processName, int oomScore) {
+    public ProcessMemoryState(int uid, int pid, String processName, int oomScore,
+            boolean hasForegroundServices) {
         this.uid = uid;
         this.pid = pid;
         this.processName = processName;
         this.oomScore = oomScore;
+        this.hasForegroundServices = hasForegroundServices;
     }
 
     private ProcessMemoryState(Parcel in) {
@@ -41,6 +44,7 @@ public final class ProcessMemoryState implements Parcelable {
         pid = in.readInt();
         processName = in.readString();
         oomScore = in.readInt();
+        hasForegroundServices = in.readInt() == 1;
     }
 
     public static final @android.annotation.NonNull Creator<ProcessMemoryState> CREATOR = new Creator<ProcessMemoryState>() {
@@ -66,5 +70,6 @@ public final class ProcessMemoryState implements Parcelable {
         parcel.writeInt(pid);
         parcel.writeString(processName);
         parcel.writeInt(oomScore);
+        parcel.writeInt(hasForegroundServices ? 1 : 0);
     }
 }

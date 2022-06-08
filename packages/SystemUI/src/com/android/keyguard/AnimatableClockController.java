@@ -23,7 +23,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.icu.text.NumberFormat;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -144,7 +143,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
     @Override
     protected void onViewAttached() {
-        Log.d(TAG, "onViewAttached mView=" + mView);
         updateLocale();
         mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
@@ -162,7 +160,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
     @Override
     protected void onViewDetached() {
-        Log.d(TAG, "onViewDetached mView=" + mView);
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mBatteryController.removeCallback(mBatteryCallback);

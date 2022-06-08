@@ -386,6 +386,7 @@ public class VoiceInteractionManagerService extends SystemService {
         void startLocalVoiceInteraction(final IBinder token, Bundle options) {
             if (mImpl == null) return;
 
+            final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
                 mImpl.showSessionLocked(options,
@@ -397,6 +398,12 @@ public class VoiceInteractionManagerService extends SystemService {
 
                             @Override
                             public void onShown() {
+                                synchronized (VoiceInteractionManagerServiceStub.this) {
+                                    if (mImpl != null) {
+                                        mImpl.grantImplicitAccessLocked(callingUid,
+                                                /* intent= */ null);
+                                    }
+                                }
                                 mAtmInternal.onLocalVoiceInteractionStarted(token,
                                         mImpl.mActiveSession.mSession,
                                         mImpl.mActiveSession.mInteractor);
@@ -965,8 +972,16 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startVoiceActivityLocked(callingFeatureId, callingPid, callingUid,
-                            token, intent, resolvedType);
+                    final ActivityInfo activityInfo = intent.resolveActivityInfo(
+                            mContext.getPackageManager(), PackageManager.MATCH_ALL);
+                    if (activityInfo != null) {
+                        final int activityUid = activityInfo.applicationInfo.uid;
+                        mImpl.grantImplicitAccessLocked(activityUid, intent);
+                    } else {
+                        Slog.w(TAG, "Cannot find ActivityInfo in startVoiceActivity.");
+                    }
+                    return mImpl.startVoiceActivityLocked(
+                            callingFeatureId, callingPid, callingUid, token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

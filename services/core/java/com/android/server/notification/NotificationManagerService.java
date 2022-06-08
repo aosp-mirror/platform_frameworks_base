@@ -657,6 +657,9 @@ public class NotificationManagerService extends SystemService {
     private int mWarnRemoteViewsSizeBytes;
     private int mStripRemoteViewsSizeBytes;
 
+    @VisibleForTesting
+    protected boolean mShowReviewPermissionsNotification;
+
     private MetricsLogger mMetricsLogger;
     private NotificationChannelLogger mNotificationChannelLogger;
     private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
@@ -2280,7 +2283,8 @@ public class NotificationManagerService extends SystemService {
                 mPermissionHelper,
                 mNotificationChannelLogger,
                 mAppOps,
-                new SysUiStatsEvent.BuilderFactory());
+                new SysUiStatsEvent.BuilderFactory(),
+                mShowReviewPermissionsNotification);
         mPreferencesHelper.updateFixedImportance(mUm.getUsers());
         mRankingHelper = new RankingHelper(getContext(),
                 mRankingHandler,
@@ -2468,6 +2472,9 @@ public class NotificationManagerService extends SystemService {
         mRankingThread.start();
 
         WorkerHandler handler = new WorkerHandler(Looper.myLooper());
+
+        mShowReviewPermissionsNotification = getContext().getResources().getBoolean(
+                R.bool.config_notificationReviewPermissions);
 
         init(handler, new RankingHandlerWorker(mRankingThread.getLooper()),
                 AppGlobals.getPackageManager(), getContext().getPackageManager(),
@@ -6320,6 +6327,11 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void sendReviewPermissionsNotification() {
+            if (!mShowReviewPermissionsNotification) {
+                // don't show if this notification is turned off
+                return;
+            }
+
             // This method is meant to be called from the JobService upon running the job for this
             // notification having been rescheduled; so without checking any other state, it will
             // send the notification.
@@ -6936,9 +6948,14 @@ public class NotificationManagerService extends SystemService {
         try {
             if (mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)
                     && mTelecomManager != null) {
-                return mTelecomManager.isInManagedCall()
-                        || mTelecomManager.isInSelfManagedCall(
-                                pkg, UserHandle.getUserHandleForUid(uid));
+                try {
+                    return mTelecomManager.isInManagedCall()
+                            || mTelecomManager.isInSelfManagedCall(
+                            pkg, UserHandle.getUserHandleForUid(uid));
+                } catch (IllegalStateException ise) {
+                    // Telecom is not ready (this is likely early boot), so there are no calls.
+                    return false;
+                }
             }
             return false;
         } finally {
@@ -11648,6 +11665,11 @@ public class NotificationManagerService extends SystemService {
     }
 
     protected void maybeShowInitialReviewPermissionsNotification() {
+        if (!mShowReviewPermissionsNotification) {
+            // if this notification is disabled by settings do not ever show it
+            return;
+        }
+
         int currentState = Settings.Global.getInt(getContext().getContentResolver(),
                 Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                 REVIEW_NOTIF_STATE_UNKNOWN);

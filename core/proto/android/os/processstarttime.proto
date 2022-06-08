@@ -1,0 +1,92 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.os;
+
+option java_multiple_files = true;
+
+// This message is used for statsd logging and should be kept in sync with
+// frameworks/proto_logging/stats/atoms.proto
+/**
+ * Logs information about process start time.
+ *
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message ProcessStartTime {
+  // The uid of the ProcessRecord.
+  optional int32 uid = 1;
+
+  // The process pid.
+  optional int32 pid = 2;
+
+  // The process name.
+  // Usually package name, "system" for system server.
+  // Provided by ActivityManagerService.
+  optional string process_name = 3;
+
+  enum StartType {
+    UNKNOWN = 0;
+    WARM = 1;
+    HOT = 2;
+    COLD = 3;
+  }
+
+  // The start type.
+  optional StartType type = 4;
+
+  // The elapsed realtime at the start of the process.
+  optional int64 process_start_time_millis = 5;
+
+  // Number of milliseconds it takes to reach bind application.
+  optional int32 bind_application_delay_millis = 6;
+
+  // Number of milliseconds it takes to finish start of the process.
+  optional int32 process_start_delay_millis = 7;
+
+  // hostingType field in ProcessRecord, the component type such as "activity",
+  // "service", "content provider", "broadcast" or other strings.
+  optional string hosting_type = 8;
+
+  // hostingNameStr field in ProcessRecord. The component class name that runs
+  // in this process.
+  optional string hosting_name = 9;
+
+  // Broadcast action name.
+  optional string broadcast_action_name = 10;
+
+  enum HostingTypeId {
+    HOSTING_TYPE_UNKNOWN = 0;
+    HOSTING_TYPE_ACTIVITY = 1;
+    HOSTING_TYPE_ADDED_APPLICATION = 2;
+    HOSTING_TYPE_BACKUP = 3;
+    HOSTING_TYPE_BROADCAST = 4;
+    HOSTING_TYPE_CONTENT_PROVIDER = 5;
+    HOSTING_TYPE_LINK_FAIL = 6;
+    HOSTING_TYPE_ON_HOLD = 7;
+    HOSTING_TYPE_NEXT_ACTIVITY = 8;
+    HOSTING_TYPE_NEXT_TOP_ACTIVITY = 9;
+    HOSTING_TYPE_RESTART = 10;
+    HOSTING_TYPE_SERVICE = 11;
+    HOSTING_TYPE_SYSTEM = 12;
+    HOSTING_TYPE_TOP_ACTIVITY = 13;
+    HOSTING_TYPE_EMPTY = 14;
+  }
+
+  optional HostingTypeId hosting_type_id = 11;
+}
+

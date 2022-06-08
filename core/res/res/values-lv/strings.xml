@@ -306,10 +306,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"piekļūt jūsu kalendāram"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Īsziņas"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sūtīt un skatīt īsziņas"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Faili"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"piekļūt failiem jūsu ierīcē"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Mūzika un audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"piekļuve mūzikai un audio jūsu ierīcē"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotoattēli un videoklipi"</string>

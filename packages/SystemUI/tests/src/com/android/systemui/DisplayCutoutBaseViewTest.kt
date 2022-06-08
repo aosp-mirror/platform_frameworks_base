@@ -169,6 +169,7 @@ class DisplayCutoutBaseViewTest : SysuiTestCase() {
 
         cutoutBaseView = spy(DisplayCutoutBaseView(mContext))
         whenever(cutoutBaseView.display).thenReturn(mockDisplay)
+        whenever(mockDisplay.uniqueId).thenReturn("mockDisplayUniqueId")
         whenever(cutoutBaseView.rootView).thenReturn(mockRootView)
         whenever(cutoutBaseView.getPhysicalPixelDisplaySizeRatio()).thenReturn(1f)
         whenever(mockDisplay.getDisplayInfo(eq(cutoutBaseView.displayInfo))

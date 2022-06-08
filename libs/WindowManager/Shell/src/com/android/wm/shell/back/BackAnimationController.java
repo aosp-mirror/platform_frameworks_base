@@ -210,19 +210,19 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         @Override
         public void setBackToLauncherCallback(IOnBackInvokedCallback callback) {
             executeRemoteCallWithTaskPermission(mController, "setBackToLauncherCallback",
-                    (controller) -> mController.setBackToLauncherCallback(callback));
+                    (controller) -> controller.setBackToLauncherCallback(callback));
         }
 
         @Override
         public void clearBackToLauncherCallback() {
             executeRemoteCallWithTaskPermission(mController, "clearBackToLauncherCallback",
-                    (controller) -> mController.clearBackToLauncherCallback());
+                    (controller) -> controller.clearBackToLauncherCallback());
         }
 
         @Override
         public void onBackToLauncherAnimationFinished() {
             executeRemoteCallWithTaskPermission(mController, "onBackToLauncherAnimationFinished",
-                    (controller) -> mController.onBackToLauncherAnimationFinished());
+                    (controller) -> controller.onBackToLauncherAnimationFinished());
         }
 
         void invalidate() {
@@ -286,7 +286,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mBackGestureStarted = true;
 
         try {
-            mBackNavigationInfo = mActivityTaskManager.startBackNavigation();
+            boolean requestAnimation = mEnableAnimations.get();
+            mBackNavigationInfo = mActivityTaskManager.startBackNavigation(requestAnimation);
             onBackNavigationInfoReceived(mBackNavigationInfo);
         } catch (RemoteException remoteException) {
             Log.e(TAG, "Failed to initAnimation", remoteException);

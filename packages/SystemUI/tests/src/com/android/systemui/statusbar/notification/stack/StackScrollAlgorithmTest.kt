@@ -5,12 +5,16 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.EmptyShadeView
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
+import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -23,10 +27,12 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private val stackScrollAlgorithm = StackScrollAlgorithm(context, hostView)
     private val expandableViewState = ExpandableViewState()
     private val notificationRow = mock(ExpandableNotificationRow::class.java)
+    private val dumpManager = mock(DumpManager::class.java)
     private val mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager::class.java)
 
     private val ambientState = AmbientState(
         context,
+        dumpManager,
         SectionProvider { _, _ -> false },
         BypassController { false },
         mStatusBarKeyguardViewManager
@@ -109,5 +115,53 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val gap = stackScrollAlgorithm.getGapForLocation(
                 /* fractionToShade= */ 0f, /* onKeyguard= */ false)
         assertThat(gap).isEqualTo(bigGap)
+    }
+
+    @Test
+    fun updateViewWithShelf_viewAboveShelf_viewShown() {
+        val viewStart = 0f
+        val shelfStart = 1f
+
+        val expandableView = mock(ExpandableView::class.java)
+        whenever(expandableView.isExpandAnimationRunning).thenReturn(false)
+        whenever(expandableView.hasExpandingChild()).thenReturn(false)
+
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.yTranslation = viewStart
+
+        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
+        assertFalse(expandableViewState.hidden)
+    }
+
+    @Test
+    fun updateViewWithShelf_viewBelowShelf_viewHidden() {
+        val shelfStart = 0f
+        val viewStart = 1f
+
+        val expandableView = mock(ExpandableView::class.java)
+        whenever(expandableView.isExpandAnimationRunning).thenReturn(false)
+        whenever(expandableView.hasExpandingChild()).thenReturn(false)
+
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.yTranslation = viewStart
+
+        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
+        assertTrue(expandableViewState.hidden)
+    }
+
+    @Test
+    fun updateViewWithShelf_viewBelowShelfButIsExpanding_viewShown() {
+        val shelfStart = 0f
+        val viewStart = 1f
+
+        val expandableView = mock(ExpandableView::class.java)
+        whenever(expandableView.isExpandAnimationRunning).thenReturn(true)
+        whenever(expandableView.hasExpandingChild()).thenReturn(true)
+
+        val expandableViewState = ExpandableViewState()
+        expandableViewState.yTranslation = viewStart
+
+        stackScrollAlgorithm.updateViewWithShelf(expandableView, expandableViewState, shelfStart)
+        assertFalse(expandableViewState.hidden)
     }
 }

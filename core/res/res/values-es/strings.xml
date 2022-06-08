@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceder a tu calendario"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"enviar y ver mensajes SMS"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Archivos"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"acceder a archivos de tu dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música y audio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acceder a música y audio de tu dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos y vídeos"</string>
@@ -2042,7 +2040,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"¿Permitir que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos los registros del dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir el acceso una vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permitir"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo documentan lo que sucede en tu dispositivo. Las aplicaciones pueden usar estos registros para encontrar y solucionar problemas.\n\nComo algunos registros pueden contener información sensible, es mejor que solo permitas que accedan a ellos las aplicaciones en las que confíes. \n\nAunque no permitas que esta aplicación acceda a todos los registros del dispositivo, aún podrá acceder a sus propios registros. Es posible que el fabricante del dispositivo pueda acceder a algunos registros o información de tu dispositivo. Más información"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo documentan lo que sucede en tu dispositivo. Las aplicaciones pueden usar estos registros para encontrar y solucionar problemas.\n\nComo algunos registros pueden contener información sensible, es mejor que solo permitas que accedan a ellos las aplicaciones en las que confíes. \n\nAunque no permitas que esta aplicación acceda a todos los registros del dispositivo, podrá seguir accediendo a sus propios registros. Es posible que el fabricante del dispositivo pueda acceder a algunos registros o información de tu dispositivo. Más información"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No volver a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quiere mostrar fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>
