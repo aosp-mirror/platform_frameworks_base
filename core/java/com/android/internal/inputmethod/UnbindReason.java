@@ -34,8 +34,7 @@ import java.lang.annotation.Retention;
         UnbindReason.DISCONNECT_IME,
         UnbindReason.NO_IME,
         UnbindReason.SWITCH_IME_FAILED,
-        UnbindReason.SWITCH_USER,
-        UnbindReason.ACCESSIBILITY_SERVICE_DISABLED
+        UnbindReason.SWITCH_USER
 })
 public @interface UnbindReason {
     /**
@@ -68,5 +67,4 @@ public @interface UnbindReason {
      * user's active IME.
      */
     int SWITCH_USER = 6;
-    int ACCESSIBILITY_SERVICE_DISABLED = 7;
 }

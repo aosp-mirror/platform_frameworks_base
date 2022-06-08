@@ -5741,11 +5741,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     // A11yManagerService unbinds the disabled accessibility service. We don't need
                     // to do it here.
-                    @UnbindReason int unbindClientReason =
-                            UnbindReason.ACCESSIBILITY_SERVICE_DISABLED;
                     executeOrSendMessage(mCurClient.client, obtainMessageIIOO(
                             MSG_UNBIND_ACCESSIBILITY_SERVICE, getSequenceNumberLocked(),
-                            unbindClientReason, mCurClient.client, accessibilityConnectionId));
+                            0 /* unused */, mCurClient.client, accessibilityConnectionId));
                 }
                 // We only have sessions when we bound to an input method. Remove this session
                 // from all clients.
