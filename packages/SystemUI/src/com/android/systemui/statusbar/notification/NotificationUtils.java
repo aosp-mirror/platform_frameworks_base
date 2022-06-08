@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.util.Compile;
 
 /**
@@ -87,6 +88,11 @@ public class NotificationUtils {
         } else {
             return logKey(entry.getKey());
         }
+    }
+
+    /** Get the notification key, reformatted for logging, for the (optional) row */
+    public static String logKey(ExpandableNotificationRow row) {
+        return row == null ? "null" : logKey(row.getEntry());
     }
 
     /** Removes newlines from the notification key to prettify apps that have these in the tag */
