@@ -114,7 +114,7 @@ public class LocaleStore {
             mIsTranslated = isTranslated;
         }
 
-        /* package */ boolean isSuggested() {
+        public boolean isSuggested() {
             if (!mIsTranslated) { // Never suggest an untranslated locale
                 return false;
             }
@@ -137,7 +137,7 @@ public class LocaleStore {
             return mFullNameNative;
         }
 
-        String getFullCountryNameNative() {
+        public String getFullCountryNameNative() {
             if (mFullCountryNameNative == null) {
                 mFullCountryNameNative = LocaleHelper.getDisplayCountry(mLocale, mLocale);
             }
