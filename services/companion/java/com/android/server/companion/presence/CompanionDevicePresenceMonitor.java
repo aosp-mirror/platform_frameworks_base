@@ -315,7 +315,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             out.append("\n");
             for (int associationId : mConnectedBtDevices) {
                 AssociationInfo a = mAssociationStore.getAssociationById(associationId);
-                out.append("    ").append(a.toString()).append('\n');
+                out.append("    ").append(a.toShortString()).append('\n');
             }
         }
 
@@ -326,7 +326,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             out.append("\n");
             for (int associationId : mNearbyBleDevices) {
                 AssociationInfo a = mAssociationStore.getAssociationById(associationId);
-                out.append("    ").append(a.toString()).append('\n');
+                out.append("    ").append(a.toShortString()).append('\n');
             }
         }
 
@@ -337,7 +337,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
             out.append("\n");
             for (int associationId : mReportedSelfManagedDevices) {
                 AssociationInfo a = mAssociationStore.getAssociationById(associationId);
-                out.append("    ").append(a.toString()).append('\n');
+                out.append("    ").append(a.toShortString()).append('\n');
             }
         }
     }
