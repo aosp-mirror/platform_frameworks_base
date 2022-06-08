@@ -707,8 +707,11 @@ final class InputMethodUtils {
                         PackageManager.ApplicationInfoFlags.of(
                                 PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS));
             } catch (PackageManager.NameNotFoundException e) {
-                Slog.w(TAG, "getApplicationInfo failed. packageName=" + packageName
-                        + " userId=" + packageManagerForUser.getUserId(), e);
+                // This is not an error.  No need to show scary error messages.
+                if (DEBUG) {
+                    Slog.d(TAG, packageName
+                            + " does not exist for userId=" + packageManagerForUser.getUserId());
+                }
                 continue;
             }
             if (ai == null) {
