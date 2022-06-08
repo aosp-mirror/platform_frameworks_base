@@ -1754,7 +1754,7 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public int getInputMethodWindowVisibleHeight() {
+        public int getInputMethodWindowVisibleHeight(IInputMethodClient client) {
             reportNotSupported();
             return 0;
         }
