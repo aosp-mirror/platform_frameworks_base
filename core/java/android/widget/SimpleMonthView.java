@@ -186,7 +186,11 @@ class SimpleMonthView extends View {
     private void updateMonthYearLabel() {
         final String format = DateFormat.getBestDateTimePattern(mLocale, MONTH_YEAR_FORMAT);
         final SimpleDateFormat formatter = new SimpleDateFormat(format, mLocale);
-        formatter.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
+        // The use of CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE instead of
+        // CAPITALIZATION_FOR_STANDALONE is to address
+        // https://unicode-org.atlassian.net/browse/ICU-21631
+        // TODO(b/229287642): Switch back to CAPITALIZATION_FOR_STANDALONE
+        formatter.setContext(DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE);
         mMonthYearLabel = formatter.format(mCalendar.getTime());
     }
 

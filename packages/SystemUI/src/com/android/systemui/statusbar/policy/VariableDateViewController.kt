@@ -54,7 +54,11 @@ internal fun getFormatFromPattern(pattern: String?): DateFormat {
     }
     val l = Locale.getDefault()
     val format = DateFormat.getInstanceForSkeleton(pattern, l)
-    format.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE)
+    // The use of CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE instead of
+    // CAPITALIZATION_FOR_STANDALONE is to address
+    // https://unicode-org.atlassian.net/browse/ICU-21631
+    // TODO(b/229287642): Switch back to CAPITALIZATION_FOR_STANDALONE
+    format.setContext(DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE)
     return format
 }
 

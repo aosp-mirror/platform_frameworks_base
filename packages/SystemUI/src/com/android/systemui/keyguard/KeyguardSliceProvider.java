@@ -414,7 +414,11 @@ public class KeyguardSliceProvider extends SliceProvider implements
         if (mDateFormat == null) {
             final Locale l = Locale.getDefault();
             DateFormat format = DateFormat.getInstanceForSkeleton(mDatePattern, l);
-            format.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
+            // The use of CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE instead of
+            // CAPITALIZATION_FOR_STANDALONE is to address
+            // https://unicode-org.atlassian.net/browse/ICU-21631
+            // TODO(b/229287642): Switch back to CAPITALIZATION_FOR_STANDALONE
+            format.setContext(DisplayContext.CAPITALIZATION_FOR_BEGINNING_OF_SENTENCE);
             mDateFormat = format;
         }
         mCurrentTime.setTime(System.currentTimeMillis());
