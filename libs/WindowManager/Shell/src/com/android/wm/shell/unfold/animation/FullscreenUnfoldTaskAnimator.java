@@ -16,11 +16,14 @@
 
 package com.android.wm.shell.unfold.animation;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.util.MathUtils.lerp;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.animation.RectEvaluator;
 import android.animation.TypeEvaluator;
+import android.annotation.NonNull;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.graphics.Matrix;
@@ -33,6 +36,8 @@ import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.unfold.UnfoldAnimationController;
+import com.android.wm.shell.unfold.UnfoldBackgroundController;
 
 /**
  * This helper class contains logic that calculates scaling and cropping parameters
@@ -42,10 +47,10 @@ import com.android.wm.shell.common.DisplayInsetsController;
  *
  * This class is used by
  * {@link com.android.wm.shell.unfold.UnfoldTransitionHandler} and
- * {@link com.android.wm.shell.fullscreen.FullscreenUnfoldController}. They use independent
+ * {@link UnfoldAnimationController}. They use independent
  * instances of FullscreenUnfoldTaskAnimator.
  */
-public class FullscreenUnfoldTaskAnimator implements
+public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
         DisplayInsetsController.OnInsetsChangedListener {
 
     private static final float[] FLOAT_9 = new float[9];
@@ -60,12 +65,15 @@ public class FullscreenUnfoldTaskAnimator implements
     private final int mExpandedTaskBarHeight;
     private final float mWindowCornerRadiusPx;
     private final DisplayInsetsController mDisplayInsetsController;
+    private final UnfoldBackgroundController mBackgroundController;
 
     private InsetsSource mTaskbarInsetsSource;
 
     public FullscreenUnfoldTaskAnimator(Context context,
+            @NonNull UnfoldBackgroundController backgroundController,
             DisplayInsetsController displayInsetsController) {
         mDisplayInsetsController = displayInsetsController;
+        mBackgroundController = backgroundController;
         mExpandedTaskBarHeight = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.taskbar_frame_height);
         mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(context);
@@ -88,27 +96,32 @@ public class FullscreenUnfoldTaskAnimator implements
         return mAnimationContextByTaskId.size() > 0;
     }
 
-    public void addTask(TaskInfo taskInfo, SurfaceControl leash) {
+    @Override
+    public void onTaskAppeared(TaskInfo taskInfo, SurfaceControl leash) {
         AnimationContext animationContext = new AnimationContext(leash, mTaskbarInsetsSource,
                 taskInfo);
         mAnimationContextByTaskId.put(taskInfo.taskId, animationContext);
     }
 
-    public void onTaskInfoChanged(TaskInfo taskInfo) {
+    @Override
+    public void onTaskChanged(TaskInfo taskInfo) {
         AnimationContext animationContext = mAnimationContextByTaskId.get(taskInfo.taskId);
         if (animationContext != null) {
             animationContext.update(mTaskbarInsetsSource, taskInfo);
         }
     }
 
-    public void removeTask(TaskInfo taskInfo) {
+    @Override
+    public void onTaskVanished(TaskInfo taskInfo) {
         mAnimationContextByTaskId.remove(taskInfo.taskId);
     }
 
+    @Override
     public void clearTasks() {
         mAnimationContextByTaskId.clear();
     }
 
+    @Override
     public void resetSurface(TaskInfo taskInfo, Transaction transaction) {
         final AnimationContext context = mAnimationContextByTaskId.get(taskInfo.taskId);
         if (context != null) {
@@ -116,6 +129,7 @@ public class FullscreenUnfoldTaskAnimator implements
         }
     }
 
+    @Override
     public void applyAnimationProgress(float progress, Transaction transaction) {
         if (mAnimationContextByTaskId.size() == 0) return;
 
@@ -132,11 +146,29 @@ public class FullscreenUnfoldTaskAnimator implements
             transaction.setWindowCrop(context.mLeash, context.mCurrentCropRect)
                     .setMatrix(context.mLeash, context.mMatrix, FLOAT_9)
                     .setCornerRadius(context.mLeash, mWindowCornerRadiusPx)
-                    .show(context.mLeash)
-            ;
+                    .show(context.mLeash);
         }
     }
 
+    @Override
+    public void prepareStartTransaction(Transaction transaction) {
+        mBackgroundController.ensureBackground(transaction);
+    }
+
+    @Override
+    public void prepareFinishTransaction(Transaction transaction) {
+        mBackgroundController.removeBackground(transaction);
+    }
+
+    @Override
+    public boolean isApplicableTask(TaskInfo taskInfo) {
+        return taskInfo != null && taskInfo.isVisible()
+                && taskInfo.realActivity != null // to filter out parents created by organizer
+                && taskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && taskInfo.getActivityType() != ACTIVITY_TYPE_HOME;
+    }
+
+    @Override
     public void resetAllSurfaces(Transaction transaction) {
         for (int i = mAnimationContextByTaskId.size() - 1; i >= 0; i--) {
             final AnimationContext context = mAnimationContextByTaskId.valueAt(i);
