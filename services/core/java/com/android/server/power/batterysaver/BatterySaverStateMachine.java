@@ -802,7 +802,8 @@ public class BatterySaverStateMachine {
         mBatterySaverController.enableBatterySaver(enable, intReason);
 
         // Handle triggering the notification to show/hide when appropriate
-        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON) {
+        if (intReason == BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON
+                || intReason == BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_ON) {
             triggerDynamicModeNotification();
         } else if (!enable) {
             hideDynamicModeNotification();

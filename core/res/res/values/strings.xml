@@ -5835,9 +5835,9 @@
     <!-- The user visible name of the notification channel for the routine mode battery saver fyi notification [CHAR_LIMIT=80]-->
     <string name="dynamic_mode_notification_channel_name">Routine Mode info notification</string>
     <!-- Title of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
-    <string name="dynamic_mode_notification_title">Battery may run out before usual charge</string>
+    <string name="dynamic_mode_notification_title">Battery Saver turned on</string>
     <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
-    <string name="dynamic_mode_notification_summary">Battery Saver activated to extend battery life</string>
+    <string name="dynamic_mode_notification_summary">Reducing battery usage to extend battery life</string>
 
     <!-- Battery saver strings -->
     <!-- The user visible name of the notification channel for battery saver notifications [CHAR_LIMIT=80] -->
