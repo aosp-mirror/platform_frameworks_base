@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import static com.android.input.flags.Flags.FLAG_INPUT_DEVICE_VIEW_BEHAVIOR_API;
+import static com.android.input.flags.Flags.FLAG_DEVICE_ASSOCIATIONS;
 import static com.android.hardware.input.Flags.keyboardLayoutPreviewFlag;
 
 import android.Manifest;
@@ -1054,13 +1055,14 @@ public final class InputManager {
     /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
-     * @param inputPort The port of the input device.
-     * @param displayPort The physical port of the associated display.
+     * @param inputPort the port of the input device
+     * @param displayPort the physical port of the associated display
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     public void addPortAssociation(@NonNull String inputPort, int displayPort) {
         try {
             mIm.addPortAssociation(inputPort, displayPort);
@@ -1072,12 +1074,13 @@ public final class InputManager {
     /**
      * Remove the runtime association between the input port and the display port. Any existing
      * static association for the cleared input port will be restored.
-     * @param inputPort The port of the input device to be cleared.
+     * @param inputPort the port of the input device to be cleared
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     public void removePortAssociation(@NonNull String inputPort) {
         try {
             mIm.removePortAssociation(inputPort);
@@ -1089,30 +1092,74 @@ public final class InputManager {
     /**
      * Add a runtime association between the input port and display, by unique id. Input ports are
      * expected to be unique.
-     * @param inputPort The port of the input device.
-     * @param displayUniqueId The unique id of the associated display.
+     * @param inputPort the port of the input device
+     * @param displayUniqueId the unique id of the associated display
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @FlaggedApi(FLAG_DEVICE_ASSOCIATIONS)
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     @TestApi
-    public void addUniqueIdAssociation(@NonNull String inputPort,
+    public void addUniqueIdAssociationByPort(@NonNull String inputPort,
             @NonNull String displayUniqueId) {
-        mGlobal.addUniqueIdAssociation(inputPort, displayUniqueId);
+        mGlobal.addUniqueIdAssociationByPort(inputPort, displayUniqueId);
     }
 
     /**
      * Removes a runtime association between the input device and display.
-     * @param inputPort The port of the input device.
+     * @param inputPort the port of the input device
      * <p>
      * Requires {@link android.Manifest.permission#ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
      * </p>
      * @hide
      */
+    @FlaggedApi(FLAG_DEVICE_ASSOCIATIONS)
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
     @TestApi
-    public void removeUniqueIdAssociation(@NonNull String inputPort) {
-        mGlobal.removeUniqueIdAssociation(inputPort);
+    public void removeUniqueIdAssociationByPort(@NonNull String inputPort) {
+        mGlobal.removeUniqueIdAssociationByPort(inputPort);
+    }
+
+    /**
+     * Add a runtime association between the input device name and display, by descriptor. Input
+     * device descriptors are expected to be unique per physical device, though one physical
+     * device can have multiple virtual input devices that possess the same descriptor.
+     * E.g. a keyboard with built in trackpad will be 2 different input devices with the same
+     * descriptor.
+     * @param inputDeviceDescriptor the descriptor of the input device
+     * @param displayUniqueId the unique id of the associated display
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    @FlaggedApi(FLAG_DEVICE_ASSOCIATIONS)
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
+    @TestApi
+    public void addUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor,
+                                                   @NonNull String displayUniqueId) {
+        mGlobal.addUniqueIdAssociationByDescriptor(inputDeviceDescriptor, displayUniqueId);
+    }
+
+    /**
+     * Removes a runtime association between the input device and display.
+    }
+
+    /**
+     * Removes a runtime association between the input device and display.
+     * @param inputDeviceDescriptor the descriptor of the input device
+     * <p>
+     * Requires {@link android.Manifest.permissions.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY}.
+     * </p>
+     * @hide
+     */
+    @FlaggedApi(FLAG_DEVICE_ASSOCIATIONS)
+    @RequiresPermission(android.Manifest.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY)
+    @TestApi
+    public void removeUniqueIdAssociationByDescriptor(@NonNull String inputDeviceDescriptor) {
+        mGlobal.removeUniqueIdAssociationByDescriptor(inputDeviceDescriptor);
     }
 
     /**
