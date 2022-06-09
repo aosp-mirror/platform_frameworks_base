@@ -88,6 +88,10 @@ class Alarm {
      * Change wasn't enable for the caller due to compat reasons.
      */
     static final int EXACT_ALLOW_REASON_COMPAT = 2;
+    /**
+     * Caller had USE_EXACT_ALARM permission.
+     */
+    static final int EXACT_ALLOW_REASON_POLICY_PERMISSION = 3;
 
     public final int type;
     /**
@@ -275,6 +279,8 @@ class Alarm {
                 return "compat";
             case EXACT_ALLOW_REASON_PERMISSION:
                 return "permission";
+            case EXACT_ALLOW_REASON_POLICY_PERMISSION:
+                return "policy_permission";
             case EXACT_ALLOW_REASON_NOT_APPLICABLE:
                 return "N/A";
             default:

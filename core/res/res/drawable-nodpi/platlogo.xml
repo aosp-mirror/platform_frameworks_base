@@ -13,24 +13,23 @@ Copyright (C) 2021 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
+<vector android:height="128dp"
     android:width="128dp"
-    android:height="128dp"
-    android:viewportWidth="128"
-    android:viewportHeight="128">
-  <path
-      android:pathData="M64,64m-64,0a64,64 0,1 1,128 0a64,64 0,1 1,-128 0"
-      android:fillColor="@android:color/system_accent3_500"/>
-  <path
-      android:pathData="M32.5,34.15a10,10 0,0 1,9.94 10V93.85"
-      android:strokeWidth="4"
-      android:fillColor="#00000000"
-      android:strokeColor="#fff"
-      android:strokeLineCap="round"/>
-  <path
-      android:pathData="M95.5,93.85H55.71V83.9A19.9,19.9 0,0 1,75.61 64h10a9.94,9.94 0,0 0,9.94 -10,19.9 19.9,0 0,0 -38.69,-6.56A20.77,20.77 0,0 0,56 50.73"
-      android:strokeWidth="4"
-      android:fillColor="#00000000"
-      android:strokeColor="#fff"
-      android:strokeLineCap="round"/>
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <path
+        android:pathData="M11 0.51a2.06 2.06 0 0 1 2 0l0.58 0.37a4.15 4.15 0 0 0 2.23 0.55l0.69-0.06a2.07 2.07 0 0 1 1.81 0.95l0.33 0.6a4.14 4.14 0 0 0 1.72 1.52l0.64 0.27a2 2 0 0 1 1.16 1.68l0 0.69A4.12 4.12 0 0 0 23 9.23l0.44 0.53a2.06 2.06 0 0 1 0.24 2l-0.3 0.62a4.14 4.14 0 0 0-0.27 2.28l0.14 0.68a2.08 2.08 0 0 1-0.72 1.91l-0.56 0.41a4 4 0 0 0-1.3 1.89l-0.19 0.66A2.06 2.06 0 0 1 19 21.58l-0.68 0.11a4.09 4.09 0 0 0-2 1.07l-0.48 0.5a2.08 2.08 0 0 1-2 0.49l-0.65-0.23a4.28 4.28 0 0 0-2.3 0l-0.65 0.23a2.08 2.08 0 0 1-2-0.49l-0.48-0.5a4 4 0 0 0-2-1.07L5 21.58A2.06 2.06 0 0 1 3.5 20.23l-0.19-0.66A4 4 0 0 0 2 17.68l-0.56-0.41a2.08 2.08 0 0 1-0.72-1.91l0.14-0.68A4.14 4.14 0 0 0 0.6 12.4l-0.3-0.62a2.06 2.06 0 0 1 0.24-2L1 9.23A4.16 4.16 0 0 0 1.8 7.08l0-0.69A2 2 0 0 1 3 4.71l0.64-0.27A4.14 4.14 0 0 0 5.34 2.92l0.33-0.6a2.07 2.07 0 0 1 1.81-0.95l0.69 0.06A4.15 4.15 0 0 0 10.4 0.88Z"
+        android:fillColor="@android:color/system_accent3_400"
+        />
+    <path
+        android:pathData="M12.34 6.53h4.05l-2 4.05a3.95 3.95 0 0 1-0.57 7.85 4.1 4.1 0 0 1-1.45-0.27"
+        android:strokeColor="@android:color/system_accent1_800"
+        android:strokeWidth="2"/>
+    <path
+        android:pathData="M12.34 6.53h4.05l-2 4.05a3.95 3.95 0 0 1-0.57 7.85 4.1 4.1 0 0 1-1.45-0.27"
+        android:strokeColor="@android:color/system_neutral1_100"
+        android:strokeWidth="0.5"/>
+
 </vector>
+

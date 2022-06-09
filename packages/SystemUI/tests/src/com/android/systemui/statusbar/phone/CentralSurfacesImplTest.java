@@ -477,7 +477,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mJankMonitor,
                 mDeviceStateManager,
                 mDreamOverlayStateController,
-                mWiredChargingRippleController);
+                mWiredChargingRippleController, mDreamManager);
         when(mKeyguardViewMediator.registerCentralSurfaces(
                 any(CentralSurfacesImpl.class),
                 any(NotificationPanelViewController.class),
@@ -531,6 +531,36 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
 
         mCentralSurfaces.executeRunnableDismissingKeyguard(null, null, false, false, false);
+    }
+
+    @Test
+    public void executeRunnableDismissingKeyguard_dreaming_notShowing() throws RemoteException {
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(true);
+
+        mCentralSurfaces.executeRunnableDismissingKeyguard(() ->  {},
+                /* cancelAction= */ null,
+                /* dismissShade= */ false,
+                /* afterKeyguardGone= */ false,
+                /* deferred= */ false);
+        mUiBgExecutor.runAllReady();
+        verify(mDreamManager, times(1)).awaken();
+    }
+
+    @Test
+    public void executeRunnableDismissingKeyguard_notDreaming_notShowing() throws RemoteException {
+        when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(false);
+
+        mCentralSurfaces.executeRunnableDismissingKeyguard(() ->  {},
+                /* cancelAction= */ null,
+                /* dismissShade= */ false,
+                /* afterKeyguardGone= */ false,
+                /* deferred= */ false);
+        mUiBgExecutor.runAllReady();
+        verify(mDreamManager, never()).awaken();
     }
 
     @Test
