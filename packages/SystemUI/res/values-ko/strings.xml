@@ -412,7 +412,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"직장 앱은 <xliff:g id="VPN_APP">%1$s</xliff:g> 앱을 통해 인터넷에 연결됩니다. IT 관리자와 VPN 제공업체가 이메일, 인터넷 사용 기록 등 직장 앱에서 이루어진 내 네트워크 활동을 볼 수 있습니다."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"개인 앱은 <xliff:g id="VPN_APP">%1$s</xliff:g> 앱을 통해 인터넷에 연결됩니다. VPN 제공업체가 이메일, 인터넷 사용 기록 등 내 네트워크 활동을 볼 수 있습니다."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"공개 VPN 설정"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN 설정 열기"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"부모님이 관리하는 기기입니다. 부모님이 내가 사용하는 앱, 내 위치, 기기 사용 시간과 같은 정보를 보고 관리할 수 있습니다."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent가 잠금 해제함"</string>
@@ -851,8 +851,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"알 수 없는 앱"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"전송 중지"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"오디오 출력에 사용 가능한 기기입니다."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"볼륨"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"브로드캐스팅 작동 원리"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"브로드캐스트"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"호환되는 블루투스 기기를 가진 근처의 사용자가 내가 브로드캐스트 중인 미디어를 수신 대기할 수 있습니다."</string>
@@ -938,8 +937,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"새로운 정보"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"활성 상태의 앱"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"사용 중이 아닐 때도 활성화되어 실행되는 앱입니다. 이 경우 앱 기능성이 향상되지만 배터리 수명에 영향을 줄 수도 있습니다."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"중지"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"중지됨"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"완료"</string>

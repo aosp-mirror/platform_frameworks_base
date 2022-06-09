@@ -407,10 +407,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Бул түзмөктө тастыктоочу борбор орнотулган. Коопсуз тармагыңыздын трафиги көзөмөлдөнүп же өзгөртүлүшү мүмкүн."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администраторуңуз түзмөгүңүздөгү трафикти көзөмөлдөөчү тармактын таржымалын каттоо функциясын иштетти."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администраторуңуз жумуш профилиңиздеги трафикке көз салуу үчүн, тармактын таржымалын иштетип койду (жеке профилиңизден маалымат алынбайт)."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Бул түзмөк Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турат. Тармакта аткарган аракеттериңиз, анын ичинде электрондук каттарыңыз жана серептөө дайындары IT администраторуна көрүнөт."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Бул түзмөк Интернетке <xliff:g id="VPN_APP_0">%1$s</xliff:g> жана <xliff:g id="VPN_APP_1">%2$s</xliff:g> аркылуу туташып турат. Тармакта аткарган аракеттериңиз, анын ичинде электрондук каттарыңыз жана серептөө дайындары IT администраторуна көрүнөт."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Жумуш колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Жумуш колдонмолоруңуз аркылуу тармакта аткарган аракеттериңиз, анын ичинде электрондук каттарыңыз жана серептөө дайындары IT администраторуна жана VPN провайдерине көрүнөт."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Жеке колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Тармакта аткарган аракеттериңиз, анын ичинде электрондук каттарыңыз жана серептөө дайындары VPN провайдерине көрүнөт."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Бул түзмөк Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турат. Тармактагы аракеттериңиз, ошондой эле электрондук почтадагы жана серепчидеги нерселериңиз IT администраторуңузга көрүнүп турат."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Бул түзмөк Интернетке <xliff:g id="VPN_APP_0">%1$s</xliff:g> жана <xliff:g id="VPN_APP_1">%2$s</xliff:g> аркылуу туташып турат. Тармактагы аракеттериңиз, ошондой эле электрондук почтадагы жана серепчидеги нерселериңиз IT администраторуңузга көрүнүп турат."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Жумуш колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Жумуш колдонмолору аркылуу тармакта жасаган аракеттериңиз, ошондой эле электрондук почтадагы жана серепчидеги нерселериңиз VPN провайдерине көрүнүп турат."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Жеке колдонмолоруңуз Интернетке <xliff:g id="VPN_APP">%1$s</xliff:g> аркылуу туташып турушат. Тармактагы аракеттериңиз, ошондой эле электрондук почтадагы жана серепчидеги нерселериңиз VPN провайдерине көрүнүп турат."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN жөндөөлөрүн ачуу"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Бул түзмөктү ата-энең башкарат. Ата-энең сен иштеткен колдонмолорду, кайда жүргөнүңдү жана түзмөктү канча убакыт колдонгонуңду көрүп, башкарып турат."</string>
@@ -558,7 +558,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Солго"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Оңго"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Ортолотуу"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Өтмөк"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Боштук"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Киргизүү"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Артка өчүрүү"</string>
@@ -851,8 +851,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Белгисиз колдонмо"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Тышкы экранга чыгарууну токтотуу"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Аудио чыгаруу үчүн жеткиликтүү түзмөктөр."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Үндүн катуулугу"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Кабарлоо кантип иштейт"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Кабарлоо"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Шайкеш Bluetooth түзмөктөрү болгон жакын жердеги кишилер кабарлап жаткан медиаңызды уга алышат"</string>
@@ -938,8 +937,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Жаңы маалымат"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Жигердүү колдонмолор"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Бул колдонмолор жабылып турса да, активдүү болуп, иштеп турушат. Алардын функционалдуулугу жакшырат, бирок батареянын кубатынын мөөнөтүнө кедергиси тийиши мүмкүн."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Токтотуу"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Токтотулду"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Бүттү"</string>

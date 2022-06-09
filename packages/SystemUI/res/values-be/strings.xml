@@ -863,8 +863,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Невядомая праграма"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Спыніць трансляцыю"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Даступныя прылады для вываду аўдыя."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Гучнасць"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як адбываецца трансляцыя"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляцыя"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Людзі паблізу, у якіх ёсць прылады з Bluetooth, змогуць праслухваць мультымедыйнае змесціва, якое вы трансліруеце"</string>
@@ -952,8 +951,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Новая інфармацыя"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Актыўныя праграмы"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Гэтыя праграмы працуюць, нават калі вы іх не выкарыстоўваеце. У выніку павышаецца іх функцыянальнасць, аднак можа знізіцца час працы ад акумулятара."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Спыніць"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Спынена"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Гатова"</string>

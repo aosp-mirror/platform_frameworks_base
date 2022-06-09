@@ -391,10 +391,10 @@
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> može pratiti mrežni saobraćaj na vašem radnom profilu"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Mrežna aktivnost radnog profila je vidljiva vašem IT administratoru"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Mreža može biti nadzirana"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Ovaj uređaj je povezan na internet putem VPN-ova"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Uređaj je povezan s internetom putem VPN-ova"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Vaše poslovne aplikacije su povezane s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Vaše lične aplikacije su povezane na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Ovaj uređaj je povezan na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Lične aplikacije su povezane s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Uređaj je povezan s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Ovaj uređaj pruža <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Upravljanje uređajem"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN mreža"</string>
@@ -410,10 +410,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"CA certifikat je instaliran na ovom uređaju. Vaš saobraćaj preko sigurne mreže može se pratiti."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Vaš administrator je uključio zapisivanje na mreži, čime se prati saobraćaj na vašem uređaju."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator je uključio zapisivanje na mreži, čime se nadzire saobraćaj na vašem radnom profilu, ali ne i na ličnom profilu."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Ovaj uređaj je povezan na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Ovaj uređaj je povezan na internet putem aplikacija <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Uređaj je povezan s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Uređaj je povezan s internetom putem aplikacija <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše poslovne aplikacije su povezane na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost u poslovnim aplikacijama, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru i pružaocu VPN usluga."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše lične aplikacije su povezane na internet putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem pružaocu VPN usluga."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Lične aplikacije su povezane s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem pružaocu VPN usluga."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otvorite postavke VPN mreže"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Ovim uređajem upravlja tvoj roditelj. Roditelj može vidjeti i upravljati informacijama kao što su aplikacije koje koristiš, lokacija i vrijeme korištenja uređaja."</string>
@@ -563,7 +563,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Lijevo"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Desno"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Sredina"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulator"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Razmaknica"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Tipka za novi red"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tipka za brisanje"</string>
@@ -958,14 +958,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Tekst je kopiran"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Slika je kopirana"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Sadržaj je kopiran"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Uređivač međumemorije"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Međumemorija"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Pregled slike"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"uredi"</string>
     <string name="add" msgid="81036585205287996">"Dodaj"</string>
     <string name="manage_users" msgid="1823875311934643849">"Upravljajte korisnicima"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Ovo obavještenje ne podržava prevlačenje na podijeljeni ekran."</string>

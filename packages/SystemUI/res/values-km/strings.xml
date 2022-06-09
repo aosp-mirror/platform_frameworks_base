@@ -851,8 +851,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"កម្មវិធី​ដែលមិន​ស្គាល់"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"បញ្ឈប់ការភ្ជាប់"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ឧបករណ៍​ដែលអាច​ប្រើបាន​សម្រាប់ឧបករណ៍​បញ្ចេញ​សំឡេង។"</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"កម្រិតសំឡេង"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>
@@ -938,8 +937,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ព័ត៌មានថ្មី"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"កម្មវិធីសកម្ម"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"កម្មវិធីទាំងនេះគឺសកម្ម និងកំពុងដំណើរការ ទោះបីជាអ្នកមិនកំពុងប្រើវាក៏ដោយ។ ដំណើរការនេះធ្វើឱ្យមុខងាររបស់កម្មវិធីទាំងនេះប្រសើរឡើង ប៉ុន្តែវាក៏អាចប៉ះពាល់ដល់កម្រិតថាមពលថ្មផងដែរ។"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ឈប់"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"បានឈប់"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"រួចរាល់"</string>
@@ -953,14 +951,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"បាន​ចម្លង​អត្ថបទ"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"បានចម្លង​រូបភាព"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"បានចម្លង​ខ្លឹមសារ"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"កម្មវិធី​​កែឃ្លីបបត"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"ឃ្លីបបត"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"​មើល​រូបភាព​សាកល្បង"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"កែ"</string>
     <string name="add" msgid="81036585205287996">"បញ្ចូល"</string>
     <string name="manage_users" msgid="1823875311934643849">"គ្រប់គ្រង​អ្នក​ប្រើប្រាស់"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ការជូនដំណឹងនេះមិនអាចឱ្យអូសដើម្បីបំបែកអេក្រង់បានទេ។"</string>

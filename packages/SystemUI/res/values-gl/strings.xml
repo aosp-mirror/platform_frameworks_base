@@ -558,7 +558,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Esquerda"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Dereita"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centro"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulador"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espazo"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Intro"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Retroceso"</string>
@@ -851,8 +851,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplicación descoñecida"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Deter emisión"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dispositivos dispoñibles para a saída de audio."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funcionan as difusións?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Difusión"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As persoas que estean preto de ti e que dispoñan de dispositivos Bluetooth compatibles poden escoitar o contido multimedia que difundas"</string>
