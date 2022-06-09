@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.stack;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
+import static com.android.systemui.util.DumpUtilsKt.println;
+import static com.android.systemui.util.DumpUtilsKt.visibilityString;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
@@ -5027,30 +5029,31 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
-        StringBuilder sb = new StringBuilder("[")
-                .append(this.getClass().getSimpleName()).append(":")
-                .append(" pulsing=").append(mPulsing ? "T" : "f")
-                .append(" expanded=").append(mIsExpanded ? "T" : "f")
-                .append(" headsUpPinned=").append(mInHeadsUpPinnedMode ? "T" : "f")
-                .append(" qsClipping=").append(mShouldUseRoundedRectClipping ? "T" : "f")
-                .append(" qsClipDismiss=").append(mDismissUsingRowTranslationX ? "T" : "f")
-                .append(" visibility=").append(DumpUtilsKt.visibilityString(getVisibility()))
-                .append(" alpha=").append(getAlpha())
-                .append(" scrollY=").append(mAmbientState.getScrollY())
-                .append(" maxTopPadding=").append(mMaxTopPadding)
-                .append(" showShelfOnly=").append(mShouldShowShelfOnly ? "T" : "f")
-                .append(" qsExpandFraction=").append(mQsExpansionFraction)
-                .append(" isCurrentUserSetup=").append(mIsCurrentUserSetup)
-                .append(" hideAmount=").append(mAmbientState.getHideAmount())
-                .append(" ambientStateSwipingUp=").append(mAmbientState.isSwipingUp())
-                .append(" maxDisplayedNotifications=").append(mMaxDisplayedNotifications)
-                .append(" intrinsicContentHeight=").append(mIntrinsicContentHeight)
-                .append(" contentHeight=").append(mContentHeight)
-                .append(" intrinsicPadding=").append(mIntrinsicPadding)
-                .append(" topPadding=").append(mTopPadding)
-                .append(" bottomPadding=").append(mBottomPadding)
-                .append("]");
-        pw.println(sb.toString());
+        pw.println("Internal state:");
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            println(pw, "pulsing", mPulsing);
+            println(pw, "expanded", mIsExpanded);
+            println(pw, "headsUpPinned", mInHeadsUpPinnedMode);
+            println(pw, "qsClipping", mShouldUseRoundedRectClipping);
+            println(pw, "qsClipDismiss", mDismissUsingRowTranslationX);
+            println(pw, "visibility", visibilityString(getVisibility()));
+            println(pw, "alpha", getAlpha());
+            println(pw, "scrollY", mAmbientState.getScrollY());
+            println(pw, "maxTopPadding", mMaxTopPadding);
+            println(pw, "showShelfOnly", mShouldShowShelfOnly);
+            println(pw, "qsExpandFraction", mQsExpansionFraction);
+            println(pw, "isCurrentUserSetup", mIsCurrentUserSetup);
+            println(pw, "hideAmount", mAmbientState.getHideAmount());
+            println(pw, "ambientStateSwipingUp", mAmbientState.isSwipingUp());
+            println(pw, "maxDisplayedNotifications", mMaxDisplayedNotifications);
+            println(pw, "intrinsicContentHeight", mIntrinsicContentHeight);
+            println(pw, "contentHeight", mContentHeight);
+            println(pw, "intrinsicPadding", mIntrinsicPadding);
+            println(pw, "topPadding", mTopPadding);
+            println(pw, "bottomPadding", mBottomPadding);
+        });
+        pw.println();
+        pw.println("Contents:");
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
             int childCount = getChildCount();
             pw.println("Number of children: " + childCount);
