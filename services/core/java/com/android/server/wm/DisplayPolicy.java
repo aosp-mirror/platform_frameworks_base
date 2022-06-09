@@ -787,7 +787,8 @@ public class DisplayPolicy {
             if (!mDisplayContent.isDefaultDisplay) {
                 return;
             }
-            if (mAwake) {
+            if (mAwake && mDisplayContent.mTransitionController.isShellTransitionsEnabled()
+                    && !mDisplayContent.mTransitionController.isCollecting()) {
                 // Start a transition for waking. This is needed for showWhenLocked activities.
                 mDisplayContent.mTransitionController.requestTransitionIfNeeded(TRANSIT_WAKE,
                         0 /* flags */, null /* trigger */, mDisplayContent);
