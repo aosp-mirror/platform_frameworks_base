@@ -1356,10 +1356,10 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"アナログのオーディオ アクセサリを検出"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"接続したデバイスはこのスマートフォンと互換性がありません。タップすると、詳細を確認できます。"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB デバッグが接続されました"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB デバッグを無効にするにはここをタップしてください"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"無効にするにはここをタップしてください"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB デバッグを無効にする場合に選択します。"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ワイヤレス デバッグが接続されました"</string>
-    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ワイヤレス デバッグをUSB デバッグを無効にするにはここをタップしてください"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"無効にするにはここをタップしてください"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にするには選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
@@ -2040,7 +2040,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> にすべてのデバイスログへのアクセスを許可しますか？"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"1 回限りのアクセスを許可"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"許可しない"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合も、このアプリはアプリ独自のログにアクセスできます。また、デバイスのメーカーもデバイスの一部のログや情報にアクセスできる可能性があります。詳細"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"デバイスのログに、このデバイスで発生したことが記録されます。アプリは問題を検出、修正するためにこれらのログを使用することができます。\n\nログによっては機密性の高い情報が含まれている可能性があるため、すべてのデバイスログへのアクセスは信頼できるアプリにのみ許可してください。\n\nすべてのデバイスログへのアクセスを許可しなかった場合でも、このアプリはアプリ独自のログにアクセスできます。また、デバイスの製造メーカーもデバイスの一部のログや情報にアクセスできる可能性があります。詳細"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"次回から表示しない"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」が「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示をリクエストしています"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編集"</string>
