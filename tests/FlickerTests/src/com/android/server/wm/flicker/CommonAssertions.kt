@@ -18,6 +18,7 @@
 package com.android.server.wm.flicker
 
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.FlickerComponentName
 
 val LAUNCHER_COMPONENT = FlickerComponentName("com.google.android.apps.nexuslauncher",
@@ -170,6 +171,33 @@ fun FlickerTestParameter.statusBarLayerPositionEnd() {
 fun FlickerTestParameter.statusBarLayerRotatesScales() {
     statusBarLayerPositionStart()
     statusBarLayerPositionEnd()
+}
+
+/**
+ * Asserts that the visibleRegion of the [FlickerComponentName.SNAPSHOT] layer can cover
+ * the visibleRegion of the given app component exactly
+ */
+fun FlickerTestParameter.snapshotStartingWindowLayerCoversExactlyOnApp(
+        component: FlickerComponentName) {
+    assertLayers {
+        invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
+            val snapshotLayers = it.subjects.filter { subject ->
+                subject.name.contains(
+                        FlickerComponentName.SNAPSHOT.toLayerName()) && subject.isVisible
+            }
+            // Verify the size of snapshotRegion covers appVisibleRegion exactly in animation.
+            if (snapshotLayers.isNotEmpty()) {
+                val visibleAreas = snapshotLayers.mapNotNull { snapshotLayer ->
+                    snapshotLayer.layer?.visibleRegion
+                }.toTypedArray()
+                val snapshotRegion = RegionSubject.assertThat(visibleAreas, this, timestamp)
+                val appVisibleRegion = it.visibleRegion(component)
+                if (snapshotRegion.region.isNotEmpty) {
+                    snapshotRegion.coversExactly(appVisibleRegion.region)
+                }
+            }
+        }
+    }
 }
 
 /**

@@ -81,8 +81,8 @@ class ActivityRecordInputSink {
         // Don't block touches from passing through to an activity below us in the same task, if
         // that activity is either from the same uid or if that activity has launched an activity
         // in our uid.
-        final ActivityRecord activityBelowInTask =
-                mActivityRecord.getTask().getActivityBelow(mActivityRecord);
+        final ActivityRecord activityBelowInTask = mActivityRecord.getTask() != null
+                ? mActivityRecord.getTask().getActivityBelow(mActivityRecord) : null;
         final boolean allowPassthrough = activityBelowInTask != null && (
                 activityBelowInTask.mAllowedTouchUid == mActivityRecord.getUid()
                         || activityBelowInTask.isUid(mActivityRecord.getUid()));
