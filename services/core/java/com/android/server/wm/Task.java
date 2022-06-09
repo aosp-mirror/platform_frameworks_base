@@ -5049,6 +5049,9 @@ class Task extends TaskFragment {
                     == ActivityOptions.ANIM_SCENE_TRANSITION) {
                 doShow = false;
             }
+            if (options != null && options.getDisableStartingWindow()) {
+                doShow = false;
+            }
             if (r.mLaunchTaskBehind) {
                 // Don't do a starting window for mLaunchTaskBehind. More importantly make sure we
                 // tell WindowManager that r is visible even though it is at the back of the root

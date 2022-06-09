@@ -1481,7 +1481,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
                     mRootWindowContainer.getDefaultTaskDisplayArea(), currentRootTask,
                     forceNonResizeable);
-            if (r != null) {
+            if (r != null && (options == null || !options.getDisableStartingWindow())) {
                 // Use a starting window to reduce the transition latency for reshowing the task.
                 // Note that with shell transition, this should be executed before requesting
                 // transition to avoid delaying the starting window.
