@@ -2712,8 +2712,8 @@ public class Vpn {
          */
         @NonNull private final ScheduledThreadPoolExecutor mExecutor;
 
-        @Nullable private ScheduledFuture<?> mScheduledHandleNetworkLostTimeout;
-        @Nullable private ScheduledFuture<?> mScheduledHandleRetryIkeSessionTimeout;
+        @Nullable private ScheduledFuture<?> mScheduledHandleNetworkLostFuture;
+        @Nullable private ScheduledFuture<?> mScheduledHandleRetryIkeSessionFuture;
 
         /** Signal to ensure shutdown is honored even if a new Network is connected. */
         private boolean mIsRunning = true;
@@ -2955,6 +2955,8 @@ public class Vpn {
             }
 
             try {
+                mTunnelIface.setUnderlyingNetwork(mIkeConnectionInfo.getNetwork());
+
                 // Transforms do not need to be persisted; the IkeSession will keep
                 // them alive for us
                 mIpSecManager.applyTunnelModeTransform(mTunnelIface, direction, transform);
@@ -3136,13 +3138,13 @@ public class Vpn {
             // If the default network is lost during the retry delay, the mActiveNetwork will be
             // null, and the new IKE session won't be established until there is a new default
             // network bringing up.
-            mScheduledHandleRetryIkeSessionTimeout =
+            mScheduledHandleRetryIkeSessionFuture =
                     mExecutor.schedule(() -> {
                         startOrMigrateIkeSession(mActiveNetwork);
 
-                        // Reset mScheduledHandleRetryIkeSessionTimeout since it's already run on
+                        // Reset mScheduledHandleRetryIkeSessionFuture since it's already run on
                         // executor thread.
-                        mScheduledHandleRetryIkeSessionTimeout = null;
+                        mScheduledHandleRetryIkeSessionFuture = null;
                     }, retryDelay, TimeUnit.SECONDS);
         }
 
@@ -3185,12 +3187,10 @@ public class Vpn {
                 mActiveNetwork = null;
             }
 
-            if (mScheduledHandleNetworkLostTimeout != null
-                    && !mScheduledHandleNetworkLostTimeout.isCancelled()
-                    && !mScheduledHandleNetworkLostTimeout.isDone()) {
+            if (mScheduledHandleNetworkLostFuture != null) {
                 final IllegalStateException exception =
                         new IllegalStateException(
-                                "Found a pending mScheduledHandleNetworkLostTimeout");
+                                "Found a pending mScheduledHandleNetworkLostFuture");
                 Log.i(
                         TAG,
                         "Unexpected error in onDefaultNetworkLost. Tear down session",
@@ -3207,13 +3207,26 @@ public class Vpn {
                                 + " on session with token "
                                 + mCurrentToken);
 
+                final int token = mCurrentToken;
                 // Delay the teardown in case a new network will be available soon. For example,
                 // during handover between two WiFi networks, Android will disconnect from the
                 // first WiFi and then connects to the second WiFi.
-                mScheduledHandleNetworkLostTimeout =
+                mScheduledHandleNetworkLostFuture =
                         mExecutor.schedule(
                                 () -> {
-                                    handleSessionLost(null, network);
+                                    if (isActiveToken(token)) {
+                                        handleSessionLost(null, network);
+                                    } else {
+                                        Log.d(
+                                                TAG,
+                                                "Scheduled handleSessionLost fired for "
+                                                        + "obsolete token "
+                                                        + token);
+                                    }
+
+                                    // Reset mScheduledHandleNetworkLostFuture since it's
+                                    // already run on executor thread.
+                                    mScheduledHandleNetworkLostFuture = null;
                                 },
                                 NETWORK_LOST_TIMEOUT_MS,
                                 TimeUnit.MILLISECONDS);
@@ -3224,28 +3237,26 @@ public class Vpn {
         }
 
         private void cancelHandleNetworkLostTimeout() {
-            if (mScheduledHandleNetworkLostTimeout != null
-                    && !mScheduledHandleNetworkLostTimeout.isDone()) {
+            if (mScheduledHandleNetworkLostFuture != null) {
                 // It does not matter what to put in #cancel(boolean), because it is impossible
-                // that the task tracked by mScheduledHandleNetworkLostTimeout is
+                // that the task tracked by mScheduledHandleNetworkLostFuture is
                 // in-progress since both that task and onDefaultNetworkChanged are submitted to
                 // mExecutor who has only one thread.
                 Log.d(TAG, "Cancel the task for handling network lost timeout");
-                mScheduledHandleNetworkLostTimeout.cancel(false /* mayInterruptIfRunning */);
-                mScheduledHandleNetworkLostTimeout = null;
+                mScheduledHandleNetworkLostFuture.cancel(false /* mayInterruptIfRunning */);
+                mScheduledHandleNetworkLostFuture = null;
             }
         }
 
         private void cancelRetryNewIkeSessionFuture() {
-            if (mScheduledHandleRetryIkeSessionTimeout != null
-                    && !mScheduledHandleRetryIkeSessionTimeout.isDone()) {
+            if (mScheduledHandleRetryIkeSessionFuture != null) {
                 // It does not matter what to put in #cancel(boolean), because it is impossible
-                // that the task tracked by mScheduledHandleRetryIkeSessionTimeout is
+                // that the task tracked by mScheduledHandleRetryIkeSessionFuture is
                 // in-progress since both that task and onDefaultNetworkChanged are submitted to
                 // mExecutor who has only one thread.
                 Log.d(TAG, "Cancel the task for handling new ike session timeout");
-                mScheduledHandleRetryIkeSessionTimeout.cancel(false /* mayInterruptIfRunning */);
-                mScheduledHandleRetryIkeSessionTimeout = null;
+                mScheduledHandleRetryIkeSessionFuture.cancel(false /* mayInterruptIfRunning */);
+                mScheduledHandleRetryIkeSessionFuture = null;
             }
         }
 
@@ -3285,7 +3296,7 @@ public class Vpn {
         }
 
         private void handleSessionLost(@Nullable Exception exception, @Nullable Network network) {
-            // Cancel mScheduledHandleNetworkLostTimeout if the session it is going to terminate is
+            // Cancel mScheduledHandleNetworkLostFuture if the session it is going to terminate is
             // already terminated due to other failures.
             cancelHandleNetworkLostTimeout();
 
