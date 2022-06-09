@@ -69,7 +69,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-
 /** A controller to handle navigation bars. */
 @SysUISingleton
 public class NavigationBarController implements

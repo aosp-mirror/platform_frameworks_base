@@ -9,7 +9,7 @@ import android.graphics.Rect;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.wm.shell.util.StagedSplitBounds;
+import com.android.wm.shell.util.SplitBounds;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class StagedSplitBoundsTest {
+public class SplitBoundsTest {
     private static final int DEVICE_WIDTH = 100;
     private static final int DEVICE_LENGTH = 200;
     private static final int DIVIDER_SIZE = 20;
@@ -42,21 +42,21 @@ public class StagedSplitBoundsTest {
 
     @Test
     public void testVerticalStacked() {
-        StagedSplitBounds ssb = new StagedSplitBounds(mTopRect, mBottomRect,
+        SplitBounds ssb = new SplitBounds(mTopRect, mBottomRect,
                 TASK_ID_1, TASK_ID_2);
         assertTrue(ssb.appsStackedVertically);
     }
 
     @Test
     public void testHorizontalStacked() {
-        StagedSplitBounds ssb = new StagedSplitBounds(mLeftRect, mRightRect,
+        SplitBounds ssb = new SplitBounds(mLeftRect, mRightRect,
                 TASK_ID_1, TASK_ID_2);
         assertFalse(ssb.appsStackedVertically);
     }
 
     @Test
     public void testHorizontalDividerBounds() {
-        StagedSplitBounds ssb = new StagedSplitBounds(mTopRect, mBottomRect,
+        SplitBounds ssb = new SplitBounds(mTopRect, mBottomRect,
                 TASK_ID_1, TASK_ID_2);
         Rect dividerBounds = ssb.visualDividerBounds;
         assertEquals(0, dividerBounds.left);
@@ -67,7 +67,7 @@ public class StagedSplitBoundsTest {
 
     @Test
     public void testVerticalDividerBounds() {
-        StagedSplitBounds ssb = new StagedSplitBounds(mLeftRect, mRightRect,
+        SplitBounds ssb = new SplitBounds(mLeftRect, mRightRect,
                 TASK_ID_1, TASK_ID_2);
         Rect dividerBounds = ssb.visualDividerBounds;
         assertEquals(DEVICE_WIDTH / 2 - DIVIDER_SIZE / 2, dividerBounds.left);
@@ -78,7 +78,7 @@ public class StagedSplitBoundsTest {
 
     @Test
     public void testEqualVerticalTaskPercent() {
-        StagedSplitBounds ssb = new StagedSplitBounds(mTopRect, mBottomRect,
+        SplitBounds ssb = new SplitBounds(mTopRect, mBottomRect,
                 TASK_ID_1, TASK_ID_2);
         float topPercentSpaceTaken = (float) (DEVICE_LENGTH / 2 - DIVIDER_SIZE / 2) / DEVICE_LENGTH;
         assertEquals(topPercentSpaceTaken, ssb.topTaskPercent, 0.01);
@@ -86,7 +86,7 @@ public class StagedSplitBoundsTest {
 
     @Test
     public void testEqualHorizontalTaskPercent() {
-        StagedSplitBounds ssb = new StagedSplitBounds(mLeftRect, mRightRect,
+        SplitBounds ssb = new SplitBounds(mLeftRect, mRightRect,
                 TASK_ID_1, TASK_ID_2);
         float leftPercentSpaceTaken = (float) (DEVICE_WIDTH / 2 - DIVIDER_SIZE / 2) / DEVICE_WIDTH;
         assertEquals(leftPercentSpaceTaken, ssb.leftTaskPercent, 0.01);
