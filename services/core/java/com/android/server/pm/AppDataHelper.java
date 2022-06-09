@@ -318,7 +318,7 @@ final class AppDataHelper {
      * requested by the app.
      */
     private boolean maybeMigrateAppDataLIF(AndroidPackage pkg, int userId) {
-        if (pkg.isSystem() && !StorageManager.isFileEncryptedNativeOrEmulated()
+        if (pkg.isSystem() && !StorageManager.isFileEncrypted()
                 && PackageManager.APPLY_DEFAULT_TO_DEVICE_PROTECTED_STORAGE) {
             final int storageTarget = pkg.isDefaultToDeviceProtectedStorage()
                     ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
@@ -390,8 +390,7 @@ final class AppDataHelper {
         // First look for stale data that doesn't belong, and check if things
         // have changed since we did our last restorecon
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
-            if (StorageManager.isFileEncryptedNativeOrEmulated()
-                    && !StorageManager.isUserKeyUnlocked(userId)) {
+            if (StorageManager.isFileEncrypted() && !StorageManager.isUserKeyUnlocked(userId)) {
                 throw new RuntimeException(
                         "Yikes, someone asked us to reconcile CE storage while " + userId
                                 + " was still locked; this would have caused massive data loss!");
@@ -493,7 +492,7 @@ final class AppDataHelper {
      */
     public Future<?> fixAppsDataOnBoot() {
         final @StorageManager.StorageFlags int storageFlags;
-        if (StorageManager.isFileEncryptedNativeOrEmulated()) {
+        if (StorageManager.isFileEncrypted()) {
             storageFlags = StorageManager.FLAG_STORAGE_DE;
         } else {
             storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
