@@ -18,6 +18,7 @@ package com.android.server.usb;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
@@ -188,10 +189,36 @@ public final class UsbDirectMidiDevice implements Closeable {
         // Otherwise, USB devices may not handle this gracefully.
         mShouldCallSetInterface = (parser.calculateMidiInterfaceDescriptorsCount() > 1);
 
+        ArrayList<UsbInterfaceDescriptor> midiInterfaceDescriptors;
         if (isUniversalMidiDevice) {
-            mUsbInterfaces = parser.findUniversalMidiInterfaceDescriptors();
+            midiInterfaceDescriptors = parser.findUniversalMidiInterfaceDescriptors();
         } else {
-            mUsbInterfaces = parser.findLegacyMidiInterfaceDescriptors();
+            midiInterfaceDescriptors = parser.findLegacyMidiInterfaceDescriptors();
+        }
+
+        mUsbInterfaces = new ArrayList<UsbInterfaceDescriptor>();
+        if (mUsbDevice.getConfigurationCount() > 0) {
+            // USB devices should default to the first configuration.
+            // The first configuration should support MIDI.
+            // Only one configuration can be used at once.
+            // Thus, use USB interfaces from the first configuration.
+            UsbConfiguration usbConfiguration = mUsbDevice.getConfiguration(0);
+            for (int interfaceIndex = 0; interfaceIndex < usbConfiguration.getInterfaceCount();
+                    interfaceIndex++) {
+                UsbInterface usbInterface = usbConfiguration.getInterface(interfaceIndex);
+                for (UsbInterfaceDescriptor midiInterfaceDescriptor : midiInterfaceDescriptors) {
+                    UsbInterface midiInterface = midiInterfaceDescriptor.toAndroid(mParser);
+                    if (areEquivalent(usbInterface, midiInterface)) {
+                        mUsbInterfaces.add(midiInterfaceDescriptor);
+                        break;
+                    }
+                }
+            }
+
+            if (mUsbDevice.getConfigurationCount() > 1) {
+                Log.w(TAG, "Skipping some USB configurations. Count: "
+                        + mUsbDevice.getConfigurationCount());
+            }
         }
 
         int numInputs = 0;
@@ -647,6 +674,37 @@ public final class UsbDirectMidiDevice implements Closeable {
         return true;
     }
 
+    private boolean areEquivalent(UsbInterface interface1, UsbInterface interface2) {
+        if ((interface1.getId() != interface2.getId())
+                || (interface1.getAlternateSetting() != interface2.getAlternateSetting())
+                || (interface1.getInterfaceClass() != interface2.getInterfaceClass())
+                || (interface1.getInterfaceSubclass() != interface2.getInterfaceSubclass())
+                || (interface1.getInterfaceProtocol() != interface2.getInterfaceProtocol())
+                || (interface1.getEndpointCount() != interface2.getEndpointCount())) {
+            return false;
+        }
+
+        if (interface1.getName() == null) {
+            if (interface2.getName() != null) {
+                return false;
+            }
+        } else if (!(interface1.getName().equals(interface2.getName()))) {
+            return false;
+        }
+
+        // Consider devices with the same endpoints but in a different order as different endpoints.
+        for (int i = 0; i < interface1.getEndpointCount(); i++) {
+            UsbEndpoint endpoint1 = interface1.getEndpoint(i);
+            UsbEndpoint endpoint2 = interface2.getEndpoint(i);
+            if ((endpoint1.getAddress() != endpoint2.getAddress())
+                    || (endpoint1.getAttributes() != endpoint2.getAttributes())
+                    || (endpoint1.getMaxPacketSize() != endpoint2.getMaxPacketSize())
+                    || (endpoint1.getInterval() != endpoint2.getInterval())) {
+                return false;
+            }
+        }
+        return true;
+    }
     /**
      * Write a description of the device to a dump stream.
      */
