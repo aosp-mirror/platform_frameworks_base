@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
@@ -552,6 +553,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 .setPkg("a")
                 .setOpPkg("a")
                 .setTag("a")
+                .setChannel(new NotificationChannel("a", null, importance))
                 .setNotification(n)
                 .setImportance(importance)
                 .build();
