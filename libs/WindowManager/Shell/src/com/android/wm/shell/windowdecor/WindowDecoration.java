@@ -30,6 +30,7 @@ import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.window.WindowContainerTransaction;
@@ -201,12 +202,16 @@ public class WindowDecoration<T extends View & TaskFocusStateConsumer> implement
             mViewHost.relayout(lp);
         }
 
-        outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
+        if (ViewRootImpl.CAPTION_ON_SHELL) {
+            outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
 
-        // Caption insets
-        mCaptionInsetsRect.set(taskBounds);
-        mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight;
-        wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect, CAPTION_INSETS_TYPES);
+            // Caption insets
+            mCaptionInsetsRect.set(taskBounds);
+            mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight;
+            wct.addRectInsetsProvider(mTaskInfo.token, mCaptionInsetsRect, CAPTION_INSETS_TYPES);
+        } else {
+            outResult.mRootView.setVisibility(View.GONE);
+        }
 
         // Task surface itself
         Point taskPosition = mTaskInfo.positionInParent;
