@@ -229,10 +229,19 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     @Test
     public void testSmartspaceEnabledRemovesKeyguardStatusArea() {
         when(mSmartspaceController.isEnabled()).thenReturn(true);
-        when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mFakeSmartspaceView);
         mController.init();
 
         assertEquals(View.GONE, mSliceView.getVisibility());
+    }
+
+    @Test
+    public void onLocaleListChangedRebuildsSmartspaceView() {
+        when(mSmartspaceController.isEnabled()).thenReturn(true);
+        mController.init();
+
+        mController.onLocaleListChanged();
+        // Should be called once on initial setup, then once again for locale change
+        verify(mSmartspaceController, times(2)).buildAndConnectView(mView);
     }
 
     @Test
