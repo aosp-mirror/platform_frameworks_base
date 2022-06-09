@@ -86,6 +86,7 @@ public class PackageInstallerActivity extends AlertActivity {
     private Uri mReferrerURI;
     private int mOriginatingUid = PackageInstaller.SessionParams.UID_UNKNOWN;
     private String mOriginatingPackage; // The package name corresponding to #mOriginatingUid
+    private int mActivityResultCode = Activity.RESULT_CANCELED;
 
     private final boolean mLocalLOGV = false;
     PackageManager mPm;
@@ -305,6 +306,7 @@ public class PackageInstallerActivity extends AlertActivity {
         if (icicle != null) {
             mAllowUnknownSources = icicle.getBoolean(ALLOW_UNKNOWN_SOURCES_KEY);
         }
+        setFinishOnTouchOutside(true);
 
         mPm = getPackageManager();
         mIpm = AppGlobals.getPackageManager();
@@ -416,7 +418,7 @@ public class PackageInstallerActivity extends AlertActivity {
                 (ignored, ignored2) -> {
                     if (mOk.isEnabled()) {
                         if (mSessionId != -1) {
-                            mInstaller.setPermissionsResult(mSessionId, true);
+                            setActivityResult(RESULT_OK);
                             finish();
                         } else {
                             startInstall();
@@ -426,10 +428,7 @@ public class PackageInstallerActivity extends AlertActivity {
         mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
                 (ignored, ignored2) -> {
                     // Cancel and finish
-                    setResult(RESULT_CANCELED);
-                    if (mSessionId != -1) {
-                        mInstaller.setPermissionsResult(mSessionId, false);
-                    }
+                    setActivityResult(RESULT_CANCELED);
                     finish();
                 }, null);
         setupAlert();
@@ -440,6 +439,23 @@ public class PackageInstallerActivity extends AlertActivity {
         if (!mOk.isInTouchMode()) {
             mAlert.getButton(DialogInterface.BUTTON_NEGATIVE).requestFocus();
         }
+    }
+
+    private void setActivityResult(int resultCode) {
+        mActivityResultCode = resultCode;
+        super.setResult(resultCode);
+    }
+
+    @Override
+    public void finish() {
+        if (mSessionId != -1) {
+            if (mActivityResultCode == Activity.RESULT_OK) {
+                mInstaller.setPermissionsResult(mSessionId, true);
+            } else {
+                mInstaller.setPermissionsResult(mSessionId, false);
+            }
+        }
+        super.finish();
     }
 
     /**
@@ -606,7 +622,7 @@ public class PackageInstallerActivity extends AlertActivity {
     @Override
     public void onBackPressed() {
         if (mSessionId != -1) {
-            mInstaller.setPermissionsResult(mSessionId, false);
+            setActivityResult(RESULT_CANCELED);
         }
         super.onBackPressed();
     }
