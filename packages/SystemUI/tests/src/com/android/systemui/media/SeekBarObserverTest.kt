@@ -178,8 +178,10 @@ class SeekBarObserverTest : SysuiTestCase() {
     }
 
     @Test
-    fun seekBarProgress_enabled_timeViewsHaveTime() {
-        val data = SeekBarViewModel.Progress(enabled = true, true, true, false, 3000, 120000)
+    fun seekBarProgress_enabledAndScrubbing_timeViewsHaveTime() {
+        val isEnabled = true
+        val isScrubbing = true
+        val data = SeekBarViewModel.Progress(isEnabled, true, true, isScrubbing, 3000, 120000)
 
         observer.onChanged(data)
 
@@ -188,8 +190,22 @@ class SeekBarObserverTest : SysuiTestCase() {
     }
 
     @Test
-    fun seekBarProgress_disabled_timeViewsEmpty() {
-        val data = SeekBarViewModel.Progress(enabled = false, true, true, false, 3000, 120000)
+    fun seekBarProgress_disabledAndScrubbing_timeViewsEmpty() {
+        val isEnabled = false
+        val isScrubbing = true
+        val data = SeekBarViewModel.Progress(isEnabled, true, true, isScrubbing, 3000, 120000)
+
+        observer.onChanged(data)
+
+        assertThat(scrubbingElapsedTimeView.text).isEqualTo("")
+        assertThat(scrubbingTotalTimeView.text).isEqualTo("")
+    }
+
+    @Test
+    fun seekBarProgress_enabledAndNotScrubbing_timeViewsEmpty() {
+        val isEnabled = true
+        val isScrubbing = false
+        val data = SeekBarViewModel.Progress(isEnabled, true, true, isScrubbing, 3000, 120000)
 
         observer.onChanged(data)
 

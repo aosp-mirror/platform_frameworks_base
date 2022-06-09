@@ -17,6 +17,7 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
 
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.display.ColorDisplayManager;
@@ -118,13 +119,18 @@ public class AutoTileManager implements UserAwareController {
         mDeviceControlsController = deviceControlsController;
         mWalletController = walletController;
         mSafetyController = safetyController;
-        String safetySpecRes;
+        String safetySpecClass;
         try {
-            safetySpecRes = context.getResources().getString(R.string.safety_quick_settings_tile);
+            safetySpecClass =
+                    context.getResources().getString(R.string.safety_quick_settings_tile_class);
+            if (safetySpecClass.length() == 0) {
+                safetySpecClass = null;
+            }
         } catch (Resources.NotFoundException | NullPointerException e) {
-            safetySpecRes = null;
+            safetySpecClass = null;
         }
-        mSafetySpec = safetySpecRes;
+        mSafetySpec = safetySpecClass != null ? CustomTile.toSpec(new ComponentName(mContext
+                .getPackageManager().getPermissionControllerPackageName(), safetySpecClass)) : null;
     }
 
     /**

@@ -69,7 +69,7 @@ public class ColorSchemeTest extends SysuiTestCase {
         // Expressive applies hue rotations to the theme color. The input theme color has hue
         // 117, ensuring the hue changed significantly is a strong signal styles are being applied.
         ColorScheme colorScheme = new ColorScheme(wallpaperColors, false, Style.EXPRESSIVE);
-        Assert.assertEquals(Cam.fromInt(colorScheme.getAccent1().get(6)).getHue(), 357.46, 0.1);
+        Assert.assertEquals(357.77, Cam.fromInt(colorScheme.getAccent1().get(6)).getHue(), 0.1);
     }
 
 

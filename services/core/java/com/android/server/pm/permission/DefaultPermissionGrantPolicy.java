@@ -603,15 +603,10 @@ final class DefaultPermissionGrantPolicy {
         final String setupWizardPackage = ArrayUtils.firstOrNull(getKnownPackages(
                 KnownPackages.PACKAGE_SETUP_WIZARD, userId));
         grantPermissionsToSystemPackage(pm, setupWizardPackage, userId, PHONE_PERMISSIONS,
-                CONTACTS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, CAMERA_PERMISSIONS);
+                CONTACTS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, CAMERA_PERMISSIONS,
+                NEARBY_DEVICES_PERMISSIONS);
         grantSystemFixedPermissionsToSystemPackage(pm, setupWizardPackage, userId,
                 NOTIFICATION_PERMISSIONS);
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH, 0)
-                || mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE,
-                0)) {
-            grantPermissionsToSystemPackage(
-                    pm, setupWizardPackage, userId, NEARBY_DEVICES_PERMISSIONS);
-        }
 
         // SearchSelector
         grantPermissionsToSystemPackage(pm, getDefaultSearchSelectorPackage(), userId,

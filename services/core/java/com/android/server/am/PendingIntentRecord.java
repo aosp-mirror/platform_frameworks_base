@@ -310,6 +310,17 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 requiredPermission, null, null, 0, 0, 0, options);
     }
 
+    /**
+     * Return true if the activity options allows PendingIntent to use caller's BAL permission.
+     */
+    public static boolean isPendingIntentBalAllowedByPermission(
+            @Nullable ActivityOptions activityOptions) {
+        if (activityOptions == null) {
+            return false;
+        }
+        return activityOptions.isPendingIntentBackgroundActivityLaunchAllowedByPermission();
+    }
+
     public static boolean isPendingIntentBalAllowedByCaller(
             @Nullable ActivityOptions activityOptions) {
         if (activityOptions == null) {
