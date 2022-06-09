@@ -6227,13 +6227,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // first time trying to show the toast, showToast gets called
         nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
         verify(mStatusBar, times(1))
-                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
 
         // second time trying to show the same toast, showToast isn't called again (total number of
         // invocations stays at one)
         nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
         verify(mStatusBar, times(1))
-                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
     }
 
     @Test
@@ -6255,7 +6255,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
         verify(mStatusBar, times(0))
-                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
     }
 
     @Test
@@ -6277,7 +6277,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
         verify(mStatusBar, times(1))
-                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
     }
 
     @Test
@@ -6297,7 +6297,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         INotificationManager nmService = (INotificationManager) mService.mService;
 
         nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
-        verify(mStatusBar).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+        verify(mStatusBar).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(),
+                anyInt());
     }
 
     @Test
@@ -6326,7 +6327,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // but never shown
         verify(mStatusBar, times(0))
-                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(), anyInt());
 
         // and removed when rate limited
         verify(mWindowManagerInternal)
@@ -6417,7 +6418,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // enqueue toast -> no toasts enqueued
         ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
                 "Text", 2000, 0, null);
-        verify(mStatusBar).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+        verify(mStatusBar).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any(),
+                anyInt());
     }
 
     @Test
