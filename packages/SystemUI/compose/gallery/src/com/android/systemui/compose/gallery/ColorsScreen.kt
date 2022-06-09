@@ -78,8 +78,7 @@ private fun ColorTile(
     ) {
         val shape = RoundedCornerShape(16.dp)
         Spacer(
-            Modifier
-                .border(1.dp, MaterialTheme.colorScheme.onBackground, shape)
+            Modifier.border(1.dp, MaterialTheme.colorScheme.onBackground, shape)
                 .background(color, shape)
                 .size(64.dp)
         )

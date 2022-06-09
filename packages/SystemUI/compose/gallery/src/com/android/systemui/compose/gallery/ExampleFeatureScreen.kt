@@ -23,7 +23,5 @@ import com.android.systemui.ExampleFeature
 /** The screen that shows ExampleFeature. */
 @Composable
 fun ExampleFeatureScreen() {
-    Column {
-        ExampleFeature("This is an example feature!")
-    }
+    Column { ExampleFeature("This is an example feature!") }
 }
