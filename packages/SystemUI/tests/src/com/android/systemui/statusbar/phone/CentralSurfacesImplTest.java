@@ -39,6 +39,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.IWallpaperManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.WallpaperManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
@@ -718,6 +719,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 .setPkg("a")
                 .setOpPkg("a")
                 .setTag("a")
+                .setChannel(new NotificationChannel("id", null, IMPORTANCE_HIGH))
                 .setNotification(n)
                 .setImportance(IMPORTANCE_HIGH)
                 .setSuppressedVisualEffects(SUPPRESSED_EFFECT_PEEK)
