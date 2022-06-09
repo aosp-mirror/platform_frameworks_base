@@ -67,6 +67,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -75,6 +76,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The policy for handling drag and drop operations to shell.
@@ -289,18 +291,15 @@ public class DragAndDropPolicy {
         final ComponentName currentActivity;
         if (!inSplitScreen) {
             currentActivity = mSession.runningTaskInfo != null
-                    ? mSession.runningTaskInfo.baseActivity
+                    ? mSession.runningTaskInfo.baseIntent.getComponent()
                     : null;
         } else {
-            final int nonReplacedSplitPosition = position == SPLIT_POSITION_TOP_OR_LEFT
-                    ? SPLIT_POSITION_BOTTOM_OR_RIGHT
-                    : SPLIT_POSITION_TOP_OR_LEFT;
-            ActivityManager.RunningTaskInfo nonReplacedTaskInfo =
-                    mSplitScreen.getTaskInfo(nonReplacedSplitPosition);
-            currentActivity = nonReplacedTaskInfo.baseActivity;
+            final ActivityManager.RunningTaskInfo nonReplacedTaskInfo =
+                    mSplitScreen.getTaskInfo(SplitLayout.reversePosition(position));
+            currentActivity = nonReplacedTaskInfo.baseIntent.getComponent();
         }
 
-        if (currentActivity.equals(dragIntentActivity)) {
+        if (Objects.equals(currentActivity, dragIntentActivity)) {
             // Only apply MULTIPLE_TASK if we are dragging the same activity
             final Intent fillInIntent = new Intent();
             fillInIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);

@@ -42,6 +42,7 @@
 #include <android_view_VerifiedMotionEvent.h>
 #include <batteryservice/include/batteryservice/BatteryServiceConstants.h>
 #include <binder/IServiceManager.h>
+#include <input/Input.h>
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
 #include <inputflinger/InputManager.h>

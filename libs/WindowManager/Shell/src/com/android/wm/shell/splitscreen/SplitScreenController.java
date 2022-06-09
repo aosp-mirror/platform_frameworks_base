@@ -83,10 +83,9 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import javax.inject.Provider;
 
 /**
  * Class manages split-screen multitasking mode and implements the main interface
@@ -138,7 +137,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final SplitscreenEventLogger mLogger;
     private final IconProvider mIconProvider;
     private final Optional<RecentTasksController> mRecentTasksOptional;
-    private final Provider<Optional<StageTaskUnfoldController>> mUnfoldControllerProvider;
 
     private StageCoordinator mStageCoordinator;
     // Only used for the legacy recents animation from splitscreen to allow the tasks to be animated
@@ -152,8 +150,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
             Transitions transitions, TransactionPool transactionPool, IconProvider iconProvider,
-            Optional<RecentTasksController> recentTasks,
-            Provider<Optional<StageTaskUnfoldController>> unfoldControllerProvider) {
+            Optional<RecentTasksController> recentTasks) {
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
@@ -164,7 +161,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mDisplayInsetsController = displayInsetsController;
         mTransitions = transitions;
         mTransactionPool = transactionPool;
-        mUnfoldControllerProvider = unfoldControllerProvider;
         mLogger = new SplitscreenEventLogger();
         mIconProvider = iconProvider;
         mRecentTasksOptional = recentTasks;
@@ -190,7 +186,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             mStageCoordinator = new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                     mTaskOrganizer, mDisplayController, mDisplayImeController,
                     mDisplayInsetsController, mTransitions, mTransactionPool, mLogger,
-                    mIconProvider, mMainExecutor, mRecentTasksOptional, mUnfoldControllerProvider);
+                    mIconProvider, mMainExecutor, mRecentTasksOptional);
         }
     }
 
@@ -224,6 +220,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public boolean moveToSideStage(int taskId, @SplitPosition int sideStagePosition) {
         return moveToStage(taskId, STAGE_TYPE_SIDE, sideStagePosition,
                 new WindowContainerTransaction());
+    }
+
+    /**
+     * Update surfaces of the split screen layout based on the current state
+     * @param transaction to write the updates to
+     */
+    public void updateSplitScreenSurfaces(SurfaceControl.Transaction transaction) {
+        mStageCoordinator.updateSurfaces(transaction);
     }
 
     private boolean moveToStage(int taskId, @StageType int stageType,
@@ -366,11 +370,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 if (apps == null || apps.length == 0) {
                     final ActivityManager.RunningTaskInfo pairedTaskInfo =
                             getTaskInfo(SplitLayout.reversePosition(position));
-                    final ComponentName pairedActivity =
-                            pairedTaskInfo != null ? pairedTaskInfo.baseActivity : null;
-                    final ComponentName intentActivity =
-                            intent.getIntent() != null ? intent.getIntent().getComponent() : null;
-                    if (pairedActivity != null && pairedActivity.equals(intentActivity)) {
+                    final ComponentName pairedActivity = pairedTaskInfo != null
+                            ? pairedTaskInfo.baseIntent.getComponent() : null;
+                    final ComponentName intentActivity = intent.getIntent() != null
+                            ? intent.getIntent().getComponent() : null;
+
+                    if (Objects.equals(pairedActivity, intentActivity)) {
                         // Switch split position if dragging the same activity to another side.
                         setSideStagePosition(SplitLayout.reversePosition(
                                 mStageCoordinator.getSideStagePosition()));
@@ -534,6 +539,17 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     final int index = i;
                     mExecutors.valueAt(index).execute(() -> {
                         mExecutors.keyAt(index).onTaskStageChanged(taskId, stage, visible);
+                    });
+                }
+            }
+
+            @Override
+            public void onSplitBoundsChanged(Rect rootBounds, Rect mainBounds, Rect sideBounds) {
+                for (int i = 0; i < mExecutors.size(); i++) {
+                    final int index = i;
+                    mExecutors.valueAt(index).execute(() -> {
+                        mExecutors.keyAt(index).onSplitBoundsChanged(rootBounds, mainBounds,
+                                sideBounds);
                     });
                 }
             }

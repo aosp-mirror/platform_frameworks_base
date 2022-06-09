@@ -402,12 +402,25 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** The time at which the previous process was last visible. */
     private long mPreviousProcessVisibleTime;
 
+    /** It is set from keyguard-going-away to set-keyguard-shown. */
+    static final int DEMOTE_TOP_REASON_DURING_UNLOCKING = 1;
+    /** It is set if legacy recents animation is running. */
+    static final int DEMOTE_TOP_REASON_ANIMATING_RECENTS = 1 << 1;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            DEMOTE_TOP_REASON_DURING_UNLOCKING,
+            DEMOTE_TOP_REASON_ANIMATING_RECENTS,
+    })
+    @interface DemoteTopReason {}
+
     /**
-     * It can be true from keyguard-going-away to set-keyguard-shown. And getTopProcessState() will
+     * If non-zero, getTopProcessState() will
      * return {@link ActivityManager#PROCESS_STATE_IMPORTANT_FOREGROUND} to avoid top app from
-     * preempting CPU while keyguard is animating.
+     * preempting CPU while another process is running an important animation.
      */
-    private volatile boolean mDemoteTopAppDuringUnlocking;
+    @DemoteTopReason
+    volatile int mDemoteTopAppReasons;
 
     /** List of intents that were used to start the most recent tasks. */
     private RecentTasks mRecentTasks;
@@ -2841,8 +2854,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             // Always reset the state regardless of keyguard-showing change, because that means the
             // unlock is either completed or canceled.
-            if (mDemoteTopAppDuringUnlocking) {
-                mDemoteTopAppDuringUnlocking = false;
+            if ((mDemoteTopAppReasons & DEMOTE_TOP_REASON_DURING_UNLOCKING) != 0) {
+                mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
                 // The scheduling group of top process was demoted by unlocking, so recompute
                 // to restore its real top priority if possible.
                 if (mTopApp != null) {
@@ -2883,7 +2896,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // animation of system UI. Even if AOD is not enabled, it should be no harm.
         final WindowProcessController proc;
         synchronized (mGlobalLockWithoutBoost) {
-            mDemoteTopAppDuringUnlocking = false;
+            mDemoteTopAppReasons &= ~DEMOTE_TOP_REASON_DURING_UNLOCKING;
             final WindowState notificationShade = mRootWindowContainer.getDefaultDisplay()
                     .getDisplayPolicy().getNotificationShade();
             proc = notificationShade != null
@@ -3425,7 +3438,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mActivityClientController.invalidateHomeTaskSnapshot(null /* token */);
                 } else if (mKeyguardShown) {
                     // Only set if it is not unlocking to launcher which may also animate.
-                    mDemoteTopAppDuringUnlocking = true;
+                    mDemoteTopAppReasons |= DEMOTE_TOP_REASON_DURING_UNLOCKING;
                 }
 
                 mRootWindowContainer.forAllDisplays(displayContent -> {
@@ -4035,6 +4048,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mTaskOrganizerController.dump(pw, "  ");
             mVisibleActivityProcessTracker.dump(pw, "  ");
             mActiveUids.dump(pw, "  ");
+            if (mDemoteTopAppReasons != 0) {
+                pw.println("  mDemoteTopAppReasons=" + mDemoteTopAppReasons);
+            }
         }
 
         if (!printedAnything) {
@@ -5663,8 +5679,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public int getTopProcessState() {
             final int topState = mTopProcessState;
-            if (mDemoteTopAppDuringUnlocking && topState == ActivityManager.PROCESS_STATE_TOP) {
-                // The unlocking UI is more important, so defer the top state of app.
+            if (mDemoteTopAppReasons != 0 && topState == ActivityManager.PROCESS_STATE_TOP) {
+                // There may be a more important UI/animation than the top app.
                 return ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
             }
             if (mRetainPowerModeAndTopProcessState) {
@@ -6474,9 +6490,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onHandleAppCrash(WindowProcessController wpc) {
+        public void onHandleAppCrash(@NonNull WindowProcessController wpc) {
             synchronized (mGlobalLock) {
-                mRootWindowContainer.handleAppCrash(wpc);
+                wpc.handleAppCrash();
             }
         }
 

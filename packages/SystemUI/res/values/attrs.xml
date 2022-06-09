@@ -193,5 +193,9 @@
     <declare-styleable name="DreamOverlayDotImageView">
         <attr name="dotColor" format="color" />
     </declare-styleable>
+
+    <declare-styleable name="DelayableMarqueeTextView">
+        <attr name="marqueeDelay" format="integer" />
+    </declare-styleable>
 </resources>
 

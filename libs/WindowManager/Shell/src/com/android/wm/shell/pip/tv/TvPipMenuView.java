@@ -43,6 +43,7 @@ import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -65,7 +66,7 @@ import java.util.List;
 /**
  * A View that represents Pip Menu on TV. It's responsible for displaying 3 ever-present Pip Menu
  * actions: Fullscreen, Move and Close, but could also display "additional" actions, that may be set
- * via a {@link #setAdditionalActions(List, Handler)} call.
+ * via a {@link #setAdditionalActions(List, RemoteAction, Handler)} call.
  */
 public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "TvPipMenuView";
@@ -93,6 +94,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final ImageView mArrowRight;
     private final ImageView mArrowDown;
     private final ImageView mArrowLeft;
+    private final TvPipMenuActionButton mA11yDoneButton;
 
     private final ScrollView mScrollView;
     private final HorizontalScrollView mHorizontalScrollView;
@@ -109,6 +111,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
     private final int mPipMenuFadeAnimationDuration;
     private final int mResizeAnimationDuration;
+
+    private final AccessibilityManager mA11yManager;
 
     public TvPipMenuView(@NonNull Context context) {
         this(context, null);
@@ -127,6 +131,8 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         inflate(context, R.layout.tv_pip_menu, this);
+
+        mA11yManager = context.getSystemService(AccessibilityManager.class);
 
         mActionButtonsContainer = findViewById(R.id.tv_pip_menu_action_buttons);
         mActionButtonsContainer.findViewById(R.id.tv_pip_menu_fullscreen_button)
@@ -152,6 +158,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         mArrowRight = findViewById(R.id.tv_pip_menu_arrow_right);
         mArrowDown = findViewById(R.id.tv_pip_menu_arrow_down);
         mArrowLeft = findViewById(R.id.tv_pip_menu_arrow_left);
+        mA11yDoneButton = findViewById(R.id.tv_pip_menu_done_button);
 
         mEduTextView = findViewById(R.id.tv_pip_menu_edu_text);
         mEduTextContainerView = findViewById(R.id.tv_pip_menu_edu_text_container);
@@ -454,6 +461,9 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         showButtonsMenu(false);
         showMovementHints(gravity);
         setFrameHighlighted(true);
+
+        mHorizontalScrollView.setFocusable(false);
+        mScrollView.setFocusable(false);
     }
 
     void showButtonsMenu() {
@@ -467,6 +477,9 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         showButtonsMenu(true);
         hideMovementHints();
         setFrameHighlighted(true);
+
+        mHorizontalScrollView.setFocusable(true);
+        mScrollView.setFocusable(true);
 
         // Always focus on the first button when opening the menu, except directly after moving.
         if (mFocusedButton == null) {
@@ -655,10 +668,16 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 mFocusedButton = mActionButtonsContainer.getFocusedChild();
             }
 
+            if (event.getKeyCode() == KEYCODE_BACK) {
+                mListener.onBackPress();
+                return true;
+            }
+
+            if (mA11yManager.isEnabled()) {
+                return super.dispatchKeyEvent(event);
+            }
+
             switch (event.getKeyCode()) {
-                case KEYCODE_BACK:
-                    mListener.onBackPress();
-                    return true;
                 case KEYCODE_DPAD_UP:
                 case KEYCODE_DPAD_DOWN:
                 case KEYCODE_DPAD_LEFT:
@@ -688,6 +707,32 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         animateAlphaTo(checkGravity(gravity, Gravity.TOP) ? 1f : 0f, mArrowDown);
         animateAlphaTo(checkGravity(gravity, Gravity.RIGHT) ? 1f : 0f, mArrowLeft);
         animateAlphaTo(checkGravity(gravity, Gravity.LEFT) ? 1f : 0f, mArrowRight);
+
+        boolean a11yEnabled = mA11yManager.isEnabled();
+        setArrowA11yEnabled(mArrowUp, a11yEnabled, KEYCODE_DPAD_UP);
+        setArrowA11yEnabled(mArrowDown, a11yEnabled, KEYCODE_DPAD_DOWN);
+        setArrowA11yEnabled(mArrowLeft, a11yEnabled, KEYCODE_DPAD_LEFT);
+        setArrowA11yEnabled(mArrowRight, a11yEnabled, KEYCODE_DPAD_RIGHT);
+
+        animateAlphaTo(a11yEnabled ? 1f : 0f, mA11yDoneButton);
+        if (a11yEnabled) {
+            mA11yDoneButton.setOnClickListener(v -> {
+                if (mListener != null) {
+                    mListener.onExitMoveMode();
+                }
+            });
+        }
+    }
+
+    private void setArrowA11yEnabled(View arrowView, boolean enabled, int keycode) {
+        arrowView.setClickable(enabled);
+        if (enabled) {
+            arrowView.setOnClickListener(v -> {
+                if (mListener != null) {
+                    mListener.onPipMovement(keycode);
+                }
+            });
+        }
     }
 
     private boolean checkGravity(int gravity, int feature) {
@@ -706,6 +751,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         animateAlphaTo(0, mArrowRight);
         animateAlphaTo(0, mArrowDown);
         animateAlphaTo(0, mArrowLeft);
+        animateAlphaTo(0, mA11yDoneButton);
     }
 
     /**

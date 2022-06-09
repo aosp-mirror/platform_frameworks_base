@@ -22,6 +22,7 @@
 ** Should include all numeric glyphs in all supported locales.
 ** Recommended: font with variable width to support AOD => LS animations
 -->
+<!-- TODO: Remove when clock migration complete -->
 <font-family xmlns:android="http://schemas.android.com/apk/res/android">
     <font android:typeface="monospace"/>
 </font-family>

@@ -182,8 +182,10 @@ public class DragAndDropPolicyTest {
         info.configuration.windowConfiguration.setActivityType(actType);
         info.configuration.windowConfiguration.setWindowingMode(winMode);
         info.isResizeable = true;
-        info.baseActivity = new ComponentName(getInstrumentation().getContext().getPackageName(),
+        info.baseActivity = new ComponentName(getInstrumentation().getContext(),
                 ".ActivityWithMode" + winMode);
+        info.baseIntent = new Intent();
+        info.baseIntent.setComponent(info.baseActivity);
         ActivityInfo activityInfo = new ActivityInfo();
         activityInfo.packageName = info.baseActivity.getPackageName();
         activityInfo.name = info.baseActivity.getClassName();

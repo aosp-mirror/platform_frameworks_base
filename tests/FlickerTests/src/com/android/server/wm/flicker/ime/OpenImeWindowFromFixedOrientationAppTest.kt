@@ -17,11 +17,12 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import androidx.test.filters.FlakyTest
+import android.platform.test.annotations.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -34,6 +35,7 @@ import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerPositionEnd
 import com.android.server.wm.flicker.navBarWindowIsVisible
+import com.android.server.wm.flicker.snapshotStartingWindowLayerCoversExactlyOnApp
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import org.junit.FixMethodOrder
@@ -106,6 +108,12 @@ class OpenImeWindowFromFixedOrientationAppTest(private val testSpec: FlickerTest
     @Presubmit
     @Test
     fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+
+    @Postsubmit
+    @Test
+    fun snapshotStartingWindowLayerCoversExactlyOnApp() {
+        testSpec.snapshotStartingWindowLayerCoversExactlyOnApp(imeTestApp.component)
+    }
 
     companion object {
         /**
