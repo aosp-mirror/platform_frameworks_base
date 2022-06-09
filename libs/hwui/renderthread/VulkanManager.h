@@ -84,7 +84,9 @@ public:
     void destroySurface(VulkanSurface* surface);
 
     Frame dequeueNextBuffer(VulkanSurface* surface);
-    void finishFrame(SkSurface* surface);
+    // Finishes the frame and submits work to the GPU
+    // Returns the estimated start time for intiating GPU work, -1 otherwise.
+    nsecs_t finishFrame(SkSurface* surface);
     void swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect);
 
     // Inserts a wait on fence command into the Vulkan command buffer.

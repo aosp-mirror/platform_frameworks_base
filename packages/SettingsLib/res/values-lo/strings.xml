@@ -175,7 +175,7 @@
     <string name="data_usage_ota" msgid="7984667793701597001">"ການອັບເດດລະບົບ"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"ການປ່ອຍສັນຍານຜ່ານ USB"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"ຮັອດສະປອດເຄື່ອນທີ່"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ປ່ອຍສັນຍານຜ່ານ Bluetooth"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ການປ່ອຍສັນຍານດ້ວຍ Bluetooth"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"ການປ່ອຍສັນຍານ"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"ການປ່ອຍສັນຍານ &amp; ຮັອດສະປອດເຄື່ອນທີ່"</string>
     <string name="managed_user_title" msgid="449081789742645723">"ແອັບເຮັດວຽກທັງໝົດ"</string>

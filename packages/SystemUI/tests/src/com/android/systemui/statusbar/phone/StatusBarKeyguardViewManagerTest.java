@@ -312,8 +312,23 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.dismissWithAction(
                 action, cancelAction, true /* afterKeyguardGone */);
 
+        when(mBouncer.isShowing()).thenReturn(false);
         mStatusBarKeyguardViewManager.hideBouncer(true);
         mStatusBarKeyguardViewManager.hide(0, 30);
+        verify(action, never()).onDismiss();
+        verify(cancelAction).run();
+    }
+
+    @Test
+    public void testHidingBouncer_cancelsGoneRunnable() {
+        OnDismissAction action = mock(OnDismissAction.class);
+        Runnable cancelAction = mock(Runnable.class);
+        mStatusBarKeyguardViewManager.dismissWithAction(
+                action, cancelAction, true /* afterKeyguardGone */);
+
+        when(mBouncer.isShowing()).thenReturn(false);
+        mStatusBarKeyguardViewManager.hideBouncer(true);
+
         verify(action, never()).onDismiss();
         verify(cancelAction).run();
     }

@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acesse sua agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"envie e veja mensagens SMS"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Arquivos"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"acessar arquivos no dispositivo"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Música e áudio"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"acessar música e áudio no dispositivo"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Fotos e vídeos"</string>
@@ -357,8 +355,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite que o app remova atalhos da tela inicial sem a intervenção do usuário."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"redirecionar as chamadas efetuadas"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Permite que o app veja o número discado ao realizar uma chamada, com a opção de redirecionar a chamada para outro número ou abortá-la."</string>
-    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"atender chamadas telefônicas"</string>
-    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permite que o app atenda uma chamada recebida."</string>
+    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"atender ligações telefônicas"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permite que o app atenda uma ligação recebida."</string>
     <string name="permlab_receiveSms" msgid="505961632050451881">"receber mensagens de texto (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="1797345626687832285">"Permite que o app receba e processe mensagens SMS. Isso significa que o app pode monitorar ou excluir mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
     <string name="permlab_receiveMms" msgid="4000650116674380275">"receber mensagens de texto (MMS)"</string>
@@ -422,7 +420,7 @@
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Permite que o app modifique os dados sobre os contatos armazenados no dispositivo Android TV. Essa permissão autoriza os apps a excluírem dados de contato."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que o app modifique os dados sobre os contatos armazenados no smartphone. Essa permissão autoriza os apps a excluírem dados de contato."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ler registro de chamadas"</string>
-    <string name="permdesc_readCallLog" msgid="8964770895425873433">"Este app pode ler seu histórico de chamadas."</string>
+    <string name="permdesc_readCallLog" msgid="8964770895425873433">"Este app pode ler seu histórico de ligações."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"salvar no registo de chamadas"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite que o app modifique o registro de chamadas de seu tablet, incluindo dados sobre chamadas recebidas e efetuadas. Apps maliciosos podem usar esta permissão para apagar ou modificar seu registro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite que o app modifique o registro de chamadas do seu dispositivo Android TV, incluindo dados sobre chamadas recebidas e realizadas. Apps maliciosos podem usar essa permissão para apagar ou modificar seu registro de chamadas."</string>
@@ -1909,7 +1907,7 @@
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Desligar"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Chamada recebida"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Chamada em andamento"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"Filtrando uma chamada recebida"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Filtrando uma ligação recebida"</string>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Sem classificação"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Você definiu a importância dessas notificações."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Isso é importante por causa das pessoas envolvidas."</string>
@@ -2073,7 +2071,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desativar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saiba mais"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações avançadas substituíram as notificações adaptáveis. Esse recurso mostra ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações avançadas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações avançadas substituíram as notificações adaptáveis. Esse recurso mostra ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações avançadas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender ligações telefônicas e controlar o Não perturbe."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informação do modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A bateria pode acabar antes da recarga normal"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"A Economia de bateria foi ativada para aumentar a duração da carga"</string>
