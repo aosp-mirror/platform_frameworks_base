@@ -28,7 +28,6 @@ import android.widget.CheckBox;
 import androidx.annotation.NonNull;
 import androidx.core.widget.CompoundButtonCompat;
 
-import com.android.settingslib.Utils;
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
@@ -42,8 +41,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     private static final String TAG = "MediaOutputAdapter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final float DEVICE_DISCONNECTED_ALPHA = 0.5f;
-    private static final float DEVICE_CONNECTED_ALPHA = 1f;
 
     private final MediaOutputDialog mMediaOutputDialog;
     private ViewGroup mConnectedItem;
@@ -131,14 +128,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (mCurrentActivePosition == position) {
                 mCurrentActivePosition = -1;
             }
-            if (device.getDeviceType() == MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE
-                    && !device.isConnected()) {
-                mTitleText.setAlpha(DEVICE_DISCONNECTED_ALPHA);
-                mTitleIcon.setAlpha(DEVICE_DISCONNECTED_ALPHA);
-            } else {
-                mTitleText.setAlpha(DEVICE_CONNECTED_ALPHA);
-                mTitleIcon.setAlpha(DEVICE_CONNECTED_ALPHA);
-            }
 
             if (mController.isTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
@@ -159,8 +148,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 // Set different layout for each device
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
                     setUpDeviceIcon(device);
-                    mTitleText.setAlpha(DEVICE_CONNECTED_ALPHA);
-                    mTitleIcon.setAlpha(DEVICE_CONNECTED_ALPHA);
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_failed));
                     mStatusIcon.setColorFilter(mController.getColorItemContent());
@@ -197,10 +184,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             ? (buttonView, isChecked) -> onGroupActionTriggered(false, device)
                             : null);
                     mCheckBox.setEnabled(isDeviceDeselectable);
-                    mCheckBox.setAlpha(
-                            isDeviceDeselectable ? DEVICE_CONNECTED_ALPHA
-                                    : DEVICE_DISCONNECTED_ALPHA
-                    );
                     setCheckBoxColor(mCheckBox, mController.getColorItemContent());
                     initSeekbar(device, isCurrentSeekbarInvisible);
                     mEndTouchArea.setVisibility(View.VISIBLE);
@@ -257,9 +240,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
                         false /* bFocused */);
                 final Drawable d = mContext.getDrawable(R.drawable.ic_add);
-                d.setColorFilter(new PorterDuffColorFilter(
-                        Utils.getColorAccentDefaultColor(mContext), PorterDuff.Mode.SRC_IN));
                 mTitleIcon.setImageDrawable(d);
+                mTitleIcon.setColorFilter(mController.getColorItemContent());
                 mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
             }
         }

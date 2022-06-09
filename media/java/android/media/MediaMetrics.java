@@ -107,6 +107,9 @@ public class MediaMetrics {
 
         public static final Key<String> EVENT = createKey("event#", String.class);
 
+        // Generally string "true" or "false"
+        public static final Key<String> ENABLED = createKey("enabled", String.class);
+
         // event generated is external (yes, no)
         public static final Key<String> EXTERNAL = createKey("external", String.class);
 
@@ -121,6 +124,13 @@ public class MediaMetrics {
                 createKey("gainDb", Double.class);
         public static final Key<String> GROUP =
                 createKey("group", String.class);
+
+        // Generally string "true" or "false"
+        public static final Key<String> HAS_HEAD_TRACKER =
+                createKey("hasHeadTracker", String.class);     // spatializer
+        // Generally string "true" or "false"
+        public static final Key<String> HEAD_TRACKER_ENABLED =
+                createKey("headTrackerEnabled", String.class); // spatializer
 
         public static final Key<Integer> INDEX = createKey("index", Integer.class); // volume
         public static final Key<String> LOG_SESSION_ID = createKey("logSessionId", String.class);

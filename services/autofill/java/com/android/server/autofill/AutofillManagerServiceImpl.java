@@ -70,6 +70,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillManager.AutofillCommitReason;
 import android.view.autofill.AutofillManager.SmartSuggestionMode;
 import android.view.autofill.AutofillValue;
 import android.view.autofill.IAutoFillManagerClient;
@@ -423,7 +424,7 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    void finishSessionLocked(int sessionId, int uid) {
+    void finishSessionLocked(int sessionId, int uid, @AutofillCommitReason int commitReason) {
         if (!isEnabledLocked()) {
             return;
         }
@@ -438,7 +439,7 @@ final class AutofillManagerServiceImpl
 
         final Session.SaveResult saveResult = session.showSaveLocked();
 
-        session.logContextCommitted(saveResult.getNoSaveUiReason());
+        session.logContextCommitted(saveResult.getNoSaveUiReason(), commitReason);
 
         if (saveResult.isLogSaveShown()) {
             session.logSaveUiShown();

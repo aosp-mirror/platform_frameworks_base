@@ -161,8 +161,9 @@ class MediaTimeoutListener @Inject constructor(
                 destroyed = false
                 mediaController?.unregisterCallback(this)
                 field = value
-                mediaController = if (field.token != null) {
-                    mediaControllerFactory.create(field.token)
+                val token = field.token
+                mediaController = if (token != null) {
+                    mediaControllerFactory.create(token)
                 } else {
                     null
                 }
