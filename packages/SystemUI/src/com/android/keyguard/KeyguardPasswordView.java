@@ -32,6 +32,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
@@ -44,6 +45,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 /**
@@ -194,9 +196,17 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
                             @Override
                             public void onAnimationEnd(Animator animation) {
-                                controller.finish(false);
-                                runOnFinishImeAnimationRunnable();
-                                finishRunnable.run();
+                                // Run this in the next frame since it results in a slow binder call
+                                // to InputMethodManager#hideSoftInput()
+                                DejankUtils.postAfterTraversal(() -> {
+                                    Trace.beginSection("KeyguardPasswordView#onAnimationEnd");
+                                    // // TODO(b/230620476): Make hideSoftInput oneway
+                                    // controller.finish() eventually calls hideSoftInput
+                                    controller.finish(false);
+                                    runOnFinishImeAnimationRunnable();
+                                    finishRunnable.run();
+                                    Trace.endSection();
+                                });
                             }
                         });
                         anim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);

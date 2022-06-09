@@ -72,6 +72,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VIRTUAL_PRELOAD;
 import static com.android.server.pm.PackageManagerService.SCAN_BOOTING;
 import static com.android.server.pm.PackageManagerService.SCAN_DONT_KILL_APP;
+import static com.android.server.pm.PackageManagerService.SCAN_DROP_CACHE;
 import static com.android.server.pm.PackageManagerService.SCAN_FIRST_BOOT_OR_UPGRADE;
 import static com.android.server.pm.PackageManagerService.SCAN_IGNORE_FROZEN;
 import static com.android.server.pm.PackageManagerService.SCAN_INITIAL;
@@ -152,6 +153,7 @@ import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.ViewCompiler;
+import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -333,7 +335,10 @@ final class InstallPackageHelper {
             mPm.mTransferredPackages.add(pkg.getPackageName());
         }
 
-        if (reconciledPkg.mCollectedSharedLibraryInfos != null) {
+        if (reconciledPkg.mCollectedSharedLibraryInfos != null
+                || (oldPkgSetting != null && oldPkgSetting.getUsesLibraryInfos() != null)) {
+            // Reconcile if the new package or the old package uses shared libraries.
+            // It is possible that the old package uses shared libraries but the new one doesn't.
             mSharedLibraries.executeSharedLibrariesUpdateLPw(pkg, pkgSetting, null, null,
                     reconciledPkg.mCollectedSharedLibraryInfos, allUsers);
         }
@@ -2543,28 +2548,31 @@ final class InstallPackageHelper {
     public void sendPendingBroadcasts() {
         String[] packages;
         ArrayList<String>[] components;
-        int size = 0;
+        int numBroadcasts = 0, numUsers;
         int[] uids;
 
         synchronized (mPm.mLock) {
             final SparseArray<ArrayMap<String, ArrayList<String>>> userIdToPackagesToComponents =
                     mPm.mPendingBroadcasts.copiedMap();
-            size = userIdToPackagesToComponents.size();
-            if (size <= 0) {
+            numUsers = userIdToPackagesToComponents.size();
+            for (int n = 0; n < numUsers; n++) {
+                numBroadcasts += userIdToPackagesToComponents.valueAt(n).size();
+            }
+            if (numBroadcasts == 0) {
                 // Nothing to be done. Just return
                 return;
             }
-            packages = new String[size];
-            components = new ArrayList[size];
-            uids = new int[size];
+            packages = new String[numBroadcasts];
+            components = new ArrayList[numBroadcasts];
+            uids = new int[numBroadcasts];
             int i = 0;  // filling out the above arrays
 
-            for (int n = 0; n < size; n++) {
+            for (int n = 0; n < numUsers; n++) {
                 final int packageUserId = userIdToPackagesToComponents.keyAt(n);
                 final ArrayMap<String, ArrayList<String>> componentsToBroadcast =
                         userIdToPackagesToComponents.valueAt(n);
                 final int numComponents = CollectionUtils.size(componentsToBroadcast);
-                for (int index = 0; i < size && index < numComponents; index++) {
+                for (int index = 0; index < numComponents; index++) {
                     packages[i] = componentsToBroadcast.keyAt(index);
                     components[i] = componentsToBroadcast.valueAt(index);
                     final PackageSetting ps = mPm.mSettings.getPackageLPr(packages[i]);
@@ -2574,12 +2582,12 @@ final class InstallPackageHelper {
                     i++;
                 }
             }
-            size = i;
+            numBroadcasts = i;
             mPm.mPendingBroadcasts.clear();
         }
         final Computer snapshot = mPm.snapshotComputer();
         // Send broadcasts
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < numBroadcasts; i++) {
             mPm.sendPackageChangedBroadcast(snapshot, packages[i], true /* dontKillApp */,
                     components[i], uids[i], null /* reason */);
         }
@@ -3414,6 +3422,11 @@ final class InstallPackageHelper {
                 // Ignore entries which are not packages
                 continue;
             }
+            if ((scanFlags & SCAN_DROP_CACHE) != 0) {
+                final PackageCacher cacher = new PackageCacher(mPm.getCacheDir());
+                Log.w(TAG, "Dropping cache of " + file.getAbsolutePath());
+                cacher.cleanCachedResult(file);
+            }
             parallelPackageParser.submit(file, parseFlags);
             fileCount++;
         }
@@ -4187,8 +4200,8 @@ final class InstallPackageHelper {
                 assertOverlayIsValid(pkg, parseFlags, scanFlags);
             }
 
-            // If the package is not on a system partition ensure it is signed with at least the
-            // minimum signature scheme version required for its target SDK.
+            // Ensure the package is signed with at least the minimum signature scheme version
+            // required for its target SDK.
             ScanPackageUtils.assertMinSignatureSchemeIsValid(pkg, parseFlags);
         }
     }

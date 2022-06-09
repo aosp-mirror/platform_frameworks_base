@@ -203,6 +203,11 @@ public enum ScrimState {
         public boolean isLowPowerState() {
             return true;
         }
+
+        @Override
+        public boolean shouldBlendWithMainColor() {
+            return false;
+        }
     },
 
     /**
@@ -323,6 +328,13 @@ public enum ScrimState {
 
     /** Prepare state for transition. */
     public void prepare(ScrimState previousState) {
+    }
+
+    /**
+     * Whether a particular state should enable blending with extracted theme colors.
+     */
+    public boolean shouldBlendWithMainColor() {
+        return true;
     }
 
     public float getFrontAlpha() {

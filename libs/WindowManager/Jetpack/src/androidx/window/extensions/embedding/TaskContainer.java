@@ -16,12 +16,14 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Activity;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Rect;
@@ -47,9 +49,11 @@ class TaskContainer {
     private int mWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     /** Active TaskFragments in this Task. */
+    @NonNull
     final List<TaskFragmentContainer> mContainers = new ArrayList<>();
 
     /** Active split pairs in this Task. */
+    @NonNull
     final List<SplitContainer> mSplitContainers = new ArrayList<>();
 
     /**
@@ -60,6 +64,9 @@ class TaskContainer {
     final Set<IBinder> mFinishedContainer = new ArraySet<>();
 
     TaskContainer(int taskId) {
+        if (taskId == INVALID_TASK_ID) {
+            throw new IllegalArgumentException("Invalid Task id");
+        }
         mTaskId = taskId;
     }
 
@@ -106,7 +113,7 @@ class TaskContainer {
     int getWindowingModeForSplitTaskFragment(@Nullable Rect taskFragmentBounds) {
         // Only set to multi-windowing mode if the pair are showing side-by-side. Otherwise, it
         // will be set to UNDEFINED which will then inherit the Task windowing mode.
-        if (taskFragmentBounds == null || taskFragmentBounds.isEmpty()) {
+        if (taskFragmentBounds == null || taskFragmentBounds.isEmpty() || isInPictureInPicture()) {
             return WINDOWING_MODE_UNDEFINED;
         }
         // We use WINDOWING_MODE_MULTI_WINDOW when the Task is fullscreen.
@@ -127,5 +134,31 @@ class TaskContainer {
     /** Whether there is any {@link TaskFragmentContainer} below this Task. */
     boolean isEmpty() {
         return mContainers.isEmpty() && mFinishedContainer.isEmpty();
+    }
+
+    /** Removes the pending appeared activity from all TaskFragments in this Task. */
+    void cleanupPendingAppearedActivity(@NonNull Activity pendingAppearedActivity) {
+        for (TaskFragmentContainer container : mContainers) {
+            container.removePendingAppearedActivity(pendingAppearedActivity);
+        }
+    }
+
+    @Nullable
+    TaskFragmentContainer getTopTaskFragmentContainer() {
+        if (mContainers.isEmpty()) {
+            return null;
+        }
+        return mContainers.get(mContainers.size() - 1);
+    }
+
+    @Nullable
+    Activity getTopNonFinishingActivity() {
+        for (int i = mContainers.size() - 1; i >= 0; i--) {
+            final Activity activity = mContainers.get(i).getTopNonFinishingActivity();
+            if (activity != null) {
+                return activity;
+            }
+        }
+        return null;
     }
 }

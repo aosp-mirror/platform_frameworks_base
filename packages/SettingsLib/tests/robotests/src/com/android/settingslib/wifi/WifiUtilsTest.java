@@ -188,6 +188,19 @@ public class WifiUtilsTest {
     }
 
     @Test
+    public void getInternetIconResource_levelOutOfRange_shouldNotCrash() {
+        // Verify that Wi-Fi level is less than the minimum level (0)
+        int level = -1;
+        WifiUtils.getInternetIconResource(level, false /* noInternet*/);
+        WifiUtils.getInternetIconResource(level, true /* noInternet*/);
+
+        // Verify that Wi-Fi level is greater than the maximum level (4)
+        level = WifiUtils.WIFI_PIE.length;
+        WifiUtils.getInternetIconResource(level, false /* noInternet*/);
+        WifiUtils.getInternetIconResource(level, true /* noInternet*/);
+    }
+
+    @Test
     public void testInternetIconInjector_getIcon_returnsCorrectValues() {
         WifiUtils.InternetIconInjector iconInjector = new WifiUtils.InternetIconInjector(mContext);
 

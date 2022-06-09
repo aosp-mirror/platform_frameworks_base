@@ -55,6 +55,7 @@ import static android.content.Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+import static android.os.PowerExemptionManager.REASON_ACTIVE_DEVICE_ADMIN;
 import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerExemptionManager.REASON_CARRIER_PRIVILEGED_APP;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
@@ -264,6 +265,20 @@ public final class AppRestrictionController {
      * Power-save allowlisted app-ids (including except-idle-allowlisted ones).
      */
     private int[] mDeviceIdleExceptIdleAllowlist = new int[0]; // No lock is needed.
+
+    /**
+     * The pre-configured system app-ids in the power-save allow list.
+     *
+     * @see #mDeviceIdleAllowlist.
+     */
+    private final ArraySet<Integer> mSystemDeviceIdleAllowlist = new ArraySet<>();
+
+    /**
+     * The pre-configured system app-ids in the power-save allow list, except-idle.
+     *
+     * @see #mDeviceIdleExceptIdleAllowlist.
+     */
+    private final ArraySet<Integer> mSystemDeviceIdleExceptIdleAllowlist = new ArraySet<>();
 
     private final Object mLock = new Object();
     private final Object mSettingsLock = new Object();
@@ -1511,12 +1526,31 @@ public final class AppRestrictionController {
     }
 
     private void initBgRestrictionExemptioFromSysConfig() {
-        mBgRestrictionExemptioFromSysConfig =
-                SystemConfig.getInstance().getBgRestrictionExemption();
+        final SystemConfig sysConfig = SystemConfig.getInstance();
+        mBgRestrictionExemptioFromSysConfig = sysConfig.getBgRestrictionExemption();
         if (DEBUG_BG_RESTRICTION_CONTROLLER) {
             final ArraySet<String> exemptedPkgs = mBgRestrictionExemptioFromSysConfig;
             for (int i = exemptedPkgs.size() - 1; i >= 0; i--) {
                 Slog.i(TAG, "bg-restriction-exemption: " + exemptedPkgs.valueAt(i));
+            }
+        }
+        loadAppIdsFromPackageList(sysConfig.getAllowInPowerSaveExceptIdle(),
+                mSystemDeviceIdleExceptIdleAllowlist);
+        loadAppIdsFromPackageList(sysConfig.getAllowInPowerSave(), mSystemDeviceIdleAllowlist);
+    }
+
+    private void loadAppIdsFromPackageList(ArraySet<String> packages, ArraySet<Integer> apps) {
+        final PackageManager pm = mInjector.getPackageManager();
+        for (int i = packages.size() - 1; i >= 0; i--) {
+            final String pkg = packages.valueAt(i);
+            try {
+                final ApplicationInfo ai = pm.getApplicationInfo(pkg,
+                        PackageManager.MATCH_SYSTEM_ONLY);
+                if (ai == null) {
+                    continue;
+                }
+                apps.add(UserHandle.getAppId(ai.uid));
+            } catch (PackageManager.NameNotFoundException e) {
             }
         }
     }
@@ -2685,6 +2719,13 @@ public final class AppRestrictionController {
                 || Arrays.binarySearch(mDeviceIdleExceptIdleAllowlist, appId) >= 0;
     }
 
+    boolean isOnSystemDeviceIdleAllowlist(int uid) {
+        final int appId = UserHandle.getAppId(uid);
+
+        return mSystemDeviceIdleAllowlist.contains(appId)
+                || mSystemDeviceIdleExceptIdleAllowlist.contains(appId);
+    }
+
     void setDeviceIdleAllowlist(int[] allAppids, int[] exceptIdleAppids) {
         mDeviceIdleAllowlist = allAppids;
         mDeviceIdleExceptIdleAllowlist = exceptIdleAppids;
@@ -2702,6 +2743,9 @@ public final class AppRestrictionController {
     int getBackgroundRestrictionExemptionReason(int uid) {
         if (UserHandle.isCore(uid)) {
             return REASON_SYSTEM_UID;
+        }
+        if (isOnSystemDeviceIdleAllowlist(uid)) {
+            return REASON_SYSTEM_ALLOW_LISTED;
         }
         if (isOnDeviceIdleAllowlist(uid)) {
             return REASON_ALLOWLISTED_PACKAGE;
@@ -2734,6 +2778,7 @@ public final class AppRestrictionController {
         if (packages != null) {
             final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
             final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
+            final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
             for (String pkg : packages) {
                 if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
                         uid, pkg) == AppOpsManager.MODE_ALLOWED) {
@@ -2748,9 +2793,11 @@ public final class AppRestrictionController {
                 } else if (isExemptedFromSysConfig(pkg)) {
                     return REASON_SYSTEM_ALLOW_LISTED;
                 } else if (mConstantsObserver.mBgRestrictionExemptedPackages.contains(pkg)) {
-                    return REASON_ALLOWLISTED_PACKAGE;
+                    return REASON_SYSTEM_ALLOW_LISTED;
                 } else if (pm.isPackageStateProtected(pkg, userId)) {
                     return REASON_DPO_PROTECTED_APP;
+                } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
+                    return REASON_ACTIVE_DEVICE_ADMIN;
                 }
             }
         }

@@ -19,8 +19,6 @@ package com.android.settingslib;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Switch;
 
 import androidx.annotation.Keep;
@@ -28,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
+import com.android.settingslib.core.instrumentation.SettingsJankMonitor;
 
 /**
  * A custom preference that provides inline switch toggle. It has a mandatory field for title, and
@@ -65,31 +64,25 @@ public class PrimarySwitchPreference extends RestrictedPreference {
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        final View switchWidget = holder.findViewById(R.id.switchWidget);
-        if (switchWidget != null) {
-            switchWidget.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mSwitch != null && !mSwitch.isEnabled()) {
-                        return;
-                    }
-                    setChecked(!mChecked);
-                    if (!callChangeListener(mChecked)) {
-                        setChecked(!mChecked);
-                    } else {
-                        persistBoolean(mChecked);
-                    }
+        mSwitch = (Switch) holder.findViewById(R.id.switchWidget);
+        if (mSwitch != null) {
+            mSwitch.setOnClickListener(v -> {
+                if (mSwitch != null && !mSwitch.isEnabled()) {
+                    return;
+                }
+                final boolean newChecked = !mChecked;
+                if (callChangeListener(newChecked)) {
+                    SettingsJankMonitor.detectToggleJank(getKey(), mSwitch);
+                    setChecked(newChecked);
+                    persistBoolean(newChecked);
                 }
             });
 
             // Consumes move events to ignore drag actions.
-            switchWidget.setOnTouchListener((v, event) -> {
+            mSwitch.setOnTouchListener((v, event) -> {
                 return event.getActionMasked() == MotionEvent.ACTION_MOVE;
             });
-        }
 
-        mSwitch = (Switch) holder.findViewById(R.id.switchWidget);
-        if (mSwitch != null) {
             mSwitch.setContentDescription(getTitle());
             mSwitch.setChecked(mChecked);
             mSwitch.setEnabled(mEnableSwitch);

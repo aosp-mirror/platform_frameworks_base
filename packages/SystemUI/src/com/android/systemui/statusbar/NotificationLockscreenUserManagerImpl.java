@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
@@ -110,6 +111,8 @@ public class NotificationLockscreenUserManagerImpl implements
     protected KeyguardManager mKeyguardManager;
     private int mState = StatusBarState.SHADE;
     private List<KeyguardNotificationSuppressor> mKeyguardSuppressors = new ArrayList<>();
+    private final ListenerSet<NotificationStateChangedListener> mNotifStateChangedListeners =
+            new ListenerSet<>();
 
     protected final BroadcastReceiver mAllUsersReceiver = new BroadcastReceiver() {
         @Override
@@ -121,6 +124,8 @@ public class NotificationLockscreenUserManagerImpl implements
                 mUsersAllowingPrivateNotifications.clear();
                 updateLockscreenNotificationSetting();
                 getEntryManager().updateNotifications("ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED");
+                // TODO(b/231976036): Consolidate pipeline invalidations related to this event
+                // notifyNotificationStateChanged();
             }
         }
     };
@@ -148,6 +153,15 @@ public class NotificationLockscreenUserManagerImpl implements
                     for (UserChangedListener listener : mListeners) {
                         listener.onUserChanged(mCurrentUserId);
                     }
+                    break;
+                case Intent.ACTION_USER_REMOVED:
+                    int removedUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                    if (removedUserId != -1) {
+                        for (UserChangedListener listener : mListeners) {
+                            listener.onUserRemoved(removedUserId);
+                        }
+                    }
+                    updateCurrentProfilesCache();
                     break;
                 case Intent.ACTION_USER_ADDED:
                 case Intent.ACTION_MANAGED_PROFILE_AVAILABLE:
@@ -245,6 +259,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 updateLockscreenNotificationSetting();
                 getEntryManager().updateNotifications("LOCK_SCREEN_SHOW_NOTIFICATIONS,"
                         + " or LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS change");
+                notifyNotificationStateChanged();
             }
         };
 
@@ -255,6 +270,8 @@ public class NotificationLockscreenUserManagerImpl implements
                 if (mDeviceProvisionedController.isDeviceProvisioned()) {
                     getEntryManager().updateNotifications("LOCK_SCREEN_ALLOW_REMOTE_INPUT"
                             + " or ZEN_MODE change");
+                    // TODO(b/231976036): Consolidate pipeline invalidations related to this event
+                    // notifyNotificationStateChanged();
                 }
             }
         };
@@ -295,6 +312,7 @@ public class NotificationLockscreenUserManagerImpl implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
@@ -641,6 +659,8 @@ public class NotificationLockscreenUserManagerImpl implements
             mUsersWithSeparateWorkChallenge.put(userId, needsSeparateChallenge);
         }
         getEntryManager().updateNotifications("NotificationLockscreenUserManager.updatePublicMode");
+        // TODO(b/234738798): Migrate KeyguardNotificationVisibilityProvider to use this listener
+        // notifyNotificationStateChanged();
     }
 
     @Override
@@ -656,6 +676,22 @@ public class NotificationLockscreenUserManagerImpl implements
     @Override
     public void removeUserChangedListener(UserChangedListener listener) {
         mListeners.remove(listener);
+    }
+
+    @Override
+    public void addNotificationStateChangedListener(NotificationStateChangedListener listener) {
+        mNotifStateChangedListeners.addIfAbsent(listener);
+    }
+
+    @Override
+    public void removeNotificationStateChangedListener(NotificationStateChangedListener listener) {
+        mNotifStateChangedListeners.remove(listener);
+    }
+
+    private void notifyNotificationStateChanged() {
+        for (NotificationStateChangedListener listener : mNotifStateChangedListeners) {
+            listener.onNotificationStateChanged();
+        }
     }
 
 //    public void updatePublicMode() {

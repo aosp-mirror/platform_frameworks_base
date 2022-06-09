@@ -30,7 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
 public final class ComputerLocked extends ComputerEngine {
 
     ComputerLocked(PackageManagerService.Snapshot args) {
-        super(args);
+        super(args, -1);
     }
 
     protected ComponentName resolveComponentName() {

@@ -1657,6 +1657,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/Task.java"
     },
+    "-451552570": {
+      "message": "Current focused window being animated by recents. Overriding back callback to recents controller callback.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-449118559": {
       "message": "Trying to update display configuration for invalid process, pid=%d",
       "level": "WARN",
@@ -1873,12 +1879,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
-    "-240296576": {
-      "message": "handleAppTransitionReady: displayId=%d appTransition={%s} openingApps=[%s] closingApps=[%s] transit=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_APP_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/AppTransitionController.java"
-    },
     "-237664290": {
       "message": "Pause the recording session on display %s",
       "level": "VERBOSE",
@@ -1980,6 +1980,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
+    "-134793542": {
+      "message": "handleAppTransitionReady: displayId=%d appTransition={%s} excludeLauncherFromAnimation=%b openingApps=[%s] closingApps=[%s] transit=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
     "-134091882": {
       "message": "Screenshotting Activity %s",
@@ -2575,12 +2581,6 @@
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
-    "397105698": {
-      "message": "grantEmbeddedWindowFocus remove request for win=%s dropped since no candidate was found",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "397382873": {
       "message": "Moving to PAUSED: %s %s",
       "level": "VERBOSE",
@@ -2917,12 +2917,6 @@
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
-    "716528224": {
-      "message": "Focused window found using wmService.getFocusedWindowLocked()",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "726205185": {
       "message": "Moving to DESTROYED: %s (destroy skipped)",
       "level": "VERBOSE",
@@ -3108,6 +3102,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
+    "958338552": {
+      "message": "grantEmbeddedWindowFocus win=%s dropped focus so setting focus to null since no candidate was found",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "959486822": {
       "message": "setSyncGroup #%d on %s",

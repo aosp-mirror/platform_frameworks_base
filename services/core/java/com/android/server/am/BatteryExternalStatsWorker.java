@@ -320,12 +320,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
-    public Future<?> scheduleSyncDueToProcessStateChange(long delayMillis) {
+    public void scheduleSyncDueToProcessStateChange(int flags, long delayMillis) {
         synchronized (BatteryExternalStatsWorker.this) {
             mProcessStateSync = scheduleDelayedSyncLocked(mProcessStateSync,
-                    () -> scheduleSync("procstate-change", UPDATE_ON_PROC_STATE_CHANGE),
+                    () -> scheduleSync("procstate-change", flags),
                     delayMillis);
-            return mProcessStateSync;
         }
     }
 

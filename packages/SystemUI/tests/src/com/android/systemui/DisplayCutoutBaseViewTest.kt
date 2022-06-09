@@ -142,6 +142,25 @@ class DisplayCutoutBaseViewTest : SysuiTestCase() {
         assertThat(cutoutBaseView.protectionRect).isEqualTo(pathBounds)
     }
 
+    @Test
+    fun testCutoutProtection_withDisplayRatio() {
+        setupDisplayCutoutBaseView(true /* fillCutout */, false /* hasCutout */)
+        whenever(cutoutBaseView.getPhysicalPixelDisplaySizeRatio()).thenReturn(0.5f)
+        val bounds = Rect(0, 0, 10, 10)
+        val path = Path()
+        val pathBounds = RectF(bounds)
+        path.addRect(pathBounds, Path.Direction.CCW)
+
+        context.mainExecutor.execute {
+            cutoutBaseView.setProtection(path, bounds)
+            cutoutBaseView.enableShowProtection(true)
+        }
+        waitForIdleSync()
+
+        assertThat(cutoutBaseView.protectionPath.isRect(pathBounds)).isTrue()
+        assertThat(cutoutBaseView.protectionRect).isEqualTo(RectF(0f, 0f, 5f, 5f))
+    }
+
     private fun setupDisplayCutoutBaseView(fillCutout: Boolean, hasCutout: Boolean) {
         mContext.orCreateTestableResources.addOverride(
                 R.array.config_displayUniqueIdArray, arrayOf<String>())
@@ -150,7 +169,9 @@ class DisplayCutoutBaseViewTest : SysuiTestCase() {
 
         cutoutBaseView = spy(DisplayCutoutBaseView(mContext))
         whenever(cutoutBaseView.display).thenReturn(mockDisplay)
+        whenever(mockDisplay.uniqueId).thenReturn("mockDisplayUniqueId")
         whenever(cutoutBaseView.rootView).thenReturn(mockRootView)
+        whenever(cutoutBaseView.getPhysicalPixelDisplaySizeRatio()).thenReturn(1f)
         whenever(mockDisplay.getDisplayInfo(eq(cutoutBaseView.displayInfo))
         ).then {
             val info = it.getArgument<DisplayInfo>(0)

@@ -147,7 +147,10 @@ public class CloudSearchPerUserService extends
                 }
             });
             if (sessionInfo.linkToDeath()) {
-                mCallbackQueue.put(requestId, sessionInfo);
+                CloudSearchCallbackInfo removedInfo = mCallbackQueue.put(requestId, sessionInfo);
+                if (removedInfo != null) {
+                    removedInfo.destroy();
+                }
             } else {
                 // destroy the session if calling process is already dead
                 onDestroyLocked(requestId);

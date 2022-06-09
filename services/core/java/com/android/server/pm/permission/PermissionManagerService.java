@@ -17,7 +17,6 @@
 package com.android.server.pm.permission;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
-import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.UPDATE_APP_OPS_STATS;
 import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
@@ -51,7 +50,6 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -596,26 +594,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public int checkPostNotificationsPermissionGrantedOrLegacyAccess(int uid) {
-            int granted = PermissionManagerService.this.checkUidPermission(uid,
-                    POST_NOTIFICATIONS);
-            AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
-            if (pkg == null) {
-                Slog.e(LOG_TAG, "No package for uid " + uid);
-                return granted;
-            }
-            if (granted != PackageManager.PERMISSION_GRANTED
-                    && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M) {
-                int flags = PermissionManagerService.this.getPermissionFlags(pkg.getPackageName(),
-                        POST_NOTIFICATIONS, UserHandle.getUserId(uid));
-                if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                    return PackageManager.PERMISSION_GRANTED;
-                }
-            }
-            return granted;
-        }
-
-        @Override
         public void startShellPermissionIdentityDelegation(int uid, @NonNull String packageName,
                 @Nullable List<String> permissionNames) {
             Objects.requireNonNull(packageName, "packageName");
@@ -988,8 +966,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             final PackageManagerInternal packageManagerInternal = LocalServices.getService(
                     PackageManagerInternal.class);
-            if (packageManagerInternal.getPackageUid(source.getPackageName(), 0,
-                    UserHandle.getUserId(callingUid)) != source.getUid()) {
+
+            // TODO(b/234653108): Clean up this UID/package & cross-user check.
+            // If calling from the system process, allow registering attribution for package from
+            // any user
+            int userId = UserHandle.getUserId((callingUid == Process.SYSTEM_UID ? source.getUid()
+                    : callingUid));
+            if (packageManagerInternal.getPackageUid(source.getPackageName(), 0, userId)
+                    != source.getUid()) {
                 throw new SecurityException("Cannot register attribution source for package:"
                         + source.getPackageName() + " from uid:" + callingUid);
             }

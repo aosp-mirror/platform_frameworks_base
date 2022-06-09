@@ -18,9 +18,7 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.app.Instrumentation
 import android.content.Context
-import android.platform.test.annotations.Presubmit
 import android.system.helpers.ActivityHelper
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -42,6 +40,7 @@ import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.testapp.Components
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) {
@@ -145,35 +144,35 @@ abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) 
         append("$primaryApp $secondaryApp")
     }
 
-    @FlakyTest(bugId = 186510496)
+    @Ignore
     @Test
     open fun navBarLayerIsVisible() {
         testSpec.navBarLayerIsVisible()
     }
 
-    @Presubmit
+    @Ignore
     @Test
     open fun statusBarLayerIsVisible() {
         testSpec.statusBarLayerIsVisible()
     }
 
-    @Presubmit
+    @Ignore
     @Test
     open fun navBarWindowIsVisible() {
         testSpec.navBarWindowIsVisible()
     }
 
-    @Presubmit
+    @Ignore
     @Test
     open fun statusBarWindowIsVisible() {
         testSpec.statusBarWindowIsVisible()
     }
 
-    @Presubmit
+    @Ignore
     @Test
     open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @Ignore
     @Test
     open fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 }

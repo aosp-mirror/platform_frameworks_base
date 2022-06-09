@@ -46,6 +46,7 @@ import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarComponent;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
+import com.android.systemui.privacy.PrivacyModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
@@ -100,8 +101,14 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * A dagger module for injecting components of System UI that are not overridden by the System UI
- * implementation.
+ * A dagger module for injecting components of System UI that are required by System UI.
+ *
+ * If your feature can be excluded, subclassed, or re-implemented by a variant of SystemUI, put
+ * your Dagger Module in {@link ReferenceSystemUIModule} and/or any variant modules that
+ * rely on the feature.
+ *
+ * Adding an entry in this file means that _all_ variants of SystemUI will receive that code. They
+ * may not appreciate that.
  */
 @Module(includes = {
             AppOpsModule.class,
@@ -116,6 +123,7 @@ import dagger.Provides;
             LogModule.class,
             PeopleHubModule.class,
             PluginModule.class,
+            PrivacyModule.class,
             QsFrameTranslateModule.class,
             ScreenshotModule.class,
             SensorModule.class,

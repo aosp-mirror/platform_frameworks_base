@@ -73,6 +73,7 @@ class Agent {
 
     private final Object mLock;
     private final Handler mHandler;
+    private final Analyst mAnalyst;
     private final InternalResourceService mIrs;
     private final Scribe mScribe;
 
@@ -110,10 +111,11 @@ class Agent {
      */
     private static final int MSG_CHECK_INDIVIDUAL_AFFORDABILITY = 1;
 
-    Agent(@NonNull InternalResourceService irs, @NonNull Scribe scribe) {
+    Agent(@NonNull InternalResourceService irs, @NonNull Scribe scribe, @NonNull Analyst analyst) {
         mLock = irs.getLock();
         mIrs = irs;
         mScribe = scribe;
+        mAnalyst = analyst;
         mHandler = new AgentHandler(TareHandlerThread.get().getLooper());
         mAppStandbyInternal = LocalServices.getService(AppStandbyInternal.class);
         mBalanceThresholdAlarmQueue = new BalanceThresholdAlarmQueue(
@@ -443,7 +445,7 @@ class Agent {
     void recordTransactionLocked(final int userId, @NonNull final String pkgName,
             @NonNull Ledger ledger, @NonNull Ledger.Transaction transaction,
             final boolean notifyOnAffordabilityChange) {
-        if (transaction.delta == 0) {
+        if (!DEBUG && transaction.delta == 0) {
             // Skip recording transactions with a delta of 0 to save on space.
             return;
         }
@@ -471,6 +473,7 @@ class Agent {
         }
         ledger.recordTransaction(transaction);
         mScribe.adjustRemainingConsumableCakesLocked(-transaction.ctp);
+        mAnalyst.noteTransaction(transaction);
         if (transaction.delta != 0 && notifyOnAffordabilityChange) {
             final ArraySet<ActionAffordabilityNote> actionAffordabilityNotes =
                     mActionAffordabilityNotes.get(userId, pkgName);

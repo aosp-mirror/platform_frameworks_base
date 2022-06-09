@@ -82,6 +82,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     /** ID for Communication strategy retrieved form audio policy manager */
     private int mCommunicationStrategyId = -1;
+
+    /** ID for Accessibility strategy retrieved form audio policy manager */
+    private int mAccessibilityStrategyId = -1;
+
+
     /** Active communication device reported by audio policy manager */
     private AudioDeviceInfo mActiveCommunicationDevice;
     /** Last preferred device set for communication strategy */
@@ -141,22 +146,28 @@ import java.util.concurrent.atomic.AtomicBoolean;
         init();
     }
 
-    private void initCommunicationStrategyId() {
+    private void initRoutingStrategyIds() {
         List<AudioProductStrategy> strategies = AudioProductStrategy.getAudioProductStrategies();
+        mCommunicationStrategyId = -1;
+        mAccessibilityStrategyId = -1;
         for (AudioProductStrategy strategy : strategies) {
-            if (strategy.getAudioAttributesForLegacyStreamType(AudioSystem.STREAM_VOICE_CALL)
-                    != null) {
+            if (mCommunicationStrategyId == -1
+                    && strategy.getAudioAttributesForLegacyStreamType(
+                            AudioSystem.STREAM_VOICE_CALL) != null) {
                 mCommunicationStrategyId = strategy.getId();
-                return;
+            }
+            if (mAccessibilityStrategyId == -1
+                    && strategy.getAudioAttributesForLegacyStreamType(
+                            AudioSystem.STREAM_ACCESSIBILITY) != null) {
+                mAccessibilityStrategyId = strategy.getId();
             }
         }
-        mCommunicationStrategyId = -1;
     }
 
     private void init() {
         setupMessaging(mContext);
 
-        initCommunicationStrategyId();
+        initRoutingStrategyIds();
         mPreferredCommunicationDevice = null;
         updateActiveCommunicationDevice();
 
@@ -813,17 +824,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
         return mDeviceInventory.setPreferredDevicesForStrategySync(strategy, devices);
     }
 
-    /*package*/ void postSetPreferredDevicesForStrategy(int strategy,
-            @NonNull List<AudioDeviceAttributes> devices) {
-        sendILMsgNoDelay(MSG_IL_SET_PREF_DEVICES_FOR_STRATEGY, SENDMSG_REPLACE, strategy, devices);
-    }
-
     /*package*/ int removePreferredDevicesForStrategySync(int strategy) {
         return mDeviceInventory.removePreferredDevicesForStrategySync(strategy);
-    }
-
-    /*package*/ void postRemovePreferredDevicesForStrategy(int strategy) {
-        sendIMsgNoDelay(MSG_I_REMOVE_PREF_DEVICES_FOR_STRATEGY, SENDMSG_REPLACE, strategy);
     }
 
     /*package*/ void registerStrategyPreferredDevicesDispatcher(
@@ -1157,6 +1159,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
         pw.println(prefix + "mCommunicationStrategyId: "
                 +  mCommunicationStrategyId);
 
+        pw.println(prefix + "mAccessibilityStrategyId: "
+                +  mAccessibilityStrategyId);
+
         pw.println("\n" + prefix + "mModeOwnerPid: " + mModeOwnerPid);
 
         mBtHelper.dump(pw, prefix);
@@ -1252,7 +1257,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_RESTORE_DEVICES:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            initCommunicationStrategyId();
+                            initRoutingStrategyIds();
                             updateActiveCommunicationDevice();
                             mDeviceInventory.onRestoreDevices();
                             mBtHelper.onAudioServerDiedRestoreA2dp();
@@ -1284,8 +1289,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     break;
                 case MSG_L_SET_BT_ACTIVE_DEVICE:
                     synchronized (mDeviceStateLock) {
-                        mDeviceInventory.onSetBtActiveDevice((BtDeviceInfo) msg.obj,
-                                mAudioService.getBluetoothContextualVolumeStream());
+                        BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
+                        mDeviceInventory.onSetBtActiveDevice(btInfo,
+                                (btInfo.mProfile != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
+                                        ? mAudioService.getBluetoothContextualVolumeStream()
+                                        : AudioSystem.STREAM_DEFAULT);
                     }
                     break;
                 case MSG_BT_HEADSET_CNCT_FAILED:
@@ -1440,22 +1448,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     final int strategy = msg.arg1;
                     mDeviceInventory.onSaveRemovePreferredDevices(strategy);
                 } break;
-                case MSG_IL_SET_PREF_DEVICES_FOR_STRATEGY: {
-                    final int strategy = msg.arg1;
-                    final List<AudioDeviceAttributes> devices =
-                            (List<AudioDeviceAttributes>) msg.obj;
-                    setPreferredDevicesForStrategySync(strategy, devices);
-                    if (strategy == mCommunicationStrategyId) {
-                        onUpdatePhoneStrategyDevice(devices.isEmpty() ? null : devices.get(0));
-                    }
-                } break;
-                case MSG_I_REMOVE_PREF_DEVICES_FOR_STRATEGY: {
-                    final int strategy = msg.arg1;
-                    removePreferredDevicesForStrategySync(strategy);
-                    if (strategy == mCommunicationStrategyId) {
-                        onUpdatePhoneStrategyDevice(null);
-                    }
-                } break;
                 case MSG_CHECK_MUTE_MUSIC:
                     checkMessagesMuteMusic(0);
                     break;
@@ -1533,8 +1525,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
     private static final int MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET = 38;
 
     private static final int MSG_L_UPDATE_COMMUNICATION_ROUTE = 39;
-    private static final int MSG_IL_SET_PREF_DEVICES_FOR_STRATEGY = 40;
-    private static final int MSG_I_REMOVE_PREF_DEVICES_FOR_STRATEGY = 41;
     private static final int MSG_L_SET_COMMUNICATION_ROUTE_FOR_CLIENT = 42;
     private static final int MSG_L_UPDATE_COMMUNICATION_ROUTE_CLIENT = 43;
     private static final int MSG_I_SCO_AUDIO_STATE_CHANGED = 44;
@@ -1836,9 +1826,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
         if (preferredCommunicationDevice == null) {
             removePreferredDevicesForStrategySync(mCommunicationStrategyId);
+            removePreferredDevicesForStrategySync(mAccessibilityStrategyId);
         } else {
             setPreferredDevicesForStrategySync(
                     mCommunicationStrategyId, Arrays.asList(preferredCommunicationDevice));
+            setPreferredDevicesForStrategySync(
+                    mAccessibilityStrategyId, Arrays.asList(preferredCommunicationDevice));
         }
         onUpdatePhoneStrategyDevice(preferredCommunicationDevice);
     }

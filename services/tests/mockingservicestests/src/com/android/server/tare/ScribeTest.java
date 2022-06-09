@@ -16,7 +16,7 @@
 
 package com.android.server.tare;
 
-
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 
 import static org.junit.Assert.assertEquals;
@@ -41,6 +41,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -66,7 +68,10 @@ public class ScribeTest {
     private Scribe mScribeUnderTest;
     private File mTestFileDir;
     private final List<PackageInfo> mInstalledPackages = new ArrayList<>();
+    private final List<Analyst.Report> mReports = new ArrayList<>();
 
+    @Mock
+    private Analyst mAnalyst;
     @Mock
     private InternalResourceService mIrs;
 
@@ -84,11 +89,12 @@ public class ScribeTest {
         when(mIrs.getLock()).thenReturn(new Object());
         when(mIrs.isEnabled()).thenReturn(true);
         when(mIrs.getInstalledPackages()).thenReturn(mInstalledPackages);
+        when(mAnalyst.getReports()).thenReturn(mReports);
         mTestFileDir = new File(getContext().getFilesDir(), "scribe_test");
         //noinspection ResultOfMethodCallIgnored
         mTestFileDir.mkdirs();
         Log.d(TAG, "Saving data to '" + mTestFileDir + "'");
-        mScribeUnderTest = new Scribe(mIrs, mTestFileDir);
+        mScribeUnderTest = new Scribe(mIrs, mAnalyst, mTestFileDir);
 
         addInstalledPackage(TEST_USER_ID, TEST_PACKAGE);
     }
@@ -102,6 +108,62 @@ public class ScribeTest {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+    }
+
+    @Test
+    public void testWritingAnalystReportsToDisk() {
+        ArgumentCaptor<List<Analyst.Report>> reportCaptor =
+                ArgumentCaptor.forClass(List.class);
+
+        InOrder inOrder = inOrder(mAnalyst);
+
+        // Empty set
+        mReports.clear();
+        mScribeUnderTest.writeImmediatelyForTesting();
+        mScribeUnderTest.loadFromDiskLocked();
+        inOrder.verify(mAnalyst).loadReports(reportCaptor.capture());
+        List<Analyst.Report> result = reportCaptor.getValue();
+        assertReportListsEqual(mReports, result);
+
+        Analyst.Report report1 = new Analyst.Report();
+        report1.cumulativeBatteryDischarge = 1;
+        report1.currentBatteryLevel = 2;
+        report1.cumulativeProfit = 3;
+        report1.numProfitableActions = 4;
+        report1.cumulativeLoss = 5;
+        report1.numUnprofitableActions = 6;
+        report1.cumulativeRewards = 7;
+        report1.numRewards = 8;
+        report1.cumulativePositiveRegulations = 9;
+        report1.numPositiveRegulations = 10;
+        report1.cumulativeNegativeRegulations = 11;
+        report1.numNegativeRegulations = 12;
+        mReports.add(report1);
+        mScribeUnderTest.writeImmediatelyForTesting();
+        mScribeUnderTest.loadFromDiskLocked();
+        inOrder.verify(mAnalyst).loadReports(reportCaptor.capture());
+        result = reportCaptor.getValue();
+        assertReportListsEqual(mReports, result);
+
+        Analyst.Report report2 = new Analyst.Report();
+        report2.cumulativeBatteryDischarge = 10;
+        report2.currentBatteryLevel = 20;
+        report2.cumulativeProfit = 30;
+        report2.numProfitableActions = 40;
+        report2.cumulativeLoss = 50;
+        report2.numUnprofitableActions = 60;
+        report2.cumulativeRewards = 70;
+        report2.numRewards = 80;
+        report2.cumulativePositiveRegulations = 90;
+        report2.numPositiveRegulations = 100;
+        report2.cumulativeNegativeRegulations = 110;
+        report2.numNegativeRegulations = 120;
+        mReports.add(report2);
+        mScribeUnderTest.writeImmediatelyForTesting();
+        mScribeUnderTest.loadFromDiskLocked();
+        inOrder.verify(mAnalyst).loadReports(reportCaptor.capture());
+        result = reportCaptor.getValue();
+        assertReportListsEqual(mReports, result);
     }
 
     @Test
@@ -274,6 +336,49 @@ public class ScribeTest {
         assertEquals(expectedTransactions.size(), actualTransactions.size());
         for (int i = 0; i < expectedTransactions.size(); ++i) {
             assertTransactionsEqual(expectedTransactions.get(i), actualTransactions.get(i));
+        }
+    }
+
+    private void assertReportListsEqual(List<Analyst.Report> expected,
+            List<Analyst.Report> actual) {
+        if (expected == null) {
+            assertNull(actual);
+            return;
+        }
+        assertNotNull(actual);
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < expected.size(); ++i) {
+            Analyst.Report eReport = expected.get(i);
+            Analyst.Report aReport = actual.get(i);
+            if (eReport == null) {
+                assertNull(aReport);
+                continue;
+            }
+            assertNotNull(aReport);
+            assertEquals("Reports #" + i + " cumulativeBatteryDischarge are not equal",
+                    eReport.cumulativeBatteryDischarge, aReport.cumulativeBatteryDischarge);
+            assertEquals("Reports #" + i + " currentBatteryLevel are not equal",
+                    eReport.currentBatteryLevel, aReport.currentBatteryLevel);
+            assertEquals("Reports #" + i + " cumulativeProfit are not equal",
+                    eReport.cumulativeProfit, aReport.cumulativeProfit);
+            assertEquals("Reports #" + i + " numProfitableActions are not equal",
+                    eReport.numProfitableActions, aReport.numProfitableActions);
+            assertEquals("Reports #" + i + " cumulativeLoss are not equal",
+                    eReport.cumulativeLoss, aReport.cumulativeLoss);
+            assertEquals("Reports #" + i + " numUnprofitableActions are not equal",
+                    eReport.numUnprofitableActions, aReport.numUnprofitableActions);
+            assertEquals("Reports #" + i + " cumulativeRewards are not equal",
+                    eReport.cumulativeRewards, aReport.cumulativeRewards);
+            assertEquals("Reports #" + i + " numRewards are not equal",
+                    eReport.numRewards, aReport.numRewards);
+            assertEquals("Reports #" + i + " cumulativePositiveRegulations are not equal",
+                    eReport.cumulativePositiveRegulations, aReport.cumulativePositiveRegulations);
+            assertEquals("Reports #" + i + " numPositiveRegulations are not equal",
+                    eReport.numPositiveRegulations, aReport.numPositiveRegulations);
+            assertEquals("Reports #" + i + " cumulativeNegativeRegulations are not equal",
+                    eReport.cumulativeNegativeRegulations, aReport.cumulativeNegativeRegulations);
+            assertEquals("Reports #" + i + " numNegativeRegulations are not equal",
+                    eReport.numNegativeRegulations, aReport.numNegativeRegulations);
         }
     }
 

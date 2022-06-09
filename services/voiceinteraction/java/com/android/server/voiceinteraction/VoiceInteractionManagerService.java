@@ -323,6 +323,16 @@ public class VoiceInteractionManagerService extends SystemService {
             new RoleObserver(mContext.getMainExecutor());
         }
 
+        void handleUserStop(String packageName, int userHandle) {
+            synchronized (VoiceInteractionManagerServiceStub.this) {
+                ComponentName curInteractor = getCurInteractor(userHandle);
+                if (curInteractor != null && packageName.equals(curInteractor.getPackageName())) {
+                    Slog.d(TAG, "switchImplementation for user stop.");
+                    switchImplementationIfNeededLocked(true);
+                }
+            }
+        }
+
         @Override
         public @NonNull IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
                 @NonNull Identity originatorIdentity, IBinder client) {
@@ -376,6 +386,7 @@ public class VoiceInteractionManagerService extends SystemService {
         void startLocalVoiceInteraction(final IBinder token, Bundle options) {
             if (mImpl == null) return;
 
+            final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
                 mImpl.showSessionLocked(options,
@@ -387,6 +398,12 @@ public class VoiceInteractionManagerService extends SystemService {
 
                             @Override
                             public void onShown() {
+                                synchronized (VoiceInteractionManagerServiceStub.this) {
+                                    if (mImpl != null) {
+                                        mImpl.grantImplicitAccessLocked(callingUid,
+                                                /* intent= */ null);
+                                    }
+                                }
                                 mAtmInternal.onLocalVoiceInteractionStarted(token,
                                         mImpl.mActiveSession.mSession,
                                         mImpl.mActiveSession.mInteractor);
@@ -955,8 +972,16 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mImpl.startVoiceActivityLocked(callingFeatureId, callingPid, callingUid,
-                            token, intent, resolvedType);
+                    final ActivityInfo activityInfo = intent.resolveActivityInfo(
+                            mContext.getPackageManager(), PackageManager.MATCH_ALL);
+                    if (activityInfo != null) {
+                        final int activityUid = activityInfo.applicationInfo.uid;
+                        mImpl.grantImplicitAccessLocked(activityUid, intent);
+                    } else {
+                        Slog.w(TAG, "Cannot find ActivityInfo in startVoiceActivity.");
+                    }
+                    return mImpl.startVoiceActivityLocked(
+                            callingFeatureId, callingPid, callingUid, token, intent, resolvedType);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -2071,6 +2096,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         PackageMonitor mPackageMonitor = new PackageMonitor() {
+
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
                 if (DEBUG) Slog.d(TAG, "onHandleForceStop uid=" + uid + " doit=" + doit);
@@ -2103,11 +2129,17 @@ public class VoiceInteractionManagerService extends SystemService {
                         }
 
                         setCurInteractor(null, userHandle);
+                        // TODO: should not reset null here. But even remove this line, the
+                        // initForUser() still reset it because the interactor will be null. Keep
+                        // it now but we should still need to fix it.
                         setCurRecognizer(null, userHandle);
                         resetCurAssistant(userHandle);
                         initForUser(userHandle);
                         switchImplementationIfNeededLocked(true);
 
+                        // When resetting the interactor, the recognizer and the assistant settings
+                        // value, we also need to reset the assistant role to keep the values
+                        // consistent. Clear the assistant role will reset to the default value.
                         Context context = getContext();
                         context.getSystemService(RoleManager.class).clearRoleHoldersAsUser(
                                 RoleManager.ROLE_ASSISTANT, 0, UserHandle.of(userHandle),

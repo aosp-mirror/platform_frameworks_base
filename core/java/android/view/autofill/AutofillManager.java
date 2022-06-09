@@ -102,6 +102,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import sun.misc.Cleaner;
 
@@ -505,12 +506,75 @@ public final class AutofillManager {
     public static final String DEVICE_CONFIG_AUTOFILL_DIALOG_HINTS =
             "autofill_dialog_hints";
 
+    /**
+     * Sets a value of delay time to show up the inline tooltip view.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_AUTOFILL_TOOLTIP_SHOW_UP_DELAY =
+            "autofill_inline_tooltip_first_show_delay";
+
     private static final String DIALOG_HINTS_DELIMITER = ":";
 
     /** @hide */
     public static final int RESULT_OK = 0;
     /** @hide */
     public static final int RESULT_CODE_NOT_SERVICE = -1;
+
+    /**
+     *  Reasons to commit the Autofill context.
+     *
+     *  <p>If adding a new reason, modify
+     *  {@link com.android.server.autofill.PresentationStatsEventLogger#getNoPresentationEventReason(int)}
+     *  as well.</p>
+     *
+     *  TODO(b/233833662): Expose this as a public API in U.
+     *  @hide
+     */
+    @IntDef(prefix = { "COMMIT_REASON_" }, value = {
+            COMMIT_REASON_UNKNOWN,
+            COMMIT_REASON_ACTIVITY_FINISHED,
+            COMMIT_REASON_VIEW_COMMITTED,
+            COMMIT_REASON_VIEW_CLICKED,
+            COMMIT_REASON_VIEW_CHANGED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AutofillCommitReason {}
+
+    /**
+     * Autofill context was committed because of an unknown reason.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_UNKNOWN = 0;
+
+    /**
+     * Autofill context was committed because activity finished.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_ACTIVITY_FINISHED = 1;
+
+    /**
+     * Autofill context was committed because {@link #commit()} was called.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_VIEW_COMMITTED = 2;
+
+    /**
+     * Autofill context was committed because view was clicked.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_VIEW_CLICKED = 3;
+
+    /**
+     * Autofill context was committed because of view changed.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_VIEW_CHANGED = 4;
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -645,16 +709,6 @@ public final class AutofillManager {
     private boolean mEnabledForAugmentedAutofillOnly;
 
     /**
-     * Indicates whether there are any fields that need to do a fill request
-     * after the activity starts.
-     *
-     * Note: This field will be set to true multiple times if there are many
-     * autofillable views. So needs to check mIsFillRequested at the same time to
-     * avoid re-trigger autofill.
-     */
-    private boolean mRequireAutofill;
-
-    /**
      * Indicates whether there is already a field to do a fill request after
      * the activity started.
      *
@@ -663,7 +717,7 @@ public final class AutofillManager {
      * triggered autofill, it is unnecessary to trigger again through
      * AutofillManager#notifyViewEnteredForActivityStarted.
      */
-    private boolean mIsFillRequested;
+    private AtomicBoolean mIsFillRequested;
 
     @Nullable private List<AutofillId> mFillDialogTriggerIds;
 
@@ -811,8 +865,7 @@ public final class AutofillManager {
         mContext = Objects.requireNonNull(context, "context cannot be null");
         mService = service;
         mOptions = context.getAutofillOptions();
-        mIsFillRequested = false;
-        mRequireAutofill = false;
+        mIsFillRequested = new AtomicBoolean(false);
 
         mIsFillDialogEnabled = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
@@ -1113,46 +1166,36 @@ public final class AutofillManager {
     }
 
     /**
-     * The view have the allowed autofill hints, marked to perform a fill request after layout if
-     * the field does not trigger a fill request.
+     * The {@link #DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED} is {@code true} or the view have
+     * the allowed autofill hints, performs a fill request to know there is any field supported
+     * fill dialog.
      *
      * @hide
      */
-    public void enableFillRequestActivityStarted(View v) {
-        if (mRequireAutofill) {
+    public void notifyViewEnteredForFillDialog(View v) {
+        // Skip if the fill request has been performed for a view.
+        if (mIsFillRequested.get()) {
             return;
         }
 
         if (mIsFillDialogEnabled
                 || ArrayUtils.containsAny(v.getAutofillHints(), mFillDialogEnabledHints)) {
             if (sDebug) {
-                Log.d(TAG, "Trigger fill request at starting");
+                Log.d(TAG, "Trigger fill request at view entered");
             }
-            mRequireAutofill = true;
+
+            // Note: No need for atomic getAndSet as this method is called on the UI thread.
+            mIsFillRequested.set(true);
+
+            int flags = FLAG_SUPPORTS_FILL_DIALOG;
+            flags |= FLAG_VIEW_NOT_FOCUSED;
+            // use root view, so autofill UI does not trigger immediately.
+            notifyViewEntered(v.getRootView(), flags);
         }
     }
 
     private boolean hasFillDialogUiFeature() {
         return mIsFillDialogEnabled || !ArrayUtils.isEmpty(mFillDialogEnabledHints);
-    }
-
-    /**
-     * Notify autofill to do a fill request while the activity started.
-     *
-     * @hide
-     */
-    public void notifyViewEnteredForActivityStarted(@NonNull View view) {
-        if (!hasAutofillFeature() || !hasFillDialogUiFeature()) {
-            return;
-        }
-
-        if (!mRequireAutofill || mIsFillRequested) {
-            return;
-        }
-
-        int flags = FLAG_SUPPORTS_FILL_DIALOG;
-        flags |= FLAG_VIEW_NOT_FOCUSED;
-        notifyViewEntered(view, flags);
     }
 
     private int getImeStateFlag(View v) {
@@ -1203,7 +1246,7 @@ public final class AutofillManager {
         }
         AutofillCallback callback;
         synchronized (mLock) {
-            mIsFillRequested = true;
+            mIsFillRequested.set(true);
             callback = notifyViewEnteredLocked(view, flags);
         }
 
@@ -1597,7 +1640,7 @@ public final class AutofillManager {
             }
             if (mSaveTriggerId != null && mSaveTriggerId.equals(id)) {
                 if (sDebug) Log.d(TAG, "triggering commit by click of " + id);
-                commitLocked();
+                commitLocked(/* commitReason= */ COMMIT_REASON_VIEW_CLICKED);
                 mMetricsLogger.write(newLog(MetricsEvent.AUTOFILL_SAVE_EXPLICITLY_TRIGGERED));
             }
         }
@@ -1615,7 +1658,7 @@ public final class AutofillManager {
         synchronized (mLock) {
             if (mSaveOnFinish) {
                 if (sDebug) Log.d(TAG, "onActivityFinishing(): calling commitLocked()");
-                commitLocked();
+                commitLocked(/* commitReason= */ COMMIT_REASON_ACTIVITY_FINISHED);
             } else {
                 if (sDebug) Log.d(TAG, "onActivityFinishing(): calling cancelLocked()");
                 cancelLocked();
@@ -1640,16 +1683,16 @@ public final class AutofillManager {
         }
         if (sVerbose) Log.v(TAG, "commit() called by app");
         synchronized (mLock) {
-            commitLocked();
+            commitLocked(/* commitReason= */ COMMIT_REASON_VIEW_COMMITTED);
         }
     }
 
     @GuardedBy("mLock")
-    private void commitLocked() {
+    private void commitLocked(@AutofillCommitReason int commitReason) {
         if (!mEnabled && !isActiveLocked()) {
             return;
         }
-        finishSessionLocked();
+        finishSessionLocked(/* commitReason= */ commitReason);
     }
 
     /**
@@ -2082,13 +2125,13 @@ public final class AutofillManager {
     }
 
     @GuardedBy("mLock")
-    private void finishSessionLocked() {
+    private void finishSessionLocked(@AutofillCommitReason int commitReason) {
         if (sVerbose) Log.v(TAG, "finishSessionLocked(): " + getStateAsStringLocked());
 
         if (!isActiveLocked()) return;
 
         try {
-            mService.finishSession(mSessionId, mContext.getUserId());
+            mService.finishSession(mSessionId, mContext.getUserId(), commitReason);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2119,8 +2162,7 @@ public final class AutofillManager {
         mFillableIds = null;
         mSaveTriggerId = null;
         mIdShownFillUi = null;
-        mIsFillRequested = false;
-        mRequireAutofill = false;
+        mIsFillRequested.set(false);
         mShowAutofillDialogCalled = false;
         mFillDialogTriggerIds = null;
         if (resetEnteredIds) {
@@ -3562,7 +3604,7 @@ public final class AutofillManager {
             }
 
             if (mVisibleTrackedIds == null) {
-                finishSessionLocked();
+                finishSessionLocked(/* commitReason= */ COMMIT_REASON_VIEW_CHANGED);
             }
         }
 
@@ -3595,9 +3637,9 @@ public final class AutofillManager {
 
             if (mVisibleTrackedIds == null) {
                 if (sVerbose) {
-                    Log.v(TAG, "No more visible ids. Invisibile = " + mInvisibleTrackedIds);
+                    Log.v(TAG, "No more visible ids. Invisible = " + mInvisibleTrackedIds);
                 }
-                finishSessionLocked();
+                finishSessionLocked(/* commitReason= */ COMMIT_REASON_VIEW_CHANGED);
             }
         }
 
@@ -3669,7 +3711,7 @@ public final class AutofillManager {
                 if (sVerbose) {
                     Log.v(TAG, "onVisibleForAutofillChangedLocked(): no more visible ids");
                 }
-                finishSessionLocked();
+                finishSessionLocked(/* commitReason= */ COMMIT_REASON_VIEW_CHANGED);
             }
         }
     }

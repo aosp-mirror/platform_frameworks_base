@@ -712,14 +712,16 @@ public final class Sensor {
     public static final String STRING_TYPE_HINGE_ANGLE = "android.sensor.hinge_angle";
 
     /**
-     * A constant describing a head tracker sensor.
+     * A constant describing a head tracker sensor. Note that this sensor type is typically not
+     * available for apps to use.
      *
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      */
     public static final int TYPE_HEAD_TRACKER = 37;
 
     /**
-     * A constant string describing a head tracker sensor.
+     * A constant string describing a head tracker sensor. Note that this sensor type is typically
+     * not available for apps to use.
      *
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      */

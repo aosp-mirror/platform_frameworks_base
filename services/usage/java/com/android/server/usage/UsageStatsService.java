@@ -357,6 +357,7 @@ public class UsageStatsService extends SystemService implements
             getDpmInternal();
             // initialize mShortcutServiceInternal
             getShortcutServiceInternal();
+            mResponseStatsTracker.onSystemServicesReady(getContext());
 
             if (ENABLE_KERNEL_UPDATES && KERNEL_COUNTER_FILE.exists()) {
                 try {
@@ -2768,18 +2769,9 @@ public class UsageStatsService extends SystemService implements
                 throw new IllegalArgumentException("id needs to be >=0");
             }
 
-            final int result = getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS);
-            // STOPSHIP (206518114): Temporarily check for PACKAGE_USAGE_STATS permission as well
-            // until the clients switch to using the new permission.
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                if (!hasPermission(callingPackage)) {
-                    throw new SecurityException(
-                            "Caller does not have the permission needed to call this API; "
-                                    + "callingPackage=" + callingPackage
-                                    + ", callingUid=" + Binder.getCallingUid());
-                }
-            }
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
+                    "queryBroadcastResponseStats");
             final int callingUid = Binder.getCallingUid();
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), callingUid,
                     userId, false /* allowAll */, false /* requireFull */,
@@ -2801,18 +2793,9 @@ public class UsageStatsService extends SystemService implements
             }
 
 
-            final int result = getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS);
-            // STOPSHIP (206518114): Temporarily check for PACKAGE_USAGE_STATS permission as well
-            // until the clients switch to using the new permission.
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                if (!hasPermission(callingPackage)) {
-                    throw new SecurityException(
-                            "Caller does not have the permission needed to call this API; "
-                                    + "callingPackage=" + callingPackage
-                                    + ", callingUid=" + Binder.getCallingUid());
-                }
-            }
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
+                    "clearBroadcastResponseStats");
             final int callingUid = Binder.getCallingUid();
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), callingUid,
                     userId, false /* allowAll */, false /* requireFull */,
@@ -2825,18 +2808,9 @@ public class UsageStatsService extends SystemService implements
         public void clearBroadcastEvents(@NonNull String callingPackage, @UserIdInt int userId) {
             Objects.requireNonNull(callingPackage);
 
-            final int result = getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS);
-            // STOPSHIP (206518114): Temporarily check for PACKAGE_USAGE_STATS permission as well
-            // until the clients switch to using the new permission.
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                if (!hasPermission(callingPackage)) {
-                    throw new SecurityException(
-                            "Caller does not have the permission needed to call this API; "
-                                    + "callingPackage=" + callingPackage
-                                    + ", callingUid=" + Binder.getCallingUid());
-                }
-            }
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS,
+                    "clearBroadcastEvents");
             final int callingUid = Binder.getCallingUid();
             userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), callingUid,
                     userId, false /* allowAll */, false /* requireFull */,

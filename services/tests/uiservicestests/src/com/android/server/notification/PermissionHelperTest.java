@@ -17,7 +17,6 @@ package com.android.server.notification;
 
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
@@ -25,8 +24,6 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import static junit.framework.Assert.fail;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -54,7 +51,6 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,14 +58,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 @SmallTest
@@ -88,59 +77,21 @@ public class PermissionHelperTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, true, false);
+        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager);
         PackageInfo testPkgInfo = new PackageInfo();
         testPkgInfo.requestedPermissions = new String[]{ Manifest.permission.POST_NOTIFICATIONS };
         when(mPackageManager.getPackageInfo(anyString(), anyLong(), anyInt()))
                 .thenReturn(testPkgInfo);
     }
 
-    // TODO (b/194833441): Remove when the migration is enabled
-    @Test
-    public void testMethodsThrowIfMigrationDisabled() throws IllegalAccessException,
-            InvocationTargetException {
-        PermissionHelper permHelper =
-                new PermissionHelper(mPmi, mPackageManager, mPermManager, false, false);
-
-        Method[] allMethods = PermissionHelper.class.getDeclaredMethods();
-        for (Method method : allMethods) {
-            if (Modifier.isPublic(method.getModifiers()) &&
-                    !Objects.equals("isMigrationEnabled", method.getName())) {
-                Parameter[] params = method.getParameters();
-                List<Object> args = Lists.newArrayListWithCapacity(params.length);
-                for (int i = 0; i < params.length; i++) {
-                    Type type = params[i].getParameterizedType();
-                    if (type.getTypeName().equals("java.lang.String")) {
-                        args.add("");
-                    } else if (type.getTypeName().equals("boolean")){
-                        args.add(false);
-                    } else if (type.getTypeName().equals("int")) {
-                        args.add(1);
-                    } else if (type.getTypeName().equals(
-                            "com.android.server.notification.PermissionHelper$PackagePermission")) {
-                        args.add(null);
-                    }
-                }
-                try {
-                    method.invoke(permHelper, args.toArray());
-                    fail("Method should have thrown because migration flag is disabled");
-                } catch (InvocationTargetException e) {
-                    if (!(e.getTargetException() instanceof IllegalStateException)) {
-                        throw e;
-                    }
-                }
-            }
-        }
-    }
-
     @Test
     public void testHasPermission() throws Exception {
-        when(mPmi.checkPostNotificationsPermissionGrantedOrLegacyAccess(anyInt()))
+        when(mPmi.checkUidPermission(anyInt(), anyString()))
                 .thenReturn(PERMISSION_GRANTED);
 
         assertThat(mPermissionHelper.hasPermission(1)).isTrue();
 
-        when(mPmi.checkPostNotificationsPermissionGrantedOrLegacyAccess(anyInt()))
+        when(mPmi.checkUidPermission(anyInt(), anyString()))
                 .thenReturn(PERMISSION_DENIED);
 
         assertThat(mPermissionHelper.hasPermission(1)).isFalse();
@@ -232,79 +183,12 @@ public class PermissionHelperTest extends UiServiceTestCase {
         verify(mPermManager).grantRuntimePermission(
                 "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
-                FLAG_PERMISSION_USER_SET, true, 10);
-    }
-
-    @Test
-    public void testSetNotificationPermission_grantReviewRequired() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
-                .thenReturn(PERMISSION_DENIED);
-
-        mPermissionHelper.setNotificationPermission("pkg", 10, true, false, true);
-
-        verify(mPermManager, never()).revokeRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10, "PermissionHelper");
-        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true, 10);
-    }
-
-    @Test
-    public void testSetNotificationPermission_pkgPerm_grantReviewRequired() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
-                .thenReturn(PERMISSION_DENIED);
-
-        PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
-                "pkg", 10, true, false);
-        mPermissionHelper.setNotificationPermission(pkgPerm);
-
-        verify(mPermManager, never()).revokeRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10, "PermissionHelper");
-        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true, 10);
-    }
-
-    @Test
-    public void testSetNotificationPermission_pkgPerm_notUserSet_grantedByDefaultPermNotSet()
-            throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
-                .thenReturn(PERMISSION_DENIED);
-        when(mPermManager.getPermissionFlags(anyString(),
-                eq(Manifest.permission.POST_NOTIFICATIONS),
-                anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
-        PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
-                "pkg", 10, true, false);
-
-        mPermissionHelper.setNotificationPermission(pkgPerm);
-        verify(mPermManager, never()).revokeRuntimePermission(
-                anyString(), anyString(), anyInt(), anyString());
-        verify(mPermManager, never()).updatePermissionFlags(
-                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
-    }
-
-    @Test
-    public void testSetNotificationPermission_pkgPerm_userSet_grantedByDefaultPermSet()
-            throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
-                .thenReturn(PERMISSION_DENIED);
-        when(mPermManager.getPermissionFlags(anyString(),
-                eq(Manifest.permission.POST_NOTIFICATIONS),
-                anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
-        PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
-                "pkg", 10, true, true);
-
-        mPermissionHelper.setNotificationPermission(pkgPerm);
-        verify(mPermManager).grantRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
-        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
-                FLAG_PERMISSION_USER_SET, true, 10);
+                FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, 10);
     }
 
     @Test
     public void testSetNotificationPermission_pkgPerm_grantedByDefaultPermSet_allUserSet()
             throws Exception {
-        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager, true, true);
         when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
         when(mPermManager.getPermissionFlags(anyString(),
@@ -317,8 +201,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
         verify(mPermManager).grantRuntimePermission(
                 "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
-                FLAG_PERMISSION_USER_SET, true, 10);
+                FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, 10);
     }
 
     @Test
@@ -331,8 +214,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
         verify(mPermManager).revokeRuntimePermission(
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
-                FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
-                FLAG_PERMISSION_USER_SET, true, 10);
+                FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, 10);
     }
 
     @Test
@@ -344,8 +226,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
         verify(mPermManager).grantRuntimePermission(
                 "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
-        verify(mPermManager, never()).updatePermissionFlags(
-                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
+                0, FLAG_PERMISSION_USER_SET, true, 10);
     }
 
     @Test
@@ -357,8 +239,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
         verify(mPermManager).revokeRuntimePermission(
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
-        verify(mPermManager, never()).updatePermissionFlags(
-                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
+                0, FLAG_PERMISSION_USER_SET, true, 10);
     }
 
     @Test

@@ -1004,7 +1004,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void onDisplayChanged(DisplayContent dc) {
         if (mDisplayContent != null && mDisplayContent.mChangingContainers.remove(this)) {
             // Cancel any change transition queued-up for this container on the old display.
-            mSurfaceFreezer.unfreeze(getPendingTransaction());
+            mSurfaceFreezer.unfreeze(getSyncTransaction());
         }
         mDisplayContent = dc;
         if (dc != null && dc != this) {
@@ -1495,8 +1495,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     int getOrientation(int candidate) {
         mLastOrientationSource = null;
-        if (!fillsParent()) {
-            // Ignore containers that don't completely fill their parents.
+        if (!providesOrientation()) {
             return SCREEN_ORIENTATION_UNSET;
         }
 
@@ -1530,8 +1529,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 continue;
             }
 
-            if (wc.fillsParent() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                // Use the orientation if the container fills its parent or requested an explicit
+            if (wc.providesOrientation() || orientation != SCREEN_ORIENTATION_UNSPECIFIED) {
+                // Use the orientation if the container can provide or requested an explicit
                 // orientation that isn't SCREEN_ORIENTATION_UNSPECIFIED.
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "%s is requesting orientation %d (%s)",
                         wc.toString(), orientation,
@@ -1560,6 +1559,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return source;
     }
 
+    boolean providesOrientation() {
+        return fillsParent();
+    }
+
     /**
      * Returns true if this container is opaque and fills all the space made available by its parent
      * container.
@@ -1582,6 +1585,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /** Returns whether the window should be shown for current user. */
     boolean showToCurrentUser() {
         return true;
+    }
+
+    void forAllWindowContainers(Consumer<WindowContainer> callback) {
+        callback.accept(this);
+        final int count = mChildren.size();
+        for (int i = 0; i < count; i++) {
+            mChildren.get(i).forAllWindowContainers(callback);
+        }
     }
 
     /**
@@ -2689,6 +2700,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return {@link #mBLASTSyncTransaction} if available. Otherwise, returns
      * {@link #getPendingTransaction()}
      */
+    @Override
     public Transaction getSyncTransaction() {
         if (mSyncTransactionCommitCallbackDepth > 0) {
             return mSyncTransaction;
@@ -2759,7 +2771,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void cancelAnimation() {
         doAnimationFinished(mSurfaceAnimator.getAnimationType(), mSurfaceAnimator.getAnimation());
         mSurfaceAnimator.cancelAnimation();
-        mSurfaceFreezer.unfreeze(getPendingTransaction());
+        mSurfaceFreezer.unfreeze(getSyncTransaction());
     }
 
     /** Whether we can start change transition with this window and current display status. */
@@ -3741,8 +3753,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             // Otherwise this is the "root" of a synced subtree, so continue on to preparation.
         }
+
         // This container's situation has changed so we need to restart its sync.
-        mSyncState = SYNC_STATE_NONE;
+        // We cannot reset the sync without a chance of a deadlock since it will request a new
+        // buffer from the app process. This could cause issues if the app has run out of buffers
+        // since the previous buffer was already synced and is still held in a transaction.
+        // Resetting syncState violates the policies outlined in BlastSyncEngine.md so for now
+        // disable this when shell transitions is disabled.
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            mSyncState = SYNC_STATE_NONE;
+        }
         prepareSync();
     }
 

@@ -113,7 +113,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * will be filtered to only include these.
      */
     static final int CONTROLLABLE_CONFIGS = ActivityInfo.CONFIG_WINDOW_CONFIGURATION
-            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE;
+            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE
+            | ActivityInfo.CONFIG_LAYOUT_DIRECTION;
     static final int CONTROLLABLE_WINDOW_CONFIGS = WindowConfiguration.WINDOW_CONFIG_BOUNDS
             | WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 
@@ -730,6 +731,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (!parent.isAllowedToEmbedActivity(activity)) {
                     final Throwable exception = new SecurityException(
                             "The task fragment is not trusted to embed the given activity.");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
+                if (parent.getTask() != activity.getTask()) {
+                    final Throwable exception = new SecurityException("The reparented activity is"
+                            + " not in the same Task as the target TaskFragment.");
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
@@ -1538,6 +1545,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (newParentTF.isEmbeddedTaskFragmentInPip() || oldParent.isEmbeddedTaskFragmentInPip()) {
             final Throwable exception = new SecurityException(
                     "Not allow to reparent in TaskFragment in PIP Task.");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return;
+        }
+        if (newParentTF.getTask() != oldParent.getTask()) {
+            final Throwable exception = new SecurityException(
+                    "The new parent is not in the same Task as the old parent.");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return;
         }

@@ -19,11 +19,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="?android:attr/dialogPreferredPadding"
-    android:paddingRight="?android:attr/dialogPreferredPadding">
+    android:paddingRight="?android:attr/dialogPreferredPadding"
+    android:orientation="vertical">
     <EditText
         android:id="@+id/broadcast_edit_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="48dp"
         android:textAlignment="viewStart"/>
+    <TextView
+        android:id="@+id/broadcast_error_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        style="@style/TextAppearance.ErrorText"
+        android:visibility="invisible"/>
 </LinearLayout>

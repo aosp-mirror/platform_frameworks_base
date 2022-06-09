@@ -58,9 +58,7 @@ import com.android.systemui.util.ViewController;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
@@ -133,14 +131,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener
             mKeyguardUnlockAnimationListener =
             new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
-                @Override
-                public void onSmartspaceSharedElementTransitionStarted() {
-                    // The smartspace needs to be able to translate out of bounds in order to
-                    // end up where the launcher's smartspace is, while its container is being
-                    // swiped off the top of the screen.
-                    setClipChildrenForUnlock(false);
-                }
-
                 @Override
                 public void onUnlockAnimationFinished() {
                     // For performance reasons, reset this once the unlock animation ends.
@@ -247,23 +237,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mStatusArea = mView.findViewById(R.id.keyguard_status_area);
 
         if (mSmartspaceController.isEnabled()) {
-            mSmartspaceView = mSmartspaceController.buildAndConnectView(mView);
             View ksv = mView.findViewById(R.id.keyguard_slice_view);
             int ksvIndex = mStatusArea.indexOfChild(ksv);
             ksv.setVisibility(View.GONE);
 
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    MATCH_PARENT, WRAP_CONTENT);
-
-            mStatusArea.addView(mSmartspaceView, ksvIndex, lp);
-            int startPadding = getContext().getResources()
-                    .getDimensionPixelSize(R.dimen.below_clock_padding_start);
-            int endPadding = getContext().getResources()
-                    .getDimensionPixelSize(R.dimen.below_clock_padding_end);
-            mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
-
+            addSmartspaceView(ksvIndex);
             updateClockLayout();
-            mKeyguardUnlockAnimationController.setLockscreenSmartspace(mSmartspaceView);
         }
 
         mSecureSettings.registerContentObserverForUser(
@@ -295,6 +274,30 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         mKeyguardUnlockAnimationController.removeKeyguardUnlockAnimationListener(
                 mKeyguardUnlockAnimationListener);
+    }
+
+    void onLocaleListChanged() {
+        if (mSmartspaceController.isEnabled()) {
+            int index = mStatusArea.indexOfChild(mSmartspaceView);
+            if (index >= 0) {
+                mStatusArea.removeView(mSmartspaceView);
+                addSmartspaceView(index);
+            }
+        }
+    }
+
+    private void addSmartspaceView(int index) {
+        mSmartspaceView = mSmartspaceController.buildAndConnectView(mView);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                MATCH_PARENT, WRAP_CONTENT);
+        mStatusArea.addView(mSmartspaceView, index, lp);
+        int startPadding = getContext().getResources().getDimensionPixelSize(
+                R.dimen.below_clock_padding_start);
+        int endPadding = getContext().getResources().getDimensionPixelSize(
+                R.dimen.below_clock_padding_end);
+        mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
+
+        mKeyguardUnlockAnimationController.setLockscreenSmartspace(mSmartspaceView);
     }
 
     /**
@@ -390,41 +393,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (mStatusArea != null) {
             PropertyAnimator.setProperty(mStatusArea, AnimatableProperty.TRANSLATION_X,
                     x, props, animate);
-
-            // If we're unlocking with the SmartSpace shared element transition, let the controller
-            // know that it should re-position our SmartSpace.
-            if (mKeyguardUnlockAnimationController.isUnlockingWithSmartSpaceTransition()) {
-                mKeyguardUnlockAnimationController.updateLockscreenSmartSpacePosition();
-            }
-        }
-    }
-
-    /** Sets an alpha value on every child view except for the smartspace. */
-    public void setChildrenAlphaExcludingSmartspace(float alpha) {
-        final Set<View> excludedViews = new HashSet<>();
-
-        if (mSmartspaceView != null) {
-            excludedViews.add(mStatusArea);
-        }
-
-        // Don't change the alpha of the invisible clock.
-        if (mCurrentClockSize == LARGE) {
-            excludedViews.add(mClockFrame);
-        } else {
-            excludedViews.add(mLargeClockFrame);
-        }
-
-        setChildrenAlphaExcluding(alpha, excludedViews);
-    }
-
-    /** Sets an alpha value on every child view except for the views in the provided set. */
-    public void setChildrenAlphaExcluding(float alpha, Set<View> excludedViews) {
-        for (int i = 0; i < mView.getChildCount(); i++) {
-            final View child = mView.getChildAt(i);
-
-            if (!excludedViews.contains(child)) {
-                child.setAlpha(alpha);
-            }
         }
     }
 

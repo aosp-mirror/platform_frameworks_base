@@ -18,6 +18,7 @@ package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
@@ -27,8 +28,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerToken;
@@ -61,6 +64,10 @@ public class JetpackTaskFragmentOrganizerTest {
     private WindowContainerTransaction mTransaction;
     @Mock
     private JetpackTaskFragmentOrganizer.TaskFragmentCallback mCallback;
+    @Mock
+    private SplitController mSplitController;
+    @Mock
+    private Handler mHandler;
     private JetpackTaskFragmentOrganizer mOrganizer;
 
     @Before
@@ -69,6 +76,7 @@ public class JetpackTaskFragmentOrganizerTest {
         mOrganizer = new JetpackTaskFragmentOrganizer(Runnable::run, mCallback);
         mOrganizer.registerOrganizer();
         spyOn(mOrganizer);
+        doReturn(mHandler).when(mSplitController).getHandler();
     }
 
     @Test
@@ -106,7 +114,9 @@ public class JetpackTaskFragmentOrganizerTest {
 
     @Test
     public void testExpandTaskFragment() {
-        final TaskFragmentContainer container = new TaskFragmentContainer(null, TASK_ID);
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
+        final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
+                new Intent(), taskContainer, mSplitController);
         final TaskFragmentInfo info = createMockInfo(container);
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
         container.setInfo(info);

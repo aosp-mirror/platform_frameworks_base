@@ -155,7 +155,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void onTaskProfileLocked(int taskId, int userId) throws RemoteException {
+    public void onTaskProfileLocked(RunningTaskInfo taskInfo) throws RemoteException {
     }
 
     @Override

@@ -219,7 +219,7 @@ class ScreenRotationAnimation {
             // If hdr layers are on-screen, e.g. picture-in-picture mode, the screenshot of
             // rotation animation is an sdr image containing tone-mapping hdr content, then
             // disable dimming effect to get avoid of hdr content being dimmed during animation.
-            t.setDimmingEnabled(mScreenshotLayer, false);
+            t.setDimmingEnabled(mScreenshotLayer, !screenshotBuffer.containsHdrLayers());
             t.setLayer(mBackColorSurface, -1);
             t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
             t.setAlpha(mBackColorSurface, 1);
@@ -565,6 +565,7 @@ class ScreenRotationAnimation {
 
         private SimpleSurfaceAnimatable.Builder initializeBuilder() {
             return new SimpleSurfaceAnimatable.Builder()
+                    .setSyncTransactionSupplier(mDisplayContent::getSyncTransaction)
                     .setPendingTransactionSupplier(mDisplayContent::getPendingTransaction)
                     .setCommitTransactionRunnable(mDisplayContent::commitPendingTransaction)
                     .setAnimationLeashSupplier(mDisplayContent::makeOverlay);

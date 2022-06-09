@@ -121,7 +121,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                         mView.onDozeAmountChanged(
                                 animation.getAnimatedFraction(),
                                 (float) animation.getAnimatedValue(),
-                                /* animatingBetweenAodAndLockScreen */ false);
+                                UdfpsKeyguardView.ANIMATION_UNLOCKED_SCREEN_OFF);
                     }
                 });
     }
@@ -154,6 +154,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         updateGenericBouncerVisibility();
         mConfigurationController.addCallback(mConfigurationListener);
         getPanelExpansionStateManager().addExpansionListener(mPanelExpansionListener);
+        updateScaleFactor();
+        mView.updatePadding();
         updateAlpha();
         updatePauseAuth();
 
@@ -367,6 +369,15 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         }
     }
 
+    /**
+     * Update the scale factor based on the device's resolution.
+     */
+    private void updateScaleFactor() {
+        if (mUdfpsController != null && mUdfpsController.mOverlayParams != null) {
+            mView.setScaleFactor(mUdfpsController.mOverlayParams.getScaleFactor());
+        }
+    }
+
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
         @Override
@@ -383,7 +394,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                 mUnlockedScreenOffDozeAnimator.start();
             } else {
                 mView.onDozeAmountChanged(linear, eased,
-                    /* animatingBetweenAodAndLockScreen */ true);
+                        UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
             }
 
             mLastDozeAmount = linear;
@@ -393,7 +404,6 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
         @Override
         public void onStateChanged(int statusBarState) {
             mStatusBarState = statusBarState;
-            mView.setStatusBarState(statusBarState);
             updateAlpha();
             updatePauseAuth();
         }
@@ -486,6 +496,8 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
 
                 @Override
                 public void onConfigChanged(Configuration newConfig) {
+                    updateScaleFactor();
+                    mView.updatePadding();
                     mView.updateColor();
                 }
             };

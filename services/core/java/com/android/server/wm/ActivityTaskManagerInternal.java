@@ -338,14 +338,16 @@ public abstract class ActivityTaskManagerInternal {
         private final @NonNull IBinder mAssistToken;
         private final @NonNull IBinder mShareableActivityToken;
         private final @NonNull IApplicationThread mAppThread;
+        private final int mUid;
 
         public ActivityTokens(@NonNull IBinder activityToken,
                 @NonNull IBinder assistToken, @NonNull IApplicationThread appThread,
-                @NonNull IBinder shareableActivityToken) {
+                @NonNull IBinder shareableActivityToken, int uid) {
             mActivityToken = activityToken;
             mAssistToken = assistToken;
             mAppThread = appThread;
             mShareableActivityToken = shareableActivityToken;
+            mUid = uid;
         }
 
         /**
@@ -374,6 +376,13 @@ public abstract class ActivityTaskManagerInternal {
          */
         public @NonNull IApplicationThread getApplicationThread() {
             return mAppThread;
+        }
+
+        /**
+         * @return The UID of the activity
+         */
+        public int getUid() {
+            return mUid;
         }
     }
 
@@ -693,4 +702,15 @@ public abstract class ActivityTaskManagerInternal {
      * @return a task ID if a valid task ID is found. Otherwise, return INVALID_TASK_ID
      */
     public abstract int getTaskToShowPermissionDialogOn(String pkgName, int uid);
+
+    /**
+     * Attempts to restart the process associated with the top most Activity associated with the
+     * given {@code packageName} in the task associated with the given {@code taskId}.
+     *
+     * This will request the process of the activity to restart with its saved state (via
+     * {@link android.app.Activity#onSaveInstanceState(Bundle)}) if possible. If the activity is in
+     * background the process will be killed keeping its record.
+     */
+    public abstract void restartTaskActivityProcessIfVisible(
+            int taskId, @NonNull String packageName);
 }

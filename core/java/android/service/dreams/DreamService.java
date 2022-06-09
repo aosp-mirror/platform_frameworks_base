@@ -36,6 +36,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -999,6 +1000,14 @@ public class DreamService extends Service implements Window.Callback {
         return mDreamServiceWrapper;
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        // We must unbind from any overlay connection if we are unbound before finishing.
+        mOverlayConnection.unbind(this);
+
+        return super.onUnbind(intent);
+    }
+
     /**
      * Stops the dream and detaches from the window.
      * <p>
@@ -1121,18 +1130,16 @@ public class DreamService extends Service implements Window.Callback {
 
         final PackageManager pm = context.getPackageManager();
 
-        final TypedArray rawMetadata = readMetadata(pm, serviceInfo);
-        if (rawMetadata == null) return null;
-
-        final DreamMetadata metadata = new DreamMetadata(
-                convertToComponentName(rawMetadata.getString(
-                        com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
-                rawMetadata.getDrawable(
-                        com.android.internal.R.styleable.Dream_previewImage),
-                rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
-                        DEFAULT_SHOW_COMPLICATIONS));
-        rawMetadata.recycle();
-        return metadata;
+        try (TypedArray rawMetadata = readMetadata(pm, serviceInfo)) {
+            if (rawMetadata == null) return null;
+            return new DreamMetadata(
+                    convertToComponentName(rawMetadata.getString(
+                            com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
+                    rawMetadata.getDrawable(
+                            com.android.internal.R.styleable.Dream_previewImage),
+                    rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
+                            DEFAULT_SHOW_COMPLICATIONS));
+        }
     }
 
     /**
@@ -1264,7 +1271,7 @@ public class DreamService extends Service implements Window.Callback {
             Intent i = new Intent(this, DreamActivity.class);
             i.setPackage(getApplicationContext().getPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.putExtra(DreamActivity.EXTRA_CALLBACK, mDreamServiceWrapper);
+            i.putExtra(DreamActivity.EXTRA_CALLBACK, new DreamActivityCallback(mDreamToken));
             final ServiceInfo serviceInfo = fetchServiceInfo(this,
                     new ComponentName(this, getClass()));
             i.putExtra(DreamActivity.EXTRA_DREAM_TITLE, fetchDreamLabel(this, serviceInfo));
@@ -1444,11 +1451,36 @@ public class DreamService extends Service implements Window.Callback {
         public void wakeUp() {
             mHandler.post(() -> DreamService.this.wakeUp(true /*fromSystem*/));
         }
+    }
 
-        /** @hide */
-        void onActivityCreated(DreamActivity a) {
-            mActivity = a;
-            onWindowCreated(a.getWindow());
+    /** @hide */
+    final class DreamActivityCallback extends Binder {
+        private final IBinder mActivityDreamToken;
+
+        DreamActivityCallback(IBinder token) {
+            mActivityDreamToken = token;
+        }
+
+        void onActivityCreated(DreamActivity activity) {
+            if (mActivityDreamToken != mDreamToken || mFinished) {
+                Slog.d(TAG, "DreamActivity was created after the dream was finished or "
+                        + "a new dream started, finishing DreamActivity");
+                if (!activity.isFinishing()) {
+                    activity.finishAndRemoveTask();
+                }
+                return;
+            }
+            if (mActivity != null) {
+                Slog.w(TAG, "A DreamActivity has already been started, "
+                        + "finishing latest DreamActivity");
+                if (!activity.isFinishing()) {
+                    activity.finishAndRemoveTask();
+                }
+                return;
+            }
+
+            mActivity = activity;
+            onWindowCreated(activity.getWindow());
         }
     }
 

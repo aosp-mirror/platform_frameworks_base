@@ -99,4 +99,10 @@ public class UdfpsEnrollViewController extends UdfpsAnimationViewController<Udfp
     public int getPaddingY() {
         return mEnrollProgressBarRadius;
     }
+
+    @Override
+    public void doAnnounceForAccessibility(String str) {
+        mView.announceForAccessibility(str);
+    }
+
 }

@@ -166,7 +166,16 @@ public final class OutputConfiguration implements Parcelable {
      * {@link #TIMESTAMP_BASE_MONOTONIC}, which is roughly the same time base as
      * {@link android.os.SystemClock#uptimeMillis}.</li>
      * <li> For all other cases, the timestamp base is {@link #TIMESTAMP_BASE_SENSOR}, the same
-     * as what's specified by {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE}.</li>
+     * as what's specified by {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE}.
+     * <ul><li> For a SurfaceTexture output surface, the camera system re-spaces the delivery
+     * of output frames based on image readout intervals, reducing viewfinder jitter. The timestamps
+     * of images remain to be {@link #TIMESTAMP_BASE_SENSOR}.</li></ul></li>
+     *
+     * <p>Note that the reduction of frame jitter for SurfaceView and SurfaceTexture comes with
+     * slight increase in photon-to-photon latency, which is the time from when photons hit the
+     * scene to when the corresponding pixels show up on the screen. If the photon-to-photon latency
+     * is more important than the smoothness of viewfinder, {@link #TIMESTAMP_BASE_SENSOR} should be
+     * used instead.</p>
      *
      * @see #TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED
      * @see #TIMESTAMP_BASE_MONOTONIC
@@ -224,9 +233,10 @@ public final class OutputConfiguration implements Parcelable {
      * display subsystem for smoother display of camera frames. An output target of SurfaceView
      * uses this time base by default.</p>
      *
-     * <p>The choreographer synchronized timestamps are also reasonable to use when drawing to a
-     * TextureView. So this timestamp base can be used for a SurfaceTexture as part of a
-     * TextureView, in addition to SurfaceView.</p>
+     * <p>This timestamp base isn't applicable to SurfaceTexture targets. SurfaceTexture's
+     * {@link android.graphics.SurfaceTexture#updateTexImage updateTexImage} function always
+     * uses the latest image from the camera stream. In the case of a TextureView, the image is
+     * displayed right away.</p>
      *
      * <p>Timestamps with this time base cannot directly match the timestamps in
      * {@link CameraCaptureSession.CaptureCallback#onCaptureStarted} or the sensor timestamps in

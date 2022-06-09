@@ -38,6 +38,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
@@ -188,6 +189,7 @@ public class ResolverListAdapter extends BaseAdapter {
      * Otherwise the callback is only queued once, with {@code rebuildCompleted} true.
      */
     protected boolean rebuildList(boolean doPostProcessing) {
+        Trace.beginSection("ResolverListAdapter#rebuildList");
         mDisplayList.clear();
         mIsTabLoaded = false;
         mLastChosenPosition = -1;
@@ -241,8 +243,10 @@ public class ResolverListAdapter extends BaseAdapter {
             mUnfilteredResolveList = originalList;
         }
 
-
-        return finishRebuildingListWithFilteredResults(currentResolveList, doPostProcessing);
+        boolean result =
+                finishRebuildingListWithFilteredResults(currentResolveList, doPostProcessing);
+        Trace.endSection();
+        return result;
     }
 
     /**
@@ -402,8 +406,9 @@ public class ResolverListAdapter extends BaseAdapter {
 
     protected void processSortedList(List<ResolvedComponentInfo> sortedComponents,
             boolean doPostProcessing) {
-        int n;
-        if (sortedComponents != null && (n = sortedComponents.size()) != 0) {
+        final int n = sortedComponents != null ? sortedComponents.size() : 0;
+        Trace.beginSection("ResolverListAdapter#processSortedList:" + n);
+        if (n != 0) {
             // First put the initial items at the top.
             if (mInitialIntents != null) {
                 for (int i = 0; i < mInitialIntents.length; i++) {
@@ -451,6 +456,7 @@ public class ResolverListAdapter extends BaseAdapter {
         mResolverListCommunicator.sendVoiceChoicesIfNeeded();
         postListReadyRunnable(doPostProcessing, /* rebuildCompleted */ true);
         mIsTabLoaded = true;
+        Trace.endSection();
     }
 
     /**

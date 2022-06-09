@@ -725,8 +725,8 @@ public interface WindowManager extends ViewManager {
 
     /**
      * Returns a set of {@link WindowMetrics} for the given display. Each WindowMetrics instance
-     * is the maximum WindowMetrics for a device state, including rotations. This is not guaranteed
-     * to include all possible device states.
+     * is the maximum WindowMetrics for a device state. This is not guaranteed to include all
+     * possible device states.
      *
      * This API can only be used by Launcher.
      *
@@ -3108,10 +3108,14 @@ public interface WindowManager extends ViewManager {
 
         /**
          * The preferred refresh rate for the window.
-         *
+         * <p>
          * This must be one of the supported refresh rates obtained for the display(s) the window
          * is on. The selected refresh rate will be applied to the display's default mode.
-         *
+         * <p>
+         * This should be used in favor of {@link LayoutParams#preferredDisplayModeId} for
+         * applications that want to specify the refresh rate, but do not want to specify a
+         * preference for any other displayMode properties (e.g., resolution).
+         * <p>
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          *
          * @see Display#getSupportedRefreshRates()

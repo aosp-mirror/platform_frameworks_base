@@ -57,7 +57,6 @@ class NotifCoordinatorsImpl @Inject constructor(
     viewConfigCoordinator: ViewConfigCoordinator,
     visualStabilityCoordinator: VisualStabilityCoordinator,
     sensitiveContentCoordinator: SensitiveContentCoordinator,
-    activityLaunchAnimCoordinator: ActivityLaunchAnimCoordinator
 ) : NotifCoordinators {
 
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
@@ -95,7 +94,6 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
         mCoordinators.add(sensitiveContentCoordinator)
-        mCoordinators.add(activityLaunchAnimCoordinator)
         if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator)
         }

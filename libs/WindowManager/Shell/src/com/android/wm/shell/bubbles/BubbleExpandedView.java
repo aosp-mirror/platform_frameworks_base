@@ -454,8 +454,11 @@ public class BubbleExpandedView extends LinearLayout {
                     p.beginRecording(mOverflowView.getWidth(), mOverflowView.getHeight()));
             p.endRecording();
             Bitmap snapshot = Bitmap.createBitmap(p);
-            return new SurfaceControl.ScreenshotHardwareBuffer(snapshot.getHardwareBuffer(),
-                    snapshot.getColorSpace(), false /* containsSecureLayers */);
+            return new SurfaceControl.ScreenshotHardwareBuffer(
+                    snapshot.getHardwareBuffer(),
+                    snapshot.getColorSpace(),
+                    false /* containsSecureLayers */,
+                    false /* containsHdrLayers */);
         }
         if (mTaskView == null || mTaskView.getSurfaceControl() == null) {
             return null;
@@ -703,6 +706,8 @@ public class BubbleExpandedView extends LinearLayout {
      * @param animate whether the pointer should animate to this position.
      */
     public void setPointerPosition(float bubblePosition, boolean onLeft, boolean animate) {
+        final boolean isRtl = mContext.getResources().getConfiguration().getLayoutDirection()
+                == LAYOUT_DIRECTION_RTL;
         // Pointer gets drawn in the padding
         final boolean showVertically = mPositioner.showBubblesVertically();
         final float paddingLeft = (showVertically && onLeft)
@@ -729,12 +734,22 @@ public class BubbleExpandedView extends LinearLayout {
             float pointerX;
             if (showVertically) {
                 pointerY = bubbleCenter - (mPointerWidth / 2f);
-                pointerX = onLeft
-                        ? -mPointerHeight + mPointerOverlap
-                        : getWidth() - mPaddingRight - mPointerOverlap;
+                if (!isRtl) {
+                    pointerX = onLeft
+                            ? -mPointerHeight + mPointerOverlap
+                            : getWidth() - mPaddingRight - mPointerOverlap;
+                } else {
+                    pointerX = onLeft
+                            ? -(getWidth() - mPaddingLeft - mPointerOverlap)
+                            : mPointerHeight - mPointerOverlap;
+                }
             } else {
                 pointerY = mPointerOverlap;
-                pointerX = bubbleCenter - (mPointerWidth / 2f);
+                if (!isRtl) {
+                    pointerX = bubbleCenter - (mPointerWidth / 2f);
+                } else {
+                    pointerX = -(getWidth() - mPaddingLeft - bubbleCenter) + (mPointerWidth / 2f);
+                }
             }
             if (animate) {
                 mPointerView.animate().translationX(pointerX).translationY(pointerY).start();

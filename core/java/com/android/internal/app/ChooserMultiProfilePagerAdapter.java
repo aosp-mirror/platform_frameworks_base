@@ -86,7 +86,11 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         final LayoutInflater inflater = LayoutInflater.from(getContext());
         final ViewGroup rootView =
                 (ViewGroup) inflater.inflate(R.layout.chooser_list_per_profile, null, false);
-        return new ChooserProfileDescriptor(rootView, adapter);
+        ChooserProfileDescriptor profileDescriptor =
+                new ChooserProfileDescriptor(rootView, adapter);
+        profileDescriptor.recyclerView.setAccessibilityDelegateCompat(
+                new ChooserRecyclerViewAccessibilityDelegate(profileDescriptor.recyclerView));
+        return profileDescriptor;
     }
 
     RecyclerView getListViewForIndex(int index) {
@@ -193,7 +197,6 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     protected void showWorkProfileOffEmptyState(ResolverListAdapter activeListAdapter,
             View.OnClickListener listener) {
         showEmptyState(activeListAdapter,
-                R.drawable.ic_work_apps_off,
                 getWorkAppPausedTitle(),
                 /* subtitle = */ null,
                 listener);
@@ -203,12 +206,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     protected void showNoPersonalToWorkIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         if (mIsSendAction) {
             showEmptyState(activeListAdapter,
-                    R.drawable.ic_sharing_disabled,
                     getCrossProfileBlockedTitle(),
                     getCantShareWithWorkMessage());
         } else {
             showEmptyState(activeListAdapter,
-                    R.drawable.ic_sharing_disabled,
                     getCrossProfileBlockedTitle(),
                     getCantAccessWorkMessage());
         }
@@ -218,12 +219,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     protected void showNoWorkToPersonalIntentsEmptyState(ResolverListAdapter activeListAdapter) {
         if (mIsSendAction) {
             showEmptyState(activeListAdapter,
-                    R.drawable.ic_sharing_disabled,
                     getCrossProfileBlockedTitle(),
                     getCantShareWithPersonalMessage());
         } else {
             showEmptyState(activeListAdapter,
-                    R.drawable.ic_sharing_disabled,
                     getCrossProfileBlockedTitle(),
                     getCantAccessPersonalMessage());
         }
@@ -231,19 +230,13 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
 
     @Override
     protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        showEmptyState(listAdapter,
-                R.drawable.ic_no_apps,
-                getNoPersonalAppsAvailableMessage(),
-                /* subtitle= */ null);
+        showEmptyState(listAdapter, getNoPersonalAppsAvailableMessage(), /* subtitle= */ null);
 
     }
 
     @Override
     protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
-        showEmptyState(listAdapter,
-                R.drawable.ic_no_apps,
-                getNoWorkAppsAvailableMessage(),
-                /* subtitle = */ null);
+        showEmptyState(listAdapter, getNoWorkAppsAvailableMessage(), /* subtitle = */ null);
     }
 
     private String getWorkAppPausedTitle() {

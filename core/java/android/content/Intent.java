@@ -3259,7 +3259,7 @@ public class Intent implements Parcelable, Cloneable {
 
 
     /**
-     * Broadcast Action: Sent when the current battery level changes.
+     * Broadcast Action: Sent when the current battery level or plug type changes.
      *
      * It has {@link android.os.BatteryManager#EXTRA_EVENTS} that carries a list of {@link Bundle}
      * instances representing individual battery level changes with associated

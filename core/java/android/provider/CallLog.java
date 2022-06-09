@@ -1292,7 +1292,8 @@ public class CallLog {
                 USER_MISSED_LOW_RING_VOLUME,
                 USER_MISSED_NO_VIBRATE,
                 USER_MISSED_CALL_SCREENING_SERVICE_SILENCED,
-                USER_MISSED_CALL_FILTERS_TIMEOUT
+                USER_MISSED_CALL_FILTERS_TIMEOUT,
+                USER_MISSED_NEVER_RANG
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface MissedReason {}
@@ -1381,6 +1382,13 @@ public class CallLog {
          * the call filters timed out.
          */
         public static final long USER_MISSED_CALL_FILTERS_TIMEOUT = 1 << 22;
+
+        /**
+         * When {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE}, set this bit when
+         * the call ended before ringing.
+         * @hide
+         */
+        public static final long USER_MISSED_NEVER_RANG = 1 << 23;
 
         /**
          * Where the {@link CallLog.Calls#TYPE} is {@link CallLog.Calls#MISSED_TYPE},

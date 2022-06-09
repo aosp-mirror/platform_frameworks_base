@@ -308,11 +308,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     void setListening(boolean listening) {
+        if (mView.isListening() == listening) return;
         mView.setListening(listening);
 
         if (mView.getTileLayout() != null) {
             mQSLogger.logAllTilesChangeListening(listening, mView.getDumpableTag(), mCachedSpecs);
             mView.getTileLayout().setListening(listening, mUiEventLogger);
+        }
+
+        if (mView.isListening()) {
+            refreshAllTiles();
         }
     }
 

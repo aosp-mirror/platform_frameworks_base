@@ -48,6 +48,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -78,6 +79,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -474,10 +476,6 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
             mThemeStyle = fetchThemeStyleFromSetting();
             mSecondaryOverlay = getOverlay(mMainWallpaperColor, ACCENT, mThemeStyle);
             mNeutralOverlay = getOverlay(mMainWallpaperColor, NEUTRAL, mThemeStyle);
-            if (colorSchemeIsApplied() && !forceReload) {
-                Log.d(TAG, "Skipping overlay creation. Theme was already: " + mColorScheme);
-                return;
-            }
             mNeedsOverlayCreation = true;
             if (DEBUG) {
                 Log.d(TAG, "fetched overlays. accent: " + mSecondaryOverlay
@@ -537,19 +535,28 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
 
     /**
      * Checks if the color scheme in mColorScheme matches the current system palettes.
+     * @param managedProfiles List of managed profiles for this user.
      */
-    private boolean colorSchemeIsApplied() {
-        return mResources.getColor(
-                android.R.color.system_accent1_500, mContext.getTheme())
-                        == mColorScheme.getAccent1().get(6)
-                && mResources.getColor(android.R.color.system_accent2_500, mContext.getTheme())
-                        == mColorScheme.getAccent2().get(6)
-                && mResources.getColor(android.R.color.system_accent3_500, mContext.getTheme())
-                        == mColorScheme.getAccent3().get(6)
-                && mResources.getColor(android.R.color.system_neutral1_500, mContext.getTheme())
-                        == mColorScheme.getNeutral1().get(6)
-                && mResources.getColor(android.R.color.system_neutral2_500, mContext.getTheme())
-                        == mColorScheme.getNeutral2().get(6);
+    private boolean colorSchemeIsApplied(Set<UserHandle> managedProfiles) {
+        final ArraySet<UserHandle> allProfiles = new ArraySet<>(managedProfiles);
+        allProfiles.add(UserHandle.SYSTEM);
+        for (UserHandle userHandle : allProfiles) {
+            Resources res = userHandle.isSystem()
+                    ? mResources : mContext.createContextAsUser(userHandle, 0).getResources();
+            if (!(res.getColor(android.R.color.system_accent1_500, mContext.getTheme())
+                    == mColorScheme.getAccent1().get(6)
+                    && res.getColor(android.R.color.system_accent2_500, mContext.getTheme())
+                    == mColorScheme.getAccent2().get(6)
+                    && res.getColor(android.R.color.system_accent3_500, mContext.getTheme())
+                    == mColorScheme.getAccent3().get(6)
+                    && res.getColor(android.R.color.system_neutral1_500, mContext.getTheme())
+                    == mColorScheme.getNeutral1().get(6)
+                    && res.getColor(android.R.color.system_neutral2_500, mContext.getTheme())
+                    == mColorScheme.getNeutral2().get(6))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void updateThemeOverlays() {
@@ -622,6 +629,12 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
                 managedProfiles.add(userInfo.getUserHandle());
             }
         }
+
+        if (colorSchemeIsApplied(managedProfiles)) {
+            Log.d(TAG, "Skipping overlay creation. Theme was already: " + mColorScheme);
+            return;
+        }
+
         if (DEBUG) {
             Log.d(TAG, "Applying overlays: " + categoryToPackage.keySet().stream()
                     .map(key -> key + " -> " + categoryToPackage.get(key)).collect(
@@ -639,6 +652,11 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
     }
 
     private Style fetchThemeStyleFromSetting() {
+        // Allow-list of Style objects that can be created from a setting string, i.e. can be
+        // used as a system-wide theme.
+        // - Content intentionally excluded, intended for media player, not system-wide
+        List<Style> validStyles = Arrays.asList(Style.EXPRESSIVE, Style.SPRITZ, Style.TONAL_SPOT,
+                Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT);
         Style style = mThemeStyle;
         final String overlayPackageJson = mSecureSettings.getStringForUser(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
@@ -648,6 +666,9 @@ public class ThemeOverlayController extends CoreStartable implements Dumpable {
                 JSONObject object = new JSONObject(overlayPackageJson);
                 style = Style.valueOf(
                         object.getString(ThemeOverlayApplier.OVERLAY_CATEGORY_THEME_STYLE));
+                if (!validStyles.contains(style)) {
+                    style = Style.TONAL_SPOT;
+                }
             } catch (JSONException | IllegalArgumentException e) {
                 Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e);
                 style = Style.TONAL_SPOT;

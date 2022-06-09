@@ -35,16 +35,19 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.app.Instrumentation;
 import android.content.Context;
+import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -332,6 +335,55 @@ public class ViewRootImplTest {
         checkKeyEvent(() -> {
             mViewRootImpl.setPausedForTransition(true /*paused*/);
         }, false /*shouldReceiveKey*/);
+    }
+
+    @UiThreadTest
+    @Test
+    public void playSoundEffect_wrongEffectId_throwException() {
+        ViewRootImpl viewRootImpl = new ViewRootImpl(sContext,
+                sContext.getDisplayNoVerify());
+        View view = new View(sContext);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+                TYPE_APPLICATION_OVERLAY);
+        layoutParams.token = new Binder();
+        view.setLayoutParams(layoutParams);
+        viewRootImpl.setView(view, layoutParams, /* panelParentView= */ null);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> viewRootImpl.playSoundEffect(/* effectId= */ -1));
+    }
+
+    @UiThreadTest
+    @Test
+    public void playSoundEffect_wrongEffectId_touchFeedbackDisabled_doNothing() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.flags = Display.FLAG_TOUCH_FEEDBACK_DISABLED;
+        Display display = new Display(DisplayManagerGlobal.getInstance(), /* displayId= */
+                0, displayInfo, new DisplayAdjustments());
+        ViewRootImpl viewRootImpl = new ViewRootImpl(sContext, display);
+        View view = new View(sContext);
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
+                TYPE_APPLICATION_OVERLAY);
+        layoutParams.token = new Binder();
+        view.setLayoutParams(layoutParams);
+        viewRootImpl.setView(view, layoutParams, /* panelParentView= */ null);
+
+        viewRootImpl.playSoundEffect(/* effectId= */ -1);
+    }
+
+    @UiThreadTest
+    @Test
+    public void performHapticFeedback_touchFeedbackDisabled_doNothing() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.flags = Display.FLAG_TOUCH_FEEDBACK_DISABLED;
+        Display display = new Display(DisplayManagerGlobal.getInstance(), /* displayId= */
+                0, displayInfo, new DisplayAdjustments());
+        ViewRootImpl viewRootImpl = new ViewRootImpl(sContext, display);
+
+        boolean result = viewRootImpl.performHapticFeedback(
+                HapticFeedbackConstants.CONTEXT_CLICK, true);
+
+        assertThat(result).isFalse();
     }
 
     class KeyView extends View {
