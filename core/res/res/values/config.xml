@@ -2030,6 +2030,10 @@
          STREAM_MUSIC as if it's on TV platform. -->
     <bool name="config_single_volume">false</bool>
 
+    <!-- Flag indicating whether notification and ringtone volumes
+         are controlled together (aliasing is true) or not. -->
+    <bool name="config_alias_ring_notif_stream_types">true</bool>
+
     <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
          on grouped devices. -->
     <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
