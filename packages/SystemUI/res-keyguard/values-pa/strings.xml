@@ -90,8 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਡੀਵਾਈਸ ਨੂੰ ਲਾਕ ਕੀਤਾ ਗਿਆ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ਡੀਵਾਈਸ ਨੂੰ ਹੱਥੀਂ ਲਾਕ ਕੀਤਾ ਗਿਆ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"ਫ਼ੇਸ ਅਣਲਾਕ ਵਰਤਣ ਲਈ, ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਕੈਮਰਾ ਪਹੁੰਚ ਚਾਲੂ ਕਰੋ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="one">ਸਿਮ ਪਿੰਨ ਦਾਖਲ ਕਰੋ। ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="NUMBER_1">%d</xliff:g> ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ।</item>
       <item quantity="other">ਸਿਮ ਪਿੰਨ ਦਾਖਲ ਕਰੋ। ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="NUMBER_1">%d</xliff:g> ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ।</item>
