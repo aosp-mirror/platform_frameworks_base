@@ -26,52 +26,61 @@ import java.io.PrintWriter;
  */
 abstract class AppsFilterLocked extends AppsFilterBase {
     /**
-     * Guards the accesses for the list/set class members
+     * The following locks guard the accesses for the list/set class members
      */
-    protected final Object mLock = new Object();
+    protected final Object mForceQueryableLock = new Object();
+    protected final Object mQueriesViaPackageLock = new Object();
+    protected final Object mQueriesViaComponentLock = new Object();
+    /**
+     * This lock covers both {@link #mImplicitlyQueryable} and {@link #mRetainedImplicitlyQueryable}
+      */
+    protected final Object mImplicitlyQueryableLock = new Object();
+    protected final Object mQueryableViaUsesLibraryLock = new Object();
+    protected final Object mProtectedBroadcastsLock = new Object();
+
     /**
      * Guards the access for {@link AppsFilterBase#mShouldFilterCache};
      */
-    protected Object mCacheLock = new Object();
+    protected final Object mCacheLock = new Object();
 
     @Override
     protected boolean isForceQueryable(int appId) {
-        synchronized (mLock) {
+        synchronized (mForceQueryableLock) {
             return super.isForceQueryable(appId);
         }
     }
 
     @Override
     protected boolean isQueryableViaPackage(int callingAppId, int targetAppId) {
-        synchronized (mLock) {
+        synchronized (mQueriesViaPackageLock) {
             return super.isQueryableViaPackage(callingAppId, targetAppId);
         }
     }
 
     @Override
     protected boolean isQueryableViaComponent(int callingAppId, int targetAppId) {
-        synchronized (mLock) {
+        synchronized (mQueriesViaComponentLock) {
             return super.isQueryableViaComponent(callingAppId, targetAppId);
         }
     }
 
     @Override
     protected boolean isImplicitlyQueryable(int callingAppId, int targetAppId) {
-        synchronized (mLock) {
+        synchronized (mImplicitlyQueryableLock) {
             return super.isImplicitlyQueryable(callingAppId, targetAppId);
         }
     }
 
     @Override
     protected boolean isRetainedImplicitlyQueryable(int callingAppId, int targetAppId) {
-        synchronized (mLock) {
+        synchronized (mImplicitlyQueryableLock) {
             return super.isRetainedImplicitlyQueryable(callingAppId, targetAppId);
         }
     }
 
     @Override
     protected boolean isQueryableViaUsesLibrary(int callingAppId, int targetAppId) {
-        synchronized (mLock) {
+        synchronized (mQueryableViaUsesLibraryLock) {
             return super.isQueryableViaUsesLibrary(callingAppId, targetAppId);
         }
     }
@@ -84,10 +93,42 @@ abstract class AppsFilterLocked extends AppsFilterBase {
     }
 
     @Override
-    protected void dumpQueryables(PrintWriter pw, @Nullable Integer filteringAppId, int[] users,
+    protected void dumpForceQueryable(PrintWriter pw, @Nullable Integer filteringAppId,
             ToString<Integer> expandPackages) {
-        synchronized (mLock) {
-            dumpQueryables(pw, filteringAppId, users, expandPackages);
+        synchronized (mForceQueryableLock) {
+            super.dumpForceQueryable(pw, filteringAppId, expandPackages);
+        }
+    }
+
+    @Override
+    protected void dumpQueriesViaPackage(PrintWriter pw, @Nullable Integer filteringAppId,
+            ToString<Integer> expandPackages) {
+        synchronized (mQueriesViaPackageLock) {
+            super.dumpQueriesViaPackage(pw, filteringAppId, expandPackages);
+        }
+    }
+
+    @Override
+    protected void dumpQueriesViaComponent(PrintWriter pw, @Nullable Integer filteringAppId,
+            ToString<Integer> expandPackages) {
+        synchronized (mQueriesViaComponentLock) {
+            super.dumpQueriesViaComponent(pw, filteringAppId, expandPackages);
+        }
+    }
+
+    @Override
+    protected void dumpQueriesViaImplicitlyQueryable(PrintWriter pw,
+            @Nullable Integer filteringAppId, int[] users, ToString<Integer> expandPackages) {
+        synchronized (mImplicitlyQueryableLock) {
+            super.dumpQueriesViaImplicitlyQueryable(pw, filteringAppId, users, expandPackages);
+        }
+    }
+
+    @Override
+    protected void dumpQueriesViaUsesLibrary(PrintWriter pw, @Nullable Integer filteringAppId,
+            ToString<Integer> expandPackages) {
+        synchronized (mQueryableViaUsesLibraryLock) {
+            super.dumpQueriesViaUsesLibrary(pw, filteringAppId, expandPackages);
         }
     }
 }

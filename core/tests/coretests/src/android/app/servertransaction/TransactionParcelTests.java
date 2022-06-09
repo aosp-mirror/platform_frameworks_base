@@ -425,7 +425,7 @@ public class TransactionParcelTests {
 
         @Override
         public void bindApplication(String s, ApplicationInfo applicationInfo,
-                String sdkSandboxClientAppPackage,
+                String sdkSandboxClientAppVolumeUuid, String sdkSandboxClientAppPackage,
                 ProviderInfoList list, ComponentName componentName, ProfilerInfo profilerInfo,
                 Bundle bundle, IInstrumentationWatcher iInstrumentationWatcher,
                 IUiAutomationConnection iUiAutomationConnection, int i, boolean b, boolean b1,

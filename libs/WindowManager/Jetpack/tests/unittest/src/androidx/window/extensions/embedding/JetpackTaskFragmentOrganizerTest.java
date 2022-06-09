@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Handler;
@@ -113,8 +114,9 @@ public class JetpackTaskFragmentOrganizerTest {
 
     @Test
     public void testExpandTaskFragment() {
+        final TaskContainer taskContainer = new TaskContainer(TASK_ID);
         final TaskFragmentContainer container = new TaskFragmentContainer(null /* activity */,
-                TASK_ID, mSplitController);
+                new Intent(), taskContainer, mSplitController);
         final TaskFragmentInfo info = createMockInfo(container);
         mOrganizer.mFragmentInfos.put(container.getTaskFragmentToken(), info);
         container.setInfo(info);

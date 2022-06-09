@@ -261,7 +261,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                     taskViewFactory.get().create(context, uiExecutor, {
                         dialog = DetailDialog(
                             activityContext, broadcastSender,
-                            it, pendingIntent, cvh
+                            it, pendingIntent, cvh, keyguardStateController, activityStarter
                         ).also {
                             it.setOnDismissListener { _ -> dialog = null }
                             it.show()

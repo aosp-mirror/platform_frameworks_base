@@ -46,15 +46,16 @@ import com.android.systemui.animation.Interpolators
  */
 open class DisplayCutoutBaseView : View, RegionInterceptableView {
 
-    private val shouldDrawCutout: Boolean = DisplayCutout.getFillBuiltInDisplayCutout(
+    private var shouldDrawCutout: Boolean = DisplayCutout.getFillBuiltInDisplayCutout(
             context.resources, context.display?.uniqueId)
+    private var displayUniqueId: String? = null
     private var displayMode: Display.Mode? = null
     protected val location = IntArray(2)
     protected var displayRotation = 0
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     @JvmField val displayInfo = DisplayInfo()
-    @JvmField protected var pendingRotationChange = false
+    @JvmField protected var pendingConfigChange = false
     @JvmField protected val paint = Paint()
     @JvmField protected val cutoutPath = Path()
 
@@ -78,6 +79,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        displayUniqueId = context.display?.uniqueId
         updateCutout()
         updateProtectionBoundingPath()
         onUpdate()
@@ -86,6 +88,12 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     fun onDisplayChanged(displayId: Int) {
         val oldMode: Display.Mode? = displayMode
         displayMode = display.mode
+
+        if (displayUniqueId != context.display?.uniqueId) {
+            displayUniqueId = context.display?.uniqueId
+            shouldDrawCutout = DisplayCutout.getFillBuiltInDisplayCutout(
+                    context.resources, displayUniqueId)
+        }
 
         // Skip if display mode or cutout hasn't changed.
         if (!displayModeChanged(oldMode, displayMode) &&
@@ -145,7 +153,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     open fun updateCutout() {
-        if (pendingRotationChange) {
+        if (pendingConfigChange) {
             return
         }
         cutoutPath.reset()
@@ -225,7 +233,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     }
 
     protected open fun updateProtectionBoundingPath() {
-        if (pendingRotationChange) {
+        if (pendingConfigChange) {
             return
         }
         val m = Matrix()

@@ -27,6 +27,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_INPUT;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_UI;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_WINDOW;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER;
 
 import static java.util.Objects.requireNonNull;
 
@@ -78,7 +79,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 import android.window.WindowContext;
@@ -350,6 +350,7 @@ public class ScreenshotController {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (ClipboardOverlayController.COPY_OVERLAY_ACTION.equals(intent.getAction())) {
+                    mUiEventLogger.log(SCREENSHOT_DISMISSED_OTHER);
                     dismissScreenshot(false);
                 }
             }
@@ -484,6 +485,7 @@ public class ScreenshotController {
                 setWindowFocusable(false);
             }
         });
+        mScreenshotView.setDefaultTimeoutMillis(mScreenshotHandler.getDefaultTimeoutMillis());
 
         mScreenshotView.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -558,14 +560,9 @@ public class ScreenshotController {
 
     private void saveScreenshot(Bitmap screenshot, Consumer<Uri> finisher, Rect screenRect,
             Insets screenInsets, ComponentName topComponent, boolean showFlash) {
-        if (mAccessibilityManager.isEnabled()) {
-            AccessibilityEvent event =
-                    new AccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-            event.setContentDescription(
-                    mContext.getResources().getString(R.string.screenshot_saving_title));
-            mAccessibilityManager.sendAccessibilityEvent(event);
-        }
-
+        withWindowAttached(() ->
+                mScreenshotView.announceForAccessibility(
+                        mContext.getResources().getString(R.string.screenshot_saving_title)));
 
         if (mScreenshotView.isAttachedToWindow()) {
             // if we didn't already dismiss for another reason
@@ -632,6 +629,7 @@ public class ScreenshotController {
                                 }
                             }
                         }
+
                         @Override
                         public void requestCompatCameraControl(boolean showControl,
                                 boolean transformationApplied,
@@ -717,6 +715,7 @@ public class ScreenshotController {
             Log.e(TAG, "requestScrollCapture failed", e);
         }
     }
+
     ListenableFuture<ScrollCaptureController.LongScreenshot> mLongScreenshotFuture;
 
     private void runBatchScrollCapture(ScrollCaptureResponse response) {

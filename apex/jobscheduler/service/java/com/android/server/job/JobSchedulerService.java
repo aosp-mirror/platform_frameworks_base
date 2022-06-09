@@ -1755,7 +1755,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             // same job ID), we remove it from the JobStore and tell the JobServiceContext to stop
             // running the job. Once the job stops running, we then call this method again.
             // TODO: rework code so we don't intentionally call this method twice for the same job
-            Slog.w(TAG, "Job didn't exist in JobStore");
+            Slog.w(TAG, "Job didn't exist in JobStore: " + jobStatus.toShortString());
         }
         if (mReadyToRock) {
             for (int i = 0; i < mControllers.size(); i++) {
@@ -3813,6 +3813,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // Double indent for readability
                     pw.increaseIndent();
                     pw.increaseIndent();
+                    pw.println(job.toShortString());
                     job.dump(pw, true, nowElapsed);
                     pw.decreaseIndent();
                     pw.decreaseIndent();

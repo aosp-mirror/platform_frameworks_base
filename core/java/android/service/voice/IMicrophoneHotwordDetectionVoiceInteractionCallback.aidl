@@ -18,6 +18,7 @@ package android.service.voice;
 
 import android.media.AudioFormat;
 import android.service.voice.HotwordDetectedResult;
+import android.service.voice.HotwordRejectedResult;
 
 /**
  * Callback for returning the detected result from the HotwordDetectionService.
@@ -33,4 +34,15 @@ oneway interface IMicrophoneHotwordDetectionVoiceInteractionCallback {
         in HotwordDetectedResult hotwordDetectedResult,
         in AudioFormat audioFormat,
         in ParcelFileDescriptor audioStream);
+
+    /**
+     * Called when the detection fails due to an error.
+     */
+    void onError();
+
+    /**
+     * Called when the detected result was not detected.
+     */
+    void onRejected(
+        in HotwordRejectedResult hotwordRejectedResult);
 }

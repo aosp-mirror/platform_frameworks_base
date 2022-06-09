@@ -1097,7 +1097,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         TaskChangeNotificationController controller = mAtm.getTaskChangeNotificationController();
         spyOn(controller);
         mWm.mRoot.lockAllProfileTasks(profileUserId);
-        verify(controller).notifyTaskProfileLocked(eq(task.mTaskId), eq(profileUserId));
+        verify(controller).notifyTaskProfileLocked(any());
 
         // Create the work lock activity on top of the task
         final ActivityRecord workLockActivity = new ActivityBuilder(mAtm).setTask(task).build();
@@ -1107,7 +1107,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Make sure the listener won't be notified again.
         clearInvocations(controller);
         mWm.mRoot.lockAllProfileTasks(profileUserId);
-        verify(controller, never()).notifyTaskProfileLocked(anyInt(), anyInt());
+        verify(controller, never()).notifyTaskProfileLocked(any());
     }
 
     /**

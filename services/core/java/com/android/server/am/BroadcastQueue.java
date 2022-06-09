@@ -860,6 +860,21 @@ public final class BroadcastQueue {
             }
         }
 
+        // Check that the receiver does *not* belong to any of the excluded packages
+        if (!skip && r.excludedPackages != null && r.excludedPackages.length > 0) {
+            if (ArrayUtils.contains(r.excludedPackages, filter.packageName)) {
+                Slog.w(TAG, "Skipping delivery of excluded package "
+                        + r.intent.toString()
+                        + " to " + filter.receiverList.app
+                        + " (pid=" + filter.receiverList.pid
+                        + ", uid=" + filter.receiverList.uid + ")"
+                        + " excludes package " + filter.packageName
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
+            }
+        }
+
         // If the broadcast also requires an app op check that as well.
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.getAppOpsManager().noteOpNoThrow(r.appOp,
@@ -1721,6 +1736,19 @@ public final class BroadcastQueue {
             }
         }
 
+        // Check that the receiver does *not* belong to any of the excluded packages
+        if (!skip && r.excludedPackages != null && r.excludedPackages.length > 0) {
+            if (ArrayUtils.contains(r.excludedPackages, component.getPackageName())) {
+                Slog.w(TAG, "Skipping delivery of excluded package "
+                        + r.intent + " to "
+                        + component.flattenToShortString()
+                        + " excludes package " + component.getPackageName()
+                        + " due to sender " + r.callerPackage
+                        + " (uid " + r.callingUid + ")");
+                skip = true;
+            }
+        }
+
         if (!skip && info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
                 r.requiredPermissions != null && r.requiredPermissions.length > 0) {
             for (int i = 0; i < r.requiredPermissions.length; i++) {
@@ -1842,8 +1870,9 @@ public final class BroadcastQueue {
         r.curApp = mService.startProcessLocked(targetProcess,
                 info.activityInfo.applicationInfo, true,
                 r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
-                new HostingRecord("broadcast", r.curComponent), isActivityCapable
-                ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
+                new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST, r.curComponent,
+                        r.intent.getAction()),
+                isActivityCapable ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
                 (r.intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false);
         if (r.curApp == null) {
             // Ah, this recipient is unavailable.  Finish it if necessary,

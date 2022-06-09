@@ -221,7 +221,7 @@
     <string name="silent_mode_silent" msgid="5079789070221150912">"Коңгуроо өчүк"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Чалганда титирөө"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Коңгуроо жандырылган"</string>
-    <string name="reboot_to_update_title" msgid="2125818841916373708">"Android тутум жаңыртуусу"</string>
+    <string name="reboot_to_update_title" msgid="2125818841916373708">"Android системасын жаңыртуу"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"Жаңыртууга даярдалууда…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"Жаңыртуу топтому иштелүүдө…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Өчүрүлүп күйгүзүлүүдө…"</string>
@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"жылнаамаңызды пайдалануу"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS билдирүүлөрдү жиберүү жана көрсөтүү"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Файлдар жана документтер"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"түзмөгүңүздөгү файлдары жана документтерди колдонуу"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Файлдар"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"түзмөгүңүздөгү файлдар жеткиликтүү болот"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Музыка жана аудио"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"түзмөгүңүздөгү музыка менен аудиолорго мүмкүнчүлүк алуу"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Сүрөттөр жана видеолор"</string>
@@ -636,9 +636,9 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Тейлөө кызматына кайрылыңыз."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Жүзүңүз жакшы тартылган жок. Кайталап көрүңүз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Өтө жарык. Жарыктыкты азайтып көрүңүз."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Өтө караңгы. Жарыгыраак жерден тартып көрүңүз."</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"Өтө караңгы. Жарыгыраак жерге туруңуз."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Телефонду алысыраак жылдырыңыз."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Телефонду жакыныраак жылдырыңыз."</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"Телефонду жакындатыңыз."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Телефонду өйдө жылдырыңыз."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Телефонду ылдый жылдырыңыз."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Телефонду солго жылдырыңыз."</string>
@@ -1670,18 +1670,18 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең 3 секунддай коё бербей басып туруңуз."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Атайын мүмкүнчүлүктөрдүн ыкчам баскычын иштетесизби?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Атайын мүмкүнчүлүктөр функциясын иштетүү үчүн үндү чоңойтуп/кичирейтүү баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nУчурдагы функциялар:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТандалган функцияларды өзгөртүү үчүн Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Атайын мүмкүнчүлүктөр функциясын иштетүү үчүн үндү катуулатуу/акырындатуу баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nУчурдагы функциялар:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТандалган функцияларды өзгөртүү үчүн Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"<xliff:g id="SERVICE">%1$s</xliff:g> ыкчам баскычын иштетесизби?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматын иштетүү үчүн үндү чоңойтуп/кичирейтүү баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nБаскычтардын ушул айкалышын башка функцияга дайындоо үчүн, Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматын иштетүү үчүн үндү катуулатуу/акырындатуу баскычтарын бир нече секунд коё бербей басып туруңуз. Ушуну менен, түзмөгүңүз бир аз башкача иштеп калышы мүмкүн.\n\nБаскычтардын ушул айкалышын башка функцияга дайындоо үчүн, Жөндөөлөр &gt; Атайын мүмкүнчүлүктөр бөлүмүнө өтүңүз."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ооба"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Жок"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"КҮЙҮК"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ӨЧҮК"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> кызматына түзмөгүңүздү толугу менен көзөмөлдөөгө уруксат бересизби?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Толук көзөмөл атайын мүмкүнчүлүктөрдү пайдаланууга керек, бирок калган көпчүлүк колдонмолорго кереги жок."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Толук көзөмөл атайын мүмкүнчүлүктөрдү иштеткен колдонмолорго керек болуп, калган көптөгөн колдонмолорго кереги деле жок."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Экранды көрүп, көзөмөлдөө"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Кызмат экрандагы нерселерди окуп, материалды башка колдонмолордун үстүнөн көрсөтөт."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Кызмат экрандагы нерселерди окуп, аларды башка колдонмолордун үстүнөн көрсөтөт."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Аракеттерди көрүп, аткаруу"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Кызмат колдонмодо жасаган аракеттериңизге же түзмөктүн сенсорлоруна көз салып, сиздин атыңыздан буйруктарды берет."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Уруксат берүү"</string>
@@ -2037,10 +2037,10 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ЧЫГАРЫП САЛУУ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"БААРЫ БИР АЧЫЛСЫН"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Зыянкеч колдонмо аныкталды"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> колдонмосуна түзмөктөгү бардык таржымалдарды колдонууга уруксат бересизби?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Бир жолу кирүүгө уруксат берүү"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Уруксат берилбесин"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Түзмөктө аткарылган бардык аракеттер түзмөктүн таржымалдарында сакталып калат. Колдонмолор бул таржымалдарды колдонуп, маселелерди оңдошот.\n\nАйрым таржымалдарда купуя маалымат болушу мүмкүн, андыктан түзмөктөгү бардык таржымалдарды ишенимдүү колдонмолорго гана пайдаланууга уруксат бериңиз. \n\nЭгер бул колдонмого түзмөктөгү айрым таржымалдарга кирүүгө тыюу салсаңыз, ал өзүнүн таржымалдарын пайдалана берет. Түзмөктү өндүрүүчү түзмөгүңүздөгү айрым таржымалдарды же маалыматты көрө берет. Кеңири маалымат"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> колдонмосуна түзмөктөгү бардык таржымалдарды жеткиликтүү кыласызбы?"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Бир жолу жеткиликтүү кылуу"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Жок"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Түзмөктө жасалган нерселердин баары таржымал болуп сактала берет. Колдонмолор анын жардамы менен көйгөйлөрдү аныктап, оңдоп турушат.\n\nАйрым таржымалдарда купуя маалымат болушу мүмкүн, андыктан түзмөктөгү бардык таржымалдарды ишенимдүү колдонмолорго гана пайдаланууга уруксат бериңиз. \n\nЭгер бул колдонмого түзмөктөгү айрым таржымалдарга кирүүгө тыюу салсаңыз, ал өзүнүн таржымалдарын пайдалана берет. Түзмөктү өндүрүүчү түзмөгүңүздөгү айрым таржымалдарды же маалыматты көрө берет. Кеңири маалымат"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Экинчи көрүнбөсүн"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> колдонмосу <xliff:g id="APP_2">%2$s</xliff:g> үлгүлөрүн көрсөткөнү жатат"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Түзөтүү"</string>
@@ -2281,5 +2281,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Жигердүү колдонмолорду карап чыгуу"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн телефондун камерасына мүмкүнчүлүк жок"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүңүздөн планшетиңиздин камерасына мүмкүнчүлүк жок"</string>
-    <string name="system_locale_title" msgid="3978041860457277638">"Тутумдун тили"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Системанын демейки параметрлери"</string>
 </resources>

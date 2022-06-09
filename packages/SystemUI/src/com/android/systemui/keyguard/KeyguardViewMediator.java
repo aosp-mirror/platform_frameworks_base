@@ -779,16 +779,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         }
 
         @Override
-        public void onBouncerVisiblityChanged(boolean shown) {
-            synchronized (KeyguardViewMediator.this) {
-                if (shown) {
-                    mPendingPinLock = false;
-                }
-                adjustStatusBarLocked(shown, false);
-            }
-        }
-
-        @Override
         public void playTrustedSound() {
             KeyguardViewMediator.this.playTrustedSound();
         }
@@ -850,8 +840,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
                 @Override
                 public void onLaunchAnimationCancelled() {
-                    Log.d(TAG, "Occlude launch animation cancelled. "
-                            + "Occluded state is now: " + mOccluded);
+                    setOccluded(true /* occluded */, false /* animate */);
+                    Log.d(TAG, "Occlude launch animation cancelled. Occluded state is now: "
+                            + mOccluded);
                 }
 
                 @NonNull
@@ -914,6 +905,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     if (mUnoccludeAnimator != null) {
                         mUnoccludeAnimator.cancel();
                     }
+
+                    setOccluded(false /* isOccluded */, false /* animate */);
+                    Log.d(TAG, "Unocclude animation cancelled. Occluded state is now: "
+                            + mOccluded);
                 }
 
                 @Override
@@ -921,12 +916,12 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         RemoteAnimationTarget[] wallpapers,
                         RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+                    setOccluded(false /* isOccluded */, true /* animate */);
+
                     if (apps == null || apps.length == 0 || apps[0] == null) {
                         Log.d(TAG, "No apps provided to unocclude runner; "
                                 + "skipping animation and unoccluding.");
-
                         finishedCallback.onAnimationFinished();
-                        setOccluded(false /* isOccluded */, true /* animate */);
                         return;
                     }
 
@@ -971,7 +966,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                             @Override
                             public void onAnimationEnd(Animator animation) {
                                 try {
-                                    setOccluded(false /* isOccluded */, true /* animate */);
                                     finishedCallback.onAnimationFinished();
                                     mUnoccludeAnimator = null;
                                 } catch (RemoteException e) {
@@ -989,6 +983,19 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private DozeParameters mDozeParameters;
 
     private final KeyguardStateController mKeyguardStateController;
+    private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
+            new KeyguardStateController.Callback() {
+        @Override
+        public void onBouncerShowingChanged() {
+            synchronized (KeyguardViewMediator.this) {
+                if (mKeyguardStateController.isBouncerShowing()) {
+                    mPendingPinLock = false;
+                }
+                adjustStatusBarLocked(mKeyguardStateController.isBouncerShowing(), false);
+            }
+        }
+    };
+
     private final Lazy<KeyguardUnlockAnimationController> mKeyguardUnlockAnimationControllerLazy;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mWallpaperSupportsAmbientMode;
@@ -1059,6 +1066,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         statusBarStateController.addCallback(this);
 
         mKeyguardStateController = keyguardStateController;
+        keyguardStateController.addCallback(mKeyguardStateControllerCallback);
         mKeyguardUnlockAnimationControllerLazy = keyguardUnlockAnimationControllerLazy;
         mScreenOffAnimationController = screenOffAnimationController;
         mInteractionJankMonitor = interactionJankMonitor;
@@ -2494,6 +2502,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 // supported, so it's always null.
                 mContext.getMainExecutor().execute(() -> {
                     if (finishedCallback == null) {
+                        mKeyguardUnlockAnimationControllerLazy.get()
+                                .notifyFinishedKeyguardExitAnimation(false /* cancelled */);
                         mInteractionJankMonitor.end(CUJ_LOCKSCREEN_UNLOCK_ANIMATION);
                         return;
                     }
@@ -2622,6 +2632,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             // The remote animation is over, so we're not going away anymore.
             mKeyguardStateController.notifyKeyguardGoingAway(false);
+
+            // Dispatch the callback on animation finishes.
+            mUpdateMonitor.dispatchKeyguardDismissAnimationFinished();
         });
 
         mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation(

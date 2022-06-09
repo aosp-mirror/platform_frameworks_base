@@ -449,6 +449,36 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(app.getInsetsState().peekSource(ITYPE_NAVIGATION_BAR));
     }
 
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testGetInsetsHintForNewControl() {
+        final WindowState app1 = createTestWindow("app1");
+        final WindowState app2 = createTestWindow("app2");
+
+        makeWindowVisible(mImeWindow);
+        final InsetsSourceProvider imeInsetsProvider = getController().getSourceProvider(ITYPE_IME);
+        imeInsetsProvider.setWindowContainer(mImeWindow, null, null);
+        imeInsetsProvider.updateSourceFrame(mImeWindow.getFrame());
+
+        imeInsetsProvider.updateControlForTarget(app1, false);
+        imeInsetsProvider.onPostLayout();
+        final InsetsSourceControl control1 = imeInsetsProvider.getControl(app1);
+        assertNotNull(control1);
+        assertEquals(imeInsetsProvider.getSource().getFrame().height(),
+                control1.getInsetsHint().bottom);
+
+        // Simulate the IME control target updated from app1 to app2 when IME insets was invisible.
+        imeInsetsProvider.setServerVisible(false);
+        imeInsetsProvider.updateControlForTarget(app2, false);
+
+        // Verify insetsHint of the new control is same as last IME source frame after the layout.
+        imeInsetsProvider.onPostLayout();
+        final InsetsSourceControl control2 = imeInsetsProvider.getControl(app2);
+        assertNotNull(control2);
+        assertEquals(imeInsetsProvider.getSource().getFrame().height(),
+                control2.getInsetsHint().bottom);
+    }
+
     private WindowState createTestWindow(String name) {
         final WindowState win = createWindow(null, TYPE_APPLICATION, name);
         win.setHasSurface(true);

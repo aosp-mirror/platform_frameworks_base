@@ -2553,4 +2553,18 @@ interface ITelephony {
      * for the slot, or {@code null} if none is resolved
      */
     String getCarrierServicePackageNameForLogicalSlot(int logicalSlotIndex);
+
+    /**
+     * set removable eSIM as default eUICC.
+     *
+     * @hide
+     */
+    void setRemovableEsimAsDefaultEuicc(boolean isDefault, String callingPackage);
+
+    /**
+     * Returns whether the removable eSIM is default eUICC or not.
+     *
+     * @hide
+     */
+    boolean isRemovableEsimDefaultEuicc(String callingPackage);
 }

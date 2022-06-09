@@ -565,6 +565,7 @@ class ScreenRotationAnimation {
 
         private SimpleSurfaceAnimatable.Builder initializeBuilder() {
             return new SimpleSurfaceAnimatable.Builder()
+                    .setSyncTransactionSupplier(mDisplayContent::getSyncTransaction)
                     .setPendingTransactionSupplier(mDisplayContent::getPendingTransaction)
                     .setCommitTransactionRunnable(mDisplayContent::commitPendingTransaction)
                     .setAnimationLeashSupplier(mDisplayContent::makeOverlay);

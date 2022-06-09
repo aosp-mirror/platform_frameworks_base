@@ -150,8 +150,8 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
     }
 
     @Override
-    public void onTaskProfileLocked(int taskId, int userId) {
-        mMainHandler.obtainMessage(ON_TASK_PROFILE_LOCKED, taskId, userId).sendToTarget();
+    public void onTaskProfileLocked(ActivityManager.RunningTaskInfo taskInfo) {
+        mMainHandler.obtainMessage(ON_TASK_PROFILE_LOCKED, taskInfo).sendToTarget();
     }
 
     @Override
@@ -341,8 +341,10 @@ public class TaskStackListenerImpl extends TaskStackListener implements Handler.
                     break;
                 }
                 case ON_TASK_PROFILE_LOCKED: {
+                    final ActivityManager.RunningTaskInfo
+                            info = (ActivityManager.RunningTaskInfo) msg.obj;
                     for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                        mTaskStackListeners.get(i).onTaskProfileLocked(msg.arg1, msg.arg2);
+                        mTaskStackListeners.get(i).onTaskProfileLocked(info);
                     }
                     break;
                 }

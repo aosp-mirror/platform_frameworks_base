@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
-import android.os.Build;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,7 +37,7 @@ public interface OnBackInvokedDispatcher {
     String TAG = "OnBackInvokedDispatcher";
 
     /** @hide */
-    boolean DEBUG = Build.isDebuggable();
+    boolean DEBUG = false;
 
     /** @hide */
     @IntDef({
@@ -96,4 +95,19 @@ public interface OnBackInvokedDispatcher {
      * @hide
      */
     default void registerSystemOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback) { }
+
+
+    /**
+     * Sets an {@link ImeOnBackInvokedDispatcher} to forward {@link OnBackInvokedCallback}s
+     * from IME to the app process to be registered on the app window.
+     *
+     * Only call this on the IME window. Create the {@link ImeOnBackInvokedDispatcher} from
+     * the application process and override
+     * {@link ImeOnBackInvokedDispatcher#getReceivingDispatcher()} to point to the app
+     * window's {@link WindowOnBackInvokedDispatcher}.
+     *
+     * @hide
+     */
+    default void setImeOnBackInvokedDispatcher(
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) { }
 }

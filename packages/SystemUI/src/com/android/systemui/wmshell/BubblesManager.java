@@ -271,6 +271,11 @@ public class BubblesManager implements Dumpable {
                         mBubbles.onCurrentProfilesChanged(currentProfiles);
                     }
 
+                    @Override
+                    public void onUserRemoved(int userId) {
+                        mBubbles.onUserRemoved(userId);
+                    }
+
                 });
 
         mSysuiProxy = new Bubbles.SysuiProxy() {

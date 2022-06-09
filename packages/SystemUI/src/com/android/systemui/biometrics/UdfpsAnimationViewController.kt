@@ -192,4 +192,9 @@ abstract class UdfpsAnimationViewController<T : UdfpsAnimationView>(
      * Called on touches outside of the view if listenForTouchesOutsideView returns true
      */
     open fun onTouchOutsideView() {}
+
+    /**
+     * Called when a view should announce an accessibility event.
+     */
+    open fun doAnnounceForAccessibility(str: String) {}
 }

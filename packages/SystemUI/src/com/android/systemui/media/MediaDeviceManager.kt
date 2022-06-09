@@ -30,6 +30,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
+import com.android.systemui.statusbar.policy.ConfigurationController
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -44,6 +45,7 @@ class MediaDeviceManager @Inject constructor(
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
     private val muteAwaitConnectionManagerFactory: MediaMuteAwaitConnectionManagerFactory,
+    private val configurationController: ConfigurationController,
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
     dumpManager: DumpManager
@@ -79,7 +81,7 @@ class MediaDeviceManager @Inject constructor(
             oldEntry?.stop()
         }
         var entry = entries[key]
-        if (entry == null || entry?.token != data.token) {
+        if (entry == null || entry.token != data.token) {
             entry?.stop()
             if (data.device != null) {
                 // If we were already provided device info (e.g. from RCN), keep that and don't
@@ -118,10 +120,9 @@ class MediaDeviceManager @Inject constructor(
     override fun dump(pw: PrintWriter, args: Array<String>) {
         with(pw) {
             println("MediaDeviceManager state:")
-            entries.forEach {
-                key, entry ->
+            entries.forEach { (key, entry) ->
                 println("  key=$key")
-                entry.dump(pw, args)
+                entry.dump(pw)
             }
         }
     }
@@ -154,7 +155,8 @@ class MediaDeviceManager @Inject constructor(
         private var playbackType = PLAYBACK_TYPE_UNKNOWN
         private var current: MediaDeviceData? = null
             set(value) {
-                if (!started || value != field) {
+                val hasSameId = value?.id != null && value.id == field?.id
+                if (!started || (!hasSameId && value != field)) {
                     field = value
                     fgExecutor.execute {
                         processDevice(key, oldKey, value)
@@ -165,6 +167,12 @@ class MediaDeviceManager @Inject constructor(
         // expected to connect imminently, it should be displayed as the current device.
         private var aboutToConnectDeviceOverride: AboutToConnectDevice? = null
 
+        private val configListener = object : ConfigurationController.ConfigurationListener {
+            override fun onLocaleListChanged() {
+                updateCurrent()
+            }
+        }
+
         @AnyThread
         fun start() = bgExecutor.execute {
             localMediaManager.registerCallback(this)
@@ -174,6 +182,7 @@ class MediaDeviceManager @Inject constructor(
             controller?.registerCallback(this)
             updateCurrent()
             started = true
+            configurationController.addCallback(configListener)
         }
 
         @AnyThread
@@ -183,9 +192,10 @@ class MediaDeviceManager @Inject constructor(
             localMediaManager.stopScan()
             localMediaManager.unregisterCallback(this)
             muteAwaitConnectionManager?.stopListening()
+            configurationController.removeCallback(configListener)
         }
 
-        fun dump(pw: PrintWriter, args: Array<String>) {
+        fun dump(pw: PrintWriter) {
             val routingSession = controller?.let {
                 mr2manager.getRoutingSessionForMediaController(it)
             }
@@ -254,7 +264,7 @@ class MediaDeviceManager @Inject constructor(
             // If we have a controller but get a null route, then don't trust the device
             val enabled = device != null && (controller == null || route != null)
             val name = route?.name?.toString() ?: device?.name
-            current = MediaDeviceData(enabled, device?.iconWithoutBackground, name)
+            current = MediaDeviceData(enabled, device?.iconWithoutBackground, name, id = device?.id)
         }
     }
 }

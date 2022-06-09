@@ -28,7 +28,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
@@ -1645,7 +1644,7 @@ class Task extends TaskFragment {
      * activities on top of it and return the instance.
      *
      * @param newR Description of the new activity being started.
-     * @return Returns the old activity that should be continued to be used,
+     * @return Returns the existing activity in the task that performs the clear-top operation,
      * or {@code null} if none was found.
      */
     private ActivityRecord clearTopActivities(ActivityRecord newR, int launchFlags) {
@@ -1664,7 +1663,6 @@ class Task extends TaskFragment {
                 && !ActivityStarter.isDocumentLaunchesIntoExisting(launchFlags)) {
             if (!r.finishing) {
                 r.finishIfPossible("clear-task-top", false /* oomAdj */);
-                return null;
             }
         }
 
@@ -1718,13 +1716,6 @@ class Task extends TaskFragment {
         final Task topTask = getTopMostTask();
         return super.supportsSplitScreenWindowingMode()
                 && (topTask == null || topTask.supportsSplitScreenWindowingModeInner(tda));
-    }
-
-    /** Returns {@code true} if this task is currently in split-screen. */
-    boolean inSplitScreen() {
-        return getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
-                && getCreatedByOrganizerTask() != null
-                && getCreatedByOrganizerTask().getAdjacentTaskFragment() != null;
     }
 
     private boolean supportsSplitScreenWindowingModeInner(@Nullable TaskDisplayArea tda) {
@@ -3078,11 +3069,22 @@ class Task extends TaskFragment {
         });
     }
 
+    /**
+     * Return the top visible requested activity. The activity has been requested to be visible,
+     * but it's possible that the activity has just been created, so no window is yet attached to
+     * this activity.
+     */
     ActivityRecord getTopVisibleActivity() {
-        return getActivity((r) -> {
-            // skip hidden (or about to hide) apps
-            return !r.mIsExiting && r.isClientVisible() && r.mVisibleRequested;
-        });
+        return getActivity((r) -> !r.mIsExiting && r.isClientVisible() && r.mVisibleRequested);
+    }
+
+    /**
+     * Return the top visible activity. The activity has a window on which contents are drawn.
+     * However it's possible that the activity has already been requested to be invisible, but the
+     * visibility is not yet committed.
+     */
+    ActivityRecord getTopRealVisibleActivity() {
+        return getActivity((r) -> !r.mIsExiting && r.isClientVisible() && r.isVisible());
     }
 
     ActivityRecord getTopWaitSplashScreenActivity() {
@@ -6005,6 +6007,9 @@ class Task extends TaskFragment {
 
         if (canBeLaunchedOnDisplay(newParent.getDisplayId())) {
             reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
+            if (isLeafTask()) {
+                newParent.onLeafTaskMoved(this, onTop);
+            }
         } else {
             Slog.w(TAG, "Task=" + this + " can't reparent to " + newParent);
         }

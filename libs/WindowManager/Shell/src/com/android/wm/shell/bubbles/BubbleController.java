@@ -66,6 +66,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
@@ -96,6 +97,8 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.common.annotations.ShellBackgroundThread;
+import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -145,6 +148,7 @@ public class BubbleController {
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
     private final WindowManagerShellWrapper mWindowManagerShellWrapper;
+    private final UserManager mUserManager;
     private final LauncherApps mLauncherApps;
     private final IStatusBarService mBarService;
     private final WindowManager mWindowManager;
@@ -157,6 +161,8 @@ public class BubbleController {
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
+
+    private final ShellExecutor mBackgroundExecutor;
 
     private BubbleLogger mLogger;
     private BubbleData mBubbleData;
@@ -227,6 +233,7 @@ public class BubbleController {
             @Nullable IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            UserManager userManager,
             LauncherApps launcherApps,
             TaskStackListenerImpl taskStackListener,
             UiEventLogger uiEventLogger,
@@ -234,8 +241,9 @@ public class BubbleController {
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
             DragAndDropController dragAndDropController,
-            ShellExecutor mainExecutor,
-            Handler mainHandler,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
@@ -243,9 +251,9 @@ public class BubbleController {
         BubbleData data = new BubbleData(context, logger, positioner, mainExecutor);
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
-                statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, taskStackListener, organizer, positioner, displayController,
-                oneHandedOptional, dragAndDropController, mainExecutor, mainHandler,
+                statusBarService, windowManager, windowManagerShellWrapper, userManager,
+                launcherApps, logger, taskStackListener, organizer, positioner, displayController,
+                oneHandedOptional, dragAndDropController, mainExecutor, mainHandler, bgExecutor,
                 taskViewTransitions, syncQueue);
     }
 
@@ -261,6 +269,7 @@ public class BubbleController {
             @Nullable IStatusBarService statusBarService,
             WindowManager windowManager,
             WindowManagerShellWrapper windowManagerShellWrapper,
+            UserManager userManager,
             LauncherApps launcherApps,
             BubbleLogger bubbleLogger,
             TaskStackListenerImpl taskStackListener,
@@ -269,8 +278,9 @@ public class BubbleController {
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
             DragAndDropController dragAndDropController,
-            ShellExecutor mainExecutor,
-            Handler mainHandler,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler,
+            @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
             SyncTransactionQueue syncQueue) {
         mContext = context;
@@ -281,11 +291,13 @@ public class BubbleController {
                 : statusBarService;
         mWindowManager = windowManager;
         mWindowManagerShellWrapper = windowManagerShellWrapper;
+        mUserManager = userManager;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mDataRepository = dataRepository;
         mLogger = bubbleLogger;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mBackgroundExecutor = bgExecutor;
         mTaskStackListener = taskStackListener;
         mTaskOrganizer = organizer;
         mSurfaceSynchronizer = synchronizer;
@@ -323,7 +335,7 @@ public class BubbleController {
 
     public void initialize() {
         mBubbleData.setListener(mBubbleDataListener);
-        mBubbleData.setSuppressionChangedListener(this::onBubbleNotificationSuppressionChanged);
+        mBubbleData.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
 
         mBubbleData.setPendingIntentCancelledListener(bubble -> {
             if (bubble.getBubbleIntent() == null) {
@@ -440,6 +452,10 @@ public class BubbleController {
 
         mOneHandedOptional.ifPresent(this::registerOneHandedState);
         mDragAndDropController.addListener(this::collapseStack);
+
+        // Clear out any persisted bubbles on disk that no longer have a valid user.
+        List<UserInfo> users = mUserManager.getAliveUsers();
+        mDataRepository.sanitizeBubbles(users);
     }
 
     @VisibleForTesting
@@ -554,11 +570,10 @@ public class BubbleController {
     }
 
     @VisibleForTesting
-    public void onBubbleNotificationSuppressionChanged(Bubble bubble) {
+    public void onBubbleMetadataFlagChanged(Bubble bubble) {
         // Make sure NoMan knows suppression state so that anyone querying it can tell.
         try {
-            mBarService.onBubbleNotificationSuppressionChanged(bubble.getKey(),
-                    !bubble.showInShade(), bubble.isSuppressed());
+            mBarService.onBubbleMetadataFlagChanged(bubble.getKey(), bubble.getFlags());
         } catch (RemoteException e) {
             // Bad things have happened
         }
@@ -582,6 +597,17 @@ public class BubbleController {
     /** Called when the profiles for the current user change. **/
     public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
         mCurrentProfiles = currentProfiles;
+    }
+
+    /** Called when a user is removed from the device, including work profiles. */
+    public void onUserRemoved(int removedUserId) {
+        UserInfo parent = mUserManager.getProfileParent(removedUserId);
+        int parentUserId = parent != null ? parent.getUserHandle().getIdentifier() : -1;
+        mBubbleData.removeBubblesForUser(removedUserId);
+        // Typically calls from BubbleData would remove bubbles from the DataRepository as well,
+        // however, this gets complicated when users are removed (mCurrentUserId won't necessarily
+        // be correct for this) so we update the repo directly.
+        mDataRepository.removeBubblesForUser(removedUserId, parentUserId);
     }
 
     /** Whether this userId belongs to the current user. */
@@ -726,7 +752,8 @@ public class BubbleController {
 
         try {
             mAddedToWindowManager = false;
-            mContext.unregisterReceiver(mBroadcastReceiver);
+            // Put on background for this binder call, was causing jank
+            mBackgroundExecutor.execute(() -> mContext.unregisterReceiver(mBroadcastReceiver));
             if (mStackView != null) {
                 mWindowManager.removeView(mStackView);
                 mBubbleData.getOverflow().cleanUpExpandedState();
@@ -1038,7 +1065,15 @@ public class BubbleController {
             }
         } else {
             Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
-            inflateAndAdd(bubble, suppressFlyout, showInShade);
+            if (notif.shouldSuppressNotificationList()) {
+                // If we're suppressing notifs for DND, we don't want the bubbles to randomly
+                // expand when DND turns off so flip the flag.
+                if (bubble.shouldAutoExpand()) {
+                    bubble.setShouldAutoExpand(false);
+                }
+            } else {
+                inflateAndAdd(bubble, suppressFlyout, showInShade);
+            }
         }
     }
 
@@ -1070,7 +1105,8 @@ public class BubbleController {
         }
     }
 
-    private void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
+    @VisibleForTesting
+    public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
         // shouldBubbleUp checks canBubble & for bubble metadata
         boolean shouldBubble = shouldBubbleUp && canLaunchInTaskView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasAnyBubbleWithKey(entry.getKey())) {
@@ -1096,7 +1132,8 @@ public class BubbleController {
         }
     }
 
-    private void onRankingUpdated(RankingMap rankingMap,
+    @VisibleForTesting
+    public void onRankingUpdated(RankingMap rankingMap,
             HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey) {
         if (mTmpRanking == null) {
             mTmpRanking = new NotificationListenerService.Ranking();
@@ -1107,19 +1144,22 @@ public class BubbleController {
             Pair<BubbleEntry, Boolean> entryData = entryDataByKey.get(key);
             BubbleEntry entry = entryData.first;
             boolean shouldBubbleUp = entryData.second;
-
             if (entry != null && !isCurrentProfile(
                     entry.getStatusBarNotification().getUser().getIdentifier())) {
                 return;
             }
-
+            if (entry != null && (entry.shouldSuppressNotificationList()
+                    || entry.getRanking().isSuspended())) {
+                shouldBubbleUp = false;
+            }
             rankingMap.getRanking(key, mTmpRanking);
-            boolean isActiveBubble = mBubbleData.hasAnyBubbleWithKey(key);
-            if (isActiveBubble && !mTmpRanking.canBubble()) {
+            boolean isActiveOrInOverflow = mBubbleData.hasAnyBubbleWithKey(key);
+            boolean isActive = mBubbleData.hasBubbleInStackWithKey(key);
+            if (isActiveOrInOverflow && !mTmpRanking.canBubble()) {
                 // If this entry is no longer allowed to bubble, dismiss with the BLOCKED reason.
                 // This means that the app or channel's ability to bubble has been revoked.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_BLOCKED);
-            } else if (isActiveBubble && (!shouldBubbleUp || entry.getRanking().isSuspended())) {
+            } else if (isActiveOrInOverflow && !shouldBubbleUp) {
                 // If this entry is allowed to bubble, but cannot currently bubble up or is
                 // suspended, dismiss it. This happens when DND is enabled and configured to hide
                 // bubbles, or focus mode is enabled and the app is designated as distracting.
@@ -1127,9 +1167,9 @@ public class BubbleController {
                 // notification, so that the bubble will be re-created if shouldBubbleUp returns
                 // true.
                 mBubbleData.dismissBubbleWithKey(key, DISMISS_NO_BUBBLE_UP);
-            } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble) {
+            } else if (entry != null && mTmpRanking.isBubble() && !isActive) {
                 entry.setFlagBubble(true);
-                onEntryUpdated(entry, shouldBubbleUp && !entry.getRanking().isSuspended());
+                onEntryUpdated(entry, shouldBubbleUp);
             }
         }
     }
@@ -1785,6 +1825,13 @@ public class BubbleController {
         public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onCurrentProfilesChanged(currentProfiles);
+            });
+        }
+
+        @Override
+        public void onUserRemoved(int removedUserId) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onUserRemoved(removedUserId);
             });
         }
 

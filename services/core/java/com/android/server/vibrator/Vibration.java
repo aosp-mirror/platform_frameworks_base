@@ -71,8 +71,8 @@ final class Vibration {
         IGNORED_SUPERSEDED,
     }
 
-    /** Start time in CLOCK_BOOTTIME base. */
-    public final long startTime;
+    /** Start time using {@link SystemClock#uptimeMillis()}, for calculations. */
+    public final long startUptimeMillis;
     public final VibrationAttributes attrs;
     public final long id;
     public final int uid;
@@ -94,11 +94,14 @@ final class Vibration {
 
     /**
      * Start/end times in unix epoch time. Only to be used for debugging purposes and to correlate
-     * with other system events, any duration calculations should be done use {@link #startTime} so
-     * as not to be affected by discontinuities created by RTC adjustments.
+     * with other system events, any duration calculations should be done use
+     * {@link #startUptimeMillis} so as not to be affected by discontinuities created by RTC
+     * adjustments.
      */
     private final long mStartTimeDebug;
     private long mEndTimeDebug;
+    /** End time using {@link SystemClock#uptimeMillis()}, for calculations. */
+    private long mEndUptimeMillis;
     private Status mStatus;
 
     /** A {@link CountDownLatch} to enable waiting for completion. */
@@ -109,7 +112,7 @@ final class Vibration {
         this.token = token;
         this.mEffect = effect;
         this.id = id;
-        this.startTime = SystemClock.elapsedRealtime();
+        this.startUptimeMillis = SystemClock.uptimeMillis();
         this.attrs = attrs;
         this.uid = uid;
         this.opPkg = opPkg;
@@ -131,6 +134,7 @@ final class Vibration {
             return;
         }
         mStatus = status;
+        mEndUptimeMillis = SystemClock.uptimeMillis();
         mEndTimeDebug = System.currentTimeMillis();
         mCompletionLatch.countDown();
     }
@@ -225,15 +229,17 @@ final class Vibration {
 
     /** Return {@link Vibration.DebugInfo} with read-only debug information about this vibration. */
     public Vibration.DebugInfo getDebugInfo() {
+        long durationMs = hasEnded() ? mEndUptimeMillis - startUptimeMillis : -1;
         return new Vibration.DebugInfo(
-                mStartTimeDebug, mEndTimeDebug, mEffect, mOriginalEffect, /* scale= */ 0, attrs,
-                uid, opPkg, reason, mStatus);
+                mStartTimeDebug, mEndTimeDebug, durationMs, mEffect, mOriginalEffect,
+                /* scale= */ 0, attrs, uid, opPkg, reason, mStatus);
     }
 
     /** Debug information about vibrations. */
     static final class DebugInfo {
         private final long mStartTimeDebug;
         private final long mEndTimeDebug;
+        private final long mDurationMs;
         private final CombinedVibration mEffect;
         private final CombinedVibration mOriginalEffect;
         private final float mScale;
@@ -243,11 +249,12 @@ final class Vibration {
         private final String mReason;
         private final Status mStatus;
 
-        DebugInfo(long startTimeDebug, long endTimeDebug, CombinedVibration effect,
-                CombinedVibration originalEffect, float scale, VibrationAttributes attrs,
-                int uid, String opPkg, String reason, Status status) {
+        DebugInfo(long startTimeDebug, long endTimeDebug, long durationMs,
+                CombinedVibration effect, CombinedVibration originalEffect, float scale,
+                VibrationAttributes attrs, int uid, String opPkg, String reason, Status status) {
             mStartTimeDebug = startTimeDebug;
             mEndTimeDebug = endTimeDebug;
+            mDurationMs = durationMs;
             mEffect = effect;
             mOriginalEffect = originalEffect;
             mScale = scale;
@@ -266,6 +273,8 @@ final class Vibration {
                     .append(", endTime: ")
                     .append(mEndTimeDebug == 0 ? null
                             : DEBUG_DATE_FORMAT.format(new Date(mEndTimeDebug)))
+                    .append(", durationMs: ")
+                    .append(mDurationMs)
                     .append(", status: ")
                     .append(mStatus.name().toLowerCase())
                     .append(", effect: ")
@@ -290,6 +299,7 @@ final class Vibration {
             final long token = proto.start(fieldId);
             proto.write(VibrationProto.START_TIME, mStartTimeDebug);
             proto.write(VibrationProto.END_TIME, mEndTimeDebug);
+            proto.write(VibrationProto.DURATION_MS, mDurationMs);
             proto.write(VibrationProto.STATUS, mStatus.ordinal());
 
             final long attrsToken = proto.start(VibrationProto.ATTRIBUTES);

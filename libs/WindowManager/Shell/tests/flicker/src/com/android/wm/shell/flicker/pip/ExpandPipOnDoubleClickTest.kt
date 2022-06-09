@@ -123,6 +123,18 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
         }
     }
 
+    @Presubmit
+    @Test
+    fun pipSameAspectRatio() {
+        val layerName = pipApp.component.toLayerName()
+        testSpec.assertLayers {
+            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            pipLayerList.zipWithNext { previous, current ->
+                current.visibleRegion.isSameAspectRatio(previous.visibleRegion)
+            }
+        }
+    }
+
     /**
      * Checks [pipApp] window remains pinned throughout the animation
      */

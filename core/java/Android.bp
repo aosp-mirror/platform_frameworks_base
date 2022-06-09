@@ -15,6 +15,14 @@ filegroup {
         "**/*.java",
         "**/*.aidl",
     ],
+    exclude_srcs: [
+        // Remove election toolbar code from build time
+        "android/service/selectiontoolbar/*.aidl",
+        "android/service/selectiontoolbar/*.java",
+        "android/view/selectiontoolbar/*.aidl",
+        "android/view/selectiontoolbar/*.java",
+        "com/android/internal/widget/floatingtoolbar/RemoteFloatingToolbarPopup.java",
+    ],
     visibility: ["//frameworks/base"],
 }
 
@@ -41,6 +49,12 @@ filegroup {
 filegroup {
     name: "TraceReportParams.aidl",
     srcs: ["android/tracing/TraceReportParams.aidl"],
+}
+
+filegroup {
+    name: "framework-internal-display-sources",
+    srcs: ["com/android/internal/display/BrightnessSynchronizer.java"],
+    visibility: ["//frameworks/base/services/tests/mockingservicestests"],
 }
 
 // These are subset of framework-core-sources that are needed by the
@@ -157,11 +171,17 @@ java_library {
     static_libs: ["modules-utils-uieventlogger-interface"],
 }
 
-filegroup {
-    name: "framework-services-net-module-wifi-shared-srcs",
-    srcs: [
-        "android/util/LocalLog.java",
+java_library {
+    name: "modules-utils-locallog",
+    srcs: ["android/util/LocalLog.java"],
+    libs: ["unsupportedappusage"],
+    sdk_version: "module_current",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:anyapex",
+        "//apex_available:platform",
     ],
+    visibility: ["//visibility:public"],
 }
 
 // keep these files in sync with the package/Tethering/jarjar-rules.txt and
@@ -394,15 +414,6 @@ filegroup {
         "com/android/internal/util/HexDump.java",
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/UserIcons.java",
-    ],
-}
-
-// Avoid including Parcelable classes as we don't want to have two copies of
-// Parcelable cross the process.
-filegroup {
-    name: "framework-cellbroadcast-shared-srcs",
-    srcs: [
-        "android/util/LocalLog.java",
     ],
 }
 

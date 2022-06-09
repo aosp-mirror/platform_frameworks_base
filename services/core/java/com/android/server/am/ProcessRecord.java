@@ -87,6 +87,7 @@ class ProcessRecord implements WindowProcessListener {
     final String processName;   // name of the process
     final String sdkSandboxClientAppPackage; // if this is an sdk sandbox process, name of the
                                              // app package for which it is running
+    final String sdkSandboxClientAppVolumeUuid; // uuid of the app for which the sandbox is running
 
     /**
      * Overall state of process's uid.
@@ -535,6 +536,11 @@ class ProcessRecord implements WindowProcessListener {
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
         sdkSandboxClientAppPackage = _sdkSandboxClientAppPackage;
+        if (isSdkSandbox) {
+            sdkSandboxClientAppVolumeUuid = getClientInfoForSdkSandbox().volumeUuid;
+        } else {
+            sdkSandboxClientAppVolumeUuid = null;
+        }
         mPersistent = false;
         mRemoved = false;
         mProfile = new ProcessProfileRecord(this);
@@ -1065,6 +1071,10 @@ class ProcessRecord implements WindowProcessListener {
             @SubReason int subReason, boolean noisy) {
         if (!mKilledByAm) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
+            if (reasonCode == ApplicationExitInfo.REASON_ANR
+                    && mErrorState.getAnrAnnotation() != null) {
+                description = description + ": " + mErrorState.getAnrAnnotation();
+            }
             if (mService != null && (noisy || info.uid == mService.mCurOomAdjUid)) {
                 mService.reportUidInfoMessageLocked(TAG,
                         "Killing " + toShortString() + " (adj " + mState.getSetAdj()

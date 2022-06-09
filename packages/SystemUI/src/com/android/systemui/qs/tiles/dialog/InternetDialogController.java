@@ -451,11 +451,11 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         final SignalStrength strength = mTelephonyManager.getSignalStrength();
         int level = (strength == null) ? 0 : strength.getLevel();
         int numLevels = SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
-        if ((mSubscriptionManager != null && shouldInflateSignalStrength(mDefaultDataSubId))
-                || isCarrierNetworkActive) {
-            level = isCarrierNetworkActive
-                    ? SignalStrength.NUM_SIGNAL_STRENGTH_BINS
-                    : (level + 1);
+        if (isCarrierNetworkActive) {
+            level = getCarrierNetworkLevel();
+            numLevels = WifiEntry.WIFI_LEVEL_MAX + 1;
+        } else if (mSubscriptionManager != null && shouldInflateSignalStrength(mDefaultDataSubId)) {
+            level += 1;
             numLevels += 1;
         }
         return getSignalStrengthIcon(mContext, level, numLevels, NO_CELL_DATA_TYPE_ICON,
@@ -687,6 +687,17 @@ public class InternetDialogController implements AccessPointController.AccessPoi
         final MergedCarrierEntry mergedCarrierEntry =
                 mAccessPointController.getMergedCarrierEntry();
         return mergedCarrierEntry != null && mergedCarrierEntry.isDefaultNetwork();
+    }
+
+    int getCarrierNetworkLevel() {
+        final MergedCarrierEntry mergedCarrierEntry =
+                mAccessPointController.getMergedCarrierEntry();
+        if (mergedCarrierEntry == null) return WifiEntry.WIFI_LEVEL_MIN;
+
+        int level = mergedCarrierEntry.getLevel();
+        // To avoid icons not found with WIFI_LEVEL_UNREACHABLE(-1), use WIFI_LEVEL_MIN(0) instead.
+        if (level < WifiEntry.WIFI_LEVEL_MIN) level = WifiEntry.WIFI_LEVEL_MIN;
+        return level;
     }
 
     @WorkerThread

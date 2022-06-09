@@ -401,6 +401,7 @@ class ShortcutUser {
 
     private void saveShortcutPackageItem(TypedXmlSerializer out, ShortcutPackageItem spi,
             boolean forBackup) throws IOException, XmlPullParserException {
+        spi.waitForBitmapSaves();
         if (forBackup) {
             if (spi.getPackageUserId() != spi.getOwnerUserId()) {
                 return; // Don't save cross-user information.

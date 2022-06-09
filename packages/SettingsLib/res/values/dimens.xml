@@ -115,12 +115,6 @@
     <!-- Minimum density scale. This is available on all devices. -->
     <fraction name="display_density_min_scale">85%</fraction>
 
-    <!-- QR code picture size -->
-    <dimen name="qrcode_preview_size">360dp</dimen>
-    <dimen name="qrcode_preview_margin">40dp</dimen>
-    <dimen name="qrcode_preview_radius">30dp</dimen>
-    <dimen name="qrcode_icon_size">27dp</dimen>
-
     <!-- Broadcast dialog -->
     <dimen name="broadcast_dialog_title_img_margin_top">18dp</dimen>
     <dimen name="broadcast_dialog_title_text_size">24sp</dimen>

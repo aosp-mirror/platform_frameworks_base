@@ -30,6 +30,7 @@ import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
@@ -1586,6 +1587,69 @@ public class MockingOomAdjusterTests {
         assertProcStates(app1, PROCESS_STATE_IMPORTANT_FOREGROUND, VISIBLE_APP_ADJ,
                 SCHED_GROUP_TOP_APP);
         assertProcStates(app2, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_TreatLikeVisFGS() {
+        final ProcessRecord app1 = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+        final ProcessRecord app2 = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+        final ProcessRecord client1 = spy(makeDefaultProcessRecord(MOCKAPP3_PID, MOCKAPP3_UID,
+                MOCKAPP3_PROCESSNAME, MOCKAPP3_PACKAGENAME, false));
+        final ProcessRecord client2 = spy(makeDefaultProcessRecord(MOCKAPP4_PID, MOCKAPP4_UID,
+                MOCKAPP4_PROCESSNAME, MOCKAPP4_PACKAGENAME, false));
+        client1.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+        client2.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+
+        final ServiceRecord s1 = bindService(app1, client1, null,
+                Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE, mock(IBinder.class));
+        final ServiceRecord s2 = bindService(app2, client2, null,
+                Context.BIND_IMPORTANT, mock(IBinder.class));
+
+        sService.mOomAdjuster.updateOomAdjLocked(app1, OomAdjuster.OOM_ADJ_REASON_NONE);
+        sService.mOomAdjuster.updateOomAdjLocked(app2, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app1, PROCESS_STATE_FOREGROUND_SERVICE, VISIBLE_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+        assertProcStates(app2, PROCESS_STATE_PERSISTENT, PERSISTENT_SERVICE_ADJ,
+                SCHED_GROUP_DEFAULT);
+
+        bindService(app2, client1, s2, Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE,
+                mock(IBinder.class));
+        sService.mOomAdjuster.updateOomAdjLocked(app2, OomAdjuster.OOM_ADJ_REASON_NONE);
+        assertProcStates(app2, PROCESS_STATE_PERSISTENT, PERSISTENT_SERVICE_ADJ,
+                SCHED_GROUP_DEFAULT);
+
+        s1.getConnections().clear();
+        s2.getConnections().clear();
+        client1.mState.setMaxAdj(UNKNOWN_ADJ);
+        client2.mState.setMaxAdj(UNKNOWN_ADJ);
+        client1.mServices.setHasForegroundServices(true, 0);
+        client2.mState.setHasOverlayUi(true);
+
+        bindService(app1, client1, s1, Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE,
+                mock(IBinder.class));
+        bindService(app2, client2, s2, Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE,
+                mock(IBinder.class));
+
+        sService.mOomAdjuster.updateOomAdjLocked(app1, OomAdjuster.OOM_ADJ_REASON_NONE);
+        sService.mOomAdjuster.updateOomAdjLocked(app2, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app1, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+        assertProcStates(app2, PROCESS_STATE_IMPORTANT_FOREGROUND, PERCEPTIBLE_APP_ADJ,
+                SCHED_GROUP_DEFAULT);
+
+        client2.mState.setHasOverlayUi(false);
+        doReturn(PROCESS_STATE_TOP).when(sService.mAtmInternal).getTopProcessState();
+        doReturn(client2).when(sService).getTopApp();
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+
+        sService.mOomAdjuster.updateOomAdjLocked(app2, OomAdjuster.OOM_ADJ_REASON_NONE);
+        assertProcStates(app2, PROCESS_STATE_BOUND_TOP, VISIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
     }
 

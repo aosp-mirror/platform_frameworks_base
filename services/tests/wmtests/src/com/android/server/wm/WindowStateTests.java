@@ -74,6 +74,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.when;
 
@@ -472,6 +473,44 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOnExitAnimationDone() {
+        final WindowState parent = createWindow(null, TYPE_APPLICATION, "parent");
+        final WindowState child = createWindow(parent, TYPE_APPLICATION_PANEL, "child");
+        final SurfaceControl.Transaction t = parent.getPendingTransaction();
+        child.startAnimation(t, mock(AnimationAdapter.class), false /* hidden */,
+                SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        parent.mAnimatingExit = parent.mRemoveOnExit = parent.mWindowRemovalAllowed = true;
+        child.mAnimatingExit = child.mRemoveOnExit = child.mWindowRemovalAllowed = true;
+        final int[] numRemovals = new int[2];
+        parent.registerWindowContainerListener(new WindowContainerListener() {
+            @Override
+            public void onRemoved() {
+                numRemovals[0]++;
+            }
+        });
+        child.registerWindowContainerListener(new WindowContainerListener() {
+            @Override
+            public void onRemoved() {
+                numRemovals[1]++;
+            }
+        });
+        spyOn(parent);
+        // parent onExitAnimationDone
+        //   -> child onExitAnimationDone() -> no-op because isAnimating()
+        //   -> parent destroySurface()
+        //     -> parent removeImmediately() because mDestroying+mRemoveOnExit
+        //       -> child removeImmediately() -> cancelAnimation()
+        //       -> child onExitAnimationDone()
+        //         -> child destroySurface() because animation is canceled
+        //           -> child removeImmediately() -> no-op because mRemoved
+        parent.onExitAnimationDone();
+        // There must be no additional destroySurface() of parent from its child.
+        verify(parent, atMost(1)).destroySurface(anyBoolean(), anyBoolean());
+        assertEquals(1, numRemovals[0]);
+        assertEquals(1, numRemovals[1]);
+    }
+
+    @Test
     public void testLayoutSeqResetOnReparent() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mLayoutSeq = 1;
@@ -728,17 +767,6 @@ public class WindowStateTests extends WindowTestsBase {
         mWm.mResizingWindows.remove(win);
         win.updateResizingWindowIfNeeded();
         assertThat(mWm.mResizingWindows).doesNotContain(win);
-    }
-
-    @Test
-    public void testCantReceiveTouchDuringRecentsAnimation() {
-        final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-
-        // Mock active recents animation
-        RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
-        when(recentsController.shouldApplyInputConsumer(win0.mActivityRecord)).thenReturn(true);
-        mWm.setRecentsAnimationController(recentsController);
-        assertFalse(win0.canReceiveTouchInput());
     }
 
     @Test

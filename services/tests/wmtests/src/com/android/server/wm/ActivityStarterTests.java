@@ -785,6 +785,34 @@ public class ActivityStarterTests extends WindowTestsBase {
     }
 
     /**
+     * This test ensures that {@link ActivityStarter#setTargetRootTaskIfNeeded} will task the
+     * adjacent task of indicated launch target into account. So the existing task will be launched
+     * into closer target.
+     */
+    @Test
+    public void testAdjustLaunchTargetWithAdjacentTask() {
+        // Create adjacent tasks and put one activity under it
+        final Task parent = new TaskBuilder(mSupervisor).build();
+        final Task adjacentParent = new TaskBuilder(mSupervisor).build();
+        parent.setAdjacentTaskFragment(adjacentParent, true);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setParentTask(parent)
+                .setCreateTask(true).build();
+
+        // Launch the activity to its adjacent parent
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchRootTask(adjacentParent.mRemoteToken.toWindowContainerToken());
+        prepareStarter(FLAG_ACTIVITY_NEW_TASK, false /* mockGetRootTask */)
+                .setReason("testAdjustLaunchTargetWithAdjacentTask")
+                .setIntent(activity.intent)
+                .setActivityOptions(options.toBundle())
+                .execute();
+
+        // Verify the activity will be launched into the original parent
+        assertTrue(activity.isDescendantOf(parent));
+    }
+
+    /**
      * This test ensures that {@link ActivityStarter#setTargetRootTaskIfNeeded} will
      * move the existing task to front if the current focused root task doesn't have running task.
      */

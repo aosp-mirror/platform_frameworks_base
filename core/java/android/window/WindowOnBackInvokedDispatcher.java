@@ -19,7 +19,6 @@ package android.window;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -55,6 +54,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             .getInt("persist.wm.debug.predictive_back", 1) != 0;
     private static final boolean ALWAYS_ENFORCE_PREDICTIVE_BACK = SystemProperties
             .getInt("persist.wm.debug.predictive_back_always_enforce", 0) != 0;
+    @Nullable
+    private ImeOnBackInvokedDispatcher mImeDispatcher;
 
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
@@ -94,6 +95,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     private void registerOnBackInvokedCallbackUnchecked(
             @NonNull OnBackInvokedCallback callback, @Priority int priority) {
+        if (mImeDispatcher != null) {
+            mImeDispatcher.registerOnBackInvokedCallback(priority, callback);
+            return;
+        }
         if (!mOnBackInvokedCallbacks.containsKey(priority)) {
             mOnBackInvokedCallbacks.put(priority, new ArrayList<>());
         }
@@ -120,6 +125,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     @Override
     public void unregisterOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback) {
+        if (mImeDispatcher != null) {
+            mImeDispatcher.unregisterOnBackInvokedCallback(callback);
+            return;
+        }
         if (!mAllCallbacks.containsKey(callback)) {
             if (DEBUG) {
                 Log.i(TAG, "Callback not found. returning...");
@@ -147,6 +156,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /** Clears all registered callbacks on the instance. */
     public void clear() {
+        if (mImeDispatcher != null) {
+            mImeDispatcher.clear();
+            mImeDispatcher = null;
+        }
         if (!mAllCallbacks.isEmpty()) {
             // Clear binder references in WM.
             setTopOnBackInvokedCallback(null);
@@ -160,18 +173,18 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             return;
         }
         try {
-            if (callback == null) {
-                mWindowSession.setOnBackInvokedCallbackInfo(mWindow, null);
-            } else {
+            OnBackInvokedCallbackInfo callbackInfo = null;
+            if (callback != null) {
                 int priority = mAllCallbacks.get(callback);
-                mWindowSession.setOnBackInvokedCallbackInfo(
-                        mWindow, new OnBackInvokedCallbackInfo(
-                                new OnBackInvokedCallbackWrapper(callback), priority));
+                final IOnBackInvokedCallback iCallback =
+                        callback instanceof ImeOnBackInvokedDispatcher
+                                    .ImeOnBackInvokedCallback
+                                ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
+                                        callback).getIOnBackInvokedCallback()
+                                : new OnBackInvokedCallbackWrapper(callback);
+                callbackInfo = new OnBackInvokedCallbackInfo(iCallback, priority);
             }
-            if (DEBUG && callback == null) {
-                Log.d(TAG, TextUtils.formatSimple("setTopOnBackInvokedCallback(null) Callers:%s",
-                        Debug.getCallers(5, "  ")));
-            }
+            mWindowSession.setOnBackInvokedCallbackInfo(mWindow, callbackInfo);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set OnBackInvokedCallback to WM. Error: " + e);
         }
@@ -190,7 +203,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         return null;
     }
 
-    private static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
+    static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
         private final WeakReference<OnBackInvokedCallback> mCallback;
 
         OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
@@ -269,5 +282,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
 
         return featureFlagEnabled && (appRequestsPredictiveBack || ALWAYS_ENFORCE_PREDICTIVE_BACK);
+    }
+
+    @Override
+    public void setImeOnBackInvokedDispatcher(
+            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+        mImeDispatcher = imeDispatcher;
     }
 }

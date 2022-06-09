@@ -1040,7 +1040,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         dumpsysOnLogcat();
 
-        mService.waitForBitmapSaves();
+        mService.waitForBitmapSavesForTest();
         // Check files and directories.
         // Package 3 has no bitmaps, so we don't create a directory.
         assertBitmapDirectories(USER_0, CALLING_PACKAGE_1, CALLING_PACKAGE_2);
@@ -1096,7 +1096,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         makeFile(mService.getUserBitmapFilePath(USER_10), CALLING_PACKAGE_2, "3").createNewFile();
         makeFile(mService.getUserBitmapFilePath(USER_10), CALLING_PACKAGE_2, "4").createNewFile();
 
-        mService.waitForBitmapSaves();
+        mService.waitForBitmapSavesForTest();
         assertBitmapDirectories(USER_0, CALLING_PACKAGE_1, CALLING_PACKAGE_2, CALLING_PACKAGE_3,
                 "a.b.c", "d.e.f");
 
@@ -1111,7 +1111,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // The below check is the same as above, except this time USER_0 use the CALLING_PACKAGE_3
         // directory.
 
-        mService.waitForBitmapSaves();
+        mService.waitForBitmapSavesForTest();
         assertBitmapDirectories(USER_0, CALLING_PACKAGE_1, CALLING_PACKAGE_2, CALLING_PACKAGE_3);
         assertBitmapDirectories(USER_10, CALLING_PACKAGE_1, CALLING_PACKAGE_2);
 
@@ -1390,7 +1390,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                             .setIcon(Icon.createWithContentUri("test_uri"))
                             .build()
             )));
-            mService.waitForBitmapSaves();
+            mService.waitForBitmapSavesForTest();
             assertWith(getCallerShortcuts())
                     .forShortcutWithId("s1", si -> {
                         assertTrue(si.hasIconUri());
@@ -1402,13 +1402,13 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                             .setIcon(Icon.createWithResource(getTestContext(), R.drawable.black_32x32))
                             .build()
             )));
-            mService.waitForBitmapSaves();
+            mService.waitForBitmapSavesForTest();
             assertWith(getCallerShortcuts())
                     .forShortcutWithId("s1", si -> {
                         assertTrue(si.hasIconResource());
                         assertEquals(R.drawable.black_32x32, si.getIconResourceId());
                     });
-            mService.waitForBitmapSaves();
+            mService.waitForBitmapSavesForTest();
 
             mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
 
@@ -1419,7 +1419,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                                     getTestContext().getResources(), R.drawable.black_64x64)))
                             .build()
             )));
-            mService.waitForBitmapSaves();
+            mService.waitForBitmapSavesForTest();
             assertWith(getCallerShortcuts())
                     .forShortcutWithId("s1", si -> {
                         assertTrue(si.hasIconFile());
@@ -1437,7 +1437,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                                     getTestContext().getResources(), R.drawable.black_64x64)))
                             .build()
             )));
-            mService.waitForBitmapSaves();
+            mService.waitForBitmapSavesForTest();
             assertWith(getCallerShortcuts())
                     .forShortcutWithId("s1", si -> {
                         assertTrue(si.hasIconFile());
@@ -1451,7 +1451,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                             .setIcon(Icon.createWithResource(getTestContext(), R.drawable.black_32x32))
                             .build()
             )));
-            mService.waitForBitmapSaves();
+            mService.waitForBitmapSavesForTest();
             assertWith(getCallerShortcuts())
                     .forShortcutWithId("s1", si -> {
                         assertTrue(si.hasIconResource());
@@ -1463,7 +1463,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                             .setIcon(Icon.createWithContentUri("test_uri"))
                             .build()
             )));
-            mService.waitForBitmapSaves();
+            mService.waitForBitmapSavesForTest();
             assertWith(getCallerShortcuts())
                     .forShortcutWithId("s1", si -> {
                         assertTrue(si.hasIconUri());

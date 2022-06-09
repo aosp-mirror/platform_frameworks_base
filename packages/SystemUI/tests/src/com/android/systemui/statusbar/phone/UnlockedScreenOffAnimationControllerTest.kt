@@ -117,11 +117,18 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         val keyguardSpy = spy(keyguardView)
         Mockito.`when`(keyguardSpy.animate()).thenReturn(animator)
         val listener = ArgumentCaptor.forClass(Animator.AnimatorListener::class.java)
+        val endAction = ArgumentCaptor.forClass(Runnable::class.java)
         controller.animateInKeyguard(keyguardSpy, Runnable {})
         Mockito.verify(animator).setListener(listener.capture())
-        // Verify that the listener is cleared when it ends
-        listener.value.onAnimationEnd(null)
+        Mockito.verify(animator).withEndAction(endAction.capture())
+
+        // Verify that the listener is cleared if we cancel it.
+        listener.value.onAnimationCancel(null)
         Mockito.verify(animator).setListener(null)
+
+        // Verify that the listener is also cleared if the end action is triggered.
+        endAction.value.run()
+        verify(animator, times(2)).setListener(null)
     }
 
     /**

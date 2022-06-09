@@ -157,7 +157,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     @Override
     public boolean pointInView(float localX, float localY, float slop) {
-        float top = mClipTopAmount;
+        float top = Math.max(0, mClipTopAmount);
         float bottom = mActualHeight;
         return localX >= -slop && localY >= top - slop && localX < ((mRight - mLeft) + slop) &&
                 localY < (bottom + slop);
@@ -422,7 +422,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
             outRect.top += getTop() + getTranslationY();
         }
         outRect.bottom = outRect.top + getActualHeight();
-        outRect.top += getClipTopAmount();
+        outRect.top += Math.max(0, getClipTopAmount());
     }
 
     public boolean isSummaryWithChildren() {

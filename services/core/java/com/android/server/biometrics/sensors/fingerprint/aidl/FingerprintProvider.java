@@ -122,18 +122,12 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         continue; // Keyguard is always allowed
                     }
 
-                    final List<ActivityManager.RunningTaskInfo> runningTasks =
-                            mActivityTaskManager.getTasks(1);
-                    if (!runningTasks.isEmpty()) {
-                        final String topPackage =
-                                runningTasks.get(0).topActivity.getPackageName();
-                        if (!topPackage.contentEquals(client.getOwnerString())
-                                && !client.isAlreadyDone()) {
-                            Slog.e(getTag(), "Stopping background authentication, top: "
-                                    + topPackage + " currentClient: " + client);
-                            mSensors.valueAt(i).getScheduler().cancelAuthenticationOrDetection(
-                                    client.getToken(), client.getRequestId());
-                        }
+                    if (Utils.isBackground(client.getOwnerString())
+                            && !client.isAlreadyDone()) {
+                        Slog.e(getTag(), "Stopping background authentication,"
+                                + " currentClient: " + client);
+                        mSensors.valueAt(i).getScheduler().cancelAuthenticationOrDetection(
+                                client.getToken(), client.getRequestId());
                     }
                 }
             });
@@ -176,6 +170,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             prop.commonProps.maxEnrollmentsPerUser,
                             componentInfo,
                             prop.sensorType,
+                            prop.halControlsIllumination,
                             true /* resetLockoutRequiresHardwareAuthToken */,
                             !workaroundLocations.isEmpty() ? workaroundLocations :
                                     Arrays.stream(prop.sensorLocations).map(location ->

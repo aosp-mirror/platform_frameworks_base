@@ -20,7 +20,6 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.annotation.CallSuper;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.app.search.ISearchCallback;
@@ -88,7 +87,7 @@ public abstract class SearchUiService extends Service {
             mHandler.sendMessage(
                     obtainMessage(SearchUiService::onQuery,
                             SearchUiService.this, sessionId, input,
-                            new CallbackWrapper(callback, null)));
+                            new CallbackWrapper(callback)));
         }
 
         @Override
@@ -173,21 +172,12 @@ public abstract class SearchUiService extends Service {
     @MainThread
     public abstract void onDestroy(@NonNull SearchSessionId sessionId);
 
-    private static final class CallbackWrapper implements Consumer<List<SearchTarget>>,
-            IBinder.DeathRecipient {
+    private static final class CallbackWrapper implements Consumer<List<SearchTarget>> {
 
         private ISearchCallback mCallback;
-        private final Consumer<CallbackWrapper> mOnBinderDied;
 
-        CallbackWrapper(ISearchCallback callback,
-                @Nullable Consumer<CallbackWrapper> onBinderDied) {
+        CallbackWrapper(ISearchCallback callback) {
             mCallback = callback;
-            mOnBinderDied = onBinderDied;
-            try {
-                mCallback.asBinder().linkToDeath(this, 0);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to link to death: " + e);
-            }
         }
 
         @Override
@@ -201,15 +191,6 @@ public abstract class SearchUiService extends Service {
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error sending result:" + e);
-            }
-        }
-
-        @Override
-        public void binderDied() {
-            mCallback.asBinder().unlinkToDeath(this, 0);
-            mCallback = null;
-            if (mOnBinderDied != null) {
-                mOnBinderDied.accept(this);
             }
         }
     }

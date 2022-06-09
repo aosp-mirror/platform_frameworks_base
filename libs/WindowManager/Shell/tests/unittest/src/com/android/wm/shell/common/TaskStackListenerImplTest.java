@@ -109,9 +109,10 @@ public class TaskStackListenerImplTest {
 
     @Test
     public void testOnTaskProfileLocked() {
-        mImpl.onTaskProfileLocked(1, 2);
-        verify(mCallback).onTaskProfileLocked(eq(1), eq(2));
-        verify(mOtherCallback).onTaskProfileLocked(eq(1), eq(2));
+        ActivityManager.RunningTaskInfo info = mock(ActivityManager.RunningTaskInfo.class);
+        mImpl.onTaskProfileLocked(info);
+        verify(mCallback).onTaskProfileLocked(eq(info));
+        verify(mOtherCallback).onTaskProfileLocked(eq(info));
     }
 
     @Test

@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.preference.PreferenceViewHolder;
@@ -61,7 +62,7 @@ public class FooterPreferenceTest {
         mFooterPreference.onBindViewHolder(holder);
 
         assertThat(((TextView) holder.findViewById(
-                        R.id.settingslib_learn_more)).getText().toString())
+                R.id.settingslib_learn_more)).getText().toString())
                 .isEqualTo("Custom learn more");
     }
 
@@ -73,17 +74,17 @@ public class FooterPreferenceTest {
     }
 
     @Test
-    public void setLearnMoreContentDescription_contentSet_shouldGetSameContentDescription() {
-        mFooterPreference.setLearnMoreContentDescription("test");
-
-        assertThat(mFooterPreference.getLearnMoreContentDescription()).isEqualTo("test");
-    }
-
-    @Test
     public void setLearnMoreAction_actionSet_shouldGetAction() {
         mFooterPreference.setLearnMoreAction(v -> {
         });
 
         assertThat(mFooterPreference.mLearnMoreListener).isNotNull();
+    }
+
+    @Test
+    public void setIconVisibility_shouldReturnSameVisibilityType() {
+        mFooterPreference.setIconVisibility(View.GONE);
+
+        assertThat(mFooterPreference.mIconVisibility).isEqualTo(View.GONE);
     }
 }

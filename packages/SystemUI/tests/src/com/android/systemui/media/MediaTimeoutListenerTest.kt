@@ -23,6 +23,8 @@ import android.media.session.PlaybackState
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
@@ -63,10 +65,13 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     @Mock private lateinit var mediaControllerFactory: MediaControllerFactory
     @Mock private lateinit var mediaController: MediaController
     @Mock private lateinit var logger: MediaTimeoutLogger
+    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     private lateinit var executor: FakeExecutor
     @Mock private lateinit var timeoutCallback: (String, Boolean) -> Unit
     @Mock private lateinit var stateCallback: (String, PlaybackState) -> Unit
     @Captor private lateinit var mediaCallbackCaptor: ArgumentCaptor<MediaController.Callback>
+    @Captor private lateinit var dozingCallbackCaptor:
+        ArgumentCaptor<StatusBarStateController.StateListener>
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     private lateinit var metadataBuilder: MediaMetadata.Builder
     private lateinit var playbackBuilder: PlaybackState.Builder
@@ -74,12 +79,19 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     private lateinit var mediaData: MediaData
     private lateinit var resumeData: MediaData
     private lateinit var mediaTimeoutListener: MediaTimeoutListener
+    private var clock = FakeSystemClock()
 
     @Before
     fun setup() {
         `when`(mediaControllerFactory.create(any())).thenReturn(mediaController)
-        executor = FakeExecutor(FakeSystemClock())
-        mediaTimeoutListener = MediaTimeoutListener(mediaControllerFactory, executor, logger)
+        executor = FakeExecutor(clock)
+        mediaTimeoutListener = MediaTimeoutListener(
+            mediaControllerFactory,
+            executor,
+            logger,
+            statusBarStateController,
+            clock
+        )
         mediaTimeoutListener.timeoutCallback = timeoutCallback
         mediaTimeoutListener.stateCallback = stateCallback
 
@@ -528,6 +540,49 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
         // Then the callback is not invoked
         verify(stateCallback, never()).invoke(eq(KEY), eq(playingState!!))
+    }
+
+    @Test
+    fun testTimeoutCallback_dozedPastTimeout_invokedOnWakeup() {
+        // When paused media is loaded
+        testOnMediaDataLoaded_registersPlaybackListener()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(PlaybackState.Builder()
+            .setState(PlaybackState.STATE_PAUSED, 0L, 0f).build())
+        verify(statusBarStateController).addCallback(capture(dozingCallbackCaptor))
+
+        // And we doze past the scheduled timeout
+        val time = clock.currentTimeMillis()
+        clock.setElapsedRealtime(time + PAUSED_MEDIA_TIMEOUT)
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        // Then when no longer dozing, the timeout runs immediately
+        dozingCallbackCaptor.value.onDozingChanged(false)
+        verify(timeoutCallback).invoke(eq(KEY), eq(true))
+        verify(logger).logTimeout(eq(KEY))
+
+        // and cancel any later scheduled timeout
+        verify(logger).logTimeoutCancelled(eq(KEY), any())
+        assertThat(executor.numPending()).isEqualTo(0)
+    }
+
+    @Test
+    fun testTimeoutCallback_dozeShortTime_notInvokedOnWakeup() {
+        // When paused media is loaded
+        val time = clock.currentTimeMillis()
+        clock.setElapsedRealtime(time)
+        testOnMediaDataLoaded_registersPlaybackListener()
+        mediaCallbackCaptor.value.onPlaybackStateChanged(PlaybackState.Builder()
+            .setState(PlaybackState.STATE_PAUSED, 0L, 0f).build())
+        verify(statusBarStateController).addCallback(capture(dozingCallbackCaptor))
+
+        // And we doze, but not past the scheduled timeout
+        clock.setElapsedRealtime(time + PAUSED_MEDIA_TIMEOUT / 2L)
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        // Then when no longer dozing, the timeout remains scheduled
+        dozingCallbackCaptor.value.onDozingChanged(false)
+        verify(timeoutCallback, never()).invoke(eq(KEY), eq(true))
+        assertThat(executor.numPending()).isEqualTo(1)
     }
 
     private fun loadMediaDataWithPlaybackState(state: PlaybackState) {

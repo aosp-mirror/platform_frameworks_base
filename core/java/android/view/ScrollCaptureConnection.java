@@ -144,8 +144,13 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
         Consumer<Rect> listener =
                 SafeCallback.create(mCancellation, mUiThread, this::onImageRequestCompleted);
         // -> UiThread
-        mUiThread.execute(() -> mLocal.onScrollCaptureImageRequest(
-                mSession, mCancellation, new Rect(requestRect), listener));
+        mUiThread.execute(() -> {
+            if (mLocal != null) {
+                mLocal.onScrollCaptureImageRequest(
+                        mSession, mCancellation, new Rect(requestRect), listener);
+            }
+        });
+
         return cancellation;
     }
 
@@ -174,7 +179,11 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
         Runnable listener =
                 SafeCallback.create(mCancellation, mUiThread, this::onEndCaptureCompleted);
         // -> UiThread
-        mUiThread.execute(() -> mLocal.onScrollCaptureEnd(listener));
+        mUiThread.execute(() -> {
+            if (mLocal != null) {
+                mLocal.onScrollCaptureEnd(listener);
+            }
+        });
         return cancellation;
     }
 

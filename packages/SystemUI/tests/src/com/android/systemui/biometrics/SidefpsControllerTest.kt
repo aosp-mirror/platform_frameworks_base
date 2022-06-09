@@ -185,6 +185,7 @@ class SidefpsControllerTest : SysuiTestCase() {
                     5 /* maxEnrollmentsPerUser */,
                     listOf() /* componentInfo */,
                     FingerprintSensorProperties.TYPE_POWER_BUTTON,
+                    true /* halControlsIllumination */,
                     true /* resetLockoutRequiresHardwareAuthToken */,
                     locations
                 )

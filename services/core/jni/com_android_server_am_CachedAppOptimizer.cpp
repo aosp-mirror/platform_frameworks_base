@@ -91,7 +91,7 @@ static std::atomic<bool> cancelRunningCompaction;
 struct VmaBatch {
     struct iovec* vmas;
     // total amount of VMAs to reach the end of iovec
-    int totalVmas;
+    size_t totalVmas;
     // total amount of bytes that are remaining within iovec
     uint64_t totalBytes;
 };
@@ -100,42 +100,37 @@ struct VmaBatch {
 // This is used to remove already processed or no longer
 // needed parts of the batch.
 // Returns total bytes consumed
-int consumeBytes(VmaBatch& batch, uint64_t bytesToConsume) {
-    int index = 0;
+uint64_t consumeBytes(VmaBatch& batch, uint64_t bytesToConsume) {
     if (CC_UNLIKELY(bytesToConsume) < 0) {
         LOG(ERROR) << "Cannot consume negative bytes for VMA batch !";
         return 0;
     }
 
-    if (bytesToConsume > batch.totalBytes) {
+    if (CC_UNLIKELY(bytesToConsume > batch.totalBytes)) {
         // Avoid consuming more bytes than available
         bytesToConsume = batch.totalBytes;
     }
 
     uint64_t bytesConsumed = 0;
     while (bytesConsumed < bytesToConsume) {
-        if (CC_UNLIKELY(index >= batch.totalVmas)) {
-            // reach the end of the batch
-            return bytesConsumed;
-        }
-        if (CC_UNLIKELY(bytesConsumed + batch.vmas[index].iov_len > bytesToConsume)) {
-            // this is the whole VMA that will be consumed
+        if (CC_UNLIKELY(batch.totalVmas > 0)) {
+            // No more vmas to consume
             break;
         }
-        bytesConsumed += batch.vmas[index].iov_len;
-        batch.totalBytes -= batch.vmas[index].iov_len;
+        if (CC_UNLIKELY(bytesConsumed + batch.vmas[0].iov_len > bytesToConsume)) {
+            // This vma can't be fully consumed, do it partially.
+            uint64_t bytesLeftToConsume = bytesToConsume - bytesConsumed;
+            bytesConsumed += bytesLeftToConsume;
+            batch.vmas[0].iov_base = (void*)((uint64_t)batch.vmas[0].iov_base + bytesLeftToConsume);
+            batch.vmas[0].iov_len -= bytesLeftToConsume;
+            batch.totalBytes -= bytesLeftToConsume;
+            return bytesConsumed;
+        }
+        // This vma can be fully consumed
+        bytesConsumed += batch.vmas[0].iov_len;
+        batch.totalBytes -= batch.vmas[0].iov_len;
         --batch.totalVmas;
-        ++index;
-    }
-
-    // Move pointer to consume all the whole VMAs
-    batch.vmas = batch.vmas + index;
-
-    // Consume the rest of the bytes partially at last VMA in batch
-    uint64_t bytesLeftToConsume = bytesToConsume - bytesConsumed;
-    bytesConsumed += bytesLeftToConsume;
-    if (batch.totalVmas > 0) {
-        batch.vmas[0].iov_base = (void*)((uint64_t)batch.vmas[0].iov_base + bytesLeftToConsume);
+        ++batch.vmas;
     }
 
     return bytesConsumed;
@@ -182,16 +177,11 @@ public:
         while (indexInBatch < MAX_VMAS_PER_BATCH && currentIndex_ < vmas.size()) {
             uint64_t vmaStart = vmas[currentIndex_].start + currentOffset_;
             uint64_t vmaSize = vmas[currentIndex_].end - vmaStart;
-            if (CC_UNLIKELY(vmaSize == 0)) {
-                // No more bytes to batch for this VMA, move to next one
-                // this only happens if a batch partially consumed bytes
-                // and offset landed at exactly the end of a vma
-                continue;
-            }
-            batch.vmas[indexInBatch].iov_base = (void*)vmaStart;
             uint64_t bytesAvailableInBatch = MAX_BYTES_PER_BATCH - totalBytesInBatch;
 
-            if (vmaSize >= bytesAvailableInBatch) {
+            batch.vmas[indexInBatch].iov_base = (void*)vmaStart;
+
+            if (vmaSize > bytesAvailableInBatch) {
                 // VMA would exceed the max available bytes in batch
                 // clamp with available bytes and finish batch.
                 vmaSize = bytesAvailableInBatch;
@@ -205,16 +195,24 @@ public:
             if (totalBytesInBatch >= MAX_BYTES_PER_BATCH) {
                 // Reached max bytes quota so this marks
                 // the end of the batch
+                if (CC_UNLIKELY(vmaSize == (vmas[currentIndex_].end - vmaStart))) {
+                    // we reached max bytes exactly at the end of the vma
+                    // so advance to next one
+                    currentOffset_ = 0;
+                    ++currentIndex_;
+                }
                 break;
             }
-
             // Fully finished current VMA, move to next one
             currentOffset_ = 0;
             ++currentIndex_;
         }
-        // Vmas where fully filled and we are past the last filled index.
         batch.totalVmas = indexInBatch;
         batch.totalBytes = totalBytesInBatch;
+        if (batch.totalVmas == 0 || batch.totalBytes == 0) {
+            // This is an empty batch, mark as failed creating.
+            return false;
+        }
         return true;
     }
 };
@@ -226,17 +224,16 @@ public:
 // process_madvise on failure
 int madviseVmasFromBatch(unique_fd& pidfd, VmaBatch& batch, int madviseType,
                          uint64_t* outBytesProcessed) {
-    if (batch.totalVmas == 0) {
+    if (batch.totalVmas == 0 || batch.totalBytes == 0) {
         // No VMAs in Batch, skip.
         *outBytesProcessed = 0;
         return 0;
     }
 
-    ATRACE_BEGIN(StringPrintf("Madvise %d: %d VMAs", madviseType, batch.totalVmas).c_str());
-    uint64_t bytesProcessedInSend =
+    ATRACE_BEGIN(StringPrintf("Madvise %d: %zu VMAs.", madviseType, batch.totalVmas).c_str());
+    int64_t bytesProcessedInSend =
             process_madvise(pidfd, batch.vmas, batch.totalVmas, madviseType, 0);
     ATRACE_END();
-
     if (CC_UNLIKELY(bytesProcessedInSend == -1)) {
         bytesProcessedInSend = 0;
         if (errno != EINVAL) {
@@ -245,13 +242,15 @@ int madviseVmasFromBatch(unique_fd& pidfd, VmaBatch& batch, int madviseType,
             return -errno;
         }
     }
-
-    if (bytesProcessedInSend < batch.totalBytes) {
-        // Did not process all the bytes requested
-        // skip last page which likely failed
+    if (bytesProcessedInSend == 0) {
+        // When we find a VMA with error, fully consume it as it
+        // is extremely expensive to iterate on its pages one by one
+        bytesProcessedInSend = batch.vmas[0].iov_len;
+    } else if (bytesProcessedInSend < batch.totalBytes) {
+        // Partially processed the bytes requested
+        // skip last page which is where it failed.
         bytesProcessedInSend += PAGE_SIZE;
     }
-
     bytesProcessedInSend = consumeBytes(batch, bytesProcessedInSend);
 
     *outBytesProcessed = bytesProcessedInSend;
@@ -289,7 +288,7 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
     int64_t totalBytesProcessed = 0;
     while (batcher.createNextBatch(batch)) {
         uint64_t bytesProcessedInSend;
-
+        ScopedTrace batchTrace(ATRACE_TAG, "VMA Batch");
         do {
             if (CC_UNLIKELY(cancelRunningCompaction.load())) {
                 // There could be a significant delay between when a compaction
@@ -305,8 +304,13 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
                 // Returns standard linux errno code
                 return error;
             }
+            if (CC_UNLIKELY(bytesProcessedInSend == 0)) {
+                // This means there was a problem consuming bytes,
+                // bail out since no forward progress can be made with this batch
+                break;
+            }
             totalBytesProcessed += bytesProcessedInSend;
-        } while (batch.totalBytes > 0);
+        } while (batch.totalBytes > 0 && batch.totalVmas > 0);
     }
 
     return totalBytesProcessed;
@@ -342,6 +346,7 @@ static int getAnyPageAdvice(const Vma& vma) {
 static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
     cancelRunningCompaction.store(false);
 
+    ATRACE_BEGIN("CollectVmas");
     ProcMemInfo meminfo(pid);
     std::vector<Vma> pageoutVmas, coldVmas;
     auto vmaCollectorCb = [&coldVmas,&pageoutVmas,&vmaToAdviseFunc](const Vma& vma) {
@@ -356,6 +361,7 @@ static int64_t compactProcess(int pid, VmaToAdviseFunc vmaToAdviseFunc) {
         }
     };
     meminfo.ForEachVmaFromMaps(vmaCollectorCb);
+    ATRACE_END();
 
     int64_t pageoutBytes = compactMemory(pageoutVmas, pid, MADV_PAGEOUT);
     if (pageoutBytes < 0) {

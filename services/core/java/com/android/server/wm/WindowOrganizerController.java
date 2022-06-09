@@ -734,6 +734,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
                     break;
                 }
+                if (parent.getTask() != activity.getTask()) {
+                    final Throwable exception = new SecurityException("The reparented activity is"
+                            + " not in the same Task as the target TaskFragment.");
+                    sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+                    break;
+                }
                 activity.reparent(parent, POSITION_TOP);
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
@@ -1539,6 +1545,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (newParentTF.isEmbeddedTaskFragmentInPip() || oldParent.isEmbeddedTaskFragmentInPip()) {
             final Throwable exception = new SecurityException(
                     "Not allow to reparent in TaskFragment in PIP Task.");
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
+            return;
+        }
+        if (newParentTF.getTask() != oldParent.getTask()) {
+            final Throwable exception = new SecurityException(
+                    "The new parent is not in the same Task as the old parent.");
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, exception);
             return;
         }

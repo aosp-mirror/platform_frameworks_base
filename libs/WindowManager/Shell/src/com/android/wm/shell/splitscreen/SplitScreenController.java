@@ -414,6 +414,13 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(RemoteAnimationTarget[] apps) {
+        if (isSplitScreenVisible()) {
+            // Evict child tasks except the top visible one under split root to ensure it could be
+            // launched as full screen when switching to it on recents.
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            mStageCoordinator.prepareEvictInvisibleChildTasks(wct);
+            mSyncQueue.queue(wct);
+        }
         return reparentSplitTasksForAnimation(apps, true /*splitExpectedToBeVisible*/);
     }
 

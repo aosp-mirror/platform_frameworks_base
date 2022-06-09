@@ -76,6 +76,7 @@ import com.android.wm.shell.pip.IPipAnimationListener;
 import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
+import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
@@ -109,9 +110,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private PipAppOpsListener mAppOpsListener;
     private PipMediaController mMediaController;
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
-    private PipKeepClearAlgorithm mPipKeepClearAlgorithm;
     private PipBoundsState mPipBoundsState;
-    private PipMotionHelper mPipMotionHelper;
     private PipTouchHandler mTouchHandler;
     private PipTransitionController mPipTransitionController;
     private TaskStackListenerImpl mTaskStackListener;
@@ -129,6 +128,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     protected PipTaskOrganizer mPipTaskOrganizer;
     protected PinnedStackListenerForwarder.PinnedTaskListener mPinnedTaskListener =
             new PipControllerPinnedTaskListener();
+
+    private boolean mIsKeyguardShowingOrAnimating;
 
     private interface PipAnimationListener {
         /**
@@ -247,10 +248,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         Set<Rect> unrestricted) {
                     if (mPipBoundsState.getDisplayId() == displayId) {
                         mPipBoundsState.setKeepClearAreas(restricted, unrestricted);
-                        mPipMotionHelper.moveToBounds(mPipKeepClearAlgorithm.adjust(
-                                mPipBoundsState.getBounds(),
-                                mPipBoundsState.getRestrictedKeepClearAreas(),
-                                mPipBoundsState.getUnrestrictedKeepClearAreas()));
                     }
                 }
             };
@@ -289,8 +286,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     @Nullable
     public static Pip create(Context context, DisplayController displayController,
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
-            PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
+            PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -305,7 +301,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
+                pipBoundsState, pipMediaController,
                 phonePipMenuController, pipTaskOrganizer, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
                 oneHandedController, mainExecutor)
@@ -316,9 +312,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             DisplayController displayController,
             PipAppOpsListener pipAppOpsListener,
             PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipKeepClearAlgorithm pipKeepClearAlgorithm,
             @NonNull PipBoundsState pipBoundsState,
-            PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
             PipTaskOrganizer pipTaskOrganizer,
@@ -341,9 +335,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mWindowManagerShellWrapper = windowManagerShellWrapper;
         mDisplayController = displayController;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
-        mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
         mPipBoundsState = pipBoundsState;
-        mPipMotionHelper = pipMotionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
         mMainExecutor = mainExecutor;
         mMediaController = pipMediaController;
@@ -603,6 +595,33 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     }
 
     /**
+     * If {@param keyguardShowing} is {@code false} and {@param animating} is {@code true},
+     * we would wait till the dismissing animation of keyguard and surfaces behind to be
+     * finished first to reset the visibility of PiP window.
+     * See also {@link #onKeyguardDismissAnimationFinished()}
+     */
+    private void onKeyguardVisibilityChanged(boolean keyguardShowing, boolean animating) {
+        if (!mPipTaskOrganizer.isInPip()) {
+            return;
+        }
+        if (keyguardShowing) {
+            mIsKeyguardShowingOrAnimating = true;
+            hidePipMenu(null /* onStartCallback */, null /* onEndCallback */);
+            mPipTaskOrganizer.setPipVisibility(false);
+        } else if (!animating) {
+            mIsKeyguardShowingOrAnimating = false;
+            mPipTaskOrganizer.setPipVisibility(true);
+        }
+    }
+
+    private void onKeyguardDismissAnimationFinished() {
+        if (mPipTaskOrganizer.isInPip()) {
+            mIsKeyguardShowingOrAnimating = false;
+            mPipTaskOrganizer.setPipVisibility(true);
+        }
+    }
+
+    /**
      * Sets a customized touch gesture that replaces the default one.
      */
     public void setTouchGesture(PipTouchGesture gesture) {
@@ -613,7 +632,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
      * Sets both shelf visibility and its height.
      */
     private void setShelfHeight(boolean visible, int height) {
-        setShelfHeightLocked(visible, height);
+        if (!mIsKeyguardShowingOrAnimating) {
+            setShelfHeightLocked(visible, height);
+        }
     }
 
     private void setShelfHeightLocked(boolean visible, int height) {
@@ -844,13 +865,6 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {
-            mMainExecutor.execute(() -> {
-                PipController.this.hidePipMenu(onStartCallback, onEndCallback);
-            });
-        }
-
-        @Override
         public void expandPip() {
             mMainExecutor.execute(() -> {
                 PipController.this.expandPip();
@@ -925,6 +939,18 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mMainExecutor.execute(() -> {
                 PipController.this.showPictureInPictureMenu();
             });
+        }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing, boolean animating) {
+            mMainExecutor.execute(() -> {
+                PipController.this.onKeyguardVisibilityChanged(showing, animating);
+            });
+        }
+
+        @Override
+        public void onKeyguardDismissAnimationFinished() {
+            mMainExecutor.execute(PipController.this::onKeyguardDismissAnimationFinished);
         }
 
         @Override

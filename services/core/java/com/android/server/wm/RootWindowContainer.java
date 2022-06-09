@@ -1999,7 +1999,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final Task rootPinnedTask = taskDisplayArea.getRootPinnedTask();
             if (rootPinnedTask != null) {
                 transitionController.collect(rootPinnedTask);
-                rootPinnedTask.dismissPip();
+                // The new ActivityRecord should replace the existing PiP, so it's more desirable
+                // that the old PiP disappears instead of turning to full-screen at the same time,
+                // as the Task#dismissPip is trying to do.
+                removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
             }
 
             // Set a transition to ensure that we don't immediately try and update the visibility
@@ -2111,6 +2114,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
             // Set the launch bounds for launch-into-pip Activity on the root task.
             if (r.getOptions() != null && r.getOptions().isLaunchIntoPip()) {
+                // Record the snapshot now, it will be later fetched for content-pip animation.
+                // We do this early in the process to make sure the right snapshot is used for
+                // entering content-pip animation.
+                mWindowManager.mTaskSnapshotController.recordTaskSnapshot(
+                        task, false /* allowSnapshotHome */);
                 rootTask.setBounds(r.getOptions().getLaunchBounds());
             }
             rootTask.setDeferTaskAppear(false);
@@ -3228,7 +3236,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (task.getActivity(activity -> !activity.finishing && activity.mUserId == userId)
                     != null) {
                 mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
-                        task.mTaskId, userId);
+                        task.getTaskInfo());
             }
         }, true /* traverseTopToBottom */);
     }
