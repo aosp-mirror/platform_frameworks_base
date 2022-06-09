@@ -88,6 +88,12 @@ public class Components {
                 PACKAGE_NAME + ".SplitScreenSecondaryActivity");
     }
 
+    public static class SendNotificationActivity {
+        public static final String LABEL = "SendNotificationApp";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".SendNotificationActivity");
+    }
+
     public static class LaunchBubbleActivity {
         public static final String LABEL = "LaunchBubbleApp";
         public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
