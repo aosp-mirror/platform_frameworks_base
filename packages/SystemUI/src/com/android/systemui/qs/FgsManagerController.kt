@@ -53,8 +53,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.DeviceConfigProxy
 import com.android.systemui.util.indentIfPossible
@@ -153,31 +153,38 @@ class FgsManagerController @Inject constructor(
 
             currentProfileIds.addAll(userTracker.userProfiles.map { it.id })
 
-            deviceConfigProxy.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI,
-                    backgroundExecutor) {
+            deviceConfigProxy.addOnPropertiesChangedListener(
+                NAMESPACE_SYSTEMUI,
+                backgroundExecutor
+            ) {
                 isAvailable = it.getBoolean(TASK_MANAGER_ENABLED, isAvailable)
                 showFooterDot =
-                        it.getBoolean(TASK_MANAGER_SHOW_FOOTER_DOT, showFooterDot)
+                    it.getBoolean(TASK_MANAGER_SHOW_FOOTER_DOT, showFooterDot)
             }
 
-            isAvailable = deviceConfigProxy.getBoolean(NAMESPACE_SYSTEMUI,
-                    TASK_MANAGER_ENABLED, DEFAULT_TASK_MANAGER_ENABLED)
-            showFooterDot = deviceConfigProxy.getBoolean(NAMESPACE_SYSTEMUI,
-                    TASK_MANAGER_SHOW_FOOTER_DOT, DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT)
+            isAvailable = deviceConfigProxy.getBoolean(
+                NAMESPACE_SYSTEMUI,
+                TASK_MANAGER_ENABLED, DEFAULT_TASK_MANAGER_ENABLED
+            )
+            showFooterDot = deviceConfigProxy.getBoolean(
+                NAMESPACE_SYSTEMUI,
+                TASK_MANAGER_SHOW_FOOTER_DOT, DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT
+            )
 
             dumpManager.registerDumpable(this)
 
             broadcastDispatcher.registerReceiver(
-                    object : BroadcastReceiver() {
-                        override fun onReceive(context: Context, intent: Intent) {
-                            if (intent.action == Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER) {
-                                showDialog(null)
-                            }
+                object : BroadcastReceiver() {
+                    override fun onReceive(context: Context, intent: Intent) {
+                        if (intent.action == Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER) {
+                            showDialog(null)
                         }
-                    },
-                    IntentFilter(Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER),
-                    executor = mainExecutor,
-                    flags = Context.RECEIVER_NOT_EXPORTED)
+                    }
+                },
+                IntentFilter(Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER),
+                executor = mainExecutor,
+                flags = Context.RECEIVER_NOT_EXPORTED
+            )
 
             initialized = true
         }
@@ -193,10 +200,12 @@ class FgsManagerController @Inject constructor(
             val userPackageKey = UserPackage(userId, packageName)
             if (isForeground) {
                 runningServiceTokens.getOrPut(userPackageKey) { StartTimeAndTokens(systemClock) }
-                        .addToken(token)
+                    .addToken(token)
             } else {
                 if (runningServiceTokens[userPackageKey]?.also {
-                            it.removeToken(token) }?.isEmpty() == true) {
+                    it.removeToken(token)
+                }?.isEmpty() == true
+                ) {
                     runningServiceTokens.remove(userPackageKey)
                 }
             }
@@ -209,7 +218,7 @@ class FgsManagerController @Inject constructor(
 
     @GuardedBy("lock")
     val onNumberOfPackagesChangedListeners: MutableSet<OnNumberOfPackagesChangedListener> =
-            mutableSetOf()
+        mutableSetOf()
 
     @GuardedBy("lock")
     val onDialogDismissedListeners: MutableSet<OnDialogDismissedListener> = mutableSetOf()
@@ -284,7 +293,7 @@ class FgsManagerController @Inject constructor(
                 recyclerView.adapter = appListAdapter
 
                 val topSpacing = dialogContext.resources
-                        .getDimensionPixelSize(R.dimen.fgs_manager_list_top_spacing)
+                    .getDimensionPixelSize(R.dimen.fgs_manager_list_top_spacing)
                 dialog.setView(recyclerView, 0, topSpacing, 0, 0)
 
                 this.dialog = dialog
@@ -302,7 +311,7 @@ class FgsManagerController @Inject constructor(
 
                 mainExecutor.execute {
                     viewLaunchedFrom
-                            ?.let { dialogLaunchAnimator.showFromView(dialog, it) } ?: dialog.show()
+                        ?.let { dialogLaunchAnimator.showFromView(dialog, it) } ?: dialog.show()
                 }
 
                 backgroundExecutor.execute {
@@ -328,11 +337,14 @@ class FgsManagerController @Inject constructor(
 
         addedPackages.forEach {
             val ai = packageManager.getApplicationInfoAsUser(it.packageName, 0, it.userId)
-            runningApps[it] = RunningApp(it.userId, it.packageName,
-                    runningServiceTokens[it]!!.startTime, it.uiControl,
-                    packageManager.getApplicationLabel(ai),
-                    packageManager.getUserBadgedIcon(
-                            packageManager.getApplicationIcon(ai), UserHandle.of(it.userId)))
+            runningApps[it] = RunningApp(
+                it.userId, it.packageName,
+                runningServiceTokens[it]!!.startTime, it.uiControl,
+                packageManager.getApplicationLabel(ai),
+                packageManager.getUserBadgedIcon(
+                    packageManager.getApplicationIcon(ai), UserHandle.of(it.userId)
+                )
+            )
             logEvent(stopped = false, it.packageName, it.userId, runningApps[it]!!.timeStarted)
         }
 
@@ -348,7 +360,7 @@ class FgsManagerController @Inject constructor(
 
         mainExecutor.execute {
             appListAdapter
-                    .setData(runningApps.values.toList().sortedByDescending { it.timeStarted })
+                .setData(runningApps.values.toList().sortedByDescending { it.timeStarted })
         }
     }
 
@@ -366,8 +378,10 @@ class FgsManagerController @Inject constructor(
         }
         backgroundExecutor.execute {
             val uid = packageManager.getPackageUidAsUser(packageName, userId)
-            SysUiStatsLog.write(SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED, uid, event,
-                    timeLogged - timeStarted)
+            SysUiStatsLog.write(
+                SysUiStatsLog.TASK_MANAGER_EVENT_REPORTED, uid, event,
+                timeLogged - timeStarted
+            )
         }
     }
 
@@ -378,8 +392,10 @@ class FgsManagerController @Inject constructor(
         private var data: List<RunningApp> = listOf()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppItemViewHolder {
-            return AppItemViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.fgs_manager_app_item, parent, false))
+            return AppItemViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.fgs_manager_app_item, parent, false)
+            )
         }
 
         override fun onBindViewHolder(holder: AppItemViewHolder, position: Int) {
@@ -391,8 +407,9 @@ class FgsManagerController @Inject constructor(
                 iconView.setImageDrawable(runningApp.icon)
                 appLabelView.text = runningApp.appLabel
                 durationView.text = DateUtils.formatDuration(
-                        max(systemClock.elapsedRealtime() - runningApp.timeStarted, 60000),
-                        DateUtils.LENGTH_MEDIUM)
+                    max(systemClock.elapsedRealtime() - runningApp.timeStarted, 60000),
+                    DateUtils.LENGTH_MEDIUM
+                )
                 stopButton.setOnClickListener {
                     stopButton.setText(R.string.fgs_manager_app_item_stop_button_stopped_label)
                     stopPackage(runningApp.userId, runningApp.packageName, runningApp.timeStarted)
@@ -430,12 +447,12 @@ class FgsManagerController @Inject constructor(
                 }
 
                 override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int):
-                        Boolean {
+                    Boolean {
                     return oldData[oldItemPosition] == newData[newItemPosition]
                 }
 
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int):
-                        Boolean {
+                    Boolean {
                     return oldData[oldItemPosition].stopped == newData[newItemPosition].stopped
                 }
             }).dispatchUpdatesTo(this)
@@ -461,7 +478,7 @@ class FgsManagerController @Inject constructor(
 
         fun updateUiControl() {
             backgroundRestrictionExemptionReason =
-                    activityManager.getBackgroundRestrictionExemptionReason(uid)
+                activityManager.getBackgroundRestrictionExemptionReason(uid)
             uiControl = when (backgroundRestrictionExemptionReason) {
                 PowerExemptionManager.REASON_SYSTEM_UID,
                 PowerExemptionManager.REASON_DEVICE_DEMO_MODE -> UIControl.HIDE_ENTRY
@@ -522,8 +539,10 @@ class FgsManagerController @Inject constructor(
         fun dump(pw: PrintWriter) {
             pw.println("StartTimeAndTokens: [")
             pw.indentIfPossible {
-                pw.println("startTime=$startTime (time running =" +
-                        " ${systemClock.elapsedRealtime() - startTime}ms)")
+                pw.println(
+                    "startTime=$startTime (time running =" +
+                        " ${systemClock.elapsedRealtime() - startTime}ms)"
+                )
                 pw.println("tokens: [")
                 pw.indentIfPossible {
                     for (token in tokens) {
@@ -571,8 +590,10 @@ class FgsManagerController @Inject constructor(
             pw.indentIfPossible {
                 pw.println("userId=$userId")
                 pw.println("packageName=$packageName")
-                pw.println("timeStarted=$timeStarted (time since start =" +
-                        " ${systemClock.elapsedRealtime() - timeStarted}ms)")
+                pw.println(
+                    "timeStarted=$timeStarted (time since start =" +
+                        " ${systemClock.elapsedRealtime() - timeStarted}ms)"
+                )
                 pw.println("uiControl=$uiControl")
                 pw.println("appLabel=$appLabel")
                 pw.println("icon=$icon")
