@@ -192,10 +192,13 @@ public class MultipathPolicyTracker {
         private final int mSubId;
 
         private long mQuota;
-        /** Current multipath budget. Nonzero iff we have budget and a UsageCallback is armed. */
-        private long mMultipathBudget;
+        /** Current multipath budget. Nonzero iff we have budget. */
+        // The budget could be accessed by multiple threads, make it volatile to ensure the callers
+        // on a different thread will not see the stale value.
+        private volatile long mMultipathBudget;
         private final NetworkTemplate mNetworkTemplate;
         private final UsageCallback mUsageCallback;
+        private boolean mUsageCallbackRegistered = false;
         private NetworkCapabilities mNetworkCapabilities;
         private final NetworkStatsManager mStatsManager;
 
@@ -234,7 +237,6 @@ public class MultipathPolicyTracker {
                 @Override
                 public void onThresholdReached(int networkType, String subscriberId) {
                     if (DBG) Log.d(TAG, "onThresholdReached for network " + network);
-                    mMultipathBudget = 0;
                     updateMultipathBudget();
                 }
             };
@@ -376,9 +378,9 @@ public class MultipathPolicyTracker {
                 if (DBG) {
                     Log.d(TAG, "Setting callback for " + budget + " bytes on network " + network);
                 }
-                registerUsageCallback(budget);
+                setMultipathBudget(budget);
             } else {
-                maybeUnregisterUsageCallback();
+                clearMultipathBudget();
             }
         }
 
@@ -403,23 +405,30 @@ public class MultipathPolicyTracker {
             return mMultipathBudget > 0;
         }
 
-        private void registerUsageCallback(long budget) {
+        // Sets the budget and registers a usage callback for it.
+        private void setMultipathBudget(long budget) {
             maybeUnregisterUsageCallback();
+            if (DBG) Log.d(TAG, "Registering callback, budget is " + mMultipathBudget);
             mStatsManager.registerUsageCallback(mNetworkTemplate, budget,
                     (command) -> mHandler.post(command), mUsageCallback);
+            mUsageCallbackRegistered = true;
             mMultipathBudget = budget;
         }
 
         private void maybeUnregisterUsageCallback() {
-            if (haveMultipathBudget()) {
-                if (DBG) Log.d(TAG, "Unregistering callback, budget was " + mMultipathBudget);
-                mStatsManager.unregisterUsageCallback(mUsageCallback);
-                mMultipathBudget = 0;
-            }
+            if (!mUsageCallbackRegistered) return;
+            if (DBG) Log.d(TAG, "Unregistering callback, budget was " + mMultipathBudget);
+            mStatsManager.unregisterUsageCallback(mUsageCallback);
+            mUsageCallbackRegistered = false;
+        }
+
+        private void clearMultipathBudget() {
+            maybeUnregisterUsageCallback();
+            mMultipathBudget = 0;
         }
 
         void shutdown() {
-            maybeUnregisterUsageCallback();
+            clearMultipathBudget();
         }
     }
 

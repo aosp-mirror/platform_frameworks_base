@@ -46,8 +46,9 @@ import com.android.systemui.animation.Interpolators
  */
 open class DisplayCutoutBaseView : View, RegionInterceptableView {
 
-    private val shouldDrawCutout: Boolean = DisplayCutout.getFillBuiltInDisplayCutout(
+    private var shouldDrawCutout: Boolean = DisplayCutout.getFillBuiltInDisplayCutout(
             context.resources, context.display?.uniqueId)
+    private var displayUniqueId: String? = null
     private var displayMode: Display.Mode? = null
     protected val location = IntArray(2)
     protected var displayRotation = 0
@@ -78,6 +79,7 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        displayUniqueId = context.display?.uniqueId
         updateCutout()
         updateProtectionBoundingPath()
         onUpdate()
@@ -86,6 +88,12 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
     fun onDisplayChanged(displayId: Int) {
         val oldMode: Display.Mode? = displayMode
         displayMode = display.mode
+
+        if (displayUniqueId != context.display?.uniqueId) {
+            displayUniqueId = context.display?.uniqueId
+            shouldDrawCutout = DisplayCutout.getFillBuiltInDisplayCutout(
+                    context.resources, displayUniqueId)
+        }
 
         // Skip if display mode or cutout hasn't changed.
         if (!displayModeChanged(oldMode, displayMode) &&

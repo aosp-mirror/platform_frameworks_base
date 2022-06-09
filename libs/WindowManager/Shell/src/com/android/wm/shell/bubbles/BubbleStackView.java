@@ -1296,7 +1296,7 @@ public class BubbleStackView extends FrameLayout
     public void onOrientationChanged() {
         mRelativeStackPositionBeforeRotation = new RelativeStackPosition(
                 mPositioner.getRestingPosition(),
-                mStackAnimationController.getAllowableStackPositionRegion());
+                mPositioner.getAllowableStackPositionRegion(getBubbleCount()));
         addOnLayoutChangeListener(mOrientationChangedListener);
         hideFlyoutImmediate();
     }
@@ -1340,7 +1340,7 @@ public class BubbleStackView extends FrameLayout
             mStackAnimationController.setStackPosition(
                     new RelativeStackPosition(
                             mPositioner.getRestingPosition(),
-                            mStackAnimationController.getAllowableStackPositionRegion()));
+                            mPositioner.getAllowableStackPositionRegion(getBubbleCount())));
         }
         if (mIsExpanded) {
             updateExpandedView();
@@ -1440,7 +1440,7 @@ public class BubbleStackView extends FrameLayout
         if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
-        final RectF stackBounds = mStackAnimationController.getAllowableStackPositionRegion();
+        final RectF stackBounds = mPositioner.getAllowableStackPositionRegion(getBubbleCount());
 
         // R constants are not final so we cannot use switch-case here.
         if (action == AccessibilityNodeInfo.ACTION_DISMISS) {

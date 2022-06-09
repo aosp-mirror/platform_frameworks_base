@@ -29,6 +29,7 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -264,6 +265,21 @@ class AssociationStoreImpl implements AssociationStore {
     public void unregisterListener(@NonNull OnChangeListener listener) {
         synchronized (mListeners) {
             mListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Dumps current companion device association states.
+     */
+    public void dump(@NonNull PrintWriter out) {
+        out.append("Companion Device Associations: ");
+        if (getAssociations().isEmpty()) {
+            out.append("<empty>\n");
+        } else {
+            out.append("\n");
+            for (AssociationInfo a : getAssociations()) {
+                out.append("  ").append(a.toString()).append('\n');
+            }
         }
     }
 
