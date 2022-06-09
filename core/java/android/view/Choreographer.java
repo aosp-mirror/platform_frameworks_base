@@ -765,10 +765,11 @@ public final class Choreographer {
                 startNanos = System.nanoTime();
                 final long jitterNanos = startNanos - frameTimeNanos;
                 if (jitterNanos >= frameIntervalNanos) {
-                    final long lastFrameOffset = jitterNanos % frameIntervalNanos;
+                    long lastFrameOffset = 0;
                     if (frameIntervalNanos == 0) {
                         Log.i(TAG, "Vsync data empty due to timeout");
                     } else {
+                        lastFrameOffset = jitterNanos % frameIntervalNanos;
                         final long skippedFrames = jitterNanos / frameIntervalNanos;
                         if (skippedFrames >= SKIPPED_FRAME_WARNING_LIMIT) {
                             Log.i(TAG, "Skipped " + skippedFrames + " frames!  "

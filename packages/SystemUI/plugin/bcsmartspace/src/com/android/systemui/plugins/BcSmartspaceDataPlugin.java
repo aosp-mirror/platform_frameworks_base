@@ -134,6 +134,12 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * Get the index of the currently selected page.
          */
         int getSelectedPage();
+
+        /**
+         * Return the top padding value from the currently visible card, or 0 if there is no current
+         * card.
+         */
+        int getCurrentCardTopPadding();
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */

@@ -32,6 +32,8 @@ import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Default implementation for {@link ViewTranslationCallback} for {@link TextView} components.
  * This class handles how to display the translated information for {@link TextView}.
@@ -48,6 +50,11 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
     private boolean mIsShowingTranslation = false;
     private boolean mAnimationRunning = false;
     private boolean mIsTextPaddingEnabled = false;
+    private boolean mOriginalIsTextSelectable = false;
+    private int mOriginalFocusable = 0;
+    private boolean mOriginalFocusableInTouchMode = false;
+    private boolean mOriginalClickable = false;
+    private boolean mOriginalLongClickable = false;
     private CharSequence mPaddedText;
     private int mAnimationDurationMillis = 250; // default value
 
@@ -81,21 +88,50 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         // update the translation response to keep the result up to date.
         // Because TextView.setTransformationMethod() will skip the same TransformationMethod
         // instance, we should create a new one to let new translation can work.
+        TextView theTextView = (TextView) view;
         if (mTranslationTransformation == null
                 || !response.equals(mTranslationTransformation.getViewTranslationResponse())) {
             TransformationMethod originalTranslationMethod =
-                    ((TextView) view).getTransformationMethod();
+                    theTextView.getTransformationMethod();
             mTranslationTransformation = new TranslationTransformationMethod(response,
                     originalTranslationMethod);
         }
         final TransformationMethod transformation = mTranslationTransformation;
+        WeakReference<TextView> textViewRef = new WeakReference<>(theTextView);
         runChangeTextWithAnimationIfNeeded(
-                (TextView) view,
+                theTextView,
                 () -> {
                     mIsShowingTranslation = true;
                     mAnimationRunning = false;
-                    // TODO(b/178353965): well-handle setTransformationMethod.
-                    ((TextView) view).setTransformationMethod(transformation);
+
+                    TextView textView = textViewRef.get();
+                    if (textView == null) {
+                        return;
+                    }
+                    // TODO(b/177214256): support selectable text translation.
+                    // We use the TransformationMethod to implement showing the translated text. The
+                    // TextView does not support the text length change for TransformationMethod.
+                    // If the text is selectable or editable, it will crash while selecting the
+                    // text. To support being able to select translated text, we need broader
+                    // changes to text APIs. For now, the callback makes the text non-selectable
+                    // while translated, and makes it selectable again after translation.
+                    mOriginalIsTextSelectable = textView.isTextSelectable();
+                    if (mOriginalIsTextSelectable) {
+                        // According to documentation for `setTextIsSelectable()`, it sets the
+                        // flags focusable, focusableInTouchMode, clickable, and longClickable
+                        // to the same value. We get the original values to restore when translation
+                        // is hidden.
+                        mOriginalFocusableInTouchMode = textView.isFocusableInTouchMode();
+                        mOriginalFocusable = textView.getFocusable();
+                        mOriginalClickable = textView.isClickable();
+                        mOriginalLongClickable = textView.isLongClickable();
+                        textView.setTextIsSelectable(false);
+                    }
+
+                    // TODO(b/233406028): We should NOT restore the original
+                    //  TransformationMethod and selectable state if it was changed WHILE
+                    //  translation was being shown.
+                    textView.setTransformationMethod(transformation);
                 });
         if (response.getKeys().contains(ViewTranslationRequest.ID_CONTENT_DESCRIPTION)) {
             CharSequence translatedContentDescription =
@@ -122,12 +158,34 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         if (mTranslationTransformation != null) {
             final TransformationMethod transformation =
                     mTranslationTransformation.getOriginalTransformationMethod();
+            TextView theTextView = (TextView) view;
+            WeakReference<TextView> textViewRef = new WeakReference<>(theTextView);
             runChangeTextWithAnimationIfNeeded(
-                    (TextView) view,
+                    theTextView,
                     () -> {
                         mIsShowingTranslation = false;
                         mAnimationRunning = false;
-                        ((TextView) view).setTransformationMethod(transformation);
+
+                        TextView textView = textViewRef.get();
+                        if (textView == null) {
+                            return;
+                        }
+                        // TODO(b/233406028): We should NOT restore the original
+                        //  TransformationMethod and selectable state if it was changed WHILE
+                        //  translation was being shown.
+                        textView.setTransformationMethod(transformation);
+
+                        if (mOriginalIsTextSelectable && !textView.isTextSelectable()) {
+                            // According to documentation for `setTextIsSelectable()`, it sets the
+                            // flags focusable, focusableInTouchMode, clickable, and longClickable
+                            // to the same value, and you must call `setFocusable()`, etc. to
+                            // restore all previous flag values.
+                            textView.setTextIsSelectable(true);
+                            textView.setFocusableInTouchMode(mOriginalFocusableInTouchMode);
+                            textView.setFocusable(mOriginalFocusable);
+                            textView.setClickable(mOriginalClickable);
+                            textView.setLongClickable(mOriginalLongClickable);
+                        }
                     });
             if (!TextUtils.isEmpty(mContentDescription)) {
                 view.setContentDescription(mContentDescription);
@@ -258,6 +316,7 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
         mAnimator.setRepeatCount(1);
         mAnimator.setDuration(mAnimationDurationMillis);
         final ColorStateList originalColors = view.getTextColors();
+        WeakReference<TextView> viewRef = new WeakReference<>(view);
         mAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -265,7 +324,10 @@ public class TextViewTranslationCallback implements ViewTranslationCallback {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                view.setTextColor(originalColors);
+                TextView view = viewRef.get();
+                if (view != null) {
+                    view.setTextColor(originalColors);
+                }
                 mAnimator = null;
             }
 

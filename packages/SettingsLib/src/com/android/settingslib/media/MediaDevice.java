@@ -350,11 +350,6 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             return 1;
         }
 
-        // Both devices have same connection status, compare the range zone
-        if (NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone()) != 0) {
-            return NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone());
-        }
-
         if (mType == another.mType) {
             // Check device is muting expected device
             if (isMutingExpectedDevice()) {
@@ -375,6 +370,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
                 return -1;
             } else if (another.isCarKitDevice()) {
                 return 1;
+            }
+
+            // Both devices have same connection status and type, compare the range zone
+            if (NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone()) != 0) {
+                return NearbyDevice.compareRangeZones(getRangeZone(), another.getRangeZone());
             }
 
             // Set last used device at the first item
