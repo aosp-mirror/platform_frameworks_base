@@ -16,10 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.provider
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.util.Log
 import com.android.systemui.Dumpable
@@ -41,17 +37,12 @@ import javax.inject.Inject
  * The only configuration is a list of allowed packages.  When this list is empty, the feature is
  * disabled.  When SystemUI starts up, this feature is disabled.
  *
- * To enabled filtering, provide the list of packages in a comma-separated list using the command:
+ * To enabled filtering, provide the space-separated list of packages using the command:
  *
- * `$ adb shell am broadcast -a com.android.systemui.action.SET_NOTIF_DEBUG_MODE
- *          --esal allowed_packages <comma-separated-packages>`
- * or
  * `$ adb shell cmd statusbar notif-filter allowed-pkgs <package> ...`
  *
- * To disable filtering, send the action without a list:
+ * To disable filtering, send the command without any packages, or explicitly reset:
  *
- * `$ adb shell am broadcast -a com.android.systemui.action.SET_NOTIF_DEBUG_MODE`
- * or
  * `$ adb shell cmd statusbar notif-filter reset`
  *
  * NOTE: this feature only works on debug builds, and when the broadcaster is root.
@@ -59,7 +50,6 @@ import javax.inject.Inject
 @SysUISingleton
 class DebugModeFilterProvider @Inject constructor(
     private val commandRegistry: CommandRegistry,
-    private val context: Context,
     dumpManager: DumpManager
 ) : Dumpable {
     private var allowedPackages: List<String> = emptyList()
@@ -82,10 +72,7 @@ class DebugModeFilterProvider @Inject constructor(
         listeners.addIfAbsent(listener)
         if (needsInitialization) {
             commandRegistry.registerCommand("notif-filter") { NotifFilterCommand() }
-            val filter = IntentFilter().apply { addAction(ACTION_SET_NOTIF_DEBUG_MODE) }
-            val permission = NOTIF_DEBUG_MODE_PERMISSION
-            context.registerReceiver(mReceiver, filter, permission, null, Context.RECEIVER_EXPORTED)
-            Log.d(TAG, "Registered: $mReceiver")
+            Log.d(TAG, "Registered notif-filter command")
         }
     }
 
@@ -108,31 +95,8 @@ class DebugModeFilterProvider @Inject constructor(
         }
     }
 
-    private val mReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent?) {
-            val action = intent?.action
-            if (ACTION_SET_NOTIF_DEBUG_MODE == action) {
-                // TODO(b/235268992) remove
-                Log.d(TAG, "ACTION_SET_NOTIF_DEBUG_MODE enter")
-                allowedPackages = intent.extras?.getStringArrayList(EXTRA_ALLOWED_PACKAGES)
-                    ?: emptyList()
-                Log.d(TAG, "Updated allowedPackages: $allowedPackages")
-                listeners.forEach(Runnable::run)
-                // TODO(b/235268992) remove
-                Log.d(TAG, "ACTION_SET_NOTIF_DEBUG_MODE leave")
-            } else {
-                Log.d(TAG, "Malformed intent: $intent")
-            }
-        }
-    }
-
     companion object {
         private const val TAG = "DebugModeFilterProvider"
-        private const val ACTION_SET_NOTIF_DEBUG_MODE =
-            "com.android.systemui.action.SET_NOTIF_DEBUG_MODE"
-        private const val NOTIF_DEBUG_MODE_PERMISSION =
-            "com.android.systemui.permission.NOTIF_DEBUG_MODE"
-        private const val EXTRA_ALLOWED_PACKAGES = "allowed_packages"
     }
 
     inner class NotifFilterCommand : Command {
