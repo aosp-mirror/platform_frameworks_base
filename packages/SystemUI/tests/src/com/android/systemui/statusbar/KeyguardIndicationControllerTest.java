@@ -71,6 +71,7 @@ import android.os.UserManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -124,7 +125,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private static final int TEST_STRING_RES = R.string.keyguard_indication_trust_unlocked;
 
-    private String mKeyguardTryFingerprintMsg;
     private String mDisclosureWithOrganization;
     private String mDisclosureGeneric;
     private String mFinancedDisclosureWithOrganization;
@@ -163,6 +163,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private IActivityManager mIActivityManager;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
     @Mock
     private ScreenLifecycle mScreenLifecycle;
     @Captor
@@ -203,7 +205,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(UserManager.class, mUserManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
-        mKeyguardTryFingerprintMsg = mContext.getString(R.string.keyguard_try_fingerprint);
         mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
                 ORGANIZATION_NAME);
         mDisclosureGeneric = mContext.getString(R.string.do_disclosure_generic);
@@ -254,7 +255,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
                 mUserManager, mExecutor, mExecutor,  mFalsingManager, mLockPatternUtils,
-                mScreenLifecycle, mIActivityManager, mKeyguardBypassController);
+                mScreenLifecycle, mIActivityManager, mKeyguardBypassController,
+                mAccessibilityManager);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -923,6 +925,67 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verifyIndicationMessage(
                 INDICATION_TYPE_TRUST,
                 trustGrantedMsg);
+    }
+
+    @Test
+    public void nonBypassFaceSuccess_touchExplorationEnabled_showsSwipeToOpen() {
+        // GIVEN non bypass face auth and touch exploration is enabled
+        when(mKeyguardBypassController.canBypass()).thenReturn(false);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        createController();
+        String swipeToOpen = mContext.getString(R.string.keyguard_unlock);
+        mController.setVisible(true);
+
+        // WHEN face authenticated
+        mController.getKeyguardCallback().onBiometricAuthenticated(0,
+                BiometricSourceType.FACE, false);
+
+        // THEN show 'swipe up to open' message
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, swipeToOpen);
+    }
+
+    @Test
+    public void nonBypassFaceSuccess_a11yEnabled_showsSwipeToOpen() {
+        // GIVEN non bypass face auth and a11y is enabled
+        when(mKeyguardBypassController.canBypass()).thenReturn(false);
+        when(mAccessibilityManager.isEnabled()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        createController();
+        String swipeToOpen = mContext.getString(R.string.keyguard_unlock);
+        mController.setVisible(true);
+
+        // WHEN face auth is successful
+        mController.getKeyguardCallback().onBiometricAuthenticated(0,
+                BiometricSourceType.FACE, false);
+
+        // THEN show 'swipe up to open' message
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, swipeToOpen);
+    }
+
+    @Test
+    public void coEx_nonBypassFaceSuccess_showsPressLockIcon() {
+        // GIVEN udfps is supported, non-bypass face auth, and no a11y enabled
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
+        when(mKeyguardBypassController.canBypass()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getIsFaceAuthenticated()).thenReturn(true);
+        when(mAccessibilityManager.isEnabled()).thenReturn(false);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(true);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN face auth succeeds
+        mController.getKeyguardCallback().onBiometricAuthenticated(0,
+                BiometricSourceType.FACE, false);
+
+        // THEN press unlock icon to open message shows
+        String pressLockIcon = mContext.getString(R.string.keyguard_face_successful_unlock_press);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, pressLockIcon);
+
+        assertThat(mTextView.getText()).isNotEqualTo(pressLockIcon);
     }
 
     private void sendUpdateDisclosureBroadcast() {
