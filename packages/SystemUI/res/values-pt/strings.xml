@@ -384,8 +384,8 @@
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"A rede pode ser monitorada"</string>
     <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"Este dispositivo está conectado à Internet usando VPNs"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Seus apps de trabalho estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Seus apps pessoais estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Este dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Apps pessoais conectados à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"Conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Este dispositivo é fornecido pela <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Gerenciamento de dispositivos"</string>
     <string name="monitoring_subtitle_vpn" msgid="800485258004629079">"VPN"</string>
@@ -404,7 +404,7 @@
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Este dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Seu dispositivo está conectado à Internet usando o <xliff:g id="VPN_APP_0">%1$s</xliff:g> e <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Seus apps de trabalho estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede em apps de trabalho, incluindo e-mails e dados de navegação, estão visíveis para o administrador de TI e o provedor de VPN."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Seus apps pessoais estão conectados à Internet usando o <xliff:g id="VPN_APP">%1$s</xliff:g>. Suas atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o provedor de VPN."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Seus apps pessoais estão conectados à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. As atividades de rede, incluindo e-mails e dados de navegação, estão visíveis para o provedor de VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir configurações de VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerenciado pelo seu pai/mãe, que pode ver e gerenciar informações como os apps que você usa, sua localização e seu tempo de uso."</string>
