@@ -152,8 +152,6 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_ADOPTABLE = "persist.sys.adoptable";
     /** {@hide} */
-    public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";
-    /** {@hide} */
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
     /** {@hide} */
     public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
@@ -257,13 +255,11 @@ public class StorageManager {
     /** {@hide} */
     public static final int DEBUG_ADOPTABLE_FORCE_OFF = 1 << 1;
     /** {@hide} */
-    public static final int DEBUG_EMULATE_FBE = 1 << 2;
+    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 2;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_ON = 1 << 3;
+    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 3;
     /** {@hide} */
-    public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 4;
-    /** {@hide} */
-    public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
+    public static final int DEBUG_VIRTUAL_DISK = 1 << 4;
 
     /** {@hide} */
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
@@ -1591,30 +1587,31 @@ public class StorageManager {
     }
 
     /** {@hide}
-     * Is this device file encrypted?
-     * @return true for file encrypted. (Implies isEncrypted() == true)
-     *         false not encrypted or using "managed" encryption
+     * Does this device have file-based encryption (FBE) enabled?
+     * @return true if the device has file-based encryption enabled.
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static boolean isFileEncryptedNativeOnly() {
+    public static boolean isFileEncrypted() {
         if (!isEncrypted()) {
             return false;
         }
         return RoSystemProperties.CRYPTO_FILE_ENCRYPTED;
     }
 
-    /** {@hide} */
-    public static boolean isFileEncryptedEmulatedOnly() {
-        return SystemProperties.getBoolean(StorageManager.PROP_EMULATE_FBE, false);
+    /** {@hide}
+     * @deprecated Use {@link #isFileEncrypted} instead, since emulated FBE is no longer supported.
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @Deprecated
+    public static boolean isFileEncryptedNativeOnly() {
+        return isFileEncrypted();
     }
 
     /** {@hide}
-     * Is this device running in a file encrypted mode, either native or emulated?
-     * @return true for file encrypted, false otherwise
+     * @deprecated Use {@link #isFileEncrypted} instead, since emulated FBE is no longer supported.
      */
+    @Deprecated
     public static boolean isFileEncryptedNativeOrEmulated() {
-        return isFileEncryptedNativeOnly()
-               || isFileEncryptedEmulatedOnly();
+        return isFileEncrypted();
     }
 
     /** {@hide} */
