@@ -552,7 +552,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Vasakule"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Paremale"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Keskele"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulaator"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Tühik"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Sisestusklahv"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Tagasilüke"</string>
@@ -739,6 +739,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"kaamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"asukoht"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"ekraanikuva salvest."</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Pealkiri puudub"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ooterežiim"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Suurendamisaken"</string>
@@ -844,6 +845,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Tundmatu rakendus"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Lõpeta ülekanne"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Saadaolevad seadmed heli esitamiseks."</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Helitugevus"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kuidas ülekandmine toimib?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Ülekanne"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Teie läheduses olevad inimesed, kellel on ühilduvad Bluetooth-seadmed, saavad kuulata teie ülekantavat meediat"</string>
@@ -929,14 +931,13 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Uus teave"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktiivsed rakendused"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Isegi kui te neid rakendusi ei kasuta, on need siiski aktiivsed ja võivad mõjutada aku tööiga"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Need rakendused on aktiivsed ja neid käitatakse isegi siis, kui te neid ei kasuta. Tänu sellele toimivad need paremini, kuid see võib mõjutada aku tööiga."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Peata"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Peatatud"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Valmis"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopeeritud"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Rakendusest <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for clipboard_dismiss_description (3335990369850165486) -->
-    <skip />
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Loobu kopeeritud tekstist"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Muuda kopeeritud teksti"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Muuda kopeeritud pilti"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Saada läheduses olevasse seadmesse"</string>
@@ -944,6 +945,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Tekst kopeeriti"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Pilt kopeeriti"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Sisu kopeeriti"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Lisa"</string>
     <string name="manage_users" msgid="1823875311934643849">"Kasutajate haldamine"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"See märguanne ei toeta jagatud ekraanikuvale lohistamist."</string>

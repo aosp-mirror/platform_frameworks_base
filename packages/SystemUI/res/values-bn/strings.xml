@@ -552,7 +552,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"বাঁ"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"ডান"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"কেন্দ্র"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"ট্যাব"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"স্পেস"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"এন্টার"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"ব্যাকস্পেস"</string>
@@ -739,6 +739,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"ক্যামেরা"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"লোকেশন"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"মাইক্রোফোন"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"স্ক্রিন রেকর্ডিং"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"কোনও শীর্ষক নেই"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"উইন্ডো বড় করে দেখা"</string>
@@ -844,6 +845,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"অজানা অ্যাপ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"কাস্ট করা বন্ধ করুন"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"অডিও আউটপুটের জন্য উপলভ্য ডিভাইস।"</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"ভলিউম"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ব্রডকাস্ট কীভাবে কাজ করে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্রচার করুন"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"আশপাশে লোকজন যাদের মানানসই ব্লুটুথ ডিভাইস আছে, তারা আপনার ব্রডকাস্ট করা মিডিয়া শুনতে পারবেন"</string>
@@ -929,14 +931,13 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"নতুন তথ্য"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"অ্যাক্টিভ অ্যাপ"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"আপনি এইসব অ্যাপ ব্যবহার না করলেও, সেগুলি এখনও চালু থাকতে পারে এবং তার জন্য ব্যাটারির চার্জ কমতে পারে"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"আপনি এমনকি ব্যবহার না করলেও, এইসব অ্যাপ অ্যাক্টিভ থাকে ও চলে। এগুলির কার্যকারিতা এটি উন্নত করে, তবে ব্যাটারির আয়ুর উপর প্রভাব ফেলতেও পারে।"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"বন্ধ করুন"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"থামানো হয়েছে"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হয়ে গেছে"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"কপি করা হয়েছে"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> থেকে"</string>
-    <!-- no translation found for clipboard_dismiss_description (3335990369850165486) -->
-    <skip />
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"কপি করা টেক্সট বাতিল করুন"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"কপি করা টেক্সট এডিট করুন"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"কপি করা ছবি এডিট করুন"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"আশেপাশের ডিভাইসে পাঠান"</string>
@@ -944,6 +945,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"টেক্সট কপি করা হয়েছে"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"ছবি কপি করা হয়েছে"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"কন্টেন্ট কপি করা হয়েছে"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"যোগ করুন"</string>
     <string name="manage_users" msgid="1823875311934643849">"ব্যবহারকারীদের ম্যানেজ করুন"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"স্প্লিটস্ক্রিন মোডে এই বিজ্ঞপ্তি টেনে আনা যাবে না।"</string>

@@ -49,11 +49,21 @@ class IRenderPipeline {
 public:
     virtual MakeCurrentResult makeCurrent() = 0;
     virtual Frame getFrame() = 0;
-    virtual bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-                      const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
-                      const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
-                      const std::vector<sp<RenderNode>>& renderNodes,
-                      FrameInfoVisualizer* profiler) = 0;
+
+    // Result of IRenderPipeline::draw
+    struct DrawResult {
+        // True if draw() succeeded, false otherwise
+        bool success = false;
+        // If drawing was successful, reports the time at which command
+        // submission occurred. -1 if this time is unknown.
+        static constexpr nsecs_t kUnknownTime = -1;
+        nsecs_t commandSubmissionTime = kUnknownTime;
+    };
+    virtual DrawResult draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
+                            const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
+                            const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
+                            const std::vector<sp<RenderNode>>& renderNodes,
+                            FrameInfoVisualizer* profiler) = 0;
     virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
                              FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;

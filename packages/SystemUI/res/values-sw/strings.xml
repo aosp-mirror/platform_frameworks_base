@@ -739,6 +739,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"mahali"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"maikrofoni"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"kurekodi skrini"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Wimbo hauna jina"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Hali tuli"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Dirisha la Ukuzaji"</string>
@@ -844,6 +845,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Programu isiyojulikana"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Acha kutuma"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Vifaa vya kutoa sauti vilivyopo"</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Sauti"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jinsi utangazaji unavyofanya kazi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Tangaza"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Watu walio karibu nawe wenye vifaa oanifu vya Bluetooth wanaweza kusikiliza maudhui unayoyatangaza"</string>
@@ -929,7 +931,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Maelezo mapya"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Programu zinazotumika"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Hata ikiwa hutumii programu hizi, bado zina shughuli na huenda zikaathiri muda wa matumizi ya betri"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Programu hizi zinaendelea kufanya kazi, hata wakati huzitumii. Hali hii huboresha utendaji wa programu hizo, lakini pia inaweza kuathiri muda wa matumizi ya betri."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Simamisha"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Imesimamishwa"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Imemaliza"</string>
@@ -943,6 +945,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Maandishi yamenakiliwa"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Picha imenakiliwa"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Maudhui yamenakiliwa"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Weka"</string>
     <string name="manage_users" msgid="1823875311934643849">"Dhibiti watumiaji"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Arifa hii hairuhusu kuburuta kwenye Skrini iliyogawanyika."</string>

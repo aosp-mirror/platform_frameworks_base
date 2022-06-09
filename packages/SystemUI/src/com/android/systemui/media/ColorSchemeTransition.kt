@@ -238,5 +238,6 @@ class ColorSchemeTransition internal constructor(
     fun updateColorScheme(colorScheme: ColorScheme?, enableGradient: Boolean) {
         isGradientEnabled = enableGradient
         colorTransitions.forEach { it.updateColorScheme(colorScheme) }
+        colorScheme?.let { mediaViewHolder.gutsViewHolder.colorScheme = colorScheme }
     }
 }

@@ -562,7 +562,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Vlevo"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Vpravo"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Střed"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulátor"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"TAB"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Mezerník"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace"</string>
@@ -749,6 +749,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"fotoaparát"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"poloha"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"nahrávání obrazovky"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Bez názvu"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Zvětšovací okno"</string>
@@ -856,6 +857,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznámá aplikace"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zastavit odesílání"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostupná zařízení pro zvukový výstup."</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Hlasitost"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jak vysílání funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysílání"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Lidé ve vašem okolí s kompatibilními zařízeními Bluetooth mohou poslouchat média, která vysíláte"</string>
@@ -943,14 +945,13 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nové informace"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivní aplikace"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"I když tyto aplikace nepoužíváte, jsou stále aktivní a mohou mít vliv na výdrž baterie"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Tyto aplikace jsou spuštěné a aktivní, i když je nepoužíváte. Zlepšuje to jejich funkčnost, ale může to mít dopad na výdrž baterie."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Konec"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zastaveno"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Hotovo"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Zkopírováno"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Z aplikace <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for clipboard_dismiss_description (3335990369850165486) -->
-    <skip />
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Odmítnout zkopírovaný text"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Upravit zkopírovaný text"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Upravit zkopírovaný obrázek"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Odeslat do zařízení v okolí"</string>
@@ -958,6 +959,14 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Text byl zkopírován"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Obrázek byl zkopírován"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Obsah byl zkopírován"</string>
+    <!-- no translation found for clipboard_editor (2971197550401892843) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
+    <skip />
+    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
+    <skip />
+    <!-- no translation found for clipboard_edit (4500155216174011640) -->
+    <skip />
     <string name="add" msgid="81036585205287996">"Přidat"</string>
     <string name="manage_users" msgid="1823875311934643849">"Správa uživatelů"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Toto oznámení nepodporuje přetažení na rozdělenou obrazovku."</string>

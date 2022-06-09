@@ -44,6 +44,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
@@ -335,10 +336,24 @@ public class StatusBarStateControllerImpl implements
                     ? Interpolators.FAST_OUT_SLOW_IN
                     : Interpolators.TOUCH_RESPONSE_REVERSE;
         }
-        mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
-        mDarkAnimator.setInterpolator(Interpolators.LINEAR);
-        mDarkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
-        mDarkAnimator.addListener(new AnimatorListenerAdapter() {
+        if (mDozeAmount == 1f && !mIsDozing) {
+            // Workaround to force relayoutWindow to be called a frame earlier. Otherwise, if
+            // mDozeAmount = 1f, then neither start() nor the first frame of the animation will
+            // cause the scrim opacity to change, which ultimately results in an extra relayout and
+            // causes us to miss a frame. By settings the doze amount to be <1f a frame earlier,
+            // we can batch the relayout with the one in NotificationShadeWindowControllerImpl.
+            setDozeAmountInternal(0.99f);
+        }
+        mDarkAnimator = createDarkAnimator();
+    }
+
+    @VisibleForTesting
+    protected ObjectAnimator createDarkAnimator() {
+        ObjectAnimator darkAnimator = ObjectAnimator.ofFloat(
+                this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
+        darkAnimator.setInterpolator(Interpolators.LINEAR);
+        darkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
+        darkAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationCancel(Animator animation) {
                 cancelInteractionJankMonitor();
@@ -354,7 +369,8 @@ public class StatusBarStateControllerImpl implements
                 beginInteractionJankMonitor();
             }
         });
-        mDarkAnimator.start();
+        darkAnimator.start();
+        return darkAnimator;
     }
 
     private void setDozeAmountInternal(float dozeAmount) {
