@@ -1635,7 +1635,9 @@ public class DisplayRotation {
                 final WindowContainer<?> source = dc.getLastOrientationSource();
                 if (source != null) {
                     mLastOrientationSource = source.toString();
-                    mSourceOrientation = source.mOrientation;
+                    final WindowState w = source.asWindowState();
+                    mSourceOrientation =
+                            w != null ? w.mAttrs.screenOrientation : source.mOrientation;
                 } else {
                     mLastOrientationSource = null;
                     mSourceOrientation = SCREEN_ORIENTATION_UNSET;

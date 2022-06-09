@@ -2427,14 +2427,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void removeImmediately() {
-        if (!mRemoved) {
-            // Destroy surface before super call. The general pattern is that the children need
-            // to be removed before the parent (so that the sync-engine tracking works). Since
-            // WindowStateAnimator is a "virtual" child, we have to do it manually here.
-            mWinAnimator.destroySurfaceLocked(getSyncTransaction());
-        }
-        super.removeImmediately();
-
         if (mRemoved) {
             // Nothing to do.
             ProtoLog.v(WM_DEBUG_ADD_REMOVE,
@@ -2443,6 +2435,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mRemoved = true;
+        // Destroy surface before super call. The general pattern is that the children need
+        // to be removed before the parent (so that the sync-engine tracking works). Since
+        // WindowStateAnimator is a "virtual" child, we have to do it manually here.
+        mWinAnimator.destroySurfaceLocked(getSyncTransaction());
+        super.removeImmediately();
 
         mWillReplaceWindow = false;
         if (mReplacementWindow != null) {
@@ -3897,6 +3894,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mDragResizingChangeReported = true;
         mWindowFrames.clearReportResizeHints();
 
+        final int prevRotation = mLastReportedConfiguration
+                .getMergedConfiguration().windowConfiguration.getRotation();
         fillClientWindowFramesAndConfiguration(mClientWindowFrames, mLastReportedConfiguration,
                 true /* useLatestConfig */, false /* relayoutVisible */);
         final boolean syncRedraw = shouldSendRedrawForSync();
@@ -3929,7 +3928,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
                     getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
                     mSyncSeqId, resizeMode);
-            if (drawPending && mOrientationChanging) {
+            if (drawPending && prevRotation != mLastReportedConfiguration
+                    .getMergedConfiguration().windowConfiguration.getRotation()) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Requested redraw for orientation change: %s", this);
@@ -5077,7 +5077,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Otherwise we add the service to mDestroySurface and allow it to be processed in our next
         // transaction.
         if (mActivityRecord != null) {
-            mActivityRecord.destroySurfaces();
+            if (mAttrs.type == TYPE_BASE_APPLICATION) {
+                mActivityRecord.destroySurfaces();
+            } else {
+                destroySurface(false /* cleanupOnResume */, mActivityRecord.mAppStopped);
+            }
         } else {
             if (hasSurface) {
                 mWmService.mDestroySurface.add(this);
@@ -5913,6 +5917,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean prepareSync() {
+        if (!mDrawHandlers.isEmpty()) {
+            Slog.w(TAG, "prepareSync with mDrawHandlers, " + this + ", " + Debug.getCallers(8));
+        }
         if (!super.prepareSync()) {
             return false;
         }
@@ -5974,11 +5981,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (asyncRotationController != null
                 && asyncRotationController.handleFinishDrawing(this, postDrawTransaction)) {
             // Consume the transaction because the controller will apply it with fade animation.
-            // Layout is not needed because the window will be hidden by the fade leash. Clear
-            // sync state because its sync transaction doesn't need to be merged to sync group.
+            // Layout is not needed because the window will be hidden by the fade leash.
             postDrawTransaction = null;
             skipLayout = true;
-            clearSyncState();
         } else if (onSyncFinishedDrawing() && postDrawTransaction != null) {
             mSyncTransaction.merge(postDrawTransaction);
             // Consume the transaction because the sync group will merge it.
@@ -6032,7 +6037,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mRedrawForSyncReported) {
             return false;
         }
-        if (mInRelayout) {
+        // TODO(b/233286785): Remove mIsWallpaper once WallpaperService handles syncId of relayout.
+        if (mInRelayout && !mIsWallpaper) {
             // The last sync seq id will return to the client, so there is no need to request the
             // client to redraw.
             return false;
@@ -6069,6 +6075,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * See {@link WindowState#mDrawHandlers}
      */
     void applyWithNextDraw(Consumer<SurfaceControl.Transaction> consumer) {
+        if (mSyncState != SYNC_STATE_NONE) {
+            Slog.w(TAG, "applyWithNextDraw with mSyncState=" + mSyncState + ", " + this
+                    + ", " + Debug.getCallers(8));
+        }
         mSyncSeqId++;
         mDrawHandlers.add(new DrawHandler(mSyncSeqId, consumer));
 

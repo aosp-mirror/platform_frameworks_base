@@ -178,6 +178,11 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return outBounds;
     }
 
+    /** Gets root bounds of the whole split layout */
+    public Rect getRootBounds() {
+        return new Rect(mRootBounds);
+    }
+
     /** Gets bounds of divider window with screen based coordinate. */
     public Rect getDividerBounds() {
         return new Rect(mDividerBounds);

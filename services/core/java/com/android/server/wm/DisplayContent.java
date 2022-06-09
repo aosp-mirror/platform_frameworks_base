@@ -1882,7 +1882,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /** Returns {@code true} if the decided new rotation has not applied to configuration yet. */
-    private boolean isRotationChanging() {
+    boolean isRotationChanging() {
         return mDisplayRotation.getRotation() != getWindowConfiguration().getRotation();
     }
 

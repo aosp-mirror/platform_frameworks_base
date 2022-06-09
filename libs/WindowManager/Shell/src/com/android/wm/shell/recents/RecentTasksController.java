@@ -44,7 +44,7 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.util.GroupedRecentTaskInfo;
-import com.android.wm.shell.util.StagedSplitBounds;
+import com.android.wm.shell.util.SplitBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -69,12 +69,12 @@ public class RecentTasksController implements TaskStackListenerCallback,
     // pair, then mSplitTasks[t1] = t2, and mSplitTasks[t2] = t1)
     private final SparseIntArray mSplitTasks = new SparseIntArray();
     /**
-     * Maps taskId to {@link StagedSplitBounds} for both taskIDs.
+     * Maps taskId to {@link SplitBounds} for both taskIDs.
      * Meaning there will be two taskId integers mapping to the same object.
      * If there's any ordering to the pairing than we can probably just get away with only one
      * taskID mapping to it, leaving both for consistency with {@link #mSplitTasks} for now.
      */
-    private final Map<Integer, StagedSplitBounds> mTaskSplitBoundsMap = new HashMap<>();
+    private final Map<Integer, SplitBounds> mTaskSplitBoundsMap = new HashMap<>();
 
     /**
      * Creates {@link RecentTasksController}, returns {@code null} if the feature is not
@@ -110,7 +110,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     /**
      * Adds a split pair. This call does not validate the taskIds, only that they are not the same.
      */
-    public void addSplitPair(int taskId1, int taskId2, StagedSplitBounds splitBounds) {
+    public void addSplitPair(int taskId1, int taskId2, SplitBounds splitBounds) {
         if (taskId1 == taskId2) {
             return;
         }
