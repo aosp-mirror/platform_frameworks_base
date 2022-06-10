@@ -537,7 +537,7 @@ public class CamcorderProfile
     public static final long RETURN_ADVANCED_VIDEO_PROFILES = 206033068L; // buganizer id
 
     /**
-     * Returns all basic encoder profiles of a camcorder profile for
+     * Returns all encoder profiles of a camcorder profile for
      * the given camera at the given quality level.
      * <p>
      * Quality levels QUALITY_LOW, QUALITY_HIGH are guaranteed to be supported, while
