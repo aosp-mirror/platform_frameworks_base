@@ -28,7 +28,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.BatteryStatsHistoryIterator;
-import com.android.internal.os.PowerCalculator;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -539,15 +538,15 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
         pw.println("  Estimated power use (mAh):");
         pw.print(prefix);
         pw.print("    Capacity: ");
-        PowerCalculator.printPowerMah(pw, getBatteryCapacity());
+        pw.print(BatteryStats.formatCharge(getBatteryCapacity()));
         pw.print(", Computed drain: ");
-        PowerCalculator.printPowerMah(pw, getConsumedPower());
+        pw.print(BatteryStats.formatCharge(getConsumedPower()));
         final Range<Double> dischargedPowerRange = getDischargedPowerRange();
         pw.print(", actual drain: ");
-        PowerCalculator.printPowerMah(pw, dischargedPowerRange.getLower());
+        pw.print(BatteryStats.formatCharge(dischargedPowerRange.getLower()));
         if (!dischargedPowerRange.getLower().equals(dischargedPowerRange.getUpper())) {
             pw.print("-");
-            PowerCalculator.printPowerMah(pw, dischargedPowerRange.getUpper());
+            pw.print(BatteryStats.formatCharge(dischargedPowerRange.getUpper()));
         }
         pw.println();
 
