@@ -2337,15 +2337,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             pw.print  ("      ");
             mNotificationPanelViewController.dump(pw, args);
         }
-        pw.println("  mStackScroller: ");
-        if (mStackScroller != null) {
-            // Double indent until we rewrite the rest of this dump()
-            pw.increaseIndent();
-            pw.increaseIndent();
-            mStackScroller.dump(pw, args);
-            pw.decreaseIndent();
-            pw.decreaseIndent();
-        }
+        pw.println("  mStackScroller: " + mStackScroller + " (dump moved)");
         pw.println("  Theme:");
         String nightMode = mUiModeManager == null ? "null" : mUiModeManager.getNightMode() + "";
         pw.println("    dark theme: " + nightMode +

@@ -14,28 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-     android:ordering="together"
-     android:interpolator="@interpolator/tv_privacy_chip_expand_interpolator"
-     android:duration="@integer/privacy_chip_animation_millis">
-    <objectAnimator
-        android:propertyName="height"
-        android:valueTo="@dimen/privacy_chip_height"
-        android:valueType="floatType"/>
-    <objectAnimator
-        android:propertyName="marginEnd"
-        android:valueTo="0"
-        android:valueType="floatType"/>
-    <objectAnimator
-        android:propertyName="radius"
-        android:valueTo="@dimen/privacy_chip_radius"
-        android:valueType="floatType"/>
-    <objectAnimator
-        android:propertyName="dotAlpha"
-        android:valueTo="255"
-        android:valueType="intType"/>
-    <objectAnimator
-        android:propertyName="bgAlpha"
-        android:valueTo="0"
-        android:valueType="intType"/>
-</set>
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:propertyName="collapseProgress"
+    android:interpolator="@interpolator/tv_privacy_chip_expand_interpolator"
+    android:valueTo="0"
+    android:valueType="floatType"
+    android:duration="@integer/privacy_chip_animation_millis" />

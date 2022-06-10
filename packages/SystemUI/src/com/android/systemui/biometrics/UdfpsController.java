@@ -24,7 +24,10 @@ import static com.android.systemui.classifier.Classifier.UDFPS_AUTHENTICATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.display.DisplayManager;
@@ -51,6 +54,7 @@ import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.dagger.BiometricsBackground;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
@@ -124,6 +128,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final UnlockedScreenOffAnimationController
             mUnlockedScreenOffAnimationController;
     @NonNull private final LatencyTracker mLatencyTracker;
+    @NonNull private final BroadcastSender mBroadcastSender;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @NonNull private final ActivityLaunchAnimator mActivityLaunchAnimator;
 
@@ -204,7 +209,7 @@ public class UdfpsController implements DozeReceiver {
                             mUnlockedScreenOffAnimationController, mHalControlsIllumination,
                             mHbmProvider, requestId, reason, callback,
                             (view, event, fromUdfpsView) -> onTouch(requestId, event,
-                                    fromUdfpsView), mActivityLaunchAnimator)));
+                                    fromUdfpsView), mActivityLaunchAnimator, mBroadcastSender)));
         }
 
         @Override
@@ -332,6 +337,20 @@ public class UdfpsController implements DozeReceiver {
     public static boolean exceedsVelocityThreshold(float velocity) {
         return velocity > 750f;
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mOverlay != null
+                    && mOverlay.getRequestReason() != REASON_AUTH_KEYGUARD
+                    && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, mRequestReason: "
+                        + mOverlay.getRequestReason());
+                mOverlay.cancel();
+                hideUdfpsOverlay();
+            }
+        }
+    };
 
     /**
      * Forwards touches to the udfps controller / view
@@ -587,6 +606,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull LatencyTracker latencyTracker,
             @NonNull ActivityLaunchAnimator activityLaunchAnimator,
             @NonNull Optional<AlternateUdfpsTouchProvider> aternateTouchProvider,
+            @NonNull BroadcastSender broadcastSender,
             @BiometricsBackground Executor biometricsExecutor) {
         mContext = context;
         mExecution = execution;
@@ -617,6 +637,7 @@ public class UdfpsController implements DozeReceiver {
         mLatencyTracker = latencyTracker;
         mActivityLaunchAnimator = activityLaunchAnimator;
         mAlternateTouchProvider = aternateTouchProvider.orElse(null);
+        mBroadcastSender = broadcastSender;
         mBiometricExecutor = biometricsExecutor;
 
         mOrientationListener = new BiometricDisplayListener(
@@ -633,6 +654,11 @@ public class UdfpsController implements DozeReceiver {
 
         final UdfpsOverlayController mUdfpsOverlayController = new UdfpsOverlayController();
         mFingerprintManager.setUdfpsOverlayController(mUdfpsOverlayController);
+
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        context.registerReceiver(mBroadcastReceiver, filter,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         udfpsHapticsSimulator.setUdfpsController(this);
         udfpsShell.setUdfpsOverlayController(mUdfpsOverlayController);

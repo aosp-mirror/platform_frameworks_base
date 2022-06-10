@@ -2501,11 +2501,6 @@ class ActivityStarter {
             }
         }
 
-        if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0 && mSourceRecord == null) {
-            // ignore the flag if there is no the sourceRecord
-            mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
-        }
-
         // We'll invoke onUserLeaving before onPause only if the launching
         // activity did not explicitly state that this is an automated launch.
         mSupervisor.mUserLeaving = (mLaunchFlags & FLAG_ACTIVITY_NO_USER_ACTION) == 0;
@@ -2699,6 +2694,12 @@ class ActivityStarter {
                 // gets launched into its own task.
                 mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
             }
+        }
+
+        if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0
+                && ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) == 0 || mSourceRecord == null)) {
+            // ignore the flag if there is no the sourceRecord or without new_task flag
+            mLaunchFlags &= ~FLAG_ACTIVITY_LAUNCH_ADJACENT;
         }
     }
 
