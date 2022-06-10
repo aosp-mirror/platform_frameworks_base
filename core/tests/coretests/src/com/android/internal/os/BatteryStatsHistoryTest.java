@@ -27,16 +27,16 @@ import android.util.Log;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 
 /**
  * Test BatteryStatsHistory.
@@ -74,7 +74,7 @@ public class BatteryStatsHistoryTest {
     @Test
     public void testConstruct() {
         BatteryStatsHistory history =
-                new BatteryStatsHistory(mBatteryStatsImpl, mSystemDir, mHistoryBuffer);
+                new BatteryStatsHistory(mHistoryBuffer, mSystemDir, () -> 32);
         createActiveFile(history);
         verifyFileNumbers(history, Arrays.asList(0));
         verifyActiveFile(history, "0.bin");
@@ -83,7 +83,7 @@ public class BatteryStatsHistoryTest {
     @Test
     public void testStartNextFile() {
         BatteryStatsHistory history =
-                new BatteryStatsHistory(mBatteryStatsImpl, mSystemDir, mHistoryBuffer);
+                new BatteryStatsHistory(mHistoryBuffer, mSystemDir, () -> 32);
 
         List<Integer> fileList = new ArrayList<>();
         fileList.add(0);
@@ -122,7 +122,7 @@ public class BatteryStatsHistoryTest {
 
         // create a new BatteryStatsHistory object, it will pick up existing history files.
         BatteryStatsHistory history2 =
-                new BatteryStatsHistory(mBatteryStatsImpl, mSystemDir, mHistoryBuffer);
+                new BatteryStatsHistory(mHistoryBuffer, mSystemDir, () -> 32);
         // verify construct can pick up all files from file system.
         verifyFileNumbers(history2, fileList);
         verifyActiveFile(history2, "33.bin");
