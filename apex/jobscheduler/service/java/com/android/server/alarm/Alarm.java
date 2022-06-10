@@ -123,6 +123,7 @@ class Alarm {
     public AlarmManagerService.PriorityClass priorityClass;
     /** Broadcast options to use when delivering this alarm */
     public Bundle mIdleOptions;
+    public boolean mUsingReserveQuota;
 
     Alarm(int type, long when, long requestedWhenElapsed, long windowLength, long interval,
             PendingIntent op, IAlarmListener rec, String listenerTag, WorkSource ws, int flags,
@@ -151,6 +152,7 @@ class Alarm {
         mExactAllowReason = exactAllowReason;
         sourcePackage = (operation != null) ? operation.getCreatorPackage() : packageName;
         creatorUid = (operation != null) ? operation.getCreatorUid() : this.uid;
+        mUsingReserveQuota = false;
     }
 
     public static String makeTag(PendingIntent pi, String tag, int type) {
@@ -340,6 +342,9 @@ class Alarm {
         TimeUtils.formatDuration(getWhenElapsed(), nowELAPSED, ipw);
         ipw.print(" maxWhenElapsed=");
         TimeUtils.formatDuration(mMaxWhenElapsed, nowELAPSED, ipw);
+        if (mUsingReserveQuota) {
+            ipw.print(" usingReserveQuota=true");
+        }
         ipw.println();
 
         if (alarmClock != null) {

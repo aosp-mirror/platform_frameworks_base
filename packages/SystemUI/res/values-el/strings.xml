@@ -845,8 +845,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Άγνωστη εφαρμογή"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Διακοπή μετάδοσης"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Διαθέσιμες συσκευές για έξοδο ήχου."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Ένταση ήχου"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Πώς λειτουργεί η μετάδοση"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Μετάδοση"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Οι άνθρωποι με συμβατές συσκευές Bluetooth που βρίσκονται κοντά σας μπορούν να ακούσουν το μέσο που μεταδίδετε."</string>
@@ -932,8 +931,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Νέες πληροφορίες"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Ενεργές εφαρμογές"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Αυτές οι εφαρμογές είναι ενεργές και εκτελούνται, ακόμη και αν δεν τις χρησιμοποιείτε. Αυτό βελτιώνει τη λειτουργικότητά τους, αλλά μπορεί να επηρεάσει τη διάρκεια ζωής της μπαταρίας."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Διακοπή"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Διακόπηκε"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Τέλος"</string>
@@ -947,6 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Το κείμενο αντιγράφηκε"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Η εικόνα αντιγράφηκε"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Το περιεχόμενο αντιγράφηκε"</string>
+    <string name="clipboard_editor" msgid="2971197550401892843">"Πρόγραμμα επεξεργασίας προχείρου"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Πρόχειρο"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Προεπισκόπηση εικόνας"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"επεξεργασία"</string>
     <string name="add" msgid="81036585205287996">"Προσθήκη"</string>
     <string name="manage_users" msgid="1823875311934643849">"Διαχείριση χρηστών"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Αυτή η ειδοποίηση δεν υποστηρίζει τη μεταφορά με σύρσιμο για χρήση του διαχωρισμού οθόνης."</string>
