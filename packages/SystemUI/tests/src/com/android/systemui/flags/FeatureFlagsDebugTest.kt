@@ -26,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -75,6 +76,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var clearCacheAction: Consumer<Int>
 
+    private val deviceConfig = DeviceConfigProxyFake()
     private val teamfoodableFlagA = BooleanFlag(500, false, true)
     private val teamfoodableFlagB = BooleanFlag(501, true, true)
 
@@ -90,6 +92,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             systemProperties,
             resources,
             dumpManager,
+            deviceConfig,
             flagMap,
             commandRegistry,
             barService
@@ -192,6 +195,21 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(3, "c", true))).isTrue()
         assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(4, "d", false))).isFalse()
         assertThat(mFeatureFlagsDebug.isEnabled(SysPropBooleanFlag(5, "e"))).isFalse()
+    }
+
+    @Test
+    fun testReadDeviceConfigBooleanFlag() {
+        val namespace = "test_namespace"
+        deviceConfig.setProperty(namespace, "a", "true", false)
+        deviceConfig.setProperty(namespace, "b", "false", false)
+        deviceConfig.setProperty(namespace, "c", null, false)
+
+        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(1, "a", namespace)))
+            .isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(2, "b", namespace)))
+            .isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(3, "c", namespace)))
+            .isFalse()
     }
 
     @Test
