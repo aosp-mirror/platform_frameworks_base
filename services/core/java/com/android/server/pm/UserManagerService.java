@@ -453,9 +453,12 @@ public class UserManagerService extends IUserManager.Stub {
     private final Bundle mGuestRestrictions = new Bundle();
 
     /**
-     * Set of user IDs being actively removed. Removed IDs linger in this set
-     * for several seconds to work around a VFS caching issue.
-     * Use {@link #addRemovingUserIdLocked(int)} to add elements to this array
+     * Set of user IDs that are being removed or were removed during the current boot.  User IDs in
+     * this set aren't reused until the device is rebooted, unless MAX_USER_ID is reached.  Some
+     * services don't fully clear out in-memory user state upon user removal; this behavior is
+     * intended to mitigate such issues by limiting user ID reuse.  This array applies to any type
+     * of user (including pre-created users) when they are removed.  Use {@link
+     * #addRemovingUserIdLocked(int)} to add elements to this array.
      */
     @GuardedBy("mUsersLock")
     private final SparseBooleanArray mRemovingUserIds = new SparseBooleanArray();
