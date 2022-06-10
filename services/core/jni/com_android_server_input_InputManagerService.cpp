@@ -224,8 +224,10 @@ static inline const char* toString(bool value) {
     return value ? "true" : "false";
 }
 
-static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextObj, int32_t style,
-        PointerIcon* outPointerIcon, SpriteIcon* outSpriteIcon) {
+static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextObj,
+                                                  PointerIconStyle style,
+                                                  PointerIcon* outPointerIcon,
+                                                  SpriteIcon* outSpriteIcon) {
     status_t status = android_view_PointerIcon_loadSystemIcon(env,
             contextObj, style, outPointerIcon);
     if (!status) {
@@ -236,7 +238,7 @@ static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextOb
     }
 }
 
-static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t style,
+static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, PointerIconStyle style,
                                    SpriteIcon* outSpriteIcon) {
     PointerIcon pointerIcon;
     loadSystemIconAsSpriteWithPointerIcon(env, contextObj, style, &pointerIcon, outSpriteIcon);
@@ -290,7 +292,7 @@ public:
     void setShowTouches(bool enabled);
     void setInteractive(bool interactive);
     void reloadCalibration();
-    void setPointerIconType(int32_t iconId);
+    void setPointerIconType(PointerIconStyle iconId);
     void reloadPointerIcons();
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
@@ -346,10 +348,11 @@ public:
 
     virtual void loadPointerIcon(SpriteIcon* icon, int32_t displayId);
     virtual void loadPointerResources(PointerResources* outResources, int32_t displayId);
-    virtual void loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
-            std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId);
-    virtual int32_t getDefaultPointerIconId();
-    virtual int32_t getCustomPointerIconId();
+    virtual void loadAdditionalMouseResources(
+            std::map<PointerIconStyle, SpriteIcon>* outResources,
+            std::map<PointerIconStyle, PointerAnimation>* outAnimationResources, int32_t displayId);
+    virtual PointerIconStyle getDefaultPointerIconId();
+    virtual PointerIconStyle getCustomPointerIconId();
     virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos);
 
 private:
@@ -1113,7 +1116,7 @@ void NativeInputManager::reloadCalibration() {
             InputReaderConfiguration::CHANGE_TOUCH_AFFINE_TRANSFORMATION);
 }
 
-void NativeInputManager::setPointerIconType(int32_t iconId) {
+void NativeInputManager::setPointerIconType(PointerIconStyle iconId) {
     AutoMutex _l(mLock);
     std::shared_ptr<PointerController> controller = mLocked.pointerController.lock();
     if (controller != nullptr) {
@@ -1430,29 +1433,31 @@ void NativeInputManager::loadPointerResources(PointerResources* outResources, in
     ScopedLocalRef<jobject> displayContext(env, env->CallObjectMethod(
             mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
 
-    loadSystemIconAsSprite(env, displayContext.get(), POINTER_ICON_STYLE_SPOT_HOVER,
-            &outResources->spotHover);
-    loadSystemIconAsSprite(env, displayContext.get(), POINTER_ICON_STYLE_SPOT_TOUCH,
-            &outResources->spotTouch);
-    loadSystemIconAsSprite(env, displayContext.get(), POINTER_ICON_STYLE_SPOT_ANCHOR,
-            &outResources->spotAnchor);
+    loadSystemIconAsSprite(env, displayContext.get(), PointerIconStyle::TYPE_SPOT_HOVER,
+                           &outResources->spotHover);
+    loadSystemIconAsSprite(env, displayContext.get(), PointerIconStyle::TYPE_SPOT_TOUCH,
+                           &outResources->spotTouch);
+    loadSystemIconAsSprite(env, displayContext.get(), PointerIconStyle::TYPE_SPOT_ANCHOR,
+                           &outResources->spotAnchor);
 }
 
-void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIcon>* outResources,
-        std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId) {
+void NativeInputManager::loadAdditionalMouseResources(
+        std::map<PointerIconStyle, SpriteIcon>* outResources,
+        std::map<PointerIconStyle, PointerAnimation>* outAnimationResources, int32_t displayId) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
     ScopedLocalRef<jobject> displayContext(env, env->CallObjectMethod(
             mServiceObj, gServiceClassInfo.getContextForDisplay, displayId));
 
-    for (int iconId = POINTER_ICON_STYLE_CONTEXT_MENU; iconId <= POINTER_ICON_STYLE_GRABBING;
-             ++iconId) {
+    for (int32_t iconId = static_cast<int32_t>(PointerIconStyle::TYPE_CONTEXT_MENU);
+         iconId <= static_cast<int32_t>(PointerIconStyle::TYPE_GRABBING); ++iconId) {
+        const PointerIconStyle pointerIconStyle = static_cast<PointerIconStyle>(iconId);
         PointerIcon pointerIcon;
-        loadSystemIconAsSpriteWithPointerIcon(
-                env, displayContext.get(), iconId, &pointerIcon, &((*outResources)[iconId]));
+        loadSystemIconAsSpriteWithPointerIcon(env, displayContext.get(), pointerIconStyle,
+                                              &pointerIcon, &((*outResources)[pointerIconStyle]));
         if (!pointerIcon.bitmapFrames.empty()) {
-            PointerAnimation& animationData = (*outAnimationResources)[iconId];
+            PointerAnimation& animationData = (*outAnimationResources)[pointerIconStyle];
             size_t numFrames = pointerIcon.bitmapFrames.size() + 1;
             animationData.durationPerFrame =
                     milliseconds_to_nanoseconds(pointerIcon.durationPerFrame);
@@ -1467,16 +1472,16 @@ void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIc
             }
         }
     }
-    loadSystemIconAsSprite(env, displayContext.get(), POINTER_ICON_STYLE_NULL,
-            &((*outResources)[POINTER_ICON_STYLE_NULL]));
+    loadSystemIconAsSprite(env, displayContext.get(), PointerIconStyle::TYPE_NULL,
+                           &((*outResources)[PointerIconStyle::TYPE_NULL]));
 }
 
-int32_t NativeInputManager::getDefaultPointerIconId() {
-    return POINTER_ICON_STYLE_ARROW;
+PointerIconStyle NativeInputManager::getDefaultPointerIconId() {
+    return PointerIconStyle::TYPE_ARROW;
 }
 
-int32_t NativeInputManager::getCustomPointerIconId() {
-    return POINTER_ICON_STYLE_CUSTOM;
+PointerIconStyle NativeInputManager::getCustomPointerIconId() {
+    return PointerIconStyle::TYPE_CUSTOM;
 }
 
 void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
@@ -2133,9 +2138,13 @@ static void nativeDisableInputDevice(JNIEnv* env, jobject nativeImplObj, jint de
 }
 
 static void nativeSetPointerIconType(JNIEnv* env, jobject nativeImplObj, jint iconId) {
+    // iconId is set in java from from frameworks/base/core/java/android/view/PointerIcon.java,
+    // where the definition in <input/Input.h> is duplicated as a sealed class (type safe enum
+    // equivalent in Java).
+
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    im->setPointerIconType(iconId);
+    im->setPointerIconType(static_cast<PointerIconStyle>(iconId));
 }
 
 static void nativeReloadPointerIcons(JNIEnv* env, jobject nativeImplObj) {
