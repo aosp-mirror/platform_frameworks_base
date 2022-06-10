@@ -90,8 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ผู้ดูแลระบบล็อกอุปกรณ์"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"มีการล็อกอุปกรณ์ด้วยตัวเอง"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ไม่รู้จัก"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"เปิดการเข้าถึงกล้องในการตั้งค่าเพื่อใช้การปลดล็อกด้วยใบหน้า"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">โปรดป้อน PIN ของซิม คุณพยายามได้อีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง</item>
       <item quantity="one">โปรดป้อน PIN ของซิม คุณพยายามได้อีก <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์</item>
