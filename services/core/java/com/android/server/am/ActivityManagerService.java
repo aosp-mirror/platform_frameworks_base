@@ -3753,7 +3753,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     final Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
                             Uri.fromParts("package", packageName, null));
-                    intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                    intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
+                            | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                     intent.putExtra(Intent.EXTRA_UID, (appInfo != null) ? appInfo.uid : -1);
                     intent.putExtra(Intent.EXTRA_USER_HANDLE, resolvedUserId);
                     final int[] visibilityAllowList =
