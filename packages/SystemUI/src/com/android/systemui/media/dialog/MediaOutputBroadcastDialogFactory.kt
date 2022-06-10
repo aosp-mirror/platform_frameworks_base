@@ -17,6 +17,7 @@
 package com.android.systemui.media.dialog
 
 import android.content.Context
+import android.media.AudioManager
 import android.media.session.MediaSessionManager
 import android.view.View
 import com.android.internal.logging.UiEventLogger
@@ -41,7 +42,8 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
     private val notifCollection: CommonNotifCollection,
     private val uiEventLogger: UiEventLogger,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>
+    private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
+    private val audioManager: AudioManager
 ) {
     var mediaOutputBroadcastDialog: MediaOutputBroadcastDialog? = null
 
@@ -52,7 +54,7 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
 
         val controller = MediaOutputController(context, packageName,
                 mediaSessionManager, lbm, starter, notifCollection,
-                dialogLaunchAnimator, nearbyMediaDevicesManagerOptional)
+                dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager)
         val dialog =
                 MediaOutputBroadcastDialog(context, aboveStatusBar, broadcastSender, controller)
         mediaOutputBroadcastDialog = dialog
