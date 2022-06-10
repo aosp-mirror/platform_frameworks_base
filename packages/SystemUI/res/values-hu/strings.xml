@@ -136,7 +136,7 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"Arc hitelesítve"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Megerősítve"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Koppintson a Megerősítés lehetőségre"</string>
-    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Zárolás arccal feloldva. Folytatás: Feloldásra koppintás."</string>
+    <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Arccal feloldva. A folytatáshoz nyomja meg a feloldás ikont."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Hitelesítve"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN-kód használata"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Minta használata"</string>
@@ -312,11 +312,13 @@
     <string name="tap_again" msgid="1315420114387908655">"Koppintson újra"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Csúsztasson felfelé a megnyitáshoz"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Az eszköz használatához nyomja meg a feloldás ikonját"</string>
-    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Zárolás arccal feloldva. Eszköz használata: Feloldás ikon."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1901953991150295169) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5558598599408514296) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (4844142668312841831) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (5640521437931460125) -->
+    <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Arccal feloldva. A megnyitáshoz nyomja meg a feloldás ikont."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1901953991150295169">"Mozgatás balra"</item>
+    <item msgid="5558598599408514296">"Mozgatás lefelé"</item>
+    <item msgid="4844142668312841831">"Mozgatás jobbra"</item>
+    <item msgid="5640521437931460125">"Mozgatás felfelé"</item>
+  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Az újrapróbálkozáshoz csúsztassa felfelé az ujját"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Az NFC használatához oldja fel a képernyőzárat"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ez az eszköz az Ön szervezetének tulajdonában van"</string>
@@ -399,7 +401,7 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Az eszközre tanúsítványkibocsátó van telepítve. Ezáltal figyelhetik és befolyásolhatják az Ön biztonságos hálózati forgalmát."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"A rendszergazda bekapcsolta az eszköz forgalmát figyelő hálózati naplózást."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"A rendszergazda bekapcsolta a hálózati naplózást, amely a munkaprofilban figyeli a forgalmat, a személyes profilban azonban nem."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Ez az eszköz a következőn keresztül csatlakozik az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája és VPN-szolgáltatója számára."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Ez az eszköz a következőn keresztül csatlakozik az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája számára."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Ez az eszköz a következőkön keresztül csatlakozik az internethez: <xliff:g id="VPN_APP_0">%1$s</xliff:g> és <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája és VPN-szolgáltatója számára."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Munkahelyi alkalmazásai a következőn keresztül csatlakoznak az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. A munkahelyi alkalmazásaiban végzett hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája és VPN-szolgáltatója számára."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Személyes alkalmazásai a következőn keresztül csatlakoznak az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a VPN-szolgáltatója számára."</string>
@@ -737,6 +739,7 @@
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"helyadatok"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
+    <string name="privacy_type_media_projection" msgid="8136723828804251547">"képernyőrögzítés"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Nincs cím"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Készenléti mód"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Nagyítás ablaka"</string>
@@ -841,8 +844,8 @@
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"A munkamenet átküldéséhez nyissa meg az alkalmazást."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Ismeretlen alkalmazás"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Átküldés leállítása"</string>
-    <!-- no translation found for media_output_dialog_accessibility_title (4681741064190167888) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Rendelkezésre álló eszközök a hangkimenethez."</string>
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Hangerő"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"A közvetítés működése"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Közvetítés"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"A közelben tartózkodó, kompatibilis Bluetooth-eszközzel rendelkező személyek meghallgathatják az Ön közvetített médiatartalmait"</string>
@@ -928,23 +931,24 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Új információ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktív alkalmazások"</string>
-    <string name="fgs_manager_dialog_message" msgid="6839542063522121108">"Még ha nem is használja ezeket az alkalmazásokat, továbbra is aktívak maradnak, és hatással lehetnek az akkumulátor élettartamára"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Ezek az alkalmazások aktívak és futnak, még akkor is, amikor nem használja őket. Ez javítja a működésüket, de hatással lehet az akkumulátor-élettartamra is."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Leállítás"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Leállítva"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Kész"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Másolva"</string>
     <string name="clipboard_edit_source" msgid="9156488177277788029">"Forrás: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Másolási UI elvetése"</string>
+    <string name="clipboard_dismiss_description" msgid="3335990369850165486">"Vágólapra másolt szöveg elvetése"</string>
     <string name="clipboard_edit_text_description" msgid="805254383912962103">"Vágólapra másolt szöveg szerkesztése"</string>
     <string name="clipboard_edit_image_description" msgid="8904857948976041306">"Vágólapra másolt kép szerkesztése"</string>
     <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"Küldés közeli eszközre"</string>
     <string name="clipboard_text_hidden" msgid="7926899867471812305">"Koppintson a megtekintéshez"</string>
-    <!-- no translation found for clipboard_text_copied (5100836834278976679) -->
-    <skip />
-    <!-- no translation found for clipboard_image_copied (3793365360174328722) -->
-    <skip />
-    <!-- no translation found for clipboard_content_copied (144452398567828145) -->
-    <skip />
+    <string name="clipboard_text_copied" msgid="5100836834278976679">"Szöveg másolva"</string>
+    <string name="clipboard_image_copied" msgid="3793365360174328722">"Kép másolva"</string>
+    <string name="clipboard_content_copied" msgid="144452398567828145">"Tartalom másolva"</string>
+    <string name="clipboard_editor" msgid="2971197550401892843">"Vágólapszerkesztő"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Vágólap"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Kép előnézete"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"szerkesztés"</string>
     <string name="add" msgid="81036585205287996">"Hozzáadás"</string>
     <string name="manage_users" msgid="1823875311934643849">"Felhasználók kezelése"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Az értesítés nem támogatja a megosztott képernyőre való áthúzást."</string>
