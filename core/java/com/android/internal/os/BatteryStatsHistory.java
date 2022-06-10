@@ -31,6 +31,7 @@ import com.android.internal.util.ParseUtils;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -207,6 +208,11 @@ public class BatteryStatsHistory {
         final int next = mFileNumbers.get(mFileNumbers.size() - 1) + 1;
         mFileNumbers.add(next);
         setActiveFile(next);
+        try {
+            mActiveFile.getBaseFile().createNewFile();
+        } catch (IOException e) {
+            Slog.e(TAG, "Could not create history file: " + mActiveFile.getBaseFile());
+        }
 
         // if free disk space is less than 100MB, delete oldest history file.
         if (!hasFreeDiskSpace()) {
