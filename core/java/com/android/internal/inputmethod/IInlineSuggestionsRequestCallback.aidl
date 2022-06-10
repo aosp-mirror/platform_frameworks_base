@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
 
-import com.android.internal.view.IInlineSuggestionsResponseCallback;
+import com.android.internal.inputmethod.IInlineSuggestionsResponseCallback;
 
 /**
  * Binder interface for the IME service to send {@link InlineSuggestionsRequest} or notify other IME
  * service events to the system.
- * {@hide}
  */
 oneway interface IInlineSuggestionsRequestCallback {
     /** Indicates that the current IME does not support inline suggestion. */
