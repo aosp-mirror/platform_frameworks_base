@@ -62,6 +62,7 @@ import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.Nullable;
 
@@ -142,6 +143,7 @@ public class KeyguardIndicationController {
     private final IActivityManager mIActivityManager;
     private final FalsingManager mFalsingManager;
     private final KeyguardBypassController mKeyguardBypassController;
+    private final AccessibilityManager mAccessibilityManager;
     private final Handler mHandler;
 
     protected KeyguardIndicationRotateTextViewController mRotateTextViewController;
@@ -218,7 +220,8 @@ public class KeyguardIndicationController {
             LockPatternUtils lockPatternUtils,
             ScreenLifecycle screenLifecycle,
             IActivityManager iActivityManager,
-            KeyguardBypassController keyguardBypassController) {
+            KeyguardBypassController keyguardBypassController,
+            AccessibilityManager accessibilityManager) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mDevicePolicyManager = devicePolicyManager;
@@ -236,6 +239,7 @@ public class KeyguardIndicationController {
         mIActivityManager = iActivityManager;
         mFalsingManager = falsingManager;
         mKeyguardBypassController = keyguardBypassController;
+        mAccessibilityManager = accessibilityManager;
         mScreenLifecycle = screenLifecycle;
         mScreenLifecycle.addObserver(mScreenObserver);
 
@@ -905,7 +909,9 @@ public class KeyguardIndicationController {
                 mStatusBarKeyguardViewManager.showBouncerMessage(message, mInitialTextColorState);
             }
         } else {
-            if (mKeyguardUpdateMonitor.isUdfpsSupported()
+            if (!mAccessibilityManager.isEnabled()
+                    && !mAccessibilityManager.isTouchExplorationEnabled()
+                    && mKeyguardUpdateMonitor.isUdfpsSupported()
                     && mKeyguardUpdateMonitor.getUserCanSkipBouncer(
                     KeyguardUpdateMonitor.getCurrentUser())) {
                 final int stringId = mKeyguardUpdateMonitor.getIsFaceAuthenticated()
@@ -915,15 +921,6 @@ public class KeyguardIndicationController {
             } else {
                 showBiometricMessage(mContext.getString(R.string.keyguard_unlock));
             }
-        }
-    }
-
-    private void showFaceFailedTryFingerprintMsg(int msgId, String a11yString) {
-        showBiometricMessage(R.string.keyguard_face_failed_use_fp);
-
-        // Although we suppress face auth errors visually, we still announce them for a11y
-        if (!TextUtils.isEmpty(a11yString)) {
-            mLockScreenIndicationView.announceForAccessibility(a11yString);
         }
     }
 
