@@ -47,6 +47,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
@@ -113,6 +114,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private MetricsLogger mMetricsLogger;
+    @Mock private DumpManager mDumpManager;
     @Mock private Resources mResources;
     @Mock(answer = Answers.RETURNS_SELF)
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
@@ -167,6 +169,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mColorExtractor,
                 mNotificationLockscreenUserManager,
                 mMetricsLogger,
+                mDumpManager,
                 new FalsingCollectorFake(),
                 new FalsingManagerFake(),
                 mResources,

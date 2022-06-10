@@ -37,6 +37,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_WAKE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
@@ -2338,6 +2339,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 continue;
             }
 
+            // Prepare transition before resume top activity, so it can be collected.
+            if (!displayShouldSleep && display.isDefaultDisplay
+                    && !display.getDisplayPolicy().isAwake()
+                    && display.mTransitionController.isShellTransitionsEnabled()
+                    && !display.mTransitionController.isCollecting()) {
+                display.mTransitionController.requestTransitionIfNeeded(TRANSIT_WAKE,
+                        0 /* flags */, null /* trigger */, display);
+            }
             // Set the sleeping state of the root tasks on the display.
             display.forAllRootTasks(rootTask -> {
                 if (displayShouldSleep) {
