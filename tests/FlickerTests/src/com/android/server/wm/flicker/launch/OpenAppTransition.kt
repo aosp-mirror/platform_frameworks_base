@@ -228,11 +228,23 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
         testSpec.assertWm {
             this.isAppWindowNotOnTop(testApp.component)
                     .then()
-                    .isAppWindowOnTop(FlickerComponentName.SNAPSHOT, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
-                    .then()
-                    .isAppWindowOnTop(testApp.component)
+                    .isAppWindowOnTop(
+                        testApp.component
+                            .or(FlickerComponentName.SNAPSHOT)
+                            .or(FlickerComponentName.SPLASH_SCREEN)
+                    )
+        }
+    }
+
+    /**
+     * Checks that [testApp] window is not on top at the start of the transition, and then becomes
+     * the top visible window until the end of the transition.
+     */
+    @Presubmit
+    @Test
+    open fun appWindowIsTopWindowAtEnd() {
+        testSpec.assertWmEnd {
+            this.isAppWindowOnTop(testApp.component)
         }
     }
 }
