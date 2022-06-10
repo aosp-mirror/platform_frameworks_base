@@ -16,13 +16,17 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.util.MathUtils;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -33,13 +37,15 @@ import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.By
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
+import java.io.PrintWriter;
+
 import javax.inject.Inject;
 
 /**
  * A global state to track all input states for the algorithm.
  */
 @SysUISingleton
-public class AmbientState {
+public class AmbientState implements Dumpable {
 
     private static final float MAX_PULSE_HEIGHT = 100000f;
     private static final boolean NOTIFICATIONS_HAVE_SHADOWS = false;
@@ -224,7 +230,8 @@ public class AmbientState {
 
     @Inject
     public AmbientState(
-            Context context,
+            @NonNull Context context,
+            @NonNull DumpManager dumpManager,
             @NonNull SectionProvider sectionProvider,
             @NonNull BypassController bypassController,
             @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
@@ -232,6 +239,7 @@ public class AmbientState {
         mBypassController = bypassController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         reload(context);
+        dumpManager.registerDumpable(this);
     }
 
     /**
@@ -694,5 +702,50 @@ public class AmbientState {
     public boolean isBouncerInTransit() {
         return mStatusBarKeyguardViewManager != null
                 && mStatusBarKeyguardViewManager.isBouncerInTransit();
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String[] args) {
+        pw.println("mTopPadding=" + mTopPadding);
+        pw.println("mStackTopMargin=" + mStackTopMargin);
+        pw.println("mStackTranslation=" + mStackTranslation);
+        pw.println("mLayoutMinHeight=" + mLayoutMinHeight);
+        pw.println("mLayoutMaxHeight=" + mLayoutMaxHeight);
+        pw.println("mLayoutHeight=" + mLayoutHeight);
+        pw.println("mContentHeight=" + mContentHeight);
+        pw.println("mHideSensitive=" + mHideSensitive);
+        pw.println("mShadeExpanded=" + mShadeExpanded);
+        pw.println("mClearAllInProgress=" + mClearAllInProgress);
+        pw.println("mDimmed=" + mDimmed);
+        pw.println("mStatusBarState=" + mStatusBarState);
+        pw.println("mExpansionChanging=" + mExpansionChanging);
+        pw.println("mPanelFullWidth=" + mPanelFullWidth);
+        pw.println("mPulsing=" + mPulsing);
+        pw.println("mPulseHeight=" + mPulseHeight);
+        pw.println("mTrackedHeadsUpRow.key=" + logKey(mTrackedHeadsUpRow));
+        pw.println("mMaxHeadsUpTranslation=" + mMaxHeadsUpTranslation);
+        pw.println("mUnlockHintRunning=" + mUnlockHintRunning);
+        pw.println("mDozeAmount=" + mDozeAmount);
+        pw.println("mDozing=" + mDozing);
+        pw.println("mFractionToShade=" + mFractionToShade);
+        pw.println("mHideAmount=" + mHideAmount);
+        pw.println("mAppearFraction=" + mAppearFraction);
+        pw.println("mAppearing=" + mAppearing);
+        pw.println("mExpansionFraction=" + mExpansionFraction);
+        pw.println("mExpandingVelocity=" + mExpandingVelocity);
+        pw.println("mOverScrollTopAmount=" + mOverScrollTopAmount);
+        pw.println("mOverScrollBottomAmount=" + mOverScrollBottomAmount);
+        pw.println("mOverExpansion=" + mOverExpansion);
+        pw.println("mStackHeight=" + mStackHeight);
+        pw.println("mStackEndHeight=" + mStackEndHeight);
+        pw.println("mStackY=" + mStackY);
+        pw.println("mScrollY=" + mScrollY);
+        pw.println("mCurrentScrollVelocity=" + mCurrentScrollVelocity);
+        pw.println("mIsSwipingUp=" + mIsSwipingUp);
+        pw.println("mPanelTracking=" + mPanelTracking);
+        pw.println("mIsFlinging=" + mIsFlinging);
+        pw.println("mNeedFlingAfterLockscreenSwipeUp=" + mNeedFlingAfterLockscreenSwipeUp);
+        pw.println("mZDistanceBetweenElements=" + mZDistanceBetweenElements);
+        pw.println("mBaseZHeight=" + mBaseZHeight);
     }
 }
