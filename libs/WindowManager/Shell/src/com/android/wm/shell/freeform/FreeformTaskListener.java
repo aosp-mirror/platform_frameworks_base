@@ -106,8 +106,6 @@ public class FreeformTaskListener<T extends AutoCloseable>
                 taskInfo.taskId);
         state.mTaskInfo = taskInfo;
         mWindowDecorationViewModel.onTaskInfoChanged(state.mTaskInfo, state.mWindowDecoration);
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TASK_ORG, "Freeform Task Info Changed: #%d",
-                taskInfo.taskId);
     }
 
     @Override
