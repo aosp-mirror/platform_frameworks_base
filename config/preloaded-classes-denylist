@@ -8,3 +8,4 @@ gov.nist.core.net.DefaultNetworkLayer
 android.net.rtp.AudioGroup
 android.net.rtp.AudioStream
 android.net.rtp.RtpStream
+java.util.concurrent.ThreadLocalRandom
