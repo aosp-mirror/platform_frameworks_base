@@ -5820,14 +5820,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (token == null && list.get(0).attachedToProcess()) {
                     ActivityRecord topRecord = list.get(0);
                     return new ActivityTokens(topRecord.token, topRecord.assistToken,
-                            topRecord.app.getThread(), topRecord.shareableActivityToken);
+                            topRecord.app.getThread(), topRecord.shareableActivityToken,
+                            topRecord.getUid());
                 }
                 // find the expected Activity
                 for (int i = 0; i < list.size(); i++) {
                     ActivityRecord record = list.get(i);
                     if (record.shareableActivityToken == token && record.attachedToProcess()) {
                         return new ActivityTokens(record.token, record.assistToken,
-                                record.app.getThread(), record.shareableActivityToken);
+                                record.app.getThread(), record.shareableActivityToken,
+                                record.getUid());
                     }
                 }
                 return null;
