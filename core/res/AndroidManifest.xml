@@ -6634,7 +6634,7 @@
                 android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
-                android:theme="@style/Theme.DeviceDefault.Wallpaper.NoTitleBar"
+                android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen"
                 android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
                 android:icon="@drawable/platlogo"
                 android:process=":ui">
