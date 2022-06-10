@@ -27,16 +27,11 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class SystemUIThemeTest {
-    @get:Rule
-    val composeRule = createComposeRule()
+    @get:Rule val composeRule = createComposeRule()
 
     @Test
     fun testThemeShowsContent() {
-        composeRule.setContent {
-            SystemUITheme {
-                Text("foo")
-            }
-        }
+        composeRule.setContent { SystemUITheme { Text("foo") } }
 
         composeRule.onNodeWithText("foo").assertIsDisplayed()
     }

@@ -47,9 +47,7 @@ fun HomeScreen(onScreenSelected: (Screen) -> Unit) {
                         shape = CircleShape,
                     ) {
                         Column(
-                            Modifier
-                                .clickable { onScreenSelected(screen) }
-                                .padding(16.dp),
+                            Modifier.clickable { onScreenSelected(screen) }.padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             Text(screen.name)

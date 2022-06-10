@@ -24,9 +24,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-/**
- * The Material 3 theme that should wrap all SystemUI Composables.
- */
+/** The Material 3 theme that should wrap all SystemUI Composables. */
 @Composable
 fun SystemUITheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
@@ -35,14 +33,13 @@ fun SystemUITheme(
     val context = LocalContext.current
 
     // TODO(b/230605885): Define our typography and color scheme.
-    val colorScheme = if (isDarkTheme) {
-        dynamicDarkColorScheme(context)
-    } else {
-        dynamicLightColorScheme(context)
-    }
+    val colorScheme =
+        if (isDarkTheme) {
+            dynamicDarkColorScheme(context)
+        } else {
+            dynamicLightColorScheme(context)
+        }
     val typography = Typography()
 
-    MaterialTheme(colorScheme, typography) {
-        content()
-    }
+    MaterialTheme(colorScheme, typography) { content() }
 }

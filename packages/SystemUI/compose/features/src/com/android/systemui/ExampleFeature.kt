@@ -44,9 +44,7 @@ fun ExampleFeature(text: String, modifier: Modifier = Modifier) {
     ) {
         var count by remember { mutableStateOf(0) }
         Column(
-            Modifier
-                .clickable { count++ }
-                .padding(16.dp),
+            Modifier.clickable { count++ }.padding(16.dp),
         ) {
             Text(text)
             Text("I was clicked $count times.")
