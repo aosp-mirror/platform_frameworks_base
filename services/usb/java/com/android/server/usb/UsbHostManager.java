@@ -102,6 +102,7 @@ public class UsbHostManager {
     private final HashMap<String, ArrayList<UsbDirectMidiDevice>>
             mMidiDevices = new HashMap<String, ArrayList<UsbDirectMidiDevice>>();
     private final HashSet<String> mMidiUniqueCodes = new HashSet<String>();
+    private static final int MAX_UNIQUE_CODE_GENERATION_ATTEMPTS = 10;
     private final Random mRandom = new Random();
     private final boolean mHasMidiFeature;
 
@@ -645,11 +646,18 @@ public class UsbHostManager {
     // Generate a 3 digit code.
     private String generateNewUsbDeviceIdentifier() {
         String code;
+        int numberOfAttempts = 0;
         do {
+            if (numberOfAttempts > MAX_UNIQUE_CODE_GENERATION_ATTEMPTS) {
+                Slog.w(TAG, "MIDI unique code array resetting");
+                mMidiUniqueCodes.clear();
+                numberOfAttempts = 0;
+            }
             code = "";
             for (int i = 0; i < 3; i++) {
                 code += mRandom.nextInt(10);
             }
+            numberOfAttempts++;
         } while (mMidiUniqueCodes.contains(code));
         mMidiUniqueCodes.add(code);
         return code;
