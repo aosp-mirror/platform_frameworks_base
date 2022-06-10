@@ -583,7 +583,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         listener.onHeightChanged(mock(ExpandableView.class), false);
 
         verify(mNotificationStackSizeCalculator)
-                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat());
+                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat(), anyFloat());
     }
 
     @Test
@@ -599,7 +599,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         listener.onHeightChanged(mock(ExpandableView.class), false);
 
         verify(mNotificationStackSizeCalculator, never())
-                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat());
+                .computeMaxKeyguardNotifications(any(), anyFloat(), anyFloat(), anyFloat());
     }
 
     @Test
@@ -622,25 +622,102 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .isNotEqualTo(-1);
     }
 
-    @Test
-    public void getLockscreenSpaceForNotifications_includesOverlapWithLockIcon() {
-        when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
-                .thenReturn(0);
-        mNotificationPanelViewController.setAmbientIndicationTop(
-                /* ambientIndicationTop= */ 0, /* ambientTextVisible */ false);
+    private void setBottomPadding(int stackBottom, int lockIconPadding, int indicationPadding,
+            int ambientPadding) {
 
-        // Use lock icon padding (100 - 80 - 5 = 15) as bottom padding
-        when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(100);
-        when(mLockIconViewController.getTop()).thenReturn(80f);
-        when(mResources.getDimensionPixelSize(R.dimen.shelf_and_lock_icon_overlap)).thenReturn(5);
-
-        // Available space (100 - 0 - 15 = 85)
-        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(100);
         when(mNotificationStackScrollLayoutController.getTop()).thenReturn(0);
-        mNotificationPanelViewController.updateResources();
+        when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(stackBottom);
+        when(mNotificationStackScrollLayoutController.getBottom()).thenReturn(stackBottom);
+        when(mLockIconViewController.getTop()).thenReturn((float) (stackBottom - lockIconPadding));
 
-        assertThat(mNotificationPanelViewController.getSpaceForLockscreenNotifications())
-                .isEqualTo(85);
+        when(mResources.getDimensionPixelSize(R.dimen.keyguard_indication_bottom_padding))
+                .thenReturn(indicationPadding);
+        mNotificationPanelViewController.loadDimens();
+
+        mNotificationPanelViewController.setAmbientIndicationTop(
+                /* ambientIndicationTop= */ stackBottom - ambientPadding,
+                /* ambientTextVisible= */ true);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenNotifications_useLockIconBottomPadding_returnsSpaceAvailable() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 20,
+                /* indicationPadding= */ 0,
+                /* ambientPadding= */ 0);
+
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
+                .isEqualTo(80);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenNotifications_useIndicationBottomPadding_returnsSpaceAvailable() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 0,
+                /* indicationPadding= */ 30,
+                /* ambientPadding= */ 0);
+
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
+                .isEqualTo(70);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenNotifications_useAmbientBottomPadding_returnsSpaceAvailable() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 0,
+                /* indicationPadding= */ 0,
+                /* ambientPadding= */ 40);
+
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenNotifications())
+                .isEqualTo(60);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_useLockIconBottomPadding_returnsShelfHeight() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 20,
+                /* indicationPadding= */ 0,
+                /* ambientPadding= */ 0);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(5);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_useIndicationBottomPadding_returnsZero() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 0,
+                /* indicationPadding= */ 30,
+                /* ambientPadding= */ 0);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_useAmbientBottomPadding_returnsZero() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 0,
+                /* indicationPadding= */ 0,
+                /* ambientPadding= */ 40);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(0);
+    }
+
+    @Test
+    public void getVerticalSpaceForLockscreenShelf_useLockIconPadding_returnsLessThanShelfHeight() {
+        setBottomPadding(/* stackScrollLayoutBottom= */ 100,
+                /* lockIconPadding= */ 10,
+                /* indicationPadding= */ 8,
+                /* ambientPadding= */ 0);
+
+        when(mNotificationShelfController.getIntrinsicHeight()).thenReturn(5);
+        assertThat(mNotificationPanelViewController.getVerticalSpaceForLockscreenShelf())
+                .isEqualTo(2);
     }
 
     @Test
