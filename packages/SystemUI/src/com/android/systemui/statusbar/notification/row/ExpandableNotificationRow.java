@@ -513,16 +513,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * or is in an allowList).
      */
     public boolean getIsNonblockable() {
-        if (mEntry == null || mEntry.getChannel() == null) {
-            Log.w(TAG, "missing entry or channel");
+        if (mEntry == null) {
             return true;
         }
-        if (mEntry.getChannel().isImportanceLockedByCriticalDeviceFunction()
-                && !mEntry.getChannel().isBlockable()) {
-            return true;
-        }
-
-        return false;
+        return !mEntry.isBlockable();
     }
 
     private boolean isConversation() {
@@ -1667,6 +1661,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             long timeUntilNoLongerRecent = RECENTLY_ALERTED_THRESHOLD_MS - timeSinceAlertedAudibly;
             postDelayed(mExpireRecentlyAlertedFlag, timeUntilNoLongerRecent);
         }
+    }
+
+    @VisibleForTesting
+    protected void setEntry(NotificationEntry entry) {
+        mEntry = entry;
     }
 
     private final Runnable mExpireRecentlyAlertedFlag = () -> applyAudiblyAlertedRecently(false);

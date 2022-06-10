@@ -83,8 +83,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private static final int sLockIconRadiusPx = (int) (sDefaultDensity * 36);
     private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
-    private static final long LONG_PRESS_TIMEOUT = 200L; // milliseconds
 
+    private final long mLongPressTimeout;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @NonNull private final KeyguardViewController mKeyguardViewController;
     @NonNull private final StatusBarStateController mStatusBarStateController;
@@ -176,6 +176,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         mView.setImageDrawable(mIcon);
         mUnlockedLabel = resources.getString(R.string.accessibility_unlock_button);
         mLockedLabel = resources.getString(R.string.accessibility_lock_icon);
+        mLongPressTimeout = resources.getInteger(R.integer.config_lockIconLongPress);
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -545,7 +546,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     /**
      * Handles the touch if it is within the lock icon view and {@link #isActionable()} is true.
      * Subsequently, will trigger {@link #onLongPress()} if a touch is continuously in the lock icon
-     * area for {@link #LONG_PRESS_TIMEOUT} ms.
+     * area for {@link #mLongPressTimeout} ms.
      *
      * Touch speed debouncing mimics logic from the velocity tracker in {@link UdfpsController}.
      */
@@ -585,7 +586,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
                 mDownDetected = true;
                 mLongPressCancelRunnable = mExecutor.executeDelayed(
-                        this::onLongPress, LONG_PRESS_TIMEOUT);
+                        this::onLongPress, mLongPressTimeout);
                 break;
             case MotionEvent.ACTION_MOVE:
             case MotionEvent.ACTION_HOVER_MOVE:
@@ -600,7 +601,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                             + "high pointer velocity=" + velocity);
                     mLongPressCancelRunnable.run();
                     mLongPressCancelRunnable = mExecutor.executeDelayed(
-                            this::onLongPress, LONG_PRESS_TIMEOUT);
+                            this::onLongPress, mLongPressTimeout);
                 }
                 break;
             case MotionEvent.ACTION_UP:

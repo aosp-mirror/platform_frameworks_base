@@ -449,6 +449,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
             mInflateCallbacks.put(entry, callback);
         }
 
+
         @Override
         public void rebindViews(@NonNull NotificationEntry entry, @NonNull Params params,
                 @NonNull InflationCallback callback) {
@@ -464,6 +465,10 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         public void invokeInflateCallbackForEntry(NotificationEntry entry) {
             getInflateCallback(entry).onInflationFinished(entry, entry.getRowController());
+        }
+
+        @Override
+        public void releaseViews(@NonNull NotificationEntry entry) {
         }
     }
 

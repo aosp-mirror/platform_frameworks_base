@@ -68,6 +68,7 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -156,6 +157,7 @@ public class NotificationStackScrollLayoutController {
     private final ConfigurationController mConfigurationController;
     private final ZenModeController mZenModeController;
     private final MetricsLogger mMetricsLogger;
+    private final DumpManager mDumpManager;
     private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
     private final Resources mResources;
@@ -635,6 +637,7 @@ public class NotificationStackScrollLayoutController {
             SysuiColorExtractor colorExtractor,
             NotificationLockscreenUserManager lockscreenUserManager,
             MetricsLogger metricsLogger,
+            DumpManager dumpManager,
             FalsingCollector falsingCollector,
             FalsingManager falsingManager,
             @Main Resources resources,
@@ -677,6 +680,7 @@ public class NotificationStackScrollLayoutController {
         mZenModeController = zenModeController;
         mLockscreenUserManager = lockscreenUserManager;
         mMetricsLogger = metricsLogger;
+        mDumpManager = dumpManager;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mShadeTransitionController = shadeTransitionController;
         mFalsingCollector = falsingCollector;
@@ -728,6 +732,7 @@ public class NotificationStackScrollLayoutController {
             }
         });
         mView.setShadeController(mShadeController);
+        mDumpManager.registerDumpable(mView);
 
         mKeyguardBypassController.registerOnBypassStateChangedListener(
                 isEnabled -> mNotificationRoundnessManager.setShouldRoundPulsingViews(!isEnabled));
