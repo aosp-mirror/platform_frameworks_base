@@ -2654,6 +2654,7 @@ public final class ActiveServices {
             }
         }
         mAm.updateProcessForegroundLocked(psr.mApp, anyForeground, fgServiceTypes, oomAdj);
+        psr.setHasReportedForegroundServices(anyForeground);
     }
 
     private void updateAllowlistManagerLocked(ProcessServiceRecord psr) {
