@@ -197,7 +197,7 @@ import android.window.ClientWindowFrames;
 import android.window.CompatOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
-import android.window.SurfaceSyncer;
+import android.window.SurfaceSyncGroup;
 import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
@@ -829,9 +829,8 @@ public final class ViewRootImpl implements ViewParent,
         return mHandwritingInitiator;
     }
 
-    private final SurfaceSyncer mSurfaceSyncer = new SurfaceSyncer();
-    private int mSyncId = UNSET_SYNC_ID;
-    private SurfaceSyncer.SyncBufferCallback mSyncBufferCallback;
+    private SurfaceSyncGroup mSyncGroup;
+    private SurfaceSyncGroup.SyncBufferCallback mSyncBufferCallback;
     private int mNumSyncsInProgress = 0;
 
     private HashSet<ScrollCaptureCallback> mRootScrollCaptureCallbacks;
@@ -3594,8 +3593,8 @@ public final class ViewRootImpl implements ViewParent,
             mSyncBufferCallback = null;
             mSyncBuffer = false;
             if (isInLocalSync()) {
-                mSurfaceSyncer.markSyncReady(mSyncId);
-                mSyncId = UNSET_SYNC_ID;
+                mSyncGroup.markSyncReady();
+                mSyncGroup = null;
             }
         }
     }
@@ -3607,17 +3606,19 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         final int seqId = mSyncSeqId;
-        mSyncId = mSurfaceSyncer.setupSync(transaction -> {
+        mSyncGroup = new SurfaceSyncGroup(transaction -> {
             // Callback will be invoked on executor thread so post to main thread.
             mHandler.postAtFrontOfQueue(() -> {
-                mSurfaceChangedTransaction.merge(transaction);
+                if (transaction != null) {
+                    mSurfaceChangedTransaction.merge(transaction);
+                }
                 reportDrawFinished(seqId);
             });
         });
         if (DEBUG_BLAST) {
-            Log.d(mTag, "Setup new sync id=" + mSyncId);
+            Log.d(mTag, "Setup new sync id=" + mSyncGroup);
         }
-        mSurfaceSyncer.addToSync(mSyncId, mSyncTarget);
+        mSyncGroup.addToSync(mSyncTarget);
         notifySurfaceSyncStarted();
     }
 
@@ -4255,11 +4256,11 @@ public final class ViewRootImpl implements ViewParent,
         return mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled();
     }
 
-    void addToSync(SurfaceSyncer.SyncTarget syncable) {
+    void addToSync(SurfaceSyncGroup.SyncTarget syncable) {
         if (!isInLocalSync()) {
             return;
         }
-        mSurfaceSyncer.addToSync(mSyncId, syncable);
+        mSyncGroup.addToSync(syncable);
     }
 
     /**
@@ -4267,7 +4268,7 @@ public final class ViewRootImpl implements ViewParent,
      * within VRI.
      */
     public boolean isInLocalSync() {
-        return mSyncId != UNSET_SYNC_ID;
+        return mSyncGroup != null;
     }
 
     private void addFrameCommitCallbackIfNeeded() {
@@ -4392,7 +4393,7 @@ public final class ViewRootImpl implements ViewParent,
             }
 
             if (mSurfaceHolder != null && mSurface.isValid()) {
-                final SurfaceSyncer.SyncBufferCallback syncBufferCallback = mSyncBufferCallback;
+                final SurfaceSyncGroup.SyncBufferCallback syncBufferCallback = mSyncBufferCallback;
                 SurfaceCallbackHelper sch = new SurfaceCallbackHelper(() ->
                         mHandler.post(() -> syncBufferCallback.onBufferReady(null)));
                 mSyncBufferCallback = null;
@@ -10929,7 +10930,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void registerCallbacksForSync(boolean syncBuffer,
-            final SurfaceSyncer.SyncBufferCallback syncBufferCallback) {
+            final SurfaceSyncGroup.SyncBufferCallback syncBufferCallback) {
         if (!isHardwareEnabled()) {
             return;
         }
@@ -11002,9 +11003,9 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    public final SurfaceSyncer.SyncTarget mSyncTarget = new SurfaceSyncer.SyncTarget() {
+    public final SurfaceSyncGroup.SyncTarget mSyncTarget = new SurfaceSyncGroup.SyncTarget() {
         @Override
-        public void onReadyToSync(SurfaceSyncer.SyncBufferCallback syncBufferCallback) {
+        public void onReadyToSync(SurfaceSyncGroup.SyncBufferCallback syncBufferCallback) {
             readyToSync(syncBufferCallback);
         }
 
@@ -11018,7 +11019,12 @@ public final class ViewRootImpl implements ViewParent,
         }
     };
 
-    private void readyToSync(SurfaceSyncer.SyncBufferCallback syncBufferCallback) {
+    @Override
+    public SurfaceSyncGroup.SyncTarget getSyncTarget() {
+        return mSyncTarget;
+    }
+
+    private void readyToSync(SurfaceSyncGroup.SyncBufferCallback syncBufferCallback) {
         mNumSyncsInProgress++;
         if (!isInLocalSync()) {
             // Always sync the buffer if the sync request did not come from VRI.
@@ -11041,10 +11047,10 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void mergeSync(int syncId, SurfaceSyncer otherSyncer) {
+    void mergeSync(SurfaceSyncGroup otherSyncGroup) {
         if (!isInLocalSync()) {
             return;
         }
-        mSurfaceSyncer.merge(mSyncId, syncId, otherSyncer);
+        mSyncGroup.merge(otherSyncGroup);
     }
 }

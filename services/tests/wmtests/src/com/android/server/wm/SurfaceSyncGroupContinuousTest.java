@@ -24,7 +24,7 @@ import android.app.KeyguardManager;
 import android.os.PowerManager;
 import android.view.SurfaceControl;
 import android.view.cts.surfacevalidator.CapturedActivity;
-import android.window.SurfaceSyncer;
+import android.window.SurfaceSyncGroup;
 
 import androidx.test.rule.ActivityTestRule;
 
@@ -35,7 +35,7 @@ import org.junit.rules.TestName;
 
 import java.util.Objects;
 
-public class SurfaceSyncerContinuousTest {
+public class SurfaceSyncGroupContinuousTest {
     @Rule
     public TestName mName = new TestName();
 
@@ -60,7 +60,7 @@ public class SurfaceSyncerContinuousTest {
 
     @Test
     public void testSurfaceViewSyncDuringResize() throws Throwable {
-        SurfaceSyncer.setTransactionFactory(SurfaceControl.Transaction::new);
-        mCapturedActivity.verifyTest(new SurfaceSyncerValidatorTestCase(), mName);
+        SurfaceSyncGroup.setTransactionFactory(SurfaceControl.Transaction::new);
+        mCapturedActivity.verifyTest(new SurfaceSyncGroupValidatorTestCase(), mName);
     }
 }

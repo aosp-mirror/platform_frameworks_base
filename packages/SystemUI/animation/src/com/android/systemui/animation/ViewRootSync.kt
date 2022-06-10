@@ -1,12 +1,11 @@
 package com.android.systemui.animation
 
 import android.view.View
-import android.window.SurfaceSyncer
+import android.window.SurfaceSyncGroup
 
 /** A util class to synchronize 2 view roots. */
 // TODO(b/200284684): Remove this class.
 object ViewRootSync {
-    private var surfaceSyncer: SurfaceSyncer? = null
 
     /**
      * Synchronize the next draw between the view roots of [view] and [otherView], then run [then].
@@ -29,13 +28,11 @@ object ViewRootSync {
             return
         }
 
-        surfaceSyncer =
-            SurfaceSyncer().apply {
-                val syncId = setupSync(Runnable { then() })
-                addToSync(syncId, view)
-                addToSync(syncId, otherView)
-                markSyncReady(syncId)
-            }
+        val syncGroup = SurfaceSyncGroup()
+        syncGroup.addSyncCompleteCallback(view.context.mainExecutor) { then() }
+        syncGroup.addToSync(view.rootSurfaceControl)
+        syncGroup.addToSync(otherView.rootSurfaceControl)
+        syncGroup.markSyncReady()
     }
 
     /** A Java-friendly API for [synchronizeNextDraw]. */
