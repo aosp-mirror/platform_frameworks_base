@@ -56,7 +56,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -244,19 +243,10 @@ public class KeyguardIndicationController {
         mScreenLifecycle.addObserver(mScreenObserver);
 
         mCoExFaceHelpMsgIdsToShow = new HashSet<>();
-        final String msgsToShowOverride = Settings.Global.getString(mContext.getContentResolver(),
-                "coex_face_help_msgs"); // TODO: remove after UX testing b/231733975
-        if (msgsToShowOverride != null) {
-            final String[] msgIds = msgsToShowOverride.split("\\|");
-            for (String msgId : msgIds) {
-                mCoExFaceHelpMsgIdsToShow.add(Integer.parseInt(msgId));
-            }
-        } else {
-            int[] msgIds = context.getResources().getIntArray(
-                    com.android.systemui.R.array.config_face_help_msgs_when_fingerprint_enrolled);
-            for (int msgId : msgIds) {
-                mCoExFaceHelpMsgIdsToShow.add(msgId);
-            }
+        int[] msgIds = context.getResources().getIntArray(
+                com.android.systemui.R.array.config_face_help_msgs_when_fingerprint_enrolled);
+        for (int msgId : msgIds) {
+            mCoExFaceHelpMsgIdsToShow.add(msgId);
         }
 
         mHandler = new Handler(mainLooper) {
@@ -1032,7 +1022,8 @@ public class KeyguardIndicationController {
                 return;
             }
 
-            if (msgId == FaceManager.FACE_ERROR_TIMEOUT) {
+            if (biometricSourceType == BiometricSourceType.FACE
+                && msgId == FaceManager.FACE_ERROR_TIMEOUT) {
                 if (mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                         KeyguardUpdateMonitor.getCurrentUser())) {
                     // no message if fingerprint is also enrolled
