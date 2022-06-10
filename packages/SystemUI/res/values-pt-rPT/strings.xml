@@ -406,7 +406,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"As suas apps de trabalho estão ligadas à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>. A sua atividade de rede em apps de trabalho, incluindo dados de navegação e emails, está visível para o seu administrador de TI e fornecedor de VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"As suas apps pessoais estão ligadas à Internet através da app <xliff:g id="VPN_APP">%1$s</xliff:g>. A sua atividade de rede, incluindo dados de navegação e emails, está visível para o seu fornecedor de VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir as definições de VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abra as definições de VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Este dispositivo é gerido pelos teus pais, que podem ver e gerir informações como as apps que utilizas, a tua localização e o tempo de utilização."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Mantido desbloqueado pelo TrustAgent"</string>
@@ -552,7 +552,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Para a esquerda"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Para a direita"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Ao centro"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulação"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espaço"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Retrocesso"</string>
