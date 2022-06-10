@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -479,5 +480,14 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
 
         // hide dialog again
         mGlobalActionsDialogLite.showOrHideDialog(true, true, null /* view */);
+    }
+
+    @Test
+    public void testBugreportAction_whenDebugMode_shouldOfferBugreportButtonBeforeProvisioning() {
+        doReturn(1).when(mGlobalSettings).getInt(anyString(), anyInt());
+
+        GlobalActionsDialogLite.BugReportAction bugReportAction =
+                mGlobalActionsDialogLite.makeBugReportActionForTesting();
+        assertThat(bugReportAction.showBeforeProvisioning()).isTrue();
     }
 }
