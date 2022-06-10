@@ -159,6 +159,8 @@ import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IInputMethodSession;
+import com.android.internal.inputmethod.IInputMethodSessionCallback;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
@@ -178,8 +180,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
 import com.android.internal.view.IInputMethodManager;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
@@ -3020,17 +3020,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             cs.sessionRequested = true;
 
             final IInputMethodInvoker curMethod = getCurMethodLocked();
-            final IInputSessionCallback.Stub callback = new IInputSessionCallback.Stub() {
-                @Override
-                public void sessionCreated(IInputMethodSession session) {
-                    final long ident = Binder.clearCallingIdentity();
-                    try {
-                        onSessionCreated(curMethod, session, serverChannel);
-                    } finally {
-                        Binder.restoreCallingIdentity(ident);
-                    }
-                }
-            };
+            final IInputMethodSessionCallback.Stub callback =
+                    new IInputMethodSessionCallback.Stub() {
+                        @Override
+                        public void sessionCreated(IInputMethodSession session) {
+                            final long ident = Binder.clearCallingIdentity();
+                            try {
+                                onSessionCreated(curMethod, session, serverChannel);
+                            } finally {
+                                Binder.restoreCallingIdentity(ident);
+                            }
+                        }
+                    };
 
             try {
                 curMethod.createSession(clientChannel, callback);

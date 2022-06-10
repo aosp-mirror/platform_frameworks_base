@@ -36,10 +36,10 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.InputMethodSession;
 
+import com.android.internal.inputmethod.IInputMethodSession;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.view.IInputMethodSession;
 
 class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {

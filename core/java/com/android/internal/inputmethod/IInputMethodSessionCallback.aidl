@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
-import com.android.internal.view.IInputMethodSession;
+import com.android.internal.inputmethod.IInputMethodSession;
 
 /**
  * Helper interface for IInputMethod to allow the input method to notify the client when a new
@@ -24,6 +24,6 @@ import com.android.internal.view.IInputMethodSession;
  * {@hide}
  */
 
-oneway interface IInputSessionCallback {
+oneway interface IInputMethodSessionCallback {
     void sessionCreated(IInputMethodSession session);
 }
