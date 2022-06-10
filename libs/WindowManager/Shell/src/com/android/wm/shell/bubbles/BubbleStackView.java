@@ -137,6 +137,9 @@ public class BubbleStackView extends FrameLayout
 
     private static final float SCRIM_ALPHA = 0.6f;
 
+    /** Minimum alpha value for scrim when alpha is being changed via drag */
+    private static final float MIN_SCRIM_ALPHA_FOR_DRAG = 0.2f;
+
     /**
      * How long to wait to animate the stack temporarily invisible after a drag/flyout hide
      * animation ends, if we are in fact temporarily invisible.
@@ -214,6 +217,7 @@ public class BubbleStackView extends FrameLayout
     private ExpandedViewAnimationController mExpandedViewAnimationController;
 
     private View mScrim;
+    private boolean mScrimAnimating;
     private View mManageMenuScrim;
     private FrameLayout mExpandedViewContainer;
 
@@ -750,9 +754,14 @@ public class BubbleStackView extends FrameLayout
             if (mShowingManage) {
                 showManageMenu(false /* show */);
             }
-            // Only allow up
-            float collapsed = Math.min(dy, 0);
-            mExpandedViewAnimationController.updateDrag((int) -collapsed);
+            // Only allow up, normalize for up direction
+            float collapsed = -Math.min(dy, 0);
+            mExpandedViewAnimationController.updateDrag((int) collapsed);
+
+            // Update scrim
+            if (!mScrimAnimating) {
+                mScrim.setAlpha(getScrimAlphaForDrag(collapsed));
+            }
         }
 
         @Override
@@ -768,7 +777,25 @@ public class BubbleStackView extends FrameLayout
                 mBubbleData.setExpanded(false);
             } else {
                 mExpandedViewAnimationController.animateBackToExpanded();
+
+                // Update scrim
+                if (!mScrimAnimating) {
+                    showScrim(true);
+                }
             }
+        }
+
+        private float getScrimAlphaForDrag(float dragAmount) {
+            // dragAmount should be negative as we allow scroll up only
+            if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+                float alphaRange = SCRIM_ALPHA - MIN_SCRIM_ALPHA_FOR_DRAG;
+
+                int dragMax = mExpandedBubble.getExpandedView().getContentHeight();
+                float dragFraction = dragAmount / dragMax;
+
+                return Math.max(SCRIM_ALPHA - alphaRange * dragFraction, MIN_SCRIM_ALPHA_FOR_DRAG);
+            }
+            return SCRIM_ALPHA;
         }
     };
 
@@ -2125,15 +2152,28 @@ public class BubbleStackView extends FrameLayout
     }
 
     private void showScrim(boolean show) {
+        AnimatorListenerAdapter listener = new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mScrimAnimating = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mScrimAnimating = false;
+            }
+        };
         if (show) {
             mScrim.animate()
                     .setInterpolator(ALPHA_IN)
                     .alpha(SCRIM_ALPHA)
+                    .setListener(listener)
                     .start();
         } else {
             mScrim.animate()
                     .alpha(0f)
                     .setInterpolator(ALPHA_OUT)
+                    .setListener(listener)
                     .start();
         }
     }
