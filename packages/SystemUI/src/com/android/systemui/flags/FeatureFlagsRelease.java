@@ -19,6 +19,7 @@ package com.android.systemui.flags;
 import static java.util.Objects.requireNonNull;
 
 import android.content.res.Resources;
+import android.provider.DeviceConfig;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -28,6 +29,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.util.DeviceConfigProxy;
 
 import java.io.PrintWriter;
 import java.util.Map;
@@ -44,6 +46,7 @@ import javax.inject.Inject;
 public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
+    private final DeviceConfigProxy mDeviceConfigProxy;
     SparseBooleanArray mBooleanCache = new SparseBooleanArray();
     SparseArray<String> mStringCache = new SparseArray<>();
 
@@ -51,9 +54,11 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
     public FeatureFlagsRelease(
             @Main Resources resources,
             SystemPropertiesHelper systemProperties,
+            DeviceConfigProxy deviceConfigProxy,
             DumpManager dumpManager) {
         mResources = resources;
         mSystemProperties = systemProperties;
+        mDeviceConfigProxy = deviceConfigProxy;
         dumpManager.registerDumpable("SysUIFlags", this);
     }
 
@@ -73,6 +78,18 @@ public class FeatureFlagsRelease implements FeatureFlags, Dumpable {
         int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
         if (cacheIndex < 0) {
             return isEnabled(flag.getId(), mResources.getBoolean(flag.getResourceId()));
+        }
+
+        return mBooleanCache.valueAt(cacheIndex);
+    }
+
+    @Override
+    public boolean isEnabled(@NonNull DeviceConfigBooleanFlag flag) {
+        int cacheIndex = mBooleanCache.indexOfKey(flag.getId());
+        if (cacheIndex < 0) {
+            boolean deviceConfigValue = mDeviceConfigProxy.getBoolean(flag.getNamespace(),
+                    flag.getName(), flag.getDefault());
+            return isEnabled(flag.getId(), deviceConfigValue);
         }
 
         return mBooleanCache.valueAt(cacheIndex);

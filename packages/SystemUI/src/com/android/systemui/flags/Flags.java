@@ -16,6 +16,8 @@
 
 package com.android.systemui.flags;
 
+import static android.provider.DeviceConfig.NAMESPACE_WINDOW_MANAGER;
+
 import com.android.internal.annotations.Keep;
 import com.android.systemui.R;
 
@@ -169,6 +171,11 @@ public class Flags {
     @Keep
     public static final SysPropBooleanFlag BUBBLES_HOME_GESTURE =
             new SysPropBooleanFlag(1101, "persist.wm.debug.bubbles_home_gesture", true);
+
+    @Keep
+    public static final DeviceConfigBooleanFlag WM_ENABLE_PARTIAL_SCREEN_SHARING =
+            new DeviceConfigBooleanFlag(1102, "record_task_content",
+                    NAMESPACE_WINDOW_MANAGER, false, true);
 
     // 1200 - predictive back
     @Keep
