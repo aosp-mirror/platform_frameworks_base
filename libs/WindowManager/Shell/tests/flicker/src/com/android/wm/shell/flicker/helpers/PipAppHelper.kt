@@ -107,33 +107,6 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         uiDevice.wait(Until.gone(By.res(SYSTEMUI_PACKAGE, "dismiss")), FIND_TIMEOUT)
     }
 
-    @JvmOverloads
-    fun enterPipViaHomeButton(wmHelper: WindowManagerStateHelper) {
-        uiDevice.pressHome()
-
-        // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper.waitPipShown() ?: SystemClock.sleep(3_000)
-        // when entering pip, the dismiss button is visible at the start. to ensure the pip
-        // animation is complete, wait until the pip dismiss button is no longer visible.
-        // b/176822698: dismiss-only state will be removed in the future
-        uiDevice.wait(Until.gone(By.res(SYSTEMUI_PACKAGE, "dismiss")), FIND_TIMEOUT)
-    }
-
-    @JvmOverloads
-    fun enterPipViaSwipeToHome(wmHelper: WindowManagerStateHelper) {
-        uiDevice.swipe(
-            uiDevice.displayWidth / 2, uiDevice.displayHeight - 10,
-            uiDevice.displayWidth / 2, uiDevice.displayHeight - 300, 3
-        )
-
-        // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper.waitPipShown() ?: SystemClock.sleep(3_000)
-        // when entering pip, the dismiss button is visible at the start. to ensure the pip
-        // animation is complete, wait until the pip dismiss button is no longer visible.
-        // b/176822698: dismiss-only state will be removed in the future
-        uiDevice.wait(Until.gone(By.res(SYSTEMUI_PACKAGE, "dismiss")), FIND_TIMEOUT)
-    }
-
     fun enableEnterPipOnUserLeaveHint() {
         clickObject(ENTER_PIP_ON_USER_LEAVE_HINT)
     }
