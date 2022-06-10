@@ -2386,21 +2386,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             List<CompletableFuture<InstallResult>> futures = new ArrayList<>();
             CompletableFuture<InstallResult> future = new CompletableFuture<>();
             futures.add(future);
-            final InstallParams installingSession = makeInstallParams(future);
+            final InstallingSession installingSession = createInstallingSession(future);
             if (isMultiPackage()) {
                 final List<PackageInstallerSession> childSessions = getChildSessions();
-                List<InstallParams> installingChildSessions = new ArrayList<>(childSessions.size());
+                List<InstallingSession> installingChildSessions =
+                        new ArrayList<>(childSessions.size());
                 for (int i = 0; i < childSessions.size(); ++i) {
                     final PackageInstallerSession session = childSessions.get(i);
                     future = new CompletableFuture<>();
                     futures.add(future);
-                    final InstallParams installingChildSession = session.makeInstallParams(future);
+                    final InstallingSession installingChildSession =
+                            session.createInstallingSession(future);
                     if (installingChildSession != null) {
                         installingChildSessions.add(installingChildSession);
                     }
                 }
                 if (!installingChildSessions.isEmpty()) {
-                    installingSession.installStage(installingChildSessions);
+                    Objects.requireNonNull(installingSession).installStage(installingChildSessions);
                 }
             } else if (installingSession != null) {
                 installingSession.installStage();
@@ -2437,12 +2439,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * Stages this session for install and returns a
-     * {@link InstallParams} representing this new staged state.
+     * {@link InstallingSession} representing this new staged state.
      *
      * @param future a future that will be completed when this session is completed.
      */
     @Nullable
-    private InstallParams makeInstallParams(CompletableFuture<InstallResult> future)
+    private InstallingSession createInstallingSession(CompletableFuture<InstallResult> future)
             throws PackageManagerException {
         synchronized (mLock) {
             if (!mSealed) {
@@ -2500,7 +2502,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return new InstallParams(stageDir, localObserver, params, mInstallSource, user,
+            return new InstallingSession(stageDir, localObserver, params, mInstallSource, user,
                     mSigningDetails, mInstallerUid, mPackageLite, mPm);
         }
     }

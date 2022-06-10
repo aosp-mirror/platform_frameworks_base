@@ -752,7 +752,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * List of packages waiting for rollback to be enabled.
      * Handler thread only!
      */
-    final SparseArray<VerificationParams> mPendingEnableRollback = new SparseArray<>();
+    final SparseArray<VerifyingSession> mPendingEnableRollback = new SparseArray<>();
 
     final PackageInstallerService mInstallerService;
 
@@ -857,7 +857,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final PendingPackageBroadcasts mPendingBroadcasts;
 
     static final int SEND_PENDING_BROADCAST = 1;
-    static final int INIT_COPY = 5;
+    // public static final int UNUSED = 5;
     static final int POST_INSTALL = 9;
     static final int WRITE_SETTINGS = 13;
     static final int WRITE_PACKAGE_RESTRICTIONS = 14;

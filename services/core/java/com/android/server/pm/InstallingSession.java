@@ -22,8 +22,8 @@ import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTANT;
-import static com.android.server.pm.PackageManagerService.INIT_COPY;
 import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
@@ -35,10 +35,8 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.PackageLite;
-import android.os.Message;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.util.ArrayMap;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -48,12 +46,10 @@ import com.android.internal.util.Preconditions;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
-final class InstallParams extends HandlerParams {
+class InstallingSession {
     final OriginInfo mOriginInfo;
     final MoveInfo mMoveInfo;
     final IPackageInstallObserver2 mObserver;
@@ -70,18 +66,27 @@ final class InstallParams extends HandlerParams {
     final int mInstallReason;
     final int mInstallScenario;
     @Nullable
-    MultiPackageInstallParams mParentInstallParams;
+    MultiPackageInstallingSession mParentInstallingSession;
     final boolean mForceQueryableOverride;
     final int mDataLoaderType;
     final long mRequiredInstalledVersionCode;
     final int mPackageSource;
     final PackageLite mPackageLite;
+    String mTraceMethod;
+    int mTraceCookie;
+    /** User handle for the user requesting the information or installation. */
+    private final UserHandle mUser;
+    @NonNull
+    final PackageManagerService mPm;
+    final InstallPackageHelper mInstallPackageHelper;
 
-    InstallParams(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
+    InstallingSession(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, InstallSource installSource, String volumeUuid,
             UserHandle user, String packageAbiOverride, int packageSource,
             PackageLite packageLite, PackageManagerService pm) {
-        super(user, pm);
+        mPm = pm;
+        mUser = user;
+        mInstallPackageHelper = new InstallPackageHelper(mPm);
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mObserver = observer;
@@ -103,11 +108,13 @@ final class InstallParams extends HandlerParams {
         mPackageLite = packageLite;
     }
 
-    InstallParams(File stagedDir, IPackageInstallObserver2 observer,
+    InstallingSession(File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             UserHandle user, SigningDetails signingDetails, int installerUid,
             PackageLite packageLite, PackageManagerService pm) {
-        super(user, pm);
+        mPm = pm;
+        mUser = user;
+        mInstallPackageHelper = new InstallPackageHelper(mPm);
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mMoveInfo = null;
         mInstallReason = fixUpInstallReason(
@@ -132,7 +139,7 @@ final class InstallParams extends HandlerParams {
 
     @Override
     public String toString() {
-        return "InstallParams{" + Integer.toHexString(System.identityHashCode(this))
+        return "InstallingSession{" + Integer.toHexString(System.identityHashCode(this))
                 + " file=" + mOriginInfo.mFile + "}";
     }
 
@@ -225,7 +232,6 @@ final class InstallParams extends HandlerParams {
                 pkgLite.installLocation);
     }
 
-    @Override
     void handleReturnCode() {
         processPendingInstall();
     }
@@ -239,30 +245,23 @@ final class InstallParams extends HandlerParams {
             F2fsUtils.releaseCompressedBlocks(
                     mPm.mContext.getContentResolver(), new File(args.getCodePath()));
         }
-        if (mParentInstallParams != null) {
-            mParentInstallParams.tryProcessInstallRequest(args, mRet);
+        if (mParentInstallingSession != null) {
+            mParentInstallingSession.tryProcessInstallRequest(args, mRet);
         } else {
             PackageInstalledInfo res = new PackageInstalledInfo(mRet);
-            processInstallRequestsAsync(
-                    res.mReturnCode == PackageManager.INSTALL_SUCCEEDED,
-                    Collections.singletonList(new InstallRequest(args, res)));
+            // Queue up an async operation since the package installation may take a little while.
+            mPm.mHandler.post(() -> mInstallPackageHelper.processInstallRequests(
+                    res.mReturnCode == PackageManager.INSTALL_SUCCEEDED /* success */,
+                    Collections.singletonList(new InstallRequest(args, res))));
         }
     }
 
-    private InstallArgs createInstallArgs(InstallParams params) {
-        if (params.mMoveInfo != null) {
-            return new MoveInstallArgs(params);
+    private InstallArgs createInstallArgs(InstallingSession installingSession) {
+        if (installingSession.mMoveInfo != null) {
+            return new MoveInstallArgs(installingSession);
         } else {
-            return new FileInstallArgs(params);
+            return new FileInstallArgs(installingSession);
         }
-    }
-
-    // Queue up an async operation since the package installation may take a little while.
-    private void processInstallRequestsAsync(boolean success,
-            List<InstallRequest> installRequests) {
-        mPm.mHandler.post(() -> {
-            mInstallPackageHelper.processInstallRequests(success, installRequests);
-        });
     }
 
     /**
@@ -316,107 +315,57 @@ final class InstallParams extends HandlerParams {
     }
 
     public void installStage() {
-        final Message msg = mPm.mHandler.obtainMessage(INIT_COPY);
         setTraceMethod("installStage").setTraceCookie(System.identityHashCode(this));
-        msg.obj = this;
-
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "installStage",
-                System.identityHashCode(msg.obj));
+                System.identityHashCode(this));
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                System.identityHashCode(msg.obj));
-
-        mPm.mHandler.sendMessage(msg);
+                System.identityHashCode(this));
+        mPm.mHandler.post(this::start);
     }
 
-    public void installStage(List<InstallParams> children)
+    public void installStage(List<InstallingSession> children)
             throws PackageManagerException {
-        final Message msg = mPm.mHandler.obtainMessage(INIT_COPY);
-        final MultiPackageInstallParams params =
-                new MultiPackageInstallParams(this, children, mPm);
-        params.setTraceMethod("installStageMultiPackage")
-                .setTraceCookie(System.identityHashCode(params));
-        msg.obj = params;
+        final MultiPackageInstallingSession installingSession =
+                new MultiPackageInstallingSession(getUser(), children, mPm);
+        setTraceMethod("installStageMultiPackage").setTraceCookie(System.identityHashCode(
+                installingSession));
 
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "installStageMultiPackage",
-                System.identityHashCode(msg.obj));
+                System.identityHashCode(installingSession));
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                System.identityHashCode(msg.obj));
-        mPm.mHandler.sendMessage(msg);
+                System.identityHashCode(installingSession));
+        mPm.mHandler.post(installingSession::start);
     }
 
     public void movePackage() {
-        final Message msg = mPm.mHandler.obtainMessage(INIT_COPY);
         setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(this));
-        msg.obj = this;
-
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "movePackage",
-                System.identityHashCode(msg.obj));
+                System.identityHashCode(this));
         Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                System.identityHashCode(msg.obj));
-        mPm.mHandler.sendMessage(msg);
+                System.identityHashCode(this));
+        mPm.mHandler.post(this::start);
     }
 
-    /**
-     * Container for a multi-package install which refers to all install sessions and args being
-     * committed together.
-     */
-    final class MultiPackageInstallParams extends HandlerParams {
-        private final List<InstallParams> mChildParams;
-        private final Map<InstallArgs, Integer> mCurrentState;
-
-        MultiPackageInstallParams(InstallParams parent, List<InstallParams> childParams,
-                PackageManagerService pm)
-                throws PackageManagerException {
-            super(parent.getUser(), pm);
-            if (childParams.size() == 0) {
-                throw new PackageManagerException("No child sessions found!");
-            }
-            mChildParams = childParams;
-            for (int i = 0; i < childParams.size(); i++) {
-                final InstallParams childParam = childParams.get(i);
-                childParam.mParentInstallParams = this;
-            }
-            this.mCurrentState = new ArrayMap<>(mChildParams.size());
-        }
-
-        @Override
-        void handleStartCopy() {
-            for (InstallParams params : mChildParams) {
-                params.handleStartCopy();
-            }
-        }
-
-        @Override
-        void handleReturnCode() {
-            for (InstallParams params : mChildParams) {
-                params.handleReturnCode();
-            }
-        }
-
-        void tryProcessInstallRequest(InstallArgs args, int currentStatus) {
-            mCurrentState.put(args, currentStatus);
-            if (mCurrentState.size() != mChildParams.size()) {
-                return;
-            }
-            int completeStatus = PackageManager.INSTALL_SUCCEEDED;
-            for (Integer status : mCurrentState.values()) {
-                if (status == PackageManager.INSTALL_UNKNOWN) {
-                    return;
-                } else if (status != PackageManager.INSTALL_SUCCEEDED) {
-                    completeStatus = status;
-                    break;
-                }
-            }
-            final List<InstallRequest> installRequests = new ArrayList<>(mCurrentState.size());
-            for (Map.Entry<InstallArgs, Integer> entry : mCurrentState.entrySet()) {
-                installRequests.add(new InstallRequest(entry.getKey(),
-                        new PackageInstalledInfo(completeStatus)));
-            }
-            processInstallRequestsAsync(
-                    completeStatus == PackageManager.INSTALL_SUCCEEDED,
-                    installRequests);
-        }
+    public UserHandle getUser() {
+        return mUser;
     }
 
+    private void start() {
+        if (DEBUG_INSTALL) Slog.i(TAG, "start " + mUser + ": " + this);
+        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                System.identityHashCode(this));
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "startInstall");
+        handleStartCopy();
+        handleReturnCode();
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+    }
 
+    private InstallingSession setTraceMethod(String traceMethod) {
+        mTraceMethod = traceMethod;
+        return this;
+    }
+
+    private void setTraceCookie(int traceCookie) {
+        mTraceCookie = traceCookie;
+    }
 }

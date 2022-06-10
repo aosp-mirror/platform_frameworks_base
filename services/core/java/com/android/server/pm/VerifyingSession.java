@@ -29,6 +29,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRITY_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_VERIFICATION;
+import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_VERIFY;
 import static com.android.server.pm.PackageManagerService.DEFAULT_VERIFICATION_RESPONSE;
 import static com.android.server.pm.PackageManagerService.ENABLE_ROLLBACK_TIMEOUT;
@@ -67,7 +68,6 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -77,9 +77,8 @@ import com.android.server.sdksandbox.SdkSandboxManagerLocal;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-final class VerificationParams extends HandlerParams {
+final class VerifyingSession {
     /**
      * Whether verification is enabled by default.
      */
@@ -119,7 +118,7 @@ final class VerificationParams extends HandlerParams {
     final VerificationInfo mVerificationInfo;
     final SigningDetails mSigningDetails;
     @Nullable
-    MultiPackageVerificationParams mParentVerificationParams;
+    MultiPackageVerifyingSession mParentVerifyingSession;
     final long mRequiredInstalledVersionCode;
     final int mDataLoaderType;
     final int mSessionId;
@@ -132,12 +131,18 @@ final class VerificationParams extends HandlerParams {
     private String mErrorMessage = null;
 
     final PackageLite mPackageLite;
+    private final UserHandle mUser;
+    @NonNull
+    final PackageManagerService mPm;
+    final InstallPackageHelper mInstallPackageHelper;
 
-    VerificationParams(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
+    VerifyingSession(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
             PackageInstaller.SessionParams sessionParams, InstallSource installSource,
             int installerUid, SigningDetails signingDetails, int sessionId, PackageLite lite,
             boolean userActionRequired, PackageManagerService pm) {
-        super(user, pm);
+        mPm = pm;
+        mUser = user;
+        mInstallPackageHelper = new InstallPackageHelper(mPm);
         mOriginInfo = OriginInfo.fromStagedFile(stagedDir);
         mObserver = observer;
         mInstallFlags = sessionParams.installFlags;
@@ -160,11 +165,11 @@ final class VerificationParams extends HandlerParams {
 
     @Override
     public String toString() {
-        return "InstallParams{" + Integer.toHexString(System.identityHashCode(this))
+        return "VerifyingSession{" + Integer.toHexString(System.identityHashCode(this))
                 + " file=" + mOriginInfo.mFile + "}";
     }
 
-    public void handleStartCopy() {
+    public void handleStartVerify() {
         PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mPm.mContext,
                 mPackageLite, mOriginInfo.mResolvedPath, mInstallFlags, mPackageAbiOverride);
 
@@ -744,7 +749,6 @@ final class VerificationParams extends HandlerParams {
         handleReturnCode();
     }
 
-
     void handleRollbackEnabled() {
         // TODO(b/112431924): Consider halting the install if we
         // couldn't enable rollback.
@@ -752,7 +756,6 @@ final class VerificationParams extends HandlerParams {
         handleReturnCode();
     }
 
-    @Override
     void handleReturnCode() {
         if (mWaitForVerificationToComplete || mWaitForIntegrityVerificationToComplete
                 || mWaitForEnableRollbackToComplete) {
@@ -762,8 +765,8 @@ final class VerificationParams extends HandlerParams {
     }
 
     private void sendVerificationCompleteNotification() {
-        if (mParentVerificationParams != null) {
-            mParentVerificationParams.trySendVerificationCompleteNotification(this);
+        if (mParentVerifyingSession != null) {
+            mParentVerifyingSession.trySendVerificationCompleteNotification(this);
         } else {
             try {
                 mObserver.onPackageInstalled(null, mRet, mErrorMessage,
@@ -774,77 +777,36 @@ final class VerificationParams extends HandlerParams {
         }
     }
 
+    private void start() {
+        if (DEBUG_INSTALL) Slog.i(TAG, "start " + mUser + ": " + this);
+        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueVerify",
+                System.identityHashCode(this));
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "start");
+        handleStartVerify();
+        handleReturnCode();
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+    }
+
     public void verifyStage() {
-        mPm.mHandler.post(this::startCopy);
+        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueVerify",
+                System.identityHashCode(this));
+        mPm.mHandler.post(this::start);
     }
 
-    public void verifyStage(List<VerificationParams> children)
+    public void verifyStage(List<VerifyingSession> children)
             throws PackageManagerException {
-        final MultiPackageVerificationParams params =
-                new MultiPackageVerificationParams(this, children, mPm);
-        mPm.mHandler.post(params::startCopy);
+        final MultiPackageVerifyingSession multiPackageVerifyingSession =
+                new MultiPackageVerifyingSession(this, children);
+        mPm.mHandler.post(multiPackageVerifyingSession::start);
     }
 
-    /**
-     * Container for a multi-package install which refers to all install sessions and args being
-     * committed together.
-     */
-    static final class MultiPackageVerificationParams extends HandlerParams {
-        private final IPackageInstallObserver2 mObserver;
-        private final List<VerificationParams> mChildParams;
-        private final Set<VerificationParams> mVerificationState;
-
-        MultiPackageVerificationParams(VerificationParams parent, List<VerificationParams> children,
-                PackageManagerService pm) throws PackageManagerException {
-            super(parent.getUser(), pm);
-            if (children.size() == 0) {
-                throw new PackageManagerException("No child sessions found!");
-            }
-            mChildParams = children;
-            // Provide every child with reference to this object as parent
-            for (int i = 0; i < children.size(); i++) {
-                final VerificationParams childParams = children.get(i);
-                childParams.mParentVerificationParams = this;
-            }
-            mVerificationState = new ArraySet<>(mChildParams.size());
-            mObserver = parent.mObserver;
-        }
-
-        @Override
-        void handleStartCopy() {
-            for (VerificationParams params : mChildParams) {
-                params.handleStartCopy();
-            }
-        }
-
-        @Override
-        void handleReturnCode() {
-            for (VerificationParams params : mChildParams) {
-                params.handleReturnCode();
-            }
-        }
-
-        void trySendVerificationCompleteNotification(VerificationParams child) {
-            mVerificationState.add(child);
-            if (mVerificationState.size() != mChildParams.size()) {
-                return;
-            }
-            int completeStatus = PackageManager.INSTALL_SUCCEEDED;
-            String errorMsg = null;
-            for (VerificationParams params : mVerificationState) {
-                int status = params.mRet;
-                if (status != PackageManager.INSTALL_SUCCEEDED) {
-                    completeStatus = status;
-                    errorMsg = params.mErrorMessage;
-                    break;
-                }
-            }
-            try {
-                mObserver.onPackageInstalled(null, completeStatus,
-                        errorMsg, new Bundle());
-            } catch (RemoteException e) {
-                Slog.i(TAG, "Observer no longer exists.");
-            }
-        }
+    public int getRet() {
+        return mRet;
+    }
+    public String getErrorMessage() {
+        return mErrorMessage;
+    }
+    public UserHandle getUser() {
+        return mUser;
     }
 }
