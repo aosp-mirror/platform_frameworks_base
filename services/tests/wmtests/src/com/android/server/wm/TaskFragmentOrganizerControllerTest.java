@@ -922,13 +922,14 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 .build();
         doReturn(true).when(mTaskFragment).isAllowedToEmbedActivity(activity);
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
-        clearInvocations(mAtm.mRootWindowContainer);
 
         // Reparent activity to mTaskFragment, which is smaller than activity's
         // minimum dimensions.
         mTransaction.reparentActivityToTaskFragment(mFragmentToken, activity.token)
                 .setErrorCallbackToken(mErrorToken);
         mWindowOrganizerController.applyTransaction(mTransaction);
+        // The pending event will be dispatched on the handler (from requestTraversal).
+        waitHandlerIdle(mWm.mAnimationHandler);
 
         verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), any(SecurityException.class));
     }
@@ -958,7 +959,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         doReturn(true).when(mTaskFragment).isAllowedToEmbedActivity(activity);
         mWindowOrganizerController.mLaunchTaskFragments.put(oldFragToken, oldTaskFrag);
         mWindowOrganizerController.mLaunchTaskFragments.put(mFragmentToken, mTaskFragment);
-        clearInvocations(mAtm.mRootWindowContainer);
 
         // Reparent oldTaskFrag's children to mTaskFragment, which is smaller than activity's
         // minimum dimensions.
@@ -966,6 +966,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                         mTaskFragment.mRemoteToken.toWindowContainerToken())
                 .setErrorCallbackToken(mErrorToken);
         mWindowOrganizerController.applyTransaction(mTransaction);
+        // The pending event will be dispatched on the handler (from requestTraversal).
+        waitHandlerIdle(mWm.mAnimationHandler);
 
         verify(mOrganizer).onTaskFragmentError(eq(mErrorToken), any(SecurityException.class));
     }
