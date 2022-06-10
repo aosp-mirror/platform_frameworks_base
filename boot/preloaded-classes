@@ -7920,11 +7920,6 @@ android.view.IDisplayWindowInsetsController
 android.view.IDisplayWindowListener$Stub$Proxy
 android.view.IDisplayWindowListener$Stub
 android.view.IDisplayWindowListener
-android.view.IDisplayWindowRotationCallback$Stub
-android.view.IDisplayWindowRotationCallback
-android.view.IDisplayWindowRotationController$Stub$Proxy
-android.view.IDisplayWindowRotationController$Stub
-android.view.IDisplayWindowRotationController
 android.view.IDockedStackListener$Stub$Proxy
 android.view.IDockedStackListener$Stub
 android.view.IDockedStackListener
