@@ -1536,7 +1536,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         boolean storageManagerIsFileBasedEncryptionEnabled() {
-            return StorageManager.isFileEncryptedNativeOnly();
+            return StorageManager.isFileEncrypted();
         }
 
         Looper getMyLooper() {

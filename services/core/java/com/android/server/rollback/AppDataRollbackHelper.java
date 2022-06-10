@@ -270,7 +270,6 @@ public class AppDataRollbackHelper {
      */
     @VisibleForTesting
     public boolean isUserCredentialLocked(int userId) {
-        return StorageManager.isFileEncryptedNativeOrEmulated()
-                && !StorageManager.isUserKeyUnlocked(userId);
+        return StorageManager.isFileEncrypted() && !StorageManager.isUserKeyUnlocked(userId);
     }
 }

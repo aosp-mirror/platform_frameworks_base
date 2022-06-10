@@ -2631,7 +2631,7 @@ public class StatsPullAtomService extends SystemService {
             latency = -1;
         }
         // File based encryption.
-        boolean fileBased = StorageManager.isFileEncryptedNativeOnly();
+        boolean fileBased = StorageManager.isFileEncrypted();
 
         //Recent disk write speed. Binder call to storaged.
         int writeSpeed = -1;

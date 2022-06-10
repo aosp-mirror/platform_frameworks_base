@@ -678,7 +678,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         // Suppress all notifications on non-FBE devices for now
-        if (!StorageManager.isFileEncryptedNativeOrEmulated()) return;
+        if (!StorageManager.isFileEncrypted()) return;
 
         unlockIntent.setFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);

@@ -1456,7 +1456,7 @@ public class SystemConfig {
 
         // Some devices can be field-converted to FBE, so offer to splice in
         // those features if not already defined by the static config
-        if (StorageManager.isFileEncryptedNativeOnly()) {
+        if (StorageManager.isFileEncrypted()) {
             addFeature(PackageManager.FEATURE_FILE_BASED_ENCRYPTION, 0);
             addFeature(PackageManager.FEATURE_SECURELY_REMOVES_USERS, 0);
         }
