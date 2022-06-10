@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.media.AudioManager;
 import android.media.session.MediaSessionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -68,6 +69,7 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
     private NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
             NearbyMediaDevicesManager.class);
+    private final AudioManager mAudioManager = mock(AudioManager.class);
 
     private MediaOutputGroupDialog mMediaOutputGroupDialog;
     private MediaOutputController mMediaOutputController;
@@ -78,7 +80,7 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotificationEntryManager, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager));
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
         mMediaOutputGroupDialog = new MediaOutputGroupDialog(mContext, false, mBroadcastSender,
                 mMediaOutputController);
