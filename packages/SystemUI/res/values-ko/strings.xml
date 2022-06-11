@@ -404,7 +404,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"직장 프로필이 <xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"개인 프로필이 <xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"공개 VPN 설정"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN 설정 열기"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"부모님이 관리하는 기기입니다. 부모님이 내가 사용하는 앱, 내 위치, 기기 사용 시간과 같은 정보를 보고 관리할 수 있습니다."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent가 잠금 해제함"</string>

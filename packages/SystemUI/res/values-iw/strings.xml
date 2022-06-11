@@ -466,7 +466,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"הצגת מצב הדגמה"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"אתרנט"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"התראה"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"ארנק"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"מגדירים אמצעי תשלום ונהנים מביצוע מהיר ומאובטח יותר של רכישות באמצעות הטלפון"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"הצגת הכול"</string>
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"הוספת כרטיס"</string>
@@ -558,7 +558,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"שמאלה"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"ימינה"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"מרכז"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"כרטיסייה"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"רווח"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"BACKSPACE"</string>

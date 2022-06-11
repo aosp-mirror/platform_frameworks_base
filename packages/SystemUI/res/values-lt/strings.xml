@@ -110,7 +110,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Fotoaparatas"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefonas"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Voice Assist"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Piniginė"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Atrakinti"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Įrenginys užrakintas"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Nuskaitomas veidas"</string>
@@ -466,7 +466,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Rodyti demonstraciniu režimu"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Eternetas"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Signalas"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Piniginė"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nustatykite, kad galėtumėte greičiau ir saugiau pirkti telefonu"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Rodyti viską"</string>
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Pridėti kortelę"</string>
@@ -558,7 +558,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Kairėn"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Dešinėn"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centras"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabuliavimo klavišas"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Tarpas"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Įvesti"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Naikinimo klavišas"</string>
