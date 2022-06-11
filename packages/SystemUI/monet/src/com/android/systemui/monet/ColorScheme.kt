@@ -174,7 +174,7 @@ enum class Style(internal val coreSpec: CoreSpec) {
             a1 = TonalSpec(HueSource(), ChromaMaxOut()),
             a2 = TonalSpec(HueVibrantSecondary(), ChromaConstant(24.0)),
             a3 = TonalSpec(HueVibrantTertiary(), ChromaConstant(32.0)),
-            n1 = TonalSpec(HueSource(), ChromaConstant(8.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(10.0)),
             n2 = TonalSpec(HueSource(), ChromaConstant(12.0))
     )),
     EXPRESSIVE(CoreSpec(
@@ -435,7 +435,7 @@ class ColorScheme(
             val h = "H${hct.hue.roundToInt().toString().padEnd(width)}"
             val c = "C${hct.chroma.roundToInt().toString().padEnd(width)}"
             val t = "T${CamUtils.lstarFromInt(color).roundToInt().toString().padEnd(width)}"
-            val hex = Integer.toHexString(color).replaceRange(0, 2, "").uppercase()
+            val hex = Integer.toHexString(color and 0xffffff).padStart(6, '0').uppercase()
             return "$h$c$t = #$hex"
         }
 

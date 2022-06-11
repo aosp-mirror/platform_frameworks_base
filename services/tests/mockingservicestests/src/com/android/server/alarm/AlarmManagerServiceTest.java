@@ -67,6 +67,7 @@ import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REFRESH_
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_EXACT_ALARMS;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.TARE_AFFORDABILITY_CHANGED;
+import static com.android.server.alarm.AlarmManagerService.AlarmHandler.TEMPORARY_QUOTA_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_COMPAT_QUOTA;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_COMPAT_WINDOW;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_QUOTA;
@@ -83,6 +84,7 @@ import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_FUT
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_WINDOW;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_PRIORITY_ALARM_DELAY;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_TEMPORARY_QUOTA_BUMP;
 import static com.android.server.alarm.AlarmManagerService.Constants.MAX_EXACT_ALARM_DENY_LIST_SIZE;
 import static com.android.server.alarm.AlarmManagerService.FREQUENT_INDEX;
 import static com.android.server.alarm.AlarmManagerService.INDEFINITE_DELAY;
@@ -110,6 +112,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -654,6 +657,7 @@ public class AlarmManagerServiceTest {
         setDeviceConfigLong(KEY_MIN_INTERVAL, 0);
         mDeviceConfigKeys.add(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX]);
         mDeviceConfigKeys.add(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[WORKING_INDEX]);
+        mDeviceConfigKeys.add(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[FREQUENT_INDEX]);
         doReturn(50).when(mDeviceConfigProperties)
                 .getInt(eq(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX]), anyInt());
         doReturn(35).when(mDeviceConfigProperties)
@@ -732,6 +736,7 @@ public class AlarmManagerServiceTest {
         setDeviceConfigLong(KEY_PRIORITY_ALARM_DELAY, 55);
         setDeviceConfigLong(KEY_MIN_DEVICE_IDLE_FUZZ, 60);
         setDeviceConfigLong(KEY_MAX_DEVICE_IDLE_FUZZ, 65);
+        setDeviceConfigInt(KEY_TEMPORARY_QUOTA_BUMP, 70);
         assertEquals(5, mService.mConstants.MIN_FUTURITY);
         assertEquals(10, mService.mConstants.MIN_INTERVAL);
         assertEquals(15, mService.mConstants.MAX_INTERVAL);
@@ -745,6 +750,7 @@ public class AlarmManagerServiceTest {
         assertEquals(55, mService.mConstants.PRIORITY_ALARM_DELAY);
         assertEquals(60, mService.mConstants.MIN_DEVICE_IDLE_FUZZ);
         assertEquals(65, mService.mConstants.MAX_DEVICE_IDLE_FUZZ);
+        assertEquals(70, mService.mConstants.TEMPORARY_QUOTA_BUMP);
     }
 
     @Test
@@ -879,6 +885,7 @@ public class AlarmManagerServiceTest {
         for (int i = 0; i < quota; i++) {
             alarmSetter.accept(firstTrigger + i);
             mNowElapsedTest = mTestTimer.getElapsed();
+            assertEquals("Incorrect trigger time at i=" + i, firstTrigger + i, mNowElapsedTest);
             mTestTimer.expire();
         }
         // This one should get deferred on set
@@ -897,6 +904,7 @@ public class AlarmManagerServiceTest {
         alarmSetter.accept(firstTrigger + quota);
         for (int i = 0; i < quota; i++) {
             mNowElapsedTest = mTestTimer.getElapsed();
+            assertEquals("Incorrect trigger time at i=" + i, firstTrigger + i, mNowElapsedTest);
             mTestTimer.expire();
         }
         final long expectedNextTrigger = firstTrigger + window;
@@ -914,6 +922,7 @@ public class AlarmManagerServiceTest {
         alarmSetter.accept(expectedNextTrigger);
         for (int i = 0; i < quota; i++) {
             mNowElapsedTest = mTestTimer.getElapsed();
+            assertEquals("Incorrect trigger time at i=" + i, firstTrigger + i, mNowElapsedTest);
             mTestTimer.expire();
         }
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
@@ -1919,16 +1928,14 @@ public class AlarmManagerServiceTest {
                 getNewMockPendingIntent(), false, false), quota, mAllowWhileIdleWindow);
 
         // Refresh the state
-        mService.removeLocked(TEST_CALLING_UID,
-                REMOVE_REASON_UNDEFINED);
+        mService.removeLocked(TEST_CALLING_UID, REMOVE_REASON_UNDEFINED);
         mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
         testQuotasDeferralOnExpiration(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP,
                 trigger, getNewMockPendingIntent(), false, false), quota, mAllowWhileIdleWindow);
 
         // Refresh the state
-        mService.removeLocked(TEST_CALLING_UID,
-                REMOVE_REASON_UNDEFINED);
+        mService.removeLocked(TEST_CALLING_UID, REMOVE_REASON_UNDEFINED);
         mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
         testQuotasNoDeferral(trigger -> setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
@@ -3303,7 +3310,7 @@ public class AlarmManagerServiceTest {
                 Arrays.asList(package4));
 
         mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, false);
-        mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[] {
+        mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[]{
                 package1,
                 package3,
         });
@@ -3315,7 +3322,7 @@ public class AlarmManagerServiceTest {
         assertTrue(mService.isScheduleExactAlarmAllowedByDefault(package4, uid4));
 
         mockChangeEnabled(SCHEDULE_EXACT_ALARM_DENIED_BY_DEFAULT, true);
-        mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[] {
+        mService.mConstants.EXACT_ALARM_DENY_LIST = new ArraySet<>(new String[]{
                 package1,
                 package3,
         });
@@ -3405,6 +3412,218 @@ public class AlarmManagerServiceTest {
 
         mockUseExactAlarmState(false);
         assertFalse(mService.hasUseExactAlarmInternal(TEST_CALLING_PACKAGE, TEST_CALLING_UID));
+    }
+
+    @Test
+    public void temporaryQuotaReserve_hasQuota() {
+        final int quotaToFill = 5;
+        final String package1 = "package1";
+        final int user1 = 123;
+        final long startTime = 54;
+        final long quotaDuration = 17;
+
+        final AlarmManagerService.TemporaryQuotaReserve quotaReserve =
+                new AlarmManagerService.TemporaryQuotaReserve(quotaDuration);
+        quotaReserve.replenishQuota(package1, user1, quotaToFill, startTime);
+
+        for (long time = startTime; time <= startTime + quotaDuration; time++) {
+            assertTrue(quotaReserve.hasQuota(package1, user1, time));
+            assertFalse(quotaReserve.hasQuota("some.other.package", 21, time));
+            assertFalse(quotaReserve.hasQuota(package1, 321, time));
+        }
+
+        assertFalse(quotaReserve.hasQuota(package1, user1, startTime + quotaDuration + 1));
+        assertFalse(quotaReserve.hasQuota(package1, user1, startTime + quotaDuration + 435421));
+
+        for (int i = 0; i < quotaToFill - 1; i++) {
+            assertTrue(i < quotaDuration);
+            // Use record usage multiple times with the same timestamp.
+            quotaReserve.recordUsage(package1, user1, startTime + i);
+            quotaReserve.recordUsage(package1, user1, startTime + i);
+            quotaReserve.recordUsage(package1, user1, startTime + i);
+            quotaReserve.recordUsage(package1, user1, startTime + i);
+
+            // Quota should not run out in this loop.
+            assertTrue(quotaReserve.hasQuota(package1, user1, startTime + i));
+        }
+        quotaReserve.recordUsage(package1, user1, startTime + quotaDuration);
+
+        // Should be out of quota now.
+        for (long time = startTime; time <= startTime + quotaDuration; time++) {
+            assertFalse(quotaReserve.hasQuota(package1, user1, time));
+        }
+    }
+
+    @Test
+    public void temporaryQuotaReserve_removeForPackage() {
+        final String[] packages = new String[]{"package1", "test.package2"};
+        final int userId = 472;
+        final long startTime = 59;
+        final long quotaDuration = 100;
+
+        final AlarmManagerService.TemporaryQuotaReserve quotaReserve =
+                new AlarmManagerService.TemporaryQuotaReserve(quotaDuration);
+
+        quotaReserve.replenishQuota(packages[0], userId, 10, startTime);
+        quotaReserve.replenishQuota(packages[1], userId, 10, startTime);
+
+        assertTrue(quotaReserve.hasQuota(packages[0], userId, startTime + 1));
+        assertTrue(quotaReserve.hasQuota(packages[1], userId, startTime + 1));
+
+        quotaReserve.removeForPackage(packages[0], userId);
+
+        assertFalse(quotaReserve.hasQuota(packages[0], userId, startTime + 1));
+        assertTrue(quotaReserve.hasQuota(packages[1], userId, startTime + 1));
+    }
+
+    @Test
+    public void temporaryQuotaReserve_removeForUser() {
+        final String[] packagesUser1 = new String[]{"test1.package1", "test1.package2"};
+        final String[] packagesUser2 = new String[]{"test2.p1", "test2.p2", "test2.p3"};
+        final int user1 = 3201;
+        final int user2 = 5409;
+        final long startTime = 59;
+        final long quotaDuration = 100;
+
+        final AlarmManagerService.TemporaryQuotaReserve quotaReserve =
+                new AlarmManagerService.TemporaryQuotaReserve(quotaDuration);
+
+        for (String packageUser1 : packagesUser1) {
+            quotaReserve.replenishQuota(packageUser1, user1, 10, startTime);
+        }
+        for (String packageUser2 : packagesUser2) {
+            quotaReserve.replenishQuota(packageUser2, user2, 10, startTime);
+        }
+
+        for (String packageUser1 : packagesUser1) {
+            assertTrue(quotaReserve.hasQuota(packageUser1, user1, startTime));
+        }
+        for (String packageUser2 : packagesUser2) {
+            assertTrue(quotaReserve.hasQuota(packageUser2, user2, startTime));
+        }
+
+        quotaReserve.removeForUser(user2);
+
+        for (String packageUser1 : packagesUser1) {
+            assertTrue(quotaReserve.hasQuota(packageUser1, user1, startTime));
+        }
+        for (String packageUser2 : packagesUser2) {
+            assertFalse(quotaReserve.hasQuota(packageUser2, user2, startTime));
+        }
+    }
+
+    @Test
+    public void triggerTemporaryQuotaBump_zeroQuota() {
+        setDeviceConfigInt(KEY_TEMPORARY_QUOTA_BUMP, 0);
+
+        mAppStandbyListener.triggerTemporaryQuotaBump(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+        verifyZeroInteractions(mPackageManagerInternal);
+        verifyZeroInteractions(mService.mHandler);
+    }
+
+    private void testTemporaryQuota_bumpedAfterDeferral(int standbyBucket) throws Exception {
+        final int temporaryQuota = 31;
+        setDeviceConfigInt(KEY_TEMPORARY_QUOTA_BUMP, temporaryQuota);
+
+        final int standbyQuota = mService.getQuotaForBucketLocked(standbyBucket);
+        when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
+                anyLong())).thenReturn(standbyBucket);
+
+        final long firstTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < standbyQuota + 1; i++) {
+            setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i, getNewMockPendingIntent());
+        }
+
+        for (int i = 0; i < standbyQuota; i++) {
+            mNowElapsedTest = mTestTimer.getElapsed();
+            assertEquals("Incorrect trigger time at i=" + i, firstTrigger + i, mNowElapsedTest);
+            mTestTimer.expire();
+        }
+
+        // The last alarm should be deferred due to exceeding the quota
+        final long deferredTrigger = firstTrigger + mAppStandbyWindow;
+        assertEquals(deferredTrigger, mTestTimer.getElapsed());
+
+        // Triggering temporary quota now.
+        mAppStandbyListener.triggerTemporaryQuotaBump(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+        assertAndHandleMessageSync(TEMPORARY_QUOTA_CHANGED);
+        // The last alarm should now be rescheduled to go as per original expectations
+        final long originalTrigger = firstTrigger + standbyQuota;
+        assertEquals("Incorrect next alarm trigger", originalTrigger, mTestTimer.getElapsed());
+    }
+
+
+    @Test
+    public void temporaryQuota_bumpedAfterDeferral_active() throws Exception {
+        testTemporaryQuota_bumpedAfterDeferral(STANDBY_BUCKET_ACTIVE);
+    }
+
+    @Test
+    public void temporaryQuota_bumpedAfterDeferral_working() throws Exception {
+        testTemporaryQuota_bumpedAfterDeferral(STANDBY_BUCKET_WORKING_SET);
+    }
+
+    @Test
+    public void temporaryQuota_bumpedAfterDeferral_frequent() throws Exception {
+        testTemporaryQuota_bumpedAfterDeferral(STANDBY_BUCKET_FREQUENT);
+    }
+
+    @Test
+    public void temporaryQuota_bumpedAfterDeferral_rare() throws Exception {
+        testTemporaryQuota_bumpedAfterDeferral(STANDBY_BUCKET_RARE);
+    }
+
+    private void testTemporaryQuota_bumpedBeforeDeferral(int standbyBucket) throws Exception {
+        final int temporaryQuota = 7;
+        setDeviceConfigInt(KEY_TEMPORARY_QUOTA_BUMP, temporaryQuota);
+
+        final int standbyQuota = mService.getQuotaForBucketLocked(standbyBucket);
+        when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
+                anyLong())).thenReturn(standbyBucket);
+
+        mAppStandbyListener.triggerTemporaryQuotaBump(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+        // No need to handle message TEMPORARY_QUOTA_CHANGED, as the quota change doesn't need to
+        // trigger a re-evaluation in this test.
+        testQuotasDeferralOnExpiration(trigger -> setTestAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
+                getNewMockPendingIntent()), standbyQuota + temporaryQuota, mAppStandbyWindow);
+
+        // refresh the state.
+        mService.removeLocked(TEST_CALLING_PACKAGE);
+        mService.mAppWakeupHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+        mService.mTemporaryQuotaReserve.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+
+        mAppStandbyListener.triggerTemporaryQuotaBump(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+        testQuotasDeferralOnSet(trigger -> setTestAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
+                getNewMockPendingIntent()), standbyQuota + temporaryQuota, mAppStandbyWindow);
+
+        // refresh the state.
+        mService.removeLocked(TEST_CALLING_PACKAGE);
+        mService.mAppWakeupHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+        mService.mTemporaryQuotaReserve.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+
+        mAppStandbyListener.triggerTemporaryQuotaBump(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+        testQuotasNoDeferral(trigger -> setTestAlarm(ELAPSED_REALTIME_WAKEUP, trigger,
+                getNewMockPendingIntent()), standbyQuota + temporaryQuota, mAppStandbyWindow);
+    }
+
+    @Test
+    public void temporaryQuota_bumpedBeforeDeferral_active() throws Exception {
+        testTemporaryQuota_bumpedBeforeDeferral(STANDBY_BUCKET_ACTIVE);
+    }
+
+    @Test
+    public void temporaryQuota_bumpedBeforeDeferral_working() throws Exception {
+        testTemporaryQuota_bumpedBeforeDeferral(STANDBY_BUCKET_WORKING_SET);
+    }
+
+    @Test
+    public void temporaryQuota_bumpedBeforeDeferral_frequent() throws Exception {
+        testTemporaryQuota_bumpedBeforeDeferral(STANDBY_BUCKET_FREQUENT);
+    }
+
+    @Test
+    public void temporaryQuota_bumpedBeforeDeferral_rare() throws Exception {
+        testTemporaryQuota_bumpedBeforeDeferral(STANDBY_BUCKET_RARE);
     }
 
     @After

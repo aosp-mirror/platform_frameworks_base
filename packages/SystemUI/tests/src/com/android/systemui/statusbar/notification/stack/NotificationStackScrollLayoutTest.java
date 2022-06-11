@@ -57,6 +57,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -101,6 +102,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private SysuiStatusBarStateController mBarState;
     @Mock private NotificationGroupManagerLegacy mGroupMembershipManger;
     @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
+    @Mock private DumpManager mDumpManager;
     @Mock private ExpandHelper mExpandHelper;
     @Mock private EmptyShadeView mEmptyShadeView;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
@@ -120,7 +122,11 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         // Interact with real instance of AmbientState.
-        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController,
+        mAmbientState = new AmbientState(
+                mContext,
+                mDumpManager,
+                mNotificationSectionsManager,
+                mBypassController,
                 mStatusBarKeyguardViewManager);
 
         // Inject dependencies before initializing the layout
