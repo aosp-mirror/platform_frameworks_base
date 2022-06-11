@@ -30,8 +30,6 @@ import android.os.Parcelable;
 import android.util.SparseArray;
 import android.view.InputChannel;
 
-import com.android.internal.view.IInputMethodSession;
-
 import java.lang.annotation.Retention;
 
 /**
