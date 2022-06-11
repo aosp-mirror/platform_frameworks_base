@@ -1135,41 +1135,13 @@ public class CameraExtensionsProxyService extends Service {
             CameraSessionConfig ret = new CameraSessionConfig();
             ret.outputConfigs = new ArrayList<>();
             for (Camera2OutputConfigImpl output : outputConfigs) {
-                CameraOutputConfig entry = new CameraOutputConfig();
-                entry.outputId = new OutputConfigId();
-                entry.outputId.id = output.getId();
-                entry.physicalCameraId = output.getPhysicalCameraId();
-                entry.surfaceGroupId = output.getSurfaceGroupId();
-                if (output instanceof SurfaceOutputConfigImpl) {
-                    SurfaceOutputConfigImpl surfaceConfig = (SurfaceOutputConfigImpl) output;
-                    entry.type = CameraOutputConfig.TYPE_SURFACE;
-                    entry.surface = surfaceConfig.getSurface();
-                } else if (output instanceof ImageReaderOutputConfigImpl) {
-                    ImageReaderOutputConfigImpl imageReaderOutputConfig =
-                            (ImageReaderOutputConfigImpl) output;
-                    entry.type = CameraOutputConfig.TYPE_IMAGEREADER;
-                    entry.size = new android.hardware.camera2.extension.Size();
-                    entry.size.width = imageReaderOutputConfig.getSize().getWidth();
-                    entry.size.height = imageReaderOutputConfig.getSize().getHeight();
-                    entry.imageFormat = imageReaderOutputConfig.getImageFormat();
-                    entry.capacity = imageReaderOutputConfig.getMaxImages();
-                } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
-                    MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
-                            (MultiResolutionImageReaderOutputConfigImpl) output;
-                    entry.type = CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER;
-                    entry.imageFormat = multiResReaderConfig.getImageFormat();
-                    entry.capacity = multiResReaderConfig.getMaxImages();
-                } else {
-                    throw new IllegalStateException("Unknown output config type!");
-                }
+                CameraOutputConfig entry = getCameraOutputConfig(output);
                 List<Camera2OutputConfigImpl> sharedOutputs =
                         output.getSurfaceSharingOutputConfigs();
                 if ((sharedOutputs != null) && (!sharedOutputs.isEmpty())) {
-                    entry.surfaceSharingOutputConfigs = new ArrayList<>();
+                    entry.sharedSurfaceConfigs = new ArrayList<>();
                     for (Camera2OutputConfigImpl sharedOutput : sharedOutputs) {
-                        OutputConfigId outputId = new OutputConfigId();
-                        outputId.id = sharedOutput.getId();
-                        entry.surfaceSharingOutputConfigs.add(outputId);
+                        entry.sharedSurfaceConfigs.add(getCameraOutputConfig(sharedOutput));
                     }
                 }
                 ret.outputConfigs.add(entry);
@@ -1853,5 +1825,37 @@ public class CameraExtensionsProxyService extends Service {
                 mParcelImage.fence = null;
             }
         }
+    }
+
+    private static CameraOutputConfig getCameraOutputConfig(Camera2OutputConfigImpl output) {
+        CameraOutputConfig ret = new CameraOutputConfig();
+        ret.outputId = new OutputConfigId();
+        ret.outputId.id = output.getId();
+        ret.physicalCameraId = output.getPhysicalCameraId();
+        ret.surfaceGroupId = output.getSurfaceGroupId();
+        if (output instanceof SurfaceOutputConfigImpl) {
+            SurfaceOutputConfigImpl surfaceConfig = (SurfaceOutputConfigImpl) output;
+            ret.type = CameraOutputConfig.TYPE_SURFACE;
+            ret.surface = surfaceConfig.getSurface();
+        } else if (output instanceof ImageReaderOutputConfigImpl) {
+            ImageReaderOutputConfigImpl imageReaderOutputConfig =
+                    (ImageReaderOutputConfigImpl) output;
+            ret.type = CameraOutputConfig.TYPE_IMAGEREADER;
+            ret.size = new android.hardware.camera2.extension.Size();
+            ret.size.width = imageReaderOutputConfig.getSize().getWidth();
+            ret.size.height = imageReaderOutputConfig.getSize().getHeight();
+            ret.imageFormat = imageReaderOutputConfig.getImageFormat();
+            ret.capacity = imageReaderOutputConfig.getMaxImages();
+        } else if (output instanceof MultiResolutionImageReaderOutputConfigImpl) {
+            MultiResolutionImageReaderOutputConfigImpl multiResReaderConfig =
+                    (MultiResolutionImageReaderOutputConfigImpl) output;
+            ret.type = CameraOutputConfig.TYPE_MULTIRES_IMAGEREADER;
+            ret.imageFormat = multiResReaderConfig.getImageFormat();
+            ret.capacity = multiResReaderConfig.getMaxImages();
+        } else {
+            throw new IllegalStateException("Unknown output config type!");
+        }
+
+        return ret;
     }
 }

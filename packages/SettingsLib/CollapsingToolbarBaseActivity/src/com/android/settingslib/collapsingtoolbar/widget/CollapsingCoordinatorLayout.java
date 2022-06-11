@@ -16,6 +16,8 @@
 
 package com.android.settingslib.collapsingtoolbar.widget;
 
+import static android.text.Layout.HYPHENATION_FREQUENCY_NORMAL_FAST;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -106,6 +108,9 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
         mAppBarLayout = findViewById(R.id.app_bar);
         if (mCollapsingToolbarLayout != null) {
             mCollapsingToolbarLayout.setLineSpacingMultiplier(TOOLBAR_LINE_SPACING_MULTIPLIER);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                mCollapsingToolbarLayout.setHyphenationFrequency(HYPHENATION_FREQUENCY_NORMAL_FAST);
+            }
             if (!TextUtils.isEmpty(mToolbarTitle)) {
                 mCollapsingToolbarLayout.setTitle(mToolbarTitle);
             }

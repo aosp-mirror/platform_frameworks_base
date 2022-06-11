@@ -756,8 +756,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(activity.getTask()).build();
         topActivity.setOccludesParent(false);
-        // The requested occluding state doesn't affect whether it fills parent.
-        assertTrue(topActivity.fillsParent());
+        // The requested occluding state doesn't affect whether it can decide orientation.
+        assertTrue(topActivity.providesOrientation());
         activity.setState(STOPPED, "Testing");
         activity.setVisibility(true);
         activity.makeActiveIfNeeded(null /* activeActivity */);

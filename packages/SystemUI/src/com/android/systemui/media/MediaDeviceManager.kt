@@ -155,7 +155,8 @@ class MediaDeviceManager @Inject constructor(
         private var playbackType = PLAYBACK_TYPE_UNKNOWN
         private var current: MediaDeviceData? = null
             set(value) {
-                if (!started || value != field) {
+                val hasSameId = value?.id != null && value.id == field?.id
+                if (!started || (!hasSameId && value != field)) {
                     field = value
                     fgExecutor.execute {
                         processDevice(key, oldKey, value)
@@ -263,7 +264,7 @@ class MediaDeviceManager @Inject constructor(
             // If we have a controller but get a null route, then don't trust the device
             val enabled = device != null && (controller == null || route != null)
             val name = route?.name?.toString() ?: device?.name
-            current = MediaDeviceData(enabled, device?.iconWithoutBackground, name)
+            current = MediaDeviceData(enabled, device?.iconWithoutBackground, name, id = device?.id)
         }
     }
 }

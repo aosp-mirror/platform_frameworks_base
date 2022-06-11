@@ -3670,7 +3670,7 @@ public abstract class Context {
      *  <li>caller has {@code android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}</li>
      *  <li>caller has {@code android.Manifest.permission.INTERACT_ACROSS_USERS} and is the same
      *      package as the {@code service} (determined by its component's package) and the Android
-     *      version is at least {@link android.os.Build.VERSION_CODES#S}</li>
+     *      version is at least {@link android.os.Build.VERSION_CODES#TIRAMISU}</li>
      *  <li>caller has {@code android.Manifest.permission.INTERACT_ACROSS_USERS} and is in same
      *      profile group as the given {@code user}</li>
      *  <li>caller has {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} and is in same
