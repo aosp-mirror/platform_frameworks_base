@@ -630,7 +630,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Обратитесь в сервисный центр."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Не удалось собрать данные. Повторите попытку."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Слишком светло. Сделайте освещение менее ярким."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Слишком темно. Сделайте освещение ярче."</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"Слишком темно. Сделайте освещение ярче"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Переместите телефон дальше."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Переместите телефон ближе."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Переместите телефон выше."</string>

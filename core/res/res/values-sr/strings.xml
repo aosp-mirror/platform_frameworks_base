@@ -1398,8 +1398,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Повезани уређај се пуни. Додирните за још опција."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Откривена је аналогна додатна опрема за аудио садржај"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Прикључени уређај није компатибилан са овим телефоном. Додирните да бисте сазнали више."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Отклањање грешака са USB-а је омогућено"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Додирните да бисте искључили отклањање грешака са USB-а"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Повезано је отклањање грешака са USB-а"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Додирните да бисте га искључили"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Изаберите да бисте онемогућили отклањања грешака са USB-а."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Бежично отклањање грешака је повезано"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Додирните да бисте искључили бежично отклањање грешака"</string>

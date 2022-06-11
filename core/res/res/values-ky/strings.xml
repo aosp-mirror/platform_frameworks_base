@@ -624,9 +624,9 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Тейлөө кызматына кайрылыңыз."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Жүзүңүз жакшы тартылган жок. Кайталап көрүңүз."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Өтө жарык. Жарыктыкты азайтып көрүңүз."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Өтө караңгы. Жарыгыраак жерден тартып көрүңүз."</string>
+    <string name="face_acquired_too_dark" msgid="252573548464426546">"Өтө караңгы. Жарыгыраак жерге туруңуз."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Телефонду алысыраак жылдырыңыз."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Телефонду жакыныраак жылдырыңыз."</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"Телефонду жакындатыңыз."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Телефонду өйдө жылдырыңыз."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Телефонду ылдый жылдырыңыз."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Телефонду солго жылдырыңыз."</string>

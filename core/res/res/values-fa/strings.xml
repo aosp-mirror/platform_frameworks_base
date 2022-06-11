@@ -1635,7 +1635,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"بلوتوث‌های صوتی"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"صفحه نمایش بی‌سیم"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"ارسال محتوا"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"پخش محتوا"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"برقراری ارتباط با دستگاه"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"فرستادن محتوای صفحه به دستگاه"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"درحال جستجوی دستگاه‌ها…"</string>
@@ -2166,7 +2166,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"کاری"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"نمای شخصی"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"نمای کاری"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"سرپرست سیستم آن را مسدود کرده است"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"سرپرست فناوری اطلاعات آن را مسدود کرده است"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"نمی‌توان این محتوا را با برنامه‌های کاری هم‌رسانی کرد"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"نمی‌توان این محتوا را با برنامه‌های کاری باز کرد"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"نمی‌توان این محتوا را با برنامه‌های شخصی هم‌رسانی کرد"</string>
