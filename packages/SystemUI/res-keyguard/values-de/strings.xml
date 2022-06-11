@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Du hast dein Passwort <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch eingegeben.\n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Du hast dein Entsperrungsmuster <xliff:g id="NUMBER_0">%1$d</xliff:g>-mal falsch gezeichnet. \n\nBitte versuche es in <xliff:g id="NUMBER_1">%2$d</xliff:g> Sekunden noch einmal."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Falscher PIN-Code der SIM-Karte. Bitte wende dich an deinen Mobilfunkanbieter, damit er dein Gerät entsperrt."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Falscher PIN-Code für die SIM-Karte. Du hast noch # Versuch, bevor das Gerät nur noch vom Mobilfunkanbieter entsperrt werden kann.}other{Falscher PIN-Code für die SIM-Karte. Du hast noch # Versuche. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"Die SIM-Karte kann nicht verwendet werden. Bitte wende dich an deinen Mobilfunkanbieter."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Falscher PUK-Code für die SIM-Karte. Du hast noch # Versuch, bevor die SIM-Karte endgültig gesperrt wird.}other{Falscher PUK-Code für die SIM-Karte. Du hast noch # Versuche, bevor die SIM-Karte endgültig gesperrt wird.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Fehler beim Entsperren der SIM-Karte mit der PIN."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Fehler beim Entsperren der SIM-Karte mithilfe des PUK-Codes."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Eingabemethode wechseln"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Gerät vom Administrator gesperrt"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Gerät manuell gesperrt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nicht erkannt"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Die Gesichtsentsperrung benötigt Kamerazugriff"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Gib die PIN für die SIM-Karte ein. Du hast noch # Versuch, bevor das Gerät nur noch vom Mobilfunkanbieter entsperrt werden kann.}other{Gib die PIN für die SIM-Karte ein. Du hast noch # Versuche.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch # Versuch, bevor die SIM-Karte endgültig gesperrt wird. Wende dich für weitere Informationen an deinen Mobilfunkanbieter.}other{Die SIM-Karte ist jetzt deaktiviert. Gib den PUK-Code ein, um fortzufahren. Du hast noch # Versuche, bevor die SIM-Karte endgültig gesperrt wird. Wende dich für weitere Informationen an deinen Mobilfunkanbieter.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Standard"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bubble"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
