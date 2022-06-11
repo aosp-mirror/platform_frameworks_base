@@ -41,5 +41,5 @@ fun SystemUITheme(
         }
     val typography = Typography()
 
-    MaterialTheme(colorScheme, typography) { content() }
+    MaterialTheme(colorScheme, typography = typography) { content() }
 }
