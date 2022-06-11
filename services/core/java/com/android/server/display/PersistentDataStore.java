@@ -153,7 +153,7 @@ final class PersistentDataStore {
 
     @VisibleForTesting
     PersistentDataStore(Injector injector) {
-        this(injector, BackgroundThread.getHandler());
+        this(injector, new Handler(BackgroundThread.getHandler().getLooper()));
     }
 
     @VisibleForTesting
