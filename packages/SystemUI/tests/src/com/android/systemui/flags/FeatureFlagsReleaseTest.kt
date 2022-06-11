@@ -20,6 +20,7 @@ import android.content.res.Resources
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -44,10 +45,13 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
     @Mock private lateinit var mDumpManager: DumpManager
 
+    private val deviceConfig = DeviceConfigProxyFake()
+
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mFeatureFlagsRelease = FeatureFlagsRelease(mResources, mSystemProperties, mDumpManager)
+        mFeatureFlagsRelease = FeatureFlagsRelease(mResources, mSystemProperties, deviceConfig,
+            mDumpManager)
     }
 
     @After
@@ -82,6 +86,21 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         assertThrows(NameNotFoundException::class.java) {
             mFeatureFlagsRelease.getString(ResourceStringFlag(4, 1004))
         }
+    }
+
+    @Test
+    fun testReadDeviceConfigBooleanFlag() {
+        val namespace = "test_namespace"
+        deviceConfig.setProperty(namespace, "a", "true", false)
+        deviceConfig.setProperty(namespace, "b", "false", false)
+        deviceConfig.setProperty(namespace, "c", null, false)
+
+        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(1, "a", namespace)))
+            .isTrue()
+        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(2, "b", namespace)))
+            .isFalse()
+        assertThat(mFeatureFlagsRelease.isEnabled(DeviceConfigBooleanFlag(3, "c", namespace)))
+            .isFalse()
     }
 
     @Test
