@@ -167,8 +167,6 @@ final class DialogFillUi {
         final Window window = mDialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                 | WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         window.setDimAmount(0.6f);
         window.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);

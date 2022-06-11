@@ -96,6 +96,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.am.HostingRecord;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
@@ -103,7 +104,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -1148,7 +1148,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // for the current activity to be paused.
                 final boolean isTop = this == taskDisplayArea.getFocusedRootTask();
                 mAtmService.startProcessAsync(next, false /* knownToBeDead */, isTop,
-                        isTop ? "pre-top-activity" : "pre-activity");
+                        isTop ? HostingRecord.HOSTING_TYPE_NEXT_TOP_ACTIVITY
+                                : HostingRecord.HOSTING_TYPE_NEXT_ACTIVITY);
             }
             if (lastResumed != null) {
                 lastResumed.setWillCloseOrEnterPip(true);
@@ -1758,7 +1759,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         final Task task = isAddingActivity ? getTask() : null;
 
         // If this task had any activity before we added this one.
-        boolean taskHadActivity = task != null && task.getActivity(Objects::nonNull) != null;
+        boolean taskHadActivity = task != null && task.getTopMostActivity() != null;
         // getActivityType() looks at the top child, so we need to read the type before adding
         // a new child in case the new child is on top and UNDEFINED.
         final int activityType = task != null ? task.getActivityType() : ACTIVITY_TYPE_UNDEFINED;
@@ -2062,9 +2063,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final boolean inPipTransition = windowingMode == WINDOWING_MODE_PINNED
                         && !mTmpFullBounds.isEmpty() && mTmpFullBounds.equals(parentBounds);
                 if (WindowConfiguration.isFloating(windowingMode) && !inPipTransition) {
-                    // For floating tasks, calculate the smallest width from the bounds of the task
+                    // For floating tasks, calculate the smallest width from the bounds of the
+                    // task, because they should not be affected by insets.
                     inOutConfig.smallestScreenWidthDp = (int) (
                             Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
+                } else if (isEmbedded()) {
+                    // For embedded TFs, the smallest width should be updated. Otherwise, inherit
+                    // from the parent task would result in applications loaded wrong resource.
+                    inOutConfig.smallestScreenWidthDp =
+                            Math.min(inOutConfig.screenWidthDp, inOutConfig.screenHeightDp);
                 }
                 // otherwise, it will just inherit
             }
@@ -2171,7 +2178,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (applicationType != ACTIVITY_TYPE_UNDEFINED || !hasChild()) {
             return applicationType;
         }
-        final ActivityRecord activity = getTopNonFinishingActivity();
+        final ActivityRecord activity = getTopMostActivity();
         return activity != null ? activity.getActivityType() : getTopChild().getActivityType();
     }
 

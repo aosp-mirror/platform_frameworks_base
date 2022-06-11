@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"دسترسی به تقویم شما"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ارسال و مشاهده پیامک‌ها"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"فایل‌ها و سندها"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"دسترسی به فایل‌ها و اسناد موجود در دستگاه"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"فایل‌ها"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"دسترسی به فایل‌های دستگاه"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"موسیقی و صدا"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"دسترسی به موسیقی و صدا در دستگاه شما"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"عکس‌ها و ویدیوها"</string>
@@ -1241,7 +1241,7 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"راه‌اندازی ادامه یابد؟"</string>
+    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ادامه راه‌اندازی؟"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"خاموش کردن صفحه"</string>
     <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ادامه راه‌اندازی"</string>
@@ -1611,7 +1611,7 @@
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"سیستم"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"بلوتوث‌های صوتی"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"صفحه نمایش بی‌سیم"</string>
-    <string name="media_route_button_content_description" msgid="2299223698196869956">"ارسال محتوا"</string>
+    <string name="media_route_button_content_description" msgid="2299223698196869956">"پخش محتوا"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"برقراری ارتباط با دستگاه"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"فرستادن محتوای صفحه به دستگاه"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"درحال جستجوی دستگاه‌ها…"</string>
@@ -2133,7 +2133,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"کاری"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"نمای شخصی"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"نمای کاری"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"سرپرست سیستم آن را مسدود کرده است"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"سرپرست فناوری اطلاعات آن را مسدود کرده است"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"نمی‌توان این محتوا را با برنامه‌های کاری هم‌رسانی کرد"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"نمی‌توان این محتوا را با برنامه‌های کاری باز کرد"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"نمی‌توان این محتوا را با برنامه‌های شخصی هم‌رسانی کرد"</string>

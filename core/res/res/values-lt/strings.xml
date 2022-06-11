@@ -307,8 +307,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pasiekti kalendorių"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"siųsti ir peržiūrėti SMS pranešimus"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"Failai ir dokumentai"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"pasiekti failus ir dokumentus jūsų įrenginyje"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"Failai"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"pasiekti failus jūsų įrenginyje"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzika ir garso įrašai"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pasiekti muziką ir garso įrašus jūsų įrenginyje"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Nuotraukos ir vaizdo įrašai"</string>
@@ -1697,7 +1697,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Išjungti spartųjį klavišą"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Naudoti spartųjį klavišą"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Spalvų inversija"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Spalvų taisymas"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Spalvų koregavimas"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Vienos rankos režimas"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Itin blanku"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Laikomi garsumo klavišai. „<xliff:g id="SERVICE_NAME">%1$s</xliff:g>“ įjungta."</string>
