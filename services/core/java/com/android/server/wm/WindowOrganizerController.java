@@ -525,7 +525,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
             }
 
-            if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) == 0) {
+            if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
                 mService.addWindowLayoutReasons(LAYOUT_REASON_CONFIG_CHANGED);
             }
         } finally {

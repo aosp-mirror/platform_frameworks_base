@@ -42,11 +42,11 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatcher
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -82,12 +82,12 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         `when`(dialog.context).thenReturn(mContext)
 
         controller = UserSwitchDialogController(
-                { userDetailViewAdapter },
-                activityStarter,
-                falsingManager,
-                dialogLaunchAnimator,
-                uiEventLogger,
-                { dialog }
+            { userDetailViewAdapter },
+            activityStarter,
+            falsingManager,
+            dialogLaunchAnimator,
+            uiEventLogger,
+            { dialog }
         )
     }
 
@@ -140,11 +140,11 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
 
         verify(activityStarter)
-                .postStartActivityDismissingKeyguard(
-                        argThat(IntentMatcher(Settings.ACTION_USER_SETTINGS)),
-                        eq(0),
-                        eq(null)
-                )
+            .postStartActivityDismissingKeyguard(
+                argThat(IntentMatcher(Settings.ACTION_USER_SETTINGS)),
+                eq(0),
+                eq(null)
+            )
         verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
     }
 
