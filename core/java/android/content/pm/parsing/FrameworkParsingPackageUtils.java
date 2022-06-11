@@ -368,8 +368,13 @@ public class FrameworkParsingPackageUtils {
             return input.success(targetVers);
         }
 
-        if (allowUnknownCodenames && UnboundedSdkLevel.isAtMost(targetCode)) {
-            return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
+        try {
+            if (allowUnknownCodenames && UnboundedSdkLevel.isAtMost(targetCode)) {
+                return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
+            }
+        } catch (IllegalArgumentException e) {
+            // isAtMost() throws it when encountering an older SDK codename
+            return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK, e.getMessage());
         }
 
         // If it's a pre-release SDK and the codename matches this platform, it
