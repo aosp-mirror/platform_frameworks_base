@@ -4773,7 +4773,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    /** Called right after {@link com.android.internal.view.IInputMethod#showSoftInput}. */
+    /** Called right after {@link com.android.internal.inputmethod.IInputMethod#showSoftInput}. */
     @GuardedBy("ImfLock.class")
     private void onShowHideSoftInputRequested(boolean show, IBinder requestToken,
             @SoftInputShowHideReason int reason) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -32,9 +32,7 @@ import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 /**
- * Top-level interface to an input method component (implemented in a
- * Service).
- * {@hide}
+ * Top-level interface to an input method component (implemented in a Service).
  */
 oneway interface IInputMethod {
     void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,

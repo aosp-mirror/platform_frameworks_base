@@ -40,6 +40,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.CancellationGroup;
+import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IInputMethodSession;
 import com.android.internal.inputmethod.IInputMethodSessionCallback;
@@ -48,7 +49,6 @@ import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputMethod;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.io.FileDescriptor;

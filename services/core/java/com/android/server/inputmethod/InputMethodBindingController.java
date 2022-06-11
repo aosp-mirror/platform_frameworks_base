@@ -45,9 +45,9 @@ import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.InputBindResult;
 import com.android.internal.inputmethod.UnbindReason;
-import com.android.internal.view.IInputMethod;
 import com.android.server.EventLogTags;
 import com.android.server.wm.WindowManagerInternal;
 

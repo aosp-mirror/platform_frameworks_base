@@ -39,7 +39,6 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnectionInvoker;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputConnectionProtoDumper;
-import com.android.internal.view.IInputMethod;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.CompletableFuture;
@@ -90,7 +89,7 @@ final class RemoteInputConnection implements InputConnection {
      * Signaled when the system decided to take away IME focus from the target app.
      *
      * <p>This is expected to be signaled immediately when the IME process receives
-     * {@link IInputMethod#unbindInput()}.</p>
+     * {@link com.android.internal.inputmethod.IInputMethod#unbindInput()}.</p>
      */
     @NonNull
     private final CancellationGroup mCancellationGroup;
