@@ -348,6 +348,7 @@ interface IActivityTaskManager {
     /**
      * Prepare the back navigation in the server. This setups the leashed for sysui to animate
      * the back gesture and returns the data needed for the animation.
+     * @param requestAnimation true if the caller wishes to animate the back navigation
      */
-    android.window.BackNavigationInfo startBackNavigation();
+    android.window.BackNavigationInfo startBackNavigation(in boolean requestAnimation);
 }

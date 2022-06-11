@@ -189,6 +189,67 @@ class UserTrackerImplTest : SysuiTestCase() {
         assertThat(tracker.userProfiles.map { it.id }).containsExactly(tracker.userId, profileID)
     }
 
+    fun testManagedProfileUnavailable() {
+        tracker.initialize(0)
+        val profileID = tracker.userId + 10
+
+        `when`(userManager.getProfiles(anyInt())).thenAnswer { invocation ->
+            val id = invocation.getArgument<Int>(0)
+            val info = UserInfo(id, "", UserInfo.FLAG_FULL)
+            val infoProfile = UserInfo(
+                    id + 10,
+                    "",
+                    "",
+                    UserInfo.FLAG_MANAGED_PROFILE or UserInfo.FLAG_QUIET_MODE,
+                    UserManager.USER_TYPE_PROFILE_MANAGED
+            )
+            infoProfile.profileGroupId = id
+            listOf(info, infoProfile)
+        }
+
+        val intent = Intent(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+                .putExtra(Intent.EXTRA_USER, UserHandle.of(profileID))
+        tracker.onReceive(context, intent)
+
+        assertThat(tracker.userProfiles.map { it.id }).containsExactly(tracker.userId, profileID)
+    }
+
+    fun testManagedProfileStartedAndRemoved() {
+        tracker.initialize(0)
+        val profileID = tracker.userId + 10
+
+        `when`(userManager.getProfiles(anyInt())).thenAnswer { invocation ->
+            val id = invocation.getArgument<Int>(0)
+            val info = UserInfo(id, "", UserInfo.FLAG_FULL)
+            val infoProfile = UserInfo(
+                    id + 10,
+                    "",
+                    "",
+                    UserInfo.FLAG_MANAGED_PROFILE,
+                    UserManager.USER_TYPE_PROFILE_MANAGED
+            )
+            infoProfile.profileGroupId = id
+            listOf(info, infoProfile)
+        }
+
+        // Managed profile started
+        val intent = Intent(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)
+                .putExtra(Intent.EXTRA_USER, UserHandle.of(profileID))
+        tracker.onReceive(context, intent)
+
+        assertThat(tracker.userProfiles.map { it.id }).containsExactly(tracker.userId, profileID)
+
+        `when`(userManager.getProfiles(anyInt())).thenAnswer { invocation ->
+            listOf(UserInfo(invocation.getArgument(0), "", UserInfo.FLAG_FULL))
+        }
+
+        val intent2 = Intent(Intent.ACTION_MANAGED_PROFILE_REMOVED)
+                .putExtra(Intent.EXTRA_USER, UserHandle.of(profileID))
+        tracker.onReceive(context, intent2)
+
+        assertThat(tracker.userProfiles.map { it.id }).containsExactly(tracker.userId)
+    }
+
     @Test
     fun testCallbackNotCalledOnAdd() {
         tracker.initialize(0)

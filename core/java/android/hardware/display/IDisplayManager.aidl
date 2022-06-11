@@ -16,7 +16,6 @@
 
 package android.hardware.display;
 
-import android.companion.virtual.IVirtualDevice;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
@@ -88,10 +87,10 @@ interface IDisplayManager {
     void requestColorMode(int displayId, int colorMode);
 
     // Requires CAPTURE_VIDEO_OUTPUT, CAPTURE_SECURE_VIDEO_OUTPUT, or an appropriate
-    // MediaProjection token or VirtualDevice for certain combinations of flags.
+    // MediaProjection token for certain combinations of flags.
     int createVirtualDisplay(in VirtualDisplayConfig virtualDisplayConfig,
             in IVirtualDisplayCallback callback, in IMediaProjection projectionToken,
-            in IVirtualDevice virtualDevice, String packageName);
+            String packageName);
 
     // No permissions required, but must be same Uid as the creator.
     void resizeVirtualDisplay(in IVirtualDisplayCallback token,
