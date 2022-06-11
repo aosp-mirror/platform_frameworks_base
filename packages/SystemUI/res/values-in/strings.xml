@@ -851,8 +851,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Aplikasi tidak dikenal"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Hentikan transmisi"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Perangkat yang tersedia untuk output audio."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volume"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cara kerja siaran"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Siaran"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Orang di dekat Anda dengan perangkat Bluetooth yang kompatibel dapat mendengarkan media yang sedang Anda siarkan"</string>

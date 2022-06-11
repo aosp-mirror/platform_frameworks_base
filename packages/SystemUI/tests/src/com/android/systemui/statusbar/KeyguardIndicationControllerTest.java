@@ -598,18 +598,44 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void doNotSendFaceHelpMessages_fingerprintEnrolled() {
+    public void sendFaceHelpMessages_fingerprintEnrolled() {
         createController();
 
         // GIVEN fingerprint enrolled
         when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                 0)).thenReturn(true);
 
-        // WHEN help messages received
+        // WHEN help messages received that are allowed to show
+        final String helpString = "helpString";
+        final int[] msgIds = new int[]{
+                BiometricFaceConstants.FACE_ACQUIRED_MOUTH_COVERING_DETECTED,
+                BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED
+        };
+        Set<CharSequence> messages = new HashSet<>();
+        for (int msgId : msgIds) {
+            final String message = helpString + msgId;
+            messages.add(message);
+            mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                    msgId, message, BiometricSourceType.FACE);
+        }
+
+        // THEN FACE_ACQUIRED_MOUTH_COVERING_DETECTED and DARK_GLASSES help messages shown
+        verifyIndicationMessages(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                messages);
+    }
+
+    @Test
+    public void doNotSendMostFaceHelpMessages_fingerprintEnrolled() {
+        createController();
+
+        // GIVEN fingerprint enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+
+        // WHEN help messages received that aren't supposed to show
         final String helpString = "helpString";
         final int[] msgIds = new int[]{
                 BiometricFaceConstants.FACE_ACQUIRED_FACE_OBSCURED,
-                BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_RIGHT,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT,
                 BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH,
