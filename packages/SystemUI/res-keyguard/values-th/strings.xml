@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"คุณพิมพ์รหัสผ่านไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> วินาที"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"รหัส PIN ของซิมไม่ถูกต้อง ตอนนี้คุณต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก # ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์}other{รหัส PIN ของซิมไม่ถูกต้อง คุณพยายามได้อีก # ครั้ง }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"ซิมไม่สามารถใช้งานได้ โปรดติดต่อผู้ให้บริการ"</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก # ครั้งก่อนที่ซิมจะใช้งานไม่ได้อย่างถาวร}other{รหัส PUK ของซิมไม่ถูกต้อง คุณพยายามได้อีก # ครั้งก่อนที่ซิมจะใช้งานไม่ได้อย่างถาวร}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"การปลดล็อกด้วย PIN ของซิมล้มเหลว!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"การปลดล็อกด้วย PUK ของซิมล้มเหลว!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"สลับวิธีการป้อนข้อมูล"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ผู้ดูแลระบบล็อกอุปกรณ์"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"มีการล็อกอุปกรณ์ด้วยตัวเอง"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ไม่รู้จัก"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"เปิดการเข้าถึงกล้องในการตั้งค่าเพื่อใช้การปลดล็อกด้วยใบหน้า"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{ป้อน PIN ของซิม คุณพยายามได้อีก # ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์}other{ป้อน PIN ของซิม คุณลองได้อีก # ครั้ง}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ตอนนี้ซิมถูกปิดใช้แล้ว ป้อนรหัส PUK เพื่อดำเนินการต่อ คุณพยายามได้อีก # ครั้งก่อนที่ซิมจะใช้งานไม่ได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ}other{ตอนนี้ซิมถูกปิดใช้แล้ว ป้อนรหัส PUK เพื่อดำเนินการต่อ คุณพยายามได้อีก # ครั้งก่อนที่ซิมจะใช้งานไม่ได้อย่างถาวร โปรดติดต่อสอบถามรายละเอียดจากผู้ให้บริการ}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"ค่าเริ่มต้น"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"บับเบิล"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"แอนะล็อก"</string>

@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ທ່ານພິມລະຫັດຜ່ານຜິດ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nໃຫ້ລອງໃໝ່ອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ທ່ານແຕ້ມຮູບແບບປົດລັອກບໍ່ຖືກ <xliff:g id="NUMBER_0">%1$d</xliff:g> ເທື່ອແລ້ວ. \n\nລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%2$d</xliff:g> ວິນາທີ."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງທ່ານຕ້ອງຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການ ເພື່ອປົດລັອກອຸປະກອນຂອງທ່ານ."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{ລະຫັດ PIN ຂອງຊິມບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ທ່ານຈະຕ້ອງຕິດຕໍ່ຫາຜູ້ໃຫ້ບໍລິການຂອງທ່ານເພື່ອປົດລັອກອຸປະກອນທ່ານ.}other{ລະຫັດ PIN ຂອງຊິມບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອ. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM ໃຊ້ບໍ່ໄດ້ແລ້ວ. ກະລຸນາຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການຂອງທ່ານ."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{ລະຫັດ PUK ຂອງຊິມບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຊິມຂອງທ່ານຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ.}other{ລະຫັດ PUK ຂອງຊິມບໍ່ຖືກຕ້ອງ, ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຊິມຂອງທ່ານຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"PIN ຂອງ SIM ເຮັດວຽກລົ້ມເຫຼວ!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK ຂອງ SIM ເຮັດວຽກລົ້ມເຫຼວ!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ສະລັບຮູບແບບການປ້ອນຂໍ້ມູນ"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ອຸປະກອນຖືກລັອກໂດຍຜູ້ເບິ່ງແຍງລະບົບ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ອຸປະກອນຖືກສັ່ງໃຫ້ລັອກ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ບໍ່ຮູ້ຈັກ"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"ເພື່ອໃຊ້ການປົດລັອກດ້ວຍໜ້າ, ໃຫ້ເປີດໃຊ້ສິດເຂົ້າເຖິງກ້ອງຖ່າຍຮູບໃນການຕັ້ງຄ່າ"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{ໃສ່ລະຫັດ PIN ຂອງຊິມ. ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຈະຕ້ອງຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການຂອງທ່ານເພື່ອປົດລັອກອຸປະກອນທ່ານ.}other{ໃສ່ລະຫັດ PIN ຂອງຊິມ. ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອ.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ຕອນນີ້ປິດການນຳໃຊ້ຊິມແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອສືບຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຊິມຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.}other{ຕອນນີ້ປິດການນຳໃຊ້ຊິມແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອສືບຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ # ເທື່ອກ່ອນທີ່ຊິມຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"ຄ່າເລີ່ມຕົ້ນ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ຟອງ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ໂມງເຂັມ"</string>

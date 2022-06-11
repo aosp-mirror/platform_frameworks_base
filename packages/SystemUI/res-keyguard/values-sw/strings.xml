@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Umeandika vibaya nenosiri lako mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Umechora vibaya mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Nambari ya PIN ya SIM si sahihi, sasa lazima uwasiliane na mtoa huduma za mtandao ndipo ufungue kifaa chako."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Nambari ya PIN ya SIM si sahihi, unaweza kujaribu mara # kabla ya kulazimika kuwasiliana na mtoa huduma wako ili afungue kifaa chako.}other{Nambari ya PIN ya SIM si sahihi, unaweza kujaribu mara #. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM haiwezi kutumika. Wasiliana na mtoa huduma wako."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Nambari ya PUK ya SIM si sahihi, unaweza kujaribu mara # kabla ya SIM kuacha kutumika kabisa.}other{Nambari ya PUK ya SIM si sahihi, unaweza kujaribu mara # kabla ya SIM kuacha kutumika kabisa.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Utendakazi wa PIN ya SIM haujafanikiwa!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Utendakazi wa PUK ya SIM haujafanikiwa!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Kubadili mbinu ya kuingiza data"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Msimamizi amefunga kifaa"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Umefunga kifaa mwenyewe"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Haitambuliwi"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Ili ufungue kwa Uso, ruhusu kamera ifikiwe"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Weka PIN ya SIM. Unaweza kujaribu mara # kuweka PIN ya SIM kabla ya kulazimika kuwasiliana na mtoa huduma wako ili afungue kifaa chako endapo kitafungwa.}other{Weka PIN ya SIM. Unaweza kujaribu mara #.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Sasa SIM imefungwa. Weka msimbo wa PUK ili uendelee. Unaweza kujaribu mara # kabla ya SIM kuacha kutumika kabisa. Wasiliana na mtoa huduma kwa maelezo.}other{Sasa SIM imefungwa. Weka msimbo wa PUK ili uendelee. Unaweza kujaribu mara # kabla ya SIM kuacha kutumika kabisa. Wasiliana na mtoa huduma kwa maelezo.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Chaguomsingi"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Kiputo"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogi"</string>

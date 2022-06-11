@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ നിങ്ങളുടെ പാസ്‌വേഡ് ‌തെറ്റായി ‌ടൈപ്പുചെയ്തു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"നിങ്ങൾ <xliff:g id="NUMBER_0">%1$d</xliff:g> തവണ അൺലോക്ക് പാറ്റേൺ ‌തെറ്റായി ‌വരച്ചു. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> സെക്കന്റിനു‌ശേഷം വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"സിം പിൻ കോഡ് തെറ്റാണ്, നിങ്ങളുടെ ഉപകരണം അൺലോക്കുചെയ്യാൻ ഇനി നിങ്ങളുടെ കാരിയറുമായി ബന്ധപ്പെടണം."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{സിം പിൻ കോഡ് തെറ്റാണ്, # ശ്രമം ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ ഉപകരണം അൺലോക്ക് ചെയ്യാൻ സേവനദാതാവിനെ ബന്ധപ്പെണം.}other{സിം പിൻ കോഡ് തെറ്റാണ്, # ശ്രമങ്ങൾ ശേഷിക്കുന്നു. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"സിം ഉപയോഗയോഗ്യമല്ല. നിങ്ങളുടെ കാരിയറെ ബന്ധപ്പെടുക."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{സിം PUK കോഡ് തെറ്റാണ്, # ശ്രമം ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകും.}other{സിം PUK കോഡ് തെറ്റാണ്, # ശ്രമങ്ങൾ ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകും.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"പിൻ ഉപയോഗിച്ച് സിം അൺലോക്കു‌ചെയ്യാനുള്ള ‌ശ്രമം പരാജയപ്പെട്ടു!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK ഉപയോഗിച്ച് സിം അൺലോക്കു‌ചെയ്യാനുള്ള ‌ശ്രമം പരാജയപ്പെട്ടു!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ഇൻപുട്ട് രീതി മാറുക"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ഉപകരണം അഡ്‌മിൻ ലോക്കുചെയ്തു"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ഉപകരണം നേരിട്ട് ലോക്കുചെയ്തു"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"തിരിച്ചറിയുന്നില്ല"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"ഫെയ്സ് അൺലോക്കിന് ക്രമീകരണത്തിൽ ക്യാമറാ ആക്സസ് ഓണാക്കൂ"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{സിം പിൻ നൽകുക. # ശ്രമം ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ ഉപകരണം അൺലോക്ക് ചെയ്യാൻ സേവനദാതാവിനെ ബന്ധപ്പെടണം.}other{സിം പിൻ നൽകുക. # ശ്രമങ്ങൾ ശേഷിക്കുന്നു.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമായിരിക്കുന്നു. തുടരുന്നതിന് PUK കോഡ് നൽകുക. # ശ്രമം ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകും. വിശദാംശങ്ങൾക്ക് സേവനദാതാവിനെ ബന്ധപ്പെടുക.}other{സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമായിരിക്കുന്നു. തുടരുന്നതിന് PUK കോഡ് നൽകുക. # ശ്രമങ്ങൾ ശേഷിക്കുന്നു, അതുകഴിഞ്ഞാൽ സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകും. വിശദാംശങ്ങൾക്ക് സേവനദാതാവിനെ ബന്ധപ്പെടുക.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"ഡിഫോൾട്ട്"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ബബിൾ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"അനലോഗ്"</string>
