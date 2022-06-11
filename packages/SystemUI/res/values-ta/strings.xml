@@ -205,8 +205,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"’சென்சார்கள் ஆஃப்’ செயலில் உள்ளது"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"எல்லா அறிவிப்புகளையும் அழி."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
-    <skip />
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{குழுவில் மேலும் # அறிவிப்பு உள்ளது.}other{குழுவில் மேலும் # அறிவிப்புகள் உள்ளன.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"நிலத்தோற்ற திசையமைப்பில் திரைப் பூட்டப்பட்டுள்ளது."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"உருவப்பட திசையமைப்பில் திசை பூட்டப்பட்டுள்ளது."</string>
     <string name="dessert_case" msgid="9104973640704357717">"இனிப்பு வடிவங்கள்"</string>
@@ -254,8 +253,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"ஹாட்ஸ்பாட்"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ஆன் செய்கிறது…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"டேட்டா சேவர்: ஆன்"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
-    <skip />
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# சாதனம்}other{# சாதனங்கள்}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"டார்ச் லைட்"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"கேமரா உபயோகத்திலுள்ளது"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"மொபைல் டேட்டா"</string>
@@ -352,8 +350,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"கெஸ்ட் பயன்முறையில் உள்ளீர்கள்"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"புதிய பயனரைச் சேர்த்தால் கெஸ்ட் பயன்முறையில் இருந்து வெளியேற்றப்படுவீர்கள். மேலும் தற்போதைய கெஸ்ட் அமர்வின் ஆப்ஸ் மற்றும் தரவு அனைத்தும் நீக்கப்படும்."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"பயனர் வரம்பை அடைந்துவிட்டீர்கள்"</string>
-    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
-    <skip />
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{ஒரு பயனரை மட்டுமே சேர்க்க முடியும்.}other{# பயனர்கள் வரை சேர்க்கலாம்.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"பயனரை அகற்றவா?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"இந்தப் பயனரின் எல்லா பயன்பாடுகளும் தரவும் நீக்கப்படும்."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"அகற்று"</string>
@@ -539,10 +536,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"எனக்கு நினைவூட்டு"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"செயல்தவிர்"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"உறக்கநிலையில் வைத்திருந்த நேரம்: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
-    <skip />
-    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
-    <skip />
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# மணிநேரம்}=2{# மணிநேரம்}other{# மணிநேரம்}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# நிமிடம்}other{# நிமிடங்கள்}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"பேட்டரி சேமிப்பு"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> பட்டன்"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"ஹோம்"</string>
@@ -766,8 +761,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"நிலைமாற்று"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"சாதனக் கட்டுப்பாடுகள்"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"கட்டுப்பாடுகளைச் சேர்க்க வேண்டிய ஆப்ஸைத் தேர்ந்தெடுங்கள்"</string>
-    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
-    <skip />
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# கட்டுப்பாடு சேர்க்கப்பட்டது.}other{# கட்டுப்பாடுகள் சேர்க்கப்பட்டன.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"அகற்றப்பட்டது"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"பிடித்தவற்றில் சேர்க்கப்பட்டது"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"பிடித்தவற்றில் சேர்க்கப்பட்டது, நிலை <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -924,12 +918,10 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"கட்டத்தைச் சேர்"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"கட்டத்தை சேர்க்காதே"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"பயனரைத் தேர்வுசெய்க"</string>
-    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
-    <skip />
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# ஆப்ஸ் செயலிலுள்ளது}other{# ஆப்ஸ் செயலிலுள்ளன}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"புதிய தகவல்கள்"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"செயலிலுள்ள ஆப்ஸ்"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"இந்த ஆப்ஸை நீங்கள் பயன்படுத்தாதபோதும் அவை செயலில் இருப்பதோடு இயங்கிக் கொண்டிருக்கும். இது அவற்றின் செயல்பாட்டை மேம்படுத்தும். ஆனால், அதே சமயம் பேட்டரி ஆயுளைக் குறைக்கக்கூடும்."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"நிறுத்து"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"இயங்கவில்லை"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"முடிந்தது"</string>
@@ -943,14 +935,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"வார்த்தைகள் நகலெடுக்கப்பட்டன"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"படம் நகலெடுக்கப்பட்டது"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"உள்ளடக்கம் நகலெடுக்கப்பட்டது"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"கிளிப்போர்டு எடிட்டர்"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"கிளிப்போர்டு"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"படத்தின் மாதிரிக்காட்சி"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"திருத்தும்"</string>
     <string name="add" msgid="81036585205287996">"சேர்"</string>
     <string name="manage_users" msgid="1823875311934643849">"பயனர்களை நிர்வகித்தல்"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"பிரிக்கப்பட்ட திரைக்குள் இந்த அறிவிப்பை இழுத்துவிட முடியாது."</string>
