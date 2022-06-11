@@ -845,13 +845,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
                 if (!staying) {
                     mNotificationShadeWindowController.setKeyguardFadingAway(true);
+                    wakeAndUnlockDejank();
                     mCentralSurfaces.hideKeyguard();
                     // hide() will happen asynchronously and might arrive after the scrims
                     // were already hidden, this means that the transition callback won't
                     // be triggered anymore and StatusBarWindowController will be forever in
                     // the fadingAway state.
                     mCentralSurfaces.updateScrimController();
-                    wakeAndUnlockDejank();
                 } else {
                     mCentralSurfaces.hideKeyguard();
                     mCentralSurfaces.finishKeyguardFadingAway();
@@ -895,7 +895,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBiometricUnlockController.finishKeyguardFadingAway();
         WindowManagerGlobal.getInstance().trimMemory(
                 ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
-
     }
 
     private void wakeAndUnlockDejank() {
