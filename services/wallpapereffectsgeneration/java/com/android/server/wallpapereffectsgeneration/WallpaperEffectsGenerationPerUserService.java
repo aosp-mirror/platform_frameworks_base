@@ -233,14 +233,13 @@ public class WallpaperEffectsGenerationPerUserService extends
     @Nullable
     private RemoteWallpaperEffectsGenerationService ensureRemoteServiceLocked() {
         if (mRemoteService == null) {
-            final String serviceName = getComponentNameLocked();
-            if (serviceName == null) {
+            final ComponentName serviceComponent = updateServiceInfoLocked();
+            if (serviceComponent == null) {
                 if (mMaster.verbose) {
                     Slog.v(TAG, "ensureRemoteServiceLocked(): not set");
                 }
                 return null;
             }
-            ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
 
             mRemoteService = new RemoteWallpaperEffectsGenerationService(getContext(),
                     serviceComponent, mUserId, this,

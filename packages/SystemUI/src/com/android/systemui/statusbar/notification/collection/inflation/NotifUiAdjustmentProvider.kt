@@ -17,9 +17,11 @@
 package com.android.systemui.statusbar.notification.collection.inflation
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.notification.SectionClassifier
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.util.ListenerSet
 import javax.inject.Inject
 
 /**
@@ -27,9 +29,30 @@ import javax.inject.Inject
  * to ensure that notifications are reinflated when ranking-derived information changes.
  */
 @SysUISingleton
-open class NotifUiAdjustmentProvider @Inject constructor(
-    private val sectionClassifier: SectionClassifier
+class NotifUiAdjustmentProvider @Inject constructor(
+    private val lockscreenUserManager: NotificationLockscreenUserManager,
+    private val sectionClassifier: SectionClassifier,
 ) {
+    private val dirtyListeners = ListenerSet<Runnable>()
+
+    fun addDirtyListener(listener: Runnable) {
+        if (dirtyListeners.isEmpty()) {
+            lockscreenUserManager.addNotificationStateChangedListener(notifStateChangedListener)
+        }
+        dirtyListeners.addIfAbsent(listener)
+    }
+
+    fun removeDirtyListener(listener: Runnable) {
+        dirtyListeners.remove(listener)
+        if (dirtyListeners.isEmpty()) {
+            lockscreenUserManager.removeNotificationStateChangedListener(notifStateChangedListener)
+        }
+    }
+
+    private val notifStateChangedListener =
+        NotificationLockscreenUserManager.NotificationStateChangedListener {
+            dirtyListeners.forEach(Runnable::run)
+        }
 
     private fun isEntryMinimized(entry: NotificationEntry): Boolean {
         val section = entry.section ?: error("Entry must have a section to determine if minimized")
@@ -42,14 +65,15 @@ open class NotifUiAdjustmentProvider @Inject constructor(
 
     /**
      * Returns a adjustment object for the given entry.  This can be compared to a previous instance
-     * from the same notification using [NotifUiAdjustment.needReinflate] to determine if it
-     * should be reinflated.
+     * from the same notification using [NotifUiAdjustment.needReinflate] to determine if it should
+     * be reinflated.
      */
     fun calculateAdjustment(entry: NotificationEntry) = NotifUiAdjustment(
         key = entry.key,
         smartActions = entry.ranking.smartActions,
         smartReplies = entry.ranking.smartReplies,
         isConversation = entry.ranking.isConversation,
-        isMinimized = isEntryMinimized(entry)
+        isMinimized = isEntryMinimized(entry),
+        needsRedaction = lockscreenUserManager.needsRedaction(entry),
     )
 }
