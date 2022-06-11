@@ -53,9 +53,9 @@ public class StackScrollAlgorithm {
     private static final Boolean DEBUG = false;
 
     private final ViewGroup mHostView;
-    private int mPaddingBetweenElements;
-    private int mGapHeight;
-    private int mGapHeightOnLockscreen;
+    private float mPaddingBetweenElements;
+    private float mGapHeight;
+    private float mGapHeightOnLockscreen;
     private int mCollapsedSize;
 
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
@@ -127,13 +127,13 @@ public class StackScrollAlgorithm {
         return getExpansionFractionWithoutShelf(mTempAlgorithmState, ambientState);
     }
 
-    private void log(String s) {
+    public static void log(String s) {
         if (DEBUG) {
             android.util.Log.i(TAG, s);
         }
     }
 
-    public void logView(View view, String s) {
+    public static void logView(View view, String s) {
         String viewString = "";
         if (view instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = ((ExpandableNotificationRow) view);
@@ -535,35 +535,40 @@ public class StackScrollAlgorithm {
                     //  more notifications than we should during this special transitional states.
                     boolean bypassPulseNotExpanding = ambientState.isBypassEnabled()
                             && ambientState.isOnKeyguard() && !ambientState.isPulseExpanding();
-                    final int stackBottom =
-                            !ambientState.isShadeExpanded() || ambientState.isDozing()
-                                    || bypassPulseNotExpanding
+                    final float stackBottom = !ambientState.isShadeExpanded()
+                            || ambientState.getDozeAmount() == 1f
+                            || bypassPulseNotExpanding
                                     ? ambientState.getInnerHeight()
-                                    : (int) ambientState.getStackHeight();
-                    final int shelfStart = stackBottom
+                                    : ambientState.getStackHeight();
+                    final float shelfStart = stackBottom
                             - ambientState.getShelf().getIntrinsicHeight()
                             - mPaddingBetweenElements;
-                    viewState.yTranslation = Math.min(viewState.yTranslation, shelfStart);
-                    if (viewState.yTranslation >= shelfStart) {
-                        viewState.hidden = !view.isExpandAnimationRunning()
-                                && !view.hasExpandingChild();
-                        viewState.inShelf = true;
-                        // Notifications in the shelf cannot be visible HUNs.
-                        viewState.headsUpIsVisible = false;
-                    }
+                    updateViewWithShelf(view, viewState, shelfStart);
                 }
             }
             // Clip height of view right before shelf.
             viewState.height = (int) (getMaxAllowedChildHeight(view) * expansionFraction);
         }
 
-        algorithmState.mCurrentYPosition += viewState.height
-                + expansionFraction * mPaddingBetweenElements;
+        algorithmState.mCurrentYPosition +=
+                expansionFraction * (getMaxAllowedChildHeight(view) + mPaddingBetweenElements);
         algorithmState.mCurrentExpandedYPosition += view.getIntrinsicHeight()
                 + mPaddingBetweenElements;
 
         setLocation(view.getViewState(), algorithmState.mCurrentYPosition, i);
         viewState.yTranslation += ambientState.getStackY();
+    }
+
+    @VisibleForTesting
+    void updateViewWithShelf(ExpandableView view, ExpandableViewState viewState, float shelfStart) {
+        viewState.yTranslation = Math.min(viewState.yTranslation, shelfStart);
+        if (viewState.yTranslation >= shelfStart) {
+            viewState.hidden = !view.isExpandAnimationRunning()
+                    && !view.hasExpandingChild();
+            viewState.inShelf = true;
+            // Notifications in the shelf cannot be visible HUNs.
+            viewState.headsUpIsVisible = false;
+        }
     }
 
     /**
@@ -849,13 +854,13 @@ public class StackScrollAlgorithm {
          * Y position of the current view during updating children
          * with expansion factor applied.
          */
-        private int mCurrentYPosition;
+        private float mCurrentYPosition;
 
         /**
          * Y position of the current view during updating children
          * without applying the expansion factor.
          */
-        private int mCurrentExpandedYPosition;
+        private float mCurrentExpandedYPosition;
     }
 
     /**

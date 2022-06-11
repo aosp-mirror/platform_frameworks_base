@@ -17,6 +17,7 @@
 package android.util;
 
 import android.content.res.Resources;
+import android.view.Display;
 
 import com.android.internal.R;
 
@@ -53,15 +54,33 @@ public class DisplayUtils {
     }
 
     /**
-     * Get the display size ratio based on the stable display size.
+     * Returns the Display.Mode with maximum resolution.
+     */
+    public static Display.Mode getMaximumResolutionDisplayMode(Display.Mode[] modes) {
+        if (modes == null || modes.length == 0) {
+            return null;
+        }
+        int maxWidth = 0;
+        Display.Mode target = null;
+        for (Display.Mode mode : modes) {
+            if (mode.getPhysicalWidth() > maxWidth) {
+                maxWidth = mode.getPhysicalWidth();
+                target = mode;
+            }
+        }
+        return target;
+    }
+
+    /**
+     * Get the display size ratio based on the physical display size.
      */
     public static float getPhysicalPixelDisplaySizeRatio(
-            int stableWidth, int stableHeight, int currentWidth, int currentHeight) {
-        if (stableWidth == currentWidth && stableHeight == currentHeight) {
+            int physicalWidth, int physicalHeight, int currentWidth, int currentHeight) {
+        if (physicalWidth == currentWidth && physicalHeight == currentHeight) {
             return 1f;
         }
-        final float widthRatio = (float) currentWidth / stableWidth;
-        final float heightRatio = (float) currentHeight / stableHeight;
+        final float widthRatio = (float) currentWidth / physicalWidth;
+        final float heightRatio = (float) currentHeight / physicalHeight;
         return Math.min(widthRatio, heightRatio);
     }
 }

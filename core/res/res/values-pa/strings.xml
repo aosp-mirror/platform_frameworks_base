@@ -305,8 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ਤੁਹਾਡੇ ਕੈਲੰਡਰ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਦੇਖੋ"</string>
-    <string name="permgrouplab_storage" msgid="5570124978732352858">"ਫ਼ਾਈਲਾਂ ਅਤੇ ਦਸਤਾਵੇਜ਼"</string>
-    <string name="permgroupdesc_storage" msgid="8352226729501080525">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ਾਈਲਾਂ ਅਤੇ ਦਸਤਾਵੇਜ਼ਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ਫ਼ਾਈਲਾਂ"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ \'ਤੇ ਫ਼ਾਈਲਾਂ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ਸੰਗੀਤ ਅਤੇ ਆਡੀਓ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਸੰਗੀਤ ਅਤੇ ਆਡੀਓ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ਫ਼ੋਟੋਆਂ ਅਤੇ ਵੀਡੀਓ"</string>
@@ -1380,7 +1380,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"ਇਨਪੁਟ ਵਿਧੀ ਚੁਣੋ"</string>
     <string name="show_ime" msgid="6406112007347443383">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>
     <string name="hardware" msgid="1800597768237606953">"ਆਭਾਸੀ ਕੀ-ਬੋਰਡ ਦਿਖਾਓ"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਦੀ ਰੂਪ-ਰੇਖਾ ਬਦਲੋ"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਦਾ ਸੰਰੂਪਣ ਕਰੋ"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ਭਾਸ਼ਾ ਅਤੇ ਖਾਕਾ ਚੁਣਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>

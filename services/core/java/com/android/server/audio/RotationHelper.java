@@ -20,12 +20,13 @@ import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.media.AudioSystem;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.util.Log;
+import android.view.Display;
 import android.view.Surface;
-import android.view.WindowManager;
 
 /**
  * Class to handle device rotation events for AudioService, and forward device rotation
@@ -47,6 +48,8 @@ import android.view.WindowManager;
 class RotationHelper {
 
     private static final String TAG = "AudioService.RotationHelper";
+
+    private static final boolean DEBUG_ROTATION = false;
 
     private static AudioDisplayListener sDisplayListener;
     private static FoldStateListener sFoldStateListener;
@@ -98,8 +101,8 @@ class RotationHelper {
         // Even though we're responding to device orientation events,
         // use display rotation so audio stays in sync with video/dialogs
         // TODO(b/148458001): Support multi-display
-        int newRotation = ((WindowManager) sContext.getSystemService(
-                Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        int newRotation = DisplayManagerGlobal.getInstance()
+                .getDisplayInfo(Display.DEFAULT_DISPLAY).rotation;
         synchronized(sRotationLock) {
             if (newRotation != sDeviceRotation) {
                 sDeviceRotation = newRotation;
@@ -109,7 +112,9 @@ class RotationHelper {
     }
 
     private static void publishRotation(int rotation) {
-        Log.v(TAG, "publishing device rotation =" + rotation + " (x90deg)");
+        if (DEBUG_ROTATION) {
+            Log.i(TAG, "publishing device rotation =" + rotation + " (x90deg)");
+        }
         switch (rotation) {
             case Surface.ROTATION_0:
                 AudioSystem.setParameters("rotation=0");
@@ -159,6 +164,9 @@ class RotationHelper {
 
         @Override
         public void onDisplayChanged(int displayId) {
+            if (DEBUG_ROTATION) {
+                Log.i(TAG, "onDisplayChanged diplayId:" + displayId);
+            }
             updateOrientation();
         }
     }
