@@ -213,6 +213,8 @@ public class AlarmManagerService extends SystemService {
     static final int RARE_INDEX = 3;
     static final int NEVER_INDEX = 4;
 
+    private static final long TEMPORARY_QUOTA_DURATION = INTERVAL_DAY;
+
     private final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
 
@@ -282,6 +284,7 @@ public class AlarmManagerService extends SystemService {
     AppWakeupHistory mAppWakeupHistory;
     AppWakeupHistory mAllowWhileIdleHistory;
     AppWakeupHistory mAllowWhileIdleCompatHistory;
+    TemporaryQuotaReserve mTemporaryQuotaReserve;
     private final SparseLongArray mLastPriorityAlarmDispatch = new SparseLongArray();
     private final SparseArray<RingBuffer<RemovedAlarm>> mRemovalHistory = new SparseArray<>();
     ClockReceiver mClockReceiver;
@@ -357,6 +360,133 @@ public class AlarmManagerService extends SystemService {
     private AppStateTrackerImpl mAppStateTracker;
     @VisibleForTesting
     boolean mAppStandbyParole;
+
+    /**
+     * Holds information about temporary quota that can be allotted to apps to use as a "reserve"
+     * when they run out of their standard app-standby quota.
+     * This reserve only lasts for a fixed duration of time from when it was last replenished.
+     */
+    static class TemporaryQuotaReserve {
+
+        private static class QuotaInfo {
+            public int remainingQuota;
+            public long expirationTime;
+            public long lastUsage;
+        }
+        /** Map of {package, user} -> {quotaInfo} */
+        private final ArrayMap<Pair<String, Integer>, QuotaInfo> mQuotaBuffer = new ArrayMap<>();
+
+        private long mMaxDuration;
+
+        TemporaryQuotaReserve(long maxDuration) {
+            mMaxDuration = maxDuration;
+        }
+
+        void replenishQuota(String packageName, int userId, int quota, long nowElapsed) {
+            if (quota <= 0) {
+                return;
+            }
+            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
+            QuotaInfo currentQuotaInfo = mQuotaBuffer.get(packageUser);
+            if (currentQuotaInfo == null) {
+                currentQuotaInfo = new QuotaInfo();
+                mQuotaBuffer.put(packageUser, currentQuotaInfo);
+            }
+            currentQuotaInfo.remainingQuota = quota;
+            currentQuotaInfo.expirationTime = nowElapsed + mMaxDuration;
+        }
+
+        /** Returns if the supplied package has reserve quota to fire at the given time. */
+        boolean hasQuota(String packageName, int userId, long triggerElapsed) {
+            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
+            final QuotaInfo quotaInfo = mQuotaBuffer.get(packageUser);
+
+            return quotaInfo != null && quotaInfo.remainingQuota > 0
+                    && triggerElapsed <= quotaInfo.expirationTime;
+        }
+
+        /**
+         * Records quota usage of the given package at the given time and subtracts quota if
+         * required.
+         */
+        void recordUsage(String packageName, int userId, long nowElapsed) {
+            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
+            final QuotaInfo quotaInfo = mQuotaBuffer.get(packageUser);
+
+            if (quotaInfo == null) {
+                Slog.wtf(TAG, "Temporary quota being consumed at " + nowElapsed
+                        + " but not found for package: " + packageName + ", user: " + userId);
+                return;
+            }
+            // Only consume quota if this usage is later than the last one recorded. This is
+            // needed as this can be called multiple times when a batch of alarms is delivered.
+            if (nowElapsed > quotaInfo.lastUsage) {
+                if (quotaInfo.remainingQuota <= 0) {
+                    Slog.wtf(TAG, "Temporary quota being consumed at " + nowElapsed
+                            + " but remaining only " + quotaInfo.remainingQuota
+                            + " for package: " + packageName + ", user: " + userId);
+                } else if (quotaInfo.expirationTime < nowElapsed) {
+                    Slog.wtf(TAG, "Temporary quota being consumed at " + nowElapsed
+                            + " but expired at " + quotaInfo.expirationTime
+                            + " for package: " + packageName + ", user: " + userId);
+                } else {
+                    quotaInfo.remainingQuota--;
+                    // We keep the quotaInfo entry even if remaining quota reduces to 0 as
+                    // following calls can be made with nowElapsed <= lastUsage. The object will
+                    // eventually be removed in cleanUpExpiredQuotas or reused in replenishQuota.
+                }
+                quotaInfo.lastUsage = nowElapsed;
+            }
+        }
+
+        /** Clean up any quotas that have expired before the given time. */
+        void cleanUpExpiredQuotas(long nowElapsed) {
+            for (int i = mQuotaBuffer.size() - 1; i >= 0; i--) {
+                final QuotaInfo quotaInfo = mQuotaBuffer.valueAt(i);
+                if (quotaInfo.expirationTime < nowElapsed) {
+                    mQuotaBuffer.removeAt(i);
+                }
+            }
+        }
+
+        void removeForUser(int userId) {
+            for (int i = mQuotaBuffer.size() - 1; i >= 0; i--) {
+                final Pair<String, Integer> packageUserKey = mQuotaBuffer.keyAt(i);
+                if (packageUserKey.second == userId) {
+                    mQuotaBuffer.removeAt(i);
+                }
+            }
+        }
+
+        void removeForPackage(String packageName, int userId) {
+            final Pair<String, Integer> packageUser = Pair.create(packageName, userId);
+            mQuotaBuffer.remove(packageUser);
+        }
+
+        void dump(IndentingPrintWriter pw, long nowElapsed) {
+            pw.increaseIndent();
+            for (int i = 0; i < mQuotaBuffer.size(); i++) {
+                final Pair<String, Integer> packageUser = mQuotaBuffer.keyAt(i);
+                final QuotaInfo quotaInfo = mQuotaBuffer.valueAt(i);
+                pw.print(packageUser.first);
+                pw.print(", u");
+                pw.print(packageUser.second);
+                pw.print(": ");
+                if (quotaInfo == null) {
+                    pw.print("--");
+                } else {
+                    pw.print("quota: ");
+                    pw.print(quotaInfo.remainingQuota);
+                    pw.print(", expiration: ");
+                    TimeUtils.formatDuration(quotaInfo.expirationTime, nowElapsed, pw);
+                    pw.print(" last used: ");
+                    TimeUtils.formatDuration(quotaInfo.lastUsage, nowElapsed, pw);
+                }
+                pw.println();
+            }
+            pw.decreaseIndent();
+        }
+    }
 
     /**
      * A container to keep rolling window history of previous times when an alarm was sent to
@@ -569,6 +699,8 @@ public class AlarmManagerService extends SystemService {
         @VisibleForTesting
         static final String KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
                 "kill_on_schedule_exact_alarm_revoked";
+        @VisibleForTesting
+        static final String KEY_TEMPORARY_QUOTA_BUMP = "temporary_quota_bump";
 
         private static final long DEFAULT_MIN_FUTURITY = 5 * 1000;
         private static final long DEFAULT_MIN_INTERVAL = 60 * 1000;
@@ -612,6 +744,8 @@ public class AlarmManagerService extends SystemService {
         private static final long DEFAULT_MAX_DEVICE_IDLE_FUZZ = 15 * 60_000;
 
         private static final boolean DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = true;
+
+        private static final int DEFAULT_TEMPORARY_QUOTA_BUMP = 0;
 
         // Minimum futurity of a new alarm
         public long MIN_FUTURITY = DEFAULT_MIN_FUTURITY;
@@ -701,6 +835,17 @@ public class AlarmManagerService extends SystemService {
                 DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED;
 
         public boolean USE_TARE_POLICY = Settings.Global.DEFAULT_ENABLE_TARE == 1;
+
+        /**
+         * The amount of temporary reserve quota to give apps on receiving the
+         * {@link AppIdleStateChangeListener#triggerTemporaryQuotaBump(String, int)} callback
+         * from {@link com.android.server.usage.AppStandbyController}.
+         * <p> This quota adds on top of the standard standby bucket quota available to the app, and
+         * works the same way, i.e. each count of quota denotes one point in time when the app can
+         * receive any number of alarms together.
+         * This quota is tracked per package and expires after {@link #TEMPORARY_QUOTA_DURATION}.
+         */
+        public int TEMPORARY_QUOTA_BUMP = DEFAULT_TEMPORARY_QUOTA_BUMP;
 
         private long mLastAllowWhileIdleWhitelistDuration = -1;
         private int mVersion = 0;
@@ -885,6 +1030,10 @@ public class AlarmManagerService extends SystemService {
                             KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED = properties.getBoolean(
                                     KEY_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED,
                                     DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
+                            break;
+                        case KEY_TEMPORARY_QUOTA_BUMP:
+                            TEMPORARY_QUOTA_BUMP = properties.getInt(KEY_TEMPORARY_QUOTA_BUMP,
+                                    DEFAULT_TEMPORARY_QUOTA_BUMP);
                             break;
                         default:
                             if (name.startsWith(KEY_PREFIX_STANDBY_QUOTA) && !standbyQuotaUpdated) {
@@ -1134,6 +1283,9 @@ public class AlarmManagerService extends SystemService {
             pw.println();
 
             pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY);
+            pw.println();
+
+            pw.print(KEY_TEMPORARY_QUOTA_BUMP, TEMPORARY_QUOTA_BUMP);
             pw.println();
 
             pw.decreaseIndent();
@@ -1747,6 +1899,8 @@ public class AlarmManagerService extends SystemService {
             mAppWakeupHistory = new AppWakeupHistory(Constants.DEFAULT_APP_STANDBY_WINDOW);
             mAllowWhileIdleHistory = new AppWakeupHistory(INTERVAL_HOUR);
             mAllowWhileIdleCompatHistory = new AppWakeupHistory(INTERVAL_HOUR);
+
+            mTemporaryQuotaReserve = new TemporaryQuotaReserve(TEMPORARY_QUOTA_DURATION);
 
             mNextWakeup = mNextNonWakeup = 0;
 
@@ -2391,6 +2545,12 @@ public class AlarmManagerService extends SystemService {
             final int quotaForBucket = getQuotaForBucketLocked(standbyBucket);
             if (wakeupsInWindow >= quotaForBucket) {
                 final long minElapsed;
+                if (mTemporaryQuotaReserve.hasQuota(sourcePackage, sourceUserId, nowElapsed)) {
+                    // We will let this alarm go out as usual, but mark it so it consumes the quota
+                    // at the time of delivery.
+                    alarm.mUsingReserveQuota = true;
+                    return alarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, nowElapsed);
+                }
                 if (quotaForBucket <= 0) {
                     // Just keep deferring indefinitely till the quota changes.
                     minElapsed = nowElapsed + INDEFINITE_DELAY;
@@ -2405,6 +2565,7 @@ public class AlarmManagerService extends SystemService {
             }
         }
         // wakeupsInWindow are less than the permitted quota, hence no deferring is needed.
+        alarm.mUsingReserveQuota = false;
         return alarm.setPolicyElapsed(APP_STANDBY_POLICY_INDEX, nowElapsed);
     }
 
@@ -3164,6 +3325,10 @@ public class AlarmManagerService extends SystemService {
 
             pw.println("App Alarm history:");
             mAppWakeupHistory.dump(pw, nowELAPSED);
+
+            pw.println();
+            pw.println("Temporary Quota Reserves:");
+            mTemporaryQuotaReserve.dump(pw, nowELAPSED);
 
             if (mPendingIdleUntil != null) {
                 pw.println();
@@ -4573,6 +4738,7 @@ public class AlarmManagerService extends SystemService {
                                 }
                             }
                             deliverAlarmsLocked(triggerList, nowELAPSED);
+                            mTemporaryQuotaReserve.cleanUpExpiredQuotas(nowELAPSED);
                             if (mConstants.USE_TARE_POLICY) {
                                 reorderAlarmsBasedOnTare(triggerPackages);
                             } else {
@@ -4682,6 +4848,7 @@ public class AlarmManagerService extends SystemService {
         public static final int REFRESH_EXACT_ALARM_CANDIDATES = 11;
         public static final int TARE_AFFORDABILITY_CHANGED = 12;
         public static final int CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE = 13;
+        public static final int TEMPORARY_QUOTA_CHANGED = 14;
 
         AlarmHandler() {
             super(Looper.myLooper());
@@ -4747,6 +4914,7 @@ public class AlarmManagerService extends SystemService {
                     }
                     break;
 
+                case TEMPORARY_QUOTA_CHANGED:
                 case APP_STANDBY_BUCKET_CHANGED:
                     synchronized (mLock) {
                         final ArraySet<Pair<String, Integer>> filterPackages = new ArraySet<>();
@@ -4958,6 +5126,7 @@ public class AlarmManagerService extends SystemService {
                             mAppWakeupHistory.removeForUser(userHandle);
                             mAllowWhileIdleHistory.removeForUser(userHandle);
                             mAllowWhileIdleCompatHistory.removeForUser(userHandle);
+                            mTemporaryQuotaReserve.removeForUser(userHandle);
                         }
                         return;
                     case Intent.ACTION_UID_REMOVED:
@@ -5006,6 +5175,7 @@ public class AlarmManagerService extends SystemService {
                             mAllowWhileIdleHistory.removeForPackage(pkg, UserHandle.getUserId(uid));
                             mAllowWhileIdleCompatHistory.removeForPackage(pkg,
                                     UserHandle.getUserId(uid));
+                            mTemporaryQuotaReserve.removeForPackage(pkg, UserHandle.getUserId(uid));
                             removeLocked(uid, REMOVE_REASON_UNDEFINED);
                         } else {
                             // external-applications-unavailable case
@@ -5039,6 +5209,30 @@ public class AlarmManagerService extends SystemService {
             }
             mHandler.obtainMessage(AlarmHandler.APP_STANDBY_BUCKET_CHANGED, userId, -1, packageName)
                     .sendToTarget();
+        }
+
+        @Override
+        public void triggerTemporaryQuotaBump(String packageName, int userId) {
+            final int quotaBump;
+            synchronized (mLock) {
+                quotaBump = mConstants.TEMPORARY_QUOTA_BUMP;
+            }
+            if (quotaBump <= 0) {
+                return;
+            }
+            final int uid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
+            if (uid < 0 || UserHandle.isCore(uid)) {
+                return;
+            }
+            if (DEBUG_STANDBY) {
+                Slog.d(TAG, "Bumping quota temporarily for " + packageName + " for user " + userId);
+            }
+            synchronized (mLock) {
+                mTemporaryQuotaReserve.replenishQuota(packageName, userId, quotaBump,
+                        mInjector.getElapsedRealtime());
+            }
+            mHandler.obtainMessage(AlarmHandler.TEMPORARY_QUOTA_CHANGED, userId, -1,
+                    packageName).sendToTarget();
         }
     }
 
@@ -5448,8 +5642,13 @@ public class AlarmManagerService extends SystemService {
                 }
             }
             if (!isExemptFromAppStandby(alarm)) {
-                mAppWakeupHistory.recordAlarmForPackage(alarm.sourcePackage,
-                        UserHandle.getUserId(alarm.creatorUid), nowELAPSED);
+                final int userId = UserHandle.getUserId(alarm.creatorUid);
+                if (alarm.mUsingReserveQuota) {
+                    mTemporaryQuotaReserve.recordUsage(alarm.sourcePackage, userId, nowELAPSED);
+                } else {
+                    mAppWakeupHistory.recordAlarmForPackage(alarm.sourcePackage, userId,
+                            nowELAPSED);
+                }
             }
             final BroadcastStats bs = inflight.mBroadcastStats;
             bs.count++;
