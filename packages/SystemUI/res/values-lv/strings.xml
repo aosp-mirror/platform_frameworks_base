@@ -857,8 +857,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nezināma lietotne"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Apturēt apraidi"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Audio izvadei pieejamās ierīces."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Skaļums"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kā darbojas apraide"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Apraide"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Tuvumā esošās personas ar saderīgām Bluetooth ierīcēm var klausīties jūsu apraidīto multivides saturu."</string>

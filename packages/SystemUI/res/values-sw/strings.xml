@@ -851,8 +851,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Programu isiyojulikana"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Acha kutuma"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Vifaa vya kutoa sauti vilivyopo"</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Sauti"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jinsi utangazaji unavyofanya kazi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Tangaza"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Watu walio karibu nawe wenye vifaa oanifu vya Bluetooth wanaweza kusikiliza maudhui unayoyatangaza"</string>

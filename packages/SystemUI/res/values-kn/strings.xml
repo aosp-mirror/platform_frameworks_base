@@ -937,8 +937,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"ಹೊಸ ಮಾಹಿತಿ"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳು"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"ಈ ಆ್ಯಪ್‌ಗಳನ್ನು ಬಳಸದಿದ್ದರೂ ಸಹ, ಅವುಗಳು ಸಕ್ರಿಯವಾಗಿರುತ್ತವೆ ಮತ್ತು ಚಾಲನೆಯಲ್ಲಿರುತ್ತವೆ. ಇದು ಅವುಗಳ ಫಂಕ್ಷನಾಲಿಟಿಯನ್ನು ಸುಧಾರಿಸುತ್ತದೆ, ಆದರೆ ಇದು ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರಬಹುದು."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ನಿಲ್ಲಿಸಲಾಗಿದೆ"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"ಮುಗಿದಿದೆ"</string>
@@ -952,14 +951,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"ಪಠ್ಯವನ್ನು ನಕಲಿಸಲಾಗಿದೆ"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"ಚಿತ್ರವನ್ನು ನಕಲಿಸಲಾಗಿದೆ"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"ವಿಷಯವನ್ನು ನಕಲಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"ಕ್ಲಿಪ್‌ಬೋರ್ಡ್ ಎಡಿಟರ್"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"ಕ್ಲಿಪ್‌ಬೋರ್ಡ್"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"ಚಿತ್ರದ ಪೂರ್ವವೀಕ್ಷಣೆ"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="add" msgid="81036585205287996">"ಸೇರಿಸಿ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಡ್ರ್ಯಾಗ್ ಮಾಡುವುದನ್ನು ಈ ಅಧಿಸೂಚನೆಯು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>

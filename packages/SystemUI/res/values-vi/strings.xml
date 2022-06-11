@@ -412,7 +412,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Ứng dụng công việc của bạn được kết nối với Internet thông qua <xliff:g id="VPN_APP">%1$s</xliff:g>. Hoạt động mạng trong các ứng dụng công việc, bao gồm email và dữ liệu duyệt web sẽ được hiển thị cho quản trị viên CNTT và nhà cung cấp VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Ứng dụng cá nhân được kết nối với Internet thông qua <xliff:g id="VPN_APP">%1$s</xliff:g>. Hoạt động mạng của bạn, bao gồm email và dữ liệu duyệt web, được hiển thị cho nhà cung cấp VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Mở cài đặt VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Mở phần cài đặt VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Thiết bị này do cha mẹ bạn quản lý. Cha mẹ có thể có thể xem và quản lý những thông tin như ứng dụng bạn dùng, vị trí của bạn và thời gian bạn sử dụng thiết bị."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Luôn được TrustAgent mở khóa"</string>
@@ -951,14 +951,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Đã sao chép văn bản"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Đã sao chép hình ảnh"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Đã sao chép nội dung"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Trình chỉnh sửa bảng nhớ tạm"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Bảng nhớ tạm"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Bản xem trước hình ảnh"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"sửa"</string>
     <string name="add" msgid="81036585205287996">"Thêm"</string>
     <string name="manage_users" msgid="1823875311934643849">"Quản lý người dùng"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Thông báo này không hỗ trợ thao tác kéo để Chia đôi màn hình."</string>

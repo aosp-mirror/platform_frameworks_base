@@ -558,7 +558,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Зүүн"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Баруун"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Гол хэсэг"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Таб"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Зай"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Оруулах"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Арилгах"</string>
@@ -951,14 +951,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Текстийг хуулсан"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Зургийг хуулсан"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Контентыг хуулсан"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Түр санах ой засварлагч"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Түр санах ой"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Зураг урьдчилан үзэх"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"засах"</string>
     <string name="add" msgid="81036585205287996">"Нэмэх"</string>
     <string name="manage_users" msgid="1823875311934643849">"Хэрэглэгчдийг удирдах"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Энэ мэдэгдэл нь Дэлгэцийг хуваах горим руу чирэхийг дэмждэггүй."</string>
