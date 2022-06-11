@@ -1006,6 +1006,16 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRotatingToSplitShadeWithQsExpanded_transitionsToShadeLocked() {
+        mStatusBarStateController.setState(KEYGUARD);
+        mNotificationPanelViewController.setQsExpanded(true);
+
+        enableSplitShade(true);
+
+        assertThat(mStatusBarStateController.getState()).isEqualTo(SHADE_LOCKED);
+    }
+
+    @Test
     public void testSwitchesToCorrectClockInSinglePaneShade() {
         mStatusBarStateController.setState(KEYGUARD);
 
