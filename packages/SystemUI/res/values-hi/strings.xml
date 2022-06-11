@@ -573,7 +573,7 @@
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"ज़्यादा जानें"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"आप <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइट सहित आपकी नेटवर्क गतिविधि को मॉनिटर कर सकता है."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN सेटिंग खोलें"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"वीपीएन सेटिंग खोलें"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"भरोसेमंद क्रेडेंशियल खोलें"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"आपके एडमिन ने नेटवर्क लॉग करना चालू कर दिया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है.\n\nज़्यादा जानकारी के लिए अपने एडमिन से संपर्क करें."</string>

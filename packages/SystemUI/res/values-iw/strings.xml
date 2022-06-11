@@ -672,7 +672,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"הצגת מצב הדגמה"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"אתרנט"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"התראה"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"ארנק"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"מגדירים אמצעי תשלום ונהנים מביצוע מהיר ומאובטח יותר של רכישות באמצעות הטלפון"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"הצגת הכול"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"לביטול הנעילה ולתשלום"</string>

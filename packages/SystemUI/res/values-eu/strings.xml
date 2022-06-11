@@ -573,7 +573,7 @@
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Informazio gehiago"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"<xliff:g id="VPN_APP">%1$s</xliff:g> aplikaziora konektatuta zaude eta hark sareko jarduerak gainbegira ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ireki VPN ezarpenak"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ireki VPN sarearen ezarpenak"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Ireki kredentzial fidagarriak"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>

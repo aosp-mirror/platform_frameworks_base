@@ -136,7 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Kaamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefon"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Häälabi"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Rahakott"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Luku avamine"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Seade on lukustatud"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Sõrmejälje ootel"</string>
@@ -666,7 +666,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Kuva demorežiim"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Äratus"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Rahakott"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Seadistage kiirem ja turvalisem viis telefoniga ostmiseks"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Kuva kõik"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Avage maksmiseks"</string>
