@@ -650,7 +650,7 @@
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Visage non reconnu. Réessayez."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Déplacez légèrement votre tête"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Regardez plus directement votre téléphone"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Regardez plus directement votre téléphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Centrez bien votre visage devant votre téléphone"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Regardez plus directement votre téléphone"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Retirez tout ce qui cache votre visage."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Nettoyez la partie supérieure de l\'écran, y compris la barre noire"</string>
