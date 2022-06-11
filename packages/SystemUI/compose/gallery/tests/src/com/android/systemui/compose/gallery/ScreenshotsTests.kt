@@ -25,17 +25,12 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ScreenshotsTests {
-    @get:Rule
-    val composeRule = createComposeRule()
+    @get:Rule val composeRule = createComposeRule()
 
     @Test
     fun exampleFeatureScreenshotTest() {
         // TODO(b/230832101): Wire this with the screenshot diff testing infra. We should reuse the
         // configuration of the features in the gallery app to populate the UIs.
-        composeRule.setContent {
-            SystemUITheme {
-                ExampleFeatureScreen()
-            }
-        }
+        composeRule.setContent { SystemUITheme { ExampleFeatureScreen() } }
     }
 }

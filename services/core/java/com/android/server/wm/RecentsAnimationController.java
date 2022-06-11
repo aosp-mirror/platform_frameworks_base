@@ -1335,16 +1335,16 @@ public class RecentsAnimationController implements DeathRecipient {
                     mDisplayContent.mPinnedTaskController.setEnterPipTransaction(
                             mFinishTransaction);
                 }
+                // In the case where we are transferring the transform to the task in preparation
+                // for entering PIP, we disable the task being able to affect sysui flags otherwise
+                // it may cause a flash
+                if (mTask.getActivityType() != mTargetActivityType
+                        && mFinishTransaction.getShouldDisableCanAffectSystemUiFlags()) {
+                    mTask.setCanAffectSystemUiFlags(false);
+                }
                 mFinishTransaction = null;
                 mFinishOverlay = null;
                 pendingTransaction.apply();
-
-                // In the case where we are transferring the transform to the task in preparation 
-                // for entering PIP, we disable the task being able to affect sysui flags otherwise
-                // it may cause a flash
-                if (mTask.getActivityType() != mTargetActivityType) {
-                    mTask.setCanAffectSystemUiFlags(false);
-                }
             } else if (!mTask.isAttached()) {
                 // Apply the task's pending transaction in case it is detached and its transaction
                 // is not reachable.

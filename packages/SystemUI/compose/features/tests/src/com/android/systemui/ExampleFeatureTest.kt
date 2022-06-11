@@ -27,27 +27,20 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class ExampleFeatureTest {
-    @get:Rule
-    val composeRule = createComposeRule()
+    @get:Rule val composeRule = createComposeRule()
 
     @Test
     fun testProvidedTextIsDisplayed() {
-        composeRule.setContent {
-            ExampleFeature("foo")
-        }
+        composeRule.setContent { ExampleFeature("foo") }
 
         composeRule.onNodeWithText("foo").assertIsDisplayed()
     }
 
     @Test
     fun testCountIsIncreasedWhenClicking() {
-        composeRule.setContent {
-            ExampleFeature("foo")
-        }
+        composeRule.setContent { ExampleFeature("foo") }
 
-        composeRule.onNodeWithText("I was clicked 0 times.")
-            .assertIsDisplayed()
-            .performClick()
+        composeRule.onNodeWithText("I was clicked 0 times.").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("I was clicked 1 times.").assertIsDisplayed()
     }
 }

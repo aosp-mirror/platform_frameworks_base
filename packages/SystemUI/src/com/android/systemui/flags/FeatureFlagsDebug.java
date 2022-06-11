@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -44,6 +45,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.commandline.Command;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
+import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
@@ -81,6 +83,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private final SecureSettings mSecureSettings;
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
+    private final DeviceConfigProxy mDeviceConfigProxy;
     private final Map<Integer, Flag<?>> mAllFlags;
     private final Map<Integer, Boolean> mBooleanFlagCache = new TreeMap<>();
     private final Map<Integer, String> mStringFlagCache = new TreeMap<>();
@@ -94,6 +97,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             SystemPropertiesHelper systemProperties,
             @Main Resources resources,
             DumpManager dumpManager,
+            DeviceConfigProxy deviceConfigProxy,
             @Named(ALL_FLAGS) Map<Integer, Flag<?>> allFlags,
             CommandRegistry commandRegistry,
             IStatusBarService barService) {
@@ -101,6 +105,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         mSecureSettings = secureSettings;
         mResources = resources;
         mSystemProperties = systemProperties;
+        mDeviceConfigProxy = deviceConfigProxy;
         mAllFlags = allFlags;
         mBarService = barService;
 
@@ -132,6 +137,18 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         if (!mBooleanFlagCache.containsKey(id)) {
             mBooleanFlagCache.put(id,
                     readFlagValue(id, mResources.getBoolean(flag.getResourceId())));
+        }
+
+        return mBooleanFlagCache.get(id);
+    }
+
+    @Override
+    public boolean isEnabled(@NonNull DeviceConfigBooleanFlag flag) {
+        int id = flag.getId();
+        if (!mBooleanFlagCache.containsKey(id)) {
+            boolean deviceConfigValue = mDeviceConfigProxy.getBoolean(flag.getNamespace(),
+                    flag.getName(), flag.getDefault());
+            mBooleanFlagCache.put(id, readFlagValue(id, deviceConfigValue));
         }
 
         return mBooleanFlagCache.get(id);
@@ -180,7 +197,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
 
     /** Specific override for Boolean flags that checks against the teamfood list.*/
     private boolean readFlagValue(int id, boolean defaultValue) {
-        Boolean result = readFlagValueInternal(id, BooleanFlagSerializer.INSTANCE);
+        Boolean result = readBooleanFlagOverride(id);
         // Only check for teamfood if the default is false.
         if (!defaultValue && result == null && id != Flags.TEAMFOOD.getId()) {
             if (mAllFlags.containsKey(id) && mAllFlags.get(id).getTeamfood()) {
@@ -189,6 +206,10 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         }
 
         return result == null ? defaultValue : result;
+    }
+
+    private Boolean readBooleanFlagOverride(int id) {
+        return readFlagValueInternal(id, BooleanFlagSerializer.INSTANCE);
     }
 
     @NonNull
@@ -293,6 +314,8 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             setFlagValue(flag.getId(), value, BooleanFlagSerializer.INSTANCE);
         } else if (flag instanceof ResourceBooleanFlag) {
             setFlagValue(flag.getId(), value, BooleanFlagSerializer.INSTANCE);
+        } else if (flag instanceof DeviceConfigBooleanFlag) {
+            setFlagValue(flag.getId(), value, BooleanFlagSerializer.INSTANCE);
         } else if (flag instanceof SysPropBooleanFlag) {
             // Store SysProp flags in SystemProperties where they can read by outside parties.
             mSystemProperties.setBoolean(((SysPropBooleanFlag) flag).getName(), value);
@@ -388,16 +411,30 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         @Nullable
         private ParcelableFlag<?> toParcelableFlag(Flag<?> f) {
             if (f instanceof BooleanFlag) {
-                return new BooleanFlag(f.getId(), isEnabled((BooleanFlag) f), f.getTeamfood());
+                return new BooleanFlag(
+                        f.getId(),
+                        isEnabled((BooleanFlag) f),
+                        f.getTeamfood(),
+                        readBooleanFlagOverride(f.getId()) != null);
             }
             if (f instanceof ResourceBooleanFlag) {
                 return new BooleanFlag(
-                        f.getId(), isEnabled((ResourceBooleanFlag) f), f.getTeamfood());
+                        f.getId(),
+                        isEnabled((ResourceBooleanFlag) f),
+                        f.getTeamfood(),
+                        readBooleanFlagOverride(f.getId()) != null);
+            }
+            if (f instanceof DeviceConfigBooleanFlag) {
+                return new BooleanFlag(
+                        f.getId(), isEnabled((DeviceConfigBooleanFlag) f), f.getTeamfood());
             }
             if (f instanceof SysPropBooleanFlag) {
                 // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
                 return new BooleanFlag(
-                        f.getId(), isEnabled((SysPropBooleanFlag) f), false);
+                        f.getId(),
+                        ((SysPropBooleanFlag) f).getDefault(),
+                        false,
+                        !mSystemProperties.get(((SysPropBooleanFlag) f).getName()).isEmpty());
             }
 
             // TODO: add support for other flag types.

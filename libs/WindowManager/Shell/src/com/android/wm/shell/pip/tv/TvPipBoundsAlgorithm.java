@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.util.ArraySet;
 import android.util.Size;
 import android.view.Gravity;
 
@@ -139,25 +138,9 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
         final Rect insetBounds = new Rect();
         getInsetBounds(insetBounds);
 
-        Set<Rect> restrictedKeepClearAreas = mTvPipBoundsState.getRestrictedKeepClearAreas();
-        Set<Rect> unrestrictedKeepClearAreas = mTvPipBoundsState.getUnrestrictedKeepClearAreas();
-
-        if (mTvPipBoundsState.isImeShowing()) {
-            if (DEBUG) {
-                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s: IME showing, height: %d",
-                        TAG, mTvPipBoundsState.getImeHeight());
-            }
-
-            final Rect imeBounds = new Rect(
-                    0,
-                    insetBounds.bottom - mTvPipBoundsState.getImeHeight(),
-                    insetBounds.right,
-                    insetBounds.bottom);
-
-            unrestrictedKeepClearAreas = new ArraySet<>(unrestrictedKeepClearAreas);
-            unrestrictedKeepClearAreas.add(imeBounds);
-        }
+        final Set<Rect> restrictedKeepClearAreas = mTvPipBoundsState.getRestrictedKeepClearAreas();
+        final Set<Rect> unrestrictedKeepClearAreas =
+                mTvPipBoundsState.getUnrestrictedKeepClearAreas();
 
         mKeepClearAlgorithm.setGravity(mTvPipBoundsState.getTvPipGravity());
         mKeepClearAlgorithm.setScreenSize(screenSize);

@@ -34,8 +34,7 @@ fun TypographyScreen() {
     val typography = MaterialTheme.typography
 
     Column(
-        Modifier
-            .fillMaxSize()
+        Modifier.fillMaxSize()
             .horizontalScroll(rememberScrollState())
             .verticalScroll(rememberScrollState()),
     ) {
