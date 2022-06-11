@@ -203,6 +203,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.util.StatsLog;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
@@ -228,6 +229,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.IoThread;
@@ -1455,6 +1457,54 @@ public class NotificationManagerService extends SystemService {
         return out;
     }
 
+    protected class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
+
+        SparseBooleanArray mUserInLockDownMode = new SparseBooleanArray();
+        boolean mIsInLockDownMode = false;
+
+        StrongAuthTracker(Context context) {
+            super(context);
+        }
+
+        private boolean containsFlag(int haystack, int needle) {
+            return (haystack & needle) != 0;
+        }
+
+        public boolean isInLockDownMode() {
+            return mIsInLockDownMode;
+        }
+
+        @Override
+        public synchronized void onStrongAuthRequiredChanged(int userId) {
+            boolean userInLockDownModeNext = containsFlag(getStrongAuthForUser(userId),
+                    STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+            mUserInLockDownMode.put(userId, userInLockDownModeNext);
+            boolean isInLockDownModeNext = mUserInLockDownMode.indexOfValue(true) != -1;
+
+            if (mIsInLockDownMode == isInLockDownModeNext) {
+                return;
+            }
+
+            if (isInLockDownModeNext) {
+                cancelNotificationsWhenEnterLockDownMode();
+            }
+
+            // When the mIsInLockDownMode is true, both notifyPostedLocked and
+            // notifyRemovedLocked will be dismissed. So we shall call
+            // cancelNotificationsWhenEnterLockDownMode before we set mIsInLockDownMode
+            // as true and call postNotificationsWhenExitLockDownMode after we set
+            // mIsInLockDownMode as false.
+            mIsInLockDownMode = isInLockDownModeNext;
+
+            if (!isInLockDownModeNext) {
+                postNotificationsWhenExitLockDownMode();
+            }
+        }
+    }
+
+    private LockPatternUtils mLockPatternUtils;
+    private StrongAuthTracker mStrongAuthTracker;
+
     public NotificationManagerService(Context context) {
         super(context);
         Notification.processWhitelistToken = WHITELIST_TOKEN;
@@ -1464,6 +1514,11 @@ public class NotificationManagerService extends SystemService {
     @VisibleForTesting
     void setAudioManager(AudioManager audioMananger) {
         mAudioManager = audioMananger;
+    }
+
+    @VisibleForTesting
+    void setStrongAuthTracker(StrongAuthTracker strongAuthTracker) {
+        mStrongAuthTracker = strongAuthTracker;
     }
 
     @VisibleForTesting
@@ -1641,6 +1696,8 @@ public class NotificationManagerService extends SystemService {
 
         mHandler = new WorkerHandler(looper);
         mRankingThread.start();
+        mLockPatternUtils = new LockPatternUtils(getContext());
+        mStrongAuthTracker = new StrongAuthTracker(getContext());
         String[] extractorNames;
         try {
             extractorNames = resources.getStringArray(R.array.config_notificationSignalExtractors);
@@ -1783,7 +1840,8 @@ public class NotificationManagerService extends SystemService {
         init(Looper.myLooper(),
                 AppGlobals.getPackageManager(), getContext().getPackageManager(),
                 getLocalService(LightsManager.class),
-                new NotificationListeners(AppGlobals.getPackageManager()),
+                new NotificationListeners(getContext(), mNotificationLock, mUserProfiles,
+                        AppGlobals.getPackageManager()),
                 new NotificationAssistants(getContext(), mNotificationLock, mUserProfiles,
                         AppGlobals.getPackageManager()),
                 new ConditionProviders(getContext(), mUserProfiles, AppGlobals.getPackageManager()),
@@ -1926,6 +1984,7 @@ public class NotificationManagerService extends SystemService {
             mRoleObserver = new RoleObserver(getContext().getSystemService(RoleManager.class),
                     mPackageManager, getContext().getMainExecutor());
             mRoleObserver.init();
+            mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
             // bind to listener services.
@@ -7169,6 +7228,29 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    private void cancelNotificationsWhenEnterLockDownMode() {
+        synchronized (mNotificationLock) {
+            int numNotifications = mNotificationList.size();
+            for (int i = 0; i < numNotifications; i++) {
+                NotificationRecord rec = mNotificationList.get(i);
+                mListeners.notifyRemovedLocked(rec, REASON_CANCEL_ALL,
+                        rec.getStats());
+            }
+
+        }
+    }
+
+    private void postNotificationsWhenExitLockDownMode() {
+        synchronized (mNotificationLock) {
+            int numNotifications = mNotificationList.size();
+            for (int i = 0; i < numNotifications; i++) {
+                NotificationRecord rec = mNotificationList.get(i);
+                mListeners.notifyPostedLocked(rec, rec);
+            }
+
+        }
+    }
+
     private void updateNotificationPulse() {
         synchronized (mNotificationLock) {
             updateLightsLocked();
@@ -7376,6 +7458,10 @@ public class NotificationManagerService extends SystemService {
 
         return new NotificationRankingUpdate(
                 rankings.toArray(new NotificationListenerService.Ranking[0]));
+    }
+
+    boolean isInLockDownMode() {
+        return mStrongAuthTracker.isInLockDownMode();
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {
@@ -7885,9 +7971,9 @@ public class NotificationManagerService extends SystemService {
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
 
-        public NotificationListeners(IPackageManager pm) {
-            super(getContext(), mNotificationLock, mUserProfiles, pm);
-
+        public NotificationListeners(Context context, Object lock, UserProfiles userProfiles,
+                IPackageManager pm) {
+            super(context, lock, userProfiles, pm);
         }
 
         @Override
@@ -7996,8 +8082,12 @@ public class NotificationManagerService extends SystemService {
          *                           targetting <= O_MR1
          */
         @GuardedBy("mNotificationLock")
-        private void notifyPostedLocked(NotificationRecord r, NotificationRecord old,
+        void notifyPostedLocked(NotificationRecord r, NotificationRecord old,
                 boolean notifyAllListeners) {
+            if (isInLockDownMode()) {
+                return;
+            }
+
             // Lazily initialized snapshots of the notification.
             StatusBarNotification sbn = r.sbn;
             StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
@@ -8060,8 +8150,11 @@ public class NotificationManagerService extends SystemService {
         @GuardedBy("mNotificationLock")
         public void notifyRemovedLocked(NotificationRecord r, int reason,
                 NotificationStats notificationStats) {
-            final StatusBarNotification sbn = r.sbn;
+            if (isInLockDownMode()) {
+                return;
+            }
 
+            final StatusBarNotification sbn = r.sbn;
             // make a copy in case changes are made to the underlying Notification object
             // NOTE: this copy is lightweight: it doesn't include heavyweight parts of the
             // notification
@@ -8112,6 +8205,10 @@ public class NotificationManagerService extends SystemService {
          */
         @GuardedBy("mNotificationLock")
         public void notifyRankingUpdateLocked(List<NotificationRecord> changedHiddenNotifications) {
+            if (isInLockDownMode()) {
+                return;
+            }
+
             boolean isHiddenRankingUpdate = changedHiddenNotifications != null
                     && changedHiddenNotifications.size() > 0;
 
