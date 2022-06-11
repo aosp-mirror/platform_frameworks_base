@@ -90,8 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"デバイスは管理者によりロックされています"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"デバイスは手動でロックされました"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"認識されませんでした"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"顔認証の使用: 設定でカメラアクセスを有効にしてください"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_1">%d</xliff:g> 回です。</item>
       <item quantity="one">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_0">%d</xliff:g> 回です。この回数を超えた場合は、携帯通信会社にお問い合わせください。</item>

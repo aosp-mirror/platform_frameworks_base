@@ -90,8 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Cihaz, yönetici tarafından kilitlendi"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Cihazın manuel olarak kilitlendi"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tanınmadı"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Yüz Tanıma Kilidi için Ayarlar\'da kamera erişimini açın"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM PIN\'inizi girin. <xliff:g id="NUMBER_1">%d</xliff:g> deneme hakkınız kaldı.</item>
       <item quantity="one">SIM PIN\'inizi girin. Cihazınızın kilidini açmak için operatörünüzle bağlantı kurmak zorunda kalmadan önce <xliff:g id="NUMBER_0">%d</xliff:g> deneme hakkınız kaldı.</item>
