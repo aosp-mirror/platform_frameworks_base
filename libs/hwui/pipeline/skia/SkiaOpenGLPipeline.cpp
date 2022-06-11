@@ -16,8 +16,15 @@
 
 #include "SkiaOpenGLPipeline.h"
 
+#include <GrBackendSurface.h>
+#include <SkBlendMode.h>
+#include <SkImageInfo.h>
+#include <cutils/properties.h>
 #include <gui/TraceUtils.h>
+#include <strings.h>
+
 #include "DeferredLayerUpdater.h"
+#include "FrameInfo.h"
 #include "LayerDrawable.h"
 #include "LightingInfo.h"
 #include "SkiaPipeline.h"
@@ -27,16 +34,8 @@
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/Frame.h"
+#include "renderthread/IRenderPipeline.h"
 #include "utils/GLUtils.h"
-
-#include <GLES3/gl3.h>
-
-#include <GrBackendSurface.h>
-#include <SkBlendMode.h>
-#include <SkImageInfo.h>
-
-#include <cutils/properties.h>
-#include <strings.h>
 
 using namespace android::uirenderer::renderthread;
 
@@ -69,12 +68,11 @@ Frame SkiaOpenGLPipeline::getFrame() {
     return mEglManager.beginFrame(mEglSurface);
 }
 
-bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-                              const LightGeometry& lightGeometry,
-                              LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                              bool opaque, const LightInfo& lightInfo,
-                              const std::vector<sp<RenderNode>>& renderNodes,
-                              FrameInfoVisualizer* profiler) {
+IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
+        const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
+        const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
+        const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
+        const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler) {
     if (!isCapturingSkp()) {
         mEglManager.damageFrame(frame, dirty);
     }
@@ -129,7 +127,7 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
         dumpResourceCacheUsage();
     }
 
-    return true;
+    return {true, IRenderPipeline::DrawResult::kUnknownTime};
 }
 
 bool SkiaOpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
