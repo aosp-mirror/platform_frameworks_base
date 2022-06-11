@@ -406,7 +406,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Laneko aplikazioak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak eta VPNaren hornitzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko dituzte."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Aplikazio pertsonalak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ireki VPN ezarpenak"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Ireki VPN sarearen ezarpenak"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Zure gurasoak kudeatzen du gailua. Zure gurasoak gailuko informazioa ikusi eta kudea dezake; besteak beste, zer aplikazio erabiltzen dituzun, zure kokapena zein den eta pantaila aurrean zenbat eta noiz egoten zaren."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPNa"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent bidez desblokeatuta"</string>
