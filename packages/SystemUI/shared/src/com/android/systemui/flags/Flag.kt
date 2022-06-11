@@ -36,6 +36,12 @@ interface ResourceFlag<T> : Flag<T> {
     val resourceId: Int
 }
 
+interface DeviceConfigFlag<T> : Flag<T> {
+    val name: String
+    val namespace: String
+    val default: T
+}
+
 interface SysPropFlag<T> : Flag<T> {
     val name: String
     val default: T
@@ -73,6 +79,14 @@ data class ResourceBooleanFlag @JvmOverloads constructor(
     @BoolRes override val resourceId: Int,
     override val teamfood: Boolean = false
 ) : ResourceFlag<Boolean>
+
+data class DeviceConfigBooleanFlag @JvmOverloads constructor(
+    override val id: Int,
+    override val name: String,
+    override val namespace: String,
+    override val default: Boolean = false,
+    override val teamfood: Boolean = false
+) : DeviceConfigFlag<Boolean>
 
 data class SysPropBooleanFlag @JvmOverloads constructor(
     override val id: Int,
