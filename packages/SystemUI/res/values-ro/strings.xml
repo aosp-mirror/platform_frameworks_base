@@ -205,8 +205,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Dezactivarea senzorilor este activă"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Ștergeți toate notificările."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
-    <skip />
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{Încă # notificare în grup.}few{Încă # notificări în grup.}other{Încă # de notificări în grup.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Ecranul este blocat în orientarea de tip peisaj."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Ecranul este blocat în orientarea de tip portret."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Vitrina cu dulciuri"</string>
@@ -254,8 +253,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Se activează..."</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Economizor date activat"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
-    <skip />
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# dispozitiv}few{# dispozitive}other{# de dispozitive}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lanternă"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Se folosește camera foto"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Date mobile"</string>
@@ -352,8 +350,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Folosiți modul pentru invitați"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Dacă adăugați un utilizator nou, veți ieși din modul pentru invitați și se vor șterge toate aplicațiile și datele din sesiunea pentru invitați actuală."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Ați atins limita de utilizatori"</string>
-    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
-    <skip />
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Se poate crea doar un utilizator.}few{Puteți adăuga până la # utilizatori.}other{Puteți adăuga până la # de utilizatori.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Eliminați utilizatorul?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toate aplicațiile și datele acestui utilizator vor fi șterse."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Eliminați"</string>
@@ -539,10 +536,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Reamintește-mi"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Anulați"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Amânată <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
-    <skip />
-    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
-    <skip />
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# oră}=2{# ore}few{# ore}other{# de ore}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# minut}few{# minute}other{# de minute}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Economisirea bateriei"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Butonul <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"La început"</string>
@@ -766,8 +761,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"Activați / dezactivați"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Comenzile dispozitivelor"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Alegeți aplicația pentru a adăuga comenzi"</string>
-    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
-    <skip />
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{S-a adăugat # comandă.}few{S-au adăugat # comenzi.}other{S-au adăugat # de comenzi.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eliminată"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Marcată ca preferată"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Marcată ca preferată, poziția <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -924,8 +918,7 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Adăugați un card"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nu adăugați un card"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Alegeți utilizatorul"</string>
-    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
-    <skip />
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplicație este activă}few{# aplicații sunt active}other{# de aplicații sunt active}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informații noi"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aplicații active"</string>
     <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Aceste aplicații sunt active și rulează, chiar dacă nu le folosiți. Astfel, funcțiile lor sunt îmbunătățite, dar autonomia bateriei poate fi afectată."</string>
@@ -942,14 +935,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Textul a fost copiat"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Imaginea a fost copiată"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Conținutul a fost copiat"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Editor de clipboard"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Clipboard"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Previzualizarea imaginii"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"editați"</string>
     <string name="add" msgid="81036585205287996">"Adăugați"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gestionați utilizatorii"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Notificarea nu acceptă tragerea pe ecranul împărțit."</string>

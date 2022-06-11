@@ -205,8 +205,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"সেন্সর অফ অ্যাক্টিভ"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"সমস্ত বিজ্ঞপ্তি সাফ করুন৷"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>টি"</string>
-    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
-    <skip />
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{ভিতরে আরও #টি বিজ্ঞপ্তি আছে।}one{ভিতরে আরও #টি বিজ্ঞপ্তি আছে।}other{ভিতরে আরও #টি বিজ্ঞপ্তি আছে।}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"ল্যান্ডস্কেপ সজ্জাতে স্ক্রিন লক করা আছে৷"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"পোর্ট্রেট অবস্থায় স্ক্রিন লক করা আছে৷"</string>
     <string name="dessert_case" msgid="9104973640704357717">"ডেজার্ট কেস"</string>
@@ -254,8 +253,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"হটস্পট"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"চালু করা হচ্ছে…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"ডেটা সেভার চালু আছে"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
-    <skip />
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{#টি ডিভাইস}one{#টি ডিভাইস}other{#টি ডিভাইস}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ফ্ল্যাশলাইট"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"ক্যামেরা ব্যবহার করা হচ্ছে"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"মোবাইল ডেটা"</string>
@@ -352,8 +350,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"আপনি \'অতিথি মোড\' ব্যবহার করছেন"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"নতুন ব্যবহারকারী যোগ করার মাধ্যমে \'অতিথি মোড\' ছেড়ে বেরিয়ে আসতে পারবেন এবং বর্তমান অতিথি সেশন থেকে সব অ্যাপ ও ডেটা মুছে যাবে।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"আর কোনও প্রোফাইল যোগ করা যাবে না"</string>
-    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
-    <skip />
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{শুধুমাত্র একজন ব্যবহারকারী ডিভাইস ব্যবহার করতে পারবেন।}one{আপনি # জন পর্যন্ত ব্যবহারকারীকে যোগ করতে পারবেন।}other{আপনি # জন পর্যন্ত ব্যবহারকারীকে যোগ করতে পারবেন।}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"ব্যবহারকারী সরাবেন?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"এই ব্যবহারকারীর সমস্ত অ্যাপ্লিকেশান ও ডেটা মুছে ফেলা হবে।"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"সরান"</string>
@@ -539,10 +536,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"আমাকে মনে করিয়ে দিও"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"আগের অবস্থায় ফিরুন"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> পরে আবার মনে করানো হবে"</string>
-    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
-    <skip />
-    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
-    <skip />
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# ঘণ্টা}=2{# ঘণ্টা}one{# ঘণ্টা}other{# ঘণ্টা}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# মিনিট}one{# মিনিট}other{# মিনিট}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"ব্যাটারি সেভার"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> বোতাম"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"হোম"</string>
@@ -552,7 +547,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"বাঁ"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"ডান"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"কেন্দ্র"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"ট্যাব"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"স্পেস"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"এন্টার"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"ব্যাকস্পেস"</string>
@@ -766,8 +761,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"টগল করুন"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ডিভাইস কন্ট্রোল"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"কন্ট্রোল যোগ করতে অ্যাপ বেছে নিন"</string>
-    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
-    <skip />
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{#টি কন্ট্রোল যোগ করা হয়েছে।}one{#টি কন্ট্রোল যোগ করা হয়েছে।}other{#টি কন্ট্রোল যোগ করা হয়েছে।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"সরানো হয়েছে"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"পছন্দসই হিসেবে চিহ্নিত করেছেন"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"পছন্দসই হিসেবে চিহ্নিত করেছেন, অবস্থান <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -924,12 +918,10 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"টাইল যোগ করুন"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"টাইল যোগ করবেন না"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"ব্যবহারকারী বেছে নিন"</string>
-    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
-    <skip />
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{#টি অ্যাপ চালু আছে}one{#টি অ্যাপ চালু আছে}other{#টি অ্যাপ চালু আছে}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"নতুন তথ্য"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"অ্যাক্টিভ অ্যাপ"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"আপনি এমনকি ব্যবহার না করলেও, এইসব অ্যাপ অ্যাক্টিভ থাকে ও চলে। এগুলির কার্যকারিতা এটি উন্নত করে, তবে ব্যাটারির আয়ুর উপর প্রভাব ফেলতেও পারে।"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"বন্ধ করুন"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"থামানো হয়েছে"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"হয়ে গেছে"</string>
@@ -943,14 +935,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"টেক্সট কপি করা হয়েছে"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"ছবি কপি করা হয়েছে"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"কন্টেন্ট কপি করা হয়েছে"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"ক্লিপবোর্ড এডিটর"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"ক্লিপবোর্ড"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"ছবির প্রিভিউ"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"এডিট করতে"</string>
     <string name="add" msgid="81036585205287996">"যোগ করুন"</string>
     <string name="manage_users" msgid="1823875311934643849">"ব্যবহারকারীদের ম্যানেজ করুন"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"স্প্লিটস্ক্রিন মোডে এই বিজ্ঞপ্তি টেনে আনা যাবে না।"</string>
