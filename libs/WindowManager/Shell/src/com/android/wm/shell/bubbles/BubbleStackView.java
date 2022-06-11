@@ -1796,7 +1796,7 @@ public class BubbleStackView extends FrameLayout
     /**
      * Update bubble order and pointer position.
      */
-    public void updateBubbleOrder(List<Bubble> bubbles) {
+    public void updateBubbleOrder(List<Bubble> bubbles, boolean updatePointerPositoion) {
         final Runnable reorder = () -> {
             for (int i = 0; i < bubbles.size(); i++) {
                 Bubble bubble = bubbles.get(i);
@@ -1812,7 +1812,10 @@ public class BubbleStackView extends FrameLayout
                     .map(b -> b.getIconView()).collect(Collectors.toList());
             mStackAnimationController.animateReorder(bubbleViews, reorder);
         }
-        updatePointerPosition(false /* forIme */);
+
+        if (updatePointerPositoion) {
+            updatePointerPosition(false /* forIme */);
+        }
     }
 
     /**
