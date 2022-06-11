@@ -1,0 +1,27 @@
+<!--
+    Copyright (C) 2020 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M21,17.17V14.5c0,-2.48 -2.02,-4.5 -4.5,-4.5S12,12.02 12,14.5v4c0,2.48 2.02,4.5 4.5,4.5c0.69,0 1.35,-0.16 1.94,-0.44C18.91,22.84 19.45,23 20,23c1.65,0 3,-1.35 3,-3C23,18.7 22.16,17.58 21,17.17zM16.5,12c1.38,0 2.5,1.12 2.5,2.5S17.88,17 16.5,17S14,15.88 14,14.5S15.12,12 16.5,12zM14,18.5v-0.26c0.72,0.48 1.58,0.76 2.5,0.76s1.78,-0.28 2.5,-0.76v0.26c0,0.04 0,0.08 0,0.11c0,0.01 0,0.02 0,0.03c0,0.03 0,0.07 -0.01,0.1c0,0.01 0,0.03 0,0.04c0,0.02 -0.01,0.05 -0.01,0.07c0,0.02 -0.01,0.05 -0.01,0.07c0,0.01 -0.01,0.03 -0.01,0.04c-0.04,0.19 -0.09,0.37 -0.17,0.55c0,0 0,0 0,0c-0.02,0.04 -0.04,0.08 -0.06,0.12c0,0.01 -0.01,0.02 -0.01,0.02c-0.01,0.02 -0.02,0.04 -0.03,0.06c-0.01,0.02 -0.03,0.05 -0.04,0.07c-0.01,0.01 -0.01,0.02 -0.02,0.03c-0.02,0.03 -0.03,0.05 -0.05,0.08c0,0 0,0 0,0.01c-0.45,0.66 -1.21,1.1 -2.07,1.1C15.12,21 14,19.88 14,18.5z"/>
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M12,5.5C12,3.02 9.98,1 7.5,1S3,3.02 3,5.5v2.67C1.84,8.58 1,9.7 1,11c0,1.65 1.35,3 3,3c0.55,0 1.09,-0.16 1.56,-0.44C6.15,13.84 6.81,14 7.5,14c2.48,0 4.5,-2.02 4.5,-4.5V5.5zM7.5,3C8.88,3 10,4.12 10,5.5S8.88,8 7.5,8S5,6.88 5,5.5S6.12,3 7.5,3zM7.5,12c-0.86,0 -1.62,-0.44 -2.07,-1.1c0,0 0,0 0,-0.01c-0.02,-0.03 -0.03,-0.05 -0.05,-0.08c-0.01,-0.01 -0.01,-0.02 -0.02,-0.03c-0.01,-0.02 -0.03,-0.05 -0.04,-0.07c-0.01,-0.02 -0.02,-0.04 -0.03,-0.06c0,-0.01 -0.01,-0.02 -0.01,-0.02c-0.02,-0.04 -0.04,-0.08 -0.06,-0.12c0,0 0,0 0,0c-0.08,-0.18 -0.14,-0.36 -0.17,-0.55c0,-0.01 -0.01,-0.03 -0.01,-0.04c0,-0.02 -0.01,-0.05 -0.01,-0.07c0,-0.02 -0.01,-0.05 -0.01,-0.07c0,-0.01 0,-0.03 0,-0.04c0,-0.03 -0.01,-0.07 -0.01,-0.1c0,-0.01 0,-0.02 0,-0.03C5,9.58 5,9.54 5,9.5V9.24C5.72,9.72 6.58,10 7.5,10S9.28,9.72 10,9.24V9.5C10,10.88 8.88,12 7.5,12z"/>
+</vector>

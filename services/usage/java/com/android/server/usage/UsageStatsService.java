@@ -357,6 +357,7 @@ public class UsageStatsService extends SystemService implements
             getDpmInternal();
             // initialize mShortcutServiceInternal
             getShortcutServiceInternal();
+            mResponseStatsTracker.onSystemServicesReady(getContext());
 
             if (ENABLE_KERNEL_UPDATES && KERNEL_COUNTER_FILE.exists()) {
                 try {

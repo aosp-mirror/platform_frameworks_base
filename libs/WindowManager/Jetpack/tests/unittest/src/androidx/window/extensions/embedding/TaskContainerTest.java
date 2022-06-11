@@ -30,6 +30,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
@@ -142,7 +143,7 @@ public class TaskContainerTest {
         assertTrue(taskContainer.isEmpty());
 
         final TaskFragmentContainer tf = new TaskFragmentContainer(null /* activity */,
-                taskContainer, mController);
+                new Intent(), taskContainer, mController);
 
         assertFalse(taskContainer.isEmpty());
 
@@ -158,11 +159,11 @@ public class TaskContainerTest {
         assertNull(taskContainer.getTopTaskFragmentContainer());
 
         final TaskFragmentContainer tf0 = new TaskFragmentContainer(null /* activity */,
-                taskContainer, mController);
+                new Intent(), taskContainer, mController);
         assertEquals(tf0, taskContainer.getTopTaskFragmentContainer());
 
         final TaskFragmentContainer tf1 = new TaskFragmentContainer(null /* activity */,
-                taskContainer, mController);
+                new Intent(), taskContainer, mController);
         assertEquals(tf1, taskContainer.getTopTaskFragmentContainer());
     }
 
