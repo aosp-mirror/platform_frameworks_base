@@ -43,6 +43,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.graphics.Color;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -107,6 +108,28 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow.setHeadsUpAnimatingAwayListener(
                 animatingAway -> mHeadsUpAnimatingAway = animatingAway);
 
+    }
+
+    @Test
+    public void testUpdateBackgroundColors_isRecursive() {
+        mGroupRow.setTintColor(Color.RED);
+        mGroupRow.getChildNotificationAt(0).setTintColor(Color.GREEN);
+        mGroupRow.getChildNotificationAt(1).setTintColor(Color.BLUE);
+
+        assertThat(mGroupRow.getCurrentBackgroundTint()).isEqualTo(Color.RED);
+        assertThat(mGroupRow.getChildNotificationAt(0).getCurrentBackgroundTint())
+                .isEqualTo(Color.GREEN);
+        assertThat(mGroupRow.getChildNotificationAt(1).getCurrentBackgroundTint())
+                .isEqualTo(Color.BLUE);
+
+        mGroupRow.updateBackgroundColors();
+
+        int resetTint = mGroupRow.getCurrentBackgroundTint();
+        assertThat(resetTint).isNotEqualTo(Color.RED);
+        assertThat(mGroupRow.getChildNotificationAt(0).getCurrentBackgroundTint())
+                .isEqualTo(resetTint);
+        assertThat(mGroupRow.getChildNotificationAt(1).getCurrentBackgroundTint())
+                .isEqualTo(resetTint);
     }
 
     @Test
