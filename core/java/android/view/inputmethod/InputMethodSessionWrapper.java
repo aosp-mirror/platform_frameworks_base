@@ -24,8 +24,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.inputmethod.IInputMethodSession;
 import com.android.internal.inputmethod.IRemoteInputConnection;
-import com.android.internal.view.IInputMethodSession;
 
 /**
  * This class wrap the {@link IInputMethodSession} object from {@link InputMethodManager}.

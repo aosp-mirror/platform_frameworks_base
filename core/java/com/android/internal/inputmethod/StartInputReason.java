@@ -95,7 +95,7 @@ public @interface StartInputReason {
     int DEACTIVATED_BY_IMMS = 9;
     /**
      * {@link com.android.server.inputmethod.InputMethodManagerService} is responding to
-     * {@link com.android.internal.view.IInputSessionCallback#sessionCreated}.
+     * {@link com.android.internal.view.IInputMethodSessionCallback#sessionCreated}.
      */
     int SESSION_CREATED_BY_IME = 10;
     /**

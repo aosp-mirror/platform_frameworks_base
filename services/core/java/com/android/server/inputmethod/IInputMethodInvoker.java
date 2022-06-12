@@ -32,13 +32,13 @@ import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IInputMethodSession;
+import com.android.internal.inputmethod.IInputMethodSessionCallback;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputMethod;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.util.List;
@@ -169,7 +169,7 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void createSession(InputChannel channel, IInputSessionCallback callback) {
+    void createSession(InputChannel channel, IInputMethodSessionCallback callback) {
         try {
             mTarget.createSession(channel, callback);
         } catch (RemoteException e) {

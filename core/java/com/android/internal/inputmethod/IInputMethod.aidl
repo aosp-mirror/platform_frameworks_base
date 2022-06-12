@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.os.IBinder;
 import android.os.ResultReceiver;
@@ -25,16 +25,14 @@ import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IInputMethodSession;
+import com.android.internal.inputmethod.IInputMethodSessionCallback;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 /**
- * Top-level interface to an input method component (implemented in a
- * Service).
- * {@hide}
+ * Top-level interface to an input method component (implemented in a Service).
  */
 oneway interface IInputMethod {
     void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
@@ -53,7 +51,7 @@ oneway interface IInputMethod {
 
     void onNavButtonFlagsChanged(int navButtonFlags);
 
-    void createSession(in InputChannel channel, IInputSessionCallback callback);
+    void createSession(in InputChannel channel, IInputMethodSessionCallback callback);
 
     void setSessionEnabled(IInputMethodSession session, boolean enabled);
 

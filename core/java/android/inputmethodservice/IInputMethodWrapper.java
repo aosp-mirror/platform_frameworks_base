@@ -40,15 +40,15 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.CancellationGroup;
+import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.IInputMethodSession;
+import com.android.internal.inputmethod.IInputMethodSessionCallback;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
-import com.android.internal.view.IInputMethod;
-import com.android.internal.view.IInputMethodSession;
-import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 
 import java.io.FileDescriptor;
@@ -110,10 +110,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
     static final class InputMethodSessionCallbackWrapper implements InputMethod.SessionCallback {
         final Context mContext;
         final InputChannel mChannel;
-        final IInputSessionCallback mCb;
+        final IInputMethodSessionCallback mCb;
 
         InputMethodSessionCallbackWrapper(Context context, InputChannel channel,
-                IInputSessionCallback cb) {
+                IInputMethodSessionCallback cb) {
             mContext = context;
             mChannel = channel;
             mCb = cb;
@@ -219,8 +219,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_CREATE_SESSION: {
                 SomeArgs args = (SomeArgs)msg.obj;
                 inputMethod.createSession(new InputMethodSessionCallbackWrapper(
-                        mContext, (InputChannel)args.arg1,
-                        (IInputSessionCallback)args.arg2));
+                        mContext, (InputChannel) args.arg1,
+                        (IInputMethodSessionCallback) args.arg2));
                 args.recycle();
                 return;
             }
@@ -375,7 +375,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void createSession(InputChannel channel, IInputSessionCallback callback) {
+    public void createSession(InputChannel channel, IInputMethodSessionCallback callback) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_CREATE_SESSION,
                 channel, callback));
     }

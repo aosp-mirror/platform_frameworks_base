@@ -97,6 +97,7 @@ import android.window.WindowOnBackInvokedDispatcher;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IInputMethodClient;
+import com.android.internal.inputmethod.IInputMethodSession;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputBindResult;
@@ -109,7 +110,6 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputMethodManager;
-import com.android.internal.view.IInputMethodSession;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
