@@ -75,7 +75,11 @@ android_test {
     ],
 
     platform_apis: true,
-    test_suites: ["device-tests"],
+
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     certificate: "platform",
 
