@@ -17,7 +17,10 @@
 package android.animation;
 
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.Log;
 import android.view.Choreographer;
 
 import java.util.ArrayList;
@@ -35,10 +38,13 @@ import java.util.ArrayList;
  * @hide
  */
 public class AnimationHandler {
+
+    private static final String TAG = "AnimationHandler";
+    private static final boolean LOCAL_LOGV = false;
+
     /**
      * Internal per-thread collections used to avoid set collisions as animations start and end
      * while being processed.
-     * @hide
      */
     private final ArrayMap<AnimationFrameCallback, Long> mDelayedCallbackStartTime =
             new ArrayMap<>();
@@ -47,6 +53,32 @@ public class AnimationHandler {
     private final ArrayList<AnimationFrameCallback> mCommitCallbacks =
             new ArrayList<>();
     private AnimationFrameCallbackProvider mProvider;
+
+    // Static flag which allows the pausing behavior to be globally disabled/enabled.
+    private static boolean sAnimatorPausingEnabled = isPauseBgAnimationsEnabledInSystemProperties();
+
+    // Static flag which prevents the system property from overriding sAnimatorPausingEnabled field.
+    private static boolean sOverrideAnimatorPausingSystemProperty = false;
+
+    /**
+     * This paused list is used to store animators forcibly paused when the activity
+     * went into the background (to avoid unnecessary background processing work).
+     * These animators should be resume()'d when the activity returns to the foreground.
+     */
+    private final ArrayList<Animator> mPausedAnimators = new ArrayList<>();
+
+    /**
+     * This structure is used to store the currently active objects (ViewRootImpls or
+     * WallpaperService.Engines) in the process. Each of these objects sends a request to
+     * AnimationHandler when it goes into the background (request to pause) or foreground
+     * (request to resume). Because all animators are managed by AnimationHandler on the same
+     * thread, it should only ever pause animators when *all* requestors are in the background.
+     * This list tracks the background/foreground state of all requestors and only ever
+     * pauses animators when all items are in the background (false). To simplify, we only ever
+     * store visible (foreground) requestors; if the set size reaches zero, there are no
+     * objects in the foreground and it is time to pause animators.
+     */
+    private final ArraySet<Object> mAnimatorRequestors = new ArraySet<>();
 
     private final Choreographer.FrameCallback mFrameCallback = new Choreographer.FrameCallback() {
         @Override
@@ -67,6 +99,135 @@ public class AnimationHandler {
         }
         return sAnimatorHandler.get();
     }
+
+    /**
+     * System property that controls the behavior of pausing infinite animators when an app
+     * is moved to the background.
+     *
+     * @return the value of 'framework.pause_bg_animations.enabled' system property
+     */
+    private static boolean isPauseBgAnimationsEnabledInSystemProperties() {
+        if (sOverrideAnimatorPausingSystemProperty) return sAnimatorPausingEnabled;
+        return SystemProperties
+                .getBoolean("framework.pause_bg_animations.enabled", true);
+    }
+
+    /**
+     * Disable the default behavior of pausing infinite animators when
+     * apps go into the background.
+     *
+     * @param enable Enable (default behavior) or disable background pausing behavior.
+     */
+    public static void setAnimatorPausingEnabled(boolean enable) {
+        sAnimatorPausingEnabled = enable;
+    }
+
+    /**
+     * Prevents the setAnimatorPausingEnabled behavior from being overridden
+     * by the 'framework.pause_bg_animations.enabled' system property value.
+     *
+     * This is for testing purposes only.
+     *
+     * @param enable Enable or disable (default behavior) overriding the system
+     *               property.
+     */
+    public static void setOverrideAnimatorPausingSystemProperty(boolean enable) {
+        sOverrideAnimatorPausingSystemProperty = enable;
+    }
+
+    /**
+     * This is called when a window goes away. We should remove
+     * it from the requestors list to ensure that we are counting requests correctly and not
+     * tracking obsolete+enabled requestors.
+     */
+    public static void removeRequestor(Object requestor) {
+        getInstance().removeRequestorImpl(requestor);
+    }
+
+    private void removeRequestorImpl(Object requestor) {
+        // Also request disablement, in case that requestor was the sole object keeping
+        // animators un-paused
+        requestAnimatorsEnabled(false, requestor);
+        mAnimatorRequestors.remove(requestor);
+        if (LOCAL_LOGV) {
+            Log.v(TAG, "removeRequestorImpl for " + requestor);
+            for (int i = 0; i < mAnimatorRequestors.size(); ++i) {
+                Log.v(TAG, "animatorRequesters " + i + " = " + mAnimatorRequestors.valueAt(i));
+            }
+        }
+    }
+
+    /**
+     * This method is called from ViewRootImpl or WallpaperService when either a window is no
+     * longer visible (enable == false) or when a window becomes visible (enable == true).
+     * If animators are not properly disabled when activities are backgrounded, it can lead to
+     * unnecessary processing, particularly for infinite animators, as the system will continue
+     * to pulse timing events even though the results are not visible. As a workaround, we
+     * pause all un-paused infinite animators, and resume them when any window in the process
+     * becomes visible.
+     */
+    public static void requestAnimatorsEnabled(boolean enable, Object requestor) {
+        getInstance().requestAnimatorsEnabledImpl(enable, requestor);
+    }
+
+    private void requestAnimatorsEnabledImpl(boolean enable, Object requestor) {
+        boolean wasEmpty = mAnimatorRequestors.isEmpty();
+        setAnimatorPausingEnabled(isPauseBgAnimationsEnabledInSystemProperties());
+        if (enable) {
+            mAnimatorRequestors.add(requestor);
+        } else {
+            mAnimatorRequestors.remove(requestor);
+        }
+        if (!sAnimatorPausingEnabled) {
+            // Resume any animators that have been paused in the meantime, otherwise noop
+            // Leave logic above so that if pausing gets re-enabled, the state of the requestors
+            // list is valid
+            resumeAnimators();
+            return;
+        }
+        boolean isEmpty = mAnimatorRequestors.isEmpty();
+        if (wasEmpty != isEmpty) {
+            // only paused/resume animators if there was a visibility change
+            if (!isEmpty) {
+                // If any requestors are enabled, resume currently paused animators
+                resumeAnimators();
+            } else {
+                // Wait before pausing to avoid thrashing animator state for temporary backgrounding
+                Choreographer.getInstance().postFrameCallbackDelayed(mPauser,
+                        Animator.getBackgroundPauseDelay());
+            }
+        }
+        if (LOCAL_LOGV) {
+            Log.v(TAG, enable ? "enable" : "disable" + " animators for " + requestor);
+            for (int i = 0; i < mAnimatorRequestors.size(); ++i) {
+                Log.v(TAG, "animatorRequesters " + i + " = " + mAnimatorRequestors.valueAt(i));
+            }
+        }
+    }
+
+    private void resumeAnimators() {
+        Choreographer.getInstance().removeFrameCallback(mPauser);
+        for (int i = mPausedAnimators.size() - 1; i >= 0; --i) {
+            mPausedAnimators.get(i).resume();
+        }
+        mPausedAnimators.clear();
+    }
+
+    private Choreographer.FrameCallback mPauser = frameTimeNanos -> {
+        if (mAnimatorRequestors.size() > 0) {
+            // something enabled animators since this callback was scheduled - bail
+            return;
+        }
+        for (int i = 0; i < mAnimationCallbacks.size(); ++i) {
+            Animator animator = ((Animator) mAnimationCallbacks.get(i));
+            if (animator != null
+                    && animator.getTotalDuration() == Animator.DURATION_INFINITE
+                    && !animator.isPaused()) {
+                mPausedAnimators.add(animator);
+                animator.pause();
+            }
+        }
+    };
 
     /**
      * By default, the Choreographer is used to provide timing for frame callbacks. A custom
