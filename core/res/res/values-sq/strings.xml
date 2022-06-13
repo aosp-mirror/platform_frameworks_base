@@ -1307,7 +1307,7 @@
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"të dhënat celulare"</item>
     <item msgid="5520925862115353992">"Wi-Fi"</item>
-    <item msgid="1055487873974272842">"Bluetooth"</item>
+    <item msgid="1055487873974272842">"Bluetooth-i"</item>
     <item msgid="1616528372438698248">"Eternet"</item>
     <item msgid="9177085807664964627">"VPN"</item>
   </string-array>
@@ -1461,7 +1461,7 @@
     <string name="ime_action_go" msgid="5536744546326495436">"Shko"</string>
     <string name="ime_action_search" msgid="4501435960587287668">"Kërko"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"Dërgo"</string>
-    <string name="ime_action_next" msgid="4169702997635728543">"Përpara"</string>
+    <string name="ime_action_next" msgid="4169702997635728543">"Para"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"U krye"</string>
     <string name="ime_action_previous" msgid="6548799326860401611">"I mëparshëm"</string>
     <string name="ime_action_default" msgid="8265027027659800121">"Ekzekuto"</string>
@@ -1502,7 +1502,7 @@
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Aplikacioni i drejtimit të makinës është në ekzekutim"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Trokit për të dalë nga aplikacioni i drejtimit të makinës."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Prapa"</string>
-    <string name="next_button_label" msgid="6040209156399907780">"Përpara"</string>
+    <string name="next_button_label" msgid="6040209156399907780">"Para"</string>
     <string name="skip_button_label" msgid="3566599811326688389">"Kapërce"</string>
     <string name="no_matches" msgid="6472699895759164599">"Asnjë përputhje"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Gjej brenda faqes"</string>

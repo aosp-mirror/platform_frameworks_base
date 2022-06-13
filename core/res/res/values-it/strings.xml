@@ -649,9 +649,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Ripeti l\'acquisizione del volto."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Impossibile riconoscere il volto. Riprova."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Cambia leggermente la posizione della testa"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda più direttamente verso il telefono"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda più direttamente verso il telefono"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Guarda più direttamente verso il telefono"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Guarda dritto nel telefono"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Guarda dritto nel telefono"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Guarda dritto nel telefono"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Rimuovi tutto ciò che ti nasconde il viso."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pulisci la parte superiore dello schermo, inclusa la barra nera"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Il tuo volto deve essere visibile per intero"</string>
