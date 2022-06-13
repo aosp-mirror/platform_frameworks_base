@@ -571,4 +571,24 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
         assertThat(mMediaOutputController.getNotificationIcon()).isNull();
     }
+
+    @Test
+    public void isVolumeControlEnabled_isCastWithVolumeFixed_returnsFalse() {
+        when(mMediaDevice1.getDeviceType()).thenReturn(
+                MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE);
+
+        when(mMediaDevice1.isVolumeFixed()).thenReturn(true);
+
+        assertThat(mMediaOutputController.isVolumeControlEnabled(mMediaDevice1)).isFalse();
+    }
+
+    @Test
+    public void isVolumeControlEnabled_isCastWithVolumeNotFixed_returnsTrue() {
+        when(mMediaDevice1.getDeviceType()).thenReturn(
+                MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE);
+
+        when(mMediaDevice1.isVolumeFixed()).thenReturn(false);
+
+        assertThat(mMediaOutputController.isVolumeControlEnabled(mMediaDevice1)).isTrue();
+    }
 }
