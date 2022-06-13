@@ -33,9 +33,9 @@ import com.android.systemui.CoreStartable;
 import com.android.systemui.R;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.dagger.DreamWeatherComplicationComponent;
+import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener;
-import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -73,7 +73,6 @@ public class DreamWeatherComplication implements Complication {
      * {@link CoreStartable} for registering {@link DreamWeatherComplication} with SystemUI.
      */
     public static class Registrant extends CoreStartable {
-        private final LockscreenSmartspaceController mSmartSpaceController;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final DreamWeatherComplication mComplication;
 
@@ -82,20 +81,16 @@ public class DreamWeatherComplication implements Complication {
          */
         @Inject
         public Registrant(Context context,
-                LockscreenSmartspaceController smartspaceController,
                 DreamOverlayStateController dreamOverlayStateController,
                 DreamWeatherComplication dreamWeatherComplication) {
             super(context);
-            mSmartSpaceController = smartspaceController;
             mDreamOverlayStateController = dreamOverlayStateController;
             mComplication = dreamWeatherComplication;
         }
 
         @Override
         public void start() {
-            if (mSmartSpaceController.isEnabled()) {
-                mDreamOverlayStateController.addComplication(mComplication);
-            }
+            mDreamOverlayStateController.addComplication(mComplication);
         }
     }
 
@@ -134,7 +129,7 @@ public class DreamWeatherComplication implements Complication {
      * ViewController to contain value/logic associated with a Weather Complication View.
      */
     static class DreamWeatherViewController extends ViewController<TextView> {
-        private final LockscreenSmartspaceController mSmartSpaceController;
+        private final DreamSmartspaceController mSmartSpaceController;
         private final ActivityStarter mActivityStarter;
         private final String mSmartspaceTrampolineActivityComponent;
         private SmartspaceTargetListener mSmartspaceTargetListener;
@@ -144,7 +139,7 @@ public class DreamWeatherComplication implements Complication {
                 @Named(DREAM_WEATHER_COMPLICATION_VIEW) TextView view,
                 @Named(SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT) String smartspaceTrampoline,
                 ActivityStarter activityStarter,
-                LockscreenSmartspaceController smartspaceController
+                DreamSmartspaceController smartspaceController
         ) {
             super(view);
             mActivityStarter = activityStarter;
@@ -192,12 +187,14 @@ public class DreamWeatherComplication implements Complication {
                             });
                         }
                     });
-            mSmartSpaceController.addListener(mSmartspaceTargetListener);
+            // We need to use an unfiltered listener here since weather is filtered from showing
+            // in the dream smartspace.
+            mSmartSpaceController.addUnfilteredListener(mSmartspaceTargetListener);
         }
 
         @Override
         protected void onViewDetached() {
-            mSmartSpaceController.removeListener(mSmartspaceTargetListener);
+            mSmartSpaceController.removeUnfilteredListener(mSmartspaceTargetListener);
         }
     }
 }
