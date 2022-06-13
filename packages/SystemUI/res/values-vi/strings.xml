@@ -573,7 +573,7 @@
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Tìm hiểu thêm"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Bạn đang kết nối với <xliff:g id="VPN_APP">%1$s</xliff:g>. Ứng dụng này có thể giám sát hoạt động mạng của bạn, bao gồm email, ứng dụng và trang web."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Mở cài đặt VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Mở phần cài đặt VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Mở thông tin xác thực tin cậy"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Quản trị viên đã bật tính năng ghi nhật ký mạng. Tính năng này giám sát lưu lượng truy cập trên thiết bị của bạn.\n\nĐể biết thêm thông tin, hãy liên hệ với quản trị viên của bạn."</string>

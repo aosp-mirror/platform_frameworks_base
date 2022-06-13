@@ -666,7 +666,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимин көрсөтүү"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Ойготкуч"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Капчык"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Телефонуңуз менен тез жана коопсуз сатып алуу үчүн жөндөңүз"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Баарын көрсөтүү"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Төлөө үчүн кулпусун ачыңыз"</string>

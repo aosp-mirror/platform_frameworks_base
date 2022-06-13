@@ -573,7 +573,7 @@
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"Saiba mais"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"Está ligado à rede <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorizar a sua atividade de rede, incluindo emails, aplicações e Sites."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir as definições de VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abra as definições de VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Abrir credenciais fidedignas"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"O seu gestor ativou os registos de rede, que monitorizam o tráfego no seu dispositivo.\n\nPara mais informações, contacte o gestor."</string>
@@ -813,7 +813,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Para a esquerda"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Para a direita"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Ao centro"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tabulação"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Espaço"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Retrocesso"</string>
