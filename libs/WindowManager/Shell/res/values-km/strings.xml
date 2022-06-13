@@ -81,4 +81,7 @@
     <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"បង្វិលឧបករណ៍របស់អ្នក ដើម្បីចូលប្រើអេក្រង់ពេញ"</string>
     <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ចុចពីរដងនៅជាប់កម្មវិធីណាមួយ ដើម្បីប្ដូរទីតាំងកម្មវិធីនោះ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"យល់ហើយ"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ពង្រីកដើម្បីទទួលបានព័ត៌មានបន្ថែម។"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"ពង្រីក"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"បិទ"</string>
 </resources>
