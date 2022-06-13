@@ -19,6 +19,7 @@ package com.android.systemui.dreams.smartspace
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
+import android.app.smartspace.SmartspaceTarget
 import android.content.Context
 import android.graphics.Color
 import android.util.Log
@@ -66,7 +67,9 @@ class DreamSmartspaceController @Inject constructor(
     private var targetFilter: SmartspaceTargetFilter? = optionalTargetFilter.orElse(null)
 
     // A shadow copy of listeners is maintained to track whether the session should remain open.
-    private var listeners = mutableSetOf<BcSmartspaceDataPlugin.SmartspaceTargetListener>()
+    private var listeners = mutableSetOf<SmartspaceTargetListener>()
+
+    private var unfilteredListeners = mutableSetOf<SmartspaceTargetListener>()
 
     // Smartspace can be used on multiple displays, such as when the user casts their screen
     private var smartspaceViews = mutableSetOf<SmartspaceView>()
@@ -113,6 +116,7 @@ class DreamSmartspaceController @Inject constructor(
     private val sessionListener = SmartspaceSession.OnTargetsAvailableListener { targets ->
         execution.assertIsMainThread()
 
+        onTargetsAvailableUnfiltered(targets)
         val filteredTargets = targets.filter { targetFilter?.filterSmartspaceTarget(it) ?: true }
         plugin?.onTargetsAvailable(filteredTargets)
     }
@@ -137,7 +141,7 @@ class DreamSmartspaceController @Inject constructor(
     private fun buildView(parent: ViewGroup): View? {
         return if (plugin != null) {
             var view = smartspaceViewComponentFactory.create(parent, plugin, stateChangeListener)
-                    .getView()
+                .getView()
             if (view !is View) {
                 return null
             }
@@ -151,7 +155,8 @@ class DreamSmartspaceController @Inject constructor(
     }
 
     private fun hasActiveSessionListeners(): Boolean {
-        return smartspaceViews.isNotEmpty() || listeners.isNotEmpty()
+        return smartspaceViews.isNotEmpty() || listeners.isNotEmpty() ||
+            unfilteredListeners.isNotEmpty()
     }
 
     private fun connectSession() {
@@ -164,13 +169,15 @@ class DreamSmartspaceController @Inject constructor(
         }
 
         val newSession = smartspaceManager.createSmartspaceSession(
-                SmartspaceConfig.Builder(context, "dream").build())
+            SmartspaceConfig.Builder(context, "dream").build()
+        )
         Log.d(TAG, "Starting smartspace session for dream")
         newSession.addOnTargetsAvailableListener(uiExecutor, sessionListener)
         this.session = newSession
 
         plugin.registerSmartspaceEventNotifier {
-                e -> session?.notifySmartspaceEvent(e)
+                e ->
+            session?.notifySmartspaceEvent(e)
         }
 
         reloadSmartspace()
@@ -217,5 +224,23 @@ class DreamSmartspaceController @Inject constructor(
 
     private fun reloadSmartspace() {
         session?.requestSmartspaceUpdate()
+    }
+
+    private fun onTargetsAvailableUnfiltered(targets: List<SmartspaceTarget>) {
+        unfilteredListeners.forEach { it.onSmartspaceTargetsUpdated(targets) }
+    }
+
+    /**
+     * Adds a listener for the raw, unfiltered list of smartspace targets. This should be used
+     * carefully, as it doesn't filter out targets which the user may not want shown.
+     */
+    fun addUnfilteredListener(listener: SmartspaceTargetListener) {
+        unfilteredListeners.add(listener)
+        connectSession()
+    }
+
+    fun removeUnfilteredListener(listener: SmartspaceTargetListener) {
+        unfilteredListeners.remove(listener)
+        disconnect()
     }
 }

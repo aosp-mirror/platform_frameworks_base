@@ -17,18 +17,19 @@ package com.android.systemui.dreams.complication;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
+import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.DreamOverlayStateController;
-import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
+import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
+import com.android.systemui.plugins.ActivityStarter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,12 +40,14 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamWeatherComplicationTest extends SysuiTestCase {
+    private static final String TRAMPOLINE_COMPONENT = "TestComponent";
+
     @SuppressWarnings("HidingField")
     @Mock
     private Context mContext;
 
     @Mock
-    private LockscreenSmartspaceController mSmartspaceController;
+    private DreamSmartspaceController mDreamSmartspaceController;
 
     @Mock
     private DreamOverlayStateController mDreamOverlayStateController;
@@ -58,22 +61,28 @@ public class DreamWeatherComplicationTest extends SysuiTestCase {
     }
 
     /**
-     * Ensures {@link DreamWeatherComplication} is only registered when it is available.
+     * Ensures {@link DreamWeatherComplication} is registered.
      */
     @Test
-    public void testComplicationAvailability() {
-        when(mSmartspaceController.isEnabled()).thenReturn(false);
+    public void testComplicationRegistered() {
         final DreamWeatherComplication.Registrant registrant =
                 new DreamWeatherComplication.Registrant(
                         mContext,
-                        mSmartspaceController,
                         mDreamOverlayStateController,
                         mComplication);
         registrant.start();
-        verify(mDreamOverlayStateController, never()).addComplication(any());
-
-        when(mSmartspaceController.isEnabled()).thenReturn(true);
-        registrant.start();
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
+    }
+
+    @Test
+    public void testGetUnfilteredTargets() {
+        final DreamWeatherComplication.DreamWeatherViewController controller =
+                new DreamWeatherComplication.DreamWeatherViewController(mock(
+                        TextView.class), TRAMPOLINE_COMPONENT, mock(ActivityStarter.class),
+                        mDreamSmartspaceController);
+        controller.onViewAttached();
+        verify(mDreamSmartspaceController).addUnfilteredListener(any());
+        controller.onViewDetached();
+        verify(mDreamSmartspaceController).removeUnfilteredListener(any());
     }
 }
