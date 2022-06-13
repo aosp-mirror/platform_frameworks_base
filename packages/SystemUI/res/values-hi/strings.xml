@@ -951,14 +951,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"टेक्स्ट कॉपी किया गया"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"इमेज कॉपी की गई"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"कॉन्टेंट कॉपी किया गया"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"क्लिपबोर्ड एडिटर"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"क्लिपबोर्ड"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"इमेज की झलक"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"बदलाव करें"</string>
     <string name="add" msgid="81036585205287996">"जोड़ें"</string>
     <string name="manage_users" msgid="1823875311934643849">"उपयोगकर्ताओं को मैनेज करें"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"इस सूचना को स्प्लिट स्क्रीन मोड में, खींचा और छोड़ा नहीं जा सकता."</string>

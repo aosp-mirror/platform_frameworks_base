@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરા"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"વૉલેટ"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR કોડ સ્કૅનર"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"અનલૉક કરો"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ડિવાઇસ લૉક કરેલું છે"</string>
@@ -468,7 +468,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ડેમો મોડ બતાવો"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ઇથરનેટ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"અલાર્મ"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"વૉલેટ"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"તમારા ફોન વડે વધુ ઝડપી તેમજ સુરક્ષિત ખરીદીઓ કરવાની રીત સેટઅપ કરી લો"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"બધું બતાવો"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"ખોલવા માટે ટૅપ કરો"</string>
@@ -951,14 +951,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"ટેક્સ્ટ કૉપિ કરી"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"છબી કૉપિ કરી"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"કન્ટેન્ટ કૉપિ કર્યું"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"ક્લિપબોર્ડ એડિટર"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"ક્લિપબોર્ડ"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"છબીનો પ્રીવ્યૂ"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"ફેરફાર કરો"</string>
     <string name="add" msgid="81036585205287996">"ઉમેરો"</string>
     <string name="manage_users" msgid="1823875311934643849">"વપરાશકર્તાઓને મેનેજ કરો"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"આ નોટિફિકેશન તેને સ્પ્લિટસ્ક્રીનમાં ખેંચવાની સુવિધાને સપોર્ટ કરતું નથી."</string>

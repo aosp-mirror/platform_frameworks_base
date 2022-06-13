@@ -953,7 +953,7 @@
     <string name="clipboard_content_copied" msgid="144452398567828145">"已複製內容"</string>
     <string name="clipboard_editor" msgid="2971197550401892843">"剪貼簿編輯器"</string>
     <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"剪貼簿"</string>
-    <string name="clipboard_image_preview" msgid="2156475174343538128">"圖片預覽"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"圖像預覽"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"編輯"</string>
     <string name="add" msgid="81036585205287996">"新增"</string>
     <string name="manage_users" msgid="1823875311934643849">"管理使用者"</string>
