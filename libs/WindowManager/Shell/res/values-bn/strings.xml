@@ -81,4 +81,7 @@
     <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"\'ফুল স্ক্রিন\' মোডে যেতে ডিভাইস ঘোরান"</string>
     <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"কোনও অ্যাপের পাশে ডবল ট্যাপ করে সেটির জায়গা পরিবর্তন করুন"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"বুঝেছি"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"আরও তথ্যের জন্য বড় করুন।"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"বড় করুন"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"বন্ধ করুন"</string>
 </resources>
