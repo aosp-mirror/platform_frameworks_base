@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"သင်သည် စကားဝှက်ကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ်မှားယွင်းစွာ ထည့်ခဲ့ပါသည်။ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"သင်သည် ပုံစံကို <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ်မှားယွင်းစွာ ဆွဲခဲ့ပါသည်။ \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာတွင် ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ဆင်းမ်ကဒ်ပင်နံပါတ် မှားယွင်းနေသောကြောင့် ယခုအခါ သင့်စက်ပစ္စည်းအား လော့ခ်ဖွင့်ရန် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ရပါမည်။"</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{ဆင်းမ်ပင်နံပါတ်ကုဒ် မှားနေသည်။ စက်ကို လော့ခ်ဖွင့်ရန် မိုဘိုင်းဖုန်းကုမ္ပဏီသို့ မဆက်သွယ်မီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}other{ဆင်းမ်ပင်နံပါတ်ကုဒ် မှားနေသည်။ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။ }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"ဆင်းမ်ကဒ်ကို အသုံးပြု၍ မရတော့ပါ။ ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။"</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{ဆင်းမ် PUK ကုဒ် မှားနေသည်။ ဆင်းမ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}other{ဆင်းမ် PUK ကုဒ် မှားနေသည်။ ဆင်းမ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"ဆင်းမ်ကဒ်ပင်နံပါတ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"ဆင်းမ်ကတ် ပင်နံပါတ် ပြန်ဖွင့်သည့်ကုဒ် လုပ်ဆောင်ချက် မအောင်မြင်ပါ။"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"စာရိုက်စနစ်ပြောင်းရန်"</string>
@@ -87,10 +85,8 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"စက်ပစ္စည်းကို ကိုယ်တိုင်ကိုယ်ကျ လော့ခ်ချထားခဲ့သည်"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"မသိ"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"‘မျက်နှာပြ လော့ခ်ဖွင့်ခြင်း’ သုံးရန် ‘ဆက်တင်များ’ တွင်ကင်မရာသုံးခွင့်ကိုဖွင့်ပါ"</string>
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{ဆင်းမ်ပင်နံပါတ် ထည့်သွင်းပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ရန် မိုဘိုင်းဖုန်းကုမ္ပဏီသို့ မဆက်သွယ်မီ # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}other{ဆင်းမ်ပင်နံပါတ် ထည့်သွင်းပါ။ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ဆင်းမ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။ အသေးစိတ်အတွက် မိုဘိုင်းဖုန်းကုမ္ပဏီကို ဆက်သွယ်ပါ။}other{ဆင်းမ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ် အပြီးပိတ်မသွားမီ သင့်တွင် # ကြိမ် ကြိုးစားခွင့်ရှိသေးသည်။ အသေးစိတ်အတွက် မိုဘိုင်းဖုန်းကုမ္ပဏီကို ဆက်သွယ်ပါ။}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"မူလ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ပူဖောင်းကွက်"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ရိုးရိုး"</string>

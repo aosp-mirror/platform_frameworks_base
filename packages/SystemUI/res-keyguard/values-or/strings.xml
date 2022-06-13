@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ଆପଣଙ୍କ ପାସ୍‌ୱର୍ଡକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଥର ଭୁଲ ଭାବେ ଟାଇପ୍ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ଆପଣଙ୍କ ଲକ୍‍ ଖୋଲିବା ପାଟର୍ନକୁ ଆପଣ <xliff:g id="NUMBER_0">%1$d</xliff:g>ଥର ଭୁଲ ଭାବେ ଅଙ୍କନ କରିଛନ୍ତି। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ସେକେଣ୍ଡ ପରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ଭୁଲ SIM PIN କୋଡ୍‌, ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ୍‌ କରିବା ପାଇଁ ଏବେ ହିଁ ନିଜ କେରିଅର୍‌ଙ୍କ ସହ ସମ୍ପର୍କ କରନ୍ତୁ।"</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{ଭୁଲ SIM PIN କୋଡ, ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରିବା ପାଇଁ ଆପଣ ଆପଣଙ୍କର କ୍ୟାରିଅର ସହ ନିଶ୍ଚିତରୂପେ ଯୋଗାଯୋଗ କରିବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}other{ଭୁଲ SIM PIN କୋଡ, ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି। }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM ବ୍ୟବହାର କରାଯାଇପାରିବ ନାହିଁ। ନିଜ କେରିଅର୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{ଭୁଲ SIM PUK କୋଡ, SIM ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର ଅଯୋଗ୍ୟ ହେବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}other{ଭୁଲ SIM PUK କୋଡ, SIM ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର ଅଯୋଗ୍ୟ ହେବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN କାମ ବିଫଳ ହେଲା!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUKର କାମ ବିଫଳ ହେଲା!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ଇନପୁଟ୍‌ ପଦ୍ଧତି ବଦଳାନ୍ତୁ"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ଡିଭାଇସ୍‍ ଆଡମିନଙ୍କ ଦ୍ୱାରା ଲକ୍‍ କରାଯାଇଛି"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ଡିଭାଇସ୍‍ ମାନୁଆଲ ଭାବେ ଲକ୍‍ କରାଗଲା"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"ଫେସ ଅନଲକର ବ୍ୟବହାର ପାଇଁ ସେଟିଂସରେ କ୍ୟାମେରାକୁ ଆକ୍ସେସ ଦିଅ"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{SIM PIN ଲେଖନ୍ତୁ। ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରିବା ପାଇଁ ଆପଣ ଆପଣଙ୍କର କ୍ୟାରିଅର ସହ ନିଶ୍ଚିତରୂପେ ଯୋଗାଯୋଗ କରିବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}other{SIM PIN ଲେଖନ୍ତୁ। ଆପଣଙ୍କର #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି।}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIMକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ ଲେଖନ୍ତୁ। SIM ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର ଅଯୋଗ୍ୟ ହେବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି। ବିବରଣୀ ପାଇଁ କ୍ୟାରିଅର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।}other{SIMକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରାଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ ଲେଖନ୍ତୁ। SIM ସ୍ଥାୟୀ ଭାବେ ବ୍ୟବହାର ଅଯୋଗ୍ୟ ହେବା ପୂର୍ବରୁ ଆପଣଙ୍କ ପାଖରେ #ଟି ପ୍ରଚେଷ୍ଟା ବାକି ଅଛି। ବିବରଣୀ ପାଇଁ କ୍ୟାରିଅର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"ଡିଫଲ୍ଟ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ବବଲ୍"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ଆନାଲଗ୍"</string>

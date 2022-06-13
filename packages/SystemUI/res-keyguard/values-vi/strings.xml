@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Bạn đã nhập sai mật khẩu <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Bạn đã vẽ không chính xác hình mở khóa <xliff:g id="NUMBER_0">%1$d</xliff:g> lần. \n\nHãy thử lại sau <xliff:g id="NUMBER_1">%2$d</xliff:g> giây."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Mã PIN của SIM không chính xác, bây giờ bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của mình."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Mã PIN của SIM không chính xác. Bạn còn # lần thử trước khi phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của mình.}other{Mã PIN của SIM không chính xác, bạn còn # lần thử. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM không thể sử dụng được. Hãy liên hệ với nhà cung cấp dịch vụ của bạn."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Mã PUK của SIM không chính xác, bạn còn # lần thử trước khi SIM vĩnh viễn không thể sử dụng được.}other{Mã PUK của SIM không chính xác, bạn còn # lần thử trước khi SIM vĩnh viễn không thể sử dụng được.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Thao tác mã PIN của SIM không thành công!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Thao tác mã PUK của SIM không thành công!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Chuyển phương thức nhập"</string>
@@ -87,10 +85,8 @@
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Thiết bị đã bị khóa theo cách thủ công"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Không nhận dạng được"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Cho phép truy cập máy ảnh để dùng Mở khóa bằng khuôn mặt"</string>
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Hãy nhập mã PIN của SIM. Bạn còn # lần thử trước khi phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của mình.}other{Nhập mã PIN của SIM. Bạn còn # lần thử.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM hiện đã bị tắt. Hãy nhập mã PUK để tiếp tục. Bạn còn # lần thử trước khi SIM vĩnh viễn không thể sử dụng được. Hãy liên hệ với nhà cung cấp dịch vụ để biết thông tin chi tiết.}other{SIM hiện đã bị tắt. Hãy nhập mã PUK để tiếp tục. Bạn còn # lần thử trước khi SIM vĩnh viễn không thể sử dụng được. Hãy liên hệ với nhà cung cấp dịch vụ để biết thông tin chi tiết.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Mặc định"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bong bóng"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Đồng hồ kim"</string>

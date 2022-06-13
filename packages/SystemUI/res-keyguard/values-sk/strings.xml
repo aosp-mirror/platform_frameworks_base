@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Už <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste zadali nesprávne heslo. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Už <xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste použili nesprávny bezpečnostný vzor. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Nesprávny kód PIN SIM karty. Teraz musíte kontaktovať svojho operátora, aby vám odomkol zariadenie."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Nesprávny kód PIN SIM karty. Zostáva vám # pokus, potom budete musieť kontaktovať svojho operátora, aby zariadenie odomkol.}few{Nesprávny kód PIN SIM karty. Zostávajú vám # pokusy. }many{Incorrect SIM PIN code, you have # remaining attempts. }other{Nesprávny kód PIN SIM karty. Zostáva vám # pokusov. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM karta je nepoužiteľná. Kontaktujte svojho operátora."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Nesprávny kód PUK SIM karty. Zostáva vám # pokus, potom sa SIM karta natrvalo zablokuje.}few{Nesprávny kód PUK SIM karty. Zostávajú vám # pokusy, potom sa SIM karta natrvalo zablokuje.}many{Incorrect SIM PUK code, you have # remaining attempts before SIM becomes permanently unusable.}other{Nesprávny kód PUK SIM karty. Zostáva vám # pokusov, potom sa SIM karta natrvalo zablokuje.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Operácia kódu PIN SIM karty zlyhala!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Operácia kódu PUK SIM karty zlyhala!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Prepnúť metódu vstupu"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Zariadenie zamkol správca"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Zariadenie bolo uzamknuté ručne"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nerozpoznané"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"V nastaveniach zapnite prístup ku kamere"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Zadajte kód PIN SIM karty. Zostáva vám # pokus, potom budete musieť kontaktovať svojho operátora, aby zariadenie odomkol.}few{Zadajte PIN SIM karty. Zostávajú vám # pokusy.}many{Enter SIM PIN. You have # remaining attempts.}other{Zadajte PIN SIM karty. Zostáva vám # pokusov.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám # pokus, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.}few{SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostávajú vám # pokusy, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.}many{SIM is now disabled. Enter PUK code to continue. You have # remaining attempts before SIM becomes permanently unusable. Contact carrier for details.}other{SIM karta je deaktivovaná. Pokračujte zadaním kódu PUK. Zostáva vám # pokusov, potom sa SIM karta natrvalo zablokuje. Podrobnosti vám poskytne operátor.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Predvolený"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bublina"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analógový"</string>
