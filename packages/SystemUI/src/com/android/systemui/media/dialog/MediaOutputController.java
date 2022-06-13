@@ -795,6 +795,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 || features.contains(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK));
     }
 
+    boolean isBluetoothLeDevice(@NonNull MediaDevice device) {
+        return device.isBLEDevice();
+    }
+
     boolean isBroadcastSupported() {
         LocalBluetoothLeBroadcast broadcast =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
