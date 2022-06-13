@@ -105,9 +105,7 @@ open class GhostedViewLaunchAnimatorController(
             }
 
             // Perform a BFS to find the largest View with background.
-            val views = LinkedList<View>().apply {
-                add(view)
-            }
+            val views = LinkedList<View>().apply { add(view) }
 
             while (views.isNotEmpty()) {
                 val v = views.removeFirst()
@@ -161,10 +159,11 @@ open class GhostedViewLaunchAnimatorController(
     }
 
     override fun createAnimatorState(): LaunchAnimator.State {
-        val state = LaunchAnimator.State(
-            topCornerRadius = getCurrentTopCornerRadius(),
-            bottomCornerRadius = getCurrentBottomCornerRadius()
-        )
+        val state =
+            LaunchAnimator.State(
+                topCornerRadius = getCurrentTopCornerRadius(),
+                bottomCornerRadius = getCurrentBottomCornerRadius()
+            )
         fillGhostedViewState(state)
         return state
     }
@@ -255,13 +254,14 @@ open class GhostedViewLaunchAnimatorController(
 
         launchContainer.getLocationOnScreen(launchContainerLocation)
         ghostViewMatrix.postScale(
-            scale, scale,
+            scale,
+            scale,
             ghostedViewState.centerX - launchContainerLocation[0],
             ghostedViewState.centerY - launchContainerLocation[1]
         )
         ghostViewMatrix.postTranslate(
-                (leftChange + rightChange) / 2f,
-                (topChange + bottomChange) / 2f
+            (leftChange + rightChange) / 2f,
+            (topChange + bottomChange) / 2f
         )
         ghostView.animationMatrix = ghostViewMatrix
 
