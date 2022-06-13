@@ -332,7 +332,7 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
                     return false;
                 }
             } else {
-                if (!shouldFilterApplicationInternal(snapshot,
+                if (!shouldFilterApplicationInternal((Computer) snapshot,
                         callingUid, callingSetting, targetPkgSetting, userId)) {
                     return false;
                 }
@@ -365,7 +365,7 @@ public abstract class AppsFilterBase implements AppsFilterSnapshot {
         return mShouldFilterCache.valueAt(callingIndex, targetIndex);
     }
 
-    protected boolean shouldFilterApplicationInternal(PackageDataSnapshot snapshot, int callingUid,
+    protected boolean shouldFilterApplicationInternal(Computer snapshot, int callingUid,
             Object callingSetting, PackageStateInternal targetPkgSetting, int targetUserId) {
         if (DEBUG_TRACING) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplicationInternal");
