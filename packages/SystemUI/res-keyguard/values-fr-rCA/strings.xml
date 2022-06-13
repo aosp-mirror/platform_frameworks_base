@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Vous avez entré un mot de passe incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises.\n\nVeuillez réessayer dans <xliff:g id="NUMBER_1">%2$d</xliff:g> secondes."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises.\n\nVeuillez réessayer dans <xliff:g id="NUMBER_1">%2$d</xliff:g> secondes."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"NIP de carte SIM incorrect. Vous devez maintenant communiquer avec votre fournisseur de services pour déverrouiller votre appareil."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{NIP de la carte SIM incorrect. Il vous reste # tentative. Après cela, vous devrez communiquer avec votre fournisseur de services pour déverrouiller votre appareil.}one{NIP de la carte SIM incorrect. Il vous reste # tentative. }other{NIP de la carte SIM incorrect. Il vous reste # tentatives. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"La carte SIM est inutilisable. Communiquez avec votre fournisseur de services."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Code PUK de la carte SIM incorrect. Il vous reste # tentative avant que votre carte SIM devienne définitivement inutilisable.}one{Code PUK de la carte SIM incorrect. Il vous reste # tentative avant que votre carte SIM devienne définitivement inutilisable.}other{Code PUK de la carte SIM incorrect. Il vous reste # tentatives avant que votre carte SIM devienne définitivement inutilisable.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Le déverrouillage par NIP de la carte SIM a échoué."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Le déverrouillage de la carte SIM par code PUK a échoué."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Changer de méthode d\'entrée"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"L\'appareil a été verrouillé par l\'administrateur"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"L\'appareil a été verrouillé manuellement"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Doigt non reconnu"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Déverr. rec. faciale : activez accès app. photo dans Param."</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Entrez le NIP de la carte SIM. Il vous reste # tentative. Après cela, vous devrez communiquer avec votre fournisseur de services pour déverrouiller votre appareil.}one{Entrez le NIP de la carte SIM. Il vous reste # tentative.}other{Entrez le NIP de la carte SIM. Il vous reste # tentatives.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{La carte SIM est maintenant désactivée. Entrez le code PUK pour continuer. Il vous reste # tentative avant que votre carte SIM devienne définitivement inutilisable. Communiquez avec votre fournisseur de services pour en savoir plus.}one{La carte SIM est maintenant désactivée. Entrez le code PUK pour continuer. Il vous reste # tentative avant que votre carte SIM devienne définitivement inutilisable. Communiquez avec votre fournisseur de services pour en savoir plus.}other{La carte SIM est maintenant désactivée. Entrez le code PUK pour continuer. Il vous reste # tentatives avant que votre carte SIM devienne définitivement inutilisable. Communiquez avec votre fournisseur de services pour en savoir plus.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Par défaut"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bulle"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogique"</string>

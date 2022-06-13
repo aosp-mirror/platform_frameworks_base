@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Netočno ste unijeli zaporku <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> put/a. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Netočan PIN kôd SIM kartice; sada morate kontaktirati svog mobilnog operatera da bi otključao vaš uređaj."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{PIN kôd SIM-a nije točan. Imate još # pokušaj, a zatim ćete morati kontaktirati mobilnog operatera da bi otključao uređaj.}one{PIN kôd SIM-a nije točan. Imate još # pokušaj. }few{PIN kôd SIM-a nije točan. Imate još # pokušaja. }other{PIN kôd SIM-a nije točan. Imate još # pokušaja. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM kartica nije upotrebljiva. Kontaktirajte svog mobilnog operatera."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{PUK kôd SIM-a nije točan. Imate još # pokušaj prije nego što SIM kartica postane trajno neupotrebljiva.}one{PUK kôd SIM-a nije točan. Imate još # pokušaj prije nego što SIM kartica postane trajno neupotrebljiva.}few{PUK kôd SIM-a nije točan. Imate još # pokušaja prije nego što SIM kartica postane trajno neupotrebljiva.}other{PUK kôd SIM-a nije točan. Imate još # pokušaja prije nego što SIM kartica postane trajno neupotrebljiva.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Operacija PIN-a SIM kartice nije uspjela!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Operacija PUK-a SIM kartice nije uspjela!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Promjena načina unosa"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administrator je zaključao uređaj"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Uređaj je ručno zaključan"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nije prepoznato"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Za otključavanje licem uključite pristup kameri"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Unesite PIN za SIM. Imate još # pokušaj, a zatim ćete morati kontaktirati mobilnog operatera da bi otključao uređaj.}one{Unesite PIN za SIM. Imate još # pokušaj.}few{Unesite PIN za SIM. Imate još # pokušaja.}other{Unesite PIN za SIM. Imate još # pokušaja.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još # pokušaj prije nego što SIM kartica postane trajno neupotrebljiva. Više informacija zatražite od mobilnog operatera.}one{SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još # pokušaj prije nego što SIM kartica postane trajno neupotrebljiva. Više informacija zatražite od mobilnog operatera.}few{SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još # pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Više informacija zatražite od mobilnog operatera.}other{SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još # pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Više informacija zatražite od mobilnog operatera.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Zadano"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Mjehurić"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogni"</string>

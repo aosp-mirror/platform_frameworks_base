@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Você digitou sua senha incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Código PIN do chip incorreto. Entre em contato com a operadora para desbloquear o dispositivo."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Código PIN do chip incorreto. Você tem # tentativa restante. Se o código correto não for digitado, será necessário entrar em contato com a operadora para desbloquear o dispositivo.}one{Código PIN do chip incorreto. Você tem # tentativa restante. }other{Código PIN do chip incorreto. Você tem # tentativas restantes. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"O chip não pode ser utilizado. Entre em contato com a operadora."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Código PUK do chip incorreto. Você tem # tentativa restante. Se o código correto não for digitado, o chip vai ficar permanentemente inutilizável.}one{Código PUK do chip incorreto. Você tem # tentativa restante. Se o código correto não for digitado, o chip vai ficar permanentemente inutilizável.}other{Código PUK do chip incorreto. Você tem # tentativas restantes. Se o código correto não for digitado, o chip vai ficar permanentemente inutilizável.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Falha na operação de PIN do chip."</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Falha na operação de PUK do chip."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Alterar o método de entrada"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado pelo administrador"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo foi bloqueado manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Não reconhecido"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Para usar o Desbloqueio facial, ative o acesso à câmera nas Configurações"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Informe o PIN do chip. Você tem # tentativa restante antes de precisar entrar em contato com a operadora para desbloquear seu dispositivo.}one{Informe o PIN do chip. Você tem # tentativa restante.}other{Informe o PIN do chip. Você tem # tentativas restantes.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{O chip está desativado. Informe o código PUK para continuar. Você tem # tentativa restante antes que o chip fique permanentemente inutilizável. Consulte sua operadora para saber mais.}one{O chip está desativado. Informe o código PUK para continuar. Você tem # tentativa restante antes que o chip fique permanentemente inutilizável. Consulte sua operadora para saber mais.}other{O chip está desativado. Informe o código PUK para continuar. Você tem # tentativas restantes antes que o chip fique permanentemente inutilizável. Consulte sua operadora para saber mais.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Padrão"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bolha"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analógico"</string>
