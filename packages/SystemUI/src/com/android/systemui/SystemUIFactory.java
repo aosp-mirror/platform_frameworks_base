@@ -16,7 +16,6 @@
 
 package com.android.systemui;
 
-import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -28,6 +27,7 @@ import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
+import com.android.systemui.util.InitializationChecker;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.transition.ShellTransitions;
 
@@ -47,7 +47,7 @@ public class SystemUIFactory {
     private GlobalRootComponent mRootComponent;
     private WMComponent mWMComponent;
     private SysUIComponent mSysUIComponent;
-    private boolean mInitializeComponents;
+    private InitializationChecker mInitializationChecker;
 
     public static <T extends SystemUIFactory> T getInstance() {
         return (T) mFactory;
@@ -89,15 +89,17 @@ public class SystemUIFactory {
     @VisibleForTesting
     public void init(Context context, boolean fromTest)
             throws ExecutionException, InterruptedException {
-        // Only initialize components for the main system ui process running as the primary user
-        mInitializeComponents = !fromTest
-                && android.os.Process.myUserHandle().isSystem()
-                && ActivityThread.currentProcessName().equals(ActivityThread.currentPackageName());
-        mRootComponent = buildGlobalRootComponent(context);
+        mRootComponent = getGlobalRootComponentBuilder()
+                .context(context)
+                .instrumentationTest(fromTest)
+                .build();
+
+        mInitializationChecker = mRootComponent.getInitializationChecker();
+        boolean initializeComponents = mInitializationChecker.initializeComponents();
 
         // Stand up WMComponent
         setupWmComponent(context);
-        if (mInitializeComponents) {
+        if (initializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
             mWMComponent.init();
@@ -105,7 +107,7 @@ public class SystemUIFactory {
 
         // And finally, retrieve whatever SysUI needs from WMShell and build SysUI.
         SysUIComponent.Builder builder = mRootComponent.getSysUIComponent();
-        if (mInitializeComponents) {
+        if (initializeComponents) {
             // Only initialize when not starting from tests since this currently initializes some
             // components that shouldn't be run in the test environment
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
@@ -145,7 +147,7 @@ public class SystemUIFactory {
                     .setBackAnimation(Optional.ofNullable(null));
         }
         mSysUIComponent = builder.build();
-        if (mInitializeComponents) {
+        if (initializeComponents) {
             mSysUIComponent.init();
         }
 
@@ -163,7 +165,8 @@ public class SystemUIFactory {
      */
     private void setupWmComponent(Context context) {
         WMComponent.Builder wmBuilder = mRootComponent.getWMComponentBuilder();
-        if (!mInitializeComponents || !WMShellConcurrencyModule.enableShellMainThread(context)) {
+        if (!mInitializationChecker.initializeComponents()
+                || !WMShellConcurrencyModule.enableShellMainThread(context)) {
             // If running under tests or shell thread is not enabled, we don't need anything special
             mWMComponent = wmBuilder.build();
             return;
@@ -195,14 +198,8 @@ public class SystemUIFactory {
         return sysUIBuilder;
     }
 
-    protected GlobalRootComponent buildGlobalRootComponent(Context context) {
-        return DaggerGlobalRootComponent.builder()
-                .context(context)
-                .build();
-    }
-
-    protected boolean shouldInitializeComponents() {
-        return mInitializeComponents;
+    protected GlobalRootComponent.Builder getGlobalRootComponentBuilder() {
+        return DaggerGlobalRootComponent.builder();
     }
 
     public GlobalRootComponent getRootComponent() {
