@@ -676,7 +676,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             }
         }
 
-        if (biometricSourceType == BiometricSourceType.FACE) {
+        // Suppress all face auth errors if fingerprint can be used to authenticate
+        if (biometricSourceType == BiometricSourceType.FACE
+                && !mUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                KeyguardUpdateMonitor.getCurrentUser())) {
             vibrateError();
         }
 
@@ -701,10 +704,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     || mStatusBarStateController.getState() == StatusBarState.SHADE_LOCKED)) {
             startWakeAndUnlock(MODE_SHOW_BOUNCER);
             UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN, getSessionId());
-        }
-
-        if (biometricSourceType == BiometricSourceType.FACE) {
-            vibrateError();
         }
 
         cleanup();
