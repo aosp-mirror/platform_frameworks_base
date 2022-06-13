@@ -1066,6 +1066,112 @@ class Linker {
     return true;
   }
 
+  bool VerifyLocaleFormat(xml::XmlResource* manifest, android::IDiagnostics* diag) {
+    // Skip it if the Manifest doesn't declare the localeConfig attribute within the <application>
+    // element.
+    const xml::Element* application = manifest->root->FindChild("", "application");
+    if (!application) {
+      return true;
+    }
+    const xml::Attribute* localeConfig =
+        application->FindAttribute(xml::kSchemaAndroid, "localeConfig");
+    if (!localeConfig) {
+      return true;
+    }
+
+    // Deserialize XML from the compiled file
+    if (localeConfig->compiled_value) {
+      const auto localeconfig_reference = ValueCast<Reference>(localeConfig->compiled_value.get());
+      const auto localeconfig_entry =
+          ResolveTableEntry(context_, &final_table_, localeconfig_reference);
+      if (!localeconfig_entry) {
+        context_->GetDiagnostics()->Error(
+            android::DiagMessage(localeConfig->compiled_value->GetSource())
+            << "no localeConfig entry");
+        return false;
+      }
+      for (const auto& value : localeconfig_entry->values) {
+        const FileReference* file_ref = ValueCast<FileReference>(value->value.get());
+        if (!file_ref) {
+          context_->GetDiagnostics()->Error(
+              android::DiagMessage(localeConfig->compiled_value->GetSource())
+              << "no file reference");
+          return false;
+        }
+        io::IFile* file = file_ref->file;
+        if (!file) {
+          context_->GetDiagnostics()->Error(android::DiagMessage(file_ref->GetSource())
+                                            << "file not found");
+          return false;
+        }
+        std::unique_ptr<io::IData> data = file->OpenAsData();
+        if (!data) {
+          context_->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
+                                            << "failed to open file");
+          return false;
+        }
+        pb::XmlNode pb_xml_node;
+        if (!pb_xml_node.ParseFromArray(data->data(), static_cast<int>(data->size()))) {
+          context_->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
+                                            << "failed to parse proto XML");
+          return false;
+        }
+
+        std::string error;
+        std::unique_ptr<xml::XmlResource> localeConfig_xml =
+            DeserializeXmlResourceFromPb(pb_xml_node, &error);
+        if (!localeConfig_xml) {
+          context_->GetDiagnostics()->Error(android::DiagMessage(file->GetSource())
+                                            << "failed to deserialize proto XML: " << error);
+          return false;
+        }
+        xml::Element* localeConfig_el = xml::FindRootElement(localeConfig_xml->root.get());
+        if (!localeConfig_el) {
+          diag->Error(android::DiagMessage(file->GetSource()) << "no root tag defined");
+          return false;
+        }
+        if (localeConfig_el->name != "locale-config") {
+          diag->Error(android::DiagMessage(file->GetSource())
+                      << "invalid element name: " << localeConfig_el->name
+                      << ", expected: locale-config");
+          return false;
+        }
+        for (const xml::Element* child_el : localeConfig_el->GetChildElements()) {
+          if (child_el->name == "locale") {
+            if (const xml::Attribute* locale_name_attr =
+                    child_el->FindAttribute(xml::kSchemaAndroid, "name")) {
+              const std::string& locale_name = locale_name_attr->value;
+              const std::string valid_name = ConvertToBCP47Tag(locale_name);
+              // Start to verify the locale format
+              ConfigDescription config;
+              if (!ConfigDescription::Parse(valid_name, &config)) {
+                diag->Error(android::DiagMessage(file->GetSource())
+                            << "invalid configuration: " << locale_name);
+                return false;
+              }
+            } else {
+              diag->Error(android::DiagMessage(file->GetSource())
+                          << "the attribute android:name is not found");
+              return false;
+            }
+          } else {
+            diag->Error(android::DiagMessage(file->GetSource())
+                        << "invalid element name: " << child_el->name << ", expected: locale");
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  std::string ConvertToBCP47Tag(const std::string& locale) {
+    std::string bcp47tag = "b+";
+    bcp47tag += locale;
+    std::replace(bcp47tag.begin(), bcp47tag.end(), '-', '+');
+    return bcp47tag;
+  }
+
   std::unique_ptr<IArchiveWriter> MakeArchiveWriter(const StringPiece& out) {
     if (options_.output_to_directory) {
       return CreateDirectoryArchiveWriter(context_->GetDiagnostics(), out);
@@ -2194,6 +2300,10 @@ class Linker {
       context_->GetDiagnostics()->Error(android::DiagMessage() << "failed processing manifest");
       return 1;
     }
+
+    if (!VerifyLocaleFormat(manifest_xml.get(), context_->GetDiagnostics())) {
+      return 1;
+    };
 
     if (!WriteApk(archive_writer.get(), &proguard_keep_set, manifest_xml.get(), &final_table_)) {
       return 1;

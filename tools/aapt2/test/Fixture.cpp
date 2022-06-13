@@ -105,9 +105,9 @@ bool CommandTestFixture::Link(const std::vector<std::string>& args, android::IDi
   }
 
   // Link against the android SDK
-  std::string android_sdk = file::BuildPath({android::base::GetExecutableDirectory(),
-                                             "integration-tests", "CommandTests",
-                                             "android-28.jar"});
+  std::string android_sdk =
+      file::BuildPath({android::base::GetExecutableDirectory(), "integration-tests", "CommandTests",
+                       "android-33.jar"});
   link_args.insert(link_args.end(), {"-I", android_sdk});
 
   return LinkCommand(diag).Execute(link_args, &std::cerr) == 0;
@@ -121,9 +121,9 @@ bool CommandTestFixture::Link(const std::vector<std::string>& args,
   }
 
   // Link against the android SDK
-  std::string android_sdk = file::BuildPath({android::base::GetExecutableDirectory(),
-                                             "integration-tests", "CommandTests",
-                                             "android-28.jar"});
+  std::string android_sdk =
+      file::BuildPath({android::base::GetExecutableDirectory(), "integration-tests", "CommandTests",
+                       "android-33.jar"});
   link_args.insert(link_args.end(), {"-I", android_sdk});
 
   // Add the files from the compiled resources directory to the link file arguments
