@@ -39,11 +39,13 @@ import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -70,6 +72,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private static final Intent ZEN_PRIORITY_SETTINGS =
             new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS);
+
+    private static final String INTERACTION_JANK_TAG = "start_zen_mode";
 
     private final ZenModeController mController;
     private final SharedPreferences mSharedPreferences;
@@ -175,8 +179,9 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     mUiHandler.post(() -> {
                         Dialog dialog = makeZenModeDialog();
                         if (view != null) {
-                            mDialogLaunchAnimator.showFromView(dialog, view,
-                                    /* cuj= */ null,
+                            mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
+                                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                            INTERACTION_JANK_TAG),
                                     /* animateBackgroundBoundsChange= */ false);
                         } else {
                             dialog.show();

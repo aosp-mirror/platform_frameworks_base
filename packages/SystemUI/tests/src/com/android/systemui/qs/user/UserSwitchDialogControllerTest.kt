@@ -42,6 +42,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatcher
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.never
@@ -94,7 +95,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     @Test
     fun showDialog_callsDialogShow() {
         controller.showDialog(launchView)
-        verify(dialogLaunchAnimator).showFromView(dialog, launchView)
+        verify(dialogLaunchAnimator).showFromView(eq(dialog), eq(launchView), any(), anyBoolean())
         verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
     }
 
