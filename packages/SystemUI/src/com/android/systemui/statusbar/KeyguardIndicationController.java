@@ -1023,7 +1023,14 @@ public class KeyguardIndicationController {
             }
 
             if (biometricSourceType == BiometricSourceType.FACE
-                && msgId == FaceManager.FACE_ERROR_TIMEOUT) {
+                    && msgId == FaceManager.FACE_ERROR_UNABLE_TO_PROCESS) {
+                // suppress all face UNABLE_TO_PROCESS errors
+                if (DEBUG) {
+                    Log.d(TAG, "skip showing FACE_ERROR_UNABLE_TO_PROCESS errString="
+                            + errString);
+                }
+            } else if (biometricSourceType == BiometricSourceType.FACE
+                    && msgId == FaceManager.FACE_ERROR_TIMEOUT) {
                 if (mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                         KeyguardUpdateMonitor.getCurrentUser())) {
                     // no message if fingerprint is also enrolled
