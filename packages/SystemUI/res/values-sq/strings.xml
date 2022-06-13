@@ -110,7 +110,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefoni"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Ndihma zanore"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Portofoli"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Shkyç"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Pajisja është e kyçur"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Po skanon fytyrën"</string>
@@ -224,7 +224,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Mbrojtësi i ekranit"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Eternet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Mos shqetëso"</string>
-    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
+    <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth-i"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Nuk ofrohet për përdorim asnjë pajisje e çiftuar"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> bateri"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
@@ -242,7 +242,7 @@
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Pajisje e jashtme ruajtëse"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Përdoruesi"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Interneti"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Ofrohen rrjete"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Rrjetet nuk ofrohen"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Nuk ka rrjete Wi-Fi të disponueshme"</string>
@@ -436,7 +436,7 @@
     <string name="stream_music" msgid="2188224742361847580">"Media"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarmi"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Njoftimi"</string>
-    <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
+    <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth-i"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Frekuenca e dyfishtë me shumë tone"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Qasshmëria"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Bjeri ziles"</string>
@@ -460,7 +460,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Shfaq modalitetin e demonstrimit"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Eternet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarmi"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Portofoli"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguro për të kryer pagesa më të shpejta dhe më të sigurta përmes telefonit"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Shto një kartë"</string>
@@ -554,7 +554,7 @@
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Kthim prapa"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"Luaj/pauzë"</string>
     <string name="keyboard_key_media_stop" msgid="1509943745250377699">"Ndalo"</string>
-    <string name="keyboard_key_media_next" msgid="8502476691227914952">"Përpara"</string>
+    <string name="keyboard_key_media_next" msgid="8502476691227914952">"Para"</string>
     <string name="keyboard_key_media_previous" msgid="5637875709190955351">"Prapa"</string>
     <string name="keyboard_key_media_rewind" msgid="3450387734224327577">"Rikthe me shpejtësi"</string>
     <string name="keyboard_key_media_fast_forward" msgid="3572444327046911822">"Përparo me shpejtësi"</string>

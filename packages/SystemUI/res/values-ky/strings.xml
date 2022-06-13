@@ -460,10 +460,10 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимин көрсөтүү"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Ойготкуч"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Капчык"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Телефонуңуз менен тез жана коопсуз сатып алуу үчүн жөндөңүз"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Баарын көрсөтүү"</string>
-    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Картаны кошуу"</string>
+    <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"Карта кошуу"</string>
     <string name="wallet_secondary_label_updating" msgid="5726130686114928551">"Жаңырууда"</string>
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Колдонуу үчүн кулпусун ачыңыз"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Кыйытмаларды алууда ката кетти. Бир аздан кийин кайталап көрүңүз."</string>
@@ -548,7 +548,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Солго"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Оңго"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Ортолотуу"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Өтмөк"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Боштук"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Киргизүү"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Артка өчүрүү"</string>

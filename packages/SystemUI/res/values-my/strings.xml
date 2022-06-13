@@ -82,7 +82,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ဘယ်ဘက်အနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ညာဘက်အနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ဖန်သားပြင် ရိုက်ကူးမှု"</string>
-    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ဖန်သားပြင်ရိုက်ကူးနေသည်"</string>
+    <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"စတင် ရိုက်ကူးမလား။"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"ရိုက်ကူးနေစဉ်အတွင်း Android စနစ်သည် သင့်ဖန်သားပြင်ပေါ်တွင် မြင်နိုင်သော (သို့) သင့်စက်ပစ္စည်းတွင် ဖွင့်ထားသော အရေးကြီးသည့် အချက်အလက်များကို ရိုက်ယူနိုင်သည်။ ၎င်းတွင် စကားဝှက်၊ ငွေပေးချေမှု အချက်အလက်၊ ဓာတ်ပုံ၊ မက်ဆေ့ဂျ်နှင့် အသံများ ပါဝင်သည်။"</string>
@@ -548,7 +548,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"ဘယ်"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"ညာ"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"ဌာန"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"တဘ်"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter ခလုတ်"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"နောက်ပြန်ဖျက်ပါ"</string>
