@@ -90,6 +90,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.window.ImeOnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
@@ -2323,6 +2324,14 @@ public final class InputMethodManager {
         InputConnection ic = view.onCreateInputConnection(tba);
         if (DEBUG) Log.v(TAG, "Starting input: tba=" + tba + " ic=" + ic);
 
+        // Clear autofill and field ids if a connection could not be established.
+        // This ensures that even disconnected EditorInfos have well-defined attributes,
+        // making them consistently and straightforwardly comparable.
+        if (ic == null) {
+            tba.autofillId = AutofillId.NO_AUTOFILL_ID;
+            tba.fieldId = 0;
+        }
+
         final Handler icHandler;
         InputBindResult res = null;
         synchronized (mH) {
@@ -2360,7 +2369,7 @@ public final class InputMethodManager {
                 mServedInputConnection = null;
                 mServedInputConnectionHandler = null;
             }
-            RemoteInputConnectionImpl servedInputConnection;
+            final RemoteInputConnectionImpl servedInputConnection;
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
                 mCursorSelEnd = tba.initialSelEnd;
