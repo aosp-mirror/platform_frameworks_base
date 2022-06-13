@@ -4809,4 +4809,6 @@
   <java-symbol type="id" name="language_picker_header" />
 
   <java-symbol type="dimen" name="status_bar_height_default" />
+
+  <java-symbol type="bool" name="system_server_plays_face_haptics" />
 </resources>
