@@ -532,6 +532,9 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
         setLastExpectedStartedId(activityOnNewDisplay);
         transitToDrawnAndVerifyOnLaunchFinished(activityOnNewDisplay);
+
+        assertWithMessage("The launching state must not include the separated launch")
+                .that(mLaunchingState.contains(activityOnNewDisplay)).isFalse();
     }
 
     @Test
