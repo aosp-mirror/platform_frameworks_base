@@ -89,6 +89,7 @@ public class SmartSpaceComplication implements Complication {
     }
 
     private static class SmartSpaceComplicationViewHolder implements ViewHolder {
+        private View mView = null;
         private static final int SMARTSPACE_COMPLICATION_WEIGHT = 10;
         private final DreamSmartspaceController mSmartSpaceController;
         private final Context mContext;
@@ -102,12 +103,16 @@ public class SmartSpaceComplication implements Complication {
 
         @Override
         public View getView() {
+            if (mView != null) {
+                return mView;
+            }
             final FrameLayout smartSpaceContainer = new FrameLayout(mContext);
             smartSpaceContainer.addView(
                     mSmartSpaceController.buildAndConnectView(smartSpaceContainer),
                     new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT));
 
+            mView = smartSpaceContainer;
             return smartSpaceContainer;
         }
 
