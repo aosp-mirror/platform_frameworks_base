@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"کیمرا"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"فون"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"صوتی معاون"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"والٹ"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"‏QR کوڈ اسکینر"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"غیر مقفل کریں"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"آلہ مقفل کر دیا گیا"</string>
@@ -468,7 +468,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ڈیمو موڈ دکھائیں"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ایتھرنیٹ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"الارم"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"والٹ"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"اپنے فون سے تیز تر مزید محفوظ خریداریاں کرنے کے لیے، سیٹ اپ مکمل کریں"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"سبھی دکھائیں"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"کھولنے کیلئے تھپتھپائیں"</string>
@@ -951,14 +951,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"متن کاپی ہو گیا"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"تصویر کاپی ہو گئی"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"مواد کاپی ہو گیا"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"کلپ بورڈ ایڈیٹر"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"کلپ بورڈ"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"تصویر کا پیش منظر"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"ترمیم کریں"</string>
     <string name="add" msgid="81036585205287996">"شامل کریں"</string>
     <string name="manage_users" msgid="1823875311934643849">"صارفین کا نظم کریں"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"یہ اطلاع اسپلٹ اسکرین کو گھسیٹنے کو سپورٹ نہیں کرتا ہے۔"</string>

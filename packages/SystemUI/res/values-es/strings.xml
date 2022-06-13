@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Cámara"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Teléfono"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Asistente voz"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Cartera"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Escáner de códigos QR"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
@@ -951,14 +951,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Texto copiado"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Imagen copiada"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Contenido copiado"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Editor del portapapeles"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Portapapeles"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Vista previa de la imagen"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"editar"</string>
     <string name="add" msgid="81036585205287996">"Añadir"</string>
     <string name="manage_users" msgid="1823875311934643849">"Gestionar usuarios"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Esta notificación no se puede arrastrar a la pantalla dividida."</string>
