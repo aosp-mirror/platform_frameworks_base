@@ -252,7 +252,8 @@ public class Vpn {
     @VisibleForTesting
     protected VpnConfig mConfig;
     private final NetworkProvider mNetworkProvider;
-    @VisibleForTesting protected VpnNetworkAgentWrapper mNetworkAgent;
+    @VisibleForTesting
+    protected NetworkAgent mNetworkAgent;
     private final Looper mLooper;
     @VisibleForTesting
     protected NetworkCapabilities mNetworkCapabilities;
@@ -496,30 +497,6 @@ public class Vpn {
             } else {
                 return IKEV2_VPN_RETRY_DELAYS_SEC[retryCount];
             }
-        }
-
-        /** Get single threaded executor for IKEv2 VPN */
-        public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {
-            return new ScheduledThreadPoolExecutor(1);
-        }
-
-        /** Get a VpnNetworkAgentWrapper instance */
-        public VpnNetworkAgentWrapper getVpnNetworkAgentWrapper(
-                @NonNull Context context,
-                @NonNull Looper looper,
-                @NonNull String logTag,
-                @NonNull NetworkCapabilities nc,
-                @NonNull LinkProperties lp,
-                @NonNull NetworkScore score,
-                @NonNull NetworkAgentConfig config,
-                @Nullable NetworkProvider provider) {
-            return new VpnNetworkAgentWrapper(
-                    new NetworkAgent(context, looper, logTag, nc, lp, score, config, provider) {
-                        @Override
-                        public void onNetworkUnwanted() {
-                            // We are user controlled, not driven by NetworkRequest.
-                        }
-                    });
         }
     }
 
@@ -1352,7 +1329,7 @@ public class Vpn {
     @VisibleForTesting
     @Nullable
     public synchronized Network getNetwork() {
-        final VpnNetworkAgentWrapper agent = mNetworkAgent;
+        final NetworkAgent agent = mNetworkAgent;
         if (null == agent) return null;
         final Network network = agent.getNetwork();
         if (null == network) return null;
@@ -1432,8 +1409,7 @@ public class Vpn {
      * registering a new NetworkAgent. This is not always possible if the new VPN configuration
      * has certain changes, in which case this method would just return {@code false}.
      */
-    private boolean updateLinkPropertiesInPlaceIfPossible(
-            VpnNetworkAgentWrapper agent, VpnConfig oldConfig) {
+    private boolean updateLinkPropertiesInPlaceIfPossible(NetworkAgent agent, VpnConfig oldConfig) {
         // NetworkAgentConfig cannot be updated without registering a new NetworkAgent.
         if (oldConfig.allowBypass != mConfig.allowBypass) {
             Log.i(TAG, "Handover not possible due to changes to allowBypass");
@@ -1498,11 +1474,15 @@ public class Vpn {
                 ? Arrays.asList(mConfig.underlyingNetworks) : null);
 
         mNetworkCapabilities = capsBuilder.build();
-        mNetworkAgent = mDeps.getVpnNetworkAgentWrapper(
-                mContext, mLooper, NETWORKTYPE /* logtag */,
+        mNetworkAgent = new NetworkAgent(mContext, mLooper, NETWORKTYPE /* logtag */,
                 mNetworkCapabilities, lp,
                 new NetworkScore.Builder().setLegacyInt(VPN_DEFAULT_SCORE).build(),
-                networkAgentConfig, mNetworkProvider);
+                networkAgentConfig, mNetworkProvider) {
+            @Override
+            public void onNetworkUnwanted() {
+                // We are user controlled, not driven by NetworkRequest.
+            }
+        };
         final long token = Binder.clearCallingIdentity();
         try {
             mNetworkAgent.register();
@@ -1526,7 +1506,7 @@ public class Vpn {
         }
     }
 
-    private void agentDisconnect(VpnNetworkAgentWrapper networkAgent) {
+    private void agentDisconnect(NetworkAgent networkAgent) {
         if (networkAgent != null) {
             networkAgent.unregister();
         }
@@ -1582,7 +1562,7 @@ public class Vpn {
         VpnConfig oldConfig = mConfig;
         String oldInterface = mInterface;
         Connection oldConnection = mConnection;
-        VpnNetworkAgentWrapper oldNetworkAgent = mNetworkAgent;
+        NetworkAgent oldNetworkAgent = mNetworkAgent;
         Set<Range<Integer>> oldUsers = mNetworkCapabilities.getUids();
 
         // Configure the interface. Abort if any of these steps fails.
@@ -2712,7 +2692,8 @@ public class Vpn {
          * of the mutable Ikev2VpnRunner fields. The Ikev2VpnRunner is built mostly lock-free by
          * virtue of everything being serialized on this executor.
          */
-        @NonNull private final ScheduledThreadPoolExecutor mExecutor;
+        @NonNull
+        private final ScheduledThreadPoolExecutor mExecutor = new ScheduledThreadPoolExecutor(1);
 
         @Nullable private ScheduledFuture<?> mScheduledHandleNetworkLostTimeout;
         @Nullable private ScheduledFuture<?> mScheduledHandleRetryIkeSessionTimeout;
@@ -2733,7 +2714,7 @@ public class Vpn {
         @Nullable private LinkProperties mUnderlyingLinkProperties;
         private final String mSessionKey;
 
-        @Nullable private IkeSessionWrapper mSession;
+        @Nullable private IkeSession mSession;
         @Nullable private IkeSessionConnectionInfo mIkeConnectionInfo;
 
         // mMobikeEnabled can only be updated after IKE AUTH is finished.
@@ -2747,11 +2728,9 @@ public class Vpn {
          */
         private int mRetryCount = 0;
 
-        IkeV2VpnRunner(
-                @NonNull Ikev2VpnProfile profile, @NonNull ScheduledThreadPoolExecutor executor) {
+        IkeV2VpnRunner(@NonNull Ikev2VpnProfile profile) {
             super(TAG);
             mProfile = profile;
-            mExecutor = executor;
             mIpSecManager = (IpSecManager) mContext.getSystemService(Context.IPSEC_SERVICE);
             mNetworkCallback = new VpnIkev2Utils.Ikev2VpnNetworkCallback(TAG, this, mExecutor);
             mSessionKey = UUID.randomUUID().toString();
@@ -2764,7 +2743,7 @@ public class Vpn {
 
             // To avoid hitting RejectedExecutionException upon shutdown of the mExecutor */
             mExecutor.setRejectedExecutionHandler(
-                    (r, exe) -> {
+                    (r, executor) -> {
                         Log.d(TAG, "Runnable " + r + " rejected by the mExecutor");
                     });
         }
@@ -2886,7 +2865,7 @@ public class Vpn {
                 // mActiveNetwork might have been updated after the setup was triggered.
                 final Network network = mIkeConnectionInfo.getNetwork();
 
-                final VpnNetworkAgentWrapper networkAgent;
+                final NetworkAgent networkAgent;
                 final LinkProperties lp;
 
                 synchronized (Vpn.this) {
@@ -2905,6 +2884,7 @@ public class Vpn {
                     mConfig.dnsServers.addAll(dnsAddrStrings);
 
                     mConfig.underlyingNetworks = new Network[] {network};
+
                     mConfig.disallowedApplications = getAppExclusionList(mPackage);
 
                     networkAgent = mNetworkAgent;
@@ -2920,10 +2900,6 @@ public class Vpn {
                     } else {
                         // Underlying networks also set in agentConnect()
                         networkAgent.setUnderlyingNetworks(Collections.singletonList(network));
-                        mNetworkCapabilities =
-                                new NetworkCapabilities.Builder(mNetworkCapabilities)
-                                        .setUnderlyingNetworks(Collections.singletonList(network))
-                                        .build();
                     }
 
                     lp = makeLinkProperties(); // Accesses VPN instance fields; must be locked
@@ -4039,9 +4015,7 @@ public class Vpn {
                 case VpnProfile.TYPE_IKEV2_IPSEC_RSA:
                 case VpnProfile.TYPE_IKEV2_FROM_IKE_TUN_CONN_PARAMS:
                     mVpnRunner =
-                            new IkeV2VpnRunner(
-                                    Ikev2VpnProfile.fromVpnProfile(profile),
-                                    mDeps.getScheduledThreadPoolExecutor());
+                            new IkeV2VpnRunner(Ikev2VpnProfile.fromVpnProfile(profile));
                     mVpnRunner.start();
                     break;
                 default:
@@ -4217,98 +4191,22 @@ public class Vpn {
      * @hide
      */
     @VisibleForTesting
-    public static class VpnNetworkAgentWrapper {
-        private final NetworkAgent mImpl;
-
-        /** Create an VpnNetworkAgentWrapper */
-        public VpnNetworkAgentWrapper(@NonNull NetworkAgent networkAgent) {
-            mImpl = networkAgent;
-        }
-
-        /** Inform ConnectivityService that this agent has now connected */
-        public void markConnected() {
-            mImpl.markConnected();
-        }
-
-        /** Register this network agent with ConnectivityService */
-        public void register() {
-            mImpl.register();
-        }
-
-        /** Unregister this network agent */
-        public void unregister() {
-            mImpl.unregister();
-        }
-
-        /** Update the LinkProperties */
-        public void sendLinkProperties(@NonNull LinkProperties lp) {
-            mImpl.sendLinkProperties(lp);
-        }
-
-        /** Update the NetworkCapabilities */
-        public void sendNetworkCapabilities(@NonNull NetworkCapabilities nc) {
-            mImpl.sendNetworkCapabilities(nc);
-        }
-
-        /** Set the underlying networks */
-        public void setUnderlyingNetworks(@NonNull List<Network> networks) {
-            mImpl.setUnderlyingNetworks(networks);
-        }
-
-        /**  The Network associated with this agent */
-        public Network getNetwork() {
-            return mImpl.getNetwork();
-        }
-    }
-
-    /**
-     * Proxy to allow testing
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    public static class IkeSessionWrapper {
-        private final IkeSession mImpl;
-
-        /** Create an IkeSessionWrapper */
-        public IkeSessionWrapper(IkeSession session) {
-            mImpl = session;
-        }
-
-        /** Update the underlying network of the IKE Session */
-        public void setNetwork(@NonNull Network network) {
-            mImpl.setNetwork(network);
-        }
-
-        /** Forcibly terminate the IKE Session */
-        public void kill() {
-            mImpl.kill();
-        }
-    }
-
-    /**
-     * Proxy to allow testing
-     *
-     * @hide
-     */
-    @VisibleForTesting
     public static class Ikev2SessionCreator {
         /** Creates a IKE session */
-        public IkeSessionWrapper createIkeSession(
+        public IkeSession createIkeSession(
                 @NonNull Context context,
                 @NonNull IkeSessionParams ikeSessionParams,
                 @NonNull ChildSessionParams firstChildSessionParams,
                 @NonNull Executor userCbExecutor,
                 @NonNull IkeSessionCallback ikeSessionCallback,
                 @NonNull ChildSessionCallback firstChildSessionCallback) {
-            return new IkeSessionWrapper(
-                    new IkeSession(
-                            context,
-                            ikeSessionParams,
-                            firstChildSessionParams,
-                            userCbExecutor,
-                            ikeSessionCallback,
-                            firstChildSessionCallback));
+            return new IkeSession(
+                    context,
+                    ikeSessionParams,
+                    firstChildSessionParams,
+                    userCbExecutor,
+                    ikeSessionCallback,
+                    firstChildSessionCallback);
         }
     }
 
