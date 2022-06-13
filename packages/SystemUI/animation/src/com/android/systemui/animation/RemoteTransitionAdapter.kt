@@ -40,6 +40,7 @@ class RemoteTransitionAdapter {
     companion object {
         /**
          * Almost a copy of Transitions#setupStartState.
+         *
          * TODO: remove when there is proper cross-process transaction sync.
          */
         @SuppressLint("NewApi")
@@ -50,7 +51,8 @@ class RemoteTransitionAdapter {
             info: TransitionInfo,
             t: SurfaceControl.Transaction
         ) {
-            val isOpening = info.type == WindowManager.TRANSIT_OPEN ||
+            val isOpening =
+                info.type == WindowManager.TRANSIT_OPEN ||
                     info.type == WindowManager.TRANSIT_TO_FRONT
             // Put animating stuff above this line and put static stuff below it.
             val zSplitLine = info.changes.size
@@ -59,15 +61,19 @@ class RemoteTransitionAdapter {
 
             // Launcher animates leaf tasks directly, so always reparent all task leashes to root.
             t.reparent(leash, info.rootLeash)
-            t.setPosition(leash, (change.startAbsBounds.left - info.rootOffset.x).toFloat(), (
-                    change.startAbsBounds.top - info.rootOffset.y).toFloat())
+            t.setPosition(
+                leash,
+                (change.startAbsBounds.left - info.rootOffset.x).toFloat(),
+                (change.startAbsBounds.top - info.rootOffset.y).toFloat()
+            )
             t.show(leash)
             // Put all the OPEN/SHOW on top
             if (mode == WindowManager.TRANSIT_OPEN || mode == WindowManager.TRANSIT_TO_FRONT) {
                 if (isOpening) {
                     t.setLayer(leash, zSplitLine + info.changes.size - layer)
-                    if (change.flags
-                            and TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT == 0) {
+                    if (
+                        change.flags and TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT == 0
+                    ) {
                         // if transferred, it should be left visible.
                         t.setAlpha(leash, 0f)
                     }
@@ -75,8 +81,9 @@ class RemoteTransitionAdapter {
                     // put on bottom and leave it visible
                     t.setLayer(leash, zSplitLine - layer)
                 }
-            } else if (mode == WindowManager.TRANSIT_CLOSE ||
-                    mode == WindowManager.TRANSIT_TO_BACK) {
+            } else if (
+                mode == WindowManager.TRANSIT_CLOSE || mode == WindowManager.TRANSIT_TO_BACK
+            ) {
                 if (isOpening) {
                     // put on bottom and leave visible
                     t.setLayer(leash, zSplitLine - layer)
@@ -102,10 +109,15 @@ class RemoteTransitionAdapter {
                 // making leashes means we have to handle them specially.
                 return change.leash
             }
-            val leashSurface = SurfaceControl.Builder()
+            val leashSurface =
+                SurfaceControl.Builder()
                     .setName(change.leash.toString() + "_transition-leash")
-                    .setContainerLayer().setParent(if (change.parent == null)
-                            info.rootLeash else info.getChange(change.parent!!)!!.leash).build()
+                    .setContainerLayer()
+                    .setParent(
+                        if (change.parent == null) info.rootLeash
+                        else info.getChange(change.parent!!)!!.leash
+                    )
+                    .build()
             // Copied Transitions setup code (which expects bottom-to-top order, so we swap here)
             setupLeash(leashSurface, change, info.changes.size - order, info, t)
             t.reparent(change.leash, leashSurface)
@@ -118,10 +130,10 @@ class RemoteTransitionAdapter {
 
         private fun newModeToLegacyMode(newMode: Int): Int {
             return when (newMode) {
-                WindowManager.TRANSIT_OPEN, WindowManager.TRANSIT_TO_FRONT
-                        -> RemoteAnimationTarget.MODE_OPENING
-                WindowManager.TRANSIT_CLOSE, WindowManager.TRANSIT_TO_BACK
-                        -> RemoteAnimationTarget.MODE_CLOSING
+                WindowManager.TRANSIT_OPEN,
+                WindowManager.TRANSIT_TO_FRONT -> RemoteAnimationTarget.MODE_OPENING
+                WindowManager.TRANSIT_CLOSE,
+                WindowManager.TRANSIT_TO_BACK -> RemoteAnimationTarget.MODE_CLOSING
                 else -> RemoteAnimationTarget.MODE_CHANGING
             }
         }
@@ -138,12 +150,13 @@ class RemoteTransitionAdapter {
             info: TransitionInfo,
             t: SurfaceControl.Transaction
         ): RemoteAnimationTarget {
-            val target = RemoteAnimationTarget(
+            val target =
+                RemoteAnimationTarget(
                     /* taskId */ if (change.taskInfo != null) change.taskInfo!!.taskId else -1,
                     /* mode */ newModeToLegacyMode(change.mode),
                     /* leash */ createLeash(info, change, order, t),
                     /* isTranslucent */ (change.flags and TransitionInfo.FLAG_TRANSLUCENT != 0 ||
-                    change.flags and TransitionInfo.FLAG_SHOW_WALLPAPER != 0),
+                        change.flags and TransitionInfo.FLAG_SHOW_WALLPAPER != 0),
                     /* clipRect */ null,
                     /* contentInsets */ Rect(0, 0, 0, 0),
                     /* prefixOrderIndex */ order,
@@ -151,15 +164,16 @@ class RemoteTransitionAdapter {
                     /* localBounds */ rectOffsetTo(change.endAbsBounds, change.endRelOffset),
                     /* screenSpaceBounds */ Rect(change.endAbsBounds),
                     /* windowConfig */ if (change.taskInfo != null)
-                            change.taskInfo!!.configuration.windowConfiguration else
-                                    WindowConfiguration(),
-                    /* isNotInRecents */ if (change.taskInfo != null)
-                            !change.taskInfo!!.isRunning else true,
+                        change.taskInfo!!.configuration.windowConfiguration
+                    else WindowConfiguration(),
+                    /* isNotInRecents */ if (change.taskInfo != null) !change.taskInfo!!.isRunning
+                    else true,
                     /* startLeash */ null,
                     /* startBounds */ Rect(change.startAbsBounds),
                     /* taskInfo */ change.taskInfo,
                     /* allowEnterPip */ change.allowEnterPip,
-                    /* windowType */ WindowManager.LayoutParams.INVALID_WINDOW_TYPE)
+                    /* windowType */ WindowManager.LayoutParams.INVALID_WINDOW_TYPE
+                )
             target.backgroundColor = change.backgroundColor
             return target
         }
@@ -192,9 +206,7 @@ class RemoteTransitionAdapter {
         }
 
         @JvmStatic
-        fun adaptRemoteRunner(
-            runner: IRemoteAnimationRunner
-        ): IRemoteTransition.Stub {
+        fun adaptRemoteRunner(runner: IRemoteAnimationRunner): IRemoteTransition.Stub {
             return object : IRemoteTransition.Stub() {
                 override fun startAnimation(
                     token: IBinder,
@@ -218,18 +230,24 @@ class RemoteTransitionAdapter {
                     var displayH = 0f
                     for (i in info.changes.indices.reversed()) {
                         val change = info.changes[i]
-                        if (change.taskInfo != null &&
-                                change.taskInfo!!.activityType
-                                        == WindowConfiguration.ACTIVITY_TYPE_HOME) {
-                            isReturnToHome = (change.mode == WindowManager.TRANSIT_OPEN ||
+                        if (
+                            change.taskInfo != null &&
+                                change.taskInfo!!.activityType ==
+                                    WindowConfiguration.ACTIVITY_TYPE_HOME
+                        ) {
+                            isReturnToHome =
+                                (change.mode == WindowManager.TRANSIT_OPEN ||
                                     change.mode == WindowManager.TRANSIT_TO_FRONT)
                             launcherTask = change
                             launcherLayer = info.changes.size - i
                         } else if (change.flags and TransitionInfo.FLAG_IS_WALLPAPER != 0) {
                             wallpaper = change
                         }
-                        if (change.parent == null && change.endRotation >= 0 &&
-                                change.endRotation != change.startRotation) {
+                        if (
+                            change.parent == null &&
+                                change.endRotation >= 0 &&
+                                change.endRotation != change.startRotation
+                        ) {
                             rotateDelta = change.endRotation - change.startRotation
                             displayW = change.endAbsBounds.width().toFloat()
                             displayH = change.endAbsBounds.height().toFloat()
@@ -240,8 +258,13 @@ class RemoteTransitionAdapter {
                     val counterLauncher = CounterRotator()
                     val counterWallpaper = CounterRotator()
                     if (launcherTask != null && rotateDelta != 0 && launcherTask.parent != null) {
-                        counterLauncher.setup(t, info.getChange(launcherTask.parent!!)!!.leash,
-                                rotateDelta, displayW, displayH)
+                        counterLauncher.setup(
+                            t,
+                            info.getChange(launcherTask.parent!!)!!.leash,
+                            rotateDelta,
+                            displayW,
+                            displayH
+                        )
                         if (counterLauncher.surface != null) {
                             t.setLayer(counterLauncher.surface!!, launcherLayer)
                         }
@@ -257,8 +280,10 @@ class RemoteTransitionAdapter {
                             val mode = info.changes[i].mode
                             // Only deal with independent layers
                             if (!TransitionInfo.isIndependent(change, info)) continue
-                            if (mode == WindowManager.TRANSIT_CLOSE ||
-                                    mode == WindowManager.TRANSIT_TO_BACK) {
+                            if (
+                                mode == WindowManager.TRANSIT_CLOSE ||
+                                    mode == WindowManager.TRANSIT_TO_BACK
+                            ) {
                                 t.setLayer(leash!!, info.changes.size * 3 - i)
                                 counterLauncher.addChild(t, leash)
                             }
@@ -273,8 +298,13 @@ class RemoteTransitionAdapter {
                             counterLauncher.addChild(t, leashMap[launcherTask.leash])
                         }
                         if (wallpaper != null && rotateDelta != 0 && wallpaper.parent != null) {
-                            counterWallpaper.setup(t, info.getChange(wallpaper.parent!!)!!.leash,
-                                    rotateDelta, displayW, displayH)
+                            counterWallpaper.setup(
+                                t,
+                                info.getChange(wallpaper.parent!!)!!.leash,
+                                rotateDelta,
+                                displayW,
+                                displayH
+                            )
                             if (counterWallpaper.surface != null) {
                                 t.setLayer(counterWallpaper.surface!!, -1)
                                 counterWallpaper.addChild(t, leashMap[wallpaper.leash])
@@ -282,37 +312,47 @@ class RemoteTransitionAdapter {
                         }
                     }
                     t.apply()
-                    val animationFinishedCallback = object : IRemoteAnimationFinishedCallback {
-                        override fun onAnimationFinished() {
-                            val finishTransaction = SurfaceControl.Transaction()
-                            counterLauncher.cleanUp(finishTransaction)
-                            counterWallpaper.cleanUp(finishTransaction)
-                            // Release surface references now. This is apparently to free GPU memory
-                            // while doing quick operations (eg. during CTS).
-                            for (i in info.changes.indices.reversed()) {
-                                info.changes[i].leash.release()
+                    val animationFinishedCallback =
+                        object : IRemoteAnimationFinishedCallback {
+                            override fun onAnimationFinished() {
+                                val finishTransaction = SurfaceControl.Transaction()
+                                counterLauncher.cleanUp(finishTransaction)
+                                counterWallpaper.cleanUp(finishTransaction)
+                                // Release surface references now. This is apparently to free GPU
+                                // memory while doing quick operations (eg. during CTS).
+                                for (i in info.changes.indices.reversed()) {
+                                    info.changes[i].leash.release()
+                                }
+                                for (i in leashMap.size - 1 downTo 0) {
+                                    leashMap.valueAt(i).release()
+                                }
+                                try {
+                                    finishCallback.onTransitionFinished(
+                                        null /* wct */,
+                                        finishTransaction
+                                    )
+                                } catch (e: RemoteException) {
+                                    Log.e(
+                                        "ActivityOptionsCompat",
+                                        "Failed to call app controlled" +
+                                            " animation finished callback",
+                                        e
+                                    )
+                                }
                             }
-                            for (i in leashMap.size - 1 downTo 0) {
-                                leashMap.valueAt(i).release()
-                            }
-                            try {
-                                finishCallback.onTransitionFinished(null /* wct */,
-                                        finishTransaction)
-                            } catch (e: RemoteException) {
-                                Log.e("ActivityOptionsCompat", "Failed to call app controlled" +
-                                        " animation finished callback", e)
-                            }
-                        }
 
-                        override fun asBinder(): IBinder? {
-                            return null
+                            override fun asBinder(): IBinder? {
+                                return null
+                            }
                         }
-                    }
                     // TODO(bc-unlcok): Pass correct transit type.
                     runner.onAnimationStart(
-                            WindowManager.TRANSIT_OLD_NONE,
-                            appsCompat, wallpapersCompat, nonAppsCompat,
-                            animationFinishedCallback)
+                        WindowManager.TRANSIT_OLD_NONE,
+                        appsCompat,
+                        wallpapersCompat,
+                        nonAppsCompat,
+                        animationFinishedCallback
+                    )
                 }
 
                 override fun mergeAnimation(
@@ -329,18 +369,14 @@ class RemoteTransitionAdapter {
         }
 
         @JvmStatic
-        fun adaptRemoteAnimation(
-            adapter: RemoteAnimationAdapter
-        ): RemoteTransition {
+        fun adaptRemoteAnimation(adapter: RemoteAnimationAdapter): RemoteTransition {
             return RemoteTransition(adaptRemoteRunner(adapter.runner), adapter.callingApplication)
         }
     }
 
-    /**
-     * Utility class that takes care of counter-rotating surfaces during a transition animation.
-     */
+    /** Utility class that takes care of counter-rotating surfaces during a transition animation. */
     class CounterRotator {
-        /** Gets the surface with the counter-rotation.  */
+        /** Gets the surface with the counter-rotation. */
         var surface: SurfaceControl? = null
             private set
 
@@ -358,7 +394,8 @@ class RemoteTransitionAdapter {
             parentH: Float
         ) {
             if (rotateDelta == 0) return
-            val surface = SurfaceControl.Builder()
+            val surface =
+                SurfaceControl.Builder()
                     .setName("Transition Unrotate")
                     .setContainerLayer()
                     .setParent(parent)
@@ -378,17 +415,15 @@ class RemoteTransitionAdapter {
             t.show(surface)
         }
 
-        /**
-         * Adds a surface that needs to be counter-rotate.
-         */
+        /** Adds a surface that needs to be counter-rotate. */
         fun addChild(t: SurfaceControl.Transaction, child: SurfaceControl?) {
             if (surface == null) return
             t.reparent(child!!, surface)
         }
 
         /**
-         * Clean-up. Since finishTransaction should reset all change leashes, we only need to remove the
-         * counter rotation surface.
+         * Clean-up. Since finishTransaction should reset all change leashes, we only need to remove
+         * the counter rotation surface.
          */
         fun cleanUp(finishTransaction: SurfaceControl.Transaction) {
             if (surface == null) return
