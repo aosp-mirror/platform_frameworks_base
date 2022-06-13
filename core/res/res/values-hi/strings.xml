@@ -328,7 +328,7 @@
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"सूचनाएं"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"सूचनाएं दिखाएं"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"विंडो का कॉन्टेंट वापस पाएं"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"उस विंडो की सामग्री की जाँच करें, जिसका आप इस्तेमाल कर रहे हैं."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"विंडो पर नज़र आ रहे कॉन्टेंट की जांच करें."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"छूकर, किसी चीज़ से जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"जिन चीज़ों पर आप टैप करेंगे उन्हें ज़ोर से बोला जाएगा और स्क्रीन को जेस्चर के ज़रिए एक्सप्लोर किया जा सकेगा."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"अपने लिखे हुए लेख पर गौर करें"</string>
