@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsResponse;
 
 /**
  * Binder interface for the IME service to receive an inline suggestion response from the system.
- * {@hide}
  */
 oneway interface IInlineSuggestionsResponseCallback {
     void onInlineSuggestionsResponse(in AutofillId fieldId, in InlineSuggestionsResponse response);

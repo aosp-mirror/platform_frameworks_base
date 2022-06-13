@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.view;
+package com.android.internal.inputmethod;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
@@ -58,7 +58,7 @@ public final class InlineSuggestionsRequestInfo implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/com/android/internal/view/InlineSuggestionsRequestInfo.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/com/android/internal/inputmethod/InlineSuggestionsRequestInfo.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -217,7 +217,7 @@ public final class InlineSuggestionsRequestInfo implements Parcelable {
     @DataClass.Generated(
             time = 1582076613213L,
             codegenVersion = "1.0.14",
-            sourceFile = "frameworks/base/core/java/com/android/internal/view/InlineSuggestionsRequestInfo.java",
+            sourceFile = "frameworks/base/core/java/com/android/internal/inputmethod/InlineSuggestionsRequestInfo.java",
             inputSignatures = "private final @android.annotation.NonNull android.content.ComponentName mComponentName\nprivate final @android.annotation.NonNull android.view.autofill.AutofillId mAutofillId\nprivate final @android.annotation.NonNull android.os.Bundle mUiExtras\nclass InlineSuggestionsRequestInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstDefs=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
