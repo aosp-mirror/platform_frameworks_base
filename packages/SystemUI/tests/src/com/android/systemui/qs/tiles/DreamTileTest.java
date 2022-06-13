@@ -20,12 +20,15 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -46,6 +49,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
@@ -53,6 +57,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -214,6 +219,30 @@ public class DreamTileTest extends SysuiTestCase {
         assertTrue(supportedTileOnlySystemUser.isAvailable());
         when(mUserTracker.getUserHandle()).thenReturn(nonSystemUserHandle);
         assertFalse(supportedTileOnlySystemUser.isAvailable());
+    }
+
+    @Test
+    public void testIconDockState() {
+        final DreamTile dockedTile = constructTileForTest(true, false);
+
+        final ArgumentCaptor<BroadcastReceiver> receiverCaptor = ArgumentCaptor.forClass(
+                BroadcastReceiver.class);
+        dockedTile.handleSetListening(true);
+        verify(mBroadcastDispatcher).registerReceiver(receiverCaptor.capture(), any());
+        final BroadcastReceiver receiver = receiverCaptor.getValue();
+
+        Intent dockIntent = new Intent(Intent.ACTION_DOCK_EVENT);
+        dockIntent.putExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_DESK);
+        receiver.onReceive(mContext, dockIntent);
+        mTestableLooper.processAllMessages();
+        assertEquals(QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_screen_saver),
+                dockedTile.getState().icon);
+
+        dockIntent.putExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
+        receiver.onReceive(mContext, dockIntent);
+        mTestableLooper.processAllMessages();
+        assertEquals(QSTileImpl.ResourceIcon.get(R.drawable.ic_qs_screen_saver_undocked),
+                dockedTile.getState().icon);
     }
 
     private void setScreensaverEnabled(boolean enabled) {
