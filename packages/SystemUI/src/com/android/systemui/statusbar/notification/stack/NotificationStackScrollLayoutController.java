@@ -1197,6 +1197,10 @@ public class NotificationStackScrollLayoutController {
         mView.setUnlockHintRunning(running);
     }
 
+    public void setPanelFlinging(boolean flinging) {
+        mView.setPanelFlinging(flinging);
+    }
+
     public boolean isFooterViewNotGone() {
         return mView.isFooterViewNotGone();
     }
