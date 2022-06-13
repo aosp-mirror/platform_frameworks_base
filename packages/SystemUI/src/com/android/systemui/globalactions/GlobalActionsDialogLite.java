@@ -99,6 +99,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -110,6 +111,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -153,6 +155,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     public static final String SYSTEM_DIALOG_REASON_DREAM = "dream";
 
     private static final String TAG = "GlobalActionsDialogLite";
+
+    private static final String INTERACTION_JANK_TAG = "global_actions";
 
     private static final boolean SHOW_SILENT_TOGGLE = true;
 
@@ -499,7 +503,9 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mDialog.getWindow().addFlags(FLAG_ALT_FOCUSABLE_IM);
 
         if (view != null) {
-            mDialogLaunchAnimator.showFromView(mDialog, view);
+            mDialogLaunchAnimator.showFromView(mDialog, view,
+                    new DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                            INTERACTION_JANK_TAG));
         } else {
             mDialog.show();
         }
