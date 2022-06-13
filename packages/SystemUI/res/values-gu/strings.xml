@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"કૅમેરા"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ફોન"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"વૉલેટ"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR કોડ સ્કૅનર"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"અનલૉક કરો"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ડિવાઇસ લૉક કરેલું છે"</string>
@@ -205,8 +205,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"\'સેન્સર બંધ છે\'ની સુવિધા સક્રિય છે"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"બધા સૂચનો સાફ કરો."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
-    <skip />
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{વધુ # નોટિફિકેશન અંદર છે.}one{વધુ # નોટિફિકેશન અંદર છે.}other{વધુ # નોટિફિકેશન અંદર છે.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"સ્ક્રીન લેન્ડસ્કેપ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"સ્ક્રીન પોટ્રેટ ઓરિએન્ટેશનમાં લૉક કરેલ છે."</string>
     <string name="dessert_case" msgid="9104973640704357717">"ડેઝર્ટ કેસ"</string>
@@ -254,8 +253,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"હૉટસ્પૉટ"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"ચાલુ કરી રહ્યાં છીએ…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"ડેટા સેવર ચાલુ છે"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
-    <skip />
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# ડિવાઇસ}one{# ડિવાઇસ}other{# ડિવાઇસ}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"ફ્લૅશલાઇટ"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"કૅમેરાનો ઉપયોગ થાય છે"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"મોબાઇલ ડેટા"</string>
@@ -352,8 +350,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"તમે અતિથિ મોડમાં છો"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"કોઈ નવા વપરાશકર્તાને ઉમેરવાથી અતિથિ મોડમાંથી નીકળી જવાશે તેમજ હાલના અતિથિ સત્રમાંથી તમામ ઍપ અને ડેટા ડિલીટ થઈ જશે."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"વપરાશકર્તા સંખ્યાની મર્યાદા"</string>
-    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
-    <skip />
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{માત્ર એક જ વપરાશકર્તા બનાવી શકાય છે.}one{તમે વધુમાં વધુ # વપરાશકર્તા ઉમેરી શકો છો.}other{તમે વધુમાં વધુ # વપરાશકર્તા ઉમેરી શકો છો.}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"વપરાશકર્તાને દૂર કરીએ?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"આ વપરાશકર્તાની તમામ ઍપ્લિકેશનો અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"કાઢી નાખો"</string>
@@ -466,7 +463,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ડેમો મોડ બતાવો"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ઇથરનેટ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"અલાર્મ"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"વૉલેટ"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"તમારા ફોન વડે વધુ ઝડપી તેમજ સુરક્ષિત ખરીદીઓ કરવાની રીત સેટઅપ કરી લો"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"બધું બતાવો"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"ખોલવા માટે ટૅપ કરો"</string>
@@ -539,10 +536,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"મને યાદ કરાવો"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"છેલ્લો ફેરફાર રદ કરો"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> માટે સ્નૂઝ કરો"</string>
-    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
-    <skip />
-    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
-    <skip />
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# કલાક}=2{# કલાક}one{# કલાક}other{# કલાક}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# મિનિટ}one{# મિનિટ}other{# મિનિટ}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"બૅટરી સેવર"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"બટન <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
@@ -766,8 +761,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"ટૉગલ કરો"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ડિવાઇસનાં નિયંત્રણો"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"નિયંત્રણો ઉમેરવા માટે ઍપ પસંદ કરો"</string>
-    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
-    <skip />
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# નિયંત્રણ ઉમેર્યું.}one{# નિયંત્રણ ઉમેર્યું.}other{# નિયંત્રણ ઉમેર્યા.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"કાઢી નાખ્યું"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"મનપસંદમાં ઉમેર્યું"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"મનપસંદમાં ઉમેર્યું, સ્થાન <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -924,12 +918,10 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ટાઇલ ઉમેરો"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ટાઇલ ઉમેરશો નહીં"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"વપરાશકર્તા પસંદ કરો"</string>
-    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
-    <skip />
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# ઍપ સક્રિય છે}one{# ઍપ સક્રિય છે}other{# ઍપ સક્રિય છે}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"નવી માહિતી"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"સક્રિય ઍપ"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"જ્યારે તમે આ ઍપનો ઉપયોગ ન કરતા હો, ત્યારે પણ તે સક્રિય અને ચાલતી હોય છે. આનાથી તેની કાર્યક્ષમતામાં સુધારો થાય છે, પરંતુ બૅટરીની આવરદાને અસર પણ થઈ શકે છે."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"રોકો"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"બંધ કરેલી છે"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"થઈ ગયું"</string>
@@ -943,14 +935,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"ટેક્સ્ટ કૉપિ કરી"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"છબી કૉપિ કરી"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"કન્ટેન્ટ કૉપિ કર્યું"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"ક્લિપબોર્ડ એડિટર"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"ક્લિપબોર્ડ"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"છબીનો પ્રીવ્યૂ"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"ફેરફાર કરો"</string>
     <string name="add" msgid="81036585205287996">"ઉમેરો"</string>
     <string name="manage_users" msgid="1823875311934643849">"વપરાશકર્તાઓને મેનેજ કરો"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"આ નોટિફિકેશન તેને સ્પ્લિટસ્ક્રીનમાં ખેંચવાની સુવિધાને સપોર્ટ કરતું નથી."</string>
