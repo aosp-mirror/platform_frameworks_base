@@ -43,6 +43,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 import android.view.DisplayInfo;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
@@ -153,7 +154,10 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayPolicy.removeWindowLw(mStatusBarWindow);  // Removes the existing one.
 
         WindowState win = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
-        win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_TOP_GESTURES};
+        win.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_STATUS_BAR),
+                new InsetsFrameProvider(ITYPE_TOP_GESTURES)
+        };
         win.getFrame().set(0, 0, 500, 100);
 
         addWindow(win);
@@ -182,7 +186,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void addingWindow_InWindowTypeWithPredefinedInsets() {
         mDisplayPolicy.removeWindowLw(mStatusBarWindow);  // Removes the existing one.
         WindowState win = createWindow(null, TYPE_STATUS_BAR, "StatusBar");
-        win.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR};
+        win.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_STATUS_BAR)
+        };
         win.getFrame().set(0, 0, 500, 100);
 
         addWindow(win);
@@ -199,12 +205,19 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void addingWindow_throwsException_WithMultipleInsetTypes() {
         WindowState win1 = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
-        win1.mAttrs.providesInsetsTypes = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        win1.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_STATUS_BAR),
+                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR)
+        };
 
         expectThrows(IllegalArgumentException.class, () -> addWindow(win1));
 
         WindowState win2 = createWindow(null, TYPE_STATUS_BAR_SUB_PANEL, "StatusBarSubPanel");
-        win2.mAttrs.providesInsetsTypes = new int[]{ITYPE_CLIMATE_BAR, ITYPE_EXTRA_NAVIGATION_BAR};
+
+        win2.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_CLIMATE_BAR),
+                new InsetsFrameProvider(ITYPE_EXTRA_NAVIGATION_BAR)
+        };
 
         expectThrows(IllegalArgumentException.class, () -> addWindow(win2));
     }
