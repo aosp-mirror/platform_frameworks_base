@@ -104,24 +104,15 @@ public final class SizeConfigurationBuckets implements Parcelable {
     /**
      * Get the changes between two configurations but don't count changes in sizes if they don't
      * cross boundaries that are important to the app.
-     *
-     * This is a static helper to deal with null `buckets`. When no buckets have been specified,
-     * this actually filters out all 3 size-configs. This is legacy behavior.
      */
     public static int filterDiff(int diff, @NonNull Configuration oldConfig,
             @NonNull Configuration newConfig, @Nullable SizeConfigurationBuckets buckets) {
+        if (buckets == null) {
+            return diff;
+        }
+
         final boolean nonSizeLayoutFieldsUnchanged =
                 areNonSizeLayoutFieldsUnchanged(oldConfig.screenLayout, newConfig.screenLayout);
-        if (buckets == null) {
-            // Only unflip CONFIG_SCREEN_LAYOUT if non-size-related  attributes of screen layout do
-            // not change.
-            if (nonSizeLayoutFieldsUnchanged) {
-                return diff & ~(CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE
-                        | CONFIG_SCREEN_LAYOUT);
-            } else {
-                return diff & ~(CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE);
-            }
-        }
         if ((diff & CONFIG_SCREEN_SIZE) != 0) {
             final boolean crosses = buckets.crossesHorizontalSizeThreshold(oldConfig.screenWidthDp,
                     newConfig.screenWidthDp)
