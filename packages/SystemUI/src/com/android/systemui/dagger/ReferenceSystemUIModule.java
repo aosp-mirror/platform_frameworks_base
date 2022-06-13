@@ -35,6 +35,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.media.dagger.MediaModule;
+import com.android.systemui.navigationbar.gestural.GestureModule;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
@@ -94,6 +95,7 @@ import dagger.Provides;
  * SystemUI code that variants of SystemUI _must_ include to function correctly.
  */
 @Module(includes = {
+        GestureModule.class,
         MediaModule.class,
         PowerModule.class,
         QSModule.class,
