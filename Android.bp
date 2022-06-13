@@ -325,6 +325,7 @@ java_defaults {
         "soundtrigger_middleware-aidl-java",
         "modules-utils-build",
         "modules-utils-preconditions",
+        "modules-utils-statemachine",
         "modules-utils-synchronous-result-receiver",
         "modules-utils-os",
         "modules-utils-uieventlogger-interface",
