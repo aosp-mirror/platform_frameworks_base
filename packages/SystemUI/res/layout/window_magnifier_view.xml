@@ -16,33 +16,25 @@
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:screenReaderFocusable="true">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
     <View
+        android:id="@+id/magnification_inner_border"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/magnification_outer_border_margin"
-        android:importantForAccessibility="no"
-        android:background="@android:color/black"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/magnification_inner_border_margin"
-        android:importantForAccessibility="no"
         android:background="@color/magnification_border_color"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="noHideDescendants">
+        android:layout_height="match_parent">
 
         <View
             android:id="@+id/left_handle"
             android:layout_width="@dimen/magnification_border_drag_size"
             android:layout_height="match_parent"
-            android:layout_above="@+id/bottom_handle"/>
+            android:layout_alignParentStart="true"/>
 
         <View
             android:id="@+id/top_handle"
@@ -54,7 +46,6 @@
             android:id="@+id/right_handle"
             android:layout_width="@dimen/magnification_border_drag_size"
             android:layout_height="match_parent"
-            android:layout_above="@+id/bottom_handle"
             android:layout_alignParentEnd="true"/>
 
         <View
@@ -68,7 +59,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/magnification_mirror_surface_margin"/>
-
     </RelativeLayout>
 
     <ImageView
@@ -79,7 +69,17 @@
         android:layout_gravity="right|bottom"
         android:padding="@dimen/magnifier_drag_handle_padding"
         android:scaleType="center"
-        android:importantForAccessibility="no"
         android:src="@drawable/ic_move_magnification"/>
 
+    <ImageView
+        android:id="@+id/close_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="30dp"
+        android:padding="@dimen/magnification_switch_button_padding"
+        android:layout_gravity="right|bottom"
+        android:scaleType="center"
+        android:visibility="gone"
+        android:background="@drawable/accessibility_magnifier_btn_bg"
+        android:src="@drawable/ic_magnification_menu_close" />
 </FrameLayout>
