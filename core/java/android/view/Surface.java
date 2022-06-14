@@ -228,6 +228,19 @@ public class Surface implements Parcelable {
      */
     public static final int FRAME_RATE_COMPATIBILITY_EXACT = 100;
 
+    // From window.h. Keep these in sync.
+    /**
+     * This surface is ignored while choosing the refresh rate.
+     * @hide
+     */
+    public static final int FRAME_RATE_COMPATIBILITY_NO_VOTE = 101;
+
+    // From window.h. Keep these in sync.
+    /**
+     * This surface will vote for the minimum refresh rate.
+     * @hide
+     */
+    public static final int FRAME_RATE_COMPATIBILITY_MIN = 102;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

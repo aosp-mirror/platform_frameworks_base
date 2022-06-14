@@ -1018,6 +1018,15 @@ static void nativeSetFrameRate(JNIEnv* env, jclass clazz, jlong transactionObj, 
                               static_cast<int8_t>(changeFrameRateStrategy));
 }
 
+static void nativeSetDefaultFrameRateCompatibility(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                                   jlong nativeObject, jint compatibility) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    const auto ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+
+    transaction->setDefaultFrameRateCompatibility(ctrl, static_cast<int8_t>(compatibility));
+}
+
 static void nativeSetFixedTransformHint(JNIEnv* env, jclass clazz, jlong transactionObj,
                                         jlong nativeObject, jint transformHint) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -2157,6 +2166,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetShadowRadius },
     {"nativeSetFrameRate", "(JJFII)V",
             (void*)nativeSetFrameRate },
+    {"nativeSetDefaultFrameRateCompatibility", "(JJI)V",
+            (void*)nativeSetDefaultFrameRateCompatibility},
     {"nativeGetPhysicalDisplayIds", "()[J",
             (void*)nativeGetPhysicalDisplayIds },
     {"nativeGetPrimaryPhysicalDisplayId", "()J",
