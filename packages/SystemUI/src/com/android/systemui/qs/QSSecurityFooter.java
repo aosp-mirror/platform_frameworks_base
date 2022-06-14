@@ -80,9 +80,11 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -107,6 +109,8 @@ class QSSecurityFooter extends ViewController<View>
     protected static final String TAG = "QSSecurityFooter";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean DEBUG_FORCE_VISIBLE = false;
+
+    private static final String INTERACTION_JANK_TAG = "managed_device_info";
 
     private final TextView mFooterText;
     private final ImageView mPrimaryFooterIcon;
@@ -557,7 +561,8 @@ class QSSecurityFooter extends ViewController<View>
 
                 mDialog.setView(view);
                 if (mView.isAggregatedVisible()) {
-                    mDialogLaunchAnimator.showFromView(mDialog, mView);
+                    mDialogLaunchAnimator.showFromView(mDialog, mView, new DialogCuj(
+                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG));
                 } else {
                     mDialog.show();
                 }

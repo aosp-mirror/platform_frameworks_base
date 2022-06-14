@@ -2137,7 +2137,7 @@
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ବ୍ୟକ୍ତିଗତ"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ୱାର୍କ"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ବ୍ୟକ୍ତିଗତ ଭ୍ୟୁ"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଭ୍ୟୁ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ୱାର୍କ ଭ୍ୟୁ"</string>
     <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"ଆପଣଙ୍କ IT ଆଡମିନଙ୍କ ଦ୍ୱାରା ବ୍ଲକ୍ କରାଯାଇଛି"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"ଏହି ବିଷୟବସ୍ତୁ ୱାର୍କ ଆପଗୁଡ଼ିକରେ ସେୟାର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ଏହି ବିଷୟବସ୍ତୁ ୱାର୍କ ଆପଗୁଡ଼ିକରେ ଖୋଲାଯାଇପାରିବ ନାହିଁ"</string>

@@ -27,8 +27,10 @@ import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -52,6 +54,8 @@ import javax.inject.Inject;
 public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         implements RecordingController.RecordingStateChangeCallback {
     private static final String TAG = "ScreenRecordTile";
+    private static final String INTERACTION_JANK_TAG = "screen_record";
+
     private final RecordingController mController;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final KeyguardStateController mKeyguardStateController;
@@ -165,7 +169,8 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
 
         ActivityStarter.OnDismissAction dismissAction = () -> {
             if (shouldAnimateFromView) {
-                mDialogLaunchAnimator.showFromView(dialog, view);
+                mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
+                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG));
             } else {
                 dialog.show();
             }

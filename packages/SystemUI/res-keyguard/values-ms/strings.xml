@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Anda telah tersilap taip kata laluan sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%1$d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%2$d</xliff:g> saat."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Kod PIN SIM salah. Anda mesti menghubungi pembawa anda untuk membuka kunci peranti."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Kod PIN SIM tidak betul, anda mempunyai # percubaan lagi sebelum perlu menghubungi pembawa anda untuk membuka kunci peranti.}other{Kod PIN SIM tidak betul, anda mempunyai # percubaan lagi. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM tidak boleh digunakan. Hubungi pembawa anda."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Kod PUK SIM tidak betul, anda mempunyai # percubaan lagi sebelum SIM tidak boleh digunakan secara kekal.}other{Kod PUK SIM tidak betul, anda mempunyai # percubaan lagi sebelum SIM tidak boleh digunakan secara kekal.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Pengendalian PIN SIM gagal!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Pengendalian PUK SIM gagal!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Tukar kaedah masukan"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Peranti dikunci oleh pentadbir"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Peranti telah dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Hidupkan kamera dalam Tetapan untuk Buka Kunci Wajah"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Masukkan PIN SIM. Anda mempunyai # percubaan lagi sebelum perlu menghubungi pembawa anda untuk membuka kunci peranti.}other{Masukkan PIN SIM. Anda mempunyai # percubaan lagi.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Anda mempunyai # percubaan lagi sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.}other{Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Anda mempunyai # percubaan lagi sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Lalai"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Gelembung"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>

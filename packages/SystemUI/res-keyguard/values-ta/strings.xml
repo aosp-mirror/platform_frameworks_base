@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"உங்கள் கடவுச்சொல்லை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக உள்ளிட்டுவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"அன்லாக் பேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"சிம்மின் பின் குறியீடு தவறானது. இனி சாதனத்தை அன்லாக் செய்ய, உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ள வேண்டும்."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{சிம் பின் குறியீடு தவறானது. உங்கள் சாதனத்தை அன்லாக் செய்ய, உங்கள் மொபைல் நிறுவனத்தைத் தொடர்புகொள்வதற்கு முன்பு மேலும் # முறை முயலலாம்.}other{சிம் பின் குறியீடு தவறானது. இன்னும் # முறை மட்டுமே முயலலாம். }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"பயன்படுத்த முடியாத சிம். உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ளவும்."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{சிம் PUK குறியீடு தவறானது. சிம் நிரந்தரமாகப் பயன்படுத்த முடியாமல் போவதற்கு முன்பு நீங்கள் # முறை முயலலாம்.}other{சிம் PUK குறியீடு தவறானது. சிம் நிரந்தரமாகப் பயன்படுத்த முடியாமல் போவதற்கு முன்பு நீங்கள் # முறை முயலலாம்.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"சிம் பின் செயல்பாடு தோல்வியடைந்தது!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"சிம் PUK செயல்பாடு தோல்வியடைந்தது!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"உள்ளீட்டு முறையை மாற்றும்"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"நிர்வாகி சாதனத்தைப் பூட்டியுள்ளார்"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"பயனர் சாதனத்தைப் பூட்டியுள்ளார்"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"அடையாளங்காணபடவில்லை"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"முகம் காட்டித் திறத்தல் அம்சத்தைப் பயன்படுத்த, அமைப்புகளில் கேமரா அணுகலை இயக்கவும்"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{சிம் பின்னை உள்ளிடவும். உங்கள் சாதனத்தை அன்லாக் செய்ய, உங்கள் மொபைல் நிறுவனத்தைத் தொடர்புகொள்வதற்கு முன்பு மேலும் # முறை முயலலாம்.}other{சிம் பின்னை உள்ளிடவும். இன்னும் # முறை மட்டுமே முயல முடியும்.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{சிம் இப்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு PUK குறியீட்டை உள்ளிடவும். நீங்கள் # முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.}other{சிம் இப்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு PUK குறியீட்டை உள்ளிடவும். நீங்கள் # முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"இயல்பு"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"பபிள்"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"அனலாக்"</string>
