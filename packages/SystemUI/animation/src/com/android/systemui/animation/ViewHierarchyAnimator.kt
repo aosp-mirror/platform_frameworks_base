@@ -41,12 +41,13 @@ class ViewHierarchyAnimator {
         private val DEFAULT_REMOVAL_INTERPOLATOR = Interpolators.STANDARD_ACCELERATE
 
         /** The properties used to animate the view bounds. */
-        private val PROPERTIES = mapOf(
-            Bound.LEFT to createViewProperty(Bound.LEFT),
-            Bound.TOP to createViewProperty(Bound.TOP),
-            Bound.RIGHT to createViewProperty(Bound.RIGHT),
-            Bound.BOTTOM to createViewProperty(Bound.BOTTOM)
-        )
+        private val PROPERTIES =
+            mapOf(
+                Bound.LEFT to createViewProperty(Bound.LEFT),
+                Bound.TOP to createViewProperty(Bound.TOP),
+                Bound.RIGHT to createViewProperty(Bound.RIGHT),
+                Bound.BOTTOM to createViewProperty(Bound.BOTTOM)
+            )
 
         private fun createViewProperty(bound: Bound): IntProperty<View> {
             return object : IntProperty<View>(bound.label) {
@@ -103,7 +104,8 @@ class ViewHierarchyAnimator {
             duration: Long,
             ephemeral: Boolean
         ): Boolean {
-            if (!isVisible(
+            if (
+                !isVisible(
                     rootView.visibility,
                     rootView.left,
                     rootView.top,
@@ -131,11 +133,7 @@ class ViewHierarchyAnimator {
             duration: Long,
             ephemeral: Boolean
         ): View.OnLayoutChangeListener {
-            return createListener(
-                interpolator,
-                duration,
-                ephemeral
-            )
+            return createListener(interpolator, duration, ephemeral)
         }
 
         /**
@@ -171,7 +169,8 @@ class ViewHierarchyAnimator {
             duration: Long = DEFAULT_DURATION,
             includeMargins: Boolean = false
         ): Boolean {
-            if (isVisible(
+            if (
+                isVisible(
                     rootView.visibility,
                     rootView.left,
                     rootView.top,
@@ -182,9 +181,13 @@ class ViewHierarchyAnimator {
                 return false
             }
 
-            val listener = createAdditionListener(
-                origin, interpolator, duration, ignorePreviousValues = !includeMargins
-            )
+            val listener =
+                createAdditionListener(
+                    origin,
+                    interpolator,
+                    duration,
+                    ignorePreviousValues = !includeMargins
+                )
             addListener(rootView, listener, recursive = true)
             return true
         }
@@ -257,24 +260,26 @@ class ViewHierarchyAnimator {
                         return
                     }
 
-                    val startValues = processStartValues(
-                        origin,
-                        left,
-                        top,
-                        right,
-                        bottom,
-                        startLeft,
-                        startTop,
-                        startRight,
-                        startBottom,
-                        ignorePreviousValues
-                    )
-                    val endValues = mapOf(
-                        Bound.LEFT to left,
-                        Bound.TOP to top,
-                        Bound.RIGHT to right,
-                        Bound.BOTTOM to bottom
-                    )
+                    val startValues =
+                        processStartValues(
+                            origin,
+                            left,
+                            top,
+                            right,
+                            bottom,
+                            startLeft,
+                            startTop,
+                            startRight,
+                            startBottom,
+                            ignorePreviousValues
+                        )
+                    val endValues =
+                        mapOf(
+                            Bound.LEFT to left,
+                            Bound.TOP to top,
+                            Bound.RIGHT to right,
+                            Bound.BOTTOM to bottom
+                        )
 
                     val boundsToAnimate = mutableSetOf<Bound>()
                     if (startValues.getValue(Bound.LEFT) != left) boundsToAnimate.add(Bound.LEFT)
@@ -313,7 +318,8 @@ class ViewHierarchyAnimator {
             interpolator: Interpolator = DEFAULT_REMOVAL_INTERPOLATOR,
             duration: Long = DEFAULT_DURATION
         ): Boolean {
-            if (!isVisible(
+            if (
+                !isVisible(
                     rootView.visibility,
                     rootView.left,
                     rootView.top,
@@ -327,11 +333,7 @@ class ViewHierarchyAnimator {
             val parent = rootView.parent as ViewGroup
 
             // Ensure that rootView's siblings animate nicely around the removal.
-            val listener = createUpdateListener(
-                interpolator,
-                duration,
-                ephemeral = true
-            )
+            val listener = createUpdateListener(interpolator, duration, ephemeral = true)
             for (i in 0 until parent.childCount) {
                 val child = parent.getChildAt(i)
                 if (child == rootView) continue
@@ -346,19 +348,21 @@ class ViewHierarchyAnimator {
             // them manually during the animation.
             parent.overlay.add(rootView)
 
-            val startValues = mapOf(
-                Bound.LEFT to rootView.left,
-                Bound.TOP to rootView.top,
-                Bound.RIGHT to rootView.right,
-                Bound.BOTTOM to rootView.bottom
-            )
-            val endValues = processEndValuesForRemoval(
-                destination,
-                rootView.left,
-                rootView.top,
-                rootView.right,
-                rootView.bottom
-            )
+            val startValues =
+                mapOf(
+                    Bound.LEFT to rootView.left,
+                    Bound.TOP to rootView.top,
+                    Bound.RIGHT to rootView.right,
+                    Bound.BOTTOM to rootView.bottom
+                )
+            val endValues =
+                processEndValuesForRemoval(
+                    destination,
+                    rootView.left,
+                    rootView.top,
+                    rootView.right,
+                    rootView.bottom
+                )
 
             val boundsToAnimate = mutableSetOf<Bound>()
             if (rootView.left != endValues.getValue(Bound.LEFT)) boundsToAnimate.add(Bound.LEFT)
@@ -400,20 +404,24 @@ class ViewHierarchyAnimator {
                             (animation.animatedValue as Float) * startAlphas[i]
                     }
                 }
-                animator.addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        rootView.animate()
-                            .alpha(0f)
-                            .setInterpolator(Interpolators.ALPHA_OUT)
-                            .setDuration(duration / 2)
-                            .withEndAction { parent.overlay.remove(rootView) }
-                            .start()
+                animator.addListener(
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            rootView
+                                .animate()
+                                .alpha(0f)
+                                .setInterpolator(Interpolators.ALPHA_OUT)
+                                .setDuration(duration / 2)
+                                .withEndAction { parent.overlay.remove(rootView) }
+                                .start()
+                        }
                     }
-                })
+                )
                 animator.start()
             } else {
                 // Fade out the view during the second half of the removal.
-                rootView.animate()
+                rootView
+                    .animate()
                     .alpha(0f)
                     .setInterpolator(Interpolators.ALPHA_OUT)
                     .setDuration(duration / 2)
@@ -440,21 +448,23 @@ class ViewHierarchyAnimator {
         ) {
             for (i in 0 until rootView.childCount) {
                 val child = rootView.getChildAt(i)
-                val childStartValues = mapOf(
-                    Bound.LEFT to child.left,
-                    Bound.TOP to child.top,
-                    Bound.RIGHT to child.right,
-                    Bound.BOTTOM to child.bottom
-                )
-                val childEndValues = processChildEndValuesForRemoval(
-                    destination,
-                    child.left,
-                    child.top,
-                    child.right,
-                    child.bottom,
-                    endValues.getValue(Bound.RIGHT) - endValues.getValue(Bound.LEFT),
-                    endValues.getValue(Bound.BOTTOM) - endValues.getValue(Bound.TOP)
-                )
+                val childStartValues =
+                    mapOf(
+                        Bound.LEFT to child.left,
+                        Bound.TOP to child.top,
+                        Bound.RIGHT to child.right,
+                        Bound.BOTTOM to child.bottom
+                    )
+                val childEndValues =
+                    processChildEndValuesForRemoval(
+                        destination,
+                        child.left,
+                        child.top,
+                        child.right,
+                        child.bottom,
+                        endValues.getValue(Bound.RIGHT) - endValues.getValue(Bound.LEFT),
+                        endValues.getValue(Bound.BOTTOM) - endValues.getValue(Bound.TOP)
+                    )
 
                 val boundsToAnimate = mutableSetOf<Bound>()
                 if (child.left != endValues.getValue(Bound.LEFT)) boundsToAnimate.add(Bound.LEFT)
@@ -500,6 +510,7 @@ class ViewHierarchyAnimator {
          * not newly introduced margins are included.
          *
          * Base case
+         * ```
          *     1) origin=TOP
          *         x---------x    x---------x    x---------x    x---------x    x---------x
          *                        x---------x    |         |    |         |    |         |
@@ -518,11 +529,11 @@ class ViewHierarchyAnimator {
          *              x      ->    x---x    ->   |     |   ->  |       |  -> |         |
          *                                         x-----x       x-------x     |         |
          *                                                                     x---------x
-         *
+         * ```
          * In case the start and end values differ in the direction of the origin, and
          * [ignorePreviousValues] is false, the previous values are used and a translation is
          * included in addition to the view expansion.
-         *
+         * ```
          *     origin=TOP_LEFT - (0,0,0,0) -> (30,30,70,70)
          *         x
          *                         x--x
@@ -531,6 +542,7 @@ class ViewHierarchyAnimator {
          *                                         x----x          |      |
          *                                                         |      |
          *                                                         x------x
+         * ```
          */
         private fun processStartValues(
             origin: Hotspot?,
@@ -555,42 +567,54 @@ class ViewHierarchyAnimator {
             var bottom = startBottom
 
             if (origin != null) {
-                left = when (origin) {
-                    Hotspot.CENTER -> (newLeft + newRight) / 2
-                    Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT -> min(startLeft, newLeft)
-                    Hotspot.TOP, Hotspot.BOTTOM -> newLeft
-                    Hotspot.TOP_RIGHT, Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT -> max(
-                        startRight,
-                        newRight
-                    )
-                }
-                top = when (origin) {
-                    Hotspot.CENTER -> (newTop + newBottom) / 2
-                    Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT -> min(startTop, newTop)
-                    Hotspot.LEFT, Hotspot.RIGHT -> newTop
-                    Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT -> max(
-                        startBottom,
-                        newBottom
-                    )
-                }
-                right = when (origin) {
-                    Hotspot.CENTER -> (newLeft + newRight) / 2
-                    Hotspot.TOP_RIGHT, Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT -> max(
-                        startRight,
-                        newRight
-                    )
-                    Hotspot.TOP, Hotspot.BOTTOM -> newRight
-                    Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT -> min(startLeft, newLeft)
-                }
-                bottom = when (origin) {
-                    Hotspot.CENTER -> (newTop + newBottom) / 2
-                    Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT -> max(
-                        startBottom,
-                        newBottom
-                    )
-                    Hotspot.LEFT, Hotspot.RIGHT -> newBottom
-                    Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT -> min(startTop, newTop)
-                }
+                left =
+                    when (origin) {
+                        Hotspot.CENTER -> (newLeft + newRight) / 2
+                        Hotspot.BOTTOM_LEFT,
+                        Hotspot.LEFT,
+                        Hotspot.TOP_LEFT -> min(startLeft, newLeft)
+                        Hotspot.TOP,
+                        Hotspot.BOTTOM -> newLeft
+                        Hotspot.TOP_RIGHT,
+                        Hotspot.RIGHT,
+                        Hotspot.BOTTOM_RIGHT -> max(startRight, newRight)
+                    }
+                top =
+                    when (origin) {
+                        Hotspot.CENTER -> (newTop + newBottom) / 2
+                        Hotspot.TOP_LEFT,
+                        Hotspot.TOP,
+                        Hotspot.TOP_RIGHT -> min(startTop, newTop)
+                        Hotspot.LEFT,
+                        Hotspot.RIGHT -> newTop
+                        Hotspot.BOTTOM_RIGHT,
+                        Hotspot.BOTTOM,
+                        Hotspot.BOTTOM_LEFT -> max(startBottom, newBottom)
+                    }
+                right =
+                    when (origin) {
+                        Hotspot.CENTER -> (newLeft + newRight) / 2
+                        Hotspot.TOP_RIGHT,
+                        Hotspot.RIGHT,
+                        Hotspot.BOTTOM_RIGHT -> max(startRight, newRight)
+                        Hotspot.TOP,
+                        Hotspot.BOTTOM -> newRight
+                        Hotspot.BOTTOM_LEFT,
+                        Hotspot.LEFT,
+                        Hotspot.TOP_LEFT -> min(startLeft, newLeft)
+                    }
+                bottom =
+                    when (origin) {
+                        Hotspot.CENTER -> (newTop + newBottom) / 2
+                        Hotspot.BOTTOM_RIGHT,
+                        Hotspot.BOTTOM,
+                        Hotspot.BOTTOM_LEFT -> max(startBottom, newBottom)
+                        Hotspot.LEFT,
+                        Hotspot.RIGHT -> newBottom
+                        Hotspot.TOP_LEFT,
+                        Hotspot.TOP,
+                        Hotspot.TOP_RIGHT -> min(startTop, newTop)
+                    }
             }
 
             return mapOf(
@@ -606,6 +630,7 @@ class ViewHierarchyAnimator {
          * view's starting bounds.
          *
          * Examples:
+         * ```
          *     1) destination=TOP
          *         x---------x    x---------x    x---------x    x---------x    x---------x
          *         |         |    |         |    |         |    x---------x
@@ -624,6 +649,7 @@ class ViewHierarchyAnimator {
          *         |         | ->  |       |  ->   |     |   ->    x---x    ->      x
          *         |         |     x-------x       x-----x
          *         x---------x
+         * ```
          */
         private fun processEndValuesForRemoval(
             destination: Hotspot,
@@ -632,32 +658,54 @@ class ViewHierarchyAnimator {
             right: Int,
             bottom: Int
         ): Map<Bound, Int> {
-            val endLeft = when (destination) {
-                Hotspot.CENTER -> (left + right) / 2
-                Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT, Hotspot.TOP ->
-                    left
-                Hotspot.TOP_RIGHT, Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT -> right
-            }
-            val endTop = when (destination) {
-                Hotspot.CENTER -> (top + bottom) / 2
-                Hotspot.LEFT, Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT, Hotspot.RIGHT ->
-                    top
-                Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT -> bottom
-            }
-            val endRight = when (destination) {
-                Hotspot.CENTER -> (left + right) / 2
-                Hotspot.TOP, Hotspot.TOP_RIGHT, Hotspot.RIGHT,
-                Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM ->
-                    right
-                Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT -> left
-            }
-            val endBottom = when (destination) {
-                Hotspot.CENTER -> (top + bottom) / 2
-                Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM,
-                Hotspot.BOTTOM_LEFT, Hotspot.LEFT ->
-                    bottom
-                Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT -> top
-            }
+            val endLeft =
+                when (destination) {
+                    Hotspot.CENTER -> (left + right) / 2
+                    Hotspot.BOTTOM,
+                    Hotspot.BOTTOM_LEFT,
+                    Hotspot.LEFT,
+                    Hotspot.TOP_LEFT,
+                    Hotspot.TOP -> left
+                    Hotspot.TOP_RIGHT,
+                    Hotspot.RIGHT,
+                    Hotspot.BOTTOM_RIGHT -> right
+                }
+            val endTop =
+                when (destination) {
+                    Hotspot.CENTER -> (top + bottom) / 2
+                    Hotspot.LEFT,
+                    Hotspot.TOP_LEFT,
+                    Hotspot.TOP,
+                    Hotspot.TOP_RIGHT,
+                    Hotspot.RIGHT -> top
+                    Hotspot.BOTTOM_RIGHT,
+                    Hotspot.BOTTOM,
+                    Hotspot.BOTTOM_LEFT -> bottom
+                }
+            val endRight =
+                when (destination) {
+                    Hotspot.CENTER -> (left + right) / 2
+                    Hotspot.TOP,
+                    Hotspot.TOP_RIGHT,
+                    Hotspot.RIGHT,
+                    Hotspot.BOTTOM_RIGHT,
+                    Hotspot.BOTTOM -> right
+                    Hotspot.BOTTOM_LEFT,
+                    Hotspot.LEFT,
+                    Hotspot.TOP_LEFT -> left
+                }
+            val endBottom =
+                when (destination) {
+                    Hotspot.CENTER -> (top + bottom) / 2
+                    Hotspot.RIGHT,
+                    Hotspot.BOTTOM_RIGHT,
+                    Hotspot.BOTTOM,
+                    Hotspot.BOTTOM_LEFT,
+                    Hotspot.LEFT -> bottom
+                    Hotspot.TOP_LEFT,
+                    Hotspot.TOP,
+                    Hotspot.TOP_RIGHT -> top
+                }
 
             return mapOf(
                 Bound.LEFT to endLeft,
@@ -675,6 +723,7 @@ class ViewHierarchyAnimator {
          * its center is at the [destination].
          *
          * Examples:
+         * ```
          *     1) destination=TOP
          *         The child maintains its left and right positions, but is shifted up so that its
          *         center is on the parent's end top edge.
@@ -682,6 +731,7 @@ class ViewHierarchyAnimator {
          *         The child shifts so that its center is on the parent's end bottom left corner.
          *     3) destination=CENTER
          *         The child shifts so that its own center is on the parent's end center.
+         * ```
          */
         private fun processChildEndValuesForRemoval(
             destination: Hotspot,
@@ -695,32 +745,54 @@ class ViewHierarchyAnimator {
             val halfWidth = (right - left) / 2
             val halfHeight = (bottom - top) / 2
 
-            val endLeft = when (destination) {
-                Hotspot.CENTER -> (parentWidth / 2) - halfWidth
-                Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT -> -halfWidth
-                Hotspot.TOP_RIGHT, Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT -> parentWidth - halfWidth
-                Hotspot.TOP, Hotspot.BOTTOM -> left
-            }
-            val endTop = when (destination) {
-                Hotspot.CENTER -> (parentHeight / 2) - halfHeight
-                Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT -> -halfHeight
-                Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT ->
-                    parentHeight - halfHeight
-                Hotspot.LEFT, Hotspot.RIGHT -> top
-            }
-            val endRight = when (destination) {
-                Hotspot.CENTER -> (parentWidth / 2) + halfWidth
-                Hotspot.TOP_RIGHT, Hotspot.RIGHT, Hotspot.BOTTOM_RIGHT -> parentWidth + halfWidth
-                Hotspot.BOTTOM_LEFT, Hotspot.LEFT, Hotspot.TOP_LEFT -> halfWidth
-                Hotspot.TOP, Hotspot.BOTTOM -> right
-            }
-            val endBottom = when (destination) {
-                Hotspot.CENTER -> (parentHeight / 2) + halfHeight
-                Hotspot.BOTTOM_RIGHT, Hotspot.BOTTOM, Hotspot.BOTTOM_LEFT ->
-                    parentHeight + halfHeight
-                Hotspot.TOP_LEFT, Hotspot.TOP, Hotspot.TOP_RIGHT -> halfHeight
-                Hotspot.LEFT, Hotspot.RIGHT -> bottom
-            }
+            val endLeft =
+                when (destination) {
+                    Hotspot.CENTER -> (parentWidth / 2) - halfWidth
+                    Hotspot.BOTTOM_LEFT,
+                    Hotspot.LEFT,
+                    Hotspot.TOP_LEFT -> -halfWidth
+                    Hotspot.TOP_RIGHT,
+                    Hotspot.RIGHT,
+                    Hotspot.BOTTOM_RIGHT -> parentWidth - halfWidth
+                    Hotspot.TOP,
+                    Hotspot.BOTTOM -> left
+                }
+            val endTop =
+                when (destination) {
+                    Hotspot.CENTER -> (parentHeight / 2) - halfHeight
+                    Hotspot.TOP_LEFT,
+                    Hotspot.TOP,
+                    Hotspot.TOP_RIGHT -> -halfHeight
+                    Hotspot.BOTTOM_RIGHT,
+                    Hotspot.BOTTOM,
+                    Hotspot.BOTTOM_LEFT -> parentHeight - halfHeight
+                    Hotspot.LEFT,
+                    Hotspot.RIGHT -> top
+                }
+            val endRight =
+                when (destination) {
+                    Hotspot.CENTER -> (parentWidth / 2) + halfWidth
+                    Hotspot.TOP_RIGHT,
+                    Hotspot.RIGHT,
+                    Hotspot.BOTTOM_RIGHT -> parentWidth + halfWidth
+                    Hotspot.BOTTOM_LEFT,
+                    Hotspot.LEFT,
+                    Hotspot.TOP_LEFT -> halfWidth
+                    Hotspot.TOP,
+                    Hotspot.BOTTOM -> right
+                }
+            val endBottom =
+                when (destination) {
+                    Hotspot.CENTER -> (parentHeight / 2) + halfHeight
+                    Hotspot.BOTTOM_RIGHT,
+                    Hotspot.BOTTOM,
+                    Hotspot.BOTTOM_LEFT -> parentHeight + halfHeight
+                    Hotspot.TOP_LEFT,
+                    Hotspot.TOP,
+                    Hotspot.TOP_RIGHT -> halfHeight
+                    Hotspot.LEFT,
+                    Hotspot.RIGHT -> bottom
+                }
 
             return mapOf(
                 Bound.LEFT to endLeft,
@@ -790,44 +862,49 @@ class ViewHierarchyAnimator {
             duration: Long,
             ephemeral: Boolean
         ) {
-            val propertyValuesHolders = buildList {
-                bounds.forEach { bound ->
-                    add(
-                        PropertyValuesHolder.ofInt(
-                            PROPERTIES[bound],
-                            startValues.getValue(bound),
-                            endValues.getValue(bound)
-                        )
-                    )
-                }
-            }.toTypedArray()
+            val propertyValuesHolders =
+                buildList {
+                        bounds.forEach { bound ->
+                            add(
+                                PropertyValuesHolder.ofInt(
+                                    PROPERTIES[bound],
+                                    startValues.getValue(bound),
+                                    endValues.getValue(bound)
+                                )
+                            )
+                        }
+                    }
+                    .toTypedArray()
 
             (view.getTag(R.id.tag_animator) as? ObjectAnimator)?.cancel()
 
             val animator = ObjectAnimator.ofPropertyValuesHolder(view, *propertyValuesHolders)
             animator.interpolator = interpolator
             animator.duration = duration
-            animator.addListener(object : AnimatorListenerAdapter() {
-                var cancelled = false
+            animator.addListener(
+                object : AnimatorListenerAdapter() {
+                    var cancelled = false
 
-                override fun onAnimationEnd(animation: Animator) {
-                    view.setTag(R.id.tag_animator, null /* tag */)
-                    bounds.forEach { view.setTag(it.overrideTag, null /* tag */) }
+                    override fun onAnimationEnd(animation: Animator) {
+                        view.setTag(R.id.tag_animator, null /* tag */)
+                        bounds.forEach { view.setTag(it.overrideTag, null /* tag */) }
 
-                    // When an animation is cancelled, a new one might be taking over. We shouldn't
-                    // unregister the listener yet.
-                    if (ephemeral && !cancelled) {
-                        // The duration is the same for the whole hierarchy, so it's safe to remove
-                        // the listener recursively. We do this because some descendant views might
-                        // not change bounds, and therefore not animate and leak the listener.
-                        recursivelyRemoveListener(view)
+                        // When an animation is cancelled, a new one might be taking over. We
+                        // shouldn't unregister the listener yet.
+                        if (ephemeral && !cancelled) {
+                            // The duration is the same for the whole hierarchy, so it's safe to
+                            // remove the listener recursively. We do this because some descendant
+                            // views might not change bounds, and therefore not animate and leak the
+                            // listener.
+                            recursivelyRemoveListener(view)
+                        }
+                    }
+
+                    override fun onAnimationCancel(animation: Animator?) {
+                        cancelled = true
                     }
                 }
-
-                override fun onAnimationCancel(animation: Animator?) {
-                    cancelled = true
-                }
-            })
+            )
 
             bounds.forEach { bound -> setBound(view, bound, startValues.getValue(bound)) }
 
@@ -838,7 +915,15 @@ class ViewHierarchyAnimator {
 
     /** An enum used to determine the origin of addition animations. */
     enum class Hotspot {
-        CENTER, LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT
+        CENTER,
+        LEFT,
+        TOP_LEFT,
+        TOP,
+        TOP_RIGHT,
+        RIGHT,
+        BOTTOM_RIGHT,
+        BOTTOM,
+        BOTTOM_LEFT
     }
 
     private enum class Bound(val label: String, val overrideTag: Int) {

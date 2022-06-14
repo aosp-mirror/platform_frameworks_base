@@ -731,7 +731,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
         mTestableLooper.processAllMessages();
 
-        verify(mDialogLaunchAnimator).showFromView(any(), eq(mRootView));
+        verify(mDialogLaunchAnimator).showFromView(any(), eq(mRootView), any());
     }
 
     @Test
@@ -768,7 +768,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         ArgumentCaptor<AlertDialog> dialogCaptor = ArgumentCaptor.forClass(AlertDialog.class);
 
         mTestableLooper.processAllMessages();
-        verify(mDialogLaunchAnimator).showFromView(dialogCaptor.capture(), any());
+        verify(mDialogLaunchAnimator).showFromView(dialogCaptor.capture(), any(), any());
 
         AlertDialog dialog = dialogCaptor.getValue();
         dialog.create();

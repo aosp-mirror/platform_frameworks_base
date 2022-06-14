@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal helytelenül adta meg a jelszót.\n\nPróbálja újra <xliff:g id="NUMBER_1">%2$d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"<xliff:g id="NUMBER_0">%1$d</xliff:g> alkalommal rosszul rajzolta le a feloldási mintát.\n\nPróbálja újra <xliff:g id="NUMBER_1">%2$d</xliff:g> másodperc múlva."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Helytelen PIN-kód a SIM-kártyához. Az eszköz feloldása érdekében, kérjük, vegye fel a kapcsolatot szolgáltatójával."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Helytelen PIN-kód a SIM-kártyához; még # próbálkozása van, mielőtt fel kell vennie a kapcsolatot szolgáltatójával az eszköz feloldásához.}other{Helytelen PIN-kód a SIM-kártyához; még # próbálkozása van. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"A SIM-kártya használhatatlan. Vegye fel a kapcsolatot szolgáltatójával."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Helytelen PUK-kód a SIM-kártyához. Még # próbálkozása maradt, mielőtt a SIM-kártya végleg használhatatlanná válik.}other{Helytelen PUK-kód a SIM-kártyához; még # próbálkozása van, mielőtt a SIM-kártya végleg használhatatlan lesz.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"A SIM-kártya PIN-művelete sikertelen!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"A SIM-kártya PUK-művelete sikertelen!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Beviteli módszer váltása"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"A rendszergazda zárolta az eszközt"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Az eszközt manuálisan lezárták"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Nem ismerhető fel"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Arcalapú feloldáshoz Hozzáférés a kamerához szükséges"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Adja meg a SIM-kártya PIN-kódját. # próbálkozása maradt. Ha elfogynak a próbálkozási lehetőségek, az eszköz feloldásához fel kell vennie a kapcsolatot szolgáltatójával.}other{Adja meg a SIM-kártya PIN-kódját. # próbálkozási lehetősége maradt.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még # próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.}other{A SIM-kártya le van tiltva. A folytatáshoz adja meg a PUK-kódot. Még # próbálkozása van, mielőtt végleg használhatatlanná válik a SIM-kártya. További információért forduljon a szolgáltatóhoz.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Alapértelmezett"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Buborék"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analóg"</string>

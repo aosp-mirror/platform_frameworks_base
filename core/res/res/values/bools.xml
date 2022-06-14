@@ -30,4 +30,5 @@
          lockscreen, setting this to true should come with customized drawables. -->
     <bool name="use_lock_pattern_drawable">false</bool>
     <bool name="resolver_landscape_phone">true</bool>
+    <bool name="system_server_plays_face_haptics">true</bool>
 </resources>
