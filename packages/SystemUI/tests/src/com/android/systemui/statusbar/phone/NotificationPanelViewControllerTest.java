@@ -172,6 +172,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardBottomAreaView mKeyguardBottomArea;
     @Mock
+    private KeyguardBottomAreaViewController mKeyguardBottomAreaViewController;
+    @Mock
     private KeyguardBottomAreaView mQsFrame;
     private KeyguardStatusView mKeyguardStatusView;
     @Mock
@@ -397,6 +399,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mNotificationStackScrollLayoutController.getHeight()).thenReturn(1000);
         when(mNotificationStackScrollLayoutController.getHeadsUpCallback())
                 .thenReturn(mHeadsUpCallback);
+        when(mKeyguardBottomAreaViewController.getView()).thenReturn(mKeyguardBottomArea);
         when(mView.findViewById(R.id.keyguard_bottom_area)).thenReturn(mKeyguardBottomArea);
         when(mKeyguardBottomArea.getLeftView()).thenReturn(mock(KeyguardAffordanceView.class));
         when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
@@ -480,7 +483,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mMainHandler = new Handler(Looper.getMainLooper());
         mPanelEventsEmitter = new NotificationPanelViewController.PanelEventsEmitter();
 
-        mNotificationPanelViewController = new NotificationPanelViewController(mView,
+        mNotificationPanelViewController = new NotificationPanelViewController(
+                mView,
                 mResources,
                 mMainHandler,
                 mLayoutInflater,
@@ -534,6 +538,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mInteractionJankMonitor,
                 mQsFrameTranslateController,
                 mSysUiState,
+                () -> mKeyguardBottomAreaViewController,
                 mKeyguardUnlockAnimationController,
                 mNotificationListContainer,
                 mPanelEventsEmitter,

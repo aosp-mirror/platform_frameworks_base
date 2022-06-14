@@ -351,6 +351,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private LockIconViewController mLockIconViewController;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
     private NotificationsQSContainerController mNotificationsQSContainerController;
+    private final Provider<KeyguardBottomAreaViewController>
+            mKeyguardBottomAreaViewControllerProvider;
     private boolean mAnimateNextPositionUpdate;
     private float mQuickQsHeaderHeight;
     private ScreenOffAnimationController mScreenOffAnimationController;
@@ -768,6 +770,7 @@ public class NotificationPanelViewController extends PanelViewController {
             InteractionJankMonitor interactionJankMonitor,
             QsFrameTranslateController qsFrameTranslateController,
             SysUiState sysUiState,
+            Provider<KeyguardBottomAreaViewController> keyguardBottomAreaViewControllerProvider,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             NotificationListContainer notificationListContainer,
             PanelEventsEmitter panelEventsEmitter,
@@ -808,6 +811,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationsQSContainerController = notificationsQSContainerController;
         mNotificationListContainer = notificationListContainer;
         mNotificationStackSizeCalculator = notificationStackSizeCalculator;
+        mKeyguardBottomAreaViewControllerProvider = keyguardBottomAreaViewControllerProvider;
         mNotificationsQSContainerController.init();
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mNotificationIconAreaController = notificationIconAreaController;
@@ -1258,8 +1262,7 @@ public class NotificationPanelViewController extends PanelViewController {
         int index = mView.indexOfChild(mKeyguardBottomArea);
         mView.removeView(mKeyguardBottomArea);
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
-        mKeyguardBottomArea = (KeyguardBottomAreaView) mLayoutInflater.inflate(
-                R.layout.keyguard_bottom_area, mView, false);
+        mKeyguardBottomArea = mKeyguardBottomAreaViewControllerProvider.get().getView();
         mKeyguardBottomArea.initFrom(oldBottomArea);
         mKeyguardBottomArea.setPreviewContainer(mPreviewContainer);
         mView.addView(mKeyguardBottomArea, index);
