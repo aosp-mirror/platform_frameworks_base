@@ -1795,7 +1795,7 @@ public final class AutofillManager {
             if (newClientState != null) {
                 responseData.putBundle(EXTRA_CLIENT_STATE, newClientState);
             }
-            if (data.getExtras().containsKey(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET)) {
+            if (data.hasExtra(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET)) {
                 responseData.putBoolean(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET,
                         data.getBooleanExtra(EXTRA_AUTHENTICATION_RESULT_EPHEMERAL_DATASET,
                                 false));
