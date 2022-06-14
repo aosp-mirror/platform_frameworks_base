@@ -54,6 +54,12 @@ public class WindowLayout {
 
     public static final int UNSPECIFIED_LENGTH = -1;
 
+    /** These coordinates are the borders of the window layout. */
+    static final int MIN_X = -100000;
+    static final int MIN_Y = -100000;
+    static final int MAX_X = 100000;
+    static final int MAX_Y = 100000;
+
     private final Rect mTempDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private final Rect mTempRect = new Rect();
 
@@ -172,8 +178,10 @@ public class WindowLayout {
         // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
         // Also, we don't allow windows in multi-window mode to extend out of the screen.
         if (noLimits && type != TYPE_SYSTEM_ERROR && !inMultiWindowMode) {
-            outDisplayFrame.left = outDisplayFrame.top = -10000;
-            outDisplayFrame.right = outDisplayFrame.bottom = 10000;
+            outDisplayFrame.left = MIN_X;
+            outDisplayFrame.top = MIN_Y;
+            outDisplayFrame.right = MAX_X;
+            outDisplayFrame.bottom = MAX_Y;
         }
 
         final boolean hasCompatScale = compatScale != 1f;

@@ -36,11 +36,14 @@ public:
 
     renderthread::MakeCurrentResult makeCurrent() override;
     renderthread::Frame getFrame() override;
-    bool draw(const renderthread::Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-              const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
-              const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
-              const std::vector<sp<RenderNode> >& renderNodes,
-              FrameInfoVisualizer* profiler) override;
+    renderthread::IRenderPipeline::DrawResult draw(const renderthread::Frame& frame,
+                                                   const SkRect& screenDirty, const SkRect& dirty,
+                                                   const LightGeometry& lightGeometry,
+                                                   LayerUpdateQueue* layerUpdateQueue,
+                                                   const Rect& contentDrawBounds, bool opaque,
+                                                   const LightInfo& lightInfo,
+                                                   const std::vector<sp<RenderNode> >& renderNodes,
+                                                   FrameInfoVisualizer* profiler) override;
     GrSurfaceOrigin getSurfaceOrigin() override { return kBottomLeft_GrSurfaceOrigin; }
     bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
                      FrameInfo* currentFrameInfo, bool* requireSwap) override;

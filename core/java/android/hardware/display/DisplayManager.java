@@ -31,7 +31,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.KeyguardManager;
-import android.companion.virtual.IVirtualDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
@@ -107,6 +106,17 @@ public final class DisplayManager {
      */
     public static final String DISPLAY_CATEGORY_PRESENTATION =
             "android.hardware.display.category.PRESENTATION";
+
+    /**
+     * Display category: All displays, including disabled displays.
+     * <p>
+     * This returns all displays, including currently disabled and inaccessible displays.
+     *
+     * @see #getDisplays(String)
+     * @hide
+     */
+    public static final String DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED =
+            "android.hardware.display.category.ALL_INCLUDING_DISABLED";
 
     /** @hide **/
     @IntDef(prefix = "VIRTUAL_DISPLAY_FLAG_", flag = true, value = {
@@ -549,17 +559,21 @@ public final class DisplayManager {
      * @see #DISPLAY_CATEGORY_PRESENTATION
      */
     public Display[] getDisplays(String category) {
-        final int[] displayIds = mGlobal.getDisplayIds();
+        boolean includeDisabledDisplays = (category != null
+                && category.equals(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED));
+        final int[] displayIds = mGlobal.getDisplayIds(includeDisabledDisplays);
         synchronized (mLock) {
             try {
-                if (category == null) {
-                    addAllDisplaysLocked(mTempDisplays, displayIds);
-                } else if (category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
+                if (category != null && category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL);
+                } else if ((category == null
+                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category))) {
+                    // All displays requested.
+                    addAllDisplaysLocked(mTempDisplays, displayIds);
                 }
                 return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
             } finally {
@@ -959,17 +973,8 @@ public final class DisplayManager {
             executor = new HandlerExecutor(
                     Handler.createAsync(handler != null ? handler.getLooper() : Looper.myLooper()));
         }
-        return mGlobal.createVirtualDisplay(mContext, projection, null /* virtualDevice */,
-                virtualDisplayConfig, callback, executor, windowContext);
-    }
-
-    /** @hide */
-    public VirtualDisplay createVirtualDisplay(@Nullable IVirtualDevice virtualDevice,
-            @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @Nullable VirtualDisplay.Callback callback,
-            @Nullable Executor executor) {
-        return mGlobal.createVirtualDisplay(mContext, null /* projection */, virtualDevice,
-                virtualDisplayConfig, callback, executor, null);
+        return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
+                executor, windowContext);
     }
 
     /**
