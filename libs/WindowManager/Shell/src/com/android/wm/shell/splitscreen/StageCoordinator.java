@@ -76,6 +76,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
@@ -1124,6 +1125,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     mDividerFadeInAnimator.cancel();
                     return;
                 }
+                transaction.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
                 transaction.setAlpha(dividerLeash, (float) animation.getAnimatedValue());
                 transaction.apply();
             });
@@ -1216,17 +1218,23 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @Override
     public void onLayoutPositionChanging(SplitLayout layout) {
-        mSyncQueue.runInSync(t -> updateSurfaceBounds(layout, t, false /* applyResizingOffset */));
+        final SurfaceControl.Transaction t = mTransactionPool.acquire();
+        t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        updateSurfaceBounds(layout, t, false /* applyResizingOffset */);
+        t.apply();
+        mTransactionPool.release(t);
     }
 
     @Override
     public void onLayoutSizeChanging(SplitLayout layout) {
-        mSyncQueue.runInSync(t -> {
-            setResizingSplits(true /* resizing */);
-            updateSurfaceBounds(layout, t, true /* applyResizingOffset */);
-            mMainStage.onResizing(getMainStageBounds(), t);
-            mSideStage.onResizing(getSideStageBounds(), t);
-        });
+        final SurfaceControl.Transaction t = mTransactionPool.acquire();
+        t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        setResizingSplits(true /* resizing */);
+        updateSurfaceBounds(layout, t, true /* applyResizingOffset */);
+        mMainStage.onResizing(getMainStageBounds(), t);
+        mSideStage.onResizing(getSideStageBounds(), t);
+        t.apply();
+        mTransactionPool.release(t);
     }
 
     @Override
