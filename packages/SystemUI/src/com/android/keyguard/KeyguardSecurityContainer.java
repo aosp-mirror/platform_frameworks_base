@@ -1124,11 +1124,13 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 Log.e(TAG, "Current user in user switcher is null.");
                 return;
             }
+            final String currentUserName = mUserSwitcherController.getCurrentUserName();
             Drawable userIcon = findUserIcon(currentUser.info.id);
             ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
-            mUserSwitcher.setText(mUserSwitcherController.getCurrentUserName());
+            mUserSwitcher.setText(currentUserName);
 
-            ViewGroup anchor = mView.findViewById(R.id.user_switcher_anchor);
+            KeyguardUserSwitcherAnchor anchor = mView.findViewById(R.id.user_switcher_anchor);
+
             BaseUserAdapter adapter = new BaseUserAdapter(mUserSwitcherController) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
@@ -1208,7 +1210,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
             anchor.setOnClickListener((v) -> {
                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
-
                 mPopup = new KeyguardUserSwitcherPopupMenu(v.getContext(), mFalsingManager);
                 mPopup.setAnchorView(anchor);
                 mPopup.setAdapter(adapter);
