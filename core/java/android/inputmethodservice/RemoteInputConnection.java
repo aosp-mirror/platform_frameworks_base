@@ -36,7 +36,6 @@ import android.view.inputmethod.TextAttribute;
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.CompletableFutureUtil;
 import com.android.internal.inputmethod.IRemoteInputConnection;
-import com.android.internal.inputmethod.IRemoteInputConnectionInvoker;
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.InputConnectionProtoDumper;
 

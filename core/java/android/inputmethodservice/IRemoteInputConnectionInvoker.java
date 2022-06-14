@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.inputmethod;
+package android.inputmethodservice;
 
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
@@ -31,6 +31,8 @@ import android.view.inputmethod.SurroundingText;
 import android.view.inputmethod.TextAttribute;
 
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.inputmethod.IRemoteInputConnection;
+import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
 import java.util.Objects;
 
@@ -38,7 +40,7 @@ import java.util.Objects;
  * A stateless wrapper of {@link com.android.internal.inputmethod.IRemoteInputConnection} to
  * encapsulate boilerplate code around {@link AndroidFuture} and {@link RemoteException}.
  */
-public final class IRemoteInputConnectionInvoker {
+final class IRemoteInputConnectionInvoker {
 
     @NonNull
     private final IRemoteInputConnection mConnection;
