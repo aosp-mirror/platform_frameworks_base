@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Introduciches o contrasinal incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Debuxaches incorrectamente o padrón de desbloqueo <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nTéntao de novo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"O código PIN da SIM non é correcto. Agora debes contactar co operador para desbloquear o dispositivo."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{O código PIN da SIM é incorrecto. Quédache # intento antes de que teñas que contactar co operador para desbloquear o dispositivo.}other{O código PIN da SIM é incorrecto. Quédanche # intentos. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"A SIM está inutilizable. Contacta co operador."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{O código PUK da SIM é incorrecto. Quédache # intento antes de que a SIM quede inutilizable para sempre.}other{O código PUK da SIM é incorrecto. Quédanche # intentos antes de que a SIM quede inutilizable para sempre.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Produciuse un erro no funcionamento do PIN da SIM"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Produciuse un erro ao tentar desbloquear a tarxeta SIM co código PUK."</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Cambia o método de introdución"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"O administrador bloqueou o dispositivo"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"O dispositivo bloqueouse manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Non se recoñeceu"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Desbloqueo facial: acceso á cámara en Configuración"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Mete o PIN da SIM. Quédache # intento antes de que teñas que contactar co operador para desbloquear o dispositivo.}other{Mete o PIN da SIM. Quédanche # intentos.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{A SIM está desactivada. Mete o código PUK para continuar. Quédache # intento antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.}other{A SIM está desactivada. Mete o código PUK para continuar. Quédanche # intentos antes de que a SIM quede inutilizable para sempre. Contacta co operador para obter información.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Predeterminado"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Burbulla"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analóxico"</string>

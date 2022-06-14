@@ -81,4 +81,7 @@
     <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"全画面表示にするにはデバイスを回転させてください"</string>
     <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"位置を変えるにはアプリの横をダブルタップしてください"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"開くと詳細が表示されます。"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"最大化"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"閉じる"</string>
 </resources>

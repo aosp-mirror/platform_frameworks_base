@@ -55,6 +55,7 @@ import android.view.InsetsAnimationControlCallbacks;
 import android.view.InsetsAnimationControlImpl;
 import android.view.InsetsAnimationControlRunner;
 import android.view.InsetsController;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -322,14 +323,14 @@ class InsetsPolicy {
         }
 
         // If not one of the types above, check whether an internal inset mapping is specified.
-        if (attrs.providesInsetsTypes != null) {
-            for (@InternalInsetsType int insetsType : attrs.providesInsetsTypes) {
-                switch (insetsType) {
+        if (attrs.providedInsets != null) {
+            for (InsetsFrameProvider provider : attrs.providedInsets) {
+                switch (provider.type) {
                     case ITYPE_STATUS_BAR:
                     case ITYPE_NAVIGATION_BAR:
                     case ITYPE_CLIMATE_BAR:
                     case ITYPE_EXTRA_NAVIGATION_BAR:
-                        return insetsType;
+                        return provider.type;
                 }
             }
         }

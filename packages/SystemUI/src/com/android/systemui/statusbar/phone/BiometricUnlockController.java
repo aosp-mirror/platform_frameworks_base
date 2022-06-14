@@ -27,8 +27,11 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -61,6 +64,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
@@ -83,6 +87,12 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private static final String BIOMETRIC_WAKE_LOCK_NAME = "wake-and-unlock:wakelock";
     private static final UiEventLogger UI_EVENT_LOGGER = new UiEventLoggerImpl();
     private static final int FP_ATTEMPTS_BEFORE_SHOW_BOUNCER = 2;
+    private static final VibrationEffect SUCCESS_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+    private static final VibrationEffect ERROR_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
 
     @IntDef(prefix = { "MODE_" }, value = {
             MODE_NONE,
@@ -158,6 +168,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final SessionTracker mSessionTracker;
     private final int mConsecutiveFpFailureThreshold;
+    private final boolean mShouldVibrate;
     private int mMode;
     private BiometricSourceType mBiometricType;
     private KeyguardViewController mKeyguardViewController;
@@ -174,6 +185,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final AuthController mAuthController;
     private final StatusBarStateController mStatusBarStateController;
     private final LatencyTracker mLatencyTracker;
+    private final VibratorHelper mVibratorHelper;
 
     private long mLastFpFailureUptimeMillis;
     private int mNumConsecutiveFpFailures;
@@ -278,7 +290,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SessionTracker sessionTracker,
             LatencyTracker latencyTracker,
-            ScreenOffAnimationController screenOffAnimationController) {
+            ScreenOffAnimationController screenOffAnimationController,
+            VibratorHelper vibrator) {
         mPowerManager = powerManager;
         mShadeController = shadeController;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -297,6 +310,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mHandler = handler;
         mConsecutiveFpFailureThreshold = resources.getInteger(
                 R.integer.fp_consecutive_failure_time_ms);
+        mShouldVibrate = !(resources.getBoolean(
+                com.android.internal.R.bool.system_server_plays_face_haptics));
         mKeyguardBypassController = keyguardBypassController;
         mKeyguardBypassController.setUnlockController(this);
         mMetricsLogger = metricsLogger;
@@ -305,6 +320,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mSessionTracker = sessionTracker;
         mScreenOffAnimationController = screenOffAnimationController;
+        mVibratorHelper = vibrator;
+
         dumpManager.registerDumpable(getClass().getName(), this);
     }
 
@@ -407,8 +424,14 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     }
 
     public void startWakeAndUnlock(BiometricSourceType biometricSourceType,
-            boolean isStrongBiometric) {
-        startWakeAndUnlock(calculateMode(biometricSourceType, isStrongBiometric));
+                                   boolean isStrongBiometric) {
+        int mode = calculateMode(biometricSourceType, isStrongBiometric);
+        if (BiometricSourceType.FACE == biometricSourceType && (mode == MODE_WAKE_AND_UNLOCK
+                || mode == MODE_WAKE_AND_UNLOCK_PULSING || mode == MODE_UNLOCK_COLLAPSING
+                || mode == MODE_WAKE_AND_UNLOCK_FROM_DREAM || mode == MODE_DISMISS_BOUNCER)) {
+            vibrateSuccess();
+        }
+        startWakeAndUnlock(mode);
     }
 
     public void startWakeAndUnlock(@WakeAndUnlockMode int mode) {
@@ -652,6 +675,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 mNumConsecutiveFpFailures = 0;
             }
         }
+
+        if (biometricSourceType == BiometricSourceType.FACE) {
+            vibrateError();
+        }
+
         cleanup();
     }
 
@@ -674,7 +702,32 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             startWakeAndUnlock(MODE_SHOW_BOUNCER);
             UI_EVENT_LOGGER.log(BiometricUiEvent.BIOMETRIC_BOUNCER_SHOWN, getSessionId());
         }
+
+        if (biometricSourceType == BiometricSourceType.FACE) {
+            vibrateError();
+        }
+
         cleanup();
+    }
+
+    private void vibrateSuccess() {
+        if (mShouldVibrate) {
+            mVibratorHelper.vibrate(Process.myUid(),
+                    "com.android.systemui",
+                    SUCCESS_VIBRATION_EFFECT,
+                    getClass().getSimpleName() + "::success",
+                    HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+        }
+    }
+
+    private void vibrateError() {
+        if (mShouldVibrate) {
+            mVibratorHelper.vibrate(Process.myUid(),
+                    "com.android.systemui",
+                    ERROR_VIBRATION_EFFECT,
+                    getClass().getSimpleName() + "::error",
+                    HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+        }
     }
 
     private void cleanup() {

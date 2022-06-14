@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਪਾਸਵਰਡ ਗਲਤ ਢੰਗ ਨਾਲ ਟਾਈਪ ਕੀਤਾ ਹੈ।\n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਉਲੀਕਿਆ ਹੈ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"ਗਲਤ ਸਿਮ ਪਿੰਨ ਕੋਡ, ਆਪਣੇ ਡੀਵਾਈਸ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਲਈ ਹੁਣ ਤੁਹਾਨੂੰ ਲਾਜ਼ਮੀ ਤੌਰ \'ਤੇ ਆਪਣੇ ਕੈਰੀਅਰ ਨਾਲ ਸੰਪਰਕ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ।"</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{ਗਲਤ ਸਿਮ ਪਿੰਨ ਕੋਡ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ ਉਸ ਤੋਂ ਬਾਅਦ ਆਪਣੇ ਡੀਵਾਈਸ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਲਈ ਤੁਹਾਨੂੰ ਆਪਣੇ ਕੈਰੀਅਰ ਨਾਲ ਸੰਪਰਕ ਕਰਨਾ ਪਵੇਗਾ।}one{ਗਲਤ ਸਿਮ ਪਿੰਨ ਕੋਡ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ। }other{ਗਲਤ ਸਿਮ ਪਿੰਨ ਕੋਡ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ। }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM ਨਾ-ਵਰਤਣਯੋਗ ਹੈ। ਆਪਣੇ ਕੈਰੀਅਰ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{ਗਲਤ ਸਿਮ PUK ਕੋਡ, ਇਸ ਤੋਂ ਪਹਿਲਾਂ ਕਿ ਸਿਮ ਬਿਲਕੁਲ ਬੇਕਾਰ ਹੋ ਜਾਵੇ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ।}one{ਗਲਤ ਸਿਮ PUK ਕੋਡ, ਇਸ ਤੋਂ ਪਹਿਲਾਂ ਕਿ ਸਿਮ ਬਿਲਕੁਲ ਬੇਕਾਰ ਹੋ ਜਾਵੇ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ।}other{ਗਲਤ ਸਿਮ PUK ਕੋਡ, ਇਸ ਤੋਂ ਪਹਿਲਾਂ ਕਿ ਸਿਮ ਬਿਲਕੁਲ ਬੇਕਾਰ ਹੋ ਜਾਵੇ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ।}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"ਸਿਮ ਪਿੰਨ ਕਾਰਵਾਈ ਅਸਫਲ ਰਹੀ!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK ਕਾਰਵਾਈ ਅਸਫਲ ਰਹੀ!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ਇਨਪੁੱਟ ਵਿਧੀ ਸਵਿੱਚ ਕਰੋ"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਡੀਵਾਈਸ ਨੂੰ ਲਾਕ ਕੀਤਾ ਗਿਆ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ਡੀਵਾਈਸ ਨੂੰ ਹੱਥੀਂ ਲਾਕ ਕੀਤਾ ਗਿਆ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"ਫ਼ੇਸ ਅਣਲਾਕ ਵਰਤਣ ਲਈ, ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਕੈਮਰਾ ਪਹੁੰਚ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{ਸਿਮ ਪਿੰਨ ਦਾਖਲ ਕਰੋ। ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ, ਉਸ ਤੋਂ ਬਾਅਦ ਆਪਣੇ ਡੀਵਾਈਸ ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਲਈ ਤੁਹਾਨੂੰ ਆਪਣੇ ਕੈਰੀਅਰ ਨਾਲ ਸੰਪਰਕ ਕਰਨਾ ਪਵੇਗਾ।}one{ਸਿਮ ਪਿੰਨ ਦਾਖਲ ਕਰੋ। ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ।}other{ਸਿਮ ਪਿੰਨ ਦਾਖਲ ਕਰੋ। ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ।}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{ਸਿਮ ਹੁਣ ਬੰਦ ਹੋ ਗਿਆ ਹੈ। ਜਾਰੀ ਰੱਖਣ ਲਈ PUK ਕੋਡ ਦਾਖਲ ਕਰੋ। ਇਸ ਤੋਂ ਪਹਿਲਾਂ ਕਿ ਸਿਮ ਬਿਲਕੁਲ ਬੇਕਾਰ ਹੋ ਜਾਵੇ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਕੈਰੀਅਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।}one{ਸਿਮ ਹੁਣ ਬੰਦ ਹੋ ਗਿਆ ਹੈ। ਜਾਰੀ ਰੱਖਣ ਲਈ PUK ਕੋਡ ਦਾਖਲ ਕਰੋ। ਇਸ ਤੋਂ ਪਹਿਲਾਂ ਕਿ ਸਿਮ ਬਿਲਕੁਲ ਬੇਕਾਰ ਹੋ ਜਾਵੇ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ। ਵੇਰਵਿਆਂ ਲਈ ਕੈਰੀਅਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।}other{ਸਿਮ ਹੁਣ ਬੰਦ ਹੋ ਗਿਆ ਹੈ। ਜਾਰੀ ਰੱਖਣ ਲਈ PUK ਕੋਡ ਦਾਖਲ ਕਰੋ। ਇਸ ਤੋਂ ਪਹਿਲਾਂ ਕਿ ਸਿਮ ਬਿਲਕੁਲ ਬੇਕਾਰ ਹੋ ਜਾਵੇ, ਤੁਹਾਡੇ ਕੋਲ # ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ। ਵੇਰਵਿਆਂ ਲਈ ਕੈਰੀਅਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ਬੁਲਬੁਲਾ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ਐਨਾਲੌਗ"</string>

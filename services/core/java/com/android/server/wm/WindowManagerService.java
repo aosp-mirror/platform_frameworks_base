@@ -2254,9 +2254,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalArgumentException(
                             "Window type can not be changed after the window is added.");
                 }
-                if (!Arrays.equals(win.mAttrs.providesInsetsTypes, attrs.providesInsetsTypes)) {
-                    throw new IllegalArgumentException(
-                            "Insets types can not be changed after the window is added.");
+                if (!(win.mAttrs.providedInsets == null && attrs.providedInsets == null)) {
+                    if (win.mAttrs.providedInsets == null || attrs.providedInsets == null
+                            || (win.mAttrs.providedInsets.length != attrs.providedInsets.length)) {
+                        throw new IllegalArgumentException(
+                                "Insets types can not be changed after the window is added.");
+                    } else {
+                        final int insetsTypes = attrs.providedInsets.length;
+                        for (int i = 0; i < insetsTypes; i++) {
+                            if (win.mAttrs.providedInsets[i].type != attrs.providedInsets[i].type) {
+                                throw new IllegalArgumentException(
+                                        "Insets types can not be changed after the window is "
+                                                + "added.");
+                            }
+                        }
+                    }
                 }
 
                 flagChanges = win.mAttrs.flags ^ attrs.flags;
