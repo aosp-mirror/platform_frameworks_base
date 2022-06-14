@@ -38,6 +38,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
 import android.hardware.usb.gadget.V1_2.UsbSpeed;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class allows you to access the state of USB and communicate with USB devices.
@@ -95,7 +97,7 @@ public class UsbManager {
      * If the sticky intent has not been found, that indicates USB is disconnected,
      * USB is not configued, MTP function is enabled, and all the other functions are disabled.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String ACTION_USB_STATE =
@@ -185,7 +187,7 @@ public class UsbManager {
      * <p>For more information about communicating with USB accessory handshake, refer to
      * <a href="https://source.android.com/devices/accessories/aoa">AOA</a> developer guide.</p>
      *
-     * {@hide}
+     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SystemApi
@@ -197,7 +199,7 @@ public class UsbManager {
      * Boolean extra indicating whether USB is connected or disconnected.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String USB_CONNECTED = "connected";
@@ -206,7 +208,7 @@ public class UsbManager {
      * Boolean extra indicating whether USB is connected or disconnected as host.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
      *
-     * {@hide}
+     * @hide
      */
     public static final String USB_HOST_CONNECTED = "host_connected";
 
@@ -214,7 +216,7 @@ public class UsbManager {
      * Boolean extra indicating whether USB is configured.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String USB_CONFIGURED = "configured";
@@ -225,7 +227,7 @@ public class UsbManager {
      * has explicitly asked for this data to be unlocked.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
      *
-     * {@hide}
+     * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String USB_DATA_UNLOCKED = "unlocked";
@@ -234,7 +236,7 @@ public class UsbManager {
      * A placeholder indicating that no USB function is being specified.
      * Used for compatibility with old init scripts to indicate no functions vs. charging function.
      *
-     * {@hide}
+     * @hide
      */
     @UnsupportedAppUsage
     public static final String USB_FUNCTION_NONE = "none";
@@ -243,7 +245,7 @@ public class UsbManager {
      * Name of the adb USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
-     * {@hide}
+     * @hide
      */
     public static final String USB_FUNCTION_ADB = "adb";
 
@@ -251,7 +253,7 @@ public class UsbManager {
      * Name of the RNDIS ethernet USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String USB_FUNCTION_RNDIS = "rndis";
@@ -260,7 +262,7 @@ public class UsbManager {
      * Name of the MTP USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
-     * {@hide}
+     * @hide
      */
     public static final String USB_FUNCTION_MTP = "mtp";
 
@@ -268,7 +270,7 @@ public class UsbManager {
      * Name of the PTP USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
-     * {@hide}
+     * @hide
      */
     public static final String USB_FUNCTION_PTP = "ptp";
 
@@ -276,7 +278,7 @@ public class UsbManager {
      * Name of the audio source USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
-     * {@hide}
+     * @hide
      */
     public static final String USB_FUNCTION_AUDIO_SOURCE = "audio_source";
 
@@ -284,7 +286,7 @@ public class UsbManager {
      * Name of the MIDI USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
-     * {@hide}
+     * @hide
      */
     public static final String USB_FUNCTION_MIDI = "midi";
 
@@ -292,7 +294,7 @@ public class UsbManager {
      * Name of the Accessory USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
-     * {@hide}
+     * @hide
      */
     public static final String USB_FUNCTION_ACCESSORY = "accessory";
 
@@ -300,7 +302,7 @@ public class UsbManager {
      * Name of the NCM USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String USB_FUNCTION_NCM = "ncm";
@@ -308,30 +310,37 @@ public class UsbManager {
     /**
      * Name of Gadget Hal Not Present;
      *
-     * {@hide}
+     * @hide
      */
     public static final String GADGET_HAL_UNKNOWN = "unknown";
 
     /**
      * Name of the USB Gadget Hal Version v1.0;
      *
-     * {@hide}
+     * @hide
      */
     public static final String GADGET_HAL_VERSION_1_0 = "V1_0";
 
     /**
      * Name of the USB Gadget Hal Version v1.1;
      *
-     * {@hide}
+     * @hide
      */
     public static final String GADGET_HAL_VERSION_1_1 = "V1_1";
 
     /**
      * Name of the USB Gadget Hal Version v1.2;
      *
-     * {@hide}
+     * @hide
      */
     public static final String GADGET_HAL_VERSION_1_2 = "V1_2";
+
+    /**
+     * Name of the USB Gadget Hal Version v2.0;
+     *
+     * @hide
+     */
+    public static final String GADGET_HAL_VERSION_2_0 = "V2_0";
 
     /**
      * Name of extra for {@link #ACTION_USB_PORT_CHANGED}
@@ -369,7 +378,7 @@ public class UsbManager {
      * This is obtained with SystemClock.elapsedRealtime()
      * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String EXTRA_ACCESSORY_UEVENT_TIME =
@@ -383,7 +392,7 @@ public class UsbManager {
      * between communicating with USB accessory handshake, refer to
      * <a href="https://source.android.com/devices/accessories/aoa">AOA</a> developer guide.</p>
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String EXTRA_ACCESSORY_STRING_COUNT =
@@ -393,7 +402,7 @@ public class UsbManager {
      * Boolean extra indicating whether got start accessory or not
      * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String EXTRA_ACCESSORY_START =
@@ -405,7 +414,7 @@ public class UsbManager {
      * sending {@link #ACTION_USB_ACCESSORY_HANDSHAKE}.
      * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final String EXTRA_ACCESSORY_HANDSHAKE_END =
@@ -439,7 +448,7 @@ public class UsbManager {
     /**
      * The Value for USB gadget hal is not presented.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int GADGET_HAL_NOT_SUPPORTED = -1;
@@ -447,7 +456,7 @@ public class UsbManager {
     /**
      * Value for Gadget Hal Version v1.0.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int GADGET_HAL_V1_0 = 10;
@@ -455,7 +464,7 @@ public class UsbManager {
     /**
      * Value for Gadget Hal Version v1.1.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int GADGET_HAL_V1_1 = 11;
@@ -463,15 +472,23 @@ public class UsbManager {
     /**
      * Value for Gadget Hal Version v1.2.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int GADGET_HAL_V1_2 = 12;
 
     /**
+     * Value for Gadget Hal Version v2.0.
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int GADGET_HAL_V2_0 = 20;
+
+    /**
      * Value for USB_STATE is not configured.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_DATA_TRANSFER_RATE_UNKNOWN = -1;
@@ -479,7 +496,7 @@ public class UsbManager {
     /**
      * Value for USB Transfer Rate of Low Speed in Mbps (real value is 1.5Mbps).
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_DATA_TRANSFER_RATE_LOW_SPEED = 2;
@@ -487,7 +504,7 @@ public class UsbManager {
     /**
      * Value for USB Transfer Rate of Full Speed in Mbps.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_DATA_TRANSFER_RATE_FULL_SPEED = 12;
@@ -495,7 +512,7 @@ public class UsbManager {
     /**
      * Value for USB Transfer Rate of High Speed in Mbps.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_DATA_TRANSFER_RATE_HIGH_SPEED = 480;
@@ -503,7 +520,7 @@ public class UsbManager {
     /**
      * Value for USB Transfer Rate of Super Speed in Mbps.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_DATA_TRANSFER_RATE_5G = 5 * 1024;
@@ -511,7 +528,7 @@ public class UsbManager {
     /**
      * Value for USB Transfer Rate of 10G.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_DATA_TRANSFER_RATE_10G = 10 * 1024;
@@ -519,7 +536,7 @@ public class UsbManager {
     /**
      * Value for USB Transfer Rate of 20G.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_DATA_TRANSFER_RATE_20G = 20 * 1024;
@@ -527,7 +544,7 @@ public class UsbManager {
     /**
      * Value for USB Transfer Rate of 40G.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_DATA_TRANSFER_RATE_40G = 40 * 1024;
@@ -543,7 +560,7 @@ public class UsbManager {
     /**
      * The Value for USB hal is not presented.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_HAL_NOT_SUPPORTED = -1;
@@ -551,7 +568,7 @@ public class UsbManager {
     /**
      * Value for USB Hal Version v1.0.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_HAL_V1_0 = 10;
@@ -559,7 +576,7 @@ public class UsbManager {
     /**
      * Value for USB Hal Version v1.1.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_HAL_V1_1 = 11;
@@ -567,7 +584,7 @@ public class UsbManager {
     /**
      * Value for USB Hal Version v1.2.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_HAL_V1_2 = 12;
@@ -575,7 +592,7 @@ public class UsbManager {
     /**
      * Value for USB Hal Version v1.3.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int USB_HAL_V1_3 = 13;
@@ -590,63 +607,63 @@ public class UsbManager {
 
     /**
      * Code for the charging usb function. Passed into {@link #setCurrentFunctions(long)}
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_NONE = 0;
 
     /**
      * Code for the mtp usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_MTP = GadgetFunction.MTP;
 
     /**
      * Code for the ptp usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_PTP = GadgetFunction.PTP;
 
     /**
      * Code for the rndis usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_RNDIS = GadgetFunction.RNDIS;
 
     /**
      * Code for the midi usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_MIDI = GadgetFunction.MIDI;
 
     /**
      * Code for the accessory usb function.
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_ACCESSORY = GadgetFunction.ACCESSORY;
 
     /**
      * Code for the audio source usb function.
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_AUDIO_SOURCE = GadgetFunction.AUDIO_SOURCE;
 
     /**
      * Code for the adb usb function.
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_ADB = GadgetFunction.ADB;
 
     /**
      * Code for the ncm source usb function.
-     * {@hide}
+     * @hide
      */
     @SystemApi
     public static final long FUNCTION_NCM = 1 << 10;
@@ -655,6 +672,11 @@ public class UsbManager {
             | FUNCTION_MIDI | FUNCTION_NCM;
 
     private static final Map<String, Long> FUNCTION_NAME_TO_CODE = new HashMap<>();
+
+    /**
+     * Counter for tracking UsbOperation operations.
+     */
+    private static final AtomicInteger sUsbOperationCount = new AtomicInteger();
 
     static {
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_MTP, FUNCTION_MTP);
@@ -687,6 +709,7 @@ public class UsbManager {
             GADGET_HAL_V1_0,
             GADGET_HAL_V1_1,
             GADGET_HAL_V1_2,
+            GADGET_HAL_V2_0,
     })
     public @interface UsbGadgetHalVersion {}
 
@@ -705,7 +728,7 @@ public class UsbManager {
     private final IUsbManager mService;
 
     /**
-     * {@hide}
+     * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public UsbManager(Context context, IUsbManager service) {
@@ -816,7 +839,7 @@ public class UsbManager {
      * {@link #FUNCTION_PTP} are supported.
      * @return A ParcelFileDescriptor holding the valid fd, or null if the fd was not found.
      *
-     * {@hide}
+     * @hide
      */
     public ParcelFileDescriptor getControlFd(long function) {
         try {
@@ -977,7 +1000,7 @@ public class UsbManager {
      * Only system components can call this function.
      * @param device to request permissions for
      *
-     * {@hide}
+     * @hide
      */
     public void grantPermission(UsbDevice device) {
         grantPermission(device, Process.myUid());
@@ -989,7 +1012,7 @@ public class UsbManager {
      * @param device to request permissions for
      * @uid uid to give permission
      *
-     * {@hide}
+     * @hide
      */
     public void grantPermission(UsbDevice device, int uid) {
         try {
@@ -1005,7 +1028,7 @@ public class UsbManager {
      * @param device to request permissions for
      * @param packageName of package to grant permissions
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
@@ -1030,7 +1053,7 @@ public class UsbManager {
      * @param function name of the USB function
      * @return true if the USB function is enabled
      *
-     * {@hide}
+     * @hide
      */
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -1062,14 +1085,17 @@ public class UsbManager {
      * @param functions the USB function(s) to set, as a bitwise mask.
      *                  Must satisfy {@link UsbManager#areSettableFunctions}
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public void setCurrentFunctions(@UsbFunctionMode long functions) {
+        int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
         try {
-            mService.setCurrentFunctions(functions);
+            mService.setCurrentFunctions(functions, operationId);
         } catch (RemoteException e) {
+            Log.e(TAG, "setCurrentFunctions: failed to call setCurrentFunctions. functions:"
+                        + functions + ", opId:" + operationId, e);
             throw e.rethrowFromSystemServer();
         }
     }
@@ -1081,14 +1107,17 @@ public class UsbManager {
      * @param functions the USB function(s) to set.
      * @param usbDataUnlocked unused
 
-     * {@hide}
+     * @hide
      */
     @Deprecated
     @UnsupportedAppUsage
     public void setCurrentFunction(String functions, boolean usbDataUnlocked) {
+        int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
         try {
-            mService.setCurrentFunction(functions, usbDataUnlocked);
+            mService.setCurrentFunction(functions, usbDataUnlocked, operationId);
         } catch (RemoteException e) {
+            Log.e(TAG, "setCurrentFunction: failed to call setCurrentFunction. functions:"
+                        + functions + ", opId:" + operationId, e);
             throw e.rethrowFromSystemServer();
         }
     }
@@ -1103,7 +1132,7 @@ public class UsbManager {
      * @return The currently enabled functions, in a bitwise mask.
      * A zero mask indicates that the current function is the charging function.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
@@ -1129,7 +1158,7 @@ public class UsbManager {
      * @param functions functions to set, in a bitwise mask.
      *                  Must satisfy {@link UsbManager#areSettableFunctions}
      *
-     * {@hide}
+     * @hide
      */
     public void setScreenUnlockedFunctions(long functions) {
         try {
@@ -1145,7 +1174,7 @@ public class UsbManager {
      * @return The currently set screen enabled functions.
      * A zero mask indicates that the screen unlocked functions feature is not enabled.
      *
-     * {@hide}
+     * @hide
      */
     public long getScreenUnlockedFunctions() {
         try {
@@ -1167,19 +1196,17 @@ public class UsbManager {
      *
      * @return The value of currently USB Bandwidth.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public int getUsbBandwidthMbps() {
         int usbSpeed;
-
         try {
             usbSpeed = mService.getCurrentUsbSpeed();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-
         return usbSpeedToBandwidth(usbSpeed);
     }
 
@@ -1191,7 +1218,7 @@ public class UsbManager {
      *
      * @return a integer {@code GADGET_HAL_*} represent hal version.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(Manifest.permission.MANAGE_USB)
@@ -1211,7 +1238,7 @@ public class UsbManager {
      *
      * @return a integer {@code USB_HAL_*} represent hal version.
      *
-     * {@hide}
+     * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(Manifest.permission.MANAGE_USB)
@@ -1507,7 +1534,7 @@ public class UsbManager {
      * @param usbDeviceConnectionHandler The component to handle usb connections,
      * {@code null} to unset.
      *
-     * {@hide}
+     * @hide
      */
     public void setUsbDeviceConnectionHandler(@Nullable ComponentName usbDeviceConnectionHandler) {
         try {
@@ -1526,7 +1553,7 @@ public class UsbManager {
      *
      * @return Whether the mask is settable.
      *
-     * {@hide}
+     * @hide
      */
     public static boolean areSettableFunctions(long functions) {
         return functions == FUNCTION_NONE
@@ -1540,7 +1567,7 @@ public class UsbManager {
      *
      * @return String representation of given mask
      *
-     * {@hide}
+     * @hide
      */
     public static String usbFunctionsToString(long functions) {
         StringJoiner joiner = new StringJoiner(",");
@@ -1576,7 +1603,7 @@ public class UsbManager {
      *
      * @return A mask of all valid functions in the string
      *
-     * {@hide}
+     * @hide
      */
     public static long usbFunctionsFromString(String functions) {
         if (functions == null || functions.equals(USB_FUNCTION_NONE)) {
@@ -1598,7 +1625,7 @@ public class UsbManager {
      *
      * @return a value of USB bandwidth
      *
-     * {@hide}
+     * @hide
      */
     public static int usbSpeedToBandwidth(int speed) {
         switch (speed) {
@@ -1632,12 +1659,14 @@ public class UsbManager {
      *
      * @return String representation of Usb Gadget Hal Version
      *
-     * {@hide}
+     * @hide
      */
     public static @NonNull String usbGadgetHalVersionToString(int version) {
         String halVersion;
 
-        if (version == GADGET_HAL_V1_2) {
+        if (version == GADGET_HAL_V2_0) {
+            halVersion = GADGET_HAL_VERSION_2_0;
+        } else if (version == GADGET_HAL_V1_2) {
             halVersion = GADGET_HAL_VERSION_1_2;
         } else if (version == GADGET_HAL_V1_1) {
             halVersion = GADGET_HAL_VERSION_1_1;

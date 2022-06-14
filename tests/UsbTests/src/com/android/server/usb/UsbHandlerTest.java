@@ -98,7 +98,7 @@ public class UsbHandlerTest {
         }
 
         @Override
-        protected void setEnabledFunctions(long functions, boolean force) {
+        protected void setEnabledFunctions(long functions, boolean force, int operationId) {
             mCurrentFunctions = functions;
         }
 
@@ -134,6 +134,20 @@ public class UsbHandlerTest {
         protected void sendStickyBroadcast(Intent intent) {
             mBroadcastedIntent = intent;
         }
+
+        @Override
+        public void handlerInitDone(int operationId) {
+        }
+
+        @Override
+        public void setCurrentUsbFunctionsCb(long functions,
+                    int status, int mRequest, long mFunctions, boolean mChargingFunctions){
+        }
+
+        @Override
+        public void getUsbSpeedCb(int speed){
+        }
+
     }
 
     @Before
