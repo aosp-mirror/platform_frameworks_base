@@ -1617,14 +1617,14 @@ public class DisplayContentTests extends WindowTestsBase {
         final Task task = app.getTask();
         final ActivityRecord app2 = new ActivityBuilder(mWm.mAtmService).setTask(task).build();
         mDisplayContent.setFixedRotationLaunchingApp(app2, (mDisplayContent.getRotation() + 1) % 4);
-        doReturn(true).when(task).isAppTransitioning();
-        // If the task is animating transition, this should be no-op.
+        doReturn(true).when(app).isInTransition();
+        // If the task contains a transition, this should be no-op.
         mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
 
         assertTrue(app2.hasFixedRotationTransform());
         assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
 
-        doReturn(false).when(task).isAppTransitioning();
+        doReturn(false).when(app).isInTransition();
         // Although this notifies app instead of app2 that uses the fixed rotation, app2 should
         // still finish the transform because there is no more transition event.
         mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
