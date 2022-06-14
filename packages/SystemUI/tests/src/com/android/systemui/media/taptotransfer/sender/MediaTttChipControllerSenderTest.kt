@@ -25,9 +25,9 @@ import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -620,22 +620,22 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         verify(windowManager).removeView(any())
     }
 
-    private fun LinearLayout.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
+    private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
 
-    private fun LinearLayout.getChipText(): String =
+    private fun ViewGroup.getChipText(): String =
         (this.requireViewById<TextView>(R.id.text)).text as String
 
-    private fun LinearLayout.getLoadingIconVisibility(): Int =
+    private fun ViewGroup.getLoadingIconVisibility(): Int =
         this.requireViewById<View>(R.id.loading).visibility
 
-    private fun LinearLayout.getUndoButton(): View = this.requireViewById(R.id.undo)
+    private fun ViewGroup.getUndoButton(): View = this.requireViewById(R.id.undo)
 
-    private fun LinearLayout.getFailureIcon(): View = this.requireViewById(R.id.failure_icon)
+    private fun ViewGroup.getFailureIcon(): View = this.requireViewById(R.id.failure_icon)
 
-    private fun getChipView(): LinearLayout {
+    private fun getChipView(): ViewGroup {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
-        return viewCaptor.value as LinearLayout
+        return viewCaptor.value as ViewGroup
     }
 
     /** Helper method providing default parameters to not clutter up the tests. */
