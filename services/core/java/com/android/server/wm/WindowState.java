@@ -4965,18 +4965,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return isAnimating(CHILDREN, ANIMATION_TYPE_WINDOW_ANIMATION);
     }
 
-    /**
-     * @return {@code true} if self or the parent container of the window is in transition.
-     * (e.g. The app or recents transition)
-     */
-    boolean inTransitionSelfOrParent() {
-        if (!mTransitionController.isShellTransitionsEnabled()) {
-            return isAnimating(PARENTS | TRANSITION,
-                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
-        }
-        return mTransitionController.inTransition(this);
-    }
-
     private boolean shouldFinishAnimatingExit() {
         // Exit animation might be applied soon.
         if (inTransition()) {
