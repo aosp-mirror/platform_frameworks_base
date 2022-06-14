@@ -4,8 +4,8 @@ import static android.telephony.ServiceState.DUPLEX_MODE_FDD;
 import static android.telephony.ServiceState.DUPLEX_MODE_TDD;
 import static android.telephony.ServiceState.DUPLEX_MODE_UNKNOWN;
 
-import android.telephony.AccessNetworkConstants.EutranBand;
 import android.telephony.AccessNetworkConstants.EutranBandArfcnFrequency;
+import android.telephony.AccessNetworkConstants.EutranBand;
 import android.telephony.AccessNetworkConstants.GeranBand;
 import android.telephony.AccessNetworkConstants.GeranBandArfcnFrequency;
 import android.telephony.AccessNetworkConstants.NgranArfcnFrequency;
@@ -13,6 +13,7 @@ import android.telephony.AccessNetworkConstants.NgranBands;
 import android.telephony.AccessNetworkConstants.UtranBand;
 import android.telephony.AccessNetworkConstants.UtranBandArfcnFrequency;
 import android.telephony.ServiceState.DuplexMode;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -227,110 +228,6 @@ public class AccessNetworkUtils {
             return EutranBand.BAND_1;
         }
 
-        return INVALID_BAND;
-    }
-
-    /**
-     * Gets the NR Operating band for a given downlink NRARFCN.
-     *
-     * <p>See 3GPP TS 38.104 Table 5.2-1 NR operating bands in FR1 and
-     * Table 5.2-2 NR operating bands in FR2
-     *
-     * @param nrarfcn The downlink NRARFCN
-     * @return Operating band number, or {@link #INVALID_BAND} if no corresponding band exists
-     */
-    public static int getOperatingBandForNrarfcn(int nrarfcn) {
-        if (nrarfcn >= 2110 && nrarfcn <= 2170) {
-            return NgranBands.BAND_1;
-        } else if (nrarfcn >= 1930 && nrarfcn <= 1990) {
-            return NgranBands.BAND_2;
-        } else if (nrarfcn >= 1805 && nrarfcn <= 1880) {
-            return NgranBands.BAND_3;
-        } else if (nrarfcn >= 869 && nrarfcn <= 894) {
-            return NgranBands.BAND_5;
-        } else if (nrarfcn >= 2620 && nrarfcn <= 2690) {
-            return NgranBands.BAND_7;
-        } else if (nrarfcn >= 925 && nrarfcn <= 960) {
-            return NgranBands.BAND_8;
-        } else if (nrarfcn >= 729 && nrarfcn <= 746) {
-            return NgranBands.BAND_12;
-        } else if (nrarfcn >= 758 && nrarfcn <= 768) {
-            return NgranBands.BAND_14;
-        } else if (nrarfcn >= 860 && nrarfcn <= 875) {
-            return NgranBands.BAND_18;
-        } else if (nrarfcn >= 791 && nrarfcn <= 821) {
-            return NgranBands.BAND_20;
-        } else if (nrarfcn >= 1930 && nrarfcn <= 1995) {
-            return NgranBands.BAND_25;
-        } else if (nrarfcn >= 859 && nrarfcn <= 894) {
-            return NgranBands.BAND_26;
-        } else if (nrarfcn >= 758 && nrarfcn <= 803) {
-            return NgranBands.BAND_28;
-        } else if (nrarfcn >= 717 && nrarfcn <= 728) {
-            return NgranBands.BAND_29;
-        } else if (nrarfcn >= 2350 && nrarfcn <= 2360) {
-            return NgranBands.BAND_30;
-        } else if (nrarfcn >= 2010 && nrarfcn <= 2025) {
-            return NgranBands.BAND_34;
-        } else if (nrarfcn >= 2570 && nrarfcn <= 2620) {
-            return NgranBands.BAND_38;
-        } else if (nrarfcn >= 1880 && nrarfcn <= 1920) {
-            return NgranBands.BAND_39;
-        } else if (nrarfcn >= 2300 && nrarfcn <= 2400) {
-            return NgranBands.BAND_40;
-        } else if (nrarfcn >= 2496 && nrarfcn <= 2690) {
-            return NgranBands.BAND_41;
-        } else if (nrarfcn >= 5150 && nrarfcn <= 5925) {
-            return NgranBands.BAND_46;
-        } else if (nrarfcn >= 3550 && nrarfcn <= 3700) {
-            return NgranBands.BAND_48;
-        } else if (nrarfcn >= 1432 && nrarfcn <= 1517) {
-            return NgranBands.BAND_50;
-        } else if (nrarfcn >= 1427 && nrarfcn <= 1432) {
-            return NgranBands.BAND_51;
-        } else if (nrarfcn >= 2483 && nrarfcn <= 2495) {
-            return NgranBands.BAND_53;
-        } else if (nrarfcn >= 2110 && nrarfcn <= 2200) {
-            return NgranBands.BAND_65; // BAND_66 has the same channels
-        } else if (nrarfcn >= 1995 && nrarfcn <= 2020) {
-            return NgranBands.BAND_70;
-        } else if (nrarfcn >= 617 && nrarfcn <= 652) {
-            return NgranBands.BAND_71;
-        } else if (nrarfcn >= 1475 && nrarfcn <= 1518) {
-            return NgranBands.BAND_74;
-        } else if (nrarfcn >= 1432 && nrarfcn <= 1517) {
-            return NgranBands.BAND_75;
-        } else if (nrarfcn >= 1427 && nrarfcn <= 1432) {
-            return NgranBands.BAND_76;
-        } else if (nrarfcn >= 3300 && nrarfcn <= 4200) {
-            return NgranBands.BAND_77;
-        } else if (nrarfcn >= 3300 && nrarfcn <= 3800) {
-            return NgranBands.BAND_78;
-        } else if (nrarfcn >= 4400 && nrarfcn <= 5000) {
-            return NgranBands.BAND_79;
-        } else if (nrarfcn >= 2496 && nrarfcn <= 2690) {
-            return NgranBands.BAND_90;
-        } else if (nrarfcn >= 1427 && nrarfcn <= 1432) {
-            return NgranBands.BAND_91;
-        } else if (nrarfcn >= 1427 && nrarfcn <= 1432) {
-            return NgranBands.BAND_92;
-        } else if (nrarfcn >= 1432 && nrarfcn <= 1517) {
-            return NgranBands.BAND_93;
-        } else if (nrarfcn >= 1427 && nrarfcn <= 1432) {
-            return NgranBands.BAND_94;
-        } else if (nrarfcn >= 1432 && nrarfcn <= 1517) {
-            return NgranBands.BAND_94;
-        } else if (nrarfcn >= 5925 && nrarfcn <= 7125) {
-            return NgranBands.BAND_96;
-        } else if (nrarfcn >= 26500 && nrarfcn <= 29500) {
-            return NgranBands.BAND_257;
-        } else if (nrarfcn >= 24250 && nrarfcn <= 27500) {
-            return NgranBands.BAND_258;
-        } else if (nrarfcn >= 37000 && nrarfcn <= 40000) {
-            return NgranBands.BAND_260;
-        } else if (nrarfcn >= 27500 && nrarfcn <= 28350) {
-            return NgranBands.BAND_261;
-        }
         return INVALID_BAND;
     }
 
