@@ -899,7 +899,7 @@ final class InstallPackageHelper {
                     Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "reconcilePackages");
                     reconciledPackages = ReconcilePackageUtils.reconcilePackages(
                             reconcileRequest, mSharedLibraries,
-                            mPm.mSettings.getKeySetManagerService(), mPm.mSettings);
+                            mPm.mSettings.getKeySetManagerService(), mPm.mSettings, mContext);
                 } catch (ReconcileFailure e) {
                     for (InstallRequest request : requests) {
                         request.mInstallResult.setError("Reconciliation failed...", e);
@@ -3669,7 +3669,7 @@ final class InstallPackageHelper {
                     final Map<String, ReconciledPackage> reconcileResult =
                             ReconcilePackageUtils.reconcilePackages(reconcileRequest,
                                     mSharedLibraries, mPm.mSettings.getKeySetManagerService(),
-                                    mPm.mSettings);
+                                    mPm.mSettings, mContext);
                     if ((scanFlags & SCAN_AS_APEX) == 0) {
                         appIdCreated = optimisticallyRegisterAppId(scanResult);
                     } else {
