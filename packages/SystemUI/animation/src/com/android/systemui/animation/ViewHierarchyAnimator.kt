@@ -39,6 +39,7 @@ class ViewHierarchyAnimator {
         private val DEFAULT_INTERPOLATOR = Interpolators.STANDARD
         private val DEFAULT_ADDITION_INTERPOLATOR = Interpolators.STANDARD_DECELERATE
         private val DEFAULT_REMOVAL_INTERPOLATOR = Interpolators.STANDARD_ACCELERATE
+        private val DEFAULT_FADE_IN_INTERPOLATOR = Interpolators.ALPHA_IN
 
         /** The properties used to animate the view bounds. */
         private val PROPERTIES = mapOf(
@@ -162,6 +163,10 @@ class ViewHierarchyAnimator {
          * animate an already visible view, see [animate] and [animateNextUpdate].
          *
          * Then animator unregisters itself once the first addition animation is complete.
+         *
+         * @param includeFadeIn true if the animator should also fade in the view and child views.
+         * @param fadeInInterpolator the interpolator to use when fading in the view. Unused if
+         *     [includeFadeIn] is false.
          */
         @JvmOverloads
         fun animateAddition(
@@ -169,7 +174,9 @@ class ViewHierarchyAnimator {
             origin: Hotspot = Hotspot.CENTER,
             interpolator: Interpolator = DEFAULT_ADDITION_INTERPOLATOR,
             duration: Long = DEFAULT_DURATION,
-            includeMargins: Boolean = false
+            includeMargins: Boolean = false,
+            includeFadeIn: Boolean = false,
+            fadeInInterpolator: Interpolator = DEFAULT_FADE_IN_INTERPOLATOR
         ): Boolean {
             if (isVisible(
                     rootView.visibility,
@@ -186,6 +193,42 @@ class ViewHierarchyAnimator {
                 origin, interpolator, duration, ignorePreviousValues = !includeMargins
             )
             addListener(rootView, listener, recursive = true)
+
+            if (!includeFadeIn) {
+                return true
+            }
+
+            if (rootView is ViewGroup) {
+                // First, fade in the container view
+                val containerDuration = duration / 6
+                createAndStartFadeInAnimator(
+                    rootView, containerDuration, startDelay = 0, interpolator = fadeInInterpolator
+                )
+
+                // Then, fade in the child views
+                val childDuration = duration / 3
+                for (i in 0 until rootView.childCount) {
+                    val view = rootView.getChildAt(i)
+                    createAndStartFadeInAnimator(
+                        view,
+                        childDuration,
+                        // Wait until the container fades in before fading in the children
+                        startDelay = containerDuration,
+                        interpolator = fadeInInterpolator
+                    )
+                }
+                // For now, we don't recursively fade in additional sub views (e.g. grandchild
+                // views) since it hasn't been necessary, but we could add that functionality.
+            } else {
+                // Fade in the view during the first half of the addition
+                createAndStartFadeInAnimator(
+                    rootView,
+                    duration / 2,
+                    startDelay = 0,
+                    interpolator = fadeInInterpolator
+                )
+            }
+
             return true
         }
 
@@ -832,6 +875,27 @@ class ViewHierarchyAnimator {
             bounds.forEach { bound -> setBound(view, bound, startValues.getValue(bound)) }
 
             view.setTag(R.id.tag_animator, animator)
+            animator.start()
+        }
+
+        private fun createAndStartFadeInAnimator(
+            view: View,
+            duration: Long,
+            startDelay: Long,
+            interpolator: Interpolator
+        ) {
+            val animator = ObjectAnimator.ofFloat(view, "alpha", 1f)
+            animator.startDelay = startDelay
+            animator.duration = duration
+            animator.interpolator = interpolator
+            animator.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    view.setTag(R.id.tag_alpha_animator, null /* tag */)
+                }
+            })
+
+            (view.getTag(R.id.tag_alpha_animator) as? ObjectAnimator)?.cancel()
+            view.setTag(R.id.tag_alpha_animator, animator)
             animator.start()
         }
     }
