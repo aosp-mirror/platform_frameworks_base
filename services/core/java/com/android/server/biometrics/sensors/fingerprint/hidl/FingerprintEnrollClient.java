@@ -55,7 +55,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
 
     FingerprintEnrollClient(@NonNull Context context,
             @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
+            long requestId, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int timeoutSec, int sensorId,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
@@ -64,6 +64,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
                 true /* shouldVibrate */);
+        setRequestId(requestId);
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
 
         mEnrollReason = enrollReason;

@@ -213,7 +213,7 @@ public class FaceService extends SystemService {
         }
 
         @Override // Binder call
-        public void enroll(int userId, final IBinder token, final byte[] hardwareAuthToken,
+        public long enroll(int userId, final IBinder token, final byte[] hardwareAuthToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures, Surface previewSurface, boolean debugConsent) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
@@ -221,23 +221,24 @@ public class FaceService extends SystemService {
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
             if (provider == null) {
                 Slog.w(TAG, "Null provider for enroll");
-                return;
+                return -1;
             }
 
-            provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
+            return provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
                     receiver, opPackageName, disabledFeatures, previewSurface, debugConsent);
         }
 
         @Override // Binder call
-        public void enrollRemotely(int userId, final IBinder token, final byte[] hardwareAuthToken,
+        public long enrollRemotely(int userId, final IBinder token, final byte[] hardwareAuthToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
                 final int[] disabledFeatures) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
             // TODO(b/145027036): Implement this.
+            return -1;
         }
 
         @Override // Binder call
-        public void cancelEnrollment(final IBinder token) {
+        public void cancelEnrollment(final IBinder token, long requestId) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -246,7 +247,7 @@ public class FaceService extends SystemService {
                 return;
             }
 
-            provider.second.cancelEnrollment(provider.first, token);
+            provider.second.cancelEnrollment(provider.first, token, requestId);
         }
 
         @Override // Binder call
@@ -624,7 +625,7 @@ public class FaceService extends SystemService {
         private void addHidlProviders(@NonNull List<FaceSensorPropertiesInternal> hidlSensors) {
             for (FaceSensorPropertiesInternal hidlSensor : hidlSensors) {
                 mServiceProviders.add(
-                        new Face10(getContext(), hidlSensor, mLockoutResetDispatcher));
+                        Face10.newInstance(getContext(), hidlSensor, mLockoutResetDispatcher));
             }
         }
 

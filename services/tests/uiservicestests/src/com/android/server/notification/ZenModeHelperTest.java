@@ -42,6 +42,7 @@ import static com.android.os.AtomsProto.DNDModeProto.ENABLED_FIELD_NUMBER;
 import static com.android.os.AtomsProto.DNDModeProto.ID_FIELD_NUMBER;
 import static com.android.os.AtomsProto.DNDModeProto.UID_FIELD_NUMBER;
 import static com.android.os.AtomsProto.DNDModeProto.ZEN_MODE_FIELD_NUMBER;
+import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -1604,6 +1605,35 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(customDefaultRule.id, ruleAfterUpdating.id);
         assertEquals(customDefaultRule.conditionId, ruleAfterUpdating.conditionId);
         assertFalse(Objects.equals(defaultRuleName, ruleAfterUpdating.name)); // update name
+    }
+
+    @Test
+    public void testAddAutomaticZenRule_beyondSystemLimit() {
+        for (int i = 0; i < RULE_LIMIT_PER_PACKAGE; i++) {
+            ScheduleInfo si = new ScheduleInfo();
+            si.startHour = i;
+            AutomaticZenRule zenRule = new AutomaticZenRule("name" + i,
+                    null,
+                    new ComponentName("android", "ScheduleConditionProvider"),
+                    ZenModeConfig.toScheduleConditionId(si),
+                    new ZenPolicy.Builder().build(),
+                    NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+            String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
+            assertNotNull(id);
+        }
+        try {
+            AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                    null,
+                    new ComponentName("android", "ScheduleConditionProvider"),
+                    ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                    new ZenPolicy.Builder().build(),
+                    NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+            String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
+            fail("allowed too many rules to be created");
+        } catch (IllegalArgumentException e) {
+            // yay
+        }
+
     }
 
     @Test

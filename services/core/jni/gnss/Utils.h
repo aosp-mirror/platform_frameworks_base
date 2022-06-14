@@ -48,6 +48,8 @@ jboolean checkAidlStatus(const android::binder::Status& status, const char* erro
 
 void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
 
+void callObjectMethodIgnoringResult(JNIEnv* env, jobject obj, jmethodID mid, ...);
+
 template <class T>
 void logHidlError(hardware::Return<T>& result, const char* errorMessage) {
     ALOGE("%s HIDL transport error: %s", errorMessage, result.description().c_str());
