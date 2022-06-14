@@ -9787,11 +9787,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.finishSync(outMergedTransaction, cancel);
     }
 
-    @Override
-    boolean canBeAnimationTarget() {
-        return true;
-    }
-
     @Nullable
     Point getMinDimensions() {
         final ActivityInfo.WindowLayout windowLayout = info.windowLayout;

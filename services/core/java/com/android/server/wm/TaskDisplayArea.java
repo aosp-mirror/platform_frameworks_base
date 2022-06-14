@@ -1778,7 +1778,9 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
     @Override
     boolean canCreateRemoteAnimationTarget() {
-        return true;
+        // In the legacy transition system, promoting animation target from TaskFragment to
+        // TaskDisplayArea prevents running finish animation. See b/194649929.
+        return WindowManagerService.sEnableShellTransitions;
     }
 
     /**

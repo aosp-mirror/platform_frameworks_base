@@ -2569,11 +2569,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    boolean canBeAnimationTarget() {
-        return true;
-    }
-
-    @Override
     boolean fillsParent() {
         // From the perspective of policy, we still want to report that this task fills parent
         // in fullscreen windowing mode even it doesn't match parent bounds because there will be
