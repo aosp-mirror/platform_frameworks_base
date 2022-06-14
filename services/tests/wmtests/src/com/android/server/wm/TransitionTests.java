@@ -793,6 +793,10 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
         assertNotNull(mDisplayContent.getAsyncRotationController());
 
+        // The app is still in transition, so the callback should be no-op.
+        mDisplayContent.mTransitionController.dispatchLegacyAppTransitionFinished(app);
+        assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
+
         statusBar.setOrientationChanging(true);
         player.startTransition();
         // Non-app windows should not be collected.
