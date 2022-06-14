@@ -120,6 +120,7 @@ package android.hardware.usb {
     field public static final int GADGET_HAL_V1_0 = 10; // 0xa
     field public static final int GADGET_HAL_V1_1 = 11; // 0xb
     field public static final int GADGET_HAL_V1_2 = 12; // 0xc
+    field public static final int GADGET_HAL_V2_0 = 20; // 0x14
     field public static final int USB_DATA_TRANSFER_RATE_10G = 10240; // 0x2800
     field public static final int USB_DATA_TRANSFER_RATE_20G = 20480; // 0x5000
     field public static final int USB_DATA_TRANSFER_RATE_40G = 40960; // 0xa000
