@@ -57,6 +57,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -115,7 +116,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mNextAlarmController,
                 mDateFormatUtil,
                 mSensorPrivacyController,
-                mDreamOverlayNotificationCountProvider,
+                Optional.of(mDreamOverlayNotificationCountProvider),
                 mZenModeController,
                 mStatusBarWindowStateController);
     }
@@ -228,6 +229,26 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
         verify(mView).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(false), isNull());
+    }
+
+    @Test
+    public void testNotificationsIconNotShownWhenCountProviderAbsent() {
+        DreamOverlayStatusBarViewController controller = new DreamOverlayStatusBarViewController(
+                mView,
+                mResources,
+                mMainExecutor,
+                mConnectivityManager,
+                mTouchSession,
+                mAlarmManager,
+                mNextAlarmController,
+                mDateFormatUtil,
+                mSensorPrivacyController,
+                Optional.empty(),
+                mZenModeController,
+                mStatusBarWindowStateController);
+        controller.onViewAttached();
+        verify(mView, never()).showIcon(
+                eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());
     }
 
     @Test
