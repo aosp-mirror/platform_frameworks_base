@@ -958,14 +958,16 @@ public class NotificationPanelViewController extends PanelViewController {
                 });
     }
 
-    private void onFinishInflate() {
+    @VisibleForTesting
+    void onFinishInflate() {
         loadDimens();
         mKeyguardStatusBar = mView.findViewById(R.id.keyguard_header);
 
         FrameLayout userAvatarContainer = null;
         KeyguardUserSwitcherView keyguardUserSwitcherView = null;
 
-        if (mKeyguardUserSwitcherEnabled && mUserManager.isUserSwitcherEnabled()) {
+        if (mKeyguardUserSwitcherEnabled && mUserManager.isUserSwitcherEnabled(
+                mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user))) {
             if (mKeyguardQsUserSwitchEnabled) {
                 ViewStub stub = mView.findViewById(R.id.keyguard_qs_user_switch_stub);
                 userAvatarContainer = (FrameLayout) stub.inflate();
@@ -1191,7 +1193,8 @@ public class NotificationPanelViewController extends PanelViewController {
         return view;
     }
 
-    private void reInflateViews() {
+    @VisibleForTesting
+    void reInflateViews() {
         if (DEBUG_LOGCAT) Log.d(TAG, "reInflateViews");
         // Re-inflate the status view group.
         KeyguardStatusView keyguardStatusView =
@@ -1212,7 +1215,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
         // Re-inflate the keyguard user switcher group.
         updateUserSwitcherFlags();
-        boolean isUserSwitcherEnabled = mUserManager.isUserSwitcherEnabled();
+        boolean isUserSwitcherEnabled = mUserManager.isUserSwitcherEnabled(
+                mResources.getBoolean(R.bool.qs_show_user_switcher_for_single_user));
         boolean showQsUserSwitch = mKeyguardQsUserSwitchEnabled && isUserSwitcherEnabled;
         boolean showKeyguardUserSwitcher =
                 !mKeyguardQsUserSwitchEnabled
@@ -1520,50 +1524,77 @@ public class NotificationPanelViewController extends PanelViewController {
         return (mQs != null ? mQs.getHeader().getHeight() : 0) + mQsPeekHeight;
     }
 
-    /**
-     * @return Space available to show notifications on lockscreen.
-     */
+    /** Returns space between top of lock icon and bottom of NotificationStackScrollLayout. */
+    private float getLockIconPadding() {
+        float lockIconPadding = 0f;
+        if (mLockIconViewController.getTop() != 0f) {
+            lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
+                    - mLockIconViewController.getTop();
+        }
+        return lockIconPadding;
+    }
+
+    /** Returns space available to show notifications on lockscreen. */
     @VisibleForTesting
-    float getSpaceForLockscreenNotifications() {
+    float getVerticalSpaceForLockscreenNotifications() {
+        final float lockIconPadding = getLockIconPadding();
+
+        float bottomPadding = Math.max(lockIconPadding,
+                Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding));
+        mKeyguardNotificationBottomPadding = bottomPadding;
+
         float staticTopPadding = mClockPositionAlgorithm.getLockscreenMinStackScrollerPadding()
                 // getMinStackScrollerPadding is from the top of the screen,
                 // but we need it from the top of the NSSL.
                 - mNotificationStackScrollLayoutController.getTop();
-
-        // Space between bottom of notifications and top of lock icon or udfps background.
-        float lockIconPadding = mLockIconViewController.getTop();
-        if (mLockIconViewController.getTop() != 0) {
-            lockIconPadding = mNotificationStackScrollLayoutController.getBottom()
-                    - mLockIconViewController.getTop()
-                    - mShelfAndLockIconOverlap;
-        }
-
-        float bottomPadding = Math.max(lockIconPadding,
-                Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding));
-
-        mKeyguardNotificationBottomPadding = bottomPadding;
         mKeyguardNotificationTopPadding = staticTopPadding;
 
         // To debug the available space, enable debug lines in this class. If you change how the
         // available space is calculated, please also update those lines.
-        float availableSpace =
+        final float verticalSpace =
                 mNotificationStackScrollLayoutController.getHeight()
                         - staticTopPadding
                         - bottomPadding;
 
         if (SPEW_LOGCAT) {
-            Log.d(TAG, "getSpaceForLockscreenNotifications()"
-                    + " availableSpace=" + availableSpace
-                    + " NSSL.height=" + mNotificationStackScrollLayoutController.getHeight()
-                    + " NSSL.top=" + mNotificationStackScrollLayoutController.getTop()
-                    + " staticTopPadding=" + staticTopPadding
-                    + " bottomPadding=" + bottomPadding
-                    + " lockIconPadding=" + lockIconPadding
-                    + " mIndicationBottomPadding=" + mIndicationBottomPadding
-                    + " mAmbientIndicationBottomPadding=" + mAmbientIndicationBottomPadding
+            Log.i(TAG, "\n");
+            Log.i(TAG, "staticTopPadding[" + staticTopPadding
+                    + "] = Clock.padding["
+                    + mClockPositionAlgorithm.getLockscreenMinStackScrollerPadding()
+                    + "] - NSSLC.top[" + mNotificationStackScrollLayoutController.getTop()
+                    + "]"
+            );
+            Log.i(TAG, "bottomPadding[" + bottomPadding
+                    + "] = max(ambientIndicationBottomPadding[" + mAmbientIndicationBottomPadding
+                    + "], mIndicationBottomPadding[" + mIndicationBottomPadding
+                    + "], lockIconPadding[" + lockIconPadding
+                    + "])"
+            );
+            Log.i(TAG, "verticalSpaceForNotifications[" + verticalSpace
+                    + "] = NSSL.height[" + mNotificationStackScrollLayoutController.getHeight()
+                    + "] - staticTopPadding[" + staticTopPadding
+                    + "] - bottomPadding[" + bottomPadding
+                    + "]"
             );
         }
-        return availableSpace;
+        return verticalSpace;
+    }
+
+    /** Returns extra space available to show the shelf on lockscreen */
+    @VisibleForTesting
+    float getVerticalSpaceForLockscreenShelf() {
+        final float lockIconPadding = getLockIconPadding();
+
+        final float noShelfOverlapBottomPadding =
+                Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
+
+        final float extraSpaceForShelf = lockIconPadding - noShelfOverlapBottomPadding;
+
+        if (extraSpaceForShelf > 0f) {
+            return Math.min(mNotificationShelfController.getIntrinsicHeight(),
+                    extraSpaceForShelf);
+        }
+        return 0f;
     }
 
     /**
@@ -1579,16 +1610,12 @@ public class NotificationPanelViewController extends PanelViewController {
             }
             return mMaxAllowedKeyguardNotifications;
         }
-
-        final float shelfIntrinsicHeight =
-                mNotificationShelfController.getVisibility() == View.GONE
-                        ? 0
-                        : mNotificationShelfController.getIntrinsicHeight();
-
         return mNotificationStackSizeCalculator.computeMaxKeyguardNotifications(
                 mNotificationStackScrollLayoutController.getView(),
-                getSpaceForLockscreenNotifications(),
-                shelfIntrinsicHeight);
+                getVerticalSpaceForLockscreenNotifications(),
+                getVerticalSpaceForLockscreenShelf(),
+                mNotificationShelfController.getIntrinsicHeight()
+        );
     }
 
     private void updateClock() {
@@ -3812,7 +3839,7 @@ public class NotificationPanelViewController extends PanelViewController {
     public void setAmbientIndicationTop(int ambientIndicationTop, boolean ambientTextVisible) {
         int ambientIndicationBottomPadding = 0;
         if (ambientTextVisible) {
-            int stackBottom = mNotificationStackScrollLayoutController.getView().getBottom();
+            int stackBottom = mNotificationStackScrollLayoutController.getBottom();
             ambientIndicationBottomPadding = stackBottom - ambientIndicationTop;
         }
         if (mAmbientIndicationBottomPadding != ambientIndicationBottomPadding) {
@@ -4361,6 +4388,9 @@ public class NotificationPanelViewController extends PanelViewController {
             if (firstRow != null && (view == firstRow || (firstRow.getNotificationParent()
                     == firstRow))) {
                 requestScrollerTopPaddingUpdate(false /* animate */);
+            }
+            if (mKeyguardShowing) {
+                updateMaxDisplayedNotifications(true);
             }
             requestPanelHeightUpdate();
         }

@@ -803,6 +803,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     private AndroidPackage mPlatformPackage;
     ComponentName mCustomResolverComponentName;
 
+    // Recorded overlay paths configuration for the Android app info.
+    private String[] mPlatformPackageOverlayPaths = null;
+    private String[] mPlatformPackageOverlayResourceDirs = null;
+    // And the same paths for the replaced resolver activity package
+    private String[] mReplacedResolverPackageOverlayPaths = null;
+    private String[] mReplacedResolverPackageOverlayResourceDirs = null;
+
     private boolean mResolverReplaced = false;
 
     @NonNull
@@ -6562,9 +6569,59 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             });
         }
 
+        if (userId == UserHandle.USER_SYSTEM) {
+            // Keep the overlays in the system application info (and anything special cased as well)
+            // up to date to make sure system ui is themed correctly.
+            maybeUpdateSystemOverlays(targetPackageName, newOverlayPaths);
+        }
+
         invalidatePackageInfoCache();
 
         return true;
+    }
+
+    private void maybeUpdateSystemOverlays(String targetPackageName, OverlayPaths newOverlayPaths) {
+        if (!mResolverReplaced) {
+            if (targetPackageName.equals("android")) {
+                if (newOverlayPaths == null) {
+                    mPlatformPackageOverlayPaths = null;
+                    mPlatformPackageOverlayResourceDirs = null;
+                } else {
+                    mPlatformPackageOverlayPaths = newOverlayPaths.getOverlayPaths().toArray(
+                            new String[0]);
+                    mPlatformPackageOverlayResourceDirs = newOverlayPaths.getResourceDirs().toArray(
+                            new String[0]);
+                }
+                applyUpdatedSystemOverlayPaths();
+            }
+        } else {
+            if (targetPackageName.equals(mResolveActivity.applicationInfo.packageName)) {
+                if (newOverlayPaths == null) {
+                    mReplacedResolverPackageOverlayPaths = null;
+                    mReplacedResolverPackageOverlayResourceDirs = null;
+                } else {
+                    mReplacedResolverPackageOverlayPaths =
+                            newOverlayPaths.getOverlayPaths().toArray(new String[0]);
+                    mReplacedResolverPackageOverlayResourceDirs =
+                            newOverlayPaths.getResourceDirs().toArray(new String[0]);
+                }
+                applyUpdatedSystemOverlayPaths();
+            }
+        }
+    }
+
+    private void applyUpdatedSystemOverlayPaths() {
+        if (mAndroidApplication == null) {
+            Slog.i(TAG, "Skipped the AndroidApplication overlay paths update - no app yet");
+        } else {
+            mAndroidApplication.overlayPaths = mPlatformPackageOverlayPaths;
+            mAndroidApplication.resourceDirs = mPlatformPackageOverlayResourceDirs;
+        }
+        if (mResolverReplaced) {
+            mResolveActivity.applicationInfo.overlayPaths = mReplacedResolverPackageOverlayPaths;
+            mResolveActivity.applicationInfo.resourceDirs =
+                    mReplacedResolverPackageOverlayResourceDirs;
+        }
     }
 
     private void enforceAdjustRuntimePermissionsPolicyOrUpgradeRuntimePermissions(
@@ -7043,6 +7100,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             PackageManagerService.onChanged();
         }
+        applyUpdatedSystemOverlayPaths();
     }
 
     ApplicationInfo getCoreAndroidApplication() {

@@ -1872,7 +1872,7 @@
     <!-- The package name of the default captive portal login app. Must be granted the
          POST_NOTIFICATIONS permission.
     -->
-    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false"></string>
+    <string name="config_defaultCaptivePortalLoginPackageName" translatable="false">com.android.captiveportallogin</string>
 
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
@@ -2422,7 +2422,7 @@
 
     <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
-    <bool name="config_dismissDreamOnActivityStart">true</bool>
+    <bool name="config_dismissDreamOnActivityStart">false</bool>
 
     <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
     <string name="config_loggable_dream_prefix" translatable="false"></string>
@@ -5657,6 +5657,9 @@
 
     <!-- Determines whether SafetyCenter feature is enabled. -->
     <bool name="config_enableSafetyCenter">true</bool>
+
+    <!-- Config for whether Safety Protection is enabled. -->
+    <bool name="config_safetyProtectionEnabled">false</bool>
 
     <!-- Flag indicating if help links for Settings app should be enabled. -->
     <bool name="config_settingsHelpLinksEnabled">false</bool>

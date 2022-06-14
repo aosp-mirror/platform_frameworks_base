@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.os.ProcessStartTime;
@@ -70,7 +71,7 @@ public final class HostingRecord {
     public static final String HOSTING_TYPE_TOP_ACTIVITY = "top-activity";
     public static final String HOSTING_TYPE_EMPTY = "";
 
-    private final String mHostingType;
+    private @NonNull final String mHostingType;
     private final String mHostingName;
     private final int mHostingZygote;
     private final String mDefiningPackageName;
@@ -79,49 +80,51 @@ public final class HostingRecord {
     private final String mDefiningProcessName;
     @Nullable private final String mAction;
 
-    public HostingRecord(String hostingType) {
+    public HostingRecord(@NonNull String hostingType) {
         this(hostingType, null /* hostingName */, REGULAR_ZYGOTE, null /* definingPackageName */,
                 -1 /* mDefiningUid */, false /* isTopApp */, null /* definingProcessName */,
                 null /* action */);
     }
 
-    public HostingRecord(String hostingType, ComponentName hostingName) {
+    public HostingRecord(@NonNull String hostingType, ComponentName hostingName) {
         this(hostingType, hostingName, REGULAR_ZYGOTE);
     }
 
-    public HostingRecord(String hostingType, ComponentName hostingName, @Nullable String action) {
+    public HostingRecord(@NonNull String hostingType, ComponentName hostingName,
+            @Nullable String action) {
         this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE,
                 null /* definingPackageName */, -1 /* mDefiningUid */, false /* isTopApp */,
                 null /* definingProcessName */, action);
     }
 
-    public HostingRecord(String hostingType, ComponentName hostingName, String definingPackageName,
-            int definingUid, String definingProcessName) {
+    public HostingRecord(@NonNull String hostingType, ComponentName hostingName,
+            String definingPackageName, int definingUid, String definingProcessName) {
         this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE, definingPackageName,
                 definingUid, false /* isTopApp */, definingProcessName, null /* action */);
     }
 
-    public HostingRecord(String hostingType, ComponentName hostingName, boolean isTopApp) {
+    public HostingRecord(@NonNull String hostingType, ComponentName hostingName, boolean isTopApp) {
         this(hostingType, hostingName.toShortString(), REGULAR_ZYGOTE,
                 null /* definingPackageName */, -1 /* mDefiningUid */, isTopApp /* isTopApp */,
                 null /* definingProcessName */, null /* action */);
     }
 
-    public HostingRecord(String hostingType, String hostingName) {
+    public HostingRecord(@NonNull String hostingType, String hostingName) {
         this(hostingType, hostingName, REGULAR_ZYGOTE);
     }
 
-    private HostingRecord(String hostingType, ComponentName hostingName, int hostingZygote) {
+    private HostingRecord(@NonNull String hostingType, ComponentName hostingName,
+            int hostingZygote) {
         this(hostingType, hostingName.toShortString(), hostingZygote);
     }
 
-    private HostingRecord(String hostingType, String hostingName, int hostingZygote) {
+    private HostingRecord(@NonNull String hostingType, String hostingName, int hostingZygote) {
         this(hostingType, hostingName, hostingZygote, null /* definingPackageName */,
                 -1 /* mDefiningUid */, false /* isTopApp */, null /* definingProcessName */,
                 null /* action */);
     }
 
-    private HostingRecord(String hostingType, String hostingName, int hostingZygote,
+    private HostingRecord(@NonNull String hostingType, String hostingName, int hostingZygote,
             String definingPackageName, int definingUid, boolean isTopApp,
             String definingProcessName, @Nullable String action) {
         mHostingType = hostingType;
@@ -134,7 +137,7 @@ public final class HostingRecord {
         mAction = action;
     }
 
-    public String getType() {
+    public @NonNull String getType() {
         return mHostingType;
     }
 
@@ -230,7 +233,7 @@ public final class HostingRecord {
      * @param hostingType
      * @return enum HostingType defined in ProcessStartTime proto
      */
-    public static int getHostingTypeIdStatsd(String hostingType) {
+    public static int getHostingTypeIdStatsd(@NonNull String hostingType) {
         switch(hostingType) {
             case HOSTING_TYPE_ACTIVITY:
                 return ProcessStartTime.HOSTING_TYPE_ACTIVITY;
