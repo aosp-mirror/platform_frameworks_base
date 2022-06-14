@@ -1660,14 +1660,17 @@ class ActivityStarter {
         transitionController.collect(r);
         try {
             mService.deferWindowLayout();
-            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
-            result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
-                    startFlags, doResume, options, inTask, inTaskFragment, restrictedBgActivity,
-                    intentGrants);
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
+                result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
+                        startFlags, doResume, options, inTask, inTaskFragment, restrictedBgActivity,
+                        intentGrants);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+                startedActivityRootTask = handleStartResult(r, options, result, newTransition,
+                        remoteTransition);
+            }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-            startedActivityRootTask = handleStartResult(r, options, result, newTransition,
-                    remoteTransition);
             mService.continueWindowLayout();
         }
         postStartActivityProcessing(r, result, startedActivityRootTask);
