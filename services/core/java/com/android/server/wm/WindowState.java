@@ -1474,15 +1474,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mAttrs;
     }
 
-    WindowManager.LayoutParams getLayoutingAttrs(int rotation) {
-        final WindowManager.LayoutParams[] paramsForRotation = mAttrs.paramsForRotation;
-        if (paramsForRotation == null || paramsForRotation.length != 4
-                || paramsForRotation[rotation] == null) {
-            return mAttrs;
-        }
-        return paramsForRotation[rotation];
-    }
-
     /** Retrieves the flags used to disable system UI functions. */
     int getDisableFlags() {
         return mDisableFlags;
