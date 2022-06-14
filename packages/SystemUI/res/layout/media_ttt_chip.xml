@@ -13,71 +13,85 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout
+<!-- Wrap in a frame layout so that we can update the margins on the inner layout. (Since this view
+     is the root view of a window, we cannot change the root view's margins.) -->
+<!-- Alphas start as 0 because the view will be animated in. -->
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/media_ttt_sender_chip"
-    android:orientation="horizontal"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:padding="@dimen/media_ttt_chip_outer_padding"
-    android:background="@drawable/media_ttt_chip_background"
-    android:layout_marginTop="50dp"
-    android:clipToPadding="false"
-    android:gravity="center_vertical"
-    >
+    android:layout_height="wrap_content">
 
-    <com.android.internal.widget.CachingIconView
-        android:id="@+id/app_icon"
-        android:layout_width="@dimen/media_ttt_app_icon_size"
-        android:layout_height="@dimen/media_ttt_app_icon_size"
-        android:layout_marginEnd="12dp"
-        />
-
-    <TextView
-        android:id="@+id/text"
+    <LinearLayout
+        android:id="@+id/media_ttt_sender_chip_inner"
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/media_ttt_text_size"
-        android:textColor="?android:attr/textColorPrimary"
-        />
+        android:padding="@dimen/media_ttt_chip_outer_padding"
+        android:background="@drawable/media_ttt_chip_background"
+        android:layout_marginTop="20dp"
+        android:clipToPadding="false"
+        android:gravity="center_vertical"
+        android:alpha="0.0"
+        >
 
-    <!-- At most one of [loading, failure_icon, undo] will be visible at a time. -->
+        <com.android.internal.widget.CachingIconView
+            android:id="@+id/app_icon"
+            android:layout_width="@dimen/media_ttt_app_icon_size"
+            android:layout_height="@dimen/media_ttt_app_icon_size"
+            android:layout_marginEnd="12dp"
+            android:alpha="0.0"
+            />
 
-    <ProgressBar
-        android:id="@+id/loading"
-        android:indeterminate="true"
-        android:layout_width="@dimen/media_ttt_status_icon_size"
-        android:layout_height="@dimen/media_ttt_status_icon_size"
-        android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
-        android:indeterminateTint="?androidprv:attr/colorAccentPrimaryVariant"
-        style="?android:attr/progressBarStyleSmall"
-        />
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/media_ttt_text_size"
+            android:textColor="?android:attr/textColorPrimary"
+            android:alpha="0.0"
+            />
 
-    <ImageView
-        android:id="@+id/failure_icon"
-        android:layout_width="@dimen/media_ttt_status_icon_size"
-        android:layout_height="@dimen/media_ttt_status_icon_size"
-        android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
-        android:src="@drawable/ic_warning"
-        android:tint="@color/GM2_red_500"
-        />
+        <!-- At most one of [loading, failure_icon, undo] will be visible at a time. -->
+        <ProgressBar
+            android:id="@+id/loading"
+            android:indeterminate="true"
+            android:layout_width="@dimen/media_ttt_status_icon_size"
+            android:layout_height="@dimen/media_ttt_status_icon_size"
+            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
+            android:indeterminateTint="?androidprv:attr/colorAccentPrimaryVariant"
+            style="?android:attr/progressBarStyleSmall"
+            android:alpha="0.0"
+            />
 
-    <TextView
-        android:id="@+id/undo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/media_transfer_undo"
-        android:textColor="?androidprv:attr/textColorOnAccent"
-        android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
-        android:textSize="@dimen/media_ttt_text_size"
-        android:paddingStart="@dimen/media_ttt_chip_outer_padding"
-        android:paddingEnd="@dimen/media_ttt_chip_outer_padding"
-        android:paddingTop="@dimen/media_ttt_undo_button_vertical_padding"
-        android:paddingBottom="@dimen/media_ttt_undo_button_vertical_padding"
-        android:layout_marginTop="@dimen/media_ttt_undo_button_vertical_negative_margin"
-        android:layout_marginBottom="@dimen/media_ttt_undo_button_vertical_negative_margin"
-        android:background="@drawable/media_ttt_undo_background"
-        />
+        <ImageView
+            android:id="@+id/failure_icon"
+            android:layout_width="@dimen/media_ttt_status_icon_size"
+            android:layout_height="@dimen/media_ttt_status_icon_size"
+            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
+            android:src="@drawable/ic_warning"
+            android:tint="@color/GM2_red_500"
+            android:alpha="0.0"
+            />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/undo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/media_transfer_undo"
+            android:textColor="?androidprv:attr/textColorOnAccent"
+            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
+            android:textSize="@dimen/media_ttt_text_size"
+            android:paddingStart="@dimen/media_ttt_chip_outer_padding"
+            android:paddingEnd="@dimen/media_ttt_chip_outer_padding"
+            android:paddingTop="@dimen/media_ttt_undo_button_vertical_padding"
+            android:paddingBottom="@dimen/media_ttt_undo_button_vertical_padding"
+            android:layout_marginTop="@dimen/media_ttt_undo_button_vertical_negative_margin"
+            android:layout_marginBottom="@dimen/media_ttt_undo_button_vertical_negative_margin"
+            android:background="@drawable/media_ttt_undo_background"
+            android:alpha="0.0"
+            />
+
+    </LinearLayout>
+</FrameLayout>
