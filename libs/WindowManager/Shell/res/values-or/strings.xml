@@ -81,4 +81,7 @@
     <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ପୂର୍ଣ୍ଣ-ସ୍କ୍ରିନ ବ୍ୟବହାର କରିବାକୁ ଆପଣଙ୍କ ଡିଭାଇସକୁ ରୋଟେଟ କରନ୍ତୁ"</string>
     <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ଏକ ଆପକୁ ରିପୋଜିସନ କରିବା ପାଇଁ ଏହା ପାଖରେ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ବୁଝିଗଲି"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ଅଧିକ ସୂଚନା ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ।"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"ବଡ଼ କରନ୍ତୁ"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"ବନ୍ଦ କରନ୍ତୁ"</string>
 </resources>

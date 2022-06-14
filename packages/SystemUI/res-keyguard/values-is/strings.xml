@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Þú hefur slegið inn rangt aðgangsorð <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> sekúndur."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Rangt PIN-númer SIM-korts. Nú þarftu að hafa samband við símafyrirtækið til að opna fyrir tækið."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Rangt PIN-númer SIM-korts. Þú átt # tilraun eftir áður en þú þarft að hafa samband við símafyrirtækið þitt til að taka tækið úr lás.}one{Rangt PIN-númer SIM-korts. Þú átt # tilraun eftir. }other{Rangt PIN-númer SIM-korts. Þú átt # tilraunir eftir. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-kortið er ónothæft. Hafðu samband við símafyrirtækið þitt."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Rangt PUK-númer SIM-korts. Þú átt # tilraun eftir áður en SIM-kortið verður ónothæft til frambúðar.}one{Rangt PUK-númer SIM-korts. Þú átt # tilraun eftir áður en SIM-kortið verður ónothæft til frambúðar.}other{Rangt PUK-númer SIM-korts. Þú átt # tilraunir eftir áður en SIM-kortið verður ónothæft til frambúðar.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"PIN-aðgerð SIM-korts mistókst!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"PUK-aðgerð SIM-korts mistókst!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Skipta um innsláttaraðferð"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Kerfisstjóri læsti tæki"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Tækinu var læst handvirkt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Þekktist ekki"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Kveiktu á myndavélaaðgangi í stillingum til að nota andlitskenni"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Sláðu inn PIN-númer SIM-korts. Þú átt # tilraun eftir áður en þú þarft að hafa samband við símafyrirtækið þitt til að taka tækið úr lás.}one{Sláðu inn PIN-númer SIM-kortsins. Þú átt # tilraun eftir.}other{Sláðu inn PIN-númer SIM-kortsins. Þú átt # tilraunir eftir.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Þú átt # tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.}one{SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Þú átt # tilraun eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.}other{SIM-kortið er nú óvirkt. Sláðu inn PUK-númer til að halda áfram. Þú átt # tilraunir eftir þar til SIM-kortið verður ónothæft til frambúðar. Hafðu samband við símafyrirtækið til að fá upplýsingar.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Sjálfgefið"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Blaðra"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Með vísum"</string>

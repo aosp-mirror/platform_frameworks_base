@@ -361,7 +361,7 @@ public abstract class BroadcastReceiver {
      * to avoid glitching the main UI thread due to disk IO.
      *
      * <p>As a general rule, broadcast receivers are allowed to run for up to 10 seconds
-     * before they system will consider them non-responsive and ANR the app.  Since these usually
+     * before the system will consider them non-responsive and ANR the app.  Since these usually
      * execute on the app's main thread, they are already bound by the ~5 second time limit
      * of various operations that can happen there (not to mention just avoiding UI jank), so
      * the receive limit is generally not of concern.  However, once you use {@code goAsync}, though

@@ -993,7 +993,7 @@ public final class Settings implements Watchable, Snappable {
             pkgSetting = new PackageSetting(pkgName, realPkgName, codePath,
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                     null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
-                    0 /*sharedUserId*/, usesSdkLibraries, usesSdkLibrariesVersions,
+                    0 /*sharedUserAppId*/, usesSdkLibraries, usesSdkLibrariesVersions,
                     usesStaticLibraries, usesStaticLibrariesVersions,
                     createMimeGroups(mimeGroupNames), domainSetId);
             pkgSetting.setLastModifiedTime(codePath.lastModified());
@@ -1282,12 +1282,12 @@ public final class Settings implements Watchable, Snappable {
                         "Package " + p.getPackageName() + " was user "
                         + existingSharedUserSetting + " but is now " + sharedUser
                         + "; I am not changing its files so it will probably fail!");
-                sharedUser.removePackage(p);
-            } else if (p.getAppId() != sharedUser.mAppId) {
+                existingSharedUserSetting.removePackage(p);
+            } else if (p.getAppId() != 0 && p.getAppId() != sharedUser.mAppId) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
-                        "Package " + p.getPackageName() + " was user id " + p.getAppId()
+                        "Package " + p.getPackageName() + " was app id " + p.getAppId()
                                 + " but is now user " + sharedUser
-                                + " with id " + sharedUser.mAppId
+                                + " with app id " + sharedUser.mAppId
                                 + "; I am not changing its files so it will probably fail!");
             }
 
@@ -1296,15 +1296,15 @@ public final class Settings implements Watchable, Snappable {
             p.setAppId(sharedUser.mAppId);
         }
 
-        // If we know about this user id, we have to update it as it
+        // If we know about this app id, we have to update it as it
         // has to point to the same PackageSetting instance as the package.
-        Object userIdPs = getSettingLPr(p.getAppId());
+        Object appIdPs = getSettingLPr(p.getAppId());
         if (sharedUser == null) {
-            if (userIdPs != null && userIdPs != p) {
+            if (appIdPs != null && appIdPs != p) {
                 mAppIds.replaceSetting(p.getAppId(), p);
             }
         } else {
-            if (userIdPs != null && userIdPs != sharedUser) {
+            if (appIdPs != null && appIdPs != sharedUser) {
                 mAppIds.replaceSetting(p.getAppId(), sharedUser);
             }
         }
@@ -3581,17 +3581,17 @@ public final class Settings implements Watchable, Snappable {
         UUID domainSetId = DomainVerificationManagerInternal.DISABLED_ID;
         PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
                 legacyNativeLibraryPathStr, primaryCpuAbiStr, secondaryCpuAbiStr, cpuAbiOverrideStr,
-                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserId*/, null, null, null, null,
-                null, domainSetId);
+                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserAppId*/, null, null, null,
+                null, null, domainSetId);
         long timeStamp = parser.getAttributeLongHex(null, "ft", 0);
         if (timeStamp == 0) {
             timeStamp = parser.getAttributeLong(null, "ts", 0);
         }
         ps.setLastModifiedTime(timeStamp);
         ps.setLastUpdateTime(parser.getAttributeLongHex(null, "ut", 0));
-        ps.setAppId(parser.getAttributeInt(null, "userId", 0));
+        ps.setAppId(parseAppId(parser));
         if (ps.getAppId() <= 0) {
-            final int sharedUserAppId = parser.getAttributeInt(null, "sharedUserId", 0);
+            final int sharedUserAppId = parseSharedUserAppId(parser);
             ps.setAppId(sharedUserAppId);
             ps.setSharedUserAppId(sharedUserAppId);
         }
@@ -3638,7 +3638,7 @@ public final class Settings implements Watchable, Snappable {
             throws XmlPullParserException, IOException {
         String name = null;
         String realName = null;
-        int userId = 0;
+        int appId = 0;
         int sharedUserAppId = 0;
         String codePathStr = null;
         String legacyCpuAbiString = null;
@@ -3670,8 +3670,8 @@ public final class Settings implements Watchable, Snappable {
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
-            userId = parser.getAttributeInt(null, "userId", 0);
-            sharedUserAppId = parser.getAttributeInt(null, "sharedUserId", 0);
+            appId = parseAppId(parser);
+            sharedUserAppId = parseSharedUserAppId(parser);
             codePathStr = parser.getAttributeValue(null, "codePath");
 
             legacyCpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
@@ -3764,8 +3764,8 @@ public final class Settings implements Watchable, Snappable {
             firstInstallTime = parser.getAttributeLongHex(null, "it", 0);
             lastUpdateTime = parser.getAttributeLongHex(null, "ut", 0);
             if (PackageManagerService.DEBUG_SETTINGS)
-                Log.v(PackageManagerService.TAG, "Reading package: " + name + " userId=" + userId
-                        + " sharedUserId=" + sharedUserAppId);
+                Log.v(PackageManagerService.TAG, "Reading package: " + name + " appId=" + appId
+                        + " sharedUserAppId=" + sharedUserAppId);
             if (realName != null) {
                 realName = realName.intern();
             }
@@ -3777,19 +3777,19 @@ public final class Settings implements Watchable, Snappable {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Error in package manager settings: <package> has no codePath at "
                                 + parser.getPositionDescription());
-            } else if (userId > 0) {
+            } else if (appId > 0) {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
                         legacyNativeLibraryPathStr, primaryCpuAbiString, secondaryCpuAbiString,
-                        cpuAbiOverrideString, userId, versionCode, pkgFlags, pkgPrivateFlags,
+                        cpuAbiOverrideString, appId, versionCode, pkgFlags, pkgPrivateFlags,
                         null /* usesSdkLibraries */, null /* usesSdkLibraryVersions */,
                         null /* usesStaticLibraries */, null /* usesStaticLibraryVersions */,
                         null /* mimeGroups */, domainSetId);
                 if (PackageManagerService.DEBUG_SETTINGS)
-                    Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
-                            + userId + " pkg=" + packageSetting);
+                    Log.i(PackageManagerService.TAG, "Reading package " + name + ": appId="
+                            + appId + " pkg=" + packageSetting);
                 if (packageSetting == null) {
-                    PackageManagerService.reportSettingsProblem(Log.ERROR, "Failure adding uid "
-                            + userId + " while parsing settings at "
+                    PackageManagerService.reportSettingsProblem(Log.ERROR, "Failure adding appId "
+                            + appId + " while parsing settings at "
                             + parser.getPositionDescription());
                 } else {
                     packageSetting.setLastModifiedTime(timeStamp);
@@ -3811,22 +3811,23 @@ public final class Settings implements Watchable, Snappable {
                     mPendingPackages.add(packageSetting);
                     if (PackageManagerService.DEBUG_SETTINGS)
                         Log.i(PackageManagerService.TAG, "Reading package " + name
-                                + ": sharedUserId=" + sharedUserAppId + " pkg=" + packageSetting);
+                                + ": sharedUserAppId=" + sharedUserAppId + " pkg="
+                                + packageSetting);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Error in package manager settings: package " + name
-                                    + " has bad sharedId " + sharedUserAppId + " at "
+                                    + " has bad sharedUserAppId " + sharedUserAppId + " at "
                                     + parser.getPositionDescription());
                 }
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Error in package manager settings: package " + name + " has bad userId "
-                                + userId + " at " + parser.getPositionDescription());
+                        "Error in package manager settings: package " + name + " has bad appId "
+                                + appId + " at " + parser.getPositionDescription());
             }
         } catch (NumberFormatException e) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Error in package manager settings: package " + name + " has bad userId "
-                            + userId + " at " + parser.getPositionDescription());
+                    "Error in package manager settings: package " + name + " has bad appId "
+                            + appId + " at " + parser.getPositionDescription());
         }
         if (packageSetting != null) {
             InstallSource installSource = InstallSource.create(
@@ -3959,6 +3960,22 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
+    /**
+     * The attribute "appId" was historically called "userId".
+     * TODO(b/235381248): Fix it when we solve tooling compatibility issues
+     */
+    private static int parseAppId(TypedXmlPullParser parser) {
+        return parser.getAttributeInt(null, "userId", 0);
+    }
+
+    /**
+     * The attribute "sharedUserAppId" was historically called "sharedUserId".
+     * TODO(b/235381248): Fix it when we solve tooling compatibility issues
+     */
+    private static int parseSharedUserAppId(TypedXmlPullParser parser) {
+        return parser.getAttributeInt(null, "sharedUserId", 0);
+    }
+
     void addInstallerPackageNames(InstallSource installSource) {
         if (installSource.installerPackageName != null) {
             mInstallerPackages.add(installSource.installerPackageName);
@@ -4089,7 +4106,7 @@ public final class Settings implements Watchable, Snappable {
         SharedUserSetting su = null;
         {
             name = parser.getAttributeValue(null, ATTR_NAME);
-            int userId = parser.getAttributeInt(null, "userId", 0);
+            int appId = parseAppId(parser);
             if (parser.getAttributeBoolean(null, "system", false)) {
                 pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
             }
@@ -4097,13 +4114,13 @@ public final class Settings implements Watchable, Snappable {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Error in package manager settings: <shared-user> has no name at "
                                 + parser.getPositionDescription());
-            } else if (userId == 0) {
+            } else if (appId == 0) {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Error in package manager settings: shared-user " + name
-                                + " has bad userId " + userId + " at "
+                                + " has bad appId " + appId + " at "
                                 + parser.getPositionDescription());
             } else {
-                if ((su = addSharedUserLPw(name.intern(), userId, pkgFlags, pkgPrivateFlags))
+                if ((su = addSharedUserLPw(name.intern(), appId, pkgFlags, pkgPrivateFlags))
                         == null) {
                     PackageManagerService
                             .reportSettingsProblem(Log.ERROR, "Occurred while parsing settings at "
@@ -4528,7 +4545,7 @@ public final class Settings implements Watchable, Snappable {
             pw.println(ps.getPackageName());
         }
 
-        pw.print(prefix); pw.print("  userId="); pw.println(ps.getAppId());
+        pw.print(prefix); pw.print("  appId="); pw.println(ps.getAppId());
 
         SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(ps);
         if (sharedUserSetting != null) {
@@ -5100,7 +5117,7 @@ public final class Settings implements Watchable, Snappable {
                 pw.println("):");
 
                 String prefix = "    ";
-                pw.print(prefix); pw.print("userId="); pw.println(su.mAppId);
+                pw.print(prefix); pw.print("appId="); pw.println(su.mAppId);
 
                 pw.print(prefix); pw.println("Packages");
                 final ArraySet<PackageStateInternal> susPackageStates =

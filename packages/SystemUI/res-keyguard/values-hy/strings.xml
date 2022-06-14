@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Դուք սխալ եք մուտքագրել ձեր գաղտնաբառը <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%2$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Դուք սխալ եք մուտքագրել ձեր ապակողպման նախշը <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ: \n\nՓորձեք կրկին <xliff:g id="NUMBER_1">%2$d</xliff:g> վայրկյանից։"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIM PIN կոդը սխալ է։ Այժմ պետք է դիմեք ձեր օպերատորին՝ սարքն արգելահանելու համար:"</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{SIM քարտի PIN կոդը սխալ է։ Մնաց # փորձ, որից հետո պետք է դիմեք ձեր օպերատորին՝ սարքն ապակողպելու համար։}one{SIM քարտի PIN կոդը սխալ է։ Մնաց # փորձ։ }other{SIM քարտի PIN կոդը սխալ է։ Մնաց # փորձ։ }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-ը հնարավոր չէ օգտագործել: Դիմեք ձեր օպերատորին:"</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{SIM քարտի PUK կոդը սխալ է։ Մնաց # փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել։}one{SIM քարտի PUK կոդը սխալ է։ Մնաց # փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել։}other{SIM քարտի PUK կոդը սխալ է։ Մնաց # փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել։}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN կոդի գործողությունը ձախողվեց:"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK կոդի գործողությունը ձախողվեց:"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Փոխել ներածման եղանակը"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Սարքը կողպված է ադմինիստրատորի կողմից"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Սարքը կողպվել է ձեռքով"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Չհաջողվեց ճանաչել"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Դեմքով ապակողպման համար թույլատրեք տեսախցիկի օգտագործումը"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Մուտքագրեք SIM քարտի PIN կոդը։ Մնացել է # փորձ, որից հետո պետք է դիմեք ձեր օպերատորին՝ սարքն ապակողպելու համար։}one{Մուտքագրեք SIM քարտի PIN կոդը։ Մնացել է # փորձ։}other{Մուտքագրեք SIM քարտի PIN կոդը։ Մնացել է # փորձ։}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM քարտն այժմ անջատված է։ Շարունակելու համար մուտքագրեք PUK կոդը։ Մնացել է # փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել։ Մանրամասների համար դիմեք օպերատորին։}one{SIM քարտն այժմ անջատված է։ Շարունակելու համար մուտքագրեք PUK կոդը։ Մնացել է # փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել։ Մանրամասների համար դիմեք օպերատորին։}other{SIM քարտն այժմ անջատված է։ Շարունակելու համար մուտքագրեք PUK կոդը։ Մնացել է # փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել։ Մանրամասների համար դիմեք օպերատորին։}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Կանխադրված"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Պղպջակ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Անալոգային"</string>

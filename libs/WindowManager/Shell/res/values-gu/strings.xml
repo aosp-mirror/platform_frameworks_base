@@ -81,4 +81,7 @@
     <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"પૂર્ણ સ્ક્રીન મોડ લાગુ કરવા માટે, તમારા ડિવાઇસને ફેરવો"</string>
     <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"કોઈ ઍપની જગ્યા બદલવા માટે, તેની બાજુમાં બે વાર ટૅપ કરો"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"સમજાઈ ગયું"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"વધુ માહિતી માટે મોટું કરો."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"મોટું કરો"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"બંધ કરો"</string>
 </resources>

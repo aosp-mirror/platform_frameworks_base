@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"<xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz idatzi duzu pasahitza, baina huts egin duzu denetan. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"<xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz marraztu duzu desblokeatzeko eredua, baina huts egin duzu denetan. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"SIMaren PIN kodea ez da zuzena. Gailua desblokeatzeko, operadorearekin jarri beharko duzu harremanetan."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Oker idatzi duzu SIMaren PIN kodea. # saiakera geratzen zaizu gailua desblokeatzeko operadorearekin harremanetan jarri behar izan aurretik.}other{Oker idatzi duzu SIMaren PIN kodea. # saiakera geratzen zaizkizu gailua desblokeatzeko operadorearekin harremanetan jarri behar izan aurretik. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM txartela erabilgaitza da. Jarri operadorearekin harremanetan."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Oker idatzi duzu SIMaren PUK kodea. # saiakera geratzen zaizu SIMa betiko ez-erabilgarri geratu aurretik.}other{Oker idatzi duzu SIMaren PUK kodea. # saiakera geratzen zaizkizu SIMa betiko ez-erabilgarri geratu aurretik.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Huts egin du SIM txartelaren PIN kodearen eragiketak!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Huts egin du SIM txartelaren PUK kodearen eragiketak!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Aldatu idazketa-metodoa"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratzaileak blokeatu egin du gailua"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Eskuz blokeatu da gailua"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ez da ezagutu"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aurpegi bidez desblokeatzeko eginbidea erabiltzeko, eman kamera atzitzeko baimena ezarpenetan"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Idatzi SIMaren PINa. # saiakera geratzen zaizu gailua desblokeatzeko operadorearekin harremanetan jarri behar izan aurretik.}other{Idatzi SIMaren PINa. # saiakera gelditzen zaizkizu.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Orain, SIMa desgaituta dago. Aurrera egiteko, idatzi PUK kodea. # saiakera geratzen zaizu SIMa betiko ez-erabilgarri geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.}other{Orain, SIMa desgaituta dago. Aurrera egiteko, idatzi PUK kodea. # saiakera geratzen zaizkizu SIMa betiko ez-erabilgarri geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Lehenetsia"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Puxikak"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analogikoa"</string>

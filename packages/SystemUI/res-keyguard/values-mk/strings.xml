@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Погрешно сте ја напишале вашата лозинка <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Погрешно сте ја нацртале вашата шема за отклучување <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%2$d</xliff:g> секунди."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Погрешен PIN-код за SIM, сега мора да контактирате со вашиот оператор за да го отклучите уредот."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Погрешен PIN-код за SIM-картичката. Ви преостанува уште # обид пред да мора да контактирате со вашиот оператор за да го отклучи уредот.}one{Погрешен PIN-код за SIM, ви преостанува уште # обид. }other{Погрешен PIN-код за SIM, ви преостануваат уште # обиди. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM-картичката е неупотреблива. Контактирајте со вашиот оператор."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{ПУК кодот за SIM-картичката е неточен. Ви преостанува уште # обид, а потоа SIM-картичката ќе стане трајно неупотреблива.}one{Погрешен PUK-код за SIM, ви преостанува уште # обид пред SIM-картичката да стане трајно неупотреблива.}other{Погрешен PUK-код за SIM, ви преостануваат уште # обиди пред SIM-картичката да стане трајно неупотреблива.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM-картичката не се отклучи со PIN-кодот!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM-картичката не се отклучи со PUK-кодот!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Префрли метод за внесување"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Уредот е заклучен од администраторот"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Уредот е заклучен рачно"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Непознат"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"За „Отклучување со лик“, вклучете пристап до камерата"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Внесете PIN-код за SIM-картичката. Ви преостанува уште # обид пред да мора да контактирате со вашиот оператор да го отклучи уредот.}one{Внесете PIN на SIM. Имате уште # обид.}other{Внесете PIN на SIM. Имате уште # обиди.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостанува уште # обид пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.}one{SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостанува уште # обид пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.}other{SIM-картичката сега е оневозможена. Внесете PUK-код за да продолжите. Ви преостануваат уште # обиди пред SIM-картичката да стане трајно неупотреблива. Контактирајте го операторот за детали.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Стандарден"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Балонче"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналоген"</string>

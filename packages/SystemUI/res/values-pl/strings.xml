@@ -205,8 +205,7 @@
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Wyłączenie czujników aktywne"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Usuń wszystkie powiadomienia."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <!-- no translation found for notification_group_overflow_description (7176322877233433278) -->
-    <skip />
+    <string name="notification_group_overflow_description" msgid="7176322877233433278">"{count,plural, =1{Jeszcze # powiadomienie w grupie.}few{Jeszcze # powiadomienia w grupie.}many{Jeszcze # powiadomień w grupie.}other{Jeszcze # powiadomienia w grupie.}}"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Ekran jest zablokowany w orientacji poziomej."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Ekran jest zablokowany w orientacji pionowej."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Półka ze słodkościami"</string>
@@ -254,8 +253,7 @@
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Hotspot"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Włączam…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Włączono Oszczędzanie danych"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (7536823087501239457) -->
-    <skip />
+    <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# urządzenie}few{# urządzenia}many{# urządzeń}other{# urządzenia}}"</string>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Latarka"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Aparat w użyciu"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Mobilna transmisja danych"</string>
@@ -352,8 +350,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"Jesteś w trybie gościa"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Dodanie nowego użytkownika spowoduje zamknięcie trybu gościa. Wszystkie aplikacje i dane z obecnej sesji gościa zostaną usunięte."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Osiągnięto limit użytkowników"</string>
-    <!-- no translation found for user_limit_reached_message (1070703858915935796) -->
-    <skip />
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Można utworzyć tylko 1 użytkownika.}few{Możesz dodać maksymalnie # użytkowników}many{Możesz dodać maksymalnie # użytkowników}other{Możesz dodać maksymalnie # użytkownika}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Usunąć użytkownika?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Wszystkie aplikacje i dane tego użytkownika zostaną usunięte."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Usuń"</string>
@@ -539,10 +536,8 @@
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"Przypomnij"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Cofnij"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Odłożono na <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2332819756222425558) -->
-    <skip />
-    <!-- no translation found for snoozeMinuteOptions (2222082405822030979) -->
-    <skip />
+    <string name="snoozeHourOptions" msgid="2332819756222425558">"{count,plural, =1{# godzina}=2{# godziny}few{# godziny}many{# godzin}other{# godziny}}"</string>
+    <string name="snoozeMinuteOptions" msgid="2222082405822030979">"{count,plural, =1{# minuta}few{# minuty}many{# minut}other{# minuty}}"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Oszczędzanie baterii"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Przycisk <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
@@ -766,8 +761,7 @@
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"przełącz"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Sterowanie urządzeniami"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Wybierz aplikację, do której chcesz dodać elementy sterujące"</string>
-    <!-- no translation found for controls_number_of_favorites (4481806788981836355) -->
-    <skip />
+    <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Dodano # element sterujący.}few{Dodano # elementy sterujące.}many{Dodano # elementów sterujących.}other{Dodano # elementu sterującego.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Usunięto"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Dodano do ulubionych"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Dodano do ulubionych, pozycja <xliff:g id="NUMBER">%d</xliff:g>"</string>
@@ -844,8 +838,7 @@
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nieznana aplikacja"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zatrzymaj przesyłanie"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostępne urządzenia do odtwarzania dźwięku."</string>
-    <!-- no translation found for media_output_dialog_accessibility_seekbar (5332843993805568978) -->
-    <skip />
+    <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Głośność"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jak działa transmitowanie"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmisja"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osoby w pobliżu ze zgodnymi urządzeniami Bluetooth mogą słuchać transmitowanych przez Ciebie multimediów"</string>
@@ -925,12 +918,10 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj kafelek"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nie dodawaj kafelka"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Wybierz użytkownika"</string>
-    <!-- no translation found for fgs_manager_footer_label (8276763570622288231) -->
-    <skip />
+    <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplikacja jest aktywna}few{# aplikacje są aktywne}many{# aplikacji jest aktywnych}other{# aplikacji jest aktywne}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nowa informacja"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktywne aplikacje"</string>
-    <!-- no translation found for fgs_manager_dialog_message (2670045017200730076) -->
-    <skip />
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Te aplikacje są aktywne i działają, nawet gdy ich nie używasz. Zwiększa to ich funkcjonalność, ale może również pogarszać żywotność baterii."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Zatrzymaj"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Zatrzymano"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Gotowe"</string>
@@ -944,14 +935,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Tekst został skopiowany"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Zdjęcie zostało skopiowane"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Treści zostały skopiowane"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Edytor schowka"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Schowek"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Podgląd obrazu"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"edytować"</string>
     <string name="add" msgid="81036585205287996">"Dodaj"</string>
     <string name="manage_users" msgid="1823875311934643849">"Zarządzaj użytkownikami"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"To powiadomienie nie obsługuje dzielenia ekranu przez przeciąganie."</string>

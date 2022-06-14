@@ -68,11 +68,9 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"Ubhale iphasiwedi yakho ngendlela engafanele <xliff:g id="NUMBER_0">%1$d</xliff:g> izikhathi. \n\nZama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Udwebe iphathini yakho yokuvula ngendlela engafanele-<xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Zama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Ikhodi yephinikhodi ye-SIM engalungile manje kumele uxhumane nenkampini yenethiwekhi yakho ukuvula idivayisi yakho."</string>
-    <!-- no translation found for kg_password_wrong_pin_code (5629415765976820357) -->
-    <skip />
+    <string name="kg_password_wrong_pin_code" msgid="5629415765976820357">"{count,plural, =1{Ikhodi engalungile Yephinikhodi ye-SIM, unomzamo ongu-# osele ngaphambi kokuba uxhumane nenkampani yakho yenethiwekhi ukuvula idivayisi yakho.}one{Ikhodi engalungile Yephinikhodi ye-SIM, unemizamo engu-# esele. }other{Ikhodi engalungile Yephinikhodi ye-SIM, unemizamo engu-# esele. }}"</string>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"I-SIM ayisebenziseki. Xhumana nemkampini yenethiwekhi yakho."</string>
-    <!-- no translation found for kg_password_wrong_puk_code (6820515467645087827) -->
-    <skip />
+    <string name="kg_password_wrong_puk_code" msgid="6820515467645087827">"{count,plural, =1{Ikhodi ye-PUK ye-SIM engalungile, unemizamo engu-# esele ngaphambi kokuba i-SIM ibe engasasebenziseki unomphela.}one{Ikhodi ye-PUK ye-SIM engalungile, unemizamo engu-# esele ngaphambi kokuthi i-SIM ibe engasasebenziseki unomphela.}other{Ikhodi ye-PUK ye-SIM engalungile, unemizamo engu-# esele ngaphambi kokuthi i-SIM ibe engasasebenziseki unomphela.}}"</string>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"Umsebenzi wephinikhodi ye-SIM wehlulekile!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"Umsebenzi we-PUK ye-SIM wehlulekile!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Shintsha indlela yokufaka"</string>
@@ -86,12 +84,9 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Idivayisi ikhiywe ngumlawuli"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Idivayisi ikhiywe ngokwenza"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Akwaziwa"</string>
-    <!-- no translation found for kg_face_sensor_privacy_enabled (939511161763558512) -->
-    <skip />
-    <!-- no translation found for kg_password_default_pin_message (1434544655827987873) -->
-    <skip />
-    <!-- no translation found for kg_password_default_puk_message (1025139786449741950) -->
-    <skip />
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Ukuze usebenzise Ukuvula Ngobuso, vula ukufinyelela kwekhamera Kumasethingi"</string>
+    <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Faka Iphinikhodi ye-SIM. Unemizamo engu-# esele ngaphambi kokuthi uxhumane nenkampani yakho yenethiwekhi ukuze uvule idivayisi yakho.}one{Faka Iphinikhodi ye-SIM Unemizamo engu-# esele.}other{Faka Iphinikhodi ye-SIM Unemizamo engu-# esele.}}"</string>
+    <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unomzamo ongu-# osele ngaphambi kokuthi i-SIM ingasasebenziseki unomphela. Xhumana nenkampani yenethiwekhi ngemininingwane.}one{I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-# esele ngaphambi kokuthi i-SIM ingasasebenziseki unomphela. Xhumana nenkampani yenethiwekhi ngemininingwane.}other{I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Unemizamo engu-# esele ngaphambi kokuthi i-SIM ingasasebenziseki unomphela. Xhumana nenkampani yenethiwekhi ngemininingwane.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Okuzenzekelayo"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Ibhamuza"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"I-Analog"</string>
