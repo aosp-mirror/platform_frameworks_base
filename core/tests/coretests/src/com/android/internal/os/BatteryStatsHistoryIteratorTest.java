@@ -35,7 +35,6 @@ import java.io.File;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-@SuppressWarnings("GuardedBy")
 public class BatteryStatsHistoryIteratorTest {
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
 
@@ -51,22 +50,32 @@ public class BatteryStatsHistoryIteratorTest {
 
     @Test
     public void testIterator() {
-        mBatteryStats.setRecordAllHistoryLocked(true);
+        synchronized (mBatteryStats) {
+            mBatteryStats.setRecordAllHistoryLocked(true);
+        }
         mBatteryStats.forceRecordAllHistory();
 
         mMockClock.realtime = 1000;
         mMockClock.uptime = 1000;
         mBatteryStats.setNoAutoReset(true);
 
-        mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0, 1_000_000,
-                1_000_000, 1_000_000);
-        mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0, 2_000_000,
-                2_000_000, 2_000_000);
+        synchronized (mBatteryStats) {
+            mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
+                    100, /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0, 1_000_000,
+                    1_000_000, 1_000_000);
+        }
+        synchronized (mBatteryStats) {
+            mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
+                    100, /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0, 2_000_000,
+                    2_000_000, 2_000_000);
+        }
 
-        mBatteryStats.noteAlarmStartLocked("foo", null, APP_UID, 3_000_000, 2_000_000);
-        mBatteryStats.noteAlarmFinishLocked("foo", null, APP_UID, 3_001_000, 2_001_000);
+        synchronized (mBatteryStats) {
+            mBatteryStats.noteAlarmStartLocked("foo", null, APP_UID, 3_000_000, 2_000_000);
+        }
+        synchronized (mBatteryStats) {
+            mBatteryStats.noteAlarmFinishLocked("foo", null, APP_UID, 3_001_000, 2_001_000);
+        }
 
         final BatteryStatsHistoryIterator iterator =
                 mBatteryStats.createBatteryStatsHistoryIterator();
@@ -111,24 +120,31 @@ public class BatteryStatsHistoryIteratorTest {
     // Test history that spans multiple buffers and uses more than 32k different strings.
     @Test
     public void tagsLongHistory() {
-        mBatteryStats.setRecordAllHistoryLocked(true);
+        synchronized (mBatteryStats) {
+            mBatteryStats.setRecordAllHistoryLocked(true);
+        }
         mBatteryStats.forceRecordAllHistory();
 
         mMockClock.realtime = 1000;
         mMockClock.uptime = 1000;
         mBatteryStats.setNoAutoReset(true);
 
-        mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
-                /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0, 1_000_000,
-                1_000_000, 1_000_000);
-
+        synchronized (mBatteryStats) {
+            mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING,
+                    100, /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0, 1_000_000,
+                    1_000_000, 1_000_000);
+        }
         // More than 32k strings
         final int eventCount = 0x7FFF + 100;
         for (int i = 0; i < eventCount; i++) {
             // Names repeat in order to verify de-duping of identical history tags.
             String name = "a" + (i % 10);
-            mBatteryStats.noteAlarmStartLocked(name, null, APP_UID, 3_000_000, 2_000_000);
-            mBatteryStats.noteAlarmFinishLocked(name, null, APP_UID, 3_500_000, 2_500_000);
+            synchronized (mBatteryStats) {
+                mBatteryStats.noteAlarmStartLocked(name, null, APP_UID, 3_000_000, 2_000_000);
+            }
+            synchronized (mBatteryStats) {
+                mBatteryStats.noteAlarmFinishLocked(name, null, APP_UID, 3_500_000, 2_500_000);
+            }
         }
 
         final BatteryStatsHistoryIterator iterator =
