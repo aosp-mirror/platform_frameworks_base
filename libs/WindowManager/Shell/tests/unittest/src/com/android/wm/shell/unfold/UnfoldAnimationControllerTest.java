@@ -206,6 +206,19 @@ public class UnfoldAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void testApplicableTaskDisappeared_resetsSurface() {
+        mTaskAnimator1.setTaskMatcher((info) -> info.getWindowingMode() == 0);
+        RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
+                .setWindowingMode(0).build();
+        mUnfoldAnimationController.onTaskAppeared(taskInfo, mLeash);
+        assertThat(mTaskAnimator1.mResetTasks).doesNotContain(taskInfo.taskId);
+
+        mUnfoldAnimationController.onTaskVanished(taskInfo);
+
+        assertThat(mTaskAnimator1.mResetTasks).contains(taskInfo.taskId);
+    }
+
+    @Test
+    public void testApplicablePinnedTaskDisappeared_doesNotResetSurface() {
         mTaskAnimator1.setTaskMatcher((info) -> info.getWindowingMode() == 2);
         RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
                 .setWindowingMode(2).build();
@@ -214,7 +227,7 @@ public class UnfoldAnimationControllerTest extends ShellTestCase {
 
         mUnfoldAnimationController.onTaskVanished(taskInfo);
 
-        assertThat(mTaskAnimator1.mResetTasks).contains(taskInfo.taskId);
+        assertThat(mTaskAnimator1.mResetTasks).doesNotContain(taskInfo.taskId);
     }
 
     @Test
