@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
-import com.android.internal.os.PowerCalculator;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -60,7 +58,7 @@ public class UserBatteryConsumer extends BatteryConsumer {
         pw.print("User ");
         pw.print(getUserId());
         pw.print(": ");
-        PowerCalculator.printPowerMah(pw, consumedPower);
+        pw.print(BatteryStats.formatCharge(consumedPower));
         pw.print(" ( ");
         mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
         pw.print(" ) ");
