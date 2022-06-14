@@ -146,6 +146,20 @@ public class ColorSchemeTest extends SysuiTestCase {
         Assert.assertTrue(cam.getChroma() <= 8.0);
     }
 
+    @Test
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public void testToString() {
+        new ColorScheme(Color.TRANSPARENT, false /* darkTheme */).toString();
+        new ColorScheme(Color.argb(0, 0, 0, 0xf), false /* darkTheme */).toString();
+        new ColorScheme(Color.argb(0xff, 0xff, 0, 0), false /* darkTheme */).toString();
+        new ColorScheme(0xFFFFFFFF, false /* darkTheme */).toString();
+
+        new ColorScheme(Color.TRANSPARENT, true /* darkTheme */).toString();
+        new ColorScheme(Color.argb(0, 0, 0, 0xf), true /* darkTheme */).toString();
+        new ColorScheme(0xFFFF0000, true /* darkTheme */).toString();
+        new ColorScheme(0xFFFFFFFF, true /* darkTheme */).toString();
+    }
+
     /**
      * Generate xml for SystemPaletteTest#testThemeStyles().
      */

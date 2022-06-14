@@ -87,20 +87,21 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
 
     fun onDisplayChanged(displayId: Int) {
         val oldMode: Display.Mode? = displayMode
-        displayMode = display.mode
+        val display: Display? = context.display
+        displayMode = display?.mode
 
-        if (displayUniqueId != context.display?.uniqueId) {
-            displayUniqueId = context.display?.uniqueId
+        if (displayUniqueId != display?.uniqueId) {
+            displayUniqueId = display?.uniqueId
             shouldDrawCutout = DisplayCutout.getFillBuiltInDisplayCutout(
                     context.resources, displayUniqueId)
         }
 
         // Skip if display mode or cutout hasn't changed.
         if (!displayModeChanged(oldMode, displayMode) &&
-                display.cutout == displayInfo.displayCutout) {
+                display?.cutout == displayInfo.displayCutout) {
             return
         }
-        if (displayId == display.displayId) {
+        if (displayId == display?.displayId) {
             updateCutout()
             updateProtectionBoundingPath()
             onUpdate()
