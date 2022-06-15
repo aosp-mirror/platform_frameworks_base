@@ -111,8 +111,8 @@ fun FlickerTestParameter.statusBarLayerIsVisible() {
  */
 fun FlickerTestParameter.navBarLayerPositionStart() {
     assertLayersStart {
-        val display = this.entry.displays.minByOrNull { it.id }
-            ?: throw RuntimeException("There is no display!")
+        val display = this.entry.displays.firstOrNull { !it.isVirtual }
+                ?: error("There is no display!")
         this.visibleRegion(FlickerComponentName.NAV_BAR)
             .coversExactly(WindowUtils.getNavigationBarPosition(display, isGesturalNavigation))
     }

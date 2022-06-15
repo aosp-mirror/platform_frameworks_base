@@ -41,7 +41,7 @@ class NewTasksAppHelper @JvmOverloads constructor(
             Until.findObject(By.res(getPackage(), "launch_new_task")),
             FIND_TIMEOUT)
 
-        require(button != null) {
+        requireNotNull(button) {
             "Button not found, this usually happens when the device " +
                     "was left in an unknown state (e.g. in split screen)"
         }

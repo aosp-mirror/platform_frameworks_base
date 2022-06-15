@@ -74,7 +74,7 @@ open class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper)
-                    testApp.openIME(device, wmHelper)
+                    testApp.openIME(wmHelper)
                 }
                 eachRun {
                     device.pressRecentApps()
@@ -92,7 +92,7 @@ open class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
             }
             teardown {
                 test {
-                    testApp.exit()
+                    testApp.exit(wmHelper)
                 }
             }
         }

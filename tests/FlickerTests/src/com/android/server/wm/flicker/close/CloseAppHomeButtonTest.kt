@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.close
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -77,29 +76,15 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         }
 
     /** {@inheritDoc} */
-    @FlakyTest
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 227430489)
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() {
         super.statusBarLayerRotatesScales()
-    }
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun launcherLayerReplacesApp() {
-        super.launcherLayerReplacesApp()
-    }
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() {
-        super.entireScreenCovered()
     }
 
     /** {@inheritDoc} */

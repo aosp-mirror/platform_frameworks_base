@@ -75,14 +75,11 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
             setup {
                 eachRun {
                     mTestApp.launchViaIntent(wmHelper)
-                    wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(mTestApp.component)
-                        .waitForAndVerify()
                 }
             }
             teardown {
                 test {
-                    mTestApp.exit()
+                    mTestApp.exit(wmHelper)
                 }
             }
             transitions {

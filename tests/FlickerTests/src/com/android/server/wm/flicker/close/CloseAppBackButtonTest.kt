@@ -80,7 +80,7 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         }
 
     /** {@inheritDoc} */
-    @FlakyTest
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 

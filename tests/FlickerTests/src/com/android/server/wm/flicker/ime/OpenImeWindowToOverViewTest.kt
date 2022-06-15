@@ -83,7 +83,7 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
                     wmHelper.StateSyncBuilder()
                         .withHomeActivityVisible()
                         .waitForAndVerify()
-                    imeTestApp.exit()
+                    imeTestApp.exit(wmHelper)
                 }
             }
         }

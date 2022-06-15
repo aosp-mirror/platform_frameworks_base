@@ -18,7 +18,6 @@ package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.FlickerComponentName
@@ -33,18 +32,15 @@ class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
     component: FlickerComponentName =
             ActivityOptions.EDITOR_POPUP_DIALOG_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
-    override fun openIME(
-        device: UiDevice,
-        wmHelper: WindowManagerStateHelper?
-    ) {
-        val editText = device.wait(Until.findObject(By.text("focused editText")), FIND_TIMEOUT)
+    override fun openIME(wmHelper: WindowManagerStateHelper) {
+        val editText = uiDevice.wait(Until.findObject(By.text("focused editText")), FIND_TIMEOUT)
 
         require(editText != null) {
             "Text field not found, this usually happens when the device " +
                     "was left in an unknown state (e.g. in split screen)"
         }
         editText.click()
-        waitIMEShown(device, wmHelper)
+        waitIMEShown(wmHelper)
     }
 
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {

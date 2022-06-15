@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.quickswitch
 
 import android.app.Instrumentation
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -65,7 +66,7 @@ import org.junit.runners.Parameterized
 @Group1
 open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val taplInstrumentation = LauncherInstrumentation()
+    private val tapl = LauncherInstrumentation()
 
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
@@ -80,36 +81,23 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
         return FlickerBuilder(instrumentation).apply {
             setup {
                 test {
-                    taplInstrumentation.setExpectedRotation(testSpec.startRotation)
-                }
-
-                eachRun {
+                    tapl.setExpectedRotation(testSpec.startRotation)
                     testApp1.launchViaIntent(wmHelper)
-                    wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(testApp1.component)
-                        .waitForAndVerify()
-
                     testApp2.launchViaIntent(wmHelper)
-                    wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(testApp2.component)
-                        .waitForAndVerify()
 
                     startDisplayBounds = wmHelper.currentState.layerState
-                        .displays.firstOrNull { !it.isVirtual }
-                        ?.layerStackSpace
-                        ?: error("Display not found")
-
-                    taplInstrumentation.launchedAppState.quickSwitchToPreviousApp()
-
+                        .physicalDisplayBounds ?: error("Display not found")
+                }
+                eachRun {
+                    tapl.launchedAppState.quickSwitchToPreviousApp()
                     wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(testApp1.component)
+                        .withNavBarStatusBarVisible()
                         .waitForAndVerify()
                 }
             }
             transitions {
-                taplInstrumentation.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
+                tapl.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp2.component)
                     .withNavBarStatusBarVisible()
                     .waitForAndVerify()
             }
@@ -315,7 +303,7 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
      *
      * NOTE: This doesn't check that the navbar is visible or not.
      */
-    @Presubmit
+    @FlakyTest
     @Test
     open fun navbarIsAlwaysInRightPosition() {
         testSpec.navBarLayerRotatesAndScales()

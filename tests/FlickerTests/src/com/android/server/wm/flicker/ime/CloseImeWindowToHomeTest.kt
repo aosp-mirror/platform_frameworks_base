@@ -62,7 +62,7 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
             setup {
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
-                    testApp.openIME(device, wmHelper)
+                    testApp.openIME(wmHelper)
                 }
             }
             transitions {
@@ -73,12 +73,6 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
                     .waitForAndVerify()
             }
             teardown {
-                eachRun {
-                    device.pressHome()
-                    wmHelper.StateSyncBuilder()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
-                }
                 test {
                     testApp.exit(wmHelper)
                 }

@@ -80,7 +80,7 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                         .withFullScreenApp(imeTestApp.component)
                         .waitForAndVerify()
 
-                    imeTestApp.openIME(device, wmHelper)
+                    imeTestApp.openIME(wmHelper)
                 }
             }
             teardown {
@@ -89,8 +89,8 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                     wmHelper.StateSyncBuilder()
                         .withHomeActivityVisible()
                         .waitForAndVerify()
-                    testApp.exit()
-                    imeTestApp.exit()
+                    testApp.exit(wmHelper)
+                    imeTestApp.exit(wmHelper)
                 }
             }
             transitions {

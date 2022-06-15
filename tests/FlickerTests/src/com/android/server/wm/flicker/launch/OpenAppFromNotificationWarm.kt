@@ -73,7 +73,7 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
                     wmHelper.StateSyncBuilder()
                         .withFullScreenApp(testApp.component)
                         .waitForAndVerify()
-                    testApp.postNotification(device, wmHelper)
+                    testApp.postNotification(wmHelper)
                     device.pressHome()
                     wmHelper.StateSyncBuilder()
                         .withHomeActivityVisible()

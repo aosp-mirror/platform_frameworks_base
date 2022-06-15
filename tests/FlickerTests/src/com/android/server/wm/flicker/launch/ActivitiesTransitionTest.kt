@@ -72,9 +72,6 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper)
-                    wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(testApp.component)
-                        .waitForAndVerify()
                 }
             }
             teardown {

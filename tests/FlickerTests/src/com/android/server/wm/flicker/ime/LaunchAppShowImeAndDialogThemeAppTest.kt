@@ -71,7 +71,7 @@ class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestPar
             }
             teardown {
                 eachRun {
-                    testApp.exit()
+                    testApp.exit(wmHelper)
                 }
             }
             transitions {

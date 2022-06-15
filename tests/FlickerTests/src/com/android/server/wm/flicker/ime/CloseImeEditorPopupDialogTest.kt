@@ -54,7 +54,7 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
             setup {
                 eachRun {
                     imeTestApp.launchViaIntent(wmHelper)
-                    imeTestApp.openIME(device, wmHelper)
+                    imeTestApp.openIME(wmHelper)
                 }
             }
             transitions {

@@ -75,9 +75,6 @@ open class OpenAppColdTest(testSpec: FlickerTestParameter) :
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp.component)
-                    .waitForAndVerify()
             }
         }
 
@@ -87,7 +84,7 @@ open class OpenAppColdTest(testSpec: FlickerTestParameter) :
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     /** {@inheritDoc} */
-    @FlakyTest
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerRotatesAndScales() {
         super.navBarLayerRotatesAndScales()

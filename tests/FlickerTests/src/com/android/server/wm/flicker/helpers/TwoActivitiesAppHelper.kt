@@ -44,7 +44,7 @@ class TwoActivitiesAppHelper @JvmOverloads constructor(
         val launchActivityButton = By.res(getPackage(), LAUNCH_SECOND_ACTIVITY)
         val button = device.wait(Until.findObject(launchActivityButton), FIND_TIMEOUT)
 
-        require(button != null) {
+        requireNotNull(button) {
             "Button not found, this usually happens when the device " +
                     "was left in an unknown state (e.g. in split screen)"
         }

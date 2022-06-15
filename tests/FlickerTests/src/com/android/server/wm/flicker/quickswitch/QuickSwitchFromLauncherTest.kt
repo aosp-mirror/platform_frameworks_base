@@ -31,13 +31,13 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.Rect
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,8 +66,6 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
 
     private val testApp = SimpleAppHelper(instrumentation)
 
-    private val startDisplayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
-
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
@@ -83,6 +81,9 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
                         .withHomeActivityVisible()
                         .withWindowSurfaceDisappeared(testApp.component)
                         .waitForAndVerify()
+
+                    startDisplayBounds = wmHelper.currentState.layerState
+                        .physicalDisplayBounds ?: error("Display not found")
                 }
             }
             transitions {
@@ -95,7 +96,7 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
 
             teardown {
                 eachRun {
-                    testApp.exit()
+                    testApp.exit(wmHelper)
                 }
             }
         }
@@ -328,6 +329,8 @@ class QuickSwitchFromLauncherTest(private val testSpec: FlickerTestParameter) {
     fun screenIsAlwaysFilled() = testSpec.entireScreenCovered()
 
     companion object {
+        private var startDisplayBounds = Rect.EMPTY
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {

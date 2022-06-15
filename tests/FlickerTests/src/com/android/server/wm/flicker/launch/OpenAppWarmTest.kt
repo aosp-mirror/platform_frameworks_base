@@ -75,15 +75,12 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter) :
                 }
             }
             teardown {
-                eachRun {
+                test {
                     testApp.exit(wmHelper)
                 }
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp.component)
-                    .waitForAndVerify()
             }
         }
 

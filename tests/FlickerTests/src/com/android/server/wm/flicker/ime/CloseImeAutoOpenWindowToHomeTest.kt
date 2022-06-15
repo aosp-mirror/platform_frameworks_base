@@ -71,7 +71,6 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
             setup {
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
-                    testApp.openIME(device, wmHelper)
                 }
             }
             teardown {
