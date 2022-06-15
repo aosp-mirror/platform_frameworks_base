@@ -16,11 +16,10 @@
 
 package com.android.server.wm.flicker.helpers
 
+import android.app.Instrumentation
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
-
-import android.app.Instrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
@@ -28,7 +27,6 @@ import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-
 import java.util.regex.Pattern
 
 class ImeAppAutoFocusHelper @JvmOverloads constructor(
@@ -75,7 +73,6 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
                     "was left in an unknown state (e.g. Screen turned off)"
         }
         button.click()
-        wmHelper.waitForAppTransitionIdle()
         wmHelper.waitForFullScreenApp(
                 ActivityOptions.DIALOG_THEMED_ACTIVITY_COMPONENT_NAME.toFlickerComponent())
         mInstrumentation.waitForIdleSync()

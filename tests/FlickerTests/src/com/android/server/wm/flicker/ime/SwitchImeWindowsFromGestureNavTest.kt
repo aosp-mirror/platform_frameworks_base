@@ -23,12 +23,12 @@ import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
@@ -41,7 +41,6 @@ import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.Before
-
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -111,7 +110,6 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                         displayBounds.bounds.width, displayBounds.bounds.height, 50)
 
                 wmHelper.waitForFullScreenApp(testApp.component)
-                wmHelper.waitForAppTransitionIdle()
                 createTag(TAG_IME_INVISIBLE)
             }
             transitions {
