@@ -17,6 +17,7 @@
 
 package com.android.server.companion;
 
+import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -620,6 +621,9 @@ public class CompanionDeviceManagerService extends SystemService {
                 Log.i(TAG, "dispatchMessage() associationId=" + associationId + "\n"
                         + " message(Base64)=" + Base64.encodeToString(message, 0));
             }
+
+            getContext().enforceCallingOrSelfPermission(DELIVER_COMPANION_MESSAGES,
+                    "dispatchMessage");
 
             AssociationInfo association = getAssociationWithCallerChecks(associationId);
             if (association == null) {
