@@ -39,7 +39,6 @@ import static com.android.server.wm.SizeCompatTests.rotateDisplay;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -211,10 +210,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(activityConfigBounds.width()).isEqualTo(activityBounds.width());
         assertThat(activityConfigBounds.height()).isEqualTo(activityBounds.height());
         assertThat(activitySizeCompatBounds.height()).isEqualTo(newTaskBounds.height());
-        final float defaultAspectRatio = mFirstActivity.mWmService.mLetterboxConfiguration
-                .getDefaultMinAspectRatioForUnresizableApps();
-        assertEquals(activitySizeCompatBounds.width(),
-                newTaskBounds.height() / defaultAspectRatio, 0.5);
+        assertThat(activitySizeCompatBounds.width()).isEqualTo(
+                newTaskBounds.height() * newTaskBounds.height() / newTaskBounds.width());
     }
 
     @Test
@@ -234,9 +231,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
         assertThat(taskBounds).isEqualTo(dagBounds);
         assertThat(activityBounds.width()).isEqualTo(dagBounds.width());
-        final float defaultAspectRatio = mFirstActivity.mWmService.mLetterboxConfiguration
-                .getDefaultMinAspectRatioForUnresizableApps();
-        assertEquals(activityBounds.height(), dagBounds.width() / defaultAspectRatio, 0.5);
+        assertThat(activityBounds.height())
+                .isEqualTo(dagBounds.width() * dagBounds.width() / dagBounds.height());
     }
 
     @Test
