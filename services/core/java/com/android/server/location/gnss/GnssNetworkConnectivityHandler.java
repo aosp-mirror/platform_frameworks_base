@@ -16,6 +16,8 @@
 
 package com.android.server.location.gnss;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
@@ -46,7 +48,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Handles network connection requests and network state change updates for AGPS data download.
@@ -582,6 +583,7 @@ class GnssNetworkConnectivityHandler {
         if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
             if (DEBUG) Log.d(TAG, "Adding Network Specifier: " + Integer.toString(mActiveSubId));
             networkRequestBuilder.setNetworkSpecifier(Integer.toString(mActiveSubId));
+            networkRequestBuilder.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
         NetworkRequest networkRequest = networkRequestBuilder.build();
         // Make sure we only have a single request.
@@ -597,6 +599,7 @@ class GnssNetworkConnectivityHandler {
                     SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
         } catch (RuntimeException e) {
             Log.e(TAG, "Failed to request network.", e);
+            mSuplConnectivityCallback = null;
             handleReleaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
         }
     }

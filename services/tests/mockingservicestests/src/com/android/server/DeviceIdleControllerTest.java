@@ -284,7 +284,7 @@ public class DeviceIdleControllerTest {
         @Override
         public void onDeviceStationaryChanged(boolean isStationary) {
             if (isStationary == motionExpected) {
-                fail("Unexpected device stationary status: " + isStationary);
+                fail("Got unexpected device stationary status: " + isStationary);
             }
             this.isStationary = isStationary;
         }
@@ -2094,6 +2094,70 @@ public class DeviceIdleControllerTest {
         inOrder.verify(mSensorManager)
                 .registerListener(eq(listener), eq(mMotionSensor),
                         eq(SensorManager.SENSOR_DELAY_NORMAL));
+    }
+
+    @Test
+    public void testStationaryDetection_NoDoze_AfterMotion() {
+        // Short timeout for testing.
+        mConstants.MOTION_INACTIVE_TIMEOUT = 6000L;
+        doReturn(Sensor.REPORTING_MODE_CONTINUOUS).when(mMotionSensor).getReportingMode();
+        setAlarmSoon(true);
+
+        final ArgumentCaptor<AlarmManager.OnAlarmListener> regAlarmListener = ArgumentCaptor
+                .forClass(AlarmManager.OnAlarmListener.class);
+        final ArgumentCaptor<AlarmManager.OnAlarmListener> motionAlarmListener = ArgumentCaptor
+                .forClass(AlarmManager.OnAlarmListener.class);
+        doNothing().when(mAlarmManager).setWindow(
+                anyInt(), anyLong(), anyLong(), eq("DeviceIdleController.motion"),
+                motionAlarmListener.capture(), any());
+        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
+                eq("DeviceIdleController.motion_registration"),
+                regAlarmListener.capture(), any());
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+
+        StationaryListenerForTest stationaryListener = new StationaryListenerForTest();
+        spyOn(stationaryListener);
+        InOrder inOrder = inOrder(stationaryListener, mSensorManager, mAlarmManager);
+
+        stationaryListener.motionExpected = true;
+        mDeviceIdleController.registerStationaryListener(stationaryListener);
+        inOrder.verify(stationaryListener, timeout(1000L).times(1))
+                .onDeviceStationaryChanged(eq(false));
+        assertFalse(stationaryListener.isStationary);
+        inOrder.verify(mSensorManager)
+                .registerListener(listenerCaptor.capture(), eq(mMotionSensor),
+                        eq(SensorManager.SENSOR_DELAY_NORMAL));
+        inOrder.verify(mAlarmManager).setWindow(
+                anyInt(), eq(mInjector.nowElapsed + mConstants.MOTION_INACTIVE_TIMEOUT), anyLong(),
+                eq("DeviceIdleController.motion"), any(), any());
+        final SensorEventListener listener = listenerCaptor.getValue();
+
+        // Trigger motion
+        listener.onSensorChanged(mock(SensorEvent.class));
+        inOrder.verify(stationaryListener, timeout(1000L).times(1))
+                .onDeviceStationaryChanged(eq(false));
+        final ArgumentCaptor<Long> registrationTimeCaptor = ArgumentCaptor.forClass(Long.class);
+        inOrder.verify(mAlarmManager).setWindow(
+                anyInt(), registrationTimeCaptor.capture(), anyLong(),
+                eq("DeviceIdleController.motion_registration"), any(), any());
+
+        // Make sure the listener is re-registered.
+        mInjector.nowElapsed = registrationTimeCaptor.getValue();
+        regAlarmListener.getValue().onAlarm();
+        inOrder.verify(mSensorManager)
+                .registerListener(eq(listener), eq(mMotionSensor),
+                        eq(SensorManager.SENSOR_DELAY_NORMAL));
+        final ArgumentCaptor<Long> timeoutCaptor = ArgumentCaptor.forClass(Long.class);
+        inOrder.verify(mAlarmManager).setWindow(anyInt(), timeoutCaptor.capture(), anyLong(),
+                eq("DeviceIdleController.motion"), any(), any());
+
+        // No motion before timeout
+        stationaryListener.motionExpected = false;
+        mInjector.nowElapsed = timeoutCaptor.getValue();
+        motionAlarmListener.getValue().onAlarm();
+        inOrder.verify(stationaryListener, timeout(1000L).times(1))
+                .onDeviceStationaryChanged(eq(true));
     }
 
     private void enterDeepState(int state) {

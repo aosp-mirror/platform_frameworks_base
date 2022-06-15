@@ -292,10 +292,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             return;
         }
 
-        final int warningLevel = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lowBatteryWarningLevel);
         final String percentage = NumberFormat.getPercentInstance()
-                .format((double) warningLevel / 100.0);
+                .format((double) mCurrentBatterySnapshot.getBatteryLevel() / 100.0);
         final String title = mContext.getString(R.string.battery_low_title);
         final String contentText = mContext.getString(
                 R.string.battery_low_description, percentage);
@@ -309,7 +307,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setContentText(contentText)
                         .setContentTitle(title)
                         .setOnlyAlertOnce(true)
-                        .setOngoing(true)
+                        .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
                         .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
@@ -336,12 +334,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
-        logEvent(BatteryWarningEvents.LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION);
     }
 
     private boolean showSevereLowBatteryDialog() {
-        final boolean isSevereState = !mCurrentBatterySnapshot.isHybrid() || mBucket < -1;
-        return isSevereState && mUseSevereDialog;
+        return mBucket < -1 && mUseSevereDialog;
     }
 
     /**
@@ -619,6 +615,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         Slog.i(TAG,
                 "show low battery warning: level=" + mBatteryLevel
                         + " [" + mBucket + "] playSound=" + playSound);
+        logEvent(BatteryWarningEvents.LowBatteryWarningEvent.LOW_BATTERY_NOTIFICATION);
         mPlaySound = playSound;
         mWarning = true;
         updateNotification();

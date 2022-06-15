@@ -1208,22 +1208,12 @@ public class JobSchedulerService extends com.android.server.SystemService
             // This may throw a SecurityException.
             jobStatus.prepareLocked();
 
-            final boolean canExecuteImmediately;
             if (toCancel != null) {
                 // Implicitly replaces the existing job record with the new instance
-                final boolean wasJobExecuting = cancelJobImplLocked(toCancel, jobStatus,
-                        JobParameters.STOP_REASON_CANCELLED_BY_APP,
-                        JobParameters.INTERNAL_STOP_REASON_CANCELED,
-                        "job rescheduled by app");
-                // Avoid overlapping job executions. Don't push for immediate execution if an old
-                // job with the same ID was running, but let TOP EJs start immediately.
-                canExecuteImmediately = !wasJobExecuting
-                        || (jobStatus.isRequestedExpeditedJob()
-                        && mUidBiasOverride.get(jobStatus.getSourceUid(), JobInfo.BIAS_DEFAULT)
-                        == JobInfo.BIAS_TOP_APP);
+                cancelJobImplLocked(toCancel, jobStatus, JobParameters.STOP_REASON_CANCELLED_BY_APP,
+                        JobParameters.INTERNAL_STOP_REASON_CANCELED, "job rescheduled by app");
             } else {
                 startTrackingJobLocked(jobStatus, null);
-                canExecuteImmediately = true;
             }
 
             if (work != null) {
@@ -1266,12 +1256,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // list and try to run it.
                 mJobPackageTracker.notePending(jobStatus);
                 mPendingJobQueue.add(jobStatus);
-                if (canExecuteImmediately) {
-                    // Don't ask the JobConcurrencyManager to try to run the job immediately. The
-                    // JobServiceContext will ask the JobConcurrencyManager for another job once
-                    // it finishes cleaning up the old job.
-                    maybeRunPendingJobsLocked();
-                }
+                maybeRunPendingJobsLocked();
             } else {
                 evaluateControllerStatesLocked(jobStatus);
             }
@@ -1392,10 +1377,8 @@ public class JobSchedulerService extends com.android.server.SystemService
      * is null, the cancelled job is removed outright from the system.  If
      * {@code incomingJob} is non-null, it replaces {@code cancelled} in the store of
      * currently scheduled jobs.
-     *
-     * @return true if the cancelled job was running
      */
-    private boolean cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob,
+    private void cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
         cancelled.unprepareLocked();
@@ -1406,7 +1389,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         mChangedJobList.remove(cancelled);
         // Cancel if running.
-        boolean wasRunning = mConcurrencyManager.stopJobOnServiceContextLocked(
+        mConcurrencyManager.stopJobOnServiceContextLocked(
                 cancelled, reason, internalReasonCode, debugReason);
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -1414,7 +1397,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             startTrackingJobLocked(incomingJob, cancelled);
         }
         reportActiveLocked();
-        return wasRunning;
     }
 
     void updateUidState(int uid, int procState) {

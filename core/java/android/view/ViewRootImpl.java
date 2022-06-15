@@ -90,6 +90,7 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 
 import android.Manifest;
+import android.animation.AnimationHandler;
 import android.animation.LayoutTransition;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
@@ -222,7 +223,6 @@ import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -800,8 +800,7 @@ public final class ViewRootImpl implements ViewParent,
             new ViewRootRectTracker(v -> v.collectPreferKeepClearRects());
     private final ViewRootRectTracker mUnrestrictedKeepClearRectsTracker =
             new ViewRootRectTracker(v -> v.collectUnrestrictedPreferKeepClearRects());
-    private List<Rect> mPendingKeepClearAreas;
-    private List<Rect> mPendingUnrestrictedKeepClearAreas;
+    private boolean mHasPendingKeepClearAreaChange;
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
@@ -1365,6 +1364,8 @@ public final class ViewRootImpl implements ViewParent,
                 mFirstInputStage = nativePreImeStage;
                 mFirstPostImeInputStage = earlyPostImeStage;
                 mPendingInputEventQueueLengthCounterName = "aq:pending:" + counterSuffix;
+
+                AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
             }
         }
     }
@@ -1710,6 +1711,7 @@ public final class ViewRootImpl implements ViewParent,
             if (!mAppVisible) {
                 WindowManagerGlobal.trimForeground();
             }
+            AnimationHandler.requestAnimatorsEnabled(mAppVisible, this);
         }
     }
 
@@ -2017,13 +2019,10 @@ public final class ViewRootImpl implements ViewParent,
                 renderer.setStopped(mStopped);
             }
             if (!mStopped) {
-                // Unnecessary to traverse if the window is not yet visible.
-                if (getHostVisibility() == View.VISIBLE) {
-                    // Make sure that relayoutWindow will be called to get valid surface because
-                    // the previous surface may have been released.
-                    mAppVisibilityChanged = true;
-                    scheduleTraversals();
-                }
+                // Make sure that relayoutWindow will be called to get valid surface because
+                // the previous surface may have been released.
+                mAppVisibilityChanged = true;
+                scheduleTraversals();
             } else {
                 if (renderer != null) {
                     renderer.destroyHardwareResources(mView);
@@ -2046,6 +2045,7 @@ public final class ViewRootImpl implements ViewParent,
         void surfaceCreated(Transaction t);
         void surfaceReplaced(Transaction t);
         void surfaceDestroyed();
+        default void surfaceSyncStarted() {};
     }
 
     private final ArrayList<SurfaceChangedCallback> mSurfaceChangedCallbacks = new ArrayList<>();
@@ -2077,6 +2077,12 @@ public final class ViewRootImpl implements ViewParent,
     private void notifySurfaceDestroyed() {
         for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
             mSurfaceChangedCallbacks.get(i).surfaceDestroyed();
+        }
+    }
+
+    private void notifySurfaceSyncStarted() {
+        for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
+            mSurfaceChangedCallbacks.get(i).surfaceSyncStarted();
         }
     }
 
@@ -3498,7 +3504,9 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 mPendingTransitions.clear();
             }
-            performDraw();
+            if (!performDraw() && mSyncBufferCallback != null) {
+                mSyncBufferCallback.onBufferReady(null);
+            }
         }
 
         if (mAttachInfo.mContentCaptureEvents != null) {
@@ -3537,6 +3545,7 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "Setup new sync id=" + mSyncId);
         }
         mSurfaceSyncer.addToSync(mSyncId, mSyncTarget);
+        notifySurfaceSyncStarted();
     }
 
     private void notifyContentCatpureEvents() {
@@ -4241,11 +4250,11 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    private void performDraw() {
+    private boolean performDraw() {
         if (mAttachInfo.mDisplayState == Display.STATE_OFF && !mReportNextDraw) {
-            return;
+            return false;
         } else if (mView == null) {
-            return;
+            return false;
         }
 
         final boolean fullRedrawNeeded = mFullRedrawNeeded || mSyncBufferCallback != null;
@@ -4329,6 +4338,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mPerformContentCapture) {
             performContentCaptureInitialReport();
         }
+        return true;
     }
 
     /**
@@ -4819,45 +4829,31 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void keepClearRectsChanged() {
-        List<Rect> restrictedKeepClearRects = mKeepClearRectsTracker.computeChangedRects();
-        List<Rect> unrestrictedKeepClearRects =
-                mUnrestrictedKeepClearRectsTracker.computeChangedRects();
-        if ((restrictedKeepClearRects != null || unrestrictedKeepClearRects != null)
-                && mView != null) {
-            if (restrictedKeepClearRects == null) {
-                restrictedKeepClearRects = Collections.emptyList();
-            }
-            if (unrestrictedKeepClearRects == null) {
-                unrestrictedKeepClearRects = Collections.emptyList();
-            }
+        boolean restrictedKeepClearRectsChanged = mKeepClearRectsTracker.computeChanges();
+        boolean unrestrictedKeepClearRectsChanged =
+                mUnrestrictedKeepClearRectsTracker.computeChanges();
 
-            if (mHandler.hasMessages(MSG_REPORT_KEEP_CLEAR_RECTS)) {
-                // Keep clear areas have been reported recently, wait before reporting new set
-                // of keep clear areas
-                mPendingKeepClearAreas = restrictedKeepClearRects;
-                mPendingUnrestrictedKeepClearAreas = unrestrictedKeepClearRects;
-            } else {
+        if ((restrictedKeepClearRectsChanged || unrestrictedKeepClearRectsChanged)
+                && mView != null) {
+            mHasPendingKeepClearAreaChange = true;
+            // Only report keep clear areas immediately if they have not been reported recently
+            if (!mHandler.hasMessages(MSG_REPORT_KEEP_CLEAR_RECTS)) {
                 mHandler.sendEmptyMessageDelayed(MSG_REPORT_KEEP_CLEAR_RECTS,
                         KEEP_CLEAR_AREA_REPORT_RATE_MILLIS);
-                try {
-                    mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
-                            unrestrictedKeepClearRects);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
+                reportKeepClearAreasChanged();
             }
         }
     }
 
     void reportKeepClearAreasChanged() {
-        final List<Rect> restrictedKeepClearRects = mPendingKeepClearAreas;
-        final List<Rect> unrestrictedKeepClearRects = mPendingUnrestrictedKeepClearAreas;
-        if (restrictedKeepClearRects == null && unrestrictedKeepClearRects == null) {
+        if (!mHasPendingKeepClearAreaChange) {
             return;
         }
+        mHasPendingKeepClearAreaChange = false;
 
-        mPendingKeepClearAreas = null;
-        mPendingUnrestrictedKeepClearAreas = null;
+        final List<Rect> restrictedKeepClearRects = mKeepClearRectsTracker.getLastComputedRects();
+        final List<Rect> unrestrictedKeepClearRects =
+                mUnrestrictedKeepClearRectsTracker.getLastComputedRects();
 
         try {
             mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
@@ -8493,6 +8489,7 @@ public final class ViewRootImpl implements ViewParent,
             mInsetsController.onControlsChanged(null);
 
             mAdded = false;
+            AnimationHandler.removeRequestor(this);
         }
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
@@ -10972,5 +10969,12 @@ public final class ViewRootImpl implements ViewParent,
         if (!mIsInTraversal && !mTraversalScheduled) {
             scheduleTraversals();
         }
+    }
+
+    void mergeSync(int syncId, SurfaceSyncer otherSyncer) {
+        if (!isInLocalSync()) {
+            return;
+        }
+        mSurfaceSyncer.merge(mSyncId, syncId, otherSyncer);
     }
 }

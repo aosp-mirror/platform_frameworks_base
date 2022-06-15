@@ -99,7 +99,7 @@ public class LocaleConfig {
             XmlResourceParser parser = res.getXml(resId);
             parseLocaleConfig(parser, res);
         } catch (Resources.NotFoundException e) {
-            Slog.w(TAG, "The resource file pointed to by the given resource ID isn't found.", e);
+            Slog.w(TAG, "The resource file pointed to by the given resource ID isn't found.");
             mStatus = STATUS_NOT_SPECIFIED;
         } catch (XmlPullParserException | IOException e) {
             Slog.w(TAG, "Failed to parse XML configuration from "

@@ -132,6 +132,26 @@ public class BatteryUsageStatsStoreTest {
     }
 
     @Test
+    public void testRemoveAllSnapshots() throws Exception {
+        prepareBatteryStats();
+
+        for (int i = 0; i < 3; i++) {
+            mMockClock.realtime += 10_000_000;
+            mMockClock.uptime += 10_000_000;
+            mMockClock.currentTime += 10_000_000;
+            prepareBatteryStats();
+
+            mBatteryStats.resetAllStatsCmdLocked();
+        }
+
+        assertThat(getDirectorySize(mStoreDirectory)).isNotEqualTo(0);
+
+        mBatteryUsageStatsStore.removeAllSnapshots();
+
+        assertThat(getDirectorySize(mStoreDirectory)).isEqualTo(0);
+    }
+
+    @Test
     public void testSavingStatsdAtomPullTimestamp() {
         mBatteryUsageStatsStore.setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(1234);
         assertThat(mBatteryUsageStatsStore.getLastBatteryUsageStatsBeforeResetAtomPullTimestamp())

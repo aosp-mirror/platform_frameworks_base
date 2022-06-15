@@ -198,9 +198,8 @@ public class RestrictedPreferenceHelper {
         if (mDisabledByAdmin != disabled) {
             mDisabledByAdmin = disabled;
             changed = true;
+            updateDisabledState();
         }
-
-        updateDisabledState();
 
         return changed;
     }
@@ -210,9 +209,8 @@ public class RestrictedPreferenceHelper {
         if (mDisabledByAppOps != disabled) {
             mDisabledByAppOps = disabled;
             changed = true;
+            updateDisabledState();
         }
-
-        updateDisabledState();
 
         return changed;
     }

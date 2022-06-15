@@ -382,7 +382,7 @@ public class InternalResourceService extends SystemService {
             if (increased) {
                 mAgent.distributeBasicIncomeLocked(newBatteryLevel);
             } else if (newBatteryLevel == mCurrentBatteryLevel) {
-                Slog.wtf(TAG, "Battery level stayed the same");
+                // The broadcast is also sent when the plug type changes...
                 return;
             }
             mCurrentBatteryLevel = newBatteryLevel;

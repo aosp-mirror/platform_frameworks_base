@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.statusbar.phone.ScrimController.OPAQUE;
 import static com.android.systemui.statusbar.phone.ScrimController.SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.ScrimController.TRANSPARENT;
+import static com.android.systemui.statusbar.phone.ScrimState.BOUNCER;
+import static com.android.systemui.statusbar.phone.ScrimState.SHADE_LOCKED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -275,7 +277,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToShadeLocked() {
-        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setQsPosition(1f, 0);
         finishAnimationsImmediately();
 
@@ -293,7 +295,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void transitionToShadeLocked_clippingQs() {
         mScrimController.setClipsQsScrim(true);
-        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setQsPosition(1f, 0);
         finishAnimationsImmediately();
 
@@ -542,7 +544,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToKeyguardBouncer() {
-        mScrimController.transitionTo(ScrimState.BOUNCER);
+        mScrimController.transitionTo(BOUNCER);
         finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible without tint
@@ -561,7 +563,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void transitionToKeyguardBouncer_clippingQs() {
         mScrimController.setClipsQsScrim(true);
-        mScrimController.transitionTo(ScrimState.BOUNCER);
+        mScrimController.transitionTo(BOUNCER);
         finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be clipping QS
@@ -581,7 +583,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void disableClipQsScrimWithoutStateTransition_updatesTintAndAlpha() {
         mScrimController.setClipsQsScrim(true);
-        mScrimController.transitionTo(ScrimState.BOUNCER);
+        mScrimController.transitionTo(BOUNCER);
 
         mScrimController.setClipsQsScrim(false);
 
@@ -602,7 +604,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void enableClipQsScrimWithoutStateTransition_updatesTintAndAlpha() {
         mScrimController.setClipsQsScrim(false);
-        mScrimController.transitionTo(ScrimState.BOUNCER);
+        mScrimController.transitionTo(BOUNCER);
 
         mScrimController.setClipsQsScrim(true);
 
@@ -672,9 +674,9 @@ public class ScrimControllerTest extends SysuiTestCase {
         finishAnimationsImmediately();
         assertEquals(mScrimState, ScrimState.UNLOCKED);
 
-        mScrimController.transitionTo(ScrimState.BOUNCER);
+        mScrimController.transitionTo(BOUNCER);
         finishAnimationsImmediately();
-        assertEquals(mScrimState, ScrimState.BOUNCER);
+        assertEquals(mScrimState, BOUNCER);
 
         mScrimController.transitionTo(ScrimState.BOUNCER_SCRIMMED);
         finishAnimationsImmediately();
@@ -1081,9 +1083,9 @@ public class ScrimControllerTest extends SysuiTestCase {
         HashSet<ScrimState> lowPowerModeStates = new HashSet<>(Arrays.asList(
                 ScrimState.OFF, ScrimState.AOD, ScrimState.PULSING));
         HashSet<ScrimState> regularStates = new HashSet<>(Arrays.asList(
-                ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, ScrimState.BOUNCER,
+                ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, BOUNCER,
                 ScrimState.DREAMING, ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR,
-                ScrimState.UNLOCKED, ScrimState.SHADE_LOCKED, ScrimState.AUTH_SCRIMMED,
+                ScrimState.UNLOCKED, SHADE_LOCKED, ScrimState.AUTH_SCRIMMED,
                 ScrimState.AUTH_SCRIMMED_SHADE));
 
         for (ScrimState state : ScrimState.values()) {
@@ -1228,7 +1230,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testNotificationScrimVisible_afterOpeningShadeFromLockscreen() {
         mScrimController.setRawPanelExpansionFraction(1);
-        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.transitionTo(SHADE_LOCKED);
         finishAnimationsImmediately();
 
         assertScrimAlpha(Map.of(
@@ -1237,10 +1239,26 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void qsExpansion_BehindTint_shadeLocked_bouncerActive_usesBouncerProgress() {
+        when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
+        // clipping doesn't change tested logic but allows to assert scrims more in line with
+        // their expected large screen behaviour
+        mScrimController.setClipsQsScrim(false);
+        mScrimController.transitionTo(SHADE_LOCKED);
+
+        mScrimController.setQsPosition(1f, 100 /* value doesn't matter */);
+        assertTintAfterExpansion(mScrimBehind, SHADE_LOCKED.getBehindTint(), /* expansion= */ 1f);
+
+        mScrimController.setQsPosition(0.8f, 100 /* value doesn't matter */);
+        // panel expansion of 0.6 means its fully transitioned with bouncer progress interpolation
+        assertTintAfterExpansion(mScrimBehind, BOUNCER.getBehindTint(), /* expansion= */ 0.6f);
+    }
+
+    @Test
     public void expansionNotificationAlpha_shadeLocked_bouncerActive_usesBouncerInterpolator() {
         when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(true);
 
-        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.transitionTo(SHADE_LOCKED);
 
         float expansion = 0.8f;
         float expectedAlpha =
@@ -1256,7 +1274,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void expansionNotificationAlpha_shadeLocked_bouncerNotActive_usesShadeInterpolator() {
         when(mStatusBarKeyguardViewManager.isBouncerInTransit()).thenReturn(false);
 
-        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.transitionTo(SHADE_LOCKED);
 
         float expansion = 0.8f;
         float expectedAlpha = ShadeInterpolation.getNotificationScrimAlpha(expansion);
@@ -1352,7 +1370,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationTransparency_followsTransitionToFullShade() {
-        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setRawPanelExpansionFraction(1.0f);
         finishAnimationsImmediately();
         float shadeLockedAlpha = mNotificationsScrim.getViewAlpha();
@@ -1379,7 +1397,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void notificationTransparency_followsNotificationScrimProgress() {
-        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.transitionTo(SHADE_LOCKED);
         mScrimController.setRawPanelExpansionFraction(1.0f);
         finishAnimationsImmediately();
         mScrimController.transitionTo(ScrimState.KEYGUARD);
@@ -1473,7 +1491,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind, TRANSPARENT,
                 mNotificationsScrim, TRANSPARENT));
 
-        mScrimController.transitionTo(ScrimState.SHADE_LOCKED);
+        mScrimController.transitionTo(SHADE_LOCKED);
         finishAnimationsImmediately();
         assertScrimAlpha(Map.of(
                 mScrimInFront, TRANSPARENT,
@@ -1502,6 +1520,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         finishAnimationsImmediately();
         // alpha is not changing linearly thus 0.2 of leeway when asserting
         assertEquals(expectedAlpha, scrim.getViewAlpha(), 0.2);
+    }
+
+    private void assertTintAfterExpansion(ScrimView scrim, int expectedTint, float expansion) {
+        String message = "Tint test failed with expected scrim tint: "
+                + Integer.toHexString(expectedTint) + " and actual tint: "
+                + Integer.toHexString(scrim.getTint()) + " for scrim: " + getScrimName(scrim);
+        mScrimController.setRawPanelExpansionFraction(expansion);
+        finishAnimationsImmediately();
+        assertEquals(message, expectedTint, scrim.getTint(), 0.1);
     }
 
     private void assertScrimTinted(Map<ScrimView, Boolean> scrimToTint) {

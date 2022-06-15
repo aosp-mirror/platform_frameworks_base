@@ -136,9 +136,18 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         val resume2 = Triple("resume 2",
             DATA.copy(active = false, isPlaying = false,
-                    playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = true),
+                playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = true),
             1000L)
 
+        val activeMoreRecent = Triple("active more recent",
+            DATA.copy(active = false, isPlaying = false,
+                playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = true, lastActive = 2L),
+            1000L)
+
+        val activeLessRecent = Triple("active less recent",
+            DATA.copy(active = false, isPlaying = false,
+                playbackLocation = MediaData.PLAYBACK_LOCAL, resumption = true, lastActive = 1L),
+            1000L)
         // Expected ordering for media players:
         // Actively playing local sessions
         // Actively playing cast sessions

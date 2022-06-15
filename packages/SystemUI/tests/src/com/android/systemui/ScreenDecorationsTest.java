@@ -63,6 +63,7 @@ import android.util.RotationUtils;
 import android.util.Size;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -136,6 +137,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private CornerDecorProvider mPrivacyDotBottomRightDecorProvider;
     @Mock
     private Display.Mode mDisplayMode;
+    @Mock
+    private DisplayInfo mDisplayInfo;
     private PrivacyDotViewController.ShowingListener mPrivacyDotShowingListener;
 
     @Before
@@ -159,7 +162,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mContext.getDisplay()).thenReturn(mDisplay);
         // Not support hwc layer by default
         doReturn(null).when(mDisplay).getDisplayDecorationSupport();
-        doReturn(mDisplayMode).when(mDisplay).getMode();
+        doReturn(mDisplayMode).when(mDisplayInfo).getMode();
 
         when(mMockTypedArray.length()).thenReturn(0);
         mPrivacyDotTopLeftDecorProvider = spy(new PrivacyDotCornerDecorProviderImpl(
@@ -214,6 +217,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mExecutor.runAllReady();
             }
         });
+        mScreenDecorations.mDisplayInfo = mDisplayInfo;
         doReturn(1f).when(mScreenDecorations).getPhysicalPixelDisplaySizeRatio();
         reset(mTunerService);
 
@@ -977,7 +981,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 getTestsDrawable(com.android.systemui.tests.R.drawable.rounded4px)
                 /* roundedBottomDrawable */,
                 0 /* roundedPadding */, false /* fillCutout */, true /* privacyDot */);
-        doReturn(Surface.ROTATION_0).when(mDisplay).getRotation();
+        mDisplayInfo.rotation = Surface.ROTATION_0;
 
         mScreenDecorations.start();
 
@@ -991,7 +995,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 getTestsDrawable(com.android.systemui.tests.R.drawable.rounded5px)
                 /* roundedBottomDrawable */,
                 0 /* roundedPadding */, false /* fillCutout */, true /* privacyDot */);
-        doReturn(Surface.ROTATION_270).when(mDisplay).getRotation();
+        mDisplayInfo.rotation = Surface.ROTATION_270;
 
         mScreenDecorations.onConfigurationChanged(null);
 
@@ -1274,7 +1278,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         final ScreenDecorHwcLayer hwcLayer = mScreenDecorations.mScreenDecorHwcLayer;
         spyOn(hwcLayer);
         doReturn(mDisplay).when(hwcLayer).getDisplay();
-        doReturn(mDisplayMode).when(mDisplay).getMode();
 
         mScreenDecorations.mDisplayListener.onDisplayChanged(1);
 
@@ -1298,7 +1301,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mScreenDecorations.mCutoutViews[BOUNDS_POSITION_TOP];
         spyOn(cutoutView);
         doReturn(mDisplay).when(cutoutView).getDisplay();
-        doReturn(mDisplayMode).when(mDisplay).getMode();
 
         mScreenDecorations.mDisplayListener.onDisplayChanged(1);
 

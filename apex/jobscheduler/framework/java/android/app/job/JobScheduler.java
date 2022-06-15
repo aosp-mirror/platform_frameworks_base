@@ -107,9 +107,7 @@ public abstract class JobScheduler {
     /**
      * Schedule a job to be executed.  Will replace any currently scheduled job with the same
      * ID with the new information in the {@link JobInfo}.  If a job with the given ID is currently
-     * running, it will be stopped. Note that in some cases, the newly scheduled job may be started
-     * before the previously running job has been fully stopped. See {@link JobService} for
-     * additional details.
+     * running, it will be stopped.
      *
      * <p class="caution"><strong>Note:</strong> Scheduling a job can have a high cost, even if it's
      * rescheduling the same job and the job didn't execute, especially on platform versions before

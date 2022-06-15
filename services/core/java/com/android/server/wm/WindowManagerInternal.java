@@ -30,6 +30,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Pair;
+import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -869,4 +870,16 @@ public abstract class WindowManagerInternal {
      */
     public abstract boolean isPointInsideWindow(
             @NonNull IBinder windowToken, int displayId, float displayX, float displayY);
+
+    /**
+     * Updates the content recording session. If a different session is already in progress, then
+     * the pre-existing session is stopped, and the new incoming session takes over.
+     *
+     * The DisplayContent for the new session will begin recording when
+     * {@link RootWindowContainer#onDisplayChanged} is invoked for the new {@link VirtualDisplay}.
+     * Must be invoked for a valid MediaProjection session.
+     *
+     * @param incomingSession the nullable incoming content recording session
+     */
+    public abstract void setContentRecordingSession(ContentRecordingSession incomingSession);
 }

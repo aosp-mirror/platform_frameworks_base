@@ -98,5 +98,10 @@ easier.
         <item name="colorAccentPrimary">@color/system_accent1_700</item>
         <item name="textColorPrimary">@color/system_neutral1_100</item>
         <item name="textColorSecondary">@color/system_neutral2_100</item>
+        <item name="colorListDivider">@color/white</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.AutofillHalfScreenDialogList" parent="Theme.DeviceDefault.DayNight">
+        <item name="colorForeground">@android:color/white</item>
     </style>
 </resources>
