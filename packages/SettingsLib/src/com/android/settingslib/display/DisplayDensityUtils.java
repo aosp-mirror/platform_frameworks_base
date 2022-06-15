@@ -25,6 +25,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -87,14 +88,14 @@ public class DisplayDensityUtils {
         }
 
         final Resources res = context.getResources();
-        final DisplayMetrics metrics = new DisplayMetrics();
-        context.getDisplayNoVerify().getRealMetrics(metrics);
+        DisplayInfo info = new DisplayInfo();
+        context.getDisplayNoVerify().getDisplayInfo(info);
 
-        final int currentDensity = metrics.densityDpi;
+        final int currentDensity = info.logicalDensityDpi;
         int currentDensityIndex = -1;
 
         // Compute number of "larger" and "smaller" scales for this display.
-        final int minDimensionPx = Math.min(metrics.widthPixels, metrics.heightPixels);
+        final int minDimensionPx = Math.min(info.logicalWidth, info.logicalHeight);
         final int maxDensity = DisplayMetrics.DENSITY_MEDIUM * minDimensionPx / MIN_DIMENSION_DP;
         final float maxScaleDimen = context.getResources().getFraction(
                 R.fraction.display_density_max_scale, 1, 1);
