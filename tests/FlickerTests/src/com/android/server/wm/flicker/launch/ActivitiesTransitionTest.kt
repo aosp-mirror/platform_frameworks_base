@@ -20,6 +20,7 @@ import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -61,6 +62,7 @@ import org.junit.runners.Parameterized
 class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp: TwoActivitiesAppHelper = TwoActivitiesAppHelper(instrumentation)
+    private val tapl = LauncherInstrumentation()
 
     /**
      * Entry point for the test runner. It will use this method to initialize and cache
@@ -71,6 +73,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
         return FlickerBuilder(instrumentation).apply {
             setup {
                 test {
+                    tapl.setExpectedRotation(testSpec.startRotation)
                     testApp.launchViaIntent(wmHelper)
                 }
             }
@@ -81,7 +84,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
             }
             transitions {
                 testApp.openSecondActivity(device, wmHelper)
-                device.pressBack()
+                tapl.pressBack()
                 wmHelper.StateSyncBuilder()
                     .withFullScreenApp(testApp.component)
                     .waitForAndVerify()

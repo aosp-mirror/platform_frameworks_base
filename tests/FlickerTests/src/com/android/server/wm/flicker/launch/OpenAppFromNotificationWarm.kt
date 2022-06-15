@@ -23,7 +23,6 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
-import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -55,8 +54,6 @@ import org.junit.runners.Parameterized
 @Postsubmit
 open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
     OpenAppTransition(testSpec) {
-    protected val taplInstrumentation = LauncherInstrumentation()
-
     override val testApp: NotificationAppHelper = NotificationAppHelper(instrumentation)
 
     open val openingNotificationsFromLockScreen = false
@@ -74,7 +71,7 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
                         .withFullScreenApp(testApp.component)
                         .waitForAndVerify()
                     testApp.postNotification(wmHelper)
-                    device.pressHome()
+                    tapl.goHome()
                     wmHelper.StateSyncBuilder()
                         .withHomeActivityVisible()
                         .waitForAndVerify()

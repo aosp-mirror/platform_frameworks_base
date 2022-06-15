@@ -19,14 +19,15 @@ package com.android.server.wm.flicker.launch
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
@@ -42,6 +43,7 @@ import org.junit.Test
 abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
+    protected val tapl = LauncherInstrumentation()
 
     /**
      * Defines the transition used to run the test
@@ -49,6 +51,7 @@ abstract class OpenAppTransition(protected val testSpec: FlickerTestParameter) {
     protected open val transition: FlickerBuilder.() -> Unit = {
         setup {
             test {
+                tapl.setExpectedRotation(testSpec.startRotation)
                 device.wakeUpAndGoToHomeScreen()
                 this.setRotation(testSpec.startRotation)
             }

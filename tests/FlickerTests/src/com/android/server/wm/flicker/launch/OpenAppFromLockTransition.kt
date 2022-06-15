@@ -51,9 +51,6 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp.component)
-                    .waitForAndVerify()
             }
         }
 

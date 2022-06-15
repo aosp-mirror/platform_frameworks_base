@@ -19,13 +19,13 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
+import android.view.Surface
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.Assume
 import org.junit.FixMethodOrder
@@ -72,11 +72,14 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
                     testApp.launchViaIntent(wmHelper)
                 }
                 eachRun {
+                    // Can't use tapl.goHome() because of b/235841947
                     device.pressHome()
                     wmHelper.StateSyncBuilder()
                         .withHomeActivityVisible()
                         .waitForAndVerify()
-                    device.pressRecentApps()
+                    // Launcher is always ROTATION_0
+                    tapl.setExpectedRotation(Surface.ROTATION_0)
+                    tapl.workspace.switchToOverview()
                     wmHelper.StateSyncBuilder()
                         .withRecentsActivityVisible()
                         .waitForAndVerify()
@@ -84,7 +87,7 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
                 }
             }
             transitions {
-                device.reopenAppFromOverview(wmHelper)
+                tapl.overview.currentTask.open()
                 wmHelper.StateSyncBuilder()
                     .withFullScreenApp(testApp.component)
                     .waitForAndVerify()

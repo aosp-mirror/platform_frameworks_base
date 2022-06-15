@@ -21,6 +21,7 @@ import android.app.WallpaperManager
 import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -63,10 +64,10 @@ import org.junit.runners.Parameterized
 @Group4
 class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val tapl = LauncherInstrumentation()
     private val mTestApp: NewTasksAppHelper = NewTasksAppHelper(instrumentation)
     private val mWallpaper by lazy {
-        getWallpaperPackage(InstrumentationRegistry.getInstrumentation())
-            ?: error("Unable to obtain wallpaper")
+        getWallpaperPackage(instrumentation) ?: error("Unable to obtain wallpaper")
     }
 
     @FlickerBuilderProvider
@@ -84,7 +85,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
             }
             transitions {
                 mTestApp.openNewTask(device, wmHelper)
-                device.pressBack()
+                tapl.pressBack()
                 wmHelper.StateSyncBuilder()
                     .withFullScreenApp(mTestApp.component)
                     .waitForAndVerify()
