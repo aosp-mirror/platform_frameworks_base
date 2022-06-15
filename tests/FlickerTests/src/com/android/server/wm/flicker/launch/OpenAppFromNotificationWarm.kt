@@ -73,7 +73,7 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
                     wmHelper.waitForFullScreenApp(testApp.component)
                     testApp.postNotification(device, wmHelper)
                     device.pressHome()
-                    wmHelper.waitForAppTransitionIdle()
+                    wmHelper.waitForHomeActivityVisible()
                 }
             }
 

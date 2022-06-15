@@ -19,7 +19,6 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.view.Display
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -61,8 +60,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
-    : OpenAppFromLauncherTransition(testSpec) {
+open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
+    OpenAppFromLauncherTransition(testSpec) {
 
     /**
      * Defines the transition used to run the test
@@ -76,14 +75,9 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
                 }
                 eachRun {
                     device.pressHome()
-                    wmHelper.waitForAppTransitionIdle()
+                    wmHelper.waitForHomeActivityVisible()
                     device.pressRecentApps()
-                    wmHelper.waitFor(
-                        WindowManagerConditionsFactory
-                            .isAppTransitionIdle(Display.DEFAULT_DISPLAY),
-                        WindowManagerConditionsFactory.isActivityVisible(LAUNCHER_COMPONENT),
-                        WindowManagerConditionsFactory.hasLayersAnimating().negate()
-                    )
+                    wmHelper.waitForRecentsActivityVisible()
                     this.setRotation(testSpec.startRotation)
                 }
             }

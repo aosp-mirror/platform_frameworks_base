@@ -17,12 +17,12 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import android.platform.test.annotations.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -30,8 +30,8 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
@@ -39,8 +39,8 @@ import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import org.junit.Assume.assumeTrue
 import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -72,12 +72,13 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
             }
             transitions {
                 device.pressRecentApps()
-                waitForRecentsActivityVisible(wmHelper)
+                wmHelper.waitForRecentsActivityVisible()
                 waitNavStatusBarVisibility(wmHelper)
             }
             teardown {
                 test {
                     device.pressHome()
+                    wmHelper.waitForHomeActivityVisible()
                     imeTestApp.exit(wmHelper)
                 }
             }
@@ -193,25 +194,6 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
                 }
             }
         }
-    }
-
-    private fun waitForRecentsActivityVisible(
-        wmHelper: WindowManagerStateHelper
-    ) {
-        val waitMsg = "state of Recents activity to be visible"
-        require(
-                wmHelper.waitFor(waitMsg) {
-                    it.wmState.homeActivity?.let { act ->
-                        it.wmState.isActivityVisible(act.name)
-                    } == true ||
-                            it.wmState.recentsActivity?.let { act ->
-                                it.wmState.isActivityVisible(act.name)
-                            } == true
-                }
-        ) { "Recents activity should be visible" }
-        wmHelper.waitForAppTransitionIdle()
-        // Ensure WindowManagerService wait until all animations have completed
-        instrumentation.uiAutomation.syncInputTransactions()
     }
 
     companion object {

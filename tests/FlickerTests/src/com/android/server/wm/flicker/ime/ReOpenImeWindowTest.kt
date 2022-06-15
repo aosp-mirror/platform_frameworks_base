@@ -17,10 +17,9 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Presubmit
-import android.view.Display
-import android.view.Surface
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
+import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -29,21 +28,19 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group2
+import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.entireScreenCovered
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.ConditionList
 import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -66,12 +63,6 @@ open class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 
-    private val waitConditionSetup = ConditionList(listOf(
-        WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY),
-        WindowManagerConditionsFactory.hasLayersAnimating().negate(),
-        WindowManagerConditionsFactory.isHomeActivityVisible()
-    ))
-
     @Before
     open fun before() {
         assumeFalse(isShellTransitionsEnabled)
@@ -87,7 +78,7 @@ open class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                 }
                 eachRun {
                     device.pressRecentApps()
-                    wmHelper.waitFor(waitConditionSetup)
+                    wmHelper.waitForRecentsActivityVisible()
                     this.setRotation(testSpec.startRotation)
                 }
             }
