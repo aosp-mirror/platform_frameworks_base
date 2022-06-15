@@ -2591,6 +2591,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                 PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
+                PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                 PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
@@ -2651,6 +2652,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         equals = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         name = "FORCE_STATUS_BAR_VISIBLE"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
+                        equals = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
+                        name = "LAYOUT_SIZE_EXTENDED_BY_CUTOUT"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                         equals = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
