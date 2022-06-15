@@ -141,8 +141,10 @@ public class RemoteAnimationTargetCompat {
         final int mode = change.getMode();
 
         t.reparent(leash, info.getRootLeash());
-        t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
-                change.getStartAbsBounds().top - info.getRootOffset().y);
+        final Rect absBounds =
+                (mode == TRANSIT_OPEN) ? change.getEndAbsBounds() : change.getStartAbsBounds();
+        t.setPosition(leash, absBounds.left - info.getRootOffset().x,
+                absBounds.top - info.getRootOffset().y);
 
         // Put all the OPEN/SHOW on top
         if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
