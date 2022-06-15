@@ -257,7 +257,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "force-dex-opt":
                     return runForceDexOpt();
                 case "bg-dexopt-job":
-                    return runDexoptJob();
+                    return runBgDexOpt();
                 case "cancel-bg-dexopt-job":
                     return cancelBgDexOptJob();
                 case "delete-dexopt":
@@ -1971,16 +1971,47 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runDexoptJob() throws RemoteException {
-        String arg;
-        List<String> packageNames = new ArrayList<>();
-        while ((arg = getNextArg()) != null) {
-            packageNames.add(arg);
+    private int runBgDexOpt() throws RemoteException {
+        String opt = getNextOption();
+
+        if (opt == null) {
+            List<String> packageNames = new ArrayList<>();
+            String arg;
+            while ((arg = getNextArg()) != null) {
+                packageNames.add(arg);
+            }
+            if (!BackgroundDexOptService.getService().runBackgroundDexoptJob(
+                    packageNames.isEmpty() ? null : packageNames)) {
+                getOutPrintWriter().println("Failure");
+                return -1;
+            }
+        } else {
+            String extraArg = getNextArg();
+            if (extraArg != null) {
+                getErrPrintWriter().println("Invalid argument: " + extraArg);
+                return -1;
+            }
+
+            switch (opt) {
+                case "--cancel":
+                    return cancelBgDexOptJob();
+
+                case "--disable":
+                    BackgroundDexOptService.getService().setDisableJobSchedulerJobs(true);
+                    break;
+
+                case "--enable":
+                    BackgroundDexOptService.getService().setDisableJobSchedulerJobs(false);
+                    break;
+
+                default:
+                    getErrPrintWriter().println("Unknown option: " + opt);
+                    return -1;
+            }
         }
-        boolean result = BackgroundDexOptService.getService().runBackgroundDexoptJob(
-                packageNames.isEmpty() ? null : packageNames);
-        getOutPrintWriter().println(result ? "Success" : "Failure");
-        return result ? 0 : -1;
+
+        getOutPrintWriter().println("Success");
+        return 0;
     }
 
     private int cancelBgDexOptJob() throws RemoteException {
@@ -4209,20 +4240,28 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  delete-dexopt PACKAGE");
         pw.println("    Delete dex optimization results for the given PACKAGE.");
         pw.println("");
-        pw.println("  bg-dexopt-job [PACKAGE...]");
-        pw.println("    Execute the background optimizations immediately.");
-        pw.println("    Optimize only the given PACKAGEs, or all packages if none is specified.");
-        pw.println("    Note that the command only runs the background optimizer logic. It will");
-        pw.println("    run even if the device is not in the idle maintenance mode. If a job is");
-        pw.println("    already running (including one started automatically by the system) it");
-        pw.println("    will wait for it to finish before starting. A background job will not be");
-        pw.println("    started automatically while one started this way is running.");
+        pw.println("  bg-dexopt-job [PACKAGE... | --cancel | --disable | --enable]");
+        pw.println("    Controls the background job that optimizes dex files:");
+        pw.println("    Without flags, run background optimization immediately on the given");
+        pw.println("    PACKAGEs, or all packages if none is specified, and wait until the job");
+        pw.println("    finishes. Note that the command only runs the background optimizer logic.");
+        pw.println("    It will run even if the device is not in the idle maintenance mode. If a");
+        pw.println("    job is already running (including one started automatically by the");
+        pw.println("    system) it will wait for it to finish before starting. A background job");
+        pw.println("    will not be started automatically while one started this way is running.");
+        pw.println("      --cancel: Cancels any currently running background optimization job");
+        pw.println("        immediately. This cancels jobs started either automatically by the");
+        pw.println("        system or through this command. Note that cancelling a currently");
+        pw.println("        running bg-dexopt-job command requires running this command from a");
+        pw.println("        separate adb shell.");
+        pw.println("      --disable: Disables background jobs from being started by the job");
+        pw.println("        scheduler. Does not affect bg-dexopt-job invocations from the shell.");
+        pw.println("        Does not imply --cancel. This state will be lost when the");
+        pw.println("        system_server process exits.");
+        pw.println("      --enable: Enables background jobs to be started by the job scheduler");
+        pw.println("        again, if previously disabled by --disable.");
         pw.println("  cancel-bg-dexopt-job");
-        pw.println("    Cancels any currently running background optimization job immediately.");
-        pw.println("    This cancels jobs started either automatically by the system or through");
-        pw.println("    the bg-dexopt-job command. Note that cancelling a currently running");
-        pw.println("    bg-dexopt-job command requires running this command from a separate adb");
-        pw.println("    shell.");
+        pw.println("    Same as bg-dexopt-job --cancel.");
         pw.println("");
         pw.println("  reconcile-secondary-dex-files TARGET-PACKAGE");
         pw.println("    Reconciles the package secondary dex files with the generated oat files.");
