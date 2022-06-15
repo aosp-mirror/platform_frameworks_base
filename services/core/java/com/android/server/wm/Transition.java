@@ -229,7 +229,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         if (restoreBelow != null) {
             final ChangeInfo info = mChanges.get(restoreBelow);
-            info.mFlags |= ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH;
+            if (info != null) {
+                info.mFlags |= ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH;
+            }
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Transition %d: Set %s as "
                 + "transient-launch", mSyncId, activity);

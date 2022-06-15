@@ -117,13 +117,18 @@ public class SurfaceSyncer {
      */
     public int setupSync(@NonNull Consumer<Transaction> syncRequestComplete) {
         synchronized (mSyncSetLock) {
-            mIdCounter++;
+            final int syncId = mIdCounter++;
             if (DEBUG) {
-                Log.d(TAG, "setupSync " + mIdCounter);
+                Log.d(TAG, "setupSync " + syncId);
             }
-            SyncSet syncSet = new SyncSet(mIdCounter, syncRequestComplete);
-            mSyncSets.put(mIdCounter, syncSet);
-            return mIdCounter;
+            SyncSet syncSet = new SyncSet(syncId, transaction -> {
+                synchronized (mSyncSetLock) {
+                    mSyncSets.remove(syncId);
+                }
+                syncRequestComplete.accept(transaction);
+            });
+            mSyncSets.put(syncId, syncSet);
+            return syncId;
         }
     }
 
@@ -138,13 +143,37 @@ public class SurfaceSyncer {
         SyncSet syncSet;
         synchronized (mSyncSetLock) {
             syncSet = mSyncSets.get(syncId);
-            mSyncSets.remove(syncId);
         }
         if (syncSet == null) {
             Log.e(TAG, "Failed to find syncSet for syncId=" + syncId);
             return;
         }
         syncSet.markSyncReady();
+    }
+
+    /**
+     * Merge another SyncSet into the specified syncId.
+     * @param syncId The current syncId to merge into
+     * @param otherSyncId The other syncId to be merged
+     * @param otherSurfaceSyncer The other SurfaceSyncer where the otherSyncId is from
+     */
+    public void merge(int syncId, int otherSyncId, SurfaceSyncer otherSurfaceSyncer) {
+        SyncSet syncSet;
+        synchronized (mSyncSetLock) {
+            syncSet = mSyncSets.get(syncId);
+        }
+
+        SyncSet otherSyncSet = otherSurfaceSyncer.getAndValidateSyncSet(otherSyncId);
+        if (otherSyncSet == null) {
+            return;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG,
+                    "merge id=" + otherSyncId + " from=" + otherSurfaceSyncer + " into id=" + syncId
+                            + " from" + this);
+        }
+        syncSet.merge(otherSyncSet);
     }
 
     /**
@@ -199,8 +228,7 @@ public class SurfaceSyncer {
         if (DEBUG) {
             Log.d(TAG, "addToSync id=" + syncId);
         }
-        syncSet.addSyncableSurface(syncTarget);
-        return true;
+        return syncSet.addSyncableSurface(syncTarget);
     }
 
     /**
@@ -284,14 +312,21 @@ public class SurfaceSyncer {
         private final Set<SyncTarget> mSyncTargets = new ArraySet<>();
 
         private final int mSyncId;
-        private final Consumer<Transaction> mSyncRequestCompleteCallback;
+        @GuardedBy("mLock")
+        private Consumer<Transaction> mSyncRequestCompleteCallback;
+
+        @GuardedBy("mLock")
+        private final Set<SyncSet> mMergedSyncSets = new ArraySet<>();
+
+        @GuardedBy("mLock")
+        private boolean mFinished;
 
         private SyncSet(int syncId, Consumer<Transaction> syncRequestComplete) {
             mSyncId = syncId;
             mSyncRequestCompleteCallback = syncRequestComplete;
         }
 
-        void addSyncableSurface(SyncTarget syncTarget) {
+        boolean addSyncableSurface(SyncTarget syncTarget) {
             SyncBufferCallback syncBufferCallback = new SyncBufferCallback() {
                 @Override
                 public void onBufferReady(Transaction t) {
@@ -306,10 +341,16 @@ public class SurfaceSyncer {
             };
 
             synchronized (mLock) {
+                if (mSyncReady) {
+                    Log.e(TAG, "Sync " + mSyncId + " was already marked as ready. No more "
+                            + "SyncTargets can be added.");
+                    return false;
+                }
                 mPendingSyncs.add(syncBufferCallback.hashCode());
                 mSyncTargets.add(syncTarget);
             }
             syncTarget.onReadyToSync(syncBufferCallback);
+            return true;
         }
 
         void markSyncReady() {
@@ -321,10 +362,11 @@ public class SurfaceSyncer {
 
         @GuardedBy("mLock")
         private void checkIfSyncIsComplete() {
-            if (!mSyncReady || !mPendingSyncs.isEmpty()) {
+            if (!mSyncReady || !mPendingSyncs.isEmpty() || !mMergedSyncSets.isEmpty()) {
                 if (DEBUG) {
                     Log.d(TAG, "Syncable is not complete. mSyncReady=" + mSyncReady
-                            + " mPendingSyncs=" + mPendingSyncs.size());
+                            + " mPendingSyncs=" + mPendingSyncs.size() + " mergedSyncs="
+                            + mMergedSyncSets.size());
                 }
                 return;
             }
@@ -338,6 +380,7 @@ public class SurfaceSyncer {
             }
             mSyncTargets.clear();
             mSyncRequestCompleteCallback.accept(mTransaction);
+            mFinished = true;
         }
 
         /**
@@ -348,6 +391,50 @@ public class SurfaceSyncer {
             synchronized (mLock) {
                 mTransaction.merge(t);
             }
+        }
+
+        public void updateCallback(Consumer<Transaction> transactionConsumer) {
+            synchronized (mLock) {
+                if (mFinished) {
+                    Log.e(TAG, "Attempting to merge SyncSet " + mSyncId + " when sync is"
+                            + " already complete");
+                    transactionConsumer.accept(new Transaction());
+                }
+
+                final Consumer<Transaction> oldCallback = mSyncRequestCompleteCallback;
+                mSyncRequestCompleteCallback = transaction -> {
+                    oldCallback.accept(new Transaction());
+                    transactionConsumer.accept(transaction);
+                };
+            }
+        }
+
+        /**
+         * Merge a SyncSet into this SyncSet. Since SyncSets could still have pending SyncTargets,
+         * we need to make sure those can still complete before the mergeTo syncSet is considered
+         * complete.
+         *
+         * We keep track of all the merged SyncSets until they are marked as done, and then they
+         * are removed from the set. This SyncSet is not considered done until all the merged
+         * SyncSets are done.
+         *
+         * When the merged SyncSet is complete, it will invoke the original syncRequestComplete
+         * callback but send an empty transaction to ensure the changes are applied early. This
+         * is needed in case the original sync is relying on the callback to continue processing.
+         *
+         * @param otherSyncSet The other SyncSet to merge into this one.
+         */
+        public void merge(SyncSet otherSyncSet) {
+            synchronized (mLock) {
+                mMergedSyncSets.add(otherSyncSet);
+            }
+            otherSyncSet.updateCallback(transaction -> {
+                synchronized (mLock) {
+                    mMergedSyncSets.remove(otherSyncSet);
+                    mTransaction.merge(transaction);
+                    checkIfSyncIsComplete();
+                }
+            });
         }
     }
 
