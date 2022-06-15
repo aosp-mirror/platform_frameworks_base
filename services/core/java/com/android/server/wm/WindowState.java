@@ -1474,15 +1474,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mAttrs;
     }
 
-    WindowManager.LayoutParams getLayoutingAttrs(int rotation) {
-        final WindowManager.LayoutParams[] paramsForRotation = mAttrs.paramsForRotation;
-        if (paramsForRotation == null || paramsForRotation.length != 4
-                || paramsForRotation[rotation] == null) {
-            return mAttrs;
-        }
-        return paramsForRotation[rotation];
-    }
-
     /** Retrieves the flags used to disable system UI functions. */
     int getDisableFlags() {
         return mDisableFlags;
@@ -4963,18 +4954,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isExitAnimationRunningSelfOrChild() {
         return isAnimating(CHILDREN, ANIMATION_TYPE_WINDOW_ANIMATION);
-    }
-
-    /**
-     * @return {@code true} if self or the parent container of the window is in transition.
-     * (e.g. The app or recents transition)
-     */
-    boolean inTransitionSelfOrParent() {
-        if (!mTransitionController.isShellTransitionsEnabled()) {
-            return isAnimating(PARENTS | TRANSITION,
-                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
-        }
-        return mTransitionController.inTransition(this);
     }
 
     private boolean shouldFinishAnimatingExit() {

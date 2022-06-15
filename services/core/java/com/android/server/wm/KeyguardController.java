@@ -627,6 +627,7 @@ class KeyguardController {
                 } else if (top.canShowWhenLocked()) {
                     mTopOccludesActivity = top;
                 }
+                top.mDismissKeyguard = false;
 
                 // Only the top activity may control occluded, as we can't occlude the Keyguard
                 // if the top app doesn't want to occlude it.
