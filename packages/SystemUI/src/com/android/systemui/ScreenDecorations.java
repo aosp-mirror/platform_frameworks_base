@@ -493,6 +493,13 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
                         cutoutView.onDisplayChanged(displayId);
                     }
                 }
+
+                DisplayCutoutView overlay = (DisplayCutoutView) getOverlayView(mFaceScanningViewId);
+                if (overlay != null) {
+                    // handle display resolution changes
+                    overlay.onDisplayChanged(displayId);
+                }
+
                 if (mScreenDecorHwcLayer != null) {
                     mScreenDecorHwcLayer.onDisplayChanged(displayId);
                 }
@@ -801,7 +808,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             });
         }
         // Use visibility of privacy dot views & face scanning view to determine the overlay's
-        // visibility if the screen decoration SW layer overlay isn't persistenly showing
+        // visibility if the screen decoration SW layer overlay isn't persistently showing
         // (ie: rounded corners always showing in SW layer)
         overlay.getRootView().setVisibility(getWindowVisibility(overlay, shouldOptimizeVisibility));
     }
@@ -960,7 +967,7 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             viewsMayNeedColorUpdate.add(R.id.rounded_corner_bottom_right);
             viewsMayNeedColorUpdate.add(R.id.display_cutout);
         }
-        if (mFaceScanningFactory.getHasProviders()) {
+        if (getOverlayView(mFaceScanningViewId) != null) {
             viewsMayNeedColorUpdate.add(mFaceScanningViewId);
         }
         final Integer[] views = new Integer[viewsMayNeedColorUpdate.size()];
@@ -1115,14 +1122,12 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             updateOverlayProviderViews();
         }
 
-        if (mFaceScanningFactory.getHasProviders()) {
-            FaceScanningOverlay faceScanningOverlay =
-                    (FaceScanningOverlay) getOverlayView(mFaceScanningViewId);
-            if (faceScanningOverlay != null) {
-                faceScanningOverlay.setFaceScanningAnimColor(
-                        Utils.getColorAttrDefaultColor(faceScanningOverlay.getContext(),
-                                com.android.systemui.R.attr.wallpaperTextColorAccent));
-            }
+        FaceScanningOverlay faceScanningOverlay =
+                (FaceScanningOverlay) getOverlayView(mFaceScanningViewId);
+        if (faceScanningOverlay != null) {
+            faceScanningOverlay.setFaceScanningAnimColor(
+                    Utils.getColorAttrDefaultColor(faceScanningOverlay.getContext(),
+                            com.android.systemui.R.attr.wallpaperTextColorAccent));
         }
     }
 
@@ -1342,9 +1347,13 @@ public class ScreenDecorations extends CoreStartable implements Tunable , Dumpab
             } else {
                 newVisible = GONE;
             }
-            if (newVisible != getVisibility()) {
+            if (updateVisOnUpdateCutout() && newVisible != getVisibility()) {
                 setVisibility(newVisible);
             }
+        }
+
+        protected boolean updateVisOnUpdateCutout() {
+            return true;
         }
 
         private void updateBoundingPath() {
