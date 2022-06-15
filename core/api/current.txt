@@ -30355,6 +30355,7 @@ package android.os {
     method public <T extends android.os.Parcelable> void writeTypedArray(@Nullable T[], int);
     method public <T extends android.os.Parcelable> void writeTypedArrayMap(@Nullable android.util.ArrayMap<java.lang.String,T>, int);
     method public <T extends android.os.Parcelable> void writeTypedList(@Nullable java.util.List<T>);
+    method public <T extends android.os.Parcelable> void writeTypedList(@Nullable java.util.List<T>, int);
     method public <T extends android.os.Parcelable> void writeTypedObject(@Nullable T, int);
     method public <T extends android.os.Parcelable> void writeTypedSparseArray(@Nullable android.util.SparseArray<T>, int);
     method public void writeValue(@Nullable Object);

@@ -1999,7 +1999,20 @@ public final class Parcel {
     }
 
     /**
-     * @hide
+     * Flatten a List containing a particular object type into the parcel, at
+     * the current dataPosition() and growing dataCapacity() if needed.  The
+     * type of the objects in the list must be one that implements Parcelable.
+     * Unlike the generic writeList() method, however, only the raw data of the
+     * objects is written and not their type, so you must use the corresponding
+     * readTypedList() to unmarshall them.
+     *
+     * @param val The list of objects to be written.
+     * @param parcelableFlags Contextual flags as per
+     * {@link Parcelable#writeToParcel(Parcel, int) Parcelable.writeToParcel()}.
+     *
+     * @see #createTypedArrayList
+     * @see #readTypedList
+     * @see Parcelable
      */
     public <T extends Parcelable> void writeTypedList(@Nullable List<T> val, int parcelableFlags) {
         if (val == null) {
