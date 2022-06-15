@@ -725,6 +725,7 @@ public class MediaControlPanel {
                         scaleTransitionDrawableLayer(transitionDrawable, 1, width, height);
                         transitionDrawable.setLayerGravity(0, Gravity.CENTER);
                         transitionDrawable.setLayerGravity(1, Gravity.CENTER);
+                        transitionDrawable.setCrossFadeEnabled(!isArtworkBound);
 
                         albumView.setImageDrawable(transitionDrawable);
                         transitionDrawable.startTransition(isArtworkBound ? 333 : 80);
