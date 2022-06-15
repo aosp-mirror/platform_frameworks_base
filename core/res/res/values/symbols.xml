@@ -737,7 +737,6 @@
   <java-symbol type="string" name="fileSizeSuffix" />
   <java-symbol type="string" name="force_close" />
   <java-symbol type="string" name="gadget_host_error_inflating" />
-  <java-symbol type="string" name="gigabyteShort" />
   <java-symbol type="string" name="gpsNotifMessage" />
   <java-symbol type="string" name="gpsNotifTicker" />
   <java-symbol type="string" name="gpsNotifTitle" />
@@ -793,7 +792,6 @@
   <java-symbol type="string" name="keyboardview_keycode_enter" />
   <java-symbol type="string" name="keyboardview_keycode_mode_change" />
   <java-symbol type="string" name="keyboardview_keycode_shift" />
-  <java-symbol type="string" name="kilobyteShort" />
   <java-symbol type="string" name="last_month" />
   <java-symbol type="string" name="launchBrowserDefault" />
   <java-symbol type="string" name="lock_to_app_unlock_pin" />
@@ -810,7 +808,6 @@
   <java-symbol type="string" name="lockscreen_emergency_call" />
   <java-symbol type="string" name="lockscreen_return_to_call" />
   <java-symbol type="string" name="low_memory" />
-  <java-symbol type="string" name="megabyteShort" />
   <java-symbol type="string" name="midnight" />
   <java-symbol type="string" name="mismatchPin" />
   <java-symbol type="string" name="mmiComplete" />
@@ -840,7 +837,6 @@
   <java-symbol type="string" name="passwordIncorrect" />
   <java-symbol type="string" name="perms_description_app" />
   <java-symbol type="string" name="perms_new_perm_prefix" />
-  <java-symbol type="string" name="petabyteShort" />
   <java-symbol type="string" name="peerTtyModeFull" />
   <java-symbol type="string" name="peerTtyModeHco" />
   <java-symbol type="string" name="peerTtyModeVco" />
@@ -1016,7 +1012,6 @@
   <java-symbol type="string" name="sync_really_delete" />
   <java-symbol type="string" name="sync_too_many_deletes_desc" />
   <java-symbol type="string" name="sync_undo_deletes" />
-  <java-symbol type="string" name="terabyteShort" />
   <java-symbol type="string" name="text_copied" />
   <java-symbol type="string" name="time_of_day" />
   <java-symbol type="string" name="time_picker_decrement_hour_button" />
