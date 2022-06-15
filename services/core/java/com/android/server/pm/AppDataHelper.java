@@ -622,7 +622,7 @@ final class AppDataHelper {
     private boolean shouldHaveAppStorage(AndroidPackage pkg) {
         PackageManager.Property noAppDataProp =
                 pkg.getProperties().get(PackageManager.PROPERTY_NO_APP_DATA_STORAGE);
-        return noAppDataProp == null || !noAppDataProp.getBoolean();
+        return (noAppDataProp == null || !noAppDataProp.getBoolean()) && pkg.getUid() >= 0;
     }
 
     /**
