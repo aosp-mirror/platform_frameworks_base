@@ -19,21 +19,22 @@ package com.android.server.wm.flicker.close
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.entireScreenCovered
+import com.android.server.wm.flicker.replacesLayer
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.flicker.replacesLayer
 import org.junit.Test
 
 /**
@@ -42,6 +43,7 @@ import org.junit.Test
 abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
+    protected val tapl = LauncherInstrumentation()
 
     /**
      * Specification of the test transition to execute

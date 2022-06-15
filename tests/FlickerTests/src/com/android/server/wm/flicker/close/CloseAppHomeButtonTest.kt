@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.close
 
-import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -69,7 +69,7 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         get() = {
             super.transition(this)
             transitions {
-                device.pressHome()
+                tapl.goHome()
                 wmHelper.waitForHomeActivityVisible()
             }
         }

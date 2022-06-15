@@ -72,7 +72,7 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         get() = {
             super.transition(this)
             transitions {
-                device.pressBack()
+                tapl.pressBack()
                 wmHelper.waitForHomeActivityVisible()
             }
         }
