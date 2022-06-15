@@ -668,6 +668,9 @@ public class NotificationPanelViewController extends PanelViewController {
     private Optional<NotificationPanelUnfoldAnimationController>
             mNotificationPanelUnfoldAnimationController;
 
+    /** The drag distance required to fully expand the split shade. */
+    private int mSplitShadeFullTransitionDistance;
+
     private final NotificationListContainer mNotificationListContainer;
     private final NotificationStackSizeCalculator mNotificationStackSizeCalculator;
 
@@ -1169,6 +1172,9 @@ public class NotificationPanelViewController extends PanelViewController {
         if (splitShadeChanged) {
             onSplitShadeEnabledChanged();
         }
+
+        mSplitShadeFullTransitionDistance =
+                mResources.getDimensionPixelSize(R.dimen.split_shade_full_transition_distance);
     }
 
     private void onSplitShadeEnabledChanged() {
@@ -3057,7 +3063,16 @@ public class NotificationPanelViewController extends PanelViewController {
         int maxHeight;
         if (mQsExpandImmediate || mQsExpanded || mIsExpanding && mQsExpandedWhenExpandingStarted
                 || mPulsing || mSplitShadeEnabled) {
-            maxHeight = calculatePanelHeightQsExpanded();
+            if (mSplitShadeEnabled && mBarState == SHADE) {
+                // Max panel height is used to calculate the fraction of the shade expansion.
+                // Traditionally the value is based on the number of notifications.
+                // On split-shade, we want the required distance to be a specific and constant
+                // value, to make sure the expansion motion has the expected speed.
+                // We also only want this on non-lockscreen for now.
+                maxHeight = mSplitShadeFullTransitionDistance;
+            } else {
+                maxHeight = calculatePanelHeightQsExpanded();
+            }
         } else {
             maxHeight = calculatePanelHeightShade();
         }
