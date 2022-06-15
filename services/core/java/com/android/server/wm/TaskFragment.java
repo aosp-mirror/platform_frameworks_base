@@ -2496,7 +2496,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (!hasChild()) {
             return false;
         }
-        return isExitAnimationRunningSelfOrChild() || inTransition();
+        return isExitAnimationRunningSelfOrChild();
     }
 
     @Override
@@ -2566,11 +2566,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (mDimmer.updateDims(getSyncTransaction(), dimBounds)) {
             scheduleAnimation();
         }
-    }
-
-    @Override
-    boolean canBeAnimationTarget() {
-        return true;
     }
 
     @Override

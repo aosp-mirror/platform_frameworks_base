@@ -928,7 +928,6 @@ public class AppTransitionController {
                 // TODO(b/213312721): Remove this once ShellTransition is enabled.
                 continue;
             } else if (parent == null || !parent.canCreateRemoteAnimationTarget()
-                    || !parent.canBeAnimationTarget()
                     // We cannot promote the animation on Task's parent when the task is in
                     // clearing task in case the animating get stuck when performing the opening
                     // task that behind it.

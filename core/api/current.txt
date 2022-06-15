@@ -18831,6 +18831,8 @@ package android.inputmethodservice {
     method @Deprecated public int getInputMethodWindowRecommendedHeight();
     method public android.view.LayoutInflater getLayoutInflater();
     method public int getMaxWidth();
+    method @NonNull public static final java.time.Duration getStylusHandwritingIdleTimeoutMax();
+    method @NonNull public final java.time.Duration getStylusHandwritingSessionTimeout();
     method @Nullable public final android.view.Window getStylusHandwritingWindow();
     method public CharSequence getTextForImeAction(int);
     method public android.app.Dialog getWindow();
@@ -18897,6 +18899,7 @@ package android.inputmethodservice {
     method public void setExtractView(android.view.View);
     method public void setExtractViewShown(boolean);
     method public void setInputView(android.view.View);
+    method public final void setStylusHandwritingSessionTimeout(@NonNull java.time.Duration);
     method public final boolean shouldOfferSwitchingToNextInputMethod();
     method public void showStatusIcon(@DrawableRes int);
     method public void showWindow(boolean);

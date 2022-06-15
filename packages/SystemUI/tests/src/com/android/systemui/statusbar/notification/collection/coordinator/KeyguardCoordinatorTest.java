@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -72,9 +73,10 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         KeyguardCoordinator keyguardCoordinator = new KeyguardCoordinator(
-                mStatusBarStateController,
-                mKeyguardUpdateMonitor, mHighPriorityProvider, mSectionHeaderVisibilityProvider,
-                mKeyguardNotificationVisibilityProvider);
+                mKeyguardNotificationVisibilityProvider,
+                mSectionHeaderVisibilityProvider,
+                mock(SharedCoordinatorLogger.class),
+                mStatusBarStateController);
 
         mEntry = new NotificationEntryBuilder()
                 .setUser(new UserHandle(NOTIF_USER_ID))

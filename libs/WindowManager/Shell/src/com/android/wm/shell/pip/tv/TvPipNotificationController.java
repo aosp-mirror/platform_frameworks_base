@@ -114,6 +114,7 @@ public class TvPipNotificationController {
                 .setOngoing(true)
                 .setCategory(Notification.CATEGORY_SYSTEM)
                 .setShowWhen(true)
+                .setOnlyAlertOnce(true)
                 .setSmallIcon(R.drawable.pip_icon)
                 .setAllowSystemGeneratedContextualActions(false)
                 .setContentIntent(createPendingIntent(context, ACTION_FULLSCREEN))

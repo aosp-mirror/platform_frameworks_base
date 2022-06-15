@@ -45,6 +45,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -210,6 +211,8 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testCreateInfo_DisplayArea() {
+        assumeTrue(mDisplayContent.mTransitionController.useShellTransitionsRotation());
+
         final Transition transition = createTestTransition(TRANSIT_OPEN);
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
@@ -792,6 +795,10 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.requestChangeTransitionIfNeeded(1 /* changes */, null /* displayChange */);
         assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
         assertNotNull(mDisplayContent.getAsyncRotationController());
+
+        // The app is still in transition, so the callback should be no-op.
+        mDisplayContent.mTransitionController.dispatchLegacyAppTransitionFinished(app);
+        assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
 
         statusBar.setOrientationChanging(true);
         player.startTransition();

@@ -4485,7 +4485,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (dataSize >= mConstants.MAX_HISTORY_BUFFER) {
             //open a new history file.
             final long start = SystemClock.uptimeMillis();
-            writeHistoryLocked(true);
+            writeHistoryLocked();
             if (DEBUG) {
                 Slog.d(TAG, "addHistoryBufferLocked writeHistoryLocked takes ms:"
                         + (SystemClock.uptimeMillis() - start));
@@ -16905,22 +16905,27 @@ public class BatteryStatsImpl extends BatteryStats {
         iPw.decreaseIndent();
     }
 
-    final ReentrantLock mWriteLock = new ReentrantLock();
+    private final Runnable mWriteAsyncRunnable = () -> {
+        synchronized (BatteryStatsImpl.this) {
+            writeSyncLocked();
+        }
+    };
 
     @GuardedBy("this")
     public void writeAsyncLocked() {
-        writeStatsLocked(false);
-        writeHistoryLocked(false);
+        BackgroundThread.getHandler().removeCallbacks(mWriteAsyncRunnable);
+        BackgroundThread.getHandler().post(mWriteAsyncRunnable);
     }
 
     @GuardedBy("this")
     public void writeSyncLocked() {
-        writeStatsLocked(true);
-        writeHistoryLocked(true);
+        BackgroundThread.getHandler().removeCallbacks(mWriteAsyncRunnable);
+        writeStatsLocked();
+        writeHistoryLocked();
     }
 
     @GuardedBy("this")
-    void writeStatsLocked(boolean sync) {
+    private void writeStatsLocked() {
         if (mStatsFile == null) {
             Slog.w(TAG,
                     "writeStatsLocked: no file associated with this instance");
@@ -16932,20 +16937,23 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         final Parcel p = Parcel.obtain();
-        final long start = SystemClock.uptimeMillis();
-        writeSummaryToParcel(p, false/*history is in separate file*/);
-        if (DEBUG) {
-            Slog.d(TAG, "writeSummaryToParcel duration ms:"
-                    + (SystemClock.uptimeMillis() - start) + " bytes:" + p.dataSize());
+        try {
+            final long start = SystemClock.uptimeMillis();
+            writeSummaryToParcel(p, false/*history is in separate file*/);
+            if (DEBUG) {
+                Slog.d(TAG, "writeSummaryToParcel duration ms:"
+                        + (SystemClock.uptimeMillis() - start) + " bytes:" + p.dataSize());
+            }
+            mLastWriteTimeMs = mClock.elapsedRealtime();
+            writeParcelToFileLocked(p, mStatsFile);
+        } finally {
+            p.recycle();
         }
-        mLastWriteTimeMs = mClock.elapsedRealtime();
-        writeParcelToFileLocked(p, mStatsFile, sync);
     }
 
-    void writeHistoryLocked(boolean sync) {
+    private void writeHistoryLocked() {
         if (mBatteryStatsHistory.getActiveFile() == null) {
-            Slog.w(TAG,
-                    "writeHistoryLocked: no history file associated with this instance");
+            Slog.w(TAG, "writeHistoryLocked: no history file associated with this instance");
             return;
         }
 
@@ -16954,28 +16962,21 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         Parcel p = Parcel.obtain();
-        final long start = SystemClock.uptimeMillis();
-        writeHistoryBuffer(p, true);
-        if (DEBUG) {
-            Slog.d(TAG, "writeHistoryBuffer duration ms:"
-                    + (SystemClock.uptimeMillis() - start) + " bytes:" + p.dataSize());
-        }
-        writeParcelToFileLocked(p, mBatteryStatsHistory.getActiveFile(), sync);
-    }
-
-    void writeParcelToFileLocked(Parcel p, AtomicFile file, boolean sync) {
-        if (sync) {
-            commitPendingDataToDisk(p, file);
-        } else {
-            BackgroundThread.getHandler().post(new Runnable() {
-                @Override public void run() {
-                    commitPendingDataToDisk(p, file);
-                }
-            });
+        try {
+            final long start = SystemClock.uptimeMillis();
+            writeHistoryBuffer(p, true);
+            if (DEBUG) {
+                Slog.d(TAG, "writeHistoryBuffer duration ms:"
+                        + (SystemClock.uptimeMillis() - start) + " bytes:" + p.dataSize());
+            }
+            writeParcelToFileLocked(p, mBatteryStatsHistory.getActiveFile());
+        } finally {
+            p.recycle();
         }
     }
 
-    private void commitPendingDataToDisk(Parcel p, AtomicFile file) {
+    private final ReentrantLock mWriteLock = new ReentrantLock();
+    private void writeParcelToFileLocked(Parcel p, AtomicFile file) {
         mWriteLock.lock();
         FileOutputStream fos = null;
         try {
@@ -16995,7 +16996,6 @@ public class BatteryStatsImpl extends BatteryStats {
             Slog.w(TAG, "Error writing battery statistics", e);
             file.failWrite(fos);
         } finally {
-            p.recycle();
             mWriteLock.unlock();
         }
     }

@@ -7399,7 +7399,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTransit = TRANSIT_OLD_UNSET;
         mTransitFlags = 0;
         mNeedsAnimationBoundsLayer = false;
-        mDismissKeyguard = false;
 
         setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM | FINISH_LAYOUT_REDO_WALLPAPER,
                 "ActivityRecord");
@@ -7979,8 +7978,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isInTransition() {
-        return mTransitionController.inTransition(this) // Shell transitions.
-                || isAnimating(PARENTS | TRANSITION); // Legacy transitions.
+        return inTransitionSelfOrParent();
     }
 
     /**
@@ -9786,11 +9784,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // finish because finish resets all the states.
         mLastAllReadyAtSync = allSyncFinished();
         super.finishSync(outMergedTransaction, cancel);
-    }
-
-    @Override
-    boolean canBeAnimationTarget() {
-        return true;
     }
 
     @Nullable
