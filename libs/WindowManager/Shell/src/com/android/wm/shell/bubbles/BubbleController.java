@@ -1350,14 +1350,18 @@ public class BubbleController {
                 mStackView.setBubbleSuppressed(update.unsuppressedBubble, false);
             }
 
+            boolean collapseStack = update.expandedChanged && !update.expanded;
+
             // At this point, the correct bubbles are inflated in the stack.
             // Make sure the order in bubble data is reflected in bubble row.
             if (update.orderChanged && mStackView != null) {
                 mDataRepository.addBubbles(mCurrentUserId, update.bubbles);
-                mStackView.updateBubbleOrder(update.bubbles);
+                // if the stack is going to be collapsed, do not update pointer position
+                // after reordering
+                mStackView.updateBubbleOrder(update.bubbles, !collapseStack);
             }
 
-            if (update.expandedChanged && !update.expanded) {
+            if (collapseStack) {
                 mStackView.setExpanded(false);
                 mSysuiProxy.requestNotificationShadeTopUi(false, TAG);
             }
