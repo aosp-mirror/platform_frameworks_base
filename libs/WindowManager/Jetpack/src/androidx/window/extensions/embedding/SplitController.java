@@ -24,9 +24,9 @@ import static androidx.window.extensions.embedding.SplitContainer.getFinishSecon
 import static androidx.window.extensions.embedding.SplitContainer.isStickyPlaceholderRule;
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenAdjacent;
 import static androidx.window.extensions.embedding.SplitContainer.shouldFinishAssociatedContainerWhenStacked;
-import static androidx.window.extensions.embedding.SplitPresenter.boundsSmallerThanMinDimensions;
+import static androidx.window.extensions.embedding.SplitPresenter.RESULT_EXPAND_FAILED_NO_TF_INFO;
 import static androidx.window.extensions.embedding.SplitPresenter.getActivityIntentMinDimensionsPair;
-import static androidx.window.extensions.embedding.SplitPresenter.getMinDimensions;
+import static androidx.window.extensions.embedding.SplitPresenter.getNonEmbeddedActivityBounds;
 import static androidx.window.extensions.embedding.SplitPresenter.shouldShowSideBySide;
 
 import android.app.Activity;
@@ -581,8 +581,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     /** Finds the activity below the given activity. */
+    @VisibleForTesting
     @Nullable
-    private Activity findActivityBelow(@NonNull Activity activity) {
+    Activity findActivityBelow(@NonNull Activity activity) {
         Activity activityBelow = null;
         final TaskFragmentContainer container = getContainerWithActivity(activity);
         if (container != null) {
@@ -620,21 +621,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             // Can launch in the existing secondary container if the rules share the same
             // presentation.
             final TaskFragmentContainer secondaryContainer = splitContainer.getSecondaryContainer();
-            if (secondaryContainer == getContainerWithActivity(secondaryActivity)
-                    && !boundsSmallerThanMinDimensions(secondaryContainer.getLastRequestedBounds(),
-                            getMinDimensions(secondaryActivity))) {
+            if (secondaryContainer == getContainerWithActivity(secondaryActivity)) {
                 // The activity is already in the target TaskFragment.
                 return true;
             }
             secondaryContainer.addPendingAppearedActivity(secondaryActivity);
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            mPresenter.expandSplitContainerIfNeeded(wct, splitContainer, primaryActivity,
-                    secondaryActivity, null /* secondaryIntent */);
-            wct.reparentActivityToTaskFragment(
-                    secondaryContainer.getTaskFragmentToken(),
-                    secondaryActivity.getActivityToken());
-            mPresenter.applyTransaction(wct);
-            return true;
+            if (mPresenter.expandSplitContainerIfNeeded(wct, splitContainer, primaryActivity,
+                    secondaryActivity, null /* secondaryIntent */)
+                    != RESULT_EXPAND_FAILED_NO_TF_INFO) {
+                wct.reparentActivityToTaskFragment(
+                        secondaryContainer.getTaskFragmentToken(),
+                        secondaryActivity.getActivityToken());
+                mPresenter.applyTransaction(wct);
+                return true;
+            }
         }
         // Create new split pair.
         mPresenter.createNewSplitContainer(primaryActivity, secondaryActivity, splitRule);
@@ -800,9 +801,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         if (splitContainer != null && existingContainer == splitContainer.getPrimaryContainer()
                 && (canReuseContainer(splitRule, splitContainer.getSplitRule())
                 // TODO(b/231845476) we should always respect clearTop.
-                || !respectClearTop)) {
-            mPresenter.expandSplitContainerIfNeeded(wct, splitContainer, primaryActivity,
-                    null /* secondaryActivity */, intent);
+                || !respectClearTop)
+                && mPresenter.expandSplitContainerIfNeeded(wct, splitContainer, primaryActivity,
+                        null /* secondaryActivity */, intent) != RESULT_EXPAND_FAILED_NO_TF_INFO) {
             // Can launch in the existing secondary container if the rules share the same
             // presentation.
             return splitContainer.getSecondaryContainer();
@@ -872,7 +873,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 pendingAppearedIntent, taskContainer, this);
         if (!taskContainer.isTaskBoundsInitialized()) {
             // Get the initial bounds before the TaskFragment has appeared.
-            final Rect taskBounds = SplitPresenter.getTaskBoundsFromActivity(activityInTask);
+            final Rect taskBounds = getNonEmbeddedActivityBounds(activityInTask);
             if (!taskContainer.setTaskBounds(taskBounds)) {
                 Log.w(TAG, "Can't find bounds from activity=" + activityInTask);
             }
