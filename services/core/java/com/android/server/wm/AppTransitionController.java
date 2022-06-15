@@ -693,7 +693,8 @@ public class AppTransitionController {
         if (adapter == null) {
             return false;
         }
-        mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(adapter);
+        mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(
+                adapter, false /* sync */, true /*isActivityEmbedding*/);
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Override with TaskFragment remote animation for transit=%s",
                 AppTransition.appTransitionOldToString(transit));
