@@ -42,7 +42,6 @@ import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dump.DumpManager;
@@ -65,7 +64,6 @@ public class SystemUIApplication extends Application implements
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
 
-    private ContextComponentHelper mComponentHelper;
     private BootCompleteCacheImpl mBootCompleteCache;
     private DumpManager mDumpManager;
 
@@ -80,14 +78,18 @@ public class SystemUIApplication extends Application implements
     private CoreStartable[] mServices;
     private boolean mServicesStarted;
     private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
-    private GlobalRootComponent mRootComponent;
     private SysUIComponent mSysUIComponent;
+    private SystemUIInitializer mInitializer;
 
     public SystemUIApplication() {
         super();
         Log.v(TAG, "SystemUIApplication constructed.");
         // SysUI may be building without protolog preprocessing in some cases
         ProtoLog.REQUIRE_PROTOLOGTOOL = false;
+    }
+
+    protected GlobalRootComponent getRootComponent() {
+        return mInitializer.getRootComponent();
     }
 
     @Override
@@ -99,10 +101,8 @@ public class SystemUIApplication extends Application implements
         TimingsTraceLog log = new TimingsTraceLog("SystemUIBootTiming",
                 Trace.TRACE_TAG_APP);
         log.traceBegin("DependencyInjection");
-        mContextAvailableCallback.onContextAvailable(this);
-        mRootComponent = SystemUIFactory.getInstance().getRootComponent();
-        mSysUIComponent = SystemUIFactory.getInstance().getSysUIComponent();
-        mComponentHelper = mSysUIComponent.getContextComponentHelper();
+        mInitializer = mContextAvailableCallback.onContextAvailable(this);
+        mSysUIComponent = mInitializer.getSysUIComponent();
         mBootCompleteCache = mSysUIComponent.provideBootCacheImpl();
         log.traceEnd();
 
@@ -189,15 +189,14 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startServicesIfNeeded() {
-        final String vendorComponent = SystemUIFactory.getInstance()
-                .getVendorComponent(getResources());
+        final String vendorComponent = mInitializer.getVendorComponent(getResources());
 
         // Sort the startables so that we get a deterministic ordering.
         // TODO: make #start idempotent and require users of CoreStartable to call it.
         Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
                 Comparator.comparing(Class::getName));
-        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponents());
-        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponentsPerUser());
+        sortedStartables.putAll(mSysUIComponent.getStartables());
+        sortedStartables.putAll(mSysUIComponent.getPerUserStartables());
         startServicesIfNeeded(
                 sortedStartables, "StartServices", vendorComponent);
     }
@@ -212,7 +211,7 @@ public class SystemUIApplication extends Application implements
         // Sort the startables so that we get a deterministic ordering.
         Map<Class<?>, Provider<CoreStartable>> sortedStartables = new TreeMap<>(
                 Comparator.comparing(Class::getName));
-        sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponentsPerUser());
+        sortedStartables.putAll(mSysUIComponent.getPerUserStartables());
         startServicesIfNeeded(
                 sortedStartables, "StartSecondaryServices", null);
     }

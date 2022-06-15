@@ -22,7 +22,7 @@
 <resources>
     <!-- SystemUIFactory component -->
     <string name="config_systemUIFactoryComponent" translatable="false">
-        com.android.systemui.tv.TvSystemUIFactory
+        com.android.systemui.tv.TvSystemUIInitializer
     </string>
 
     <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
