@@ -166,8 +166,8 @@ public class BatteryStatsImpl extends BatteryStats {
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
-    // Current on-disk Parcel version
-    static final int VERSION = 208;
+    // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
+    public static final int VERSION = 208;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -1625,7 +1625,8 @@ public class BatteryStatsImpl extends BatteryStats {
             mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
         } else {
             mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
-            mBatteryStatsHistory = new BatteryStatsHistory(this, historyDirectory, mHistoryBuffer);
+            mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer, historyDirectory,
+                    this::getMaxHistoryFiles);
         }
         mHandler = null;
         mPlatformIdleStateCallback = null;
@@ -3980,8 +3981,8 @@ public class BatteryStatsImpl extends BatteryStats {
         int idx;
         if (idxObj != null) {
             idx = idxObj;
-            if ((idx & TAG_FIRST_OCCURRENCE_FLAG) != 0) {
-                mHistoryTagPool.put(tag, idx & ~TAG_FIRST_OCCURRENCE_FLAG);
+            if ((idx & BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG) != 0) {
+                mHistoryTagPool.put(tag, idx & ~BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
             }
             return idx;
         } else if (mNextHistoryTagIdx < HISTORY_TAG_INDEX_LIMIT) {
@@ -3996,10 +3997,10 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mHistoryTags != null) {
                 mHistoryTags.put(idx, key);
             }
-            return idx | TAG_FIRST_OCCURRENCE_FLAG;
+            return idx | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG;
         } else {
             // Tag pool overflow: include the tag itself in the parcel
-            return HISTORY_TAG_INDEX_LIMIT | TAG_FIRST_OCCURRENCE_FLAG;
+            return HISTORY_TAG_INDEX_LIMIT | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG;
         }
     }
 
@@ -4084,49 +4085,10 @@ public class BatteryStatsImpl extends BatteryStats {
         in coulombs follows.
      */
 
-    // Part of initial delta int that specifies the time delta.
-    static final int DELTA_TIME_MASK = 0x7ffff;
-    static final int DELTA_TIME_LONG = 0x7ffff;   // The delta is a following long
-    static final int DELTA_TIME_INT = 0x7fffe;    // The delta is a following int
-    static final int DELTA_TIME_ABS = 0x7fffd;    // Following is an entire abs update.
-    // Flag in delta int: a new battery level int follows.
-    static final int DELTA_BATTERY_LEVEL_FLAG               = 0x00080000;
-    // Flag in delta int: a new full state and battery status int follows.
-    static final int DELTA_STATE_FLAG                       = 0x00100000;
-    // Flag in delta int: a new full state2 int follows.
-    static final int DELTA_STATE2_FLAG                      = 0x00200000;
-    // Flag in delta int: contains a wakelock or wakeReason tag.
-    static final int DELTA_WAKELOCK_FLAG                    = 0x00400000;
-    // Flag in delta int: contains an event description.
-    static final int DELTA_EVENT_FLAG                       = 0x00800000;
-    // Flag in delta int: contains the battery charge count in uAh.
-    static final int DELTA_BATTERY_CHARGE_FLAG              = 0x01000000;
-    // These upper bits are the frequently changing state bits.
-    static final int DELTA_STATE_MASK                       = 0xfe000000;
-
-    // Flag in history tag index: indicates that this is the first occurrence of this tag,
-    // therefore the tag value is written in the parcel
-    static final int TAG_FIRST_OCCURRENCE_FLAG = 0x8000;
-
-    // These are the pieces of battery state that are packed in to the upper bits of
-    // the state int that have been packed in to the first delta int.  They must fit
-    // in STATE_BATTERY_MASK.
-    static final int STATE_BATTERY_MASK         = 0xff000000;
-    static final int STATE_BATTERY_STATUS_MASK  = 0x00000007;
-    static final int STATE_BATTERY_STATUS_SHIFT = 29;
-    static final int STATE_BATTERY_HEALTH_MASK  = 0x00000007;
-    static final int STATE_BATTERY_HEALTH_SHIFT = 26;
-    static final int STATE_BATTERY_PLUG_MASK    = 0x00000003;
-    static final int STATE_BATTERY_PLUG_SHIFT   = 24;
-
-    // We use the low bit of the battery state int to indicate that we have full details
-    // from a battery level change.
-    static final int BATTERY_DELTA_LEVEL_FLAG   = 0x00000001;
-
     @GuardedBy("this")
     public void writeHistoryDelta(Parcel dest, HistoryItem cur, HistoryItem last) {
         if (last == null || cur.cmd != HistoryItem.CMD_UPDATE) {
-            dest.writeInt(DELTA_TIME_ABS);
+            dest.writeInt(BatteryStatsHistory.DELTA_TIME_ABS);
             cur.writeToParcel(dest, 0);
             return;
         }
@@ -4137,48 +4099,48 @@ public class BatteryStatsImpl extends BatteryStats {
 
         int deltaTimeToken;
         if (deltaTime < 0 || deltaTime > Integer.MAX_VALUE) {
-            deltaTimeToken = DELTA_TIME_LONG;
-        } else if (deltaTime >= DELTA_TIME_ABS) {
-            deltaTimeToken = DELTA_TIME_INT;
+            deltaTimeToken = BatteryStatsHistory.DELTA_TIME_LONG;
+        } else if (deltaTime >= BatteryStatsHistory.DELTA_TIME_ABS) {
+            deltaTimeToken = BatteryStatsHistory.DELTA_TIME_INT;
         } else {
             deltaTimeToken = (int)deltaTime;
         }
-        int firstToken = deltaTimeToken | (cur.states&DELTA_STATE_MASK);
+        int firstToken = deltaTimeToken | (cur.states & BatteryStatsHistory.DELTA_STATE_MASK);
         final int includeStepDetails = mLastHistoryStepLevel > cur.batteryLevel
-                ? BATTERY_DELTA_LEVEL_FLAG : 0;
+                ? BatteryStatsHistory.BATTERY_DELTA_LEVEL_FLAG : 0;
         final boolean computeStepDetails = includeStepDetails != 0
                 || mLastHistoryStepDetails == null;
         final int batteryLevelInt = buildBatteryLevelInt(cur) | includeStepDetails;
         final boolean batteryLevelIntChanged = batteryLevelInt != lastBatteryLevelInt;
         if (batteryLevelIntChanged) {
-            firstToken |= DELTA_BATTERY_LEVEL_FLAG;
+            firstToken |= BatteryStatsHistory.DELTA_BATTERY_LEVEL_FLAG;
         }
         final int stateInt = buildStateInt(cur);
         final boolean stateIntChanged = stateInt != lastStateInt;
         if (stateIntChanged) {
-            firstToken |= DELTA_STATE_FLAG;
+            firstToken |= BatteryStatsHistory.DELTA_STATE_FLAG;
         }
         final boolean state2IntChanged = cur.states2 != last.states2;
         if (state2IntChanged) {
-            firstToken |= DELTA_STATE2_FLAG;
+            firstToken |= BatteryStatsHistory.DELTA_STATE2_FLAG;
         }
         if (cur.wakelockTag != null || cur.wakeReasonTag != null) {
-            firstToken |= DELTA_WAKELOCK_FLAG;
+            firstToken |= BatteryStatsHistory.DELTA_WAKELOCK_FLAG;
         }
         if (cur.eventCode != HistoryItem.EVENT_NONE) {
-            firstToken |= DELTA_EVENT_FLAG;
+            firstToken |= BatteryStatsHistory.DELTA_EVENT_FLAG;
         }
 
         final boolean batteryChargeChanged = cur.batteryChargeUah != last.batteryChargeUah;
         if (batteryChargeChanged) {
-            firstToken |= DELTA_BATTERY_CHARGE_FLAG;
+            firstToken |= BatteryStatsHistory.DELTA_BATTERY_CHARGE_FLAG;
         }
         dest.writeInt(firstToken);
         if (DEBUG) Slog.i(TAG, "WRITE DELTA: firstToken=0x" + Integer.toHexString(firstToken)
                 + " deltaTime=" + deltaTime);
 
-        if (deltaTimeToken >= DELTA_TIME_INT) {
-            if (deltaTimeToken == DELTA_TIME_INT) {
+        if (deltaTimeToken >= BatteryStatsHistory.DELTA_TIME_INT) {
+            if (deltaTimeToken == BatteryStatsHistory.DELTA_TIME_INT) {
                 if (DEBUG) Slog.i(TAG, "WRITE DELTA: int deltaTime=" + (int)deltaTime);
                 dest.writeInt((int)deltaTime);
             } else {
@@ -4226,11 +4188,13 @@ public class BatteryStatsImpl extends BatteryStats {
                 wakeReasonIndex = 0xffff;
             }
             dest.writeInt((wakeReasonIndex<<16) | wakeLockIndex);
-            if (cur.wakelockTag != null && (wakeLockIndex & TAG_FIRST_OCCURRENCE_FLAG) != 0) {
+            if (cur.wakelockTag != null
+                    && (wakeLockIndex & BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG) != 0) {
                 cur.wakelockTag.writeToParcel(dest, 0);
                 cur.tagsFirstOccurrence = true;
             }
-            if (cur.wakeReasonTag != null && (wakeReasonIndex & TAG_FIRST_OCCURRENCE_FLAG) != 0) {
+            if (cur.wakeReasonTag != null
+                    && (wakeReasonIndex & BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG) != 0) {
                 cur.wakeReasonTag.writeToParcel(dest, 0);
                 cur.tagsFirstOccurrence = true;
             }
@@ -4239,7 +4203,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final int index = writeHistoryTag(cur.eventTag);
             final int codeAndIndex = (cur.eventCode & 0xffff) | (index << 16);
             dest.writeInt(codeAndIndex);
-            if ((index & TAG_FIRST_OCCURRENCE_FLAG) != 0) {
+            if ((index & BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG) != 0) {
                 cur.eventTag.writeToParcel(dest, 0);
                 cur.tagsFirstOccurrence = true;
             }
@@ -4298,10 +4262,13 @@ public class BatteryStatsImpl extends BatteryStats {
         } else if ((h.batteryPlugType&BatteryManager.BATTERY_PLUGGED_WIRELESS) != 0) {
             plugType = 3;
         }
-        return ((h.batteryStatus&STATE_BATTERY_STATUS_MASK)<<STATE_BATTERY_STATUS_SHIFT)
-                | ((h.batteryHealth&STATE_BATTERY_HEALTH_MASK)<<STATE_BATTERY_HEALTH_SHIFT)
-                | ((plugType&STATE_BATTERY_PLUG_MASK)<<STATE_BATTERY_PLUG_SHIFT)
-                | (h.states&(~STATE_BATTERY_MASK));
+        return ((h.batteryStatus & BatteryStatsHistory.STATE_BATTERY_STATUS_MASK)
+                << BatteryStatsHistory.STATE_BATTERY_STATUS_SHIFT)
+                | ((h.batteryHealth & BatteryStatsHistory.STATE_BATTERY_HEALTH_MASK)
+                << BatteryStatsHistory.STATE_BATTERY_HEALTH_SHIFT)
+                | ((plugType & BatteryStatsHistory.STATE_BATTERY_PLUG_MASK)
+                << BatteryStatsHistory.STATE_BATTERY_PLUG_SHIFT)
+                | (h.states & (~BatteryStatsHistory.STATE_BATTERY_MASK));
     }
 
     private void computeHistoryStepDetails(final HistoryStepDetails out,
@@ -4501,7 +4468,7 @@ public class BatteryStatsImpl extends BatteryStats {
             // Mark every entry in the pool with a flag indicating that the tag
             // has not yet been encountered while writing the current history buffer.
             for (Map.Entry<HistoryTag, Integer> entry: mHistoryTagPool.entrySet()) {
-                entry.setValue(entry.getValue() | TAG_FIRST_OCCURRENCE_FLAG);
+                entry.setValue(entry.getValue() | BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG);
             }
             startRecordingHistory(elapsedRealtimeMs, uptimeMs, false);
             HistoryItem newItem = new HistoryItem();
@@ -12363,7 +12330,8 @@ public class BatteryStatsImpl extends BatteryStats {
             mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
         } else {
             mStatsFile = new AtomicFile(new File(systemDir, "batterystats.bin"));
-            mBatteryStatsHistory = new BatteryStatsHistory(this, systemDir, mHistoryBuffer);
+            mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer, systemDir,
+                    this::getMaxHistoryFiles);
         }
         mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
         mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
@@ -12386,6 +12354,12 @@ public class BatteryStatsImpl extends BatteryStats {
         // Notify statsd that the system is initially not in doze.
         mDeviceIdleMode = DEVICE_IDLE_MODE_OFF;
         FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mDeviceIdleMode);
+    }
+
+    private int getMaxHistoryFiles() {
+        synchronized (this) {
+            return mConstants.MAX_HISTORY_FILES;
+        }
     }
 
     @VisibleForTesting
@@ -12926,7 +12900,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mHistoryTags = new SparseArray<>(mHistoryTagPool.size());
         for (Map.Entry<HistoryTag, Integer> entry: mHistoryTagPool.entrySet()) {
-            mHistoryTags.put(entry.getValue() & ~TAG_FIRST_OCCURRENCE_FLAG, entry.getKey());
+            mHistoryTags.put(entry.getValue() & ~BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG,
+                    entry.getKey());
         }
     }
 
@@ -17089,9 +17064,9 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     void  readHistoryBuffer(Parcel in) throws ParcelFormatException {
         final int version = in.readInt();
-        if (version != VERSION) {
+        if (version != BatteryStatsHistory.VERSION) {
             Slog.w("BatteryStats", "readHistoryBuffer: version got " + version
-                    + ", expected " + VERSION + "; erasing old stats");
+                    + ", expected " + BatteryStatsHistory.VERSION + "; erasing old stats");
             return;
         }
 
@@ -17152,7 +17127,7 @@ public class BatteryStatsImpl extends BatteryStats {
             TimeUtils.formatDuration(mLastHistoryElapsedRealtimeMs, sb);
             Slog.i(TAG, sb.toString());
         }
-        out.writeInt(VERSION);
+        out.writeInt(BatteryStatsHistory.VERSION);
         out.writeLong(mHistoryBaseTimeMs + mLastHistoryElapsedRealtimeMs);
         if (!inclData) {
             out.writeInt(0);
