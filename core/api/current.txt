@@ -39619,6 +39619,34 @@ package android.service.wallpaper {
 
 package android.speech {
 
+  public final class AlternativeSpan implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getAlternatives();
+    method public int getEndPosition();
+    method public int getStartPosition();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.speech.AlternativeSpan> CREATOR;
+  }
+
+  public static final class AlternativeSpan.Builder {
+    ctor public AlternativeSpan.Builder(int, int);
+    method @NonNull public android.speech.AlternativeSpan build();
+    method @NonNull public android.speech.AlternativeSpan.Builder setAlternatives(@NonNull java.util.List<java.lang.String>);
+  }
+
+  public final class AlternativeSpans implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.speech.AlternativeSpan> getSpans();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.speech.AlternativeSpans> CREATOR;
+  }
+
+  public static final class AlternativeSpans.Builder {
+    ctor public AlternativeSpans.Builder();
+    method @NonNull public android.speech.AlternativeSpans build();
+    method @NonNull public android.speech.AlternativeSpans.Builder setSpans(@NonNull java.util.List<android.speech.AlternativeSpan>);
+  }
+
   public interface RecognitionListener {
     method public void onBeginningOfSpeech();
     method public void onBufferReceived(byte[]);
@@ -39780,6 +39808,7 @@ package android.speech {
     field public static final int ERROR_SERVER_DISCONNECTED = 11; // 0xb
     field public static final int ERROR_SPEECH_TIMEOUT = 6; // 0x6
     field public static final int ERROR_TOO_MANY_REQUESTS = 10; // 0xa
+    field public static final String RESULTS_ALTERNATIVES = "results_alternatives";
     field public static final String RESULTS_RECOGNITION = "results_recognition";
   }
 
