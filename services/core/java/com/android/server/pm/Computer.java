@@ -130,7 +130,6 @@ public interface Computer extends PackageDataSnapshot {
      */
     ActivityInfo getActivityInfoInternal(ComponentName component, long flags,
             int filterCallingUid, int userId);
-    @Override
     AndroidPackage getPackage(String packageName);
     AndroidPackage getPackage(int uid);
     ApplicationInfo generateApplicationInfoFromSettings(String packageName, long flags,
@@ -318,7 +317,6 @@ public interface Computer extends PackageDataSnapshot {
     PreferredIntentResolver getPreferredActivities(@UserIdInt int userId);
 
     @NonNull
-    @Override
     ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
 
     @Nullable
@@ -645,11 +643,9 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid);
 
-    @Override
     @NonNull
     UserInfo[] getUserInfos();
 
-    @Override
     @NonNull
     Collection<SharedUserSetting> getAllSharedUsers();
 }

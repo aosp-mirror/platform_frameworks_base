@@ -55,7 +55,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
-import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watchable;
@@ -309,7 +308,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
 
         @Override
         public void onCompatChange(String packageName) {
-            PackageDataSnapshot snapshot = mPmInternal.snapshot();
+            Computer snapshot = (Computer) mPmInternal.snapshot();
             AndroidPackage pkg = snapshot.getPackage(packageName);
             if (pkg == null) {
                 return;
@@ -435,7 +434,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
      * @param newPkgSetting the new setting being added
      * @param isReplace     if the package is being replaced and may need extra cleanup.
      */
-    public void addPackage(PackageDataSnapshot snapshot, PackageStateInternal newPkgSetting,
+    public void addPackage(Computer snapshot, PackageStateInternal newPkgSetting,
             boolean isReplace) {
         if (DEBUG_TRACING) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "filter.addPackage");
@@ -632,7 +631,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         }
     }
 
-    private void updateEntireShouldFilterCache(PackageDataSnapshot snapshot, int subjectUserId) {
+    private void updateEntireShouldFilterCache(Computer snapshot, int subjectUserId) {
         final ArrayMap<String, ? extends PackageStateInternal> settings =
                 snapshot.getPackageStates();
         final UserInfo[] users = snapshot.getUserInfos();
@@ -653,7 +652,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         onChanged();
     }
 
-    private void updateEntireShouldFilterCacheInner(PackageDataSnapshot snapshot,
+    private void updateEntireShouldFilterCacheInner(Computer snapshot,
             ArrayMap<String, ? extends PackageStateInternal> settings,
             UserInfo[] users,
             int subjectUserId) {
@@ -684,7 +683,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
 
             final ArrayMap<String, AndroidPackage> packagesCache = new ArrayMap<>();
             final UserInfo[][] usersRef = new UserInfo[1][];
-            final PackageDataSnapshot snapshot = pmInternal.snapshot();
+            final Computer snapshot = (Computer) pmInternal.snapshot();
             final ArrayMap<String, ? extends PackageStateInternal> settings =
                     snapshot.getPackageStates();
             final UserInfo[] users = snapshot.getUserInfos();
@@ -712,7 +711,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         }, delayMs);
     }
 
-    public void onUserCreated(PackageDataSnapshot snapshot, int newUserId) {
+    public void onUserCreated(Computer snapshot, int newUserId) {
         if (!mCacheReady) {
             return;
         }
@@ -727,7 +726,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         onChanged();
     }
 
-    private void updateShouldFilterCacheForPackage(PackageDataSnapshot snapshot,
+    private void updateShouldFilterCacheForPackage(Computer snapshot,
             String packageName) {
         if (!mCacheReady) {
             return;
@@ -744,7 +743,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
     }
 
     @GuardedBy("mCacheLock")
-    private void updateShouldFilterCacheForPackage(PackageDataSnapshot snapshot,
+    private void updateShouldFilterCacheForPackage(Computer snapshot,
             @Nullable String skipPackageName, PackageStateInternal subjectSetting, ArrayMap<String,
             ? extends PackageStateInternal> allSettings, UserInfo[] allUsers, int subjectUserId,
             int maxIndex) {
@@ -771,7 +770,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
     }
 
     @GuardedBy("mCacheLock")
-    private void updateShouldFilterCacheForUser(PackageDataSnapshot snapshot,
+    private void updateShouldFilterCacheForUser(Computer snapshot,
             PackageStateInternal subjectSetting, UserInfo[] allUsers,
             PackageStateInternal otherSetting, int subjectUserId) {
         for (int ou = 0; ou < allUsers.length; ou++) {
@@ -889,12 +888,12 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
     }
 
     /**
-     * Equivalent to calling {@link #addPackage(PackageDataSnapshot, PackageStateInternal, boolean)}
+     * Equivalent to calling {@link #addPackage(Computer, PackageStateInternal, boolean)}
      * with {@code isReplace} equal to {@code false}.
      *
-     * @see AppsFilterImpl#addPackage(PackageDataSnapshot, PackageStateInternal, boolean)
+     * @see AppsFilterImpl#addPackage(Computer, PackageStateInternal, boolean)
      */
-    public void addPackage(PackageDataSnapshot snapshot, PackageStateInternal newPkgSetting) {
+    public void addPackage(Computer snapshot, PackageStateInternal newPkgSetting) {
         addPackage(snapshot, newPkgSetting, false /* isReplace */);
     }
 
@@ -904,7 +903,7 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
      * @param setting   the setting of the package being removed.
      * @param isReplace if the package is being replaced.
      */
-    public void removePackage(PackageDataSnapshot snapshot, PackageStateInternal setting,
+    public void removePackage(Computer snapshot, PackageStateInternal setting,
             boolean isReplace) {
         final ArraySet<String> additionalChangedPackages;
         final ArrayMap<String, ? extends PackageStateInternal> settings =
