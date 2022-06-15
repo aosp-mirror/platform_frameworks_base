@@ -44,7 +44,7 @@ import javax.inject.Named;
  * a {@link ComplicationLayoutEngine}.
  */
 public class ComplicationHostViewController extends ViewController<ConstraintLayout> {
-    public static final String TAG = "ComplicationHostViewController";
+    public static final String TAG = "ComplicationHostVwCtrl";
 
     private final ComplicationLayoutEngine mLayoutEngine;
     private final LifecycleOwner mLifecycleOwner;
