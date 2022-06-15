@@ -81,6 +81,11 @@ public class Flags {
 
     public static final ResourceBooleanFlag FACE_SCANNING_ANIM =
             new ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation);
+    /**
+     * Whether the KeyguardBottomArea(View|Controller) should use the modern architecture or the old
+     * one.
+     */
+    public static final BooleanFlag MODERN_BOTTOM_AREA = new BooleanFlag(206, false);
 
     /***************************************/
     // 300 - power menu
