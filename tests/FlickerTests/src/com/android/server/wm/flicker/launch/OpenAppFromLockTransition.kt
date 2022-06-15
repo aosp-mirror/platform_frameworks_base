@@ -17,10 +17,12 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.navBarLayerPositionEnd
+import com.android.server.wm.flicker.statusBarLayerPositionEnd
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.Test
 
@@ -109,6 +111,16 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
     @Presubmit
     @Test
     override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerPositionEnd()
+
+    /**
+     * Checks the position of the status bar at the start and end of the transition
+     *
+     * Differently from the normal usage of this assertion, check only the final state of the
+     * transition because the display is off at the start and the NavBar is never visible
+     */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerPositionEnd()
 
     /**
      * Checks that the status bar layer is visible at the end of the trace
