@@ -106,6 +106,7 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
                 PowerManager.WAKE_REASON_APPLICATION,
                 "com.android.systemui:media_tap_to_transfer_activated"
             )
+            animateChipIn(currentChipView)
         }
 
         // Cancel and re-set the chip timeout each time we get a new state.
@@ -136,6 +137,12 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
      * A method implemented by subclasses to update [currentChipView] based on [chipInfo].
      */
     abstract fun updateChipView(chipInfo: T, currentChipView: ViewGroup)
+
+    /**
+     * A method that can be implemented by subclcasses to do custom animations for when the chip
+     * appears.
+     */
+    open fun animateChipIn(chipView: ViewGroup) {}
 
     /**
      * Returns the size that the icon should be, or null if no size override is needed.
