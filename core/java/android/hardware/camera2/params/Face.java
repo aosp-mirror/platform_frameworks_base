@@ -17,6 +17,8 @@
 
 package android.hardware.camera2.params;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraCharacteristics;
@@ -49,12 +51,12 @@ public final class Face {
      */
     public static final int SCORE_MAX = 100;
 
-    private final Rect mBounds;
-    private final int mScore;
-    private final int mId;
-    private final Point mLeftEye;
-    private final Point mRightEye;
-    private final Point mMouth;
+    private Rect mBounds;
+    private int mScore;
+    private int mId;
+    private Point mLeftEye;
+    private Point mRightEye;
+    private Point mMouth;
 
     /**
      * Create a new face with all fields set.
@@ -66,6 +68,10 @@ public final class Face {
      * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
      * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
      * rightEyePosition, and mouthPosition may be independently null or not-null.</p>
+     *
+     * <p>This constructor is public to allow for easier application testing by
+     * creating custom object instances. It's not necessary to construct these
+     * objects during normal use of the camera API.</p>
      *
      * @param bounds Bounds of the face.
      * @param score Confidence level between {@value #SCORE_MIN}-{@value #SCORE_MAX}.
@@ -81,11 +87,48 @@ public final class Face {
      *             or if id is {@value #ID_UNSUPPORTED} and
      *               leftEyePosition/rightEyePosition/mouthPosition aren't all null,
      *             or else if id is negative.
-     *
-     * @hide
      */
-    public Face(Rect bounds, int score, int id,
-            Point leftEyePosition, Point rightEyePosition, Point mouthPosition) {
+    public Face(@NonNull Rect bounds, int score, int id,
+            @NonNull Point leftEyePosition, @NonNull Point rightEyePosition,
+            @NonNull Point mouthPosition) {
+        init(bounds, score, id, leftEyePosition, rightEyePosition, mouthPosition);
+    }
+
+    /**
+     * Create a new face without the optional fields.
+     *
+     * <p>The id, leftEyePosition, rightEyePosition, and mouthPosition are considered optional.
+     * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
+     * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
+     * rightEyePosition, and mouthPosition may be independently null or not-null. When devices
+     * report the value of key {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} as
+     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link CaptureResult},
+     * the face id of each face is expected to be {@value #ID_UNSUPPORTED}, the leftEyePosition,
+     * rightEyePosition, and mouthPositions are expected to be {@code null} for each face.</p>
+     *
+     * <p>This constructor is public to allow for easier application testing by
+     * creating custom object instances. It's not necessary to construct these
+     * objects during normal use of the camera API.</p>
+     *
+     * @param bounds Bounds of the face.
+     * @param score Confidence level between {@value #SCORE_MIN}-{@value #SCORE_MAX}.
+     *
+     * @throws IllegalArgumentException
+     *             if bounds is {@code null},
+     *             or if the confidence is not in the range of
+     *             {@value #SCORE_MIN}-{@value #SCORE_MAX}.
+     */
+    public Face(@NonNull Rect bounds, int score) {
+        init(bounds, score, ID_UNSUPPORTED,
+                /*leftEyePosition*/null, /*rightEyePosition*/null, /*mouthPosition*/null);
+    }
+
+    /**
+     * Initialize the object (shared by constructors).
+     */
+    private void init(@NonNull Rect bounds, int score, int id,
+            @Nullable Point leftEyePosition, @Nullable Point rightEyePosition,
+            @Nullable Point mouthPosition) {
         checkNotNull("bounds", bounds);
         if (score < SCORE_MIN || score > SCORE_MAX) {
             throw new IllegalArgumentException("Confidence out of range");
@@ -104,33 +147,6 @@ public final class Face {
         mLeftEye = leftEyePosition;
         mRightEye = rightEyePosition;
         mMouth = mouthPosition;
-    }
-
-    /**
-     * Create a new face without the optional fields.
-     *
-     * <p>The id, leftEyePosition, rightEyePosition, and mouthPosition are considered optional.
-     * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
-     * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
-     * rightEyePosition, and mouthPosition may be independently null or not-null. When devices
-     * report the value of key {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} as
-     * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link CaptureResult},
-     * the face id of each face is expected to be {@value #ID_UNSUPPORTED}, the leftEyePosition,
-     * rightEyePosition, and mouthPositions are expected to be {@code null} for each face.</p>
-     *
-     * @param bounds Bounds of the face.
-     * @param score Confidence level between {@value #SCORE_MIN}-{@value #SCORE_MAX}.
-     *
-     * @throws IllegalArgumentException
-     *             if bounds is {@code null},
-     *             or if the confidence is not in the range of
-     *             {@value #SCORE_MIN}-{@value #SCORE_MAX}.
-     *
-     * @hide
-     */
-    public Face(Rect bounds, int score) {
-        this(bounds, score, ID_UNSUPPORTED,
-                /*leftEyePosition*/null, /*rightEyePosition*/null, /*mouthPosition*/null);
     }
 
     /**

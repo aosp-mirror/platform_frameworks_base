@@ -48,6 +48,14 @@ public final class Capability {
     /**
      * Create a new Capability object.
      *
+     * <p>The mode argument can be any integer value. maxStreamingWidth and maxStreamingHeight
+     * must be non-negative, while minZoomRatio and maxZoomRatio must be strictly
+     * positive.</p>
+     *
+     * <p>This constructor is public to allow for easier application testing by
+     * creating custom object instances. It's not necessary to construct these
+     * objects during normal use of the camera API.</p>
+     *
      * @param mode supported mode for a camera capability.
      * @param maxStreamingWidth The width of the maximum streaming size for this mode
      * @param maxStreamingHeight The height of the maximum streaming size for this mode
@@ -55,7 +63,6 @@ public final class Capability {
      * @param maxZoomRatio the maximum zoom ratio this mode supports
      *
      * @throws IllegalArgumentException if any of the argument is not valid
-     * @hide
      */
     public Capability(int mode, int maxStreamingWidth, int maxStreamingHeight,
             float minZoomRatio, float maxZoomRatio) {
