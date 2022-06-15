@@ -90,7 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratzaileak blokeatu egin du gailua"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Eskuz blokeatu da gailua"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ez da ezagutu"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aurpegi bidez desblokeatzeko eginbidea erabiltzeko, eman kamera atzitzeko baimena ezarpenetan"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aurpegi bidezko desblokeoak kamera atzitzeko baimena behar du"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Idatzi SIMaren PINa. <xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu.</item>
       <item quantity="one">Idatzi SIMaren PINa. <xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu; oker idatziz gero, operadoreari eskatu beharko diozu gailua desblokeatzeko.</item>
