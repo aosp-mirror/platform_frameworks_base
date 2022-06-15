@@ -91,7 +91,9 @@ class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.waitImeShown()
+                wmHelper.StateSyncBuilder()
+                    .withImeShown()
+                    .waitForAndVerify()
             }
         }
     }

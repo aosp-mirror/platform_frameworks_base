@@ -180,7 +180,8 @@ fun FlickerTestParameter.statusBarLayerRotatesScales() {
  * the visibleRegion of the given app component exactly
  */
 fun FlickerTestParameter.snapshotStartingWindowLayerCoversExactlyOnApp(
-        component: FlickerComponentName) {
+    component: FlickerComponentName
+) {
     assertLayers {
         invoke("snapshotStartingWindowLayerCoversExactlyOnApp") {
             val snapshotLayers = it.subjects.filter { subject ->

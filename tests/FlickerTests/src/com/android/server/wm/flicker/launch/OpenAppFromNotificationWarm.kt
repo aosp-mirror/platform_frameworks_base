@@ -70,10 +70,14 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
                 }
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp.component)
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(testApp.component)
+                        .waitForAndVerify()
                     testApp.postNotification(device, wmHelper)
                     device.pressHome()
-                    wmHelper.waitForHomeActivityVisible()
+                    wmHelper.StateSyncBuilder()
+                        .withHomeActivityVisible()
+                        .waitForAndVerify()
                 }
             }
 
@@ -106,7 +110,9 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
                 instrumentation.uiAutomation.syncInputTransactions()
 
                 // Wait for the app to launch
-                wmHelper.waitForFullScreenApp(testApp.component)
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp.component)
+                    .waitForAndVerify()
             }
 
             teardown {

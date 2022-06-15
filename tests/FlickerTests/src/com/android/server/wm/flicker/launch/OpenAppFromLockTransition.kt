@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.navBarLayerPositionEnd
@@ -27,8 +27,8 @@ import org.junit.Test
 /**
  * Base class for app launch tests from lock screen
  */
-abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter)
-    : OpenAppTransition(testSpec) {
+abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
+    OpenAppTransition(testSpec) {
 
     /**
      * Defines the transition used to run the test
@@ -39,9 +39,9 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter)
             setup {
                 eachRun {
                     device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
+                    wmHelper.StateSyncBuilder()
+                        .withoutTopVisibleAppWindows()
+                        .waitForAndVerify()
                 }
             }
             teardown {
@@ -51,7 +51,9 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter)
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.waitForFullScreenApp(testApp.component)
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp.component)
+                    .waitForAndVerify()
             }
         }
 

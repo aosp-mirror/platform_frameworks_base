@@ -22,13 +22,11 @@ import android.platform.test.annotations.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -75,21 +73,21 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
                 }
                 eachRun {
                     device.pressHome()
-                    wmHelper.waitForHomeActivityVisible()
+                    wmHelper.StateSyncBuilder()
+                        .withHomeActivityVisible()
+                        .waitForAndVerify()
                     device.pressRecentApps()
-                    wmHelper.waitForRecentsActivityVisible()
+                    wmHelper.StateSyncBuilder()
+                        .withRecentsActivityVisible()
+                        .waitForAndVerify()
                     this.setRotation(testSpec.startRotation)
                 }
             }
             transitions {
                 device.reopenAppFromOverview(wmHelper)
-                wmHelper.waitFor(
-                    WindowManagerConditionsFactory.hasLayersAnimating().negate(),
-                    WindowManagerConditionsFactory.isWMStateComplete(),
-                    WindowManagerConditionsFactory.isLayerVisible(LAUNCHER_COMPONENT).negate(),
-                    WindowManagerConditionsFactory.isActivityVisible(LAUNCHER_COMPONENT).negate()
-                )
-                wmHelper.waitForFullScreenApp(testApp.component)
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp.component)
+                    .waitForAndVerify()
             }
         }
 

@@ -16,15 +16,14 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.app.Instrumentation
+import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
+import android.view.Surface
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
-
-import android.app.Instrumentation
-import android.platform.test.annotations.Presubmit
-import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -34,13 +33,13 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.traces.common.FlickerComponentName
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 
 /**
  * Test IME snapshot mechanism won't apply when transitioning from non-IME focused dialog activity.
@@ -60,7 +59,9 @@ class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestPar
             setup {
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
-                    wmHelper.waitImeShown()
+                    wmHelper.StateSyncBuilder()
+                        .withImeShown()
+                        .waitForAndVerify()
                     testApp.startDialogThemedActivity(wmHelper)
                     // Verify IME insets isn't visible on dialog since it's non-IME focusable window
                     assertFalse(testApp.getInsetsVisibleFromDialog(ime()))

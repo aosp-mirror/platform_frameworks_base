@@ -73,9 +73,10 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
                     "was left in an unknown state (e.g. Screen turned off)"
         }
         button.click()
-        wmHelper.waitForFullScreenApp(
+        wmHelper.StateSyncBuilder()
+            .withFullScreenApp(
                 ActivityOptions.DIALOG_THEMED_ACTIVITY_COMPONENT_NAME.toFlickerComponent())
-        mInstrumentation.waitForIdleSync()
+            .waitForAndVerify()
     }
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {
         val dialog = uiDevice.wait(
@@ -84,14 +85,16 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         // Pressing back key to dismiss the dialog
         if (dialog != null) {
             uiDevice.pressBack()
-            wmHelper.waitForAppTransitionIdle()
+            wmHelper.StateSyncBuilder()
+                .withAppTransitionIdle()
+                .waitForAndVerify()
         }
     }
     fun getInsetsVisibleFromDialog(type: Int): Boolean {
-        var insetsVisibilityTextView = uiDevice.wait(
+        val insetsVisibilityTextView = uiDevice.wait(
                 Until.findObject(By.res("android:id/text1")), FIND_TIMEOUT)
         if (insetsVisibilityTextView != null) {
-            var visibility = insetsVisibilityTextView.text.toString()
+            val visibility = insetsVisibilityTextView.text.toString()
             val matcher = when (type) {
                 ime() -> {
                     Pattern.compile("IME\\: (VISIBLE|INVISIBLE)").matcher(visibility)

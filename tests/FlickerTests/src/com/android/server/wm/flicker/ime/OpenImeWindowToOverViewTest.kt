@@ -72,14 +72,18 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
             }
             transitions {
                 device.pressRecentApps()
-                wmHelper.waitForRecentsActivityVisible()
-                waitNavStatusBarVisibility(wmHelper)
+                val builder = wmHelper.StateSyncBuilder()
+                    .withRecentsActivityVisible()
+                waitNavStatusBarVisibility(builder)
+                builder.waitForAndVerify()
             }
             teardown {
                 test {
                     device.pressHome()
-                    wmHelper.waitForHomeActivityVisible()
-                    imeTestApp.exit(wmHelper)
+                    wmHelper.StateSyncBuilder()
+                        .withHomeActivityVisible()
+                        .waitForAndVerify()
+                    imeTestApp.exit()
                 }
             }
         }
@@ -98,12 +102,13 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
      *
      * b/227189877
      */
-    private fun waitNavStatusBarVisibility(wmHelper: WindowManagerStateHelper) {
+    private fun waitNavStatusBarVisibility(stateSync: WindowManagerStateHelper.StateSyncBuilder) {
         when {
             testSpec.isLandscapeOrSeascapeAtStart && !testSpec.isGesturalNavigation ->
-                wmHelper.waitFor(statusBarInvisible)
+                stateSync.add(statusBarInvisible)
             testSpec.isLandscapeOrSeascapeAtStart ->
-                wmHelper.waitFor(statusBarInvisible, navBarInvisible)
+                stateSync.add(statusBarInvisible)
+                    .add(navBarInvisible)
         }
     }
 

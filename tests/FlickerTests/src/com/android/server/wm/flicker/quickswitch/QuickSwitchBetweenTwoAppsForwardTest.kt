@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
@@ -86,10 +85,14 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
 
                 eachRun {
                     testApp1.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp1.component)
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(testApp1.component)
+                        .waitForAndVerify()
 
                     testApp2.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp2.component)
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(testApp2.component)
+                        .waitForAndVerify()
 
                     startDisplayBounds = wmHelper.currentState.layerState
                         .displays.firstOrNull { !it.isVirtual }
@@ -98,16 +101,17 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
 
                     taplInstrumentation.launchedAppState.quickSwitchToPreviousApp()
 
-                    wmHelper.waitForFullScreenApp(testApp1.component)
-                    wmHelper.waitForAppTransitionIdle()
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(testApp1.component)
+                        .waitForAndVerify()
                 }
             }
             transitions {
                 taplInstrumentation.launchedAppState.quickSwitchToPreviousAppSwipeLeft()
-
-                wmHelper.waitForFullScreenApp(testApp2.component)
-                wmHelper.waitForAppTransitionIdle()
-                wmHelper.waitForNavBarStatusBarVisible()
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp2.component)
+                    .withNavBarStatusBarVisible()
+                    .waitForAndVerify()
             }
 
             teardown {
@@ -261,7 +265,7 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
         testSpec.assertWm {
             this.isAppWindowVisible(testApp1.component)
                     .then()
-                    .isAppWindowVisible(LAUNCHER_COMPONENT, isOptional = true)
+                    .isAppWindowVisible(FlickerComponentName.LAUNCHER, isOptional = true)
                     .then()
                     .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
@@ -280,7 +284,7 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
         testSpec.assertLayers {
             this.isVisible(testApp1.component)
                     .then()
-                    .isVisible(LAUNCHER_COMPONENT, isOptional = true)
+                    .isVisible(FlickerComponentName.LAUNCHER, isOptional = true)
                     .then()
                     .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()

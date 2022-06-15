@@ -16,9 +16,9 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
-import android.platform.test.annotations.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
@@ -54,8 +54,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppWarmTest(testSpec: FlickerTestParameter)
-    : OpenAppFromLauncherTransition(testSpec) {
+open class OpenAppWarmTest(testSpec: FlickerTestParameter) :
+    OpenAppFromLauncherTransition(testSpec) {
     /**
      * Defines the transition used to run the test
      */
@@ -68,7 +68,9 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter)
                 }
                 eachRun {
                     device.pressHome()
-                    wmHelper.waitForHomeActivityVisible()
+                    wmHelper.StateSyncBuilder()
+                        .withHomeActivityVisible()
+                        .waitForAndVerify()
                     this.setRotation(testSpec.startRotation)
                 }
             }
@@ -79,7 +81,9 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter)
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.waitForFullScreenApp(testApp.component)
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp.component)
+                    .waitForAndVerify()
             }
         }
 

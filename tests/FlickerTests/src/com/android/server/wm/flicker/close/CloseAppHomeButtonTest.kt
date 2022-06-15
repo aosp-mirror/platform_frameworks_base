@@ -70,7 +70,9 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
             super.transition(this)
             transitions {
                 tapl.goHome()
-                wmHelper.waitForHomeActivityVisible()
+                wmHelper.StateSyncBuilder()
+                    .withHomeActivityVisible()
+                    .waitForAndVerify()
             }
         }
 

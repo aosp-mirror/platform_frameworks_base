@@ -46,6 +46,8 @@ class NewTasksAppHelper @JvmOverloads constructor(
                     "was left in an unknown state (e.g. in split screen)"
         }
         button.click()
-        wmHelper.waitForFullScreenApp(component)
+        wmHelper.StateSyncBuilder()
+            .withFullScreenApp(component)
+            .waitForAndVerify()
     }
 }

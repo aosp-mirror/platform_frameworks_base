@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
@@ -88,17 +87,22 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
 
                 eachRun {
                     testApp1.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp1.component)
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(testApp1.component)
+                        .waitForAndVerify()
 
                     testApp2.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp2.component)
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(testApp2.component)
+                        .waitForAndVerify()
                 }
             }
             transitions {
                 taplInstrumentation.launchedAppState.quickSwitchToPreviousApp()
-                wmHelper.waitForFullScreenApp(testApp1.component)
-                wmHelper.waitForAppTransitionIdle()
-                wmHelper.waitForNavBarStatusBarVisible()
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp1.component)
+                    .withNavBarStatusBarVisible()
+                    .waitForAndVerify()
             }
 
             teardown {
@@ -251,7 +255,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
             this.isAppWindowVisible(testApp2.component)
                     .then()
                     // TODO: Do we actually want to test this? Seems too implementation specific...
-                    .isAppWindowVisible(LAUNCHER_COMPONENT, isOptional = true)
+                    .isAppWindowVisible(FlickerComponentName.LAUNCHER, isOptional = true)
                     .then()
                     .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
@@ -270,7 +274,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
         testSpec.assertLayers {
             this.isVisible(testApp2.component)
                     .then()
-                    .isVisible(LAUNCHER_COMPONENT, isOptional = true)
+                    .isVisible(FlickerComponentName.LAUNCHER, isOptional = true)
                     .then()
                     .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()

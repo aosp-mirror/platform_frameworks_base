@@ -54,7 +54,9 @@ class ImeEditorPopupDialogAppHelper @JvmOverloads constructor(
         // Pressing back key to dismiss the dialog
         if (dismissButton != null) {
             dismissButton.click()
-            wmHelper.waitForAppTransitionIdle()
+            wmHelper.StateSyncBuilder()
+                .withAppTransitionIdle()
+                .waitForAndVerify()
         }
     }
 }

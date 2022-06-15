@@ -63,7 +63,9 @@ open class ImeAppHelper @JvmOverloads constructor(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            wmHelper.waitImeShown()
+            wmHelper.StateSyncBuilder()
+                .withImeShown()
+                .waitForAndVerify()
         }
     }
 
@@ -80,7 +82,9 @@ open class ImeAppHelper @JvmOverloads constructor(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            wmHelper.waitImeGone()
+            wmHelper.StateSyncBuilder()
+                .withImeGone()
+                .waitForAndVerify()
         }
     }
 
@@ -96,7 +100,9 @@ open class ImeAppHelper @JvmOverloads constructor(
         if (wmHelper == null) {
             device.waitForIdle()
         } else {
-            wmHelper.waitForActivityRemoved(component)
+            wmHelper.StateSyncBuilder()
+                .withActivityRemoved(component)
+                .waitForAndVerify()
         }
     }
 }

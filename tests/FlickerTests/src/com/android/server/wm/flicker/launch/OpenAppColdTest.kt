@@ -54,8 +54,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppColdTest(testSpec: FlickerTestParameter)
-    : OpenAppFromLauncherTransition(testSpec) {
+open class OpenAppColdTest(testSpec: FlickerTestParameter) :
+    OpenAppFromLauncherTransition(testSpec) {
     /**
      * Defines the transition used to run the test
      */
@@ -75,7 +75,9 @@ open class OpenAppColdTest(testSpec: FlickerTestParameter)
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.waitForFullScreenApp(testApp.component)
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp.component)
+                    .waitForAndVerify()
             }
         }
 
