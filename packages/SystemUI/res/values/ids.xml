@@ -176,5 +176,8 @@
     <item type="id" name="rounded_corner_top_right"/>
     <item type="id" name="rounded_corner_bottom_left"/>
     <item type="id" name="rounded_corner_bottom_right"/>
+
+    <!-- face scanning view id -->
+    <item type="id" name="face_scanning_anim"/>
 </resources>
 

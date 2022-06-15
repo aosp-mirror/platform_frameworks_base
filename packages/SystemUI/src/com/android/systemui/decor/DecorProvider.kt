@@ -80,3 +80,15 @@ abstract class CornerDecorProvider : DecorProvider() {
         listOf(alignedBound1, alignedBound2)
     }
 }
+
+/**
+ * A provider for view shown on bound.
+ */
+abstract class BoundDecorProvider : DecorProvider() {
+    /** The bound which a view is aligned based on rotation 0 */
+    @DisplayCutout.BoundsPosition protected abstract val alignedBound: Int
+
+    override val alignedBounds: List<Int> by lazy {
+        listOf(alignedBound)
+    }
+}
