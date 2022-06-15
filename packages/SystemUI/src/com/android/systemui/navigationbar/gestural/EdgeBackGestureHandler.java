@@ -234,7 +234,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private boolean mIsBackGestureAllowed;
     private boolean mGestureBlockingActivityRunning;
     private boolean mIsInPipMode;
-    private boolean mIsPredictiveBackAnimEnabled;
+    private boolean mIsNewBackAffordanceEnabled;
 
     private InputMonitor mInputMonitor;
     private InputChannelCompat.InputEventReceiver mInputEventReceiver;
@@ -524,8 +524,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     Choreographer.getInstance(), this::onInputEvent);
 
             // Add a nav bar panel window
-            mIsPredictiveBackAnimEnabled =
-                    mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_ANIM);
+            mIsNewBackAffordanceEnabled = mFeatureFlags.isEnabled(Flags.NEW_BACK_AFFORDANCE);
             resetEdgeBackPlugin();
             mPluginManager.addPluginListener(
                     this, NavigationEdgeBackPlugin.class, /*allowMultiple=*/ false);
@@ -545,7 +544,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     }
 
     private void resetEdgeBackPlugin() {
-        if (mIsPredictiveBackAnimEnabled) {
+        if (mIsNewBackAffordanceEnabled) {
             setEdgeBackPlugin(
                     mBackPanelControllerFactory.create(mContext, mBackAnimation));
         } else {
