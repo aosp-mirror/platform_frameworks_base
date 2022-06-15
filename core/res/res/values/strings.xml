@@ -20,23 +20,11 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Suffix added to a number to signify size in bytes. -->
     <string name="byteShort">B</string>
-    <!-- Suffix added to a number to signify size in kilobytes (1000 bytes).
-        If you retain the Latin script for the localization, please use the lowercase
-        'k', as it signifies 1000 bytes as opposed to 1024 bytes. -->
-    <string name="kilobyteShort">kB</string>
-    <!-- Suffix added to a number to signify size in megabytes. -->
-    <string name="megabyteShort">MB</string>
-    <!-- Suffix added to a number to signify size in gigabytes. -->
-    <string name="gigabyteShort">GB</string>
-    <!-- Suffix added to a number to signify size in terabytes. -->
-    <string name="terabyteShort">TB</string>
-    <!-- Suffix added to a number to signify size in petabytes. -->
-    <string name="petabyteShort">PB</string>
-    <!-- Format string used to add a suffix like "kB" or "MB" to a number
-         to display a size in kilobytes, megabytes, or other size units.
-         Some languages (like French) will want to add a space between
-         the placeholders. -->
-    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="MB">%2$s</xliff:g></string>
+    <!-- Format string used to add a suffix like "B" to a number
+         to display a size in bytes.
+         Some languages may want to remove the space between the placeholders
+         or replace it with a non-breaking space. -->
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="B">%2$s</xliff:g></string>
 
     <!-- Used in Contacts for a field that has no label and in Note Pad
          for a note with no name. -->
