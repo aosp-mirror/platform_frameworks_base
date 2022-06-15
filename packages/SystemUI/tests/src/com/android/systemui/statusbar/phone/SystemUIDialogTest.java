@@ -14,12 +14,10 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.BroadcastReceiver;
@@ -45,6 +43,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class SystemUIDialogTest extends SysuiTestCase {
 
+    private SystemUIDialog mDialog;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
 
@@ -53,37 +52,24 @@ public class SystemUIDialogTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mDependency.injectTestDependency(BroadcastDispatcher.class, mBroadcastDispatcher);
+
+        mDialog = new SystemUIDialog(mContext);
     }
 
     @Test
     public void testRegisterReceiver() {
-        final SystemUIDialog dialog = new SystemUIDialog(mContext);
         final ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
         final ArgumentCaptor<IntentFilter> intentFilterCaptor =
                 ArgumentCaptor.forClass(IntentFilter.class);
 
-        dialog.show();
+        mDialog.show();
         verify(mBroadcastDispatcher).registerReceiver(broadcastReceiverCaptor.capture(),
                 intentFilterCaptor.capture(), eq(null), any());
-        assertTrue(intentFilterCaptor.getValue().hasAction(Intent.ACTION_SCREEN_OFF));
+
         assertTrue(intentFilterCaptor.getValue().hasAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
-        dialog.dismiss();
+        mDialog.dismiss();
         verify(mBroadcastDispatcher).unregisterReceiver(eq(broadcastReceiverCaptor.getValue()));
-    }
-
-
-    @Test
-    public void testNoRegisterReceiver() {
-        final SystemUIDialog dialog = new SystemUIDialog(mContext, false);
-
-        dialog.show();
-        verify(mBroadcastDispatcher, never()).registerReceiver(any(), any(), eq(null), any());
-        assertTrue(dialog.isShowing());
-
-        dialog.dismiss();
-        verify(mBroadcastDispatcher, never()).unregisterReceiver(any());
-        assertFalse(dialog.isShowing());
     }
 }

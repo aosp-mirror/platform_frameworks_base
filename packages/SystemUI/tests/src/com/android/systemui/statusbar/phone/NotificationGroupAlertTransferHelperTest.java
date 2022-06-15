@@ -37,7 +37,6 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -48,10 +47,8 @@ import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCal
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.wm.shell.bubbles.Bubbles;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -78,7 +75,6 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private RowContentBindStage mBindStage;
     @Mock PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    @Mock StatusBarStateController mStatusBarStateController;
     @Captor private ArgumentCaptor<NotificationEntryListener> mListenerCaptor;
     private NotificationEntryListener mNotificationEntryListener;
     private final HashMap<String, NotificationEntry> mPendingEntries = new HashMap<>();
@@ -89,34 +85,27 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mHeadsUpManager = new HeadsUpManager(mContext, mock(HeadsUpManagerLogger.class)) {};
+        mHeadsUpManager = new HeadsUpManager(mContext) {};
 
         when(mNotificationEntryManager.getPendingNotificationsIterator())
                 .thenReturn(mPendingEntries.values());
 
         mGroupManager = new NotificationGroupManagerLegacy(
-                mStatusBarStateController,
+                mock(StatusBarStateController.class),
                 () -> mPeopleNotificationIdentifier,
-                Optional.of(mock(Bubbles.class)),
-                mock(DumpManager.class));
+                Optional.of(mock(Bubbles.class)));
         mDependency.injectTestDependency(NotificationGroupManagerLegacy.class, mGroupManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
 
         when(mBindStage.getStageParams(any())).thenReturn(new RowContentBindParams());
 
-        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper(
-                mBindStage, mStatusBarStateController, mGroupManager);
+        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper(mBindStage);
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
 
         mGroupAlertTransferHelper.bind(mNotificationEntryManager, mGroupManager);
         verify(mNotificationEntryManager).addNotificationEntryListener(mListenerCaptor.capture());
         mNotificationEntryListener = mListenerCaptor.getValue();
         mHeadsUpManager.addListener(mGroupAlertTransferHelper);
-    }
-
-    @After
-    public void tearDown() {
-        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
     }
 
     private void mockHasHeadsUpContentView(NotificationEntry entry,
@@ -314,11 +303,10 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
     @Test
     public void testUpdateChildToSummaryDoesNotTransfer() {
-        final String tag = "fooTag";
         NotificationEntry summaryEntry =
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
-                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47, tag);
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47);
         mockHasHeadsUpContentView(childEntry, false);
 
         mHeadsUpManager.showNotification(summaryEntry);
@@ -330,7 +318,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         StatusBarNotification oldNotification = childEntry.getSbn();
         childEntry.setSbn(
                 mGroupTestHelper.createSummaryNotification(
-                        Notification.GROUP_ALERT_SUMMARY, 47, tag).getSbn());
+                        Notification.GROUP_ALERT_SUMMARY, 47).getSbn());
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));

@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 
 import androidx.test.filters.LargeTest;
@@ -30,7 +29,6 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-@Presubmit
 @LargeTest
 public class MacAuthenticatedInputStreamTest extends AndroidTestCase {
 

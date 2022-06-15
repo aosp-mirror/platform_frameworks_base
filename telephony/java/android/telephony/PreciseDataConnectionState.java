@@ -125,9 +125,9 @@ public final class PreciseDataConnectionState implements Parcelable {
         mId = in.readInt();
         mState = in.readInt();
         mNetworkType = in.readInt();
-        mLinkProperties = in.readParcelable(LinkProperties.class.getClassLoader(), android.net.LinkProperties.class);
+        mLinkProperties = in.readParcelable(LinkProperties.class.getClassLoader());
         mFailCause = in.readInt();
-        mApnSetting = in.readParcelable(ApnSetting.class.getClassLoader(), android.telephony.data.ApnSetting.class);
+        mApnSetting = in.readParcelable(ApnSetting.class.getClassLoader());
     }
 
     /**

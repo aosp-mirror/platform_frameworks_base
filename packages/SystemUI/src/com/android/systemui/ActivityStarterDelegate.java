@@ -16,7 +16,6 @@ package com.android.systemui;
 
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.os.UserHandle;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -24,7 +23,7 @@ import androidx.annotation.Nullable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
 
@@ -34,131 +33,119 @@ import dagger.Lazy;
 
 /**
  * Single common instance of ActivityStarter that can be gotten and referenced from anywhere, but
- * delegates to an actual implementation (CentralSurfaces).
+ * delegates to an actual implementation (StatusBar).
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @SysUISingleton
 public class ActivityStarterDelegate implements ActivityStarter {
 
-    private Lazy<Optional<CentralSurfaces>> mActualStarterOptionalLazy;
+    private Optional<Lazy<StatusBar>> mActualStarter;
 
     @Inject
-    public ActivityStarterDelegate(Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy) {
-        mActualStarterOptionalLazy = centralSurfacesOptionalLazy;
+    public ActivityStarterDelegate(Optional<Lazy<StatusBar>> statusBar) {
+        mActualStarter = statusBar;
     }
 
     @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startPendingIntentDismissingKeyguard(intent));
+        mActualStarter.ifPresent(
+                starter -> starter.get().startPendingIntentDismissingKeyguard(intent));
     }
 
     @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent,
             Runnable intentSentUiThreadCallback) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startPendingIntentDismissingKeyguard(
-                        intent, intentSentUiThreadCallback));
+        mActualStarter.ifPresent(
+                starter -> starter.get().startPendingIntentDismissingKeyguard(intent,
+                        intentSentUiThreadCallback));
     }
 
     @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent,
             Runnable intentSentUiThreadCallback, View associatedView) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startPendingIntentDismissingKeyguard(
-                        intent, intentSentUiThreadCallback, associatedView));
+        mActualStarter.ifPresent(
+                starter -> starter.get().startPendingIntentDismissingKeyguard(intent,
+                        intentSentUiThreadCallback, associatedView));
     }
 
     @Override
     public void startPendingIntentDismissingKeyguard(PendingIntent intent,
             Runnable intentSentUiThreadCallback,
             ActivityLaunchAnimator.Controller animationController) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startPendingIntentDismissingKeyguard(
-                        intent, intentSentUiThreadCallback, animationController));
+        mActualStarter.ifPresent(
+                starter -> starter.get().startPendingIntentDismissingKeyguard(intent,
+                        intentSentUiThreadCallback, animationController));
     }
 
     @Override
     public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
             int flags) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startActivity(intent, onlyProvisioned, dismissShade, flags));
+        mActualStarter.ifPresent(
+                starter -> starter.get().startActivity(intent, onlyProvisioned, dismissShade,
+                        flags));
     }
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startActivity(intent, dismissShade));
+        mActualStarter.ifPresent(starter -> starter.get().startActivity(intent, dismissShade));
     }
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            boolean showOverLockscreenWhenLocked) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startActivity(intent, dismissShade, animationController,
-                    showOverLockscreenWhenLocked));
-    }
-
-    @Override
-    public void startActivity(Intent intent, boolean dismissShade,
-            @Nullable ActivityLaunchAnimator.Controller animationController,
-            boolean showOverLockscreenWhenLocked, UserHandle userHandle) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startActivity(intent, dismissShade, animationController,
-                    showOverLockscreenWhenLocked, userHandle));
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
+        mActualStarter.ifPresent(
+                starter -> starter.get().startActivity(intent, dismissShade, animationController));
     }
 
     @Override
     public void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startActivity(intent, onlyProvisioned, dismissShade));
+        mActualStarter.ifPresent(
+                starter -> starter.get().startActivity(intent, onlyProvisioned, dismissShade));
     }
 
     @Override
     public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.startActivity(intent, dismissShade, callback));
+        mActualStarter.ifPresent(
+                starter -> starter.get().startActivity(intent, dismissShade, callback));
     }
 
     @Override
     public void postStartActivityDismissingKeyguard(Intent intent, int delay) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.postStartActivityDismissingKeyguard(intent, delay));
+        mActualStarter.ifPresent(
+                starter -> starter.get().postStartActivityDismissingKeyguard(intent, delay));
     }
 
     @Override
     public void postStartActivityDismissingKeyguard(Intent intent, int delay,
             @Nullable ActivityLaunchAnimator.Controller animationController) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.postStartActivityDismissingKeyguard(
-                        intent, delay, animationController));
+        mActualStarter.ifPresent(
+                starter -> starter.get().postStartActivityDismissingKeyguard(intent, delay,
+                        animationController));
     }
 
     @Override
     public void postStartActivityDismissingKeyguard(PendingIntent intent) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.postStartActivityDismissingKeyguard(intent));
+        mActualStarter.ifPresent(
+                starter -> starter.get().postStartActivityDismissingKeyguard(intent));
     }
 
     @Override
     public void postStartActivityDismissingKeyguard(PendingIntent intent,
             ActivityLaunchAnimator.Controller animationController) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.postStartActivityDismissingKeyguard(
-                        intent, animationController));
+        mActualStarter.ifPresent(starter ->
+                starter.get().postStartActivityDismissingKeyguard(intent, animationController));
     }
 
     @Override
     public void postQSRunnableDismissingKeyguard(Runnable runnable) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.postQSRunnableDismissingKeyguard(runnable));
+        mActualStarter.ifPresent(
+                starter -> starter.get().postQSRunnableDismissingKeyguard(runnable));
     }
 
     @Override
     public void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancel,
             boolean afterKeyguardGone) {
-        mActualStarterOptionalLazy.get().ifPresent(
-                starter -> starter.dismissKeyguardThenExecute(action, cancel, afterKeyguardGone));
+        mActualStarter.ifPresent(starter -> starter.get().dismissKeyguardThenExecute(action, cancel,
+                afterKeyguardGone));
     }
 }

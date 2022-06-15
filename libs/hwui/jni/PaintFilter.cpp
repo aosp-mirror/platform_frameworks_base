@@ -29,6 +29,10 @@ public:
         fClearFlags = static_cast<uint16_t>(clearFlags);
         fSetFlags = static_cast<uint16_t>(setFlags);
     }
+    void filter(SkPaint* paint) override {
+        uint32_t flags = Paint::GetSkPaintJavaFlags(*paint);
+        Paint::SetSkPaintJavaFlags(paint, (flags & ~fClearFlags) | fSetFlags);
+    }
     void filterFullPaint(Paint* paint) override {
         paint->setJavaFlags((paint->getJavaFlags() & ~fClearFlags) | fSetFlags);
     }
@@ -70,7 +74,7 @@ int register_android_graphics_DrawFilter(JNIEnv* env) {
     result |= RegisterMethodsOrDie(env, "android/graphics/PaintFlagsDrawFilter", paintflags_methods,
                                    NELEM(paintflags_methods));
 
-    return result;
+    return 0;
 }
 
 }

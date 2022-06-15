@@ -41,14 +41,15 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SystemConfigFileCommitEventLogger;
-import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.server.IoThread;
+import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 import com.android.server.job.controllers.JobStatus;
 
@@ -56,12 +57,13 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -131,7 +133,7 @@ public final class JobStore {
     @VisibleForTesting
     public static JobStore initAndGetForTesting(Context context, File dataDir) {
         JobStore jobStoreUnderTest = new JobStore(context, new Object(), dataDir);
-        jobStoreUnderTest.clearForTesting();
+        jobStoreUnderTest.clear();
         return jobStoreUnderTest;
     }
 
@@ -220,14 +222,6 @@ public final class JobStore {
         return replaced;
     }
 
-    /**
-     * The same as above but does not schedule writing. This makes perf benchmarks more stable.
-     */
-    @VisibleForTesting
-    public void addForTesting(JobStatus jobStatus) {
-        mJobSet.add(jobStatus);
-    }
-
     boolean containsJob(JobStatus jobStatus) {
         return mJobSet.contains(jobStatus);
     }
@@ -279,14 +273,6 @@ public final class JobStore {
     }
 
     /**
-     * The same as above but does not schedule writing. This makes perf benchmarks more stable.
-     */
-    @VisibleForTesting
-    public void clearForTesting() {
-        mJobSet.clear();
-    }
-
-    /**
      * @param userHandle User for whom we are querying the list of jobs.
      * @return A list of all the jobs scheduled for the provided user. Never null.
      */
@@ -335,7 +321,7 @@ public final class JobStore {
     }
 
     /** Version of the db schema. */
-    private static final int JOBS_FILE_VERSION = 1;
+    private static final int JOBS_FILE_VERSION = 0;
     /** Tag corresponds to constraints this job needs. */
     private static final String XML_TAG_PARAMS_CONSTRAINTS = "constraints";
     /** Tag corresponds to execution parameters. */
@@ -483,9 +469,11 @@ public final class JobStore {
             int numJobs = 0;
             int numSystemJobs = 0;
             int numSyncJobs = 0;
-            mEventLogger.setStartTime(SystemClock.uptimeMillis());
-            try (FileOutputStream fos = mJobsFile.startWrite()) {
-                TypedXmlSerializer out = Xml.resolveSerializer(fos);
+            try {
+                mEventLogger.setStartTime(SystemClock.uptimeMillis());
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(baos, StandardCharsets.UTF_8.name());
                 out.startDocument(null, true);
                 out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -514,6 +502,9 @@ public final class JobStore {
                 out.endTag(null, "job-info");
                 out.endDocument();
 
+                // Write out to disk in one fell swoop.
+                FileOutputStream fos = mJobsFile.startWrite();
+                fos.write(baos.toByteArray());
                 mJobsFile.finishWrite(fos);
             } catch (IOException e) {
                 if (DEBUG) {
@@ -530,8 +521,7 @@ public final class JobStore {
             }
         }
 
-        /**
-         * Write out a tag with data comprising the required fields and bias of this job and
+        /** Write out a tag with data comprising the required fields and priority of this job and
          * its client.
          */
         private void addAttributesToJobTag(XmlSerializer out, JobStatus jobStatus)
@@ -547,8 +537,7 @@ public final class JobStore {
             }
             out.attribute(null, "sourceUserId", String.valueOf(jobStatus.getSourceUserId()));
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
-            out.attribute(null, "bias", String.valueOf(jobStatus.getBias()));
-            out.attribute(null, "priority", String.valueOf(jobStatus.getJob().getPriority()));
+            out.attribute(null, "priority", String.valueOf(jobStatus.getPriority()));
             out.attribute(null, "flags", String.valueOf(jobStatus.getFlags()));
             if (jobStatus.getInternalFlags() != 0) {
                 out.attribute(null, "internalFlags", String.valueOf(jobStatus.getInternalFlags()));
@@ -714,8 +703,9 @@ public final class JobStore {
             int numJobs = 0;
             int numSystemJobs = 0;
             int numSyncJobs = 0;
-            List<JobStatus> jobs;
-            try (FileInputStream fis = mJobsFile.openRead()) {
+            try {
+                List<JobStatus> jobs;
+                FileInputStream fis = mJobsFile.openRead();
                 synchronized (mLock) {
                     jobs = readJobMapImpl(fis, rtcGood);
                     if (jobs != null) {
@@ -736,6 +726,7 @@ public final class JobStore {
                         }
                     }
                 }
+                fis.close();
             } catch (FileNotFoundException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "Could not find jobs file, probably there was nothing to load.");
@@ -752,9 +743,10 @@ public final class JobStore {
             Slog.i(TAG, "Read " + numJobs + " jobs");
         }
 
-        private List<JobStatus> readJobMapImpl(InputStream fis, boolean rtcIsGood)
+        private List<JobStatus> readJobMapImpl(FileInputStream fis, boolean rtcIsGood)
                 throws XmlPullParserException, IOException {
-            XmlPullParser parser = Xml.resolvePullParser(fis);
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
 
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
@@ -772,11 +764,10 @@ public final class JobStore {
             String tagName = parser.getName();
             if ("job-info".equals(tagName)) {
                 final List<JobStatus> jobs = new ArrayList<JobStatus>();
-                final int version;
                 // Read in version info.
                 try {
-                    version = Integer.parseInt(parser.getAttributeValue(null, "version"));
-                    if (version > JOBS_FILE_VERSION || version < 0) {
+                    int version = Integer.parseInt(parser.getAttributeValue(null, "version"));
+                    if (version != JOBS_FILE_VERSION) {
                         Slog.d(TAG, "Invalid version number, aborting jobs file read.");
                         return null;
                     }
@@ -791,7 +782,7 @@ public final class JobStore {
                         tagName = parser.getName();
                         // Start reading job.
                         if ("job".equals(tagName)) {
-                            JobStatus persistedJob = restoreJobFromXml(rtcIsGood, parser, version);
+                            JobStatus persistedJob = restoreJobFromXml(rtcIsGood, parser);
                             if (persistedJob != null) {
                                 if (DEBUG) {
                                     Slog.d(TAG, "Read out " + persistedJob);
@@ -814,35 +805,23 @@ public final class JobStore {
          *               will take the parser into the body of the job tag.
          * @return Newly instantiated job holding all the information we just read out of the xml tag.
          */
-        private JobStatus restoreJobFromXml(boolean rtcIsGood, XmlPullParser parser,
-                int schemaVersion) throws XmlPullParserException, IOException {
+        private JobStatus restoreJobFromXml(boolean rtcIsGood, XmlPullParser parser)
+                throws XmlPullParserException, IOException {
             JobInfo.Builder jobBuilder;
             int uid, sourceUserId;
             long lastSuccessfulRunTime;
             long lastFailedRunTime;
             int internalFlags = 0;
 
-            // Read out job identifier attributes and bias.
+            // Read out job identifier attributes and priority.
             try {
                 jobBuilder = buildBuilderFromXml(parser);
                 jobBuilder.setPersisted(true);
                 uid = Integer.parseInt(parser.getAttributeValue(null, "uid"));
 
-                String val;
-                if (schemaVersion == 0) {
-                    val = parser.getAttributeValue(null, "priority");
-                    if (val != null) {
-                        jobBuilder.setBias(Integer.parseInt(val));
-                    }
-                } else if (schemaVersion >= 1) {
-                    val = parser.getAttributeValue(null, "bias");
-                    if (val != null) {
-                        jobBuilder.setBias(Integer.parseInt(val));
-                    }
-                    val = parser.getAttributeValue(null, "priority");
-                    if (val != null) {
-                        jobBuilder.setPriority(Integer.parseInt(val));
-                    }
+                String val = parser.getAttributeValue(null, "priority");
+                if (val != null) {
+                    jobBuilder.setPriority(Integer.parseInt(val));
                 }
                 val = parser.getAttributeValue(null, "flags");
                 if (val != null) {
@@ -992,17 +971,10 @@ public final class JobStore {
 
             final JobInfo builtJob;
             try {
-                // Don't perform prefetch-deadline check here. Apps targeting S- shouldn't have
-                // any prefetch-with-deadline jobs accidentally dropped. It's not worth doing
-                // target SDK version checks here for apps targeting T+. There's no way for an
-                // app to keep a perpetually scheduled prefetch job with a deadline. Prefetch jobs
-                // with a deadline would run and then any newly scheduled prefetch jobs wouldn't
-                // have a deadline. If a job is rescheduled (via jobFinished(true) or onStopJob()'s
-                // return value), the deadline is dropped. Periodic jobs require all constraints
-                // to be met, so there's no issue with their deadlines.
-                builtJob = jobBuilder.build(false);
+                builtJob = jobBuilder.build();
             } catch (Exception e) {
-                Slog.w(TAG, "Unable to build job from XML, ignoring: " + jobBuilder.summarize(), e);
+                Slog.w(TAG, "Unable to build job from XML, ignoring: "
+                        + jobBuilder.summarize());
                 return null;
             }
 
@@ -1018,10 +990,11 @@ public final class JobStore {
             }
 
             // And now we're done
+            JobSchedulerInternal service = LocalServices.getService(JobSchedulerInternal.class);
             final int appBucket = JobSchedulerService.standbyBucketForPackage(sourcePackageName,
                     sourceUserId, elapsedNow);
             JobStatus js = new JobStatus(
-                    builtJob, uid, sourcePackageName, sourceUserId,
+                    jobBuilder.build(), uid, sourcePackageName, sourceUserId,
                     appBucket, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,

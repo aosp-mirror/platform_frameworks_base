@@ -32,7 +32,6 @@ import android.util.Size;
 import android.util.TypedValue;
 import android.view.Gravity;
 
-import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
@@ -57,7 +56,7 @@ public class PipBoundsAlgorithm {
     private int mDefaultStackGravity;
     private int mDefaultMinSize;
     private int mOverridableMinSize;
-    protected Point mScreenEdgeInsets;
+    private Point mScreenEdgeInsets;
 
     public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState,
             @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
@@ -77,15 +76,15 @@ public class PipBoundsAlgorithm {
     private void reloadResources(Context context) {
         final Resources res = context.getResources();
         mDefaultAspectRatio = res.getFloat(
-                R.dimen.config_pictureInPictureDefaultAspectRatio);
+                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);
         mDefaultStackGravity = res.getInteger(
-                R.integer.config_defaultPictureInPictureGravity);
+                com.android.internal.R.integer.config_defaultPictureInPictureGravity);
         mDefaultMinSize = res.getDimensionPixelSize(
-                R.dimen.default_minimal_size_pip_resizable_task);
+                com.android.internal.R.dimen.default_minimal_size_pip_resizable_task);
         mOverridableMinSize = res.getDimensionPixelSize(
-                R.dimen.overridable_minimal_size_pip_resizable_task);
+                com.android.internal.R.dimen.overridable_minimal_size_pip_resizable_task);
         final String screenEdgeInsetsDpString = res.getString(
-                R.string.config_defaultPictureInPictureScreenEdgeInsets);
+                com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets);
         final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
                 ? Size.parseSize(screenEdgeInsetsDpString)
                 : null;
@@ -97,9 +96,9 @@ public class PipBoundsAlgorithm {
         mMaxAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
         mDefaultSizePercent = res.getFloat(
-                R.dimen.config_pictureInPictureDefaultSizePercent);
+                com.android.internal.R.dimen.config_pictureInPictureDefaultSizePercent);
         mMaxAspectRatioForMinSize = res.getFloat(
-                R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
+                com.android.internal.R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
         mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
     }
 
@@ -194,7 +193,7 @@ public class PipBoundsAlgorithm {
     public float getAspectRatioOrDefault(
             @android.annotation.Nullable PictureInPictureParams params) {
         return params != null && params.hasSetAspectRatio()
-                ? params.getAspectRatioFloat()
+                ? params.getAspectRatio()
                 : getDefaultAspectRatio();
     }
 

@@ -17,23 +17,18 @@ package com.android.systemui.statusbar.phone
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.Rect
 import android.os.LocaleList
 import android.view.View.LAYOUT_DIRECTION_RTL
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.policy.ConfigurationController
 
 import java.util.ArrayList
-import javax.inject.Inject
 
-@SysUISingleton
-class ConfigurationControllerImpl @Inject constructor(context: Context) : ConfigurationController {
+class ConfigurationControllerImpl(context: Context) : ConfigurationController {
 
     private val listeners: MutableList<ConfigurationController.ConfigurationListener> = ArrayList()
     private val lastConfig = Configuration()
     private var density: Int = 0
     private var smallestScreenWidth: Int = 0
-    private var maxBounds: Rect? = null
     private var fontScale: Float = 0.toFloat()
     private val inCarMode: Boolean
     private var uiMode: Int = 0
@@ -90,14 +85,6 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
             }
         }
 
-        val maxBounds = newConfig.windowConfiguration.maxBounds
-        if (maxBounds != this.maxBounds) {
-            this.maxBounds = maxBounds
-            listeners.filterForEach({ this.listeners.contains(it) }) {
-                it.onMaxBoundsChanged()
-            }
-        }
-
         val localeList = newConfig.locales
         if (localeList != this.localeList) {
             this.localeList = localeList
@@ -126,7 +113,7 @@ class ConfigurationControllerImpl @Inject constructor(context: Context) : Config
 
         if (lastConfig.updateFrom(newConfig) and ActivityInfo.CONFIG_ASSETS_PATHS != 0) {
             listeners.filterForEach({ this.listeners.contains(it) }) {
-                it.onThemeChanged()
+                it.onOverlayChanged()
             }
         }
     }

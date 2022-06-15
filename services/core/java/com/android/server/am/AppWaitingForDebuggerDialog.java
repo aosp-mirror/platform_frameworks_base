@@ -57,6 +57,9 @@ final class AppWaitingForDebuggerDialog extends BaseErrorDialog {
         attrs.setTitle("Waiting For Debugger: " + app.info.processName);
         getWindow().setAttributes(attrs);
     }
+    
+    public void onStop() {
+    }
 
     @Override
     protected void closeDialog() {

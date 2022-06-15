@@ -22,7 +22,6 @@ import android.annotation.StyleRes;
 import android.annotation.SuppressLint;
 import android.annotation.UiThread;
 import android.app.Activity;
-import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.content.Context;
@@ -44,25 +43,19 @@ import java.util.ArrayList;
  */
 public interface SplashScreen {
     /**
-     * The splash screen style is not defined.
+     * Force splash screen to be empty.
      * @hide
      */
-    int SPLASH_SCREEN_STYLE_UNDEFINED = -1;
+    int SPLASH_SCREEN_STYLE_EMPTY = 0;
     /**
-     * Flag to be used with {@link ActivityOptions#setSplashScreenStyle}, to avoid showing the
-     * splash screen icon of the launched activity
-     */
-    int SPLASH_SCREEN_STYLE_SOLID_COLOR = 0;
-    /**
-     * Flag to be used with {@link ActivityOptions#setSplashScreenStyle}, to show the splash screen
-     * icon of the launched activity.
+     * Force splash screen to show icon.
+     * @hide
      */
     int SPLASH_SCREEN_STYLE_ICON = 1;
 
     /** @hide */
     @IntDef(prefix = { "SPLASH_SCREEN_STYLE_" }, value = {
-            SPLASH_SCREEN_STYLE_UNDEFINED,
-            SPLASH_SCREEN_STYLE_SOLID_COLOR,
+            SPLASH_SCREEN_STYLE_EMPTY,
             SPLASH_SCREEN_STYLE_ICON
     })
     @interface SplashScreenStyle {}
@@ -255,6 +248,7 @@ public interface SplashScreen {
 
         public void handOverSplashScreenView(@NonNull IBinder token,
                 @NonNull SplashScreenView splashScreenView) {
+            transferSurface(splashScreenView);
             dispatchOnExitAnimation(token, splashScreenView);
         }
 
@@ -277,6 +271,10 @@ public interface SplashScreen {
                 final SplashScreenImpl impl = findImpl(token);
                 return impl != null && impl.mExitAnimationListener != null;
             }
+        }
+
+        private void transferSurface(@NonNull SplashScreenView splashScreenView) {
+            splashScreenView.transferSurface();
         }
     }
 }

@@ -24,18 +24,17 @@ import androidx.collection.ArraySet;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.dagger.NotificationsModule;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -52,7 +51,6 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
     private final ArrayList<Callback> mGroupChangesAllowedCallbacks = new ArrayList<>();
     private final ArraySet<Callback> mPersistentGroupCallbacks = new ArraySet<>();
     private final Handler mHandler;
-    private final VisualStabilityProvider mVisualStabilityProvider;
 
     private boolean mPanelExpanded;
     private boolean mScreenOn;
@@ -71,15 +69,11 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
      */
     public VisualStabilityManager(
             NotificationEntryManager notificationEntryManager,
-            VisualStabilityProvider visualStabilityProvider,
             @Main Handler handler,
             StatusBarStateController statusBarStateController,
-            WakefulnessLifecycle wakefulnessLifecycle,
-            DumpManager dumpManager) {
+            WakefulnessLifecycle wakefulnessLifecycle) {
 
-        mVisualStabilityProvider = visualStabilityProvider;
         mHandler = handler;
-        dumpManager.registerDumpable(this);
 
         if (notificationEntryManager != null) {
             notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
@@ -184,7 +178,6 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
         if (changedToTrue) {
             notifyChangeAllowed(mReorderingAllowedCallbacks, mPersistentReorderingCallbacks);
         }
-        mVisualStabilityProvider.setReorderingAllowed(reorderingAllowed);
         boolean groupChangesAllowed = (!mScreenOn || !mPanelExpanded) && !mPulsing;
         changedToTrue = groupChangesAllowed && !mGroupChangedAllowed;
         mGroupChangedAllowed = groupChangesAllowed;
@@ -293,7 +286,7 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
     }
 
     @Override
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("VisualStabilityManager state:");
         pw.print("  mIsTemporaryReorderingAllowed="); pw.println(mIsTemporaryReorderingAllowed);
         pw.print("  mTemporaryReorderingStart="); pw.println(mTemporaryReorderingStart);

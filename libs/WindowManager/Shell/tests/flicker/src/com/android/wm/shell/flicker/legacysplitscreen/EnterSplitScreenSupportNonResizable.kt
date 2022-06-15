@@ -25,8 +25,8 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.wm.shell.flicker.dockedStackDividerIsVisible
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
@@ -54,9 +54,9 @@ class EnterSplitScreenSupportNonResizable(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
 
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            cleanSetup(this)
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+        get() = { configuration ->
+            cleanSetup(this, configuration)
             setup {
                 eachRun {
                     nonResizeableApp.launchViaIntent(wmHelper)
@@ -67,12 +67,12 @@ class EnterSplitScreenSupportNonResizable(
             }
         }
 
-    override val ignoredWindows: List<FlickerComponentName>
-        get() = listOf(LAUNCHER_COMPONENT,
-            FlickerComponentName.SPLASH_SCREEN,
-            FlickerComponentName.SNAPSHOT,
-            nonResizeableApp.component,
-            splitScreenApp.component)
+    override val ignoredWindows: List<String>
+        get() = listOf(LAUNCHER_PACKAGE_NAME,
+                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
+                nonResizeableApp.defaultWindowName,
+                splitScreenApp.defaultWindowName)
 
     @Before
     override fun setup() {
@@ -88,20 +88,15 @@ class EnterSplitScreenSupportNonResizable(
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisibleAtEnd()
+    fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
 
     @Presubmit
     @Test
     fun appWindowIsVisible() {
         testSpec.assertWmEnd {
-            isAppWindowVisible(nonResizeableApp.component)
+            isVisible(nonResizeableApp.defaultWindowName)
         }
     }
-
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

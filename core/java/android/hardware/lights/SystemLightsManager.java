@@ -145,7 +145,7 @@ public final class SystemLightsManager extends LightsManager {
          */
         @RequiresPermission(Manifest.permission.CONTROL_DEVICE_LIGHTS)
         private SystemLightsSession() {
-            mCloseGuard.open("SystemLightsSession.close");
+            mCloseGuard.open("close");
         }
 
         /**

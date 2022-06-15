@@ -22,7 +22,6 @@ import android.os.Handler
 import android.os.Looper
 import android.service.quicksettings.Tile
 import android.view.View
-import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.R
@@ -70,9 +69,7 @@ class DeviceControlsTile @Inject constructor(
 
     private var hasControlsApps = AtomicBoolean(false)
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    val icon: QSTile.Icon
-        get() = ResourceIcon.get(controlsComponent.getTileImageId())
+    private val icon = ResourceIcon.get(R.drawable.controls_icon)
 
     private val listingCallback = object : ControlsListingController.ControlsListingCallback {
         override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
@@ -115,22 +112,33 @@ class DeviceControlsTile @Inject constructor(
         }
 
         mUiHandler.post {
-            val showOverLockscreenWhenLocked = state.state == Tile.STATE_ACTIVE
-            mActivityStarter.startActivity(
-                intent, true /* dismissShade */, animationController, showOverLockscreenWhenLocked)
+            if (keyguardStateController.isUnlocked) {
+                mActivityStarter.startActivity(
+                        intent, true /* dismissShade */, animationController)
+            } else {
+                if (state.state == Tile.STATE_ACTIVE) {
+                    mHost.collapsePanels()
+                    // With an active tile, don't use ActivityStarter so that the activity is
+                    // started without prompting keyguard unlock.
+                    mContext.startActivity(intent)
+                } else {
+                    mActivityStarter.postStartActivityDismissingKeyguard(
+                            intent, 0 /* delay */, animationController)
+                }
+            }
         }
     }
 
     override fun handleUpdateState(state: QSTile.State, arg: Any?) {
         state.label = tileLabel
+
         state.contentDescription = state.label
         state.icon = icon
         if (controlsComponent.isEnabled() && hasControlsApps.get()) {
             if (controlsComponent.getVisibility() == AVAILABLE) {
-                val structure = controlsComponent
-                    .getControlsController().get().getPreferredStructure().structure
                 state.state = Tile.STATE_ACTIVE
-                state.secondaryLabel = if (structure == tileLabel) null else structure
+                state.secondaryLabel = controlsComponent
+                        .getControlsController().get().getPreferredStructure().structure
             } else {
                 state.state = Tile.STATE_INACTIVE
                 state.secondaryLabel = mContext.getText(R.string.controls_tile_locked)
@@ -152,6 +160,6 @@ class DeviceControlsTile @Inject constructor(
     override fun handleLongClick(view: View?) {}
 
     override fun getTileLabel(): CharSequence {
-        return mContext.getText(controlsComponent.getTileTitleId())
+        return mContext.getText(R.string.quick_controls_title)
     }
 }

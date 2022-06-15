@@ -29,7 +29,7 @@ public class BatteryStatsDualTimerTest extends TestCase {
 
     @SmallTest
     public void testResetDetach() throws Exception {
-        final MockClock clocks = new MockClock();
+        final MockClocks clocks = new MockClocks();
         clocks.realtime = clocks.uptime = 100;
 
         final BatteryStatsImpl.TimeBase timeBase = new BatteryStatsImpl.TimeBase();

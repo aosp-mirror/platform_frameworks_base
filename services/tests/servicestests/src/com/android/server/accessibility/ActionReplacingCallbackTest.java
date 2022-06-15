@@ -16,27 +16,6 @@
 
 package com.android.server.accessibility;
 
-import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS;
-import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
-import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK;
-import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE;
-import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CONTEXT_CLICK;
-import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND;
-
-import static junit.framework.TestCase.assertTrue;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import android.graphics.Region;
 import android.os.RemoteException;
 import android.view.MagnificationSpec;
@@ -56,7 +35,27 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS;
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK;
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE;
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND;
+import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction.ACTION_CONTEXT_CLICK;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
  * Tests for ActionReplacingCallback
@@ -131,8 +130,8 @@ public class ActionReplacingCallbackTest {
         verify(mMockReplacerConnection).findAccessibilityNodeInfoByAccessibilityId(
                 eq(AccessibilityNodeInfo.ROOT_NODE_ID), (Region) anyObject(),
                 mInteractionIdCaptor.capture(), eq(mActionReplacingCallback), eq(0),
-                eq(INTERROGATING_PID), eq(INTERROGATING_TID), nullable(MagnificationSpec.class),
-                nullable(float[].class), eq(null));
+                eq(INTERROGATING_PID), eq(INTERROGATING_TID), (MagnificationSpec) anyObject(),
+                eq(null));
         mReplacerInteractionId = mInteractionIdCaptor.getValue().intValue();
     }
 
@@ -248,7 +247,7 @@ public class ActionReplacingCallbackTest {
                 .findAccessibilityNodeInfoByAccessibilityId(eq(AccessibilityNodeInfo.ROOT_NODE_ID),
                         (Region) anyObject(), anyInt(), (ActionReplacingCallback) anyObject(),
                         eq(0),  eq(INTERROGATING_PID), eq(INTERROGATING_TID),
-                        (MagnificationSpec) anyObject(), nullable(float[].class), eq(null));
+                        (MagnificationSpec) anyObject(), eq(null));
         ActionReplacingCallback actionReplacingCallback = new ActionReplacingCallback(
                 mMockServiceCallback, mMockReplacerConnection, INTERACTION_ID, INTERROGATING_PID,
                 INTERROGATING_TID);

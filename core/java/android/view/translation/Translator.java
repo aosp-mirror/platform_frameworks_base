@@ -53,6 +53,9 @@ public class Translator {
 
     private static final String TAG = "Translator";
 
+    // TODO: make this configurable and cross the Translation component
+    private static boolean sDEBUG = false;
+
     private final Object mLock = new Object();
 
     private int mId;

@@ -343,20 +343,10 @@ class LegacySplitScreenTaskListener implements ShellTaskOrganizer.TaskListener {
 
     @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
-        b.setParent(findTaskSurface(taskId));
-    }
-
-    @Override
-    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
-            SurfaceControl.Transaction t) {
-        t.reparent(sc, findTaskSurface(taskId));
-    }
-
-    private SurfaceControl findTaskSurface(int taskId) {
         if (!mLeashByTaskId.contains(taskId)) {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
-        return mLeashByTaskId.get(taskId);
+        b.setParent(mLeashByTaskId.get(taskId));
     }
 
     @Override

@@ -16,14 +16,7 @@
 
 package android.net;
 
-import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
-
-import android.annotation.NonNull;
-import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.system.ErrnoException;
-import android.system.Os;
 
 import java.io.Closeable;
 import java.io.FileDescriptor;
@@ -81,39 +74,32 @@ public class LocalSocket implements Closeable {
         this.isBound = false;
     }
 
-    private void checkConnected() {
-        try {
-            Os.getpeername(impl.getFileDescriptor());
-        } catch (ErrnoException e) {
-            throw new IllegalArgumentException("Not a connected socket", e);
-        }
-        isConnected = true;
-        isBound = true;
-        implCreated = true;
-    }
-
     /**
-     * Creates a LocalSocket instance using the {@link FileDescriptor} for an already-connected
-     * AF_LOCAL/UNIX domain stream socket. The passed-in FileDescriptor is not managed by this class
-     * and must be closed by the caller. Calling {@link #close()} on a socket created by this
-     * method has no effect.
+     * Creates a LocalSocket instances using the FileDescriptor for an already-connected
+     * AF_LOCAL/UNIX domain stream socket. Note: the FileDescriptor must be closed by the caller:
+     * closing the LocalSocket will not close it.
      *
-     * @param fd the filedescriptor to adopt
-     *
-     * @hide
+     * @hide - used by BluetoothSocket.
      */
-    @SystemApi(client = MODULE_LIBRARIES)
-    public LocalSocket(@NonNull @SuppressLint("UseParcelFileDescriptor") FileDescriptor fd) {
-        this(new LocalSocketImpl(fd), SOCKET_UNKNOWN);
-        checkConnected();
+    public static LocalSocket createConnectedLocalSocket(FileDescriptor fd) {
+        return createConnectedLocalSocket(new LocalSocketImpl(fd), SOCKET_UNKNOWN);
     }
 
     /**
      * for use with LocalServerSocket.accept()
      */
     static LocalSocket createLocalSocketForAccept(LocalSocketImpl impl) {
-        LocalSocket socket = new LocalSocket(impl, SOCKET_UNKNOWN);
-        socket.checkConnected();
+        return createConnectedLocalSocket(impl, SOCKET_UNKNOWN);
+    }
+
+    /**
+     * Creates a LocalSocket from an existing LocalSocketImpl that is already connected.
+     */
+    private static LocalSocket createConnectedLocalSocket(LocalSocketImpl impl, int sockType) {
+        LocalSocket socket = new LocalSocket(impl, sockType);
+        socket.isConnected = true;
+        socket.isBound = true;
+        socket.implCreated = true;
         return socket;
     }
 

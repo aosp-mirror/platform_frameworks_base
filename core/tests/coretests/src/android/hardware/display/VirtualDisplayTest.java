@@ -16,10 +16,6 @@
 
 package android.hardware.display;
 
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-
-import android.annotation.ColorInt;
-import android.app.Dialog;
 import android.app.Presentation;
 import android.content.Context;
 import android.graphics.Color;
@@ -37,11 +33,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
-import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams.Flags;
 import android.widget.ImageView;
 
 import androidx.test.filters.LargeTest;
@@ -117,7 +110,7 @@ public class VirtualDisplayTest extends AndroidTestCase {
      * Ensures that an application can create a private virtual display and show
      * its own windows on it.
      */
-    public void testPrivateVirtualDisplay() {
+    public void testPrivateVirtualDisplay() throws Exception {
         VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(NAME,
                 WIDTH, HEIGHT, DENSITY, mSurface, 0);
         assertNotNull("virtual display must not be null", virtualDisplay);
@@ -127,7 +120,9 @@ public class VirtualDisplayTest extends AndroidTestCase {
             assertDisplayRegistered(display, Display.FLAG_PRIVATE);
 
             // Show a private presentation on the display.
-            assertDisplayCanShowPresentation("private presentation window", display, BLUEISH, 0);
+            assertDisplayCanShowPresentation("private presentation window",
+                    display, BLUEISH,
+                    WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION, 0);
         } finally {
             virtualDisplay.release();
         }
@@ -138,9 +133,10 @@ public class VirtualDisplayTest extends AndroidTestCase {
      * Ensures that an application can create a private presentation virtual display and show
      * its own windows on it.
      */
-    public void testPrivatePresentationVirtualDisplay() {
+    public void testPrivatePresentationVirtualDisplay() throws Exception {
         VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(NAME,
-                WIDTH, HEIGHT, DENSITY, mSurface, DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION);
+                WIDTH, HEIGHT, DENSITY, mSurface,
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION);
         assertNotNull("virtual display must not be null", virtualDisplay);
 
         Display display = virtualDisplay.getDisplay();
@@ -148,7 +144,9 @@ public class VirtualDisplayTest extends AndroidTestCase {
             assertDisplayRegistered(display, Display.FLAG_PRIVATE | Display.FLAG_PRESENTATION);
 
             // Show a private presentation on the display.
-            assertDisplayCanShowPresentation("private presentation window", display, BLUEISH, 0);
+            assertDisplayCanShowPresentation("private presentation window",
+                    display, BLUEISH,
+                    WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION, 0);
         } finally {
             virtualDisplay.release();
         }
@@ -163,7 +161,7 @@ public class VirtualDisplayTest extends AndroidTestCase {
      * type to create the window.  Another choice might be SYSTEM_ALERT_WINDOW but
      * that requires a permission.
      */
-    public void testPublicPresentationVirtualDisplay() {
+    public void testPublicPresentationVirtualDisplay() throws Exception {
         VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(NAME,
                 WIDTH, HEIGHT, DENSITY, mSurface,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
@@ -179,22 +177,29 @@ public class VirtualDisplayTest extends AndroidTestCase {
             // virtual display automatically.
             Display defaultDisplay = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
             assertDisplayCanShowPresentation("mirrored window",
-                    defaultDisplay, GREENISH, 0);
+                    defaultDisplay, GREENISH,
+                    WindowManager.LayoutParams.TYPE_TOAST, 0);
 
             // Mirroring case with secure window (but display is not secure).
             // Show a window on the default display.  It should be replaced with black on
             // the virtual display.
             assertDisplayCanShowPresentation("mirrored secure window on non-secure display",
-                    defaultDisplay, Color.BLACK, WindowManager.LayoutParams.FLAG_SECURE);
+                    defaultDisplay, Color.BLACK,
+                    WindowManager.LayoutParams.TYPE_TOAST,
+                    WindowManager.LayoutParams.FLAG_SECURE);
 
             // Presentation case.
             // Show a normal presentation on the display.
-            assertDisplayCanShowPresentation("presentation window", display, BLUEISH, 0);
+            assertDisplayCanShowPresentation("presentation window",
+                    display, BLUEISH,
+                    WindowManager.LayoutParams.TYPE_TOAST, 0);
 
             // Presentation case with secure window (but display is not secure).
             // Show a normal presentation on the display.  It should be replaced with black.
             assertDisplayCanShowPresentation("secure presentation window on non-secure display",
-                    display, Color.BLACK, WindowManager.LayoutParams.FLAG_SECURE);
+                    display, Color.BLACK,
+                    WindowManager.LayoutParams.TYPE_TOAST,
+                    WindowManager.LayoutParams.FLAG_SECURE);
         } finally {
             virtualDisplay.release();
         }
@@ -209,7 +214,7 @@ public class VirtualDisplayTest extends AndroidTestCase {
      * type to create the window.  Another choice might be SYSTEM_ALERT_WINDOW but
      * that requires a permission.
      */
-    public void testSecurePublicPresentationVirtualDisplay() {
+    public void testSecurePublicPresentationVirtualDisplay() throws Exception {
         VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(NAME,
                 WIDTH, HEIGHT, DENSITY, mSurface,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE
@@ -226,12 +231,16 @@ public class VirtualDisplayTest extends AndroidTestCase {
             // virtual display automatically.
             Display defaultDisplay = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
             assertDisplayCanShowPresentation("mirrored secure window on secure display",
-                    defaultDisplay, GREENISH, WindowManager.LayoutParams.FLAG_SECURE);
+                    defaultDisplay, GREENISH,
+                    WindowManager.LayoutParams.TYPE_TOAST,
+                    WindowManager.LayoutParams.FLAG_SECURE);
 
             // Presentation case with secure window (and display is secure).
             // Show a normal presentation on the display.
             assertDisplayCanShowPresentation("secure presentation window on secure display",
-                    display, BLUEISH, WindowManager.LayoutParams.FLAG_SECURE);
+                    display, BLUEISH,
+                    WindowManager.LayoutParams.TYPE_TOAST,
+                    WindowManager.LayoutParams.FLAG_SECURE);
         } finally {
             virtualDisplay.release();
         }
@@ -242,7 +251,7 @@ public class VirtualDisplayTest extends AndroidTestCase {
      * Ensures that an application can create a trusted virtual display with the permission
      * {@code ADD_TRUSTED_DISPLAY}.
      */
-    public void testTrustedVirtualDisplay() {
+    public void testTrustedVirtualDisplay() throws Exception {
         VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(NAME,
                 WIDTH, HEIGHT, DENSITY, mSurface,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED);
@@ -290,65 +299,55 @@ public class VirtualDisplayTest extends AndroidTestCase {
         assertFalse("display must no longer be valid", display.isValid());
     }
 
-    /**
-     * Verifies that virtual display shows the expected {@code color}.
-     * <p>
-     * If {@code display} is the {@link Display#DEFAULT_DISPLAY default display}, show a fullscreen
-     * overlay {@link Dialog} on the default display and verify if the dialog is mirrored to the
-     * virtual display.
-     * </p><p>
-     * If {@code display} is a {@link VirtualDisplay}, show a {@link Presentation} on that virtual
-     * display and verify the content.
-     * </p>
-     */
     private void assertDisplayCanShowPresentation(String message, final Display display,
-            @ColorInt final int color, @Flags final int windowFlags) {
+            final int color, final int windowType, final int windowFlags) {
         // At this point, we should not have seen any blue.
         assertTrue(message + ": display should not show content before window is shown",
                 mImageListener.getColor() != color);
 
-        final Dialog[] dialogs = new Dialog[1];
+        final TestPresentation[] presentation = new TestPresentation[1];
         try {
             // Show the presentation.
-            runOnUiThread(() -> {
-                if (display.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                    final Context windowContext = getContext().createWindowContext(display,
-                            TYPE_APPLICATION_OVERLAY, null /* options */);
-                    dialogs[0] = new TestDialog(windowContext, color, windowFlags);
-                } else {
-                    dialogs[0] = new TestPresentation(getContext(), display, color, windowFlags);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    presentation[0] = new TestPresentation(getContext(), display,
+                            color, windowType, windowFlags);
+                    presentation[0].show();
                 }
-                dialogs[0].show();
             });
 
-            // Wait for the color to be seen.
+            // Wait for the blue to be seen.
             assertTrue(message + ": display should show content after window is shown",
                     mImageListener.waitForColor(color, TIMEOUT));
         } finally {
-            if (dialogs[0] != null) {
-                runOnUiThread(() -> dialogs[0].dismiss());
+            if (presentation[0] != null) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        presentation[0].dismiss();
+                    }
+                });
             }
         }
     }
 
     private void runOnUiThread(Runnable runnable) {
-        final Throwable[] thrown = new Throwable[1];
-        assertTrue("Timed out", mHandler.runWithScissors(() -> {
+        Runnable waiter = new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    notifyAll();
+                }
+            }
+        };
+        synchronized (waiter) {
+            mHandler.post(runnable);
+            mHandler.post(waiter);
             try {
-                runnable.run();
-            } catch (Throwable t) {
-                t.printStackTrace();
-                thrown[0] = t;
+                waiter.wait(TIMEOUT);
+            } catch (InterruptedException ex) {
             }
-        }, TIMEOUT));
-        if (thrown[0] != null) {
-            if (thrown[0] instanceof RuntimeException) {
-                throw (RuntimeException) thrown[0];
-            }
-            if (thrown[0] instanceof Error) {
-                throw (Error) thrown[0];
-            }
-            throw new RuntimeException(thrown[0]);
         }
     }
 
@@ -361,15 +360,13 @@ public class VirtualDisplayTest extends AndroidTestCase {
         return null;
     }
 
-    private static final class TestPresentation extends Presentation {
-        @ColorInt
+    private final class TestPresentation extends Presentation {
         private final int mColor;
-        @Flags
         private final int mWindowFlags;
 
-        TestPresentation(Context context, Display display, @ColorInt int color,
-                @Flags int windowFlags) {
-            super(context, display);
+        public TestPresentation(Context context, Display display,
+                int color, int windowType, int windowFlags) {
+            super(context, display, 0 /* theme */, windowType);
             mColor = color;
             mWindowFlags = windowFlags;
         }
@@ -381,42 +378,13 @@ public class VirtualDisplayTest extends AndroidTestCase {
             setTitle(TAG);
             getWindow().addFlags(mWindowFlags);
 
-            setContentView(createImageView(getContext(), mColor));
+            // Create a solid color image to use as the content of the presentation.
+            ImageView view = new ImageView(getContext());
+            view.setImageDrawable(new ColorDrawable(mColor));
+            view.setLayoutParams(new LayoutParams(
+                    LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            setContentView(view);
         }
-    }
-
-    private static final class TestDialog extends Dialog {
-        @ColorInt
-        private final int mColor;
-        @Flags
-        private final int mWindowFlags;
-
-        TestDialog(Context context, @ColorInt int color, @Flags int windowFlags) {
-            super(context, android.R.style.Theme_Material_NoActionBar_Fullscreen);
-            mColor = color;
-            mWindowFlags = windowFlags;
-        }
-
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            setTitle(TAG);
-            final Window window = getWindow();
-            window.setType(TYPE_APPLICATION_OVERLAY);
-            window.addFlags(mWindowFlags);
-
-            setContentView(createImageView(getContext(), mColor));
-        }
-    }
-
-    private static View createImageView(Context context, @ColorInt int color) {
-        // Create a solid color image to use as the content of the presentation.
-        ImageView view = new ImageView(context);
-        view.setImageDrawable(new ColorDrawable(color));
-        view.setLayoutParams(new LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        return view;
     }
 
     /**

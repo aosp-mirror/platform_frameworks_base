@@ -105,7 +105,6 @@ public class VolumeRecord implements Parcelable {
         final boolean primary = false;
         final boolean removable = true;
         final boolean emulated = false;
-        final boolean externallyManaged = false;
         final boolean allowMassStorage = false;
         final long maxFileSize = 0;
         final UserHandle user = new UserHandle(UserHandle.USER_NULL);
@@ -117,8 +116,7 @@ public class VolumeRecord implements Parcelable {
         }
 
         return new StorageVolume(id, userPath, internalPath, description, primary, removable,
-                emulated, externallyManaged, allowMassStorage, maxFileSize, user, null /* uuid */,
-                fsUuid, envState);
+                emulated, allowMassStorage, maxFileSize, user, null /* uuid */, fsUuid, envState);
     }
 
     public void dump(IndentingPrintWriter pw) {

@@ -35,6 +35,7 @@ import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 import com.android.server.powerstats.ProtoStreamUtils.ChannelUtils;
 import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerResultUtils;
@@ -312,12 +313,12 @@ public final class PowerStatsLogger extends Handler {
         return mStartWallTime;
     }
 
-    public PowerStatsLogger(Context context, Looper looper, File dataStoragePath,
+    public PowerStatsLogger(Context context, File dataStoragePath,
             String meterFilename, String meterCacheFilename,
             String modelFilename, String modelCacheFilename,
             String residencyFilename, String residencyCacheFilename,
             IPowerStatsHALWrapper powerStatsHALWrapper) {
-        super(looper);
+        super(Looper.getMainLooper());
         mStartWallTime = currentTimeMillis() - SystemClock.elapsedRealtime();
         if (DEBUG) Slog.d(TAG, "mStartWallTime: " + mStartWallTime);
         mPowerStatsHALWrapper = powerStatsHALWrapper;

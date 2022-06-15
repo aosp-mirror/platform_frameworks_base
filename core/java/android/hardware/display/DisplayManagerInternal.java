@@ -18,7 +18,6 @@ package android.hardware.display;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.companion.virtual.IVirtualDevice;
 import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.os.Handler;
@@ -30,13 +29,11 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.window.DisplayWindowPolicyController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Display manager local system service interface.
@@ -59,14 +56,6 @@ public abstract class DisplayManagerInternal {
      */
     public abstract void initPowerManagement(DisplayPowerCallbacks callbacks,
             Handler handler, SensorManager sensorManager);
-
-    /**
-     * Called by the VirtualDeviceManagerService to create a VirtualDisplay owned by a
-     * VirtualDevice.
-     */
-    public abstract int createVirtualDisplay(VirtualDisplayConfig config,
-            IVirtualDisplayCallback callback, IVirtualDevice virtualDevice,
-            DisplayWindowPolicyController dwpc, String packageName);
 
     /**
      * Called by the power manager to request a new power state.
@@ -137,14 +126,6 @@ public abstract class DisplayManagerInternal {
      * returned object must be treated as immutable.
      */
     public abstract DisplayInfo getDisplayInfo(int displayId);
-
-    /**
-     * Returns a set of DisplayInfo, for the states that may be assumed by either the given display,
-     * or any other display within that display's group.
-     *
-     * @param displayId The logical display id to fetch DisplayInfo for.
-     */
-    public abstract Set<DisplayInfo> getPossibleDisplayInfo(int displayId);
 
     /**
      * Returns the position of the display's projection.
@@ -359,36 +340,6 @@ public abstract class DisplayManagerInternal {
     public abstract List<RefreshRateLimitation> getRefreshRateLimitations(int displayId);
 
     /**
-     * For the given displayId, updates if WindowManager is responsible for mirroring on that
-     * display. If {@code false}, then SurfaceFlinger performs no layer mirroring to the
-     * given display.
-     * Only used for mirroring started from MediaProjection.
-     */
-    public abstract void setWindowManagerMirroring(int displayId, boolean isMirroring);
-
-    /**
-     * Returns the default size of the surface associated with the display, or null if the surface
-     * is not provided for layer mirroring by SurfaceFlinger.
-     * Only used for mirroring started from MediaProjection.
-     */
-    public abstract Point getDisplaySurfaceDefaultSize(int displayId);
-
-    /**
-     * Receives early interactivity changes from power manager.
-     *
-     * @param interactive The interactive state that the device is moving into.
-     */
-    public abstract void onEarlyInteractivityChange(boolean interactive);
-
-    /**
-     * Get {@link DisplayWindowPolicyController} associated to the {@link DisplayInfo#displayId}
-     *
-     * @param displayId The id of the display.
-     * @return The associated {@link DisplayWindowPolicyController}.
-     */
-    public abstract DisplayWindowPolicyController getDisplayWindowPolicyController(int displayId);
-
-    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the
@@ -569,19 +520,8 @@ public abstract class DisplayManagerInternal {
         void onProximityNegative();
         void onDisplayStateChange(boolean allInactive, boolean allOff);
 
-        /**
-         * Acquires a suspend blocker with a specified label.
-         *
-         * @param id A logging label for the acquisition.
-         */
-        void acquireSuspendBlocker(String id);
-
-        /**
-         * Releases a suspend blocker with a specified label.
-         *
-         * @param id A logging label for the release.
-         */
-        void releaseSuspendBlocker(String id);
+        void acquireSuspendBlocker();
+        void releaseSuspendBlocker();
     }
 
     /**

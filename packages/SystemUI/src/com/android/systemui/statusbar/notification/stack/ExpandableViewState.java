@@ -34,13 +34,10 @@ public class ExpandableViewState extends ViewState {
 
     private static final int TAG_ANIMATOR_HEIGHT = R.id.height_animator_tag;
     private static final int TAG_ANIMATOR_TOP_INSET = R.id.top_inset_animator_tag;
-    private static final int TAG_ANIMATOR_BOTTOM_INSET = R.id.bottom_inset_animator_tag;
     private static final int TAG_END_HEIGHT = R.id.height_animator_end_value_tag;
     private static final int TAG_END_TOP_INSET = R.id.top_inset_animator_end_value_tag;
-    private static final int TAG_END_BOTTOM_INSET = R.id.bottom_inset_animator_end_value_tag;
     private static final int TAG_START_HEIGHT = R.id.height_animator_start_value_tag;
     private static final int TAG_START_TOP_INSET = R.id.top_inset_animator_start_value_tag;
-    private static final int TAG_START_BOTTOM_INSET = R.id.bottom_inset_animator_start_value_tag;
 
     // These are flags such that we can create masks for filtering.
 
@@ -99,15 +96,10 @@ public class ExpandableViewState extends ViewState {
     public boolean headsUpIsVisible;
 
     /**
-     * How much the child overlaps on top with the child above.
-     */
-    public int clipTopAmount;
-
-    /**
-     * How much the child overlaps on bottom with the child above. This is used to
+     * How much the child overlaps with the previous child on top. This is used to
      * show the background properly when the child on top is translating away.
      */
-    public int clipBottomAmount;
+    public int clipTopAmount;
 
     /**
      * The index of the view, only accounting for views not equal to GONE
@@ -146,8 +138,8 @@ public class ExpandableViewState extends ViewState {
         if (view instanceof ExpandableView) {
             ExpandableView expandableView = (ExpandableView) view;
 
-            final int height = expandableView.getActualHeight();
-            final int newHeight = this.height;
+            int height = expandableView.getActualHeight();
+            int newHeight = this.height;
 
             // apply height
             if (height != newHeight) {
@@ -165,13 +157,9 @@ public class ExpandableViewState extends ViewState {
             expandableView.setBelowSpeedBump(this.belowSpeedBump);
 
             // apply clipping
-            final float oldClipTopAmount = expandableView.getClipTopAmount();
+            float oldClipTopAmount = expandableView.getClipTopAmount();
             if (oldClipTopAmount != this.clipTopAmount) {
                 expandableView.setClipTopAmount(this.clipTopAmount);
-            }
-            final float oldClipBottomAmount = expandableView.getClipBottomAmount();
-            if (oldClipBottomAmount != this.clipBottomAmount) {
-                expandableView.setClipBottomAmount(this.clipBottomAmount);
             }
 
             expandableView.setTransformingInShelf(false);
@@ -199,18 +187,11 @@ public class ExpandableViewState extends ViewState {
             abortAnimation(child, TAG_ANIMATOR_HEIGHT);
         }
 
-        // start clip top animation
+        // start top inset animation
         if (this.clipTopAmount != expandableView.getClipTopAmount()) {
-            startClipAnimation(expandableView, properties, /* clipTop */true);
+            startInsetAnimation(expandableView, properties);
         } else {
             abortAnimation(child, TAG_ANIMATOR_TOP_INSET);
-        }
-
-        // start clip bottom animation
-        if (this.clipBottomAmount != expandableView.getClipBottomAmount()) {
-            startClipAnimation(expandableView, properties, /* clipTop */ false);
-        } else {
-            abortAnimation(child, TAG_ANIMATOR_BOTTOM_INSET);
         }
 
         // start dimmed animation
@@ -320,20 +301,16 @@ public class ExpandableViewState extends ViewState {
         child.setActualHeightAnimating(true);
     }
 
-    private void startClipAnimation(final ExpandableView child, AnimationProperties properties,
-            boolean clipTop) {
-        Integer previousStartValue = getChildTag(child,
-                clipTop ? TAG_START_TOP_INSET : TAG_START_BOTTOM_INSET);
-        Integer previousEndValue = getChildTag(child,
-                clipTop ? TAG_END_TOP_INSET : TAG_END_BOTTOM_INSET);
-        int newEndValue = clipTop ? this.clipTopAmount : this.clipBottomAmount;
+    private void startInsetAnimation(final ExpandableView child, AnimationProperties properties) {
+        Integer previousStartValue = getChildTag(child, TAG_START_TOP_INSET);
+        Integer previousEndValue = getChildTag(child, TAG_END_TOP_INSET);
+        int newEndValue = this.clipTopAmount;
         if (previousEndValue != null && previousEndValue == newEndValue) {
             return;
         }
-        ValueAnimator previousAnimator = getChildTag(child,
-                clipTop ? TAG_ANIMATOR_TOP_INSET : TAG_ANIMATOR_BOTTOM_INSET);
+        ValueAnimator previousAnimator = getChildTag(child, TAG_ANIMATOR_TOP_INSET);
         AnimationFilter filter = properties.getAnimationFilter();
-        if (clipTop && !filter.animateTopInset || !clipTop) {
+        if (!filter.animateTopInset) {
             // just a local update was performed
             if (previousAnimator != null) {
                 // we need to increase all animation keyframes of the previous animator by the
@@ -342,28 +319,22 @@ public class ExpandableViewState extends ViewState {
                 int relativeDiff = newEndValue - previousEndValue;
                 int newStartValue = previousStartValue + relativeDiff;
                 values[0].setIntValues(newStartValue, newEndValue);
-                child.setTag(clipTop ? TAG_START_TOP_INSET : TAG_START_BOTTOM_INSET, newStartValue);
-                child.setTag(clipTop ? TAG_END_TOP_INSET : TAG_END_BOTTOM_INSET, newEndValue);
+                child.setTag(TAG_START_TOP_INSET, newStartValue);
+                child.setTag(TAG_END_TOP_INSET, newEndValue);
                 previousAnimator.setCurrentPlayTime(previousAnimator.getCurrentPlayTime());
                 return;
             } else {
                 // no new animation needed, let's just apply the value
-                if (clipTop) {
-                    child.setClipTopAmount(newEndValue);
-                } else {
-                    child.setClipBottomAmount(newEndValue);
-                }
+                child.setClipTopAmount(newEndValue);
                 return;
             }
         }
 
-        ValueAnimator animator = ValueAnimator.ofInt(
-                clipTop ? child.getClipTopAmount() : child.getClipBottomAmount(), newEndValue);
-        animator.addUpdateListener(animation -> {
-            if (clipTop) {
+        ValueAnimator animator = ValueAnimator.ofInt(child.getClipTopAmount(), newEndValue);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
                 child.setClipTopAmount((int) animation.getAnimatedValue());
-            } else {
-                child.setClipBottomAmount((int) animation.getAnimatedValue());
             }
         });
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
@@ -382,16 +353,15 @@ public class ExpandableViewState extends ViewState {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                child.setTag(clipTop ? TAG_ANIMATOR_TOP_INSET : TAG_ANIMATOR_BOTTOM_INSET, null);
-                child.setTag(clipTop ? TAG_START_TOP_INSET : TAG_START_BOTTOM_INSET, null);
-                child.setTag(clipTop ? TAG_END_TOP_INSET : TAG_END_BOTTOM_INSET, null);
+                child.setTag(TAG_ANIMATOR_TOP_INSET, null);
+                child.setTag(TAG_START_TOP_INSET, null);
+                child.setTag(TAG_END_TOP_INSET, null);
             }
         });
         startAnimator(animator, listener);
-        child.setTag(clipTop ? TAG_ANIMATOR_TOP_INSET:TAG_ANIMATOR_BOTTOM_INSET, animator);
-        child.setTag(clipTop ? TAG_START_TOP_INSET: TAG_START_BOTTOM_INSET,
-                clipTop ? child.getClipTopAmount() : child.getClipBottomAmount());
-        child.setTag(clipTop ? TAG_END_TOP_INSET: TAG_END_BOTTOM_INSET, newEndValue);
+        child.setTag(TAG_ANIMATOR_TOP_INSET, animator);
+        child.setTag(TAG_START_TOP_INSET, child.getClipTopAmount());
+        child.setTag(TAG_END_TOP_INSET, newEndValue);
     }
 
     /**

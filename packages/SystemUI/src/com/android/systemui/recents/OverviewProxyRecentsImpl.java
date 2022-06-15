@@ -17,14 +17,16 @@
 package com.android.systemui.recents;
 
 import android.annotation.Nullable;
+import android.app.trust.TrustManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.shared.recents.IOverviewProxy;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Optional;
 
@@ -40,22 +42,25 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
 
     private final static String TAG = "OverviewProxyRecentsImpl";
     @Nullable
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final Lazy<StatusBar> mStatusBarLazy;
 
+    private Context mContext;
     private Handler mHandler;
-    private final OverviewProxyService mOverviewProxyService;
+    private TrustManager mTrustManager;
+    private OverviewProxyService mOverviewProxyService;
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
-    public OverviewProxyRecentsImpl(Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            OverviewProxyService overviewProxyService) {
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
-        mOverviewProxyService = overviewProxyService;
+    public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy) {
+        mStatusBarLazy = statusBarLazy.orElse(null);
     }
 
     @Override
     public void onStart(Context context) {
+        mContext = context;
         mHandler = new Handler();
+        mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
     }
 
     @Override
@@ -64,9 +69,12 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
         if (overviewProxy != null) {
             try {
                 overviewProxy.onOverviewShown(triggeredFromAltTab);
+                return;
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send overview show event to launcher.", e);
             }
+        } else {
+            // Do nothing
         }
     }
 
@@ -76,9 +84,12 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
         if (overviewProxy != null) {
             try {
                 overviewProxy.onOverviewHidden(triggeredFromAltTab, triggeredFromHomeKey);
+                return;
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send overview hide event to launcher.", e);
             }
+        } else {
+            // Do nothing
         }
     }
 
@@ -98,16 +109,19 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
                 }
             };
             // Preload only if device for current user is unlocked
-            final Optional<CentralSurfaces> centralSurfacesOptional =
-                    mCentralSurfacesOptionalLazy.get();
-            if (centralSurfacesOptional.map(CentralSurfaces::isKeyguardShowing).orElse(false)) {
-                centralSurfacesOptional.get().executeRunnableDismissingKeyguard(
-                        () -> mHandler.post(toggleRecents), null, true /* dismissShade */,
-                        false /* afterKeyguardGone */,
-                        true /* deferred */);
+            if (mStatusBarLazy != null && mStatusBarLazy.get().isKeyguardShowing()) {
+                mStatusBarLazy.get().executeRunnableDismissingKeyguard(() -> {
+                        // Flush trustmanager before checking device locked per user
+                        mTrustManager.reportKeyguardShowingChanged();
+                        mHandler.post(toggleRecents);
+                    }, null,  true /* dismissShade */, false /* afterKeyguardGone */,
+                    true /* deferred */);
             } else {
                 toggleRecents.run();
             }
+            return;
+        } else {
+            // Do nothing
         }
     }
 }

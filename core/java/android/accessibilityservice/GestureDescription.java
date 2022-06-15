@@ -525,7 +525,7 @@ public final class GestureDescription {
         public GestureStep(Parcel parcel) {
             timeSinceGestureStart = parcel.readLong();
             Parcelable[] parcelables =
-                    parcel.readParcelableArray(TouchPoint.class.getClassLoader(), TouchPoint.class);
+                    parcel.readParcelableArray(TouchPoint.class.getClassLoader());
             numTouchPoints = (parcelables == null) ? 0 : parcelables.length;
             touchPoints = new TouchPoint[numTouchPoints];
             for (int i = 0; i < numTouchPoints; i++) {

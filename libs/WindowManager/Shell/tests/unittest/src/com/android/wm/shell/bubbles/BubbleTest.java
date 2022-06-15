@@ -63,7 +63,7 @@ public class BubbleTest extends ShellTestCase {
     private Bubble mBubble;
 
     @Mock
-    private Bubbles.BubbleMetadataFlagListener mBubbleMetadataFlagListener;
+    private Bubbles.SuppressionChangedListener mSuppressionListener;
 
     @Before
     public void setUp() {
@@ -81,7 +81,7 @@ public class BubbleTest extends ShellTestCase {
         when(mNotif.getBubbleMetadata()).thenReturn(metadata);
         when(mSbn.getKey()).thenReturn("mock");
         mBubbleEntry = new BubbleEntry(mSbn, null, true, false, false, false);
-        mBubble = new Bubble(mBubbleEntry, mBubbleMetadataFlagListener, null, mMainExecutor);
+        mBubble = new Bubble(mBubbleEntry, mSuppressionListener, null, mMainExecutor);
     }
 
     @Test
@@ -144,22 +144,22 @@ public class BubbleTest extends ShellTestCase {
     }
 
     @Test
-    public void testBubbleMetadataFlagListener_change_notified() {
+    public void testSuppressionListener_change_notified() {
         assertThat(mBubble.showInShade()).isTrue();
 
         mBubble.setSuppressNotification(true);
 
         assertThat(mBubble.showInShade()).isFalse();
 
-        verify(mBubbleMetadataFlagListener).onBubbleMetadataFlagChanged(mBubble);
+        verify(mSuppressionListener).onBubbleNotificationSuppressionChange(mBubble);
     }
 
     @Test
-    public void testBubbleMetadataFlagListener_noChange_doesntNotify() {
+    public void testSuppressionListener_noChange_doesntNotify() {
         assertThat(mBubble.showInShade()).isTrue();
 
         mBubble.setSuppressNotification(false);
 
-        verify(mBubbleMetadataFlagListener, never()).onBubbleMetadataFlagChanged(any());
+        verify(mSuppressionListener, never()).onBubbleNotificationSuppressionChange(any());
     }
 }

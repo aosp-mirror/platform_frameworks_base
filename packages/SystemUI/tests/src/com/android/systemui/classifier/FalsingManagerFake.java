@@ -23,6 +23,7 @@ import android.net.Uri;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.plugins.FalsingManager;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +132,7 @@ public class FalsingManagerFake implements FalsingManager {
     }
 
     @Override
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
     }
 
     @Override

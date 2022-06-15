@@ -18,6 +18,8 @@ package com.android.systemui.dagger;
 
 import android.content.Context;
 
+import com.android.systemui.util.concurrency.ThreadFactory;
+
 import javax.inject.Singleton;
 
 import dagger.BindsInstance;
@@ -27,7 +29,10 @@ import dagger.Component;
  * Root component for Dagger injection.
  */
 @Singleton
-@Component(modules = {GlobalModule.class})
+@Component(modules = {
+        GlobalModule.class,
+        SysUISubcomponentModule.class,
+        WMModule.class})
 public interface GlobalRootComponent {
 
     /**
@@ -42,12 +47,17 @@ public interface GlobalRootComponent {
     }
 
     /**
-     * Builder for a {@link WMComponent}, which makes it a subcomponent of this class.
+     * Builder for a WMComponent.
      */
     WMComponent.Builder getWMComponentBuilder();
 
     /**
-     * Builder for a {@link SysUIComponent}, which makes it a subcomponent of this class.
+     * Builder for a SysUIComponent.
      */
     SysUIComponent.Builder getSysUIComponent();
+
+    /**
+     * Build a {@link ThreadFactory}.
+     */
+    ThreadFactory createThreadFactory();
 }

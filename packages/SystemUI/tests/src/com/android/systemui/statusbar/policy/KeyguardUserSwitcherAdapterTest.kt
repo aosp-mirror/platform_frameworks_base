@@ -193,6 +193,5 @@ class KeyguardUserSwitcherAdapterTest : SysuiTestCase() {
                     isCurrentUser,
                     false /* isAddUser */,
                     false /* isRestricted */,
-                    true /* isSwitchToEnabled */,
-                    false /* isAddSupervisedUser */)
+                    true /* isSwitchToEnabled */)
 }

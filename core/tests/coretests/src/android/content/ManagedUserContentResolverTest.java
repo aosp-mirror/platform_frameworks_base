@@ -20,7 +20,6 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.LargeTest;
 
@@ -37,7 +36,6 @@ import androidx.test.filters.LargeTest;
  * Run: adb shell am instrument -e class android.content.ManagedUserContentResolverTest -w \
  *     com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
  */
-@Presubmit
 @LargeTest
 public class ManagedUserContentResolverTest extends AbstractCrossUserContentResolverTest {
     @Override

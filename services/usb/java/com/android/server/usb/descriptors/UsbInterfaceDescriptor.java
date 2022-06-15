@@ -42,9 +42,6 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
     private ArrayList<UsbEndpointDescriptor> mEndpointDescriptors =
             new ArrayList<UsbEndpointDescriptor>();
 
-    // Used for MIDI only.
-    private UsbDescriptor mMidiHeaderInterfaceDescriptor;
-
     UsbInterfaceDescriptor(int length, byte type) {
         super(length, type);
         mHierarchyLevel = 3;
@@ -108,18 +105,7 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
         mEndpointDescriptors.add(endpoint);
     }
 
-    public void setMidiHeaderInterfaceDescriptor(UsbDescriptor descriptor) {
-        mMidiHeaderInterfaceDescriptor = descriptor;
-    }
-
-    public UsbDescriptor getMidiHeaderInterfaceDescriptor() {
-        return mMidiHeaderInterfaceDescriptor;
-    }
-
-    /**
-    * Returns a UsbInterface that this UsbInterfaceDescriptor is describing.
-    */
-    public UsbInterface toAndroid(UsbDescriptorParser parser) {
+    UsbInterface toAndroid(UsbDescriptorParser parser) {
         if (UsbDescriptorParser.DEBUG) {
             Log.d(TAG, "toAndroid() class:" + Integer.toHexString(mUsbClass)
                     + " subclass:" + Integer.toHexString(mUsbSubclass)

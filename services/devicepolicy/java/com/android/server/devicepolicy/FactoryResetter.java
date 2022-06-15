@@ -16,8 +16,6 @@
 
 package com.android.server.devicepolicy;
 
-import static com.android.server.FactoryResetter.setFactoryResetting;
-
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.content.Context;
@@ -38,10 +36,7 @@ import java.util.Objects;
 
 /**
  * Entry point for "factory reset" requests.
- *
- * @deprecated TODO(b/225012970): should be moved to {@code com.android.server.FactoryResetter}
  */
-@Deprecated
 public final class FactoryResetter {
 
     private static final String TAG = FactoryResetter.class.getSimpleName();
@@ -64,8 +59,6 @@ public final class FactoryResetter {
     public boolean factoryReset() throws IOException {
         Preconditions.checkCallAuthorization(mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.MASTER_CLEAR) == PackageManager.PERMISSION_GRANTED);
-
-        setFactoryResetting(mContext);
 
         if (mSafetyChecker == null) {
             factoryResetInternalUnchecked();

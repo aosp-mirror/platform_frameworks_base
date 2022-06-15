@@ -23,58 +23,47 @@ import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotifInteractionLog
-import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class StatusBarNotificationActivityStarterLogger @Inject constructor(
     @NotifInteractionLog private val buffer: LogBuffer
 ) {
-    fun logStartingActivityFromClick(entry: NotificationEntry) {
+    fun logStartingActivityFromClick(key: String) {
         buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
+            str1 = key
         }, {
-            "(1/5) onNotificationClicked: $str1"
+            "(1/4) onNotificationClicked: $str1"
         })
     }
 
-    fun logHandleClickAfterKeyguardDismissed(entry: NotificationEntry) {
+    fun logHandleClickAfterKeyguardDismissed(key: String) {
         buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
+            str1 = key
         }, {
-            "(2/5) handleNotificationClickAfterKeyguardDismissed: $str1"
+            "(2/4) handleNotificationClickAfterKeyguardDismissed: $str1"
         })
     }
 
-    fun logHandleClickAfterPanelCollapsed(entry: NotificationEntry) {
+    fun logHandleClickAfterPanelCollapsed(key: String) {
         buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
+            str1 = key
         }, {
-            "(3/5) handleNotificationClickAfterPanelCollapsed: $str1"
+            "(3/4) handleNotificationClickAfterPanelCollapsed: $str1"
         })
     }
 
-    fun logStartNotificationIntent(entry: NotificationEntry) {
+    fun logStartNotificationIntent(key: String, pendingIntent: PendingIntent) {
         buffer.log(TAG, INFO, {
-            str1 = entry.logKey
-        }, {
-            "(4/5) startNotificationIntent: $str1"
-        })
-    }
-
-    fun logSendPendingIntent(entry: NotificationEntry, pendingIntent: PendingIntent, result: Int) {
-        buffer.log(TAG, INFO, {
-            str1 = entry.logKey
+            str1 = key
             str2 = pendingIntent.intent.toString()
-            int1 = result
         }, {
-            "(5/5) Started intent $str2 for notification $str1 with result code $int1"
+            "(4/4) Starting $str2 for notification $str1"
         })
     }
 
-    fun logExpandingBubble(entry: NotificationEntry) {
+    fun logExpandingBubble(key: String) {
         buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
+            str1 = key
         }, {
             "Expanding bubble for $str1 (rather than firing intent)"
         })
@@ -88,33 +77,33 @@ class StatusBarNotificationActivityStarterLogger @Inject constructor(
         })
     }
 
-    fun logNonClickableNotification(entry: NotificationEntry) {
+    fun logNonClickableNotification(key: String) {
         buffer.log(TAG, ERROR, {
-            str1 = entry.logKey
+            str1 = key
         }, {
             "onNotificationClicked called for non-clickable notification! $str1"
         })
     }
 
-    fun logFullScreenIntentSuppressedByDnD(entry: NotificationEntry) {
+    fun logFullScreenIntentSuppressedByDnD(key: String) {
         buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
+            str1 = key
         }, {
             "No Fullscreen intent: suppressed by DND: $str1"
         })
     }
 
-    fun logFullScreenIntentNotImportantEnough(entry: NotificationEntry) {
+    fun logFullScreenIntentNotImportantEnough(key: String) {
         buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
+            str1 = key
         }, {
             "No Fullscreen intent: not important enough: $str1"
         })
     }
 
-    fun logSendingFullScreenIntent(entry: NotificationEntry, pendingIntent: PendingIntent) {
+    fun logSendingFullScreenIntent(key: String, pendingIntent: PendingIntent) {
         buffer.log(TAG, INFO, {
-            str1 = entry.logKey
+            str1 = key
             str2 = pendingIntent.intent.toString()
         }, {
             "Notification $str1 has fullScreenIntent; sending fullScreenIntent $str2"

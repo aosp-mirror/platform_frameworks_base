@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -47,8 +48,9 @@ public class ShadeControllerImpl implements ShadeController {
     protected final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final int mDisplayId;
-    protected final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    protected final Lazy<StatusBar> mStatusBarLazy;
     private final Lazy<AssistManager> mAssistManagerLazy;
+    private final Optional<Bubbles> mBubblesOptional;
 
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
@@ -59,23 +61,25 @@ public class ShadeControllerImpl implements ShadeController {
             NotificationShadeWindowController notificationShadeWindowController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             WindowManager windowManager,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
-            Lazy<AssistManager> assistManagerLazy
+            Lazy<StatusBar> statusBarLazy,
+            Lazy<AssistManager> assistManagerLazy,
+            Optional<Bubbles> bubblesOptional
     ) {
         mCommandQueue = commandQueue;
         mStatusBarStateController = statusBarStateController;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mDisplayId = windowManager.getDefaultDisplay().getDisplayId();
-        // TODO: Remove circular reference to CentralSurfaces when possible.
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        // TODO: Remove circular reference to StatusBar when possible.
+        mStatusBarLazy = statusBarLazy;
         mAssistManagerLazy = assistManagerLazy;
+        mBubblesOptional = bubblesOptional;
     }
 
     @Override
     public void instantExpandNotificationsPanel() {
         // Make our window larger and the panel expanded.
-        getCentralSurfaces().makeExpandedVisible(true /* force */);
+        getStatusBar().makeExpandedVisible(true /* force */);
         getNotificationPanelViewController().expand(false /* animate */);
         mCommandQueue.recomputeDisableFlags(mDisplayId, false /* animate */);
     }
@@ -110,8 +114,12 @@ public class ShadeControllerImpl implements ShadeController {
         }
         if (SPEW) {
             Log.d(TAG, "animateCollapse():"
-                    + " mExpandedVisible=" + getCentralSurfaces().isExpandedVisible()
+                    + " mExpandedVisible=" + getStatusBar().isExpandedVisible()
                     + " flags=" + flags);
+        }
+
+        if ((flags & CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL) == 0) {
+            getStatusBar().postHideRecentApps();
         }
 
         // TODO(b/62444020): remove when this bug is fixed
@@ -119,14 +127,14 @@ public class ShadeControllerImpl implements ShadeController {
                 + " canPanelBeCollapsed(): "
                 + getNotificationPanelViewController().canPanelBeCollapsed());
         if (getNotificationShadeWindowView() != null
-                && getNotificationPanelViewController().canPanelBeCollapsed()
-                && (flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
+                && getNotificationPanelViewController().canPanelBeCollapsed()) {
             // release focus immediately to kick off focus change transition
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 
-            getCentralSurfaces().getNotificationShadeWindowViewController().cancelExpandHelper();
-            getNotificationPanelViewController()
-                    .collapsePanel(true /* animate */, delayed, speedUpFactor);
+            getStatusBar().getNotificationShadeWindowViewController().cancelExpandHelper();
+            getStatusBarView().collapsePanel(true /* animate */, delayed, speedUpFactor);
+        } else if (mBubblesOptional.isPresent()) {
+            mBubblesOptional.get().collapseStack();
         }
     }
 
@@ -136,17 +144,10 @@ public class ShadeControllerImpl implements ShadeController {
         if (!getNotificationPanelViewController().isFullyCollapsed()) {
             mCommandQueue.animateCollapsePanels(
                     CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
-            getCentralSurfaces().visibilityChanged(false);
+            getStatusBar().visibilityChanged(false);
             mAssistManagerLazy.get().hideAssist();
         }
         return false;
-    }
-
-    @Override
-    public boolean isShadeOpen() {
-        NotificationPanelViewController controller =
-                getNotificationPanelViewController();
-        return controller.isExpanding() || controller.isFullyExpanded();
     }
 
     @Override
@@ -155,7 +156,7 @@ public class ShadeControllerImpl implements ShadeController {
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        if (getCentralSurfaces().getNotificationShadeWindowView().isVisibleToUser()) {
+                        if (getStatusBar().getNotificationShadeWindowView().isVisibleToUser()) {
                             getNotificationPanelViewController().removeOnGlobalLayoutListener(this);
                             getNotificationPanelViewController().getView().post(executable);
                         }
@@ -185,7 +186,7 @@ public class ShadeControllerImpl implements ShadeController {
             // close the shade if it was open
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
                     true /* force */, true /* delayed */);
-            getCentralSurfaces().visibilityChanged(false);
+            getStatusBar().visibilityChanged(false);
 
             return true;
         } else {
@@ -201,26 +202,30 @@ public class ShadeControllerImpl implements ShadeController {
                 runPostCollapseRunnables();
             }
         } else if (!getPresenter().isPresenterFullyCollapsed()) {
-            getCentralSurfaces().instantCollapseNotificationPanel();
-            getCentralSurfaces().visibilityChanged(false);
+            getStatusBar().instantCollapseNotificationPanel();
+            getStatusBar().visibilityChanged(false);
         } else {
             runPostCollapseRunnables();
         }
     }
 
-    private CentralSurfaces getCentralSurfaces() {
-        return mCentralSurfacesOptionalLazy.get().get();
+    private StatusBar getStatusBar() {
+        return mStatusBarLazy.get();
     }
 
     private NotificationPresenter getPresenter() {
-        return getCentralSurfaces().getPresenter();
+        return getStatusBar().getPresenter();
     }
 
     protected NotificationShadeWindowView getNotificationShadeWindowView() {
-        return getCentralSurfaces().getNotificationShadeWindowView();
+        return getStatusBar().getNotificationShadeWindowView();
+    }
+
+    protected PhoneStatusBarView getStatusBarView() {
+        return (PhoneStatusBarView) getStatusBar().getStatusBarView();
     }
 
     private NotificationPanelViewController getNotificationPanelViewController() {
-        return getCentralSurfaces().getPanelController();
+        return getStatusBar().getPanelController();
     }
 }

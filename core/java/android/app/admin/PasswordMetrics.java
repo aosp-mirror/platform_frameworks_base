@@ -41,7 +41,6 @@ import static com.android.internal.widget.PasswordValidationError.NOT_ENOUGH_SYM
 import static com.android.internal.widget.PasswordValidationError.NOT_ENOUGH_UPPER_CASE;
 import static com.android.internal.widget.PasswordValidationError.TOO_LONG;
 import static com.android.internal.widget.PasswordValidationError.TOO_SHORT;
-import static com.android.internal.widget.PasswordValidationError.TOO_SHORT_WHEN_ALL_NUMERIC;
 import static com.android.internal.widget.PasswordValidationError.WEAK_CREDENTIAL_TYPE;
 
 import android.annotation.IntDef;
@@ -570,15 +569,21 @@ public final class PasswordMetrics implements Parcelable {
             result.add(new PasswordValidationError(TOO_LONG, MAX_PASSWORD_LENGTH));
         }
 
-        final PasswordMetrics minMetrics = applyComplexity(adminMetrics,
-                actualMetrics.credType == CREDENTIAL_TYPE_PIN, bucket);
+        // A flag indicating whether the provided password already has non-numeric characters in
+        // it or if the admin imposes the requirement of any non-numeric characters.
+        final boolean hasOrWouldNeedNonNumeric =
+                actualMetrics.nonNumeric > 0 || adminMetrics.nonNumeric > 0
+                        || adminMetrics.letters > 0 || adminMetrics.lowerCase > 0
+                        || adminMetrics.upperCase > 0 || adminMetrics.symbols > 0;
+        final PasswordMetrics minMetrics =
+                applyComplexity(adminMetrics, hasOrWouldNeedNonNumeric, bucket);
 
         // Clamp required length between maximum and minimum valid values.
         minMetrics.length = Math.min(MAX_PASSWORD_LENGTH,
                 Math.max(minMetrics.length, MIN_LOCK_PASSWORD_SIZE));
         minMetrics.removeOverlapping();
 
-        comparePasswordMetrics(minMetrics, bucket, actualMetrics, result);
+        comparePasswordMetrics(minMetrics, actualMetrics, result);
 
         return result;
     }
@@ -586,22 +591,10 @@ public final class PasswordMetrics implements Parcelable {
     /**
      * TODO: move to PasswordPolicy
      */
-    private static void comparePasswordMetrics(PasswordMetrics minMetrics, ComplexityBucket bucket,
+    private static void comparePasswordMetrics(PasswordMetrics minMetrics,
             PasswordMetrics actualMetrics, ArrayList<PasswordValidationError> result) {
         if (actualMetrics.length < minMetrics.length) {
             result.add(new PasswordValidationError(TOO_SHORT, minMetrics.length));
-        }
-        if (actualMetrics.nonNumeric == 0 && minMetrics.nonNumeric == 0 && minMetrics.letters == 0
-                && minMetrics.lowerCase == 0 && minMetrics.upperCase == 0
-                && minMetrics.symbols == 0) {
-            // When provided password is all numeric and all numeric password is allowed.
-            int allNumericMinimumLength = bucket.getMinimumLength(false);
-            if (allNumericMinimumLength > minMetrics.length
-                    && allNumericMinimumLength > minMetrics.numeric
-                    && actualMetrics.length < allNumericMinimumLength) {
-                result.add(new PasswordValidationError(
-                        TOO_SHORT_WHEN_ALL_NUMERIC, allNumericMinimumLength));
-            }
         }
         if (actualMetrics.letters < minMetrics.letters) {
             result.add(new PasswordValidationError(NOT_ENOUGH_LETTERS, minMetrics.letters));
@@ -675,12 +668,15 @@ public final class PasswordMetrics implements Parcelable {
      *
      * TODO: move to PasswordPolicy
      */
-    public static PasswordMetrics applyComplexity(PasswordMetrics adminMetrics, boolean isPin,
+    public static PasswordMetrics applyComplexity(
+            PasswordMetrics adminMetrics, boolean withNonNumericCharacters,
             int complexity) {
-        return applyComplexity(adminMetrics, isPin, ComplexityBucket.forComplexity(complexity));
+        return applyComplexity(adminMetrics, withNonNumericCharacters,
+                ComplexityBucket.forComplexity(complexity));
     }
 
-    private static PasswordMetrics applyComplexity(PasswordMetrics adminMetrics, boolean isPin,
+    private static PasswordMetrics applyComplexity(
+            PasswordMetrics adminMetrics, boolean withNonNumericCharacters,
             ComplexityBucket bucket) {
         final PasswordMetrics minMetrics = new PasswordMetrics(adminMetrics);
 
@@ -688,7 +684,8 @@ public final class PasswordMetrics implements Parcelable {
             minMetrics.seqLength = Math.min(minMetrics.seqLength, MAX_ALLOWED_SEQUENCE);
         }
 
-        minMetrics.length = Math.max(minMetrics.length, bucket.getMinimumLength(!isPin));
+        minMetrics.length = Math.max(minMetrics.length,
+                bucket.getMinimumLength(withNonNumericCharacters));
 
         return minMetrics;
     }

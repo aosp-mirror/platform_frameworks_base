@@ -16,8 +16,6 @@
 
 package com.android.systemui.util.concurrency;
 
-import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
-
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -27,10 +25,10 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.UiBackground;
 
 import java.util.concurrent.Executor;
-
-import javax.inject.Named;
+import java.util.concurrent.Executors;
 
 import dagger.Module;
 import dagger.Provides;
@@ -122,6 +120,16 @@ public abstract class SysUIConcurrencyModule {
     }
 
     /**
+     * Provide a Main-Thread Executor.
+     */
+    @Provides
+    @SysUISingleton
+    @Main
+    public static DelayableExecutor provideMainDelayableExecutor(@Main Looper looper) {
+        return new ExecutorImpl(looper);
+    }
+
+    /**
      * Provide a Background-Thread Executor by default.
      */
     @Provides
@@ -151,29 +159,15 @@ public abstract class SysUIConcurrencyModule {
         return new RepeatableExecutorImpl(exec);
     }
 
-    /** */
-    @Provides
-    @Main
-    public static MessageRouter providesMainMessageRouter(
-            @Main DelayableExecutor executor) {
-        return new MessageRouterImpl(executor);
-    }
-
-    /** */
-    @Provides
-    @Background
-    public static MessageRouter providesBackgroundMessageRouter(
-            @Background DelayableExecutor executor) {
-        return new MessageRouterImpl(executor);
-    }
-
-    /** */
+    /**
+     * Provide an Executor specifically for running UI operations on a separate thread.
+     *
+     * Keep submitted runnables short and to the point, just as with any other UI code.
+     */
     @Provides
     @SysUISingleton
-    @Named(TIME_TICK_HANDLER_NAME)
-    public static Handler provideTimeTickHandler() {
-        HandlerThread thread = new HandlerThread("TimeTick");
-        thread.start();
-        return new Handler(thread.getLooper());
+    @UiBackground
+    public static Executor provideUiBackgroundExecutor() {
+        return Executors.newSingleThreadExecutor();
     }
 }

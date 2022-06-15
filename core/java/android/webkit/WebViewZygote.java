@@ -25,7 +25,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.Zygote;
 
 /** @hide */
 public class WebViewZygote {
@@ -128,15 +127,13 @@ public class WebViewZygote {
 
         try {
             String abi = sPackage.applicationInfo.primaryCpuAbi;
-            int runtimeFlags = Zygote.getMemorySafetyRuntimeFlagsForSecondaryZygote(
-                    sPackage.applicationInfo, null);
             sZygote = Process.ZYGOTE_PROCESS.startChildZygote(
                     "com.android.internal.os.WebViewZygoteInit",
                     "webview_zygote",
                     Process.WEBVIEW_ZYGOTE_UID,
                     Process.WEBVIEW_ZYGOTE_UID,
                     null,  // gids
-                    runtimeFlags,
+                    0,  // runtimeFlags
                     "webview_zygote",  // seInfo
                     abi,  // abi
                     TextUtils.join(",", Build.SUPPORTED_ABIS),

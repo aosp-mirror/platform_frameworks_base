@@ -17,39 +17,32 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.res.Resources
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.parser.toFlickerComponent
+import android.content.ComponentName
 import com.android.wm.shell.flicker.testapp.Components
 
 class SplitScreenHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    componentsInfo: FlickerComponentName
+    componentsInfo: ComponentName
 ) : BaseAppHelper(instrumentation, activityLabel, componentsInfo) {
 
     companion object {
         const val TEST_REPETITIONS = 1
         const val TIMEOUT_MS = 3_000L
 
-        // TODO: remove all legacy split screen flicker tests when legacy split screen is fully
-        //  deprecated.
-        fun isUsingLegacySplit(): Boolean =
-                Resources.getSystem().getBoolean(com.android.internal.R.bool.config_useLegacySplit)
-
         fun getPrimary(instrumentation: Instrumentation): SplitScreenHelper =
             SplitScreenHelper(instrumentation,
                 Components.SplitScreenActivity.LABEL,
-                Components.SplitScreenActivity.COMPONENT.toFlickerComponent())
+                Components.SplitScreenActivity.COMPONENT)
 
         fun getSecondary(instrumentation: Instrumentation): SplitScreenHelper =
             SplitScreenHelper(instrumentation,
                 Components.SplitScreenSecondaryActivity.LABEL,
-                Components.SplitScreenSecondaryActivity.COMPONENT.toFlickerComponent())
+                Components.SplitScreenSecondaryActivity.COMPONENT)
 
         fun getNonResizeable(instrumentation: Instrumentation): SplitScreenHelper =
             SplitScreenHelper(instrumentation,
                 Components.NonResizeableActivity.LABEL,
-                Components.NonResizeableActivity.COMPONENT.toFlickerComponent())
+                Components.NonResizeableActivity.COMPONENT)
     }
 }

@@ -21,14 +21,12 @@ import static com.google.common.truth.Truth.assertThat;
 import android.app.Person;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 
 import org.junit.Test;
 
 import java.util.Set;
 
-@Presubmit
 public class AppSearchShortcutInfoTest {
 
     @Test
@@ -49,7 +47,7 @@ public class AppSearchShortcutInfoTest {
         final Intent shortcutIntent = new Intent(Intent.ACTION_VIEW);
         final ShortcutInfo shortcut = new AppSearchShortcutInfo.Builder(/*packageName=*/"", id)
                 .setActivity(activity)
-                .setShortLabel(id)
+                .setLongLabel(id)
                 .setIconResName(shortcutIconResName)
                 .setIntent(shortcutIntent)
                 .setPerson(person)
@@ -62,13 +60,11 @@ public class AppSearchShortcutInfoTest {
         assertThat(shortcut.getId()).isEqualTo(id);
         assertThat(shortcut.getShortLabel()).isEqualTo(id);
         assertThat(shortcut.getIconResName()).isEqualTo(shortcutIconResName);
-        assertThat(shortcut.getIntent().toString()).isEqualTo(shortcutIntent.toString());
+        assertThat(shortcut.getIntent().toString()).isEqualTo(shortcut.toString());
         assertThat(shortcut.getPersons().length).isEqualTo(1);
-        final Person target = shortcut.getPersons()[0];
-        assertThat(target.getName()).isEqualTo(person.getName());
-        assertThat(target.isBot()).isEqualTo(person.isBot());
-        assertThat(target.isImportant()).isEqualTo(person.isImportant());
+        assertThat(shortcut.getPersons()[0]).isEqualTo(person);
         assertThat(shortcut.getCategories()).isEqualTo(categorySet);
+        assertThat(shortcut.getFlags()).isEqualTo(ShortcutInfo.FLAG_LONG_LIVED);
         assertThat(shortcut.getActivity()).isEqualTo(activity);
     }
 }

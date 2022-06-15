@@ -1,3 +1,4 @@
 # Bug component: 847766
-# Internal APIs related to time detection. SDK APIs are in android.app.time.
-include /services/core/java/com/android/server/timedetector/OWNERS
+mingaleev@google.com
+narayan@google.com
+nfuller@google.com

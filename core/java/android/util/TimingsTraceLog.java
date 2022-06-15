@@ -61,33 +61,13 @@ public class TimingsTraceLog {
         mTraceTag = traceTag;
         mThreadId = Thread.currentThread().getId();
         mMaxNestedCalls = maxNestedCalls;
-        this.mStartNames = createAndGetStartNamesArray();
-        this.mStartTimes = createAndGetStartTimesArray();
-    }
-
-    /**
-     * Note: all fields will be copied except for {@code mStartNames} and {@code mStartTimes}
-     * in order to save memory. The copied object is only expected to be used at levels deeper than
-     * the value of {@code mCurrentLevel} when the object is copied.
-     *
-     * @param other object to be copied
-     */
-    protected TimingsTraceLog(TimingsTraceLog other) {
-        this.mTag = other.mTag;
-        this.mTraceTag = other.mTraceTag;
-        this.mThreadId = Thread.currentThread().getId();
-        this.mMaxNestedCalls = other.mMaxNestedCalls;
-        this.mStartNames = createAndGetStartNamesArray();
-        this.mStartTimes = createAndGetStartTimesArray();
-        this.mCurrentLevel = other.mCurrentLevel;
-    }
-
-    private String[] createAndGetStartNamesArray() {
-        return mMaxNestedCalls > 0 ? new String[mMaxNestedCalls] : null;
-    }
-
-    private long[] createAndGetStartTimesArray() {
-        return mMaxNestedCalls > 0 ? new long[mMaxNestedCalls] : null;
+        if (maxNestedCalls > 0) {
+            mStartNames = new String[maxNestedCalls];
+            mStartTimes = new long[maxNestedCalls];
+        } else {
+            mStartNames = null;
+            mStartTimes = null;
+        }
     }
 
     /**
@@ -147,7 +127,7 @@ public class TimingsTraceLog {
      * Logs a duration so it can be parsed by external tools for performance reporting.
      */
     public void logDuration(String name, long timeMs) {
-        Slog.v(mTag, name + " took to complete: " + timeMs + "ms");
+        Slog.d(mTag, name + " took to complete: " + timeMs + "ms");
     }
 
     /**

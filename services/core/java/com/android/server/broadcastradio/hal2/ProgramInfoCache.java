@@ -189,8 +189,7 @@ class ProgramInfoCache {
                 removed.add(id);
             }
         }
-        if (modified.isEmpty() && removed.isEmpty() && mComplete == chunk.isComplete()
-                && !chunk.isPurge()) {
+        if (modified.isEmpty() && removed.isEmpty() && mComplete == chunk.isComplete()) {
             return null;
         }
         mComplete = chunk.isComplete();
@@ -240,10 +239,9 @@ class ProgramInfoCache {
         }
 
         // Determine number of chunks we need to send.
-        int numChunks = purge ? 1 : 0;
+        int numChunks = 0;
         if (modified != null) {
-            numChunks = Math.max(numChunks,
-                    roundUpFraction(modified.size(), maxNumModifiedPerChunk));
+            numChunks = roundUpFraction(modified.size(), maxNumModifiedPerChunk);
         }
         if (removed != null) {
             numChunks = Math.max(numChunks, roundUpFraction(removed.size(), maxNumRemovedPerChunk));

@@ -20,7 +20,6 @@ import static com.android.server.notification.GroupHelper.AUTOGROUP_KEY;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -54,7 +53,7 @@ import java.util.Map;
 public class GroupHelperTest extends UiServiceTestCase {
     private @Mock GroupHelper.Callback mCallback;
 
-    private final static int AUTOGROUP_AT_COUNT = 7;
+    private final static int AUTOGROUP_AT_COUNT = 4;
     private GroupHelper mGroupHelper;
 
     @Before
@@ -89,7 +88,7 @@ public class GroupHelperTest extends UiServiceTestCase {
                     false);
         }
         verify(mCallback, never()).addAutoGroupSummary(
-                eq(UserHandle.USER_SYSTEM), eq(pkg), anyString(), anyBoolean());
+                eq(UserHandle.USER_SYSTEM), eq(pkg), anyString());
         verify(mCallback, never()).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
@@ -106,7 +105,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         mGroupHelper.onNotificationPosted(
                 getSbn(pkg2, AUTOGROUP_AT_COUNT, "four", UserHandle.SYSTEM), false);
         verify(mCallback, never()).addAutoGroupSummary(
-                eq(UserHandle.USER_SYSTEM), eq(pkg), anyString(), anyBoolean());
+                eq(UserHandle.USER_SYSTEM), eq(pkg), anyString());
         verify(mCallback, never()).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
@@ -121,8 +120,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
         mGroupHelper.onNotificationPosted(
                 getSbn(pkg, AUTOGROUP_AT_COUNT, "four", UserHandle.ALL), false);
-        verify(mCallback, never()).addAutoGroupSummary(
-                anyInt(), eq(pkg), anyString(), anyBoolean());
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), eq(pkg), anyString());
         verify(mCallback, never()).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
@@ -138,11 +136,12 @@ public class GroupHelperTest extends UiServiceTestCase {
         mGroupHelper.onNotificationPosted(
                 getSbn(pkg, AUTOGROUP_AT_COUNT, "four", UserHandle.SYSTEM, "a"), false);
         verify(mCallback, never()).addAutoGroupSummary(
-                eq(UserHandle.USER_SYSTEM), eq(pkg), anyString(), anyBoolean());
+                eq(UserHandle.USER_SYSTEM), eq(pkg), anyString());
         verify(mCallback, never()).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
     }
+
 
     @Test
     public void testPostingOverLimit() throws Exception {
@@ -151,23 +150,7 @@ public class GroupHelperTest extends UiServiceTestCase {
             mGroupHelper.onNotificationPosted(
                     getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM), false);
         }
-        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(), eq(false));
-        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString());
-        verify(mCallback, never()).removeAutoGroup(anyString());
-        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
-    }
-
-    @Test
-    public void testPostingOverLimit_addsOngoingFlag() throws Exception {
-        final String pkg = "package";
-        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
-            StatusBarNotification sbn = getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM);
-            if (i == 0) {
-                sbn.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
-            }
-            mGroupHelper.onNotificationPosted(sbn, false);
-        }
-        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(), eq(true));
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString());
         verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
@@ -191,11 +174,11 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
 
         verify(mCallback, times(AUTOGROUP_AT_COUNT + 1))
-            .updateAutogroupSummary(anyInt(), anyString(), eq(true));
+            .updateAutogroupSummary(anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
-                userId, pkg), AUTOGROUP_AT_COUNT + 1);
+                userId, pkg, AUTOGROUP_KEY), AUTOGROUP_AT_COUNT + 1);
     }
 
     @Test
@@ -216,14 +199,15 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
 
         notifications.get(0).getNotification().flags &= ~Notification.FLAG_ONGOING_EVENT;
-        mGroupHelper.onNotificationUpdated(notifications.get(0));
+
+        mGroupHelper.onNotificationUpdated(notifications.get(0), true);
 
         verify(mCallback, times(AUTOGROUP_AT_COUNT + 2))
-                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
+                .updateAutogroupSummary(anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
-                userId, pkg), AUTOGROUP_AT_COUNT);
+                userId, pkg, AUTOGROUP_KEY), AUTOGROUP_AT_COUNT);
     }
 
     @Test
@@ -245,18 +229,18 @@ public class GroupHelperTest extends UiServiceTestCase {
 
         notifications.get(0).getNotification().flags &= ~Notification.FLAG_ONGOING_EVENT;
 
-        mGroupHelper.onNotificationUpdated(notifications.get(0));
+        mGroupHelper.onNotificationUpdated(notifications.get(0), true);
 
         notifications.get(0).getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
 
-        mGroupHelper.onNotificationUpdated(notifications.get(0));
+        mGroupHelper.onNotificationUpdated(notifications.get(0), true);
 
         verify(mCallback, times(AUTOGROUP_AT_COUNT + 3))
-                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
+                .updateAutogroupSummary(anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
-                userId, pkg), AUTOGROUP_AT_COUNT + 1);
+                userId, pkg, AUTOGROUP_KEY), AUTOGROUP_AT_COUNT + 1);
     }
 
     @Test
@@ -279,11 +263,11 @@ public class GroupHelperTest extends UiServiceTestCase {
         mGroupHelper.onNotificationRemoved(notifications.get(0));
 
         verify(mCallback, times(AUTOGROUP_AT_COUNT + 2))
-                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
+                .updateAutogroupSummary(anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
-                userId, pkg), AUTOGROUP_AT_COUNT);
+                userId, pkg, AUTOGROUP_KEY), AUTOGROUP_AT_COUNT);
     }
 
 
@@ -304,14 +288,14 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
 
         notifications.get(0).getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
-        mGroupHelper.onNotificationUpdated(notifications.get(0));
+        mGroupHelper.onNotificationUpdated(notifications.get(0), true);
 
         verify(mCallback, times(1))
-                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
+                .updateAutogroupSummary(anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
-                userId, pkg), 1);
+                userId, pkg, AUTOGROUP_KEY), 1);
     }
 
     @Test
@@ -321,7 +305,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         for (int i = 0; i < AUTOGROUP_AT_COUNT + 1; i++) {
             notifications.add(getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM));
         }
-        StatusBarNotification sbn = notifications.get(AUTOGROUP_AT_COUNT);
+        StatusBarNotification sbn = notifications.get(0);
         sbn.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
         sbn.setOverrideGroupKey(AUTOGROUP_KEY);
 
@@ -331,11 +315,11 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
 
         verify(mCallback, times(1))
-                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
+                .updateAutogroupSummary(anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
         assertEquals(mGroupHelper.getOngoingGroupCount(
-                userId, pkg), 1);
+                userId, pkg, AUTOGROUP_KEY), 1);
     }
 
     @Test
@@ -355,10 +339,10 @@ public class GroupHelperTest extends UiServiceTestCase {
         }
 
         verify(mCallback, times(0))
-                .updateAutogroupSummary(anyInt(), anyString(), eq(true));
+                .updateAutogroupSummary(anyString(), eq(true));
 
         int userId = UserHandle.SYSTEM.getIdentifier();
-        assertEquals(mGroupHelper.getOngoingGroupCount(userId, pkg), 0);
+        assertEquals(mGroupHelper.getOngoingGroupCount(userId, pkg, AUTOGROUP_KEY), 0);
     }
 
 
@@ -371,7 +355,7 @@ public class GroupHelperTest extends UiServiceTestCase {
             posted.add(sbn);
             mGroupHelper.onNotificationPosted(sbn, false);
         }
-        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(), eq(false));
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString());
         verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
@@ -398,22 +382,28 @@ public class GroupHelperTest extends UiServiceTestCase {
             posted.add(sbn);
             mGroupHelper.onNotificationPosted(sbn, false);
         }
-        verify(mCallback, times(1)).addAutoGroupSummary(
-                anyInt(), eq(pkg), anyString(), anyBoolean());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString());
         verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
         Mockito.reset(mCallback);
 
-        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+        int i = 0;
+        for (i = 0; i < AUTOGROUP_AT_COUNT - 2; i++) {
             final StatusBarNotification sbn =
                     getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM, "app group");
             mGroupHelper.onNotificationPosted(sbn, false);
-            verify(mCallback, times(1)).removeAutoGroup(sbn.getKey());
-            if (i < AUTOGROUP_AT_COUNT -1) {
-                verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
-            }
         }
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 2)).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
+        Mockito.reset(mCallback);
+
+        for (; i < AUTOGROUP_AT_COUNT; i++) {
+            final StatusBarNotification sbn =
+                    getSbn(pkg, i, String.valueOf(i), UserHandle.SYSTEM, "app group");
+            mGroupHelper.onNotificationPosted(sbn, false);
+        }
+        verify(mCallback, times(2)).removeAutoGroup(anyString());
         verify(mCallback, times(1)).removeAutoGroupSummary(anyInt(), anyString());
     }
 
@@ -427,7 +417,7 @@ public class GroupHelperTest extends UiServiceTestCase {
             posted.add(sbn);
             mGroupHelper.onNotificationPosted(sbn, false);
         }
-        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(), eq(false));
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString());
         verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
@@ -451,7 +441,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         final StatusBarNotification sbn = getSbn(pkg, 5, String.valueOf(5), UserHandle.SYSTEM);
         posted.add(sbn);
         mGroupHelper.onNotificationPosted(sbn, true);
-        verify(mCallback, times(1)).addAutoGroup(sbn.getKey());
+        verify(mCallback, times(posted.size())).addAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroup(anyString());
         verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString());
     }

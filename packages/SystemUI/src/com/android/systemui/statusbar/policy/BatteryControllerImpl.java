@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 
 import static android.os.BatteryManager.EXTRA_PRESENT;
 
-import android.annotation.WorkerThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,7 +28,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,13 +42,11 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.power.EnhancedEstimates;
-import com.android.systemui.util.Assert;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Default implementation of a {@link BatteryController}. This controller monitors for battery
@@ -88,11 +84,6 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     boolean mHasReceivedBattery = false;
     private Estimate mEstimate;
     private boolean mFetchingEstimate = false;
-
-    // Use AtomicReference because we may request it from a different thread
-    // Use WeakReference because we are keeping a reference to a View that's not as long lived
-    // as this controller.
-    private AtomicReference<WeakReference<View>> mPowerSaverStartView = new AtomicReference<>();
 
     @VisibleForTesting
     public BatteryControllerImpl(
@@ -135,11 +126,11 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
         mDemoModeController.addCallback(this);
         updatePowerSave();
-        updateEstimateInBackground();
+        updateEstimate();
     }
 
     @Override
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("BatteryController state:");
         pw.print("  mLevel="); pw.println(mLevel);
         pw.print("  mPluggedIn="); pw.println(mPluggedIn);
@@ -150,19 +141,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     }
 
     @Override
-    public void setPowerSaveMode(boolean powerSave, View view) {
-        if (powerSave) mPowerSaverStartView.set(new WeakReference<>(view));
+    public void setPowerSaveMode(boolean powerSave) {
         BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true);
-    }
-
-    @Override
-    public WeakReference<View> getLastPowerSaverStartView() {
-        return mPowerSaverStartView.get();
-    }
-
-    @Override
-    public void clearLastPowerSaverStartView() {
-        mPowerSaverStartView.set(null);
     }
 
     @Override
@@ -340,9 +320,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
         }
     }
 
-    @WorkerThread
     private void updateEstimate() {
-        Assert.isNotMainThread();
         // if the estimate has been cached we can just use that, otherwise get a new one and
         // throw it in the cache.
         mEstimate = Estimate.getCachedEstimateIfAvailable(mContext);

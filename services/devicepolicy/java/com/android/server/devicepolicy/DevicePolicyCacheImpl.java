@@ -18,7 +18,6 @@ package com.android.server.devicepolicy;
 import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
-import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
@@ -38,12 +37,8 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
      */
     private final Object mLock = new Object();
 
-    /**
-     * Indicates which user is screen capture disallowed on. Can be {@link UserHandle#USER_NULL},
-     * {@link UserHandle#USER_ALL} or a concrete user ID.
-     */
     @GuardedBy("mLock")
-    private int mScreenCaptureDisallowedUser = UserHandle.USER_NULL;
+    private final SparseBooleanArray mScreenCaptureDisabled = new SparseBooleanArray();
 
     @GuardedBy("mLock")
     private final SparseIntArray mPasswordQuality = new SparseIntArray();
@@ -51,17 +46,12 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     @GuardedBy("mLock")
     private final SparseIntArray mPermissionPolicy = new SparseIntArray();
 
-    /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}.
-     *
-     * <p>For users affiliated with the device, they inherit the policy from {@code DO} so
-     * it will map to the {@code DO}'s policy. Otherwise it will map to the admin of the requesting
-     * user.
-     */
     @GuardedBy("mLock")
     private final SparseBooleanArray mCanGrantSensorsPermissions = new SparseBooleanArray();
 
     public void onUserRemoved(int userHandle) {
         synchronized (mLock) {
+            mScreenCaptureDisabled.delete(userHandle);
             mPasswordQuality.delete(userHandle);
             mPermissionPolicy.delete(userHandle);
             mCanGrantSensorsPermissions.delete(userHandle);
@@ -69,22 +59,15 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
-    public boolean isScreenCaptureAllowed(int userHandle) {
+    public boolean isScreenCaptureAllowed(int userHandle, boolean ownerCanAddInternalSystemWindow) {
         synchronized (mLock) {
-            return mScreenCaptureDisallowedUser != UserHandle.USER_ALL
-                    && mScreenCaptureDisallowedUser != userHandle;
+            return !mScreenCaptureDisabled.get(userHandle) || ownerCanAddInternalSystemWindow;
         }
     }
 
-    public int getScreenCaptureDisallowedUser() {
+    public void setScreenCaptureAllowed(int userHandle, boolean allowed) {
         synchronized (mLock) {
-            return mScreenCaptureDisallowedUser;
-        }
-    }
-
-    public void setScreenCaptureDisallowedUser(int userHandle) {
-        synchronized (mLock) {
-            mScreenCaptureDisallowedUser = userHandle;
+            mScreenCaptureDisabled.put(userHandle, !allowed);
         }
     }
 
@@ -119,16 +102,17 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
-    public boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userId) {
+    public boolean canAdminGrantSensorsPermissionsForUser(@UserIdInt int userHandle) {
         synchronized (mLock) {
-            return mCanGrantSensorsPermissions.get(userId, false);
+            return mCanGrantSensorsPermissions.get(userHandle, false);
         }
     }
 
     /** Sets ahmin control over permission grants for user. */
-    public void setAdminCanGrantSensorsPermissions(@UserIdInt int userId, boolean canGrant) {
+    public void setAdminCanGrantSensorsPermissions(@UserIdInt int userHandle,
+            boolean canGrant) {
         synchronized (mLock) {
-            mCanGrantSensorsPermissions.put(userId, canGrant);
+            mCanGrantSensorsPermissions.put(userHandle, canGrant);
         }
     }
 
@@ -136,7 +120,7 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     public void dump(IndentingPrintWriter pw) {
         pw.println("Device policy cache:");
         pw.increaseIndent();
-        pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
+        pw.println("Screen capture disabled: " + mScreenCaptureDisabled.toString());
         pw.println("Password quality: " + mPasswordQuality.toString());
         pw.println("Permission policy: " + mPermissionPolicy.toString());
         pw.println("Admin can grant sensors permission: "

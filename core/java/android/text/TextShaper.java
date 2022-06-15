@@ -222,8 +222,7 @@ public class TextShaper {
                     mp.getDirections(0, count),
                     false /* tabstop is not supported */,
                     null,
-                    -1, -1, // ellipsis is not supported.
-                    false /* fallback line spacing is not used */
+                    -1, -1 // ellipsis is not supported.
             );
             tl.shape(consumer);
         } finally {

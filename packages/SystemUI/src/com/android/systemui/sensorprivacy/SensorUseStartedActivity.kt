@@ -134,9 +134,7 @@ class SensorUseStartedActivity @Inject constructor(
     override fun onClick(dialog: DialogInterface?, which: Int) {
         when (which) {
             BUTTON_POSITIVE -> {
-                if (sensorPrivacyController.requiresAuthentication() &&
-                        keyguardStateController.isMethodSecure &&
-                        keyguardStateController.isShowing) {
+                if (keyguardStateController.isMethodSecure && keyguardStateController.isShowing) {
                     keyguardDismissUtil.executeWhenUnlocked({
                         bgHandler.postDelayed({
                             disableSensorPrivacy()

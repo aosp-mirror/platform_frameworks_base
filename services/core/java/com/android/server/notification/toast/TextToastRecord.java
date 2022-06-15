@@ -62,8 +62,7 @@ public class TextToastRecord extends ToastRecord {
             Slog.w(TAG, "StatusBar not available to show text toast for package " + pkg);
             return false;
         }
-        mStatusBar.showToast(uid, pkg, token, text, windowToken, getDuration(), mCallback,
-                displayId);
+        mStatusBar.showToast(uid, pkg, token, text, windowToken, getDuration(), mCallback);
         return true;
     }
 

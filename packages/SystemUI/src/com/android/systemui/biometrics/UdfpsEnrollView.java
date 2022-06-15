@@ -17,7 +17,7 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
-import android.graphics.Rect;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
@@ -61,11 +61,13 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
         return mFingerprintDrawable;
     }
 
-    void updateSensorLocation(@NonNull Rect sensorBounds) {
+    void updateSensorLocation(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
         View fingerprintAccessibilityView = findViewById(R.id.udfps_enroll_accessibility_view);
+        final int sensorHeight = sensorProps.sensorRadius * 2;
+        final int sensorWidth = sensorHeight;
         ViewGroup.LayoutParams params = fingerprintAccessibilityView.getLayoutParams();
-        params.width = sensorBounds.width();
-        params.height = sensorBounds.height();
+        params.width = sensorWidth;
+        params.height = sensorHeight;
         fingerprintAccessibilityView.setLayoutParams(params);
         fingerprintAccessibilityView.requestLayout();
     }
@@ -76,16 +78,19 @@ public class UdfpsEnrollView extends UdfpsAnimationView {
 
     void onEnrollmentProgress(int remaining, int totalSteps) {
         mHandler.post(() -> {
-            mFingerprintProgressDrawable.onEnrollmentProgress(remaining, totalSteps);
+            mFingerprintProgressDrawable.setEnrollmentProgress(remaining, totalSteps);
             mFingerprintDrawable.onEnrollmentProgress(remaining, totalSteps);
         });
     }
 
     void onEnrollmentHelp(int remaining, int totalSteps) {
-        mHandler.post(() -> mFingerprintProgressDrawable.onEnrollmentHelp(remaining, totalSteps));
+        mHandler.post(
+                () -> mFingerprintProgressDrawable.setEnrollmentProgress(remaining, totalSteps));
     }
 
     void onLastStepAcquired() {
-        mHandler.post(mFingerprintProgressDrawable::onLastStepAcquired);
+        mHandler.post(() -> {
+            mFingerprintProgressDrawable.onLastStepAcquired();
+        });
     }
 }

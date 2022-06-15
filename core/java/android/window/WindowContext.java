@@ -17,8 +17,6 @@ package android.window;
 
 import static android.view.WindowManagerImpl.createWindowContextWindowManager;
 
-import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
@@ -28,7 +26,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.Display;
+import android.os.IBinder;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -45,33 +43,23 @@ import java.lang.ref.Reference;
  * @hide
  */
 @UiContext
-public class WindowContext extends ContextWrapper implements WindowProvider {
+public class WindowContext extends ContextWrapper {
     private final WindowManager mWindowManager;
-    @WindowManager.LayoutParams.WindowType
-    private final int mType;
-    @Nullable
-    private final Bundle mOptions;
+    private final @WindowManager.LayoutParams.WindowType int mType;
+    private final @Nullable Bundle mOptions;
     private final ComponentCallbacksController mCallbacksController =
             new ComponentCallbacksController();
     private final WindowContextController mController;
 
     /**
-     * Default implementation of {@link WindowContext}
-     * <p>
-     * Note that the users should call {@link Context#createWindowContext(Display, int, Bundle)}
-     * to create a {@link WindowContext} instead of using this constructor
-     * </p><p>
-     * Example usage:
-     * <pre class="prettyprint">
-     * Bundle options = new Bundle();
-     * options.put(KEY_ROOT_DISPLAY_AREA_ID, displayAreaInfo.rootDisplayAreaId);
-     * Context windowContext = context.createWindowContext(display, windowType, options);
-     * </pre></p>
+     * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
+     * the token.
      *
-     * @param base    Base {@link Context} for this new instance.
-     * @param type    Window type to be used with this context.
+     * @param base Base {@link Context} for this new instance.
+     * @param type Window type to be used with this context.
      * @param options A bundle used to pass window-related options.
-     * @see DisplayAreaInfo#rootDisplayAreaId
+     *
+     * @hide
      */
     public WindowContext(@NonNull Context base, int type, @Nullable Bundle options) {
         super(base);
@@ -79,7 +67,7 @@ public class WindowContext extends ContextWrapper implements WindowProvider {
         mType = type;
         mOptions = options;
         mWindowManager = createWindowContextWindowManager(this);
-        WindowTokenClient token = (WindowTokenClient) getWindowContextToken();
+        IBinder token = getWindowContextToken();
         mController = new WindowContextController(token);
 
         Reference.reachabilityFence(this);
@@ -117,13 +105,10 @@ public class WindowContext extends ContextWrapper implements WindowProvider {
 
     @Override
     public void destroy() {
-        try {
-            mCallbacksController.clearCallbacks();
-            // Called to the base ContextImpl to do final clean-up.
-            getBaseContext().destroy();
-        } finally {
-            Reference.reachabilityFence(this);
-        }
+        mCallbacksController.clearCallbacks();
+        // Called to the base ContextImpl to do final clean-up.
+        getBaseContext().destroy();
+        Reference.reachabilityFence(this);
     }
 
     @Override
@@ -137,19 +122,7 @@ public class WindowContext extends ContextWrapper implements WindowProvider {
     }
 
     /** Dispatch {@link Configuration} to each {@link ComponentCallbacks}. */
-    @VisibleForTesting(visibility = PACKAGE)
-    public void dispatchConfigurationChanged(@NonNull Configuration newConfig) {
+    void dispatchConfigurationChanged(@NonNull Configuration newConfig) {
         mCallbacksController.dispatchConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public int getWindowType() {
-        return mType;
-    }
-
-    @Nullable
-    @Override
-    public Bundle getWindowContextOptions() {
-        return mOptions;
     }
 }

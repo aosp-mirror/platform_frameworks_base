@@ -16,9 +16,8 @@
 
 package com.android.internal.util;
 
-import android.annotation.NonNull;
 import android.os.FileUtils;
-import android.util.Log;
+import android.util.Slog;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -33,6 +32,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 /**
  * Utility that rotates files over time, similar to {@code logrotate}. There is
@@ -47,8 +47,6 @@ import libcore.io.IoUtils;
  * <p>
  * Users must periodically call {@link #maybeRotate(long)} to perform actual
  * rotation. Not inherently thread safe.
- *
- * @hide
  */
 public class FileRotator {
     private static final String TAG = "FileRotator";
@@ -112,7 +110,7 @@ public class FileRotator {
             if (!name.startsWith(mPrefix)) continue;
 
             if (name.endsWith(SUFFIX_BACKUP)) {
-                if (LOGD) Log.d(TAG, "recovering " + name);
+                if (LOGD) Slog.d(TAG, "recovering " + name);
 
                 final File backupFile = new File(mBasePath, name);
                 final File file = new File(
@@ -122,7 +120,7 @@ public class FileRotator {
                 backupFile.renameTo(file);
 
             } else if (name.endsWith(SUFFIX_NO_BACKUP)) {
-                if (LOGD) Log.d(TAG, "recovering " + name);
+                if (LOGD) Slog.d(TAG, "recovering " + name);
 
                 final File noBackupFile = new File(mBasePath, name);
                 final File file = new File(
@@ -233,7 +231,7 @@ public class FileRotator {
      * if the write fails.
      */
     private void rewriteSingle(Rewriter rewriter, String name) throws IOException {
-        if (LOGD) Log.d(TAG, "rewriting " + name);
+        if (LOGD) Slog.d(TAG, "rewriting " + name);
 
         final File file = new File(mBasePath, name);
         final File backupFile;
@@ -283,20 +281,6 @@ public class FileRotator {
     }
 
     /**
-     * Process a single file atomically, with the given start and end timestamps.
-     * If a file with these exact start and end timestamps does not exist, a new
-     * empty file will be written.
-     */
-    public void rewriteSingle(@NonNull Rewriter rewriter, long startTimeMillis, long endTimeMillis)
-            throws IOException {
-        final FileInfo info = new FileInfo(mPrefix);
-
-        info.startMillis = startTimeMillis;
-        info.endMillis = endTimeMillis;
-        rewriteSingle(rewriter, info.build());
-    }
-
-    /**
      * Read any rotated data that overlap the requested time range.
      */
     public void readMatching(Reader reader, long matchStartMillis, long matchEndMillis)
@@ -307,7 +291,7 @@ public class FileRotator {
 
             // read file when it overlaps
             if (info.startMillis <= matchEndMillis && matchStartMillis <= info.endMillis) {
-                if (LOGD) Log.d(TAG, "reading matching " + name);
+                if (LOGD) Slog.d(TAG, "reading matching " + name);
 
                 final File file = new File(mBasePath, name);
                 readFile(file, reader);
@@ -364,7 +348,7 @@ public class FileRotator {
             if (info.isActive()) {
                 if (info.startMillis <= rotateBefore) {
                     // found active file; rotate if old enough
-                    if (LOGD) Log.d(TAG, "rotating " + name);
+                    if (LOGD) Slog.d(TAG, "rotating " + name);
 
                     info.endMillis = currentTimeMillis;
 
@@ -374,7 +358,7 @@ public class FileRotator {
                 }
             } else if (info.endMillis <= deleteBefore) {
                 // found rotated file; delete if old enough
-                if (LOGD) Log.d(TAG, "deleting " + name);
+                if (LOGD) Slog.d(TAG, "deleting " + name);
 
                 final File file = new File(mBasePath, name);
                 file.delete();
@@ -399,10 +383,7 @@ public class FileRotator {
             writer.write(bos);
             bos.flush();
         } finally {
-            try {
-                fos.getFD().sync();
-            } catch (IOException e) {
-            }
+            FileUtils.sync(fos);
             IoUtils.closeQuietly(bos);
         }
     }

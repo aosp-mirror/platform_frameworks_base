@@ -16,14 +16,10 @@
 
 package android.hardware.camera2.impl;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.HardwareBuffer;
-import android.hardware.SyncFence;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -34,17 +30,15 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.extension.CaptureBundle;
 import android.hardware.camera2.extension.CaptureStageImpl;
 import android.hardware.camera2.extension.ICaptureProcessorImpl;
 import android.hardware.camera2.extension.IImageCaptureExtenderImpl;
 import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
-import android.hardware.camera2.extension.IProcessResultImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
 import android.hardware.camera2.extension.ParcelImage;
-import android.hardware.camera2.params.DynamicRangeProfiles;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
@@ -55,7 +49,11 @@ import android.media.ImageWriter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
@@ -68,11 +66,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 public final class CameraExtensionSessionImpl extends CameraExtensionSession {
-    private static final int PREVIEW_QUEUE_SIZE = 10;
+    private static final int PREVIEW_QUEUE_SIZE = 3;
     private static final String TAG = "CameraExtensionSessionImpl";
 
     private final Executor mExecutor;
@@ -85,10 +82,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private final StateCallback mCallbacks;
     private final List<Size> mSupportedPreviewSizes;
     private final InitializeSessionHandler mInitializeHandler;
-    private final int mSessionId;
-    private final Set<CaptureRequest.Key> mSupportedRequestKeys;
-    private final Set<CaptureResult.Key> mSupportedResultKeys;
-    private boolean mCaptureResultsSupported;
 
     private CameraCaptureSession mCaptureSession = null;
     private Surface mCameraRepeatingSurface, mClientRepeatingRequestSurface;
@@ -127,8 +120,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     public static CameraExtensionSessionImpl createCameraExtensionSession(
             @NonNull CameraDevice cameraDevice,
             @NonNull Context ctx,
-            @NonNull ExtensionSessionConfiguration config,
-            int sessionId)
+            @NonNull ExtensionSessionConfiguration config)
             throws CameraAccessException, RemoteException {
         long clientId = CameraExtensionCharacteristics.registerClient(ctx);
         if (clientId < 0) {
@@ -151,18 +143,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 config.getOutputConfigurations().size() > 2) {
             throw new IllegalArgumentException("Unexpected amount of output surfaces, received: " +
                     config.getOutputConfigurations().size() + " expected <= 2");
-        }
-
-        for (OutputConfiguration c : config.getOutputConfigurations()) {
-            if (c.getDynamicRangeProfile() != DynamicRangeProfiles.STANDARD) {
-                throw new IllegalArgumentException("Unsupported dynamic range profile: " +
-                        c.getDynamicRangeProfile());
-            }
-            if (c.getStreamUseCase() !=
-                    CameraCharacteristics.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT) {
-                throw new IllegalArgumentException("Unsupported stream use case: " +
-                        c.getStreamUseCase());
-            }
         }
 
         Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
@@ -209,10 +189,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 repeatingRequestSurface,
                 burstCaptureSurface,
                 config.getStateCallback(),
-                config.getExecutor(),
-                sessionId,
-                extensionChars.getAvailableCaptureRequestKeys(config.getExtension()),
-                extensionChars.getAvailableCaptureResultKeys(config.getExtension()));
+                config.getExecutor());
 
         session.initialize();
 
@@ -227,10 +204,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             @Nullable Surface repeatingRequestSurface,
             @Nullable Surface burstCaptureSurface,
             @NonNull StateCallback callback,
-            @NonNull Executor executor,
-            int sessionId,
-            @NonNull Set<CaptureRequest.Key> requestKeys,
-            @Nullable Set<CaptureResult.Key> resultKeys) {
+            @NonNull Executor executor) {
         mExtensionClientId = extensionClientId;
         mImageExtender = imageExtender;
         mPreviewExtender = previewExtender;
@@ -245,10 +219,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         mHandler = new Handler(mHandlerThread.getLooper());
         mInitialized = false;
         mInitializeHandler = new InitializeSessionHandler();
-        mSessionId = sessionId;
-        mSupportedRequestKeys = requestKeys;
-        mSupportedResultKeys = resultKeys;
-        mCaptureResultsSupported = !resultKeys.isEmpty();
     }
 
     private void initializeRepeatingRequestPipeline() throws RemoteException {
@@ -475,8 +445,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             mInternalRepeatingRequestEnabled = false;
             try {
                 return setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                        new PreviewRequestHandler(request, executor, listener,
-                                mRepeatingRequestImageCallback), request);
+                        new RepeatingRequestHandler(request, executor, listener,
+                                mRepeatingRequestImageCallback));
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to set repeating request! Extension service does not "
                         + "respond");
@@ -505,7 +475,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         return captureStageList;
     }
 
-    private List<CaptureRequest> createBurstRequest(CameraDevice cameraDevice,
+    private static List<CaptureRequest> createBurstRequest(CameraDevice cameraDevice,
             List<CaptureStageImpl> captureStageList, CaptureRequest clientRequest,
             Surface target, int captureTemplate, Map<CaptureRequest, Integer> captureMap) {
         CaptureRequest.Builder requestBuilder;
@@ -517,30 +487,32 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 return null;
             }
 
-            // This will guarantee that client configured
-            // parameters always have the highest priority.
-            for (CaptureRequest.Key requestKey : mSupportedRequestKeys){
-                Object value = clientRequest.get(requestKey);
-                if (value != null) {
-                    captureStage.parameters.set(requestKey, value);
-                }
+            // This will override the extension capture stage jpeg parameters with the user set
+            // jpeg quality and rotation. This will guarantee that client configured jpeg
+            // parameters always have highest priority.
+            Integer jpegRotation = clientRequest.get(CaptureRequest.JPEG_ORIENTATION);
+            if (jpegRotation != null) {
+                captureStage.parameters.set(CaptureRequest.JPEG_ORIENTATION, jpegRotation);
+            }
+            Byte jpegQuality = clientRequest.get(CaptureRequest.JPEG_QUALITY);
+            if (jpegQuality != null) {
+                captureStage.parameters.set(CaptureRequest.JPEG_QUALITY, jpegQuality);
             }
 
             requestBuilder.addTarget(target);
             CaptureRequest request = requestBuilder.build();
             CameraMetadataNative.update(request.getNativeMetadata(), captureStage.parameters);
             ret.add(request);
-            if (captureMap != null) {
-                captureMap.put(request, captureStage.id);
-            }
+            captureMap.put(request, captureStage.id);
         }
 
         return ret;
     }
 
-    private CaptureRequest createRequest(CameraDevice cameraDevice,
-            List<CaptureStageImpl> captureStageList, Surface target, int captureTemplate,
-            CaptureRequest clientRequest) throws CameraAccessException {
+    private static CaptureRequest createRequest(CameraDevice cameraDevice,
+                                                List<CaptureStageImpl> captureStageList,
+                                                Surface target,
+                                                int captureTemplate) throws CameraAccessException {
         CaptureRequest.Builder requestBuilder;
         requestBuilder = cameraDevice.createCaptureRequest(captureTemplate);
         if (target != null) {
@@ -548,33 +520,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         CaptureRequest ret = requestBuilder.build();
-        CameraMetadataNative nativeMeta = ret.getNativeMetadata();
         for (CaptureStageImpl captureStage : captureStageList) {
             if (captureStage != null) {
-                CameraMetadataNative.update(nativeMeta, captureStage.parameters);
+                CameraMetadataNative.update(ret.getNativeMetadata(), captureStage.parameters);
             }
         }
-
-        if (clientRequest != null) {
-            // This will guarantee that client configured
-            // parameters always have the highest priority.
-            for (CaptureRequest.Key requestKey : mSupportedRequestKeys) {
-                Object value = clientRequest.get(requestKey);
-                if (value != null) {
-                    nativeMeta.set(requestKey, value);
-                }
-            }
-        }
-
         return ret;
-    }
-
-    private CaptureRequest createRequest(CameraDevice cameraDevice,
-            List<CaptureStageImpl> captureStageList,
-            Surface target,
-            int captureTemplate) throws CameraAccessException {
-        return createRequest(cameraDevice, captureStageList, target, captureTemplate,
-                /*clientRequest*/ null);
     }
 
     @Override
@@ -585,57 +536,33 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             throw new IllegalStateException("Uninitialized component");
         }
 
-        if (request.getTargets().size() != 1) {
-            throw new IllegalArgumentException("Single capture to both preview & still capture " +
-                    "outputs target is not supported!");
+        if (mClientCaptureSurface == null) {
+            throw new IllegalArgumentException("No output surface registered for single requests!");
         }
 
-        int seqId = -1;
-        if ((mClientCaptureSurface != null) && request.containsTarget(mClientCaptureSurface)) {
-            HashMap<CaptureRequest, Integer> requestMap = new HashMap<>();
-            List<CaptureRequest> burstRequest;
-            try {
-                burstRequest = createBurstRequest(mCameraDevice,
-                        mImageExtender.getCaptureStages(), request, mCameraBurstSurface,
-                        CameraDevice.TEMPLATE_STILL_CAPTURE, requestMap);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to initialize internal burst request! Extension service does"
-                        + " not respond!");
-                throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
-            }
-            if (burstRequest == null) {
-                throw new UnsupportedOperationException(
-                        "Failed to create still capture burst request");
-            }
-
-            seqId =  mCaptureSession.captureBurstRequests(burstRequest,
-                    new CameraExtensionUtils.HandlerExecutor(mHandler),
-                    new BurstRequestHandler(request, executor, listener, requestMap,
-                            mBurstCaptureImageCallback));
-        } else if ((mClientRepeatingRequestSurface != null) &&
-                request.containsTarget(mClientRepeatingRequestSurface)) {
-
-            CaptureRequest captureRequest = null;
-            try {
-                ArrayList<CaptureStageImpl> captureStageList = new ArrayList<>();
-                captureStageList.add(mPreviewExtender.getCaptureStage());
-
-                captureRequest = createRequest(mCameraDevice, captureStageList,
-                        mCameraRepeatingSurface, CameraDevice.TEMPLATE_PREVIEW, request);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to initialize capture request! Extension service does"
-                        + " not respond!");
-                throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
-            }
-
-            seqId = mCaptureSession.capture(captureRequest, new PreviewRequestHandler(request,
-                    executor, listener, mRepeatingRequestImageCallback, true /*singleCapture*/),
-                    mHandler);
-        } else {
-            throw new IllegalArgumentException("Capture request to unknown output surface!");
+        if (!request.containsTarget(mClientCaptureSurface) || (request.getTargets().size() != 1)) {
+            throw new IllegalArgumentException("Invalid single capture output target!");
         }
 
-        return seqId;
+        HashMap<CaptureRequest, Integer> requestMap = new HashMap<>();
+        List<CaptureRequest> burstRequest;
+        try {
+            burstRequest = createBurstRequest(mCameraDevice,
+                    mImageExtender.getCaptureStages(), request, mCameraBurstSurface,
+                    CameraDevice.TEMPLATE_STILL_CAPTURE, requestMap);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to initialize internal burst request! Extension service does"
+                    + " not respond!");
+            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
+        }
+        if (burstRequest == null) {
+            throw new UnsupportedOperationException("Failed to create still capture burst request");
+        }
+
+        return mCaptureSession.captureBurstRequests(burstRequest,
+                new CameraExtensionUtils.HandlerExecutor(mHandler),
+                new BurstRequestHandler(request, executor, listener, requestMap,
+                        mBurstCaptureImageCallback));
     }
 
     @Override
@@ -694,17 +621,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     }
 
     private int setRepeatingRequest(CaptureStageImpl captureStage,
-            CameraCaptureSession.CaptureCallback requestHandler) throws CameraAccessException {
-        return setRepeatingRequest(captureStage, requestHandler, /*clientRequest*/ null);
-    }
-
-    private int setRepeatingRequest(CaptureStageImpl captureStage,
-            CameraCaptureSession.CaptureCallback requestHandler, CaptureRequest clientRequest)
+                                    CameraCaptureSession.CaptureCallback requestHandler)
             throws CameraAccessException {
         ArrayList<CaptureStageImpl> captureStageList = new ArrayList<>();
         captureStageList.add(captureStage);
-        CaptureRequest repeatingRequest = createRequest(mCameraDevice, captureStageList,
-                mCameraRepeatingSurface, CameraDevice.TEMPLATE_PREVIEW, clientRequest);
+        CaptureRequest repeatingRequest = createRequest(mCameraDevice,
+                captureStageList, mCameraRepeatingSurface, CameraDevice.TEMPLATE_PREVIEW);
         return mCaptureSession.setSingleRepeatingRequest(repeatingRequest,
                 new CameraExtensionUtils.HandlerExecutor(mHandler), requestHandler);
     }
@@ -873,7 +795,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             } else {
                 try {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new PreviewRequestHandler(null, null, null,
+                            new RepeatingRequestHandler(null, null, null,
                                     mRepeatingRequestImageCallback));
                 } catch (CameraAccessException | RemoteException e) {
                     Log.e(TAG,
@@ -913,7 +835,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
         private ImageCallback mImageCallback = null;
         private boolean mCaptureFailed = false;
-        private CaptureResultHandler mCaptureResultHandler = null;
 
         public BurstRequestHandler(@NonNull CaptureRequest request, @NonNull Executor executor,
                 @NonNull ExtensionCaptureCallback callbacks,
@@ -1034,18 +955,20 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
             Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
             if (timestamp != null) {
-                if (mCaptureResultsSupported && (mCaptureResultHandler == null)) {
-                    mCaptureResultHandler = new CaptureResultHandler(mClientRequest, mExecutor,
-                            mCallbacks, result.getSequenceId());
-                }
                 if (mImageProcessor != null) {
                     if (mCapturePendingMap.indexOfKey(timestamp) >= 0) {
                         Image img = mCapturePendingMap.get(timestamp).first;
-                        mCaptureStageMap.put(stageId, new Pair<>(img, result));
+                        mCaptureStageMap.put(stageId,
+                                new Pair<>(img,
+                                        result));
                         checkAndFireBurstProcessing();
                     } else {
-                        mCapturePendingMap.put(timestamp, new Pair<>(null, stageId));
-                        mCaptureStageMap.put(stageId, new Pair<>(null, result));
+                        mCapturePendingMap.put(timestamp,
+                                new Pair<>(null,
+                                        stageId));
+                        mCaptureStageMap.put(stageId,
+                                new Pair<>(null,
+                                        result));
                     }
                 } else {
                     mCaptureRequestMap.clear();
@@ -1055,11 +978,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                 () -> mCallbacks
                                         .onCaptureProcessStarted(CameraExtensionSessionImpl.this,
                                                 mClientRequest));
-
-                        if (mCaptureResultHandler != null) {
-                            mCaptureResultHandler.onCaptureCompleted(timestamp,
-                                    initializeFilteredResults(result));
-                        }
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
@@ -1087,7 +1005,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 List<CaptureBundle> captureList = initializeParcelable(mCaptureStageMap,
                         jpegOrientation, jpegQuality);
                 try {
-                    mImageProcessor.process(captureList, mCaptureResultHandler);
+                    mImageProcessor.process(captureList);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to process multi-frame request! Extension service "
                             + "does not respond!");
@@ -1119,11 +1037,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         private class ImageCallback implements OnImageAvailableListener {
-            @Override
-            public void onImageDropped(long timestamp) {
-                notifyCaptureFailed();
-            }
-
             @Override
             public void onImageAvailable(ImageReader reader, Image img) {
                 if (mCaptureFailed) {
@@ -1157,9 +1070,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     }
 
     private class ImageLoopbackCallback implements OnImageAvailableListener {
-        @Override
-        public void onImageDropped(long timestamp) { }
-
         @Override
         public void onImageAvailable(ImageReader reader, Image img) {
             img.close();
@@ -1206,7 +1116,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                  */
                 try {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new PreviewRequestHandler(null, null, null,
+                            new RepeatingRequestHandler(null, null, null,
                                     mImageCallback));
                 } catch (CameraAccessException | RemoteException e) {
                     Log.e(TAG, "Failed to start the internal repeating request!");
@@ -1222,8 +1132,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     }
 
     private interface OnImageAvailableListener {
-        void onImageDropped(long timestamp);
-        void onImageAvailable (ImageReader reader, Image img);
+        public void onImageAvailable (ImageReader reader, Image img);
     }
 
     private class CameraOutputImageCallback implements ImageReader.OnImageAvailableListener,
@@ -1265,29 +1174,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             } else {
                 mImageListenerMap.put(img.getTimestamp(), new Pair<>(img, null));
             }
-
-            notifyDroppedImages(timestamp);
-        }
-
-        private void notifyDroppedImages(long timestamp) {
-            Set<Long> timestamps = mImageListenerMap.keySet();
-            ArrayList<Long> removedTs = new ArrayList<>();
-            for (long ts : timestamps) {
-                if (ts < timestamp) {
-                    Log.e(TAG, "Dropped image with ts: " + ts);
-                    Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(ts);
-                    if (entry.second != null) {
-                        entry.second.onImageDropped(ts);
-                    }
-                    if (entry.first != null) {
-                        entry.first.close();
-                    }
-                    removedTs.add(ts);
-                }
-            }
-            for (long ts : removedTs) {
-                mImageListenerMap.remove(ts);
-            }
         }
 
         public void registerListener(Long timestamp, OnImageAvailableListener listener) {
@@ -1316,12 +1202,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     entry.first.close();
                 }
             }
-            for (long timestamp : mImageListenerMap.keySet()) {
-                Pair<Image, OnImageAvailableListener> entry = mImageListenerMap.get(timestamp);
-                if (entry.second != null) {
-                    entry.second.onImageDropped(timestamp);
-                }
-            }
             mImageListenerMap.clear();
         }
     }
@@ -1340,80 +1220,32 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
     }
 
-    private class CaptureResultHandler extends IProcessResultImpl.Stub {
-        private final Executor mExecutor;
-        private final ExtensionCaptureCallback mCallbacks;
-        private final CaptureRequest mClientRequest;
-        private final int mRequestId;
-
-        public CaptureResultHandler(@NonNull CaptureRequest clientRequest,
-                @NonNull Executor executor, @NonNull ExtensionCaptureCallback listener,
-                int requestId) {
-            mClientRequest = clientRequest;
-            mExecutor = executor;
-            mCallbacks = listener;
-            mRequestId = requestId;
-        }
-
-        @Override
-        public void onCaptureCompleted(long shutterTimestamp, CameraMetadataNative result) {
-            if (result == null) {
-                Log.e(TAG,"Invalid capture result!");
-                return;
-            }
-
-            result.set(CaptureResult.SENSOR_TIMESTAMP, shutterTimestamp);
-            TotalCaptureResult totalResult = new TotalCaptureResult(mCameraDevice.getId(), result,
-                    mClientRequest, mRequestId, shutterTimestamp, new ArrayList<CaptureResult>(),
-                    mSessionId, new PhysicalCaptureResultInfo[0]);
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                mExecutor.execute(
-                        () -> mCallbacks.onCaptureResultAvailable(CameraExtensionSessionImpl.this,
-                                mClientRequest, totalResult));
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
-    // This handler can operate in three modes:
+    // This handler can operate in two modes:
     // 1) Using valid client callbacks, which means camera buffers will be propagated the
     //    registered output surfaces and clients will be notified accordingly.
     // 2) Without any client callbacks where an internal repeating request is kept active
     //    to satisfy the extensions continuous preview/(repeating request) requirement.
-    // 3) Single capture mode, where internal repeating requests are ignored and the preview
-    //    logic is only triggered for the image processor case.
-    private class PreviewRequestHandler extends CameraCaptureSession.CaptureCallback {
+    private class RepeatingRequestHandler extends CameraCaptureSession.CaptureCallback {
         private final Executor mExecutor;
         private final ExtensionCaptureCallback mCallbacks;
         private final CaptureRequest mClientRequest;
         private final boolean mClientNotificationsEnabled;
         private final CameraOutputImageCallback mRepeatingImageCallback;
-        private final boolean mSingleCapture;
         private OnImageAvailableListener mImageCallback = null;
         private LongSparseArray<Pair<Image, TotalCaptureResult>> mPendingResultMap =
                 new LongSparseArray<>();
-        private CaptureResultHandler mCaptureResultHandler = null;
 
         private boolean mRequestUpdatedNeeded = false;
 
-        public PreviewRequestHandler(@Nullable CaptureRequest clientRequest,
+        public RepeatingRequestHandler(@Nullable CaptureRequest clientRequest,
                 @Nullable Executor executor, @Nullable ExtensionCaptureCallback listener,
                 @NonNull CameraOutputImageCallback imageCallback) {
-            this(clientRequest, executor, listener, imageCallback, false /*singleCapture*/);
-        }
-
-        public PreviewRequestHandler(@Nullable CaptureRequest clientRequest,
-                @Nullable Executor executor, @Nullable ExtensionCaptureCallback listener,
-                @NonNull CameraOutputImageCallback imageCallback, boolean singleCapture) {
             mClientRequest = clientRequest;
             mExecutor = executor;
             mCallbacks = listener;
             mClientNotificationsEnabled =
                     (mClientRequest != null) && (mExecutor != null) && (mCallbacks != null);
             mRepeatingImageCallback = imageCallback;
-            mSingleCapture = singleCapture;
         }
 
         @Override
@@ -1460,7 +1292,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         public void onCaptureSequenceAborted(@NonNull CameraCaptureSession session,
                                              int sequenceId) {
             synchronized (mInterfaceLock) {
-                if (mInternalRepeatingRequestEnabled && !mSingleCapture) {
+                if (mInternalRepeatingRequestEnabled) {
                     resumeInternalRepeatingRequest(true);
                 }
             }
@@ -1478,6 +1310,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             } else {
                 notifyConfigurationFailure();
             }
+
         }
 
         @Override
@@ -1486,10 +1319,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                                long frameNumber) {
 
             synchronized (mInterfaceLock) {
-                if (mRequestUpdatedNeeded && !mSingleCapture) {
+                if (mRequestUpdatedNeeded) {
                     mRequestUpdatedNeeded = false;
                     resumeInternalRepeatingRequest(false);
-                } else if (mInternalRepeatingRequestEnabled && !mSingleCapture) {
+                } else if (mInternalRepeatingRequestEnabled) {
                     resumeInternalRepeatingRequest(true);
                 }
             }
@@ -1534,13 +1367,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             synchronized (mInterfaceLock) {
                 final Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
                 if (timestamp != null) {
-                    if (mCaptureResultsSupported && mClientNotificationsEnabled &&
-                            (mCaptureResultHandler == null)) {
-                        mCaptureResultHandler = new CaptureResultHandler(mClientRequest, mExecutor,
-                                mCallbacks, result.getSequenceId());
-                    }
-                    if ((!mSingleCapture) && (mPreviewProcessorType ==
-                            IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY)) {
+                    if (mPreviewProcessorType ==
+                            IPreviewExtenderImpl.PROCESSOR_TYPE_REQUEST_UPDATE_ONLY) {
                         CaptureStageImpl captureStage = null;
                         try {
                             captureStage = mPreviewRequestUpdateProcessor.process(
@@ -1551,7 +1379,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                         }
                         if (captureStage != null) {
                             try {
-                                setRepeatingRequest(captureStage, this, request);
+                                setRepeatingRequest(captureStage, this);
                                 mRequestUpdatedNeeded = true;
                             } catch (IllegalStateException e) {
                                 // This is possible in case the camera device closes and the
@@ -1566,21 +1394,11 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     } else if (mPreviewProcessorType ==
                             IPreviewExtenderImpl.PROCESSOR_TYPE_IMAGE_PROCESSOR) {
                         int idx = mPendingResultMap.indexOfKey(timestamp);
-
-                        if ((idx >= 0) && (mPendingResultMap.get(timestamp).first == null)) {
-                            // Image was dropped before we can receive the capture results
-                            if ((mCaptureResultHandler != null)) {
-                                mCaptureResultHandler.onCaptureCompleted(timestamp,
-                                        initializeFilteredResults(result));
-                            }
-                            discardPendingRepeatingResults(idx, mPendingResultMap, false);
-                        } else  if (idx >= 0) {
-                            // Image came before the capture results
+                        if (idx >= 0) {
                             ParcelImage parcelImage = initializeParcelImage(
                                     mPendingResultMap.get(timestamp).first);
                             try {
-                                mPreviewImageProcessor.process(parcelImage, result,
-                                        mCaptureResultHandler);
+                                mPreviewImageProcessor.process(parcelImage, result);
                             } catch (RemoteException e) {
                                 processStatus = false;
                                 Log.e(TAG, "Extension service does not respond during " +
@@ -1602,7 +1420,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                             }
                             discardPendingRepeatingResults(idx, mPendingResultMap, false);
                         } else {
-                            // Image not yet available
                             notifyClient = false;
                             mPendingResultMap.put(timestamp,
                                     new Pair<>(null,
@@ -1619,11 +1436,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                                         .onCaptureProcessStarted(
                                                 CameraExtensionSessionImpl.this,
                                                 mClientRequest));
-                                if ((mCaptureResultHandler != null) && (mPreviewProcessorType !=
-                                        IPreviewExtenderImpl.PROCESSOR_TYPE_IMAGE_PROCESSOR)) {
-                                    mCaptureResultHandler.onCaptureCompleted(timestamp,
-                                            initializeFilteredResults(result));
-                                }
                             } else {
                                 mExecutor.execute(
                                         () -> mCallbacks
@@ -1650,10 +1462,10 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             try {
                 if (internal) {
                     setRepeatingRequest(mPreviewExtender.getCaptureStage(),
-                            new PreviewRequestHandler(null, null, null,
+                            new RepeatingRequestHandler(null, null, null,
                                     mRepeatingImageCallback));
                 } else {
-                    setRepeatingRequest(mPreviewExtender.getCaptureStage(), this, mClientRequest);
+                    setRepeatingRequest(mPreviewExtender.getCaptureStage(), this);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to resume internal repeating request, extension service"
@@ -1689,24 +1501,19 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
             for (int i = idx; i >= 0; i--) {
                 if (previewMap.valueAt(i).first != null) {
                     previewMap.valueAt(i).first.close();
-                } else if (mClientNotificationsEnabled && (previewMap.valueAt(i).second != null) &&
-                        ((i != idx) || notifyCurrentIndex)) {
-                    TotalCaptureResult result = previewMap.valueAt(i).second;
-                    Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
-                    mCaptureResultHandler.onCaptureCompleted(timestamp,
-                            initializeFilteredResults(result));
-
-                    Log.w(TAG, "Preview frame drop with timestamp: " + previewMap.keyAt(i));
-                    final long ident = Binder.clearCallingIdentity();
-                    try {
-                        mExecutor.execute(
-                                () -> mCallbacks
-                                        .onCaptureFailed(CameraExtensionSessionImpl.this,
-                                                mClientRequest));
-                    } finally {
-                        Binder.restoreCallingIdentity(ident);
+                } else {
+                    if (mClientNotificationsEnabled && ((i != idx) || notifyCurrentIndex)) {
+                        Log.w(TAG, "Preview frame drop with timestamp: " + previewMap.keyAt(i));
+                        final long ident = Binder.clearCallingIdentity();
+                        try {
+                            mExecutor.execute(
+                                    () -> mCallbacks
+                                            .onCaptureFailed(CameraExtensionSessionImpl.this,
+                                                    mClientRequest));
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
+                        }
                     }
-
                 }
                 previewMap.removeAt(i);
             }
@@ -1717,12 +1524,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
 
             public ImageForwardCallback(@NonNull ImageWriter imageWriter) {
                 mOutputWriter = imageWriter;
-            }
-
-            @Override
-            public void onImageDropped(long timestamp) {
-                discardPendingRepeatingResults(mPendingResultMap.indexOfKey(timestamp),
-                        mPendingResultMap, true);
             }
 
             @Override
@@ -1744,15 +1545,6 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
 
         private class ImageProcessCallback implements OnImageAvailableListener {
-
-            @Override
-            public void onImageDropped(long timestamp) {
-                discardPendingRepeatingResults(mPendingResultMap.indexOfKey(timestamp),
-                        mPendingResultMap, true);
-                // Add an empty frame&results entry to flag that we dropped a frame
-                // and valid capture results can immediately return to client.
-                mPendingResultMap.put(timestamp, new Pair<>(null, null));
-            }
 
             @Override
             public void onImageAvailable(ImageReader reader, Image img) {
@@ -1787,7 +1579,7 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     ParcelImage parcelImage = initializeParcelImage(img);
                     try {
                         mPreviewImageProcessor.process(parcelImage,
-                                mPendingResultMap.get(timestamp).second, mCaptureResultHandler);
+                                mPendingResultMap.get(timestamp).second);
                     } catch (RemoteException e) {
                         processStatus = false;
                         Log.e(TAG, "Extension service does not respond during " +
@@ -1820,19 +1612,8 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         }
     }
 
-    private CameraMetadataNative initializeFilteredResults(TotalCaptureResult result) {
-        CameraMetadataNative captureResults = new CameraMetadataNative();
-        for (CaptureResult.Key key : mSupportedResultKeys) {
-            Object value = result.get(key);
-            if (value != null) {
-                captureResults.set(key, value);
-            }
-        }
-        return captureResults;
-    }
-
     private static Size findSmallestAspectMatchedSize(@NonNull List<Size> sizes,
-            @NonNull Size arSize) {
+                                                      @NonNull Size arSize) {
         final float TOLL = .01f;
 
         if (arSize.getHeight() == 0) {
@@ -1867,13 +1648,12 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
     private static ParcelImage initializeParcelImage(Image img) {
         ParcelImage parcelImage = new ParcelImage();
         parcelImage.buffer = img.getHardwareBuffer();
-        try {
-            SyncFence fd = img.getFence();
-            if (fd.isValid()) {
-                parcelImage.fence = fd.getFdDup();
+        if (img.getFenceFd() >= 0) {
+            try {
+                parcelImage.fence = ParcelFileDescriptor.fromFd(img.getFenceFd());
+            } catch (IOException e) {
+                Log.e(TAG,"Failed to parcel buffer fence!");
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to parcel buffer fence!");
         }
         parcelImage.width = img.getWidth();
         parcelImage.height = img.getHeight();

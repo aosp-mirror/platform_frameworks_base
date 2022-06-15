@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spanned;
-import android.text.SpannedString;
 import android.text.method.WordIterator;
 import android.text.style.SpellCheckSpan;
 import android.text.style.SuggestionSpan;
@@ -417,15 +416,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     }
                     if (spellCheckSpanStart >= 0 && spellCheckSpanEnd > spellCheckSpanStart
                             && end > start) {
-                        boolean visibleToAccessibility = mTextView.isVisibleToAccessibility();
-                        CharSequence beforeText =
-                                visibleToAccessibility ? new SpannedString(editable) : null;
-                        boolean spanRemoved = removeErrorSuggestionSpan(
-                                editable, start, end, RemoveReason.OBSOLETE);
-                        if (visibleToAccessibility && spanRemoved) {
-                            mTextView.sendAccessibilityEventTypeViewTextChanged(
-                                    beforeText, start, end);
-                        }
+                        removeErrorSuggestionSpan(editable, start, end, RemoveReason.OBSOLETE);
                     }
                 }
                 return spellCheckSpan;
@@ -446,9 +437,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
         OBSOLETE,
     }
 
-    private static boolean removeErrorSuggestionSpan(
+    private static void removeErrorSuggestionSpan(
             Editable editable, int start, int end, RemoveReason reason) {
-        boolean spanRemoved = false;
         SuggestionSpan[] spans = editable.getSpans(start, end, SuggestionSpan.class);
         for (SuggestionSpan span : spans) {
             if (editable.getSpanStart(span) == start
@@ -460,10 +450,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
                             + editable.subSequence(start, end) + ", reason: " + reason);
                 }
                 editable.removeSpan(span);
-                spanRemoved = true;
             }
         }
-        return spanRemoved;
     }
 
     @Override
@@ -580,13 +568,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
         }
         SuggestionSpan suggestionSpan =
                 new SuggestionSpan(mTextView.getContext(), suggestions, flags);
-        boolean spanRemoved = removeErrorSuggestionSpan(editable, start, end, RemoveReason.REPLACE);
-        boolean sendAccessibilityEvent = !spanRemoved && mTextView.isVisibleToAccessibility();
-        CharSequence beforeText = sendAccessibilityEvent ? new SpannedString(editable) : null;
+        removeErrorSuggestionSpan(editable, start, end, RemoveReason.REPLACE);
         editable.setSpan(suggestionSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        if (sendAccessibilityEvent) {
-            mTextView.sendAccessibilityEventTypeViewTextChanged(beforeText, start, end);
-        }
 
         mTextView.invalidateRegion(start, end, false /* No cursor involved */);
     }

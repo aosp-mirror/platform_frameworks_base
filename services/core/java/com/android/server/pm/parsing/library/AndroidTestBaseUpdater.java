@@ -29,7 +29,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 /**
@@ -64,7 +63,7 @@ public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
                     ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
             try {
                 return platformCompat.isChangeEnabled(REMOVE_ANDROID_TEST_BASE,
-                        AndroidPackageUtils.generateAppInfoWithoutState(pkg));
+                        pkg.toAppInfoWithoutState());
             } catch (RemoteException | NullPointerException e) {
                 Log.e(TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
             }

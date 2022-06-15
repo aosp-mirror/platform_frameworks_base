@@ -56,6 +56,11 @@ public class TestableDependency extends Dependency {
         return mParent.createDependency(key);
     }
 
+    @Override
+    protected boolean autoRegisterModulesForDump() {
+        return false;
+    }
+
     public <T> boolean hasInstantiatedDependency(Class<T> key) {
         return mObjs.containsKey(key) || mInstantiatedObjects.contains(key);
     }

@@ -144,8 +144,7 @@ final class ErrorDialogController {
         if (mWaitDialog == null) {
             return;
         }
-        final BaseErrorDialog dialog = mWaitDialog;
-        mService.mUiHandler.post(dialog::dismiss);
+        mWaitDialog.dismiss();
         mWaitDialog = null;
     }
 

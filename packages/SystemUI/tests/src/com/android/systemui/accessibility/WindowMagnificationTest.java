@@ -22,14 +22,13 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_M
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
@@ -100,19 +99,17 @@ public class WindowMagnificationTest extends SysuiTestCase {
     }
 
     @Test
-    public void requestWindowMagnificationConnection_setConnectionAndListener() {
+    public void requestWindowMagnificationConnection_setWindowMagnificationConnection() {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
         verify(mAccessibilityManager).setWindowMagnificationConnection(any(
                 IWindowMagnificationConnection.class));
-        verify(mModeSwitchesController).setSwitchListenerDelegate(notNull());
 
         mCommandQueue.requestWindowMagnificationConnection(false);
         waitForIdleSync();
 
-        verify(mAccessibilityManager).setWindowMagnificationConnection(isNull());
-        verify(mModeSwitchesController).setSwitchListenerDelegate(isNull());
+        verify(mAccessibilityManager).setWindowMagnificationConnection(null);
     }
 
     @Test
@@ -148,13 +145,12 @@ public class WindowMagnificationTest extends SysuiTestCase {
     }
 
     @Test
-    public void onMove_enabled_notifyCallback() throws RemoteException {
-        mCommandQueue.requestWindowMagnificationConnection(true);
-        waitForIdleSync();
+    public void onConfigurationChanged_updateModeSwitches() {
+        final Configuration config = new Configuration();
+        config.densityDpi = Configuration.DENSITY_DPI_ANY;
+        mWindowMagnification.onConfigurationChanged(config);
 
-        mWindowMagnification.onMove(TEST_DISPLAY);
-
-        verify(mConnectionCallback).onMove(TEST_DISPLAY);
+        verify(mModeSwitchesController).onConfigurationChanged(anyInt());
     }
 
     @Test
@@ -167,29 +163,30 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
     @Test
     public void overviewProxyIsConnected_controllerIsAvailable_updateSysUiStateFlag() {
-        final WindowMagnificationController mController = mock(WindowMagnificationController.class);
-        mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
+        final WindowMagnificationAnimationController mController = mock(
+                WindowMagnificationAnimationController.class);
+        mWindowMagnification.mAnimationControllerSupplier = new FakeAnimationControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mController);
-        mWindowMagnification.mMagnificationControllerSupplier.get(TEST_DISPLAY);
+        mWindowMagnification.mAnimationControllerSupplier.get(TEST_DISPLAY);
 
         mOverviewProxyListener.onConnectionChanged(true);
 
-        verify(mController).updateSysUIStateFlag();
+        verify(mController).updateSysUiStateFlag();
     }
 
-    private static class FakeControllerSupplier extends
-            DisplayIdIndexSupplier<WindowMagnificationController> {
+    private static class FakeAnimationControllerSupplier extends
+            DisplayIdIndexSupplier<WindowMagnificationAnimationController> {
 
-        private final WindowMagnificationController mController;
+        private final WindowMagnificationAnimationController mController;
 
-        FakeControllerSupplier(DisplayManager displayManager,
-                WindowMagnificationController controller) {
+        FakeAnimationControllerSupplier(DisplayManager displayManager,
+                WindowMagnificationAnimationController controller) {
             super(displayManager);
             mController = controller;
         }
 
         @Override
-        protected WindowMagnificationController createInstance(Display display) {
+        protected WindowMagnificationAnimationController createInstance(Display display) {
             return mController;
         }
     }

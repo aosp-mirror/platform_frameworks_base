@@ -16,7 +16,6 @@
 
 package android.app.compat;
 
-import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
 import android.content.Context;
 import android.os.Binder;
@@ -34,7 +33,6 @@ public final class ChangeIdStateCache
     private static final String CACHE_KEY = "cache_key.is_compat_change_enabled";
     private static final int MAX_ENTRIES = 20;
     private static boolean sDisabled = false;
-    private volatile IPlatformCompat mPlatformCompat;
 
     /** @hide */
     public ChangeIdStateCache() {
@@ -63,36 +61,18 @@ public final class ChangeIdStateCache
         }
     }
 
-    @NonNull
-    IPlatformCompat getPlatformCompatService() {
-        IPlatformCompat platformCompat = mPlatformCompat;
-        if (platformCompat == null) {
-            synchronized (this) {
-                platformCompat = mPlatformCompat;
-                if (platformCompat == null) {
-                    platformCompat = IPlatformCompat.Stub.asInterface(
-                        ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-                    if (platformCompat == null) {
-                        throw new RuntimeException(
-                            "Could not get PlatformCompatService instance!");
-                    }
-                    mPlatformCompat = platformCompat;
-                }
-            }
-        }
-        return platformCompat;
-    }
-
     @Override
-    public Boolean recompute(ChangeIdStateQuery query) {
+    protected Boolean recompute(ChangeIdStateQuery query) {
+        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
         final long token = Binder.clearCallingIdentity();
         try {
             if (query.type == ChangeIdStateQuery.QUERY_BY_PACKAGE_NAME) {
-                return getPlatformCompatService().isChangeEnabledByPackageName(query.changeId,
+                return platformCompat.isChangeEnabledByPackageName(query.changeId,
                                                                    query.packageName,
                                                                    query.userId);
             } else if (query.type == ChangeIdStateQuery.QUERY_BY_UID) {
-                return getPlatformCompatService().isChangeEnabledByUid(query.changeId, query.uid);
+                return platformCompat.isChangeEnabledByUid(query.changeId, query.uid);
             } else {
                 throw new IllegalArgumentException("Invalid query type: " + query.type);
             }

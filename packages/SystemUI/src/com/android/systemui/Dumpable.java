@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.dump.DumpManager;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -34,5 +35,5 @@ public interface Dumpable {
      * @param pw Where to write your dump to.
      * @param args Arguments.
      */
-    void dump(@NonNull PrintWriter pw, @NonNull String[] args);
+    void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args);
 }

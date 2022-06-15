@@ -27,7 +27,6 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -61,7 +60,6 @@ public class BrightnessSliderView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        setLayerType(LAYER_TYPE_HARDWARE, null);
 
         mSlider = requireViewById(R.id.slider);
         mSlider.setAccessibilityLabel(getContentDescription().toString());
@@ -185,7 +183,6 @@ public class BrightnessSliderView extends FrameLayout {
      *
      * Used in {@link com.android.systemui.qs.QSAnimator}.
      */
-    @Keep
     public void setSliderScaleY(float scale) {
         if (scale != mScale) {
             mScale = scale;
@@ -202,7 +199,6 @@ public class BrightnessSliderView extends FrameLayout {
         }
     }
 
-    @Keep
     public float getSliderScaleY() {
         return mScale;
     }

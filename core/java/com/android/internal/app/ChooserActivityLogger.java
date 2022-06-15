@@ -34,8 +34,7 @@ public interface ChooserActivityLogger {
             int appProvidedApp, boolean isWorkprofile, int previewType, String intent);
 
     /** Logs a UiEventReported event for the system sharesheet when the user selects a target. */
-    void logShareTargetSelected(int targetType, String packageName, int positionPicked,
-            boolean isPinned);
+    void logShareTargetSelected(int targetType, String packageName, int positionPicked);
 
     /** Logs a UiEventReported event for the system sharesheet being triggered by the user. */
     default void logSharesheetTriggered() {

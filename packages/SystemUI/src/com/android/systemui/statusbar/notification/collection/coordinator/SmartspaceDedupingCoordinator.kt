@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.app.smartspace.SmartspaceTarget
 import android.os.Parcelable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -27,7 +28,6 @@ import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -45,7 +45,7 @@ import javax.inject.Inject
  */
 // This class is a singleton so that the same instance can be accessed by both the old and new
 // pipelines
-@CoordinatorScope
+@SysUISingleton
 class SmartspaceDedupingCoordinator @Inject constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val smartspaceController: LockscreenSmartspaceController,
@@ -65,11 +65,9 @@ class SmartspaceDedupingCoordinator @Inject constructor(
         statusBarStateController.addCallback(statusBarStateListener)
         smartspaceController.addListener(this::onNewSmartspaceTargets)
 
-        if (!pipeline.isNewPipelineEnabled) {
-            // TODO (b/173126564): Remove this once the old pipeline is no longer necessary
-            notificationLockscreenUserManager.addKeyguardNotificationSuppressor { entry ->
-                isDupedWithSmartspaceContent(entry)
-            }
+        // TODO (b/173126564): Remove this once the old pipeline is no longer necessary
+        notificationLockscreenUserManager.addKeyguardNotificationSuppressor { entry ->
+            isDupedWithSmartspaceContent(entry)
         }
 
         recordStatusBarState(statusBarStateController.state)

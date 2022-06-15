@@ -1,7 +1,12 @@
 {
-  "imports": [
+  "presubmit": [
     {
-      "path": "frameworks/base/services/companion"
+      "name": "CtsOsTestCases",
+      "options": [
+        {
+          "include-filter": "android.os.cts.CompanionDeviceManagerTest"
+        }
+      ]
     }
   ]
 }

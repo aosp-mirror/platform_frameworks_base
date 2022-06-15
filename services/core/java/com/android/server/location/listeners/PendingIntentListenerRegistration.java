@@ -80,7 +80,7 @@ public abstract class PendingIntentListenerRegistration<TRequest, TListener> ext
     }
 
     @Override
-    public void onCanceled(PendingIntent intent) {
+    public void onCancelled(PendingIntent intent) {
         if (Log.isLoggable(getOwner().getTag(), Log.DEBUG)) {
             Log.d(getOwner().getTag(),
                     "pending intent registration " + getIdentity() + " canceled");

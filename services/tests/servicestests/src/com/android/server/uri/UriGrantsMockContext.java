@@ -16,7 +16,7 @@
 
 package com.android.server.uri;
 
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -35,7 +35,6 @@ import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.FileUtils;
 import android.os.PatternMatcher;
-import android.os.Process;
 import android.os.UserHandle;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockPackageManager;
@@ -121,47 +120,42 @@ public class UriGrantsMockContext extends ContextWrapper {
         LocalServices.addService(PackageManagerInternal.class, mPmInternal);
 
         for (int userId : new int[] { USER_PRIMARY, USER_SECONDARY }) {
-            when(mPmInternal.getPackageUid(eq(PKG_SOCIAL), anyLong(), eq(userId)))
+            when(mPmInternal.getPackageUid(eq(PKG_SOCIAL), anyInt(), eq(userId)))
                     .thenReturn(UserHandle.getUid(userId, UID_SOCIAL));
-            when(mPmInternal.getPackageUid(eq(PKG_CAMERA), anyLong(), eq(userId)))
+            when(mPmInternal.getPackageUid(eq(PKG_CAMERA), anyInt(), eq(userId)))
                     .thenReturn(UserHandle.getUid(userId, UID_CAMERA));
-            when(mPmInternal.getPackageUid(eq(PKG_PRIVATE), anyLong(), eq(userId)))
+            when(mPmInternal.getPackageUid(eq(PKG_PRIVATE), anyInt(), eq(userId)))
                     .thenReturn(UserHandle.getUid(userId, UID_PRIVATE));
-            when(mPmInternal.getPackageUid(eq(PKG_PUBLIC), anyLong(), eq(userId)))
+            when(mPmInternal.getPackageUid(eq(PKG_PUBLIC), anyInt(), eq(userId)))
                     .thenReturn(UserHandle.getUid(userId, UID_PUBLIC));
-            when(mPmInternal.getPackageUid(eq(PKG_FORCE), anyLong(), eq(userId)))
+            when(mPmInternal.getPackageUid(eq(PKG_FORCE), anyInt(), eq(userId)))
                     .thenReturn(UserHandle.getUid(userId, UID_FORCE));
-            when(mPmInternal.getPackageUid(eq(PKG_COMPLEX), anyLong(), eq(userId)))
+            when(mPmInternal.getPackageUid(eq(PKG_COMPLEX), anyInt(), eq(userId)))
                     .thenReturn(UserHandle.getUid(userId, UID_COMPLEX));
 
-            when(mPmInternal.resolveContentProvider(eq(PKG_CAMERA), anyLong(), eq(userId),
-                    eq(Process.SYSTEM_UID)))
+            when(mPmInternal.resolveContentProvider(eq(PKG_CAMERA), anyInt(), eq(userId)))
                     .thenReturn(buildCameraProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_CAMERA), anyLong(), eq(userId),
+            when(mPmInternal.resolveContentProvider(eq(PKG_CAMERA), anyInt(), eq(userId),
                     eq(UserHandle.getUid(userId, UID_CAMERA))))
                     .thenReturn(buildCameraProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_PRIVATE), anyLong(), eq(userId),
-                    eq(Process.SYSTEM_UID)))
+            when(mPmInternal.resolveContentProvider(eq(PKG_PRIVATE), anyInt(), eq(userId)))
                     .thenReturn(buildPrivateProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_PRIVATE), anyLong(), eq(userId),
+            when(mPmInternal.resolveContentProvider(eq(PKG_PRIVATE), anyInt(), eq(userId),
                     eq(UserHandle.getUid(userId, UID_PRIVATE))))
                     .thenReturn(buildPrivateProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_PUBLIC), anyLong(), eq(userId),
-                    eq(Process.SYSTEM_UID)))
+            when(mPmInternal.resolveContentProvider(eq(PKG_PUBLIC), anyInt(), eq(userId)))
                     .thenReturn(buildPublicProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_PUBLIC), anyLong(), eq(userId),
+            when(mPmInternal.resolveContentProvider(eq(PKG_PUBLIC), anyInt(), eq(userId),
                     eq(UserHandle.getUid(userId, UID_PUBLIC))))
                     .thenReturn(buildPublicProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_FORCE), anyLong(), eq(userId),
-                    eq(Process.SYSTEM_UID)))
+            when(mPmInternal.resolveContentProvider(eq(PKG_FORCE), anyInt(), eq(userId)))
                     .thenReturn(buildForceProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_FORCE), anyLong(), eq(userId),
+            when(mPmInternal.resolveContentProvider(eq(PKG_FORCE), anyInt(), eq(userId),
                     eq(UserHandle.getUid(userId, UID_FORCE))))
                     .thenReturn(buildForceProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_COMPLEX), anyLong(), eq(userId),
-                    eq(Process.SYSTEM_UID)))
+            when(mPmInternal.resolveContentProvider(eq(PKG_COMPLEX), anyInt(), eq(userId)))
                     .thenReturn(buildComplexProvider(userId));
-            when(mPmInternal.resolveContentProvider(eq(PKG_COMPLEX), anyLong(), eq(userId),
+            when(mPmInternal.resolveContentProvider(eq(PKG_COMPLEX), anyInt(), eq(userId),
                     eq(UserHandle.getUid(userId, UID_COMPLEX))))
                     .thenReturn(buildComplexProvider(userId));
         }

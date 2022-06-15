@@ -23,7 +23,6 @@ import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingLinearLayout
 import com.android.systemui.R
-import com.android.systemui.statusbar.notification.NotificationFadeAware
 import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationMessagingTemplateViewWrapper.setCustomImageMessageTransform
@@ -43,7 +42,6 @@ class NotificationConversationTemplateViewWrapper constructor(
     )
     private val conversationLayout: ConversationLayout = view as ConversationLayout
 
-    private lateinit var conversationIconContainer: View
     private lateinit var conversationIconView: CachingIconView
     private lateinit var conversationBadgeBg: View
     private lateinit var expandBtn: View
@@ -61,8 +59,6 @@ class NotificationConversationTemplateViewWrapper constructor(
         messagingLinearLayout = conversationLayout.messagingLinearLayout
         imageMessageContainer = conversationLayout.imageMessageContainer
         with(conversationLayout) {
-            conversationIconContainer =
-                    requireViewById(com.android.internal.R.id.conversation_icon_container)
             conversationIconView = requireViewById(com.android.internal.R.id.conversation_icon)
             conversationBadgeBg =
                     requireViewById(com.android.internal.R.id.conversation_icon_badge_bg)
@@ -140,10 +136,4 @@ class NotificationConversationTemplateViewWrapper constructor(
                 minHeightWithActions
             else
                 super.getMinLayoutHeight()
-
-    override fun setNotificationFaded(faded: Boolean) {
-        // Do not call super
-        NotificationFadeAware.setLayerTypeForFaded(expandBtn, faded)
-        NotificationFadeAware.setLayerTypeForFaded(conversationIconContainer, faded)
-    }
 }

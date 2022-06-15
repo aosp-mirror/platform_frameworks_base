@@ -17,12 +17,10 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
-import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,10 +48,11 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     //-----------------------------------------------------------------
     // Overrides of AudioSystemAdapter
     @Override
-    public int setDeviceConnectionState(AudioDeviceAttributes attributes, int state,
-            int codecFormat) {
-        Log.i(TAG, String.format("setDeviceConnectionState(0x%s, %d, 0x%s",
-                attributes.toString(), state, Integer.toHexString(codecFormat)));
+    public int setDeviceConnectionState(int device, int state, String deviceAddress,
+            String deviceName, int codecFormat) {
+        Log.i(TAG, String.format("setDeviceConnectionState(0x%s, %d, %s, %s, 0x%s",
+                Integer.toHexString(device), state, deviceAddress, deviceName,
+                Integer.toHexString(codecFormat)));
         return AudioSystem.AUDIO_STATUS_OK;
     }
 
@@ -123,12 +122,5 @@ public class NoOpAudioSystemAdapter extends AudioSystemAdapter {
     @Override
     public boolean isStreamActive(int stream, int inPastMs) {
         return mIsStreamActive;
-    }
-
-    @Override
-    @NonNull
-    public ArrayList<AudioDeviceAttributes> getDevicesForAttributes(
-            @NonNull AudioAttributes attributes, boolean forVolume) {
-        return new ArrayList<>();
     }
 }

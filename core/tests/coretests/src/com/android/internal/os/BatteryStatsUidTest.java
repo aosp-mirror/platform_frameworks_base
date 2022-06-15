@@ -27,7 +27,7 @@ public class BatteryStatsUidTest extends TestCase {
     private static final String TAG = "BatteryStatsTimeBaseTest";
 
     static class TestBsi extends BatteryStatsImpl {
-        TestBsi(MockClock clocks) {
+        TestBsi(MockClocks clocks) {
             super(clocks);
         }
     }

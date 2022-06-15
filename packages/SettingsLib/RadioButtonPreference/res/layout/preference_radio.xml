@@ -66,7 +66,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="2"
-            android:hyphenationFrequency="normalFast"
             android:textAppearance="?android:attr/textAppearanceListItem"/>
 
         <LinearLayout
@@ -81,7 +80,6 @@
                 android:layout_weight="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textAlignment="viewStart"
-                android:hyphenationFrequency="normalFast"
                 android:textColor="?android:attr/textColorSecondary"/>
 
             <TextView

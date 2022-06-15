@@ -28,14 +28,13 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
-import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.TransformState;
 
 /**
  * A hybrid view which may contain information about one ore more notifications.
  */
 public class HybridNotificationView extends AlphaOptimizedLinearLayout
-        implements TransformableView, NotificationFadeAware {
+        implements TransformableView {
 
     protected final ViewTransformationHelper mTransformationHelper = new ViewTransformationHelper();
     protected TextView mTitleView;
@@ -149,7 +148,4 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
         setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         mTransformationHelper.setVisible(visible);
     }
-
-    @Override
-    public void setNotificationFaded(boolean faded) {}
 }

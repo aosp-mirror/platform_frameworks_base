@@ -28,15 +28,14 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.Utils
-import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils
+import com.android.systemui.R
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -53,8 +52,8 @@ private const val BASE_DEBOUNCE_TIME = 2000
 @SysUISingleton
 class WiredChargingRippleController @Inject constructor(
     commandRegistry: CommandRegistry,
-    private val batteryController: BatteryController,
-    private val configurationController: ConfigurationController,
+    batteryController: BatteryController,
+    configurationController: ConfigurationController,
     featureFlags: FeatureFlags,
     private val context: Context,
     private val windowManager: WindowManager,
@@ -62,7 +61,7 @@ class WiredChargingRippleController @Inject constructor(
     private val uiEventLogger: UiEventLogger
 ) {
     private var pluggedIn: Boolean? = null
-    private val rippleEnabled: Boolean = featureFlags.isEnabled(Flags.CHARGING_RIPPLE) &&
+    private val rippleEnabled: Boolean = featureFlags.isChargingRippleEnabled &&
             !SystemProperties.getBoolean("persist.debug.suppress-charging-ripple", false)
     private var normalizedPortPosX: Float = context.resources.getFloat(
             R.dimen.physical_charger_port_location_normalized_x)
@@ -88,19 +87,15 @@ class WiredChargingRippleController @Inject constructor(
 
     init {
         pluggedIn = batteryController.isPluggedIn
-        commandRegistry.registerCommand("charging-ripple") { ChargingRippleCommand() }
-        updateRippleColor()
-    }
-
-    fun registerCallbacks() {
         val batteryStateChangeCallback = object : BatteryController.BatteryStateChangeCallback {
             override fun onBatteryLevelChanged(
                 level: Int,
                 nowPluggedIn: Boolean,
                 charging: Boolean
             ) {
-                // Suppresses the ripple when the state change comes from wireless charging.
-                if (batteryController.isPluggedInWireless) {
+                // Suppresses the ripple when it's disabled, or when the state change comes
+                // from wireless charging.
+                if (!rippleEnabled || batteryController.isPluggedInWireless) {
                     return
                 }
                 val wasPluggedIn = pluggedIn
@@ -119,6 +114,9 @@ class WiredChargingRippleController @Inject constructor(
             override fun onThemeChanged() {
                 updateRippleColor()
             }
+            override fun onOverlayChanged() {
+                updateRippleColor()
+            }
 
             override fun onConfigChanged(newConfig: Configuration?) {
                 normalizedPortPosX = context.resources.getFloat(
@@ -128,6 +126,9 @@ class WiredChargingRippleController @Inject constructor(
             }
         }
         configurationController.addCallback(configurationChangedListener)
+
+        commandRegistry.registerCommand("charging-ripple") { ChargingRippleCommand() }
+        updateRippleColor()
     }
 
     // Lazily debounce ripple to avoid triggering ripple constantly (e.g. from flaky chargers).
@@ -147,7 +148,7 @@ class WiredChargingRippleController @Inject constructor(
     }
 
     fun startRipple() {
-        if (rippleView.rippleInProgress || rippleView.parent != null) {
+        if (!rippleEnabled || rippleView.rippleInProgress || rippleView.parent != null) {
             // Skip if ripple is still playing, or not playing but already added the parent
             // (which might happen just before the animation starts or right after
             // the animation ends.)
@@ -175,7 +176,7 @@ class WiredChargingRippleController @Inject constructor(
         val width = displayMetrics.widthPixels
         val height = displayMetrics.heightPixels
         rippleView.radius = Integer.max(width, height).toFloat()
-        rippleView.origin = when (RotationUtils.getExactRotation(context)) {
+        rippleView.origin = when (RotationUtils.getRotation(context)) {
             RotationUtils.ROTATION_LANDSCAPE -> {
                 PointF(width * normalizedPortPosY, height * (1 - normalizedPortPosX))
             }

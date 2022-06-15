@@ -41,7 +41,6 @@ public class SimpleSurfaceAnimatable implements SurfaceAnimator.Animatable {
     private final SurfaceControl mParentSurfaceControl;
     private final Runnable mCommitTransactionRunnable;
     private final Supplier<SurfaceControl.Builder> mAnimationLeashFactory;
-    private final Supplier<SurfaceControl.Transaction> mSyncTransaction;
     private final Supplier<SurfaceControl.Transaction> mPendingTransaction;
     private final BiConsumer<SurfaceControl.Transaction, SurfaceControl> mOnAnimationLeashCreated;
     private final Consumer<SurfaceControl.Transaction> mOnAnimationLeashLost;
@@ -61,14 +60,8 @@ public class SimpleSurfaceAnimatable implements SurfaceAnimator.Animatable {
         mAnimationLeashFactory = builder.mAnimationLeashFactory;
         mOnAnimationLeashCreated = builder.mOnAnimationLeashCreated;
         mOnAnimationLeashLost = builder.mOnAnimationLeashLost;
-        mSyncTransaction = builder.mSyncTransactionSupplier;
         mPendingTransaction = builder.mPendingTransactionSupplier;
         mOnAnimationFinished = builder.mOnAnimationFinished;
-    }
-
-    @Override
-    public SurfaceControl.Transaction getSyncTransaction() {
-        return mSyncTransaction.get();
     }
 
     @NonNull
@@ -167,9 +160,6 @@ public class SimpleSurfaceAnimatable implements SurfaceAnimator.Animatable {
         private Consumer<Runnable> mOnAnimationFinished = null;
 
         @NonNull
-        private Supplier<SurfaceControl.Transaction> mSyncTransactionSupplier;
-
-        @NonNull
         private Supplier<SurfaceControl.Transaction> mPendingTransactionSupplier;
 
         @NonNull
@@ -213,15 +203,6 @@ public class SimpleSurfaceAnimatable implements SurfaceAnimator.Animatable {
         public SimpleSurfaceAnimatable.Builder setOnAnimationLeashLost(
                 @Nullable Consumer<SurfaceControl.Transaction> onAnimationLeashLost) {
             mOnAnimationLeashLost = onAnimationLeashLost;
-            return this;
-        }
-
-        /**
-         * @see SurfaceAnimator.Animatable#getSyncTransaction()
-         */
-        public Builder setSyncTransactionSupplier(
-                @NonNull Supplier<SurfaceControl.Transaction> syncTransactionSupplier) {
-            mSyncTransactionSupplier = syncTransactionSupplier;
             return this;
         }
 
@@ -309,9 +290,6 @@ public class SimpleSurfaceAnimatable implements SurfaceAnimator.Animatable {
         }
 
         public SurfaceAnimator.Animatable build() {
-            if (mSyncTransactionSupplier == null) {
-                throw new IllegalArgumentException("mSyncTransactionSupplier cannot be null");
-            }
             if (mPendingTransactionSupplier == null) {
                 throw new IllegalArgumentException("mPendingTransactionSupplier cannot be null");
             }

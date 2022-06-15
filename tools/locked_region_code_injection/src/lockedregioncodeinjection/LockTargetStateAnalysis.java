@@ -13,15 +13,14 @@
  */
 package lockedregioncodeinjection;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicInterpreter;
 import org.objectweb.asm.tree.analysis.BasicValue;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple dataflow analysis to determine if the operands on the stack must be one of target lock
@@ -32,7 +31,6 @@ public class LockTargetStateAnalysis extends BasicInterpreter {
     private final List<LockTarget> targetLocks;
 
     public LockTargetStateAnalysis(List<LockTarget> targetLocks) {
-        super(Utils.ASM_VERSION);
         this.targetLocks = targetLocks;
     }
 

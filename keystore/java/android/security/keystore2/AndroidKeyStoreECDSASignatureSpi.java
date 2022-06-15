@@ -29,10 +29,7 @@ import libcore.util.EmptyArray;
 import java.io.ByteArrayOutputStream;
 import java.security.InvalidKeyException;
 import java.security.SignatureSpi;
-import java.security.spec.NamedParameterSpec;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Base class for {@link SignatureSpi} providing Android KeyStore backed ECDSA signatures.
@@ -40,10 +37,6 @@ import java.util.Set;
  * @hide
  */
 abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignatureSpiBase {
-    private static final Set<String> ACCEPTED_SIGNING_SCHEMES = Set.of(
-            KeyProperties.KEY_ALGORITHM_EC.toLowerCase(),
-            NamedParameterSpec.ED25519.getName().toLowerCase(),
-            "eddsa");
 
     public final static class NONE extends AndroidKeyStoreECDSASignatureSpi {
         public NONE() {
@@ -121,18 +114,6 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         }
     }
 
-    public static final class Ed25519 extends AndroidKeyStoreECDSASignatureSpi {
-        public Ed25519() {
-            // Ed25519 uses an internal digest system.
-            super(KeymasterDefs.KM_DIGEST_NONE);
-        }
-
-        @Override
-        protected String getAlgorithm() {
-            return NamedParameterSpec.ED25519.getName();
-        }
-    }
-
     public final static class SHA1 extends AndroidKeyStoreECDSASignatureSpi {
         public SHA1() {
             super(KeymasterDefs.KM_DIGEST_SHA1);
@@ -193,10 +174,9 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
 
     @Override
     protected final void initKey(AndroidKeyStoreKey key) throws InvalidKeyException {
-        if (!ACCEPTED_SIGNING_SCHEMES.contains(key.getAlgorithm().toLowerCase())) {
+        if (!KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(key.getAlgorithm())) {
             throw new InvalidKeyException("Unsupported key algorithm: " + key.getAlgorithm()
-                    + ". Only" + Arrays.toString(ACCEPTED_SIGNING_SCHEMES.stream().toArray())
-                    + " supported");
+                    + ". Only" + KeyProperties.KEY_ALGORITHM_EC + " supported");
         }
 
         long keySizeBits = -1;

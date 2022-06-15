@@ -44,8 +44,6 @@ public class RecoverySystemShellCommand extends ShellCommand {
                     return requestLskf();
                 case "clear-lskf":
                     return clearLskf();
-                case "is-lskf-captured":
-                    return isLskfCaptured();
                 case "reboot-and-apply":
                     return rebootAndApply();
                 default:
@@ -76,14 +74,6 @@ public class RecoverySystemShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int isLskfCaptured() throws RemoteException {
-        String packageName = getNextArgRequired();
-        boolean captured = mService.isLskfCaptured(packageName);
-        PrintWriter pw = getOutPrintWriter();
-        pw.printf("%s LSKF capture status: %s\n", packageName, captured ? "true" : "false");
-        return 0;
-    }
-
     private int rebootAndApply() throws RemoteException {
         String packageName = getNextArgRequired();
         String rebootReason = getNextArgRequired();
@@ -100,9 +90,8 @@ public class RecoverySystemShellCommand extends ShellCommand {
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
         pw.println("Recovery system commands:");
-        pw.println("  request-lskf <package_name>");
+        pw.println("  request-lskf <token>");
         pw.println("  clear-lskf");
-        pw.println("  is-lskf-captured <package_name>");
-        pw.println("  reboot-and-apply <package_name> <reason>");
+        pw.println("  reboot-and-apply <token> <reason>");
     }
 }

@@ -884,7 +884,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
                                      jlong bitmapHandle, jint density, jobject parcel) {
 #ifdef __ANDROID__ // Layoutlib does not support parcel
     if (parcel == NULL) {
-        ALOGD("------- writeToParcel null parcel\n");
+        SkDebugf("------- writeToParcel null parcel\n");
         return JNI_FALSE;
     }
 

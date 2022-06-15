@@ -56,7 +56,7 @@ public class GeocoderProxy {
 
     private GeocoderProxy(Context context) {
         mServiceWatcher = ServiceWatcher.create(context, "GeocoderProxy",
-                CurrentUserServiceSupplier.createFromConfig(context, SERVICE_ACTION,
+                new CurrentUserServiceSupplier(context, SERVICE_ACTION,
                         com.android.internal.R.bool.config_enableGeocoderOverlay,
                         com.android.internal.R.string.config_geocoderProviderPackageName),
                 null);
@@ -83,9 +83,9 @@ public class GeocoderProxy {
             }
 
             @Override
-            public void onError(Throwable t) {
+            public void onError() {
                 try {
-                    listener.onResults(t.toString(), Collections.emptyList());
+                    listener.onResults("Service not Available", Collections.emptyList());
                 } catch (RemoteException e) {
                     // ignore
                 }
@@ -110,9 +110,9 @@ public class GeocoderProxy {
             }
 
             @Override
-            public void onError(Throwable t) {
+            public void onError() {
                 try {
-                    listener.onResults(t.toString(), Collections.emptyList());
+                    listener.onResults("Service not Available", Collections.emptyList());
                 } catch (RemoteException e) {
                     // ignore
                 }

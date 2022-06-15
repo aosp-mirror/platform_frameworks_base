@@ -69,6 +69,7 @@ java_library {
         "test/**/*.proto",
     ],
     proto: {
-        type: "stream",
+        plugin: "javastream",
     },
+    static_libs: ["libprotobuf-java-lite"],
 }

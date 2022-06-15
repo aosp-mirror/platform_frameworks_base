@@ -50,9 +50,7 @@ import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.IpSecAlgorithm;
 import android.net.IpSecTransform;
-import android.net.LinkProperties;
 import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.net.RouteInfo;
 import android.net.eap.EapSessionConfig;
 import android.net.ipsec.ike.ChildSaProposal;
@@ -88,7 +86,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Utility class to build and convert IKEv2/IPsec parameters.
@@ -379,41 +376,22 @@ public class VpnIkev2Utils {
     static class Ikev2VpnNetworkCallback extends NetworkCallback {
         private final String mTag;
         private final Vpn.IkeV2VpnRunnerCallback mCallback;
-        private final Executor mExecutor;
 
-        Ikev2VpnNetworkCallback(String tag, Vpn.IkeV2VpnRunnerCallback callback,
-                Executor executor) {
+        Ikev2VpnNetworkCallback(String tag, Vpn.IkeV2VpnRunnerCallback callback) {
             mTag = tag;
             mCallback = callback;
-            mExecutor = executor;
         }
 
         @Override
         public void onAvailable(@NonNull Network network) {
             Log.d(mTag, "Starting IKEv2/IPsec session on new network: " + network);
-            mExecutor.execute(() -> mCallback.onDefaultNetworkChanged(network));
-        }
-
-        @Override
-        public void onCapabilitiesChanged(@NonNull Network network,
-                @NonNull NetworkCapabilities networkCapabilities) {
-            Log.d(mTag, "NC changed for net " + network + " : " + networkCapabilities);
-            mExecutor.execute(
-                    () -> mCallback.onDefaultNetworkCapabilitiesChanged(networkCapabilities));
-        }
-
-        @Override
-        public void onLinkPropertiesChanged(@NonNull Network network,
-                @NonNull LinkProperties linkProperties) {
-            Log.d(mTag, "LP changed for net " + network + " : " + linkProperties);
-            mExecutor.execute(
-                    () -> mCallback.onDefaultNetworkLinkPropertiesChanged(linkProperties));
+            mCallback.onDefaultNetworkChanged(network);
         }
 
         @Override
         public void onLost(@NonNull Network network) {
             Log.d(mTag, "Tearing down; lost network: " + network);
-            mExecutor.execute(() -> mCallback.onSessionLost(network, null));
+            mCallback.onSessionLost(network, null);
         }
     }
 

@@ -16,14 +16,12 @@
 
 package com.android.server.biometrics.sensors;
 
-import android.util.Slog;
 import android.util.SparseIntArray;
 
 /**
  * For a single sensor, caches lockout states for all users.
  */
 public class LockoutCache implements LockoutTracker {
-    private static final String TAG = "LockoutCache";
 
     // Map of userId to LockoutMode
     private final SparseIntArray mUserLockoutStates;
@@ -33,7 +31,6 @@ public class LockoutCache implements LockoutTracker {
     }
 
     public void setLockoutModeForUser(int userId, @LockoutMode int mode) {
-        Slog.d(TAG, "Lockout for user: " + userId +  " is " + mode);
         synchronized (this) {
             mUserLockoutStates.put(userId, mode);
         }

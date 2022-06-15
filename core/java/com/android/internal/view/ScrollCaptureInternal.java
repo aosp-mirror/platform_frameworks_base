@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.ScrollCaptureCallback;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.ListView;
 
 /**
@@ -44,7 +43,7 @@ public class ScrollCaptureInternal {
     private static final int DOWN = 1;
 
     /**
-     * Cannot scroll according to {@link View#canScrollVertically}.
+     * Not a ViewGroup, or cannot scroll according to View APIs.
      */
     public static final int TYPE_FIXED = 0;
 
@@ -61,7 +60,7 @@ public class ScrollCaptureInternal {
     public static final int TYPE_RECYCLING = 2;
 
     /**
-     * Unknown scrollable view with no child views (or not a subclass of ViewGroup).
+     * The ViewGroup scrolls, but has no child views in
      */
     private static final int TYPE_OPAQUE = 3;
 
@@ -74,6 +73,16 @@ public class ScrollCaptureInternal {
      * as excluded during scroll capture search.
      */
     private static int detectScrollingType(View view) {
+        // Must be a ViewGroup
+        if (!(view instanceof ViewGroup)) {
+            if (DEBUG_VERBOSE) {
+                Log.v(TAG, "hint: not a subclass of ViewGroup");
+            }
+            return TYPE_FIXED;
+        }
+        if (DEBUG_VERBOSE) {
+            Log.v(TAG, "hint: is a subclass of ViewGroup");
+        }
         // Confirm that it can scroll.
         if (!(view.canScrollVertically(DOWN) || view.canScrollVertically(UP))) {
             // Nothing to scroll here, move along.
@@ -85,17 +94,6 @@ public class ScrollCaptureInternal {
         if (DEBUG_VERBOSE) {
             Log.v(TAG, "hint: can be scrolled up or down");
         }
-        // Must be a ViewGroup
-        if (!(view instanceof ViewGroup)) {
-            if (DEBUG_VERBOSE) {
-                Log.v(TAG, "hint: not a subclass of ViewGroup");
-            }
-            return TYPE_OPAQUE;
-        }
-        if (DEBUG_VERBOSE) {
-            Log.v(TAG, "hint: is a subclass of ViewGroup");
-        }
-
         // ScrollViews accept only a single child.
         if (((ViewGroup) view).getChildCount() > 1) {
             if (DEBUG_VERBOSE) {
@@ -190,18 +188,6 @@ public class ScrollCaptureInternal {
                 }
                 return new ScrollCaptureViewSupport<>((ViewGroup) view,
                         new RecyclerViewCaptureHelper());
-            case TYPE_OPAQUE:
-                if (DEBUG) {
-                    Log.d(TAG, "scroll capture: FOUND " + view.getClass().getName()
-                            + "[" + resolveId(view.getContext(), view.getId()) + "]"
-                            + " -> TYPE_OPAQUE");
-                }
-                if (view instanceof WebView) {
-                    Log.d(TAG, "scroll capture: Using WebView support");
-                    return new ScrollCaptureViewSupport<>((WebView) view,
-                            new WebViewCaptureHelper());
-                }
-                break;
             case TYPE_FIXED:
                 // ignore
                 break;

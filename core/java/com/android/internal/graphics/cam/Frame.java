@@ -19,8 +19,6 @@ package com.android.internal.graphics.cam;
 import android.annotation.NonNull;
 import android.util.MathUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 /**
  * The frame, or viewing conditions, where a color was seen. Used, along with a color, to create a
  * color appearance model representing the color.
@@ -70,18 +68,15 @@ public final class Frame {
     private final float mFlRoot;
     private final float mZ;
 
-    @VisibleForTesting
-    public float getAw() {
+    float getAw() {
         return mAw;
     }
 
-    @VisibleForTesting
-    public float getN() {
+    float getN() {
         return mN;
     }
 
-    @VisibleForTesting
-    public float getNbb() {
+    float getNbb() {
         return mNbb;
     }
 
@@ -97,9 +92,8 @@ public final class Frame {
         return mNc;
     }
 
-    @VisibleForTesting
     @NonNull
-    public float[] getRgbD() {
+    float[] getRgbD() {
         return mRgbD;
     }
 
@@ -107,9 +101,7 @@ public final class Frame {
         return mFl;
     }
 
-    @VisibleForTesting
-    @NonNull
-    public float getFlRoot() {
+    float getFlRoot() {
         return mFlRoot;
     }
 
@@ -175,7 +167,7 @@ public final class Frame {
                 5.0 * adaptingLuminance));
 
         // Intermediate factor, ratio of background relative luminance to white relative luminance
-        float n = (float) CamUtils.yFromLstar(backgroundLstar) / whitepoint[1];
+        float n = CamUtils.yFromLstar(backgroundLstar) / whitepoint[1];
 
         // Base exponential nonlinearity
         // note Schlomer 2018 has a typo and uses 1.58, the correct factor is 1.48

@@ -31,8 +31,6 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
-
 /**
  * An interface class to manage connectivity subsystem recovery/restart operations.
  */
@@ -195,30 +193,22 @@ public class ConnectivitySubsystemsRecoveryManager {
         mApmMonitorRegistered = false;
     }
 
-    @VisibleForTesting
-    void startTrackingWifiRestart() {
-        if (mWifiManager == null) return;
+    private void startTrackingWifiRestart() {
         mWifiManager.registerSubsystemRestartTrackingCallback(new HandlerExecutor(mHandler),
                 mWifiSubsystemRestartTrackingCallback);
     }
 
-    @VisibleForTesting
-    void stopTrackingWifiRestart() {
-        if (mWifiManager == null) return;
+    private void stopTrackingWifiRestart() {
         mWifiManager.unregisterSubsystemRestartTrackingCallback(
                 mWifiSubsystemRestartTrackingCallback);
     }
 
-    @VisibleForTesting
-    void startTrackingTelephonyRestart() {
-        if (mTelephonyManager == null) return;
+    private void startTrackingTelephonyRestart() {
         mTelephonyManager.registerTelephonyCallback(new HandlerExecutor(mHandler),
                 mTelephonyCallback);
     }
 
-    @VisibleForTesting
-    void stopTrackingTelephonyRestart() {
-        if (mTelephonyManager == null) return;
+    private void stopTrackingTelephonyRestart() {
         mTelephonyManager.unregisterTelephonyCallback(mTelephonyCallback);
     }
 

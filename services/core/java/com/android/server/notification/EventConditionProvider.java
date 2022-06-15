@@ -41,7 +41,6 @@ import android.util.SparseArray;
 
 import com.android.server.notification.CalendarTracker.CheckEventResult;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
-import com.android.server.pm.PackageManagerService;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -267,7 +266,12 @@ public class EventConditionProvider extends SystemConditionProviderService {
     private void rescheduleAlarm(long now, long time) {
         mNextAlarmTime = time;
         final AlarmManager alarms = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        final PendingIntent pendingIntent = getPendingIntent(time);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext,
+                REQUEST_CODE_EVALUATE,
+                new Intent(ACTION_EVALUATE)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                        .putExtra(EXTRA_TIME, time),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         alarms.cancel(pendingIntent);
         if (time == 0 || time < now) {
             if (DEBUG) Slog.d(TAG, "Not scheduling evaluate: " + (time == 0 ? "no time specified"
@@ -277,17 +281,6 @@ public class EventConditionProvider extends SystemConditionProviderService {
         if (DEBUG) Slog.d(TAG, String.format("Scheduling evaluate for %s, in %s, now=%s",
                 ts(time), formatDuration(time - now), ts(now)));
         alarms.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
-    }
-
-    PendingIntent getPendingIntent(long time) {
-        final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext,
-                REQUEST_CODE_EVALUATE,
-                new Intent(ACTION_EVALUATE)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                        .setPackage(PackageManagerService.PLATFORM_PACKAGE_NAME)
-                        .putExtra(EXTRA_TIME, time),
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        return pendingIntent;
     }
 
     private Condition createCondition(Uri id, int state) {
@@ -306,8 +299,7 @@ public class EventConditionProvider extends SystemConditionProviderService {
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             filter.addAction(ACTION_EVALUATE);
-            registerReceiver(mReceiver, filter,
-                    Context.RECEIVER_EXPORTED_UNAUDITED);
+            registerReceiver(mReceiver, filter);
         } else {
             unregisterReceiver(mReceiver);
         }

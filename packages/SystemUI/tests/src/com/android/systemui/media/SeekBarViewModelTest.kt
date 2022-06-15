@@ -36,7 +36,6 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -47,7 +46,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
@@ -73,14 +71,14 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     private val token1 = MediaSession.Token(1, null)
     private val token2 = MediaSession.Token(2, null)
 
-    @JvmField @Rule val mockito = MockitoJUnit.rule()
-
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
         viewModel = SeekBarViewModel(FakeRepeatableExecutor(fakeExecutor))
-        viewModel.logSeek = { }
+        viewModel.logSmartspaceClick = { }
+        mockController = mock(MediaController::class.java)
         whenever(mockController.sessionToken).thenReturn(token1)
+        mockTransport = mock(MediaController.TransportControls::class.java)
 
         // LiveData to run synchronously
         ArchTaskExecutor.getInstance().setDelegate(taskExecutor)
@@ -324,42 +322,6 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun seekStarted_listenerNotified() {
-        var isScrubbing: Boolean? = null
-        val listener = object : SeekBarViewModel.ScrubbingChangeListener {
-            override fun onScrubbingChanged(scrubbing: Boolean) {
-                isScrubbing = scrubbing
-            }
-        }
-        viewModel.setScrubbingChangeListener(listener)
-
-        viewModel.onSeekStarting()
-        fakeExecutor.runAllReady()
-
-        assertThat(isScrubbing).isTrue()
-    }
-
-    @Test
-    fun seekEnded_listenerNotified() {
-        var isScrubbing: Boolean? = null
-        val listener = object : SeekBarViewModel.ScrubbingChangeListener {
-            override fun onScrubbingChanged(scrubbing: Boolean) {
-                isScrubbing = scrubbing
-            }
-        }
-        viewModel.setScrubbingChangeListener(listener)
-
-        // Start seeking
-        viewModel.onSeekStarting()
-        fakeExecutor.runAllReady()
-        // End seeking
-        viewModel.onSeek(15L)
-        fakeExecutor.runAllReady()
-
-        assertThat(isScrubbing).isFalse()
-    }
-
-    @Test
     @Ignore
     fun onProgressChangedFromUser() {
         // WHEN user starts dragging the seek bar
@@ -375,20 +337,16 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onProgressChangedFromUserWithoutStartTrackingTouch_transportUpdated() {
-        whenever(mockController.transportControls).thenReturn(mockTransport)
-        viewModel.updateController(mockController)
+    fun onProgressChangedFromUserWithoutStartTrackingTouch() {
+        // WHEN user starts dragging the seek bar
         val pos = 42
         val bar = SeekBar(context)
-
-        // WHEN we get an onProgressChanged event without an onStartTrackingTouch event
         with(viewModel.seekBarListener) {
             onProgressChanged(bar, pos, true)
         }
         fakeExecutor.runAllReady()
-
-        // THEN we immediately update the transport
-        verify(mockTransport).seekTo(pos.toLong())
+        // THEN then elapsed time should not be updated
+        assertThat(viewModel.progress.value!!.elapsedTime).isNull()
     }
 
     @Test

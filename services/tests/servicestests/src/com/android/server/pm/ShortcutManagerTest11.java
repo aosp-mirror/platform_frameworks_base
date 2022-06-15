@@ -30,7 +30,6 @@ import android.content.pm.LauncherApps.ShortcutChangeCallback;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.ShortcutInfo;
 import android.os.test.TestLooper;
-import android.platform.test.annotations.Presubmit;
 
 import com.android.server.pm.ShortcutService.ConfigConstants;
 
@@ -43,7 +42,6 @@ import java.util.List;
  *
  atest -c com.android.server.pm.ShortcutManagerTest11
  */
-@Presubmit
 public class ShortcutManagerTest11 extends BaseShortcutManagerTest {
 
     private static final ShortcutQuery QUERY_MATCH_ALL = createShortcutQuery(

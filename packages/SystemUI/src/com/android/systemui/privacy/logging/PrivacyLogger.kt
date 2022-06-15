@@ -16,7 +16,7 @@
 
 package com.android.systemui.privacy.logging
 
-import android.permission.PermissionGroupUsage
+import android.permission.PermGroupUsage
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogMessage
@@ -41,16 +41,6 @@ class PrivacyLogger @Inject constructor(
             bool1 = active
         }, {
             "App Op: $int1 for $str1($int2), active=$bool1"
-        })
-    }
-
-    fun logUpdatedItemFromMediaProjection(uid: Int, packageName: String, active: Boolean) {
-        log(LogLevel.INFO, {
-            int1 = uid
-            str1 = packageName
-            bool1 = active
-        }, {
-            "MediaProjection: $str1($int1), active=$bool1"
         })
     }
 
@@ -110,7 +100,7 @@ class PrivacyLogger @Inject constructor(
         })
     }
 
-    fun logUnfilteredPermGroupUsage(contents: List<PermissionGroupUsage>) {
+    fun logUnfilteredPermGroupUsage(contents: List<PermGroupUsage>) {
         log(LogLevel.DEBUG, {
             str1 = contents.toString()
         }, {

@@ -17,9 +17,9 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
-import android.content.pm.SigningDetails;
-import android.content.pm.SigningDetails.SignatureSchemeVersion;
 import android.util.Log;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -35,41 +35,40 @@ import java.util.ArrayList;
 
 class PackageSignatures {
 
-    @NonNull SigningDetails mSigningDetails;
+    @NonNull PackageParser.SigningDetails mSigningDetails;
 
     PackageSignatures(PackageSignatures orig) {
-        if (orig != null && orig.mSigningDetails != SigningDetails.UNKNOWN) {
-            mSigningDetails = new SigningDetails(orig.mSigningDetails);
+        if (orig != null && orig.mSigningDetails != PackageParser.SigningDetails.UNKNOWN) {
+            mSigningDetails = new PackageParser.SigningDetails(orig.mSigningDetails);
         } else {
-            mSigningDetails = SigningDetails.UNKNOWN;
+            mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
         }
     }
 
-    PackageSignatures(SigningDetails signingDetails) {
+    PackageSignatures(PackageParser.SigningDetails signingDetails) {
         mSigningDetails = signingDetails;
     }
 
     PackageSignatures() {
-        mSigningDetails = SigningDetails.UNKNOWN;
+        mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
     }
 
     void writeXml(TypedXmlSerializer serializer, String tagName,
             ArrayList<Signature> writtenSignatures) throws IOException {
-        if (mSigningDetails.getSignatures() == null) {
+        if (mSigningDetails.signatures == null) {
             return;
         }
         serializer.startTag(null, tagName);
-        serializer.attributeInt(null, "count", mSigningDetails.getSignatures().length);
-        serializer.attributeInt(null, "schemeVersion", mSigningDetails.getSignatureSchemeVersion());
-        writeCertsListXml(serializer, writtenSignatures, mSigningDetails.getSignatures(), false);
+        serializer.attributeInt(null, "count", mSigningDetails.signatures.length);
+        serializer.attributeInt(null, "schemeVersion", mSigningDetails.signatureSchemeVersion);
+        writeCertsListXml(serializer, writtenSignatures, mSigningDetails.signatures, false);
 
         // if we have past signer certificate information, write it out
-        if (mSigningDetails.getPastSigningCertificates() != null) {
+        if (mSigningDetails.pastSigningCertificates != null) {
             serializer.startTag(null, "pastSigs");
-            serializer.attributeInt(null, "count",
-                    mSigningDetails.getPastSigningCertificates().length);
+            serializer.attributeInt(null, "count", mSigningDetails.pastSigningCertificates.length);
             writeCertsListXml(serializer, writtenSignatures,
-                    mSigningDetails.getPastSigningCertificates(), true);
+                    mSigningDetails.pastSigningCertificates, true);
             serializer.endTag(null, "pastSigs");
         }
         serializer.endTag(null, tagName);
@@ -107,7 +106,8 @@ class PackageSignatures {
 
     void readXml(TypedXmlPullParser parser, ArrayList<Signature> readSignatures)
             throws IOException, XmlPullParserException {
-        SigningDetails.Builder builder = new SigningDetails.Builder();
+        PackageParser.SigningDetails.Builder builder =
+                new PackageParser.SigningDetails.Builder();
 
         final int count = parser.getAttributeInt(null, "count", -1);
         if (count == -1) {
@@ -142,13 +142,13 @@ class PackageSignatures {
             PackageManagerService.reportSettingsProblem(Log.WARN,
                     "Error in package manager settings: <sigs> "
                             + "unable to convert certificate(s) to public key(s).");
-            mSigningDetails = SigningDetails.UNKNOWN;
+            mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
         }
     }
 
     private int readCertsListXml(TypedXmlPullParser parser, ArrayList<Signature> readSignatures,
             ArrayList<Signature> signatures, int count, boolean isPastSigs,
-            SigningDetails.Builder builder)
+            PackageParser.SigningDetails.Builder builder)
             throws IOException, XmlPullParserException {
         int pos = 0;
 
@@ -315,25 +315,25 @@ class PackageSignatures {
         buf.append("PackageSignatures{");
         buf.append(Integer.toHexString(System.identityHashCode(this)));
         buf.append(" version:");
-        buf.append(mSigningDetails.getSignatureSchemeVersion());
+        buf.append(mSigningDetails.signatureSchemeVersion);
         buf.append(", signatures:[");
-        if (mSigningDetails.getSignatures() != null) {
-            for (int i = 0; i < mSigningDetails.getSignatures().length; i++) {
+        if (mSigningDetails.signatures != null) {
+            for (int i = 0; i < mSigningDetails.signatures.length; i++) {
                 if (i > 0) buf.append(", ");
                 buf.append(Integer.toHexString(
-                        mSigningDetails.getSignatures()[i].hashCode()));
+                        mSigningDetails.signatures[i].hashCode()));
             }
         }
         buf.append("]");
         buf.append(", past signatures:[");
-        if (mSigningDetails.getPastSigningCertificates() != null) {
-            for (int i = 0; i < mSigningDetails.getPastSigningCertificates().length; i++) {
+        if (mSigningDetails.pastSigningCertificates != null) {
+            for (int i = 0; i < mSigningDetails.pastSigningCertificates.length; i++) {
                 if (i > 0) buf.append(", ");
                 buf.append(Integer.toHexString(
-                        mSigningDetails.getPastSigningCertificates()[i].hashCode()));
+                        mSigningDetails.pastSigningCertificates[i].hashCode()));
                 buf.append(" flags: ");
-                buf.append(Integer.toHexString(
-                        mSigningDetails.getPastSigningCertificates()[i].getFlags()));
+                buf.append(
+                        Integer.toHexString(mSigningDetails.pastSigningCertificates[i].getFlags()));
             }
         }
         buf.append("]}");

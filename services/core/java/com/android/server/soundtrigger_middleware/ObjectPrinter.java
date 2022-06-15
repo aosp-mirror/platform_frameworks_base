@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Map;
 
@@ -31,28 +33,67 @@ class ObjectPrinter {
     static public final int kDefaultMaxCollectionLength = 16;
 
     /**
+     * Simple version of {@link #print(Object, boolean, int)} that prints an object, without
+     * recursing into sub-objects.
+     *
+     * @param obj The object to print.
+     * @return A string representing the object.
+     */
+    static String print(@Nullable Object obj) {
+        return print(obj, false, kDefaultMaxCollectionLength);
+    }
+
+    /**
      * Pretty-prints an object.
      *
      * @param obj                 The object to print.
+     * @param deep                Whether to pretty-print sub-objects (if false, just prints them
+     *                            with {@link Object#toString()}).
      * @param maxCollectionLength Whenever encountering collections, maximum number of elements to
      *                            print.
      * @return A string representing the object.
      */
-    static String print(@Nullable Object obj, int maxCollectionLength) {
+    static String print(@Nullable Object obj, boolean deep, int maxCollectionLength) {
         StringBuilder builder = new StringBuilder();
-        print(builder, obj, maxCollectionLength);
+        print(builder, obj, deep, maxCollectionLength);
         return builder.toString();
     }
 
     /**
-     * A version of {@link #print(Object, int)} that uses a {@link StringBuilder}.
+     * This version is suitable for use inside a toString() override of an object, e.g.:
+     * <pre><code>
+     *     class MyObject {
+     *         ...
+     *         @Override
+     *         String toString() {
+     *             return ObjectPrinter.printPublicFields(this, ...);
+     *         }
+     *     }
+     * </code></pre>
      *
-     * @param builder             StringBuilder to print into.
      * @param obj                 The object to print.
+     * @param deep                Whether to pretty-print sub-objects (if false, just prints them
+     *                            with {@link Object#toString()}).
      * @param maxCollectionLength Whenever encountering collections, maximum number of elements to
      *                            print.
      */
-    static void print(@NonNull StringBuilder builder, @Nullable Object obj,
+    static String printPublicFields(@Nullable Object obj, boolean deep, int maxCollectionLength) {
+        StringBuilder builder = new StringBuilder();
+        printPublicFields(builder, obj, deep, maxCollectionLength);
+        return builder.toString();
+    }
+
+    /**
+     * A version of {@link #print(Object, boolean, int)} that uses a {@link StringBuilder}.
+     *
+     * @param builder             StringBuilder to print into.
+     * @param obj                 The object to print.
+     * @param deep                Whether to pretty-print sub-objects (if false, just prints them
+     *                            with {@link Object#toString()}).
+     * @param maxCollectionLength Whenever encountering collections, maximum number of elements to
+     *                            print.
+     */
+    static void print(@NonNull StringBuilder builder, @Nullable Object obj, boolean deep,
             int maxCollectionLength) {
         try {
             if (obj == null) {
@@ -60,16 +101,16 @@ class ObjectPrinter {
                 return;
             }
             if (obj instanceof Boolean) {
-                builder.append(obj);
+                builder.append(obj.toString());
                 return;
             }
             if (obj instanceof Number) {
-                builder.append(obj);
+                builder.append(obj.toString());
                 return;
             }
             if (obj instanceof Character) {
                 builder.append('\'');
-                builder.append(obj);
+                builder.append(obj.toString());
                 builder.append('\'');
                 return;
             }
@@ -96,7 +137,7 @@ class ObjectPrinter {
                         isLong = true;
                         break;
                     }
-                    print(builder, child, maxCollectionLength);
+                    print(builder, child, deep, maxCollectionLength);
                     ++i;
                 }
                 if (isLong) {
@@ -122,9 +163,9 @@ class ObjectPrinter {
                         isLong = true;
                         break;
                     }
-                    print(builder, child.getKey(), maxCollectionLength);
+                    print(builder, child.getKey(), deep, maxCollectionLength);
                     builder.append(": ");
-                    print(builder, child.getValue(), maxCollectionLength);
+                    print(builder, child.getValue(), deep, maxCollectionLength);
                     ++i;
                 }
                 if (isLong) {
@@ -148,7 +189,7 @@ class ObjectPrinter {
                         isLong = true;
                         break;
                     }
-                    print(builder, Array.get(obj, i), maxCollectionLength);
+                    print(builder, Array.get(obj, i), deep, maxCollectionLength);
                 }
                 if (isLong) {
                     builder.append("... (+");
@@ -159,7 +200,48 @@ class ObjectPrinter {
                 return;
             }
 
-            builder.append(obj);
+            if (!deep) {
+                builder.append(obj.toString());
+                return;
+            }
+            printPublicFields(builder, obj, deep, maxCollectionLength);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * A version of {@link #printPublicFields(Object, boolean, int)} that uses a {@link
+     * StringBuilder}.
+     *
+     * @param obj                 The object to print.
+     * @param deep                Whether to pretty-print sub-objects (if false, just prints them
+     *                            with {@link Object#toString()}).
+     * @param maxCollectionLength Whenever encountering collections, maximum number of elements to
+     *                            print.
+     */
+    static void printPublicFields(@NonNull StringBuilder builder, @Nullable Object obj,
+            boolean deep,
+            int maxCollectionLength) {
+        try {
+            Class cls = obj.getClass();
+            builder.append("{ ");
+
+            boolean first = true;
+            for (Field fld : cls.getDeclaredFields()) {
+                int mod = fld.getModifiers();
+                if ((mod & Modifier.PUBLIC) != 0 && (mod & Modifier.STATIC) == 0) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        builder.append(", ");
+                    }
+                    builder.append(fld.getName());
+                    builder.append(": ");
+                    print(builder, fld.get(obj), deep, maxCollectionLength);
+                }
+            }
+            builder.append(" }");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

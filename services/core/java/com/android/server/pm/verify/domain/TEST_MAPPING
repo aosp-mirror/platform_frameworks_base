@@ -12,6 +12,9 @@
       "name": "CtsDomainVerificationDeviceStandaloneTestCases"
     },
     {
+      "name": "CtsDomainVerificationDeviceMultiUserTestCases"
+    },
+    {
       "name": "CtsDomainVerificationHostTestCases"
     }
   ]

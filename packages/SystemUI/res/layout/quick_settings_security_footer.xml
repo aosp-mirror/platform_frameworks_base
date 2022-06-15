@@ -14,18 +14,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout
+<com.android.systemui.util.DualHeightHorizontalLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="0dp"
-    android:layout_height="@dimen/qs_security_footer_single_line_height"
-    android:layout_weight="1"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/qs_security_footer_height"
     android:clickable="true"
-    android:orientation="horizontal"
-    android:paddingHorizontal="@dimen/qs_footer_padding"
+    android:padding="@dimen/qs_footer_padding"
     android:gravity="center_vertical"
     android:layout_gravity="center_vertical|center_horizontal"
-    android:layout_marginEnd="@dimen/qs_footer_action_inset"
+    android:layout_marginBottom="@dimen/qs_footers_margin_bottom"
     android:background="@drawable/qs_security_footer_background"
+    systemui:singleLineHeight="@dimen/qs_security_footer_single_line_height"
+    systemui:textViewId="@id/footer_text"
     >
 
     <ImageView
@@ -42,7 +43,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:singleLine="true"
+        android:maxLines="@integer/qs_security_footer_maxLines"
         android:ellipsize="end"
         android:textAppearance="@style/TextAppearance.QS.SecurityFooter"
         android:textColor="?android:attr/textColorSecondary"/>
@@ -57,4 +58,4 @@
         android:autoMirrored="true"
         android:tint="?android:attr/textColorSecondary" />
 
-</LinearLayout>
+</com.android.systemui.util.DualHeightHorizontalLinearLayout>

@@ -29,20 +29,14 @@ import java.util.Objects;
  * Representation of {@link VibrationEffectSegment} that ramps vibration amplitude and/or frequency
  * for a specified duration.
  *
- * <p>The amplitudes are expressed by float values in the range [0, 1], representing the relative
- * output acceleration for the vibrator. The frequencies are expressed in hertz by positive finite
- * float values. The special value zero is used here for an unspecified frequency, and will be
- * automatically mapped to the device's default vibration frequency (usually the resonant
- * frequency).
- *
  * @hide
  */
 @TestApi
 public final class RampSegment extends VibrationEffectSegment {
     private final float mStartAmplitude;
-    private final float mStartFrequencyHz;
+    private final float mStartFrequency;
     private final float mEndAmplitude;
-    private final float mEndFrequencyHz;
+    private final float mEndFrequency;
     private final int mDuration;
 
     RampSegment(@NonNull Parcel in) {
@@ -50,12 +44,12 @@ public final class RampSegment extends VibrationEffectSegment {
     }
 
     /** @hide */
-    public RampSegment(float startAmplitude, float endAmplitude, float startFrequencyHz,
-            float endFrequencyHz, int duration) {
+    public RampSegment(float startAmplitude, float endAmplitude, float startFrequency,
+            float endFrequency, int duration) {
         mStartAmplitude = startAmplitude;
         mEndAmplitude = endAmplitude;
-        mStartFrequencyHz = startFrequencyHz;
-        mEndFrequencyHz = endFrequencyHz;
+        mStartFrequency = startFrequency;
+        mEndFrequency = endFrequency;
         mDuration = duration;
     }
 
@@ -67,8 +61,8 @@ public final class RampSegment extends VibrationEffectSegment {
         RampSegment other = (RampSegment) o;
         return Float.compare(mStartAmplitude, other.mStartAmplitude) == 0
                 && Float.compare(mEndAmplitude, other.mEndAmplitude) == 0
-                && Float.compare(mStartFrequencyHz, other.mStartFrequencyHz) == 0
-                && Float.compare(mEndFrequencyHz, other.mEndFrequencyHz) == 0
+                && Float.compare(mStartFrequency, other.mStartFrequency) == 0
+                && Float.compare(mEndFrequency, other.mEndFrequency) == 0
                 && mDuration == other.mDuration;
     }
 
@@ -80,12 +74,12 @@ public final class RampSegment extends VibrationEffectSegment {
         return mEndAmplitude;
     }
 
-    public float getStartFrequencyHz() {
-        return mStartFrequencyHz;
+    public float getStartFrequency() {
+        return mStartFrequency;
     }
 
-    public float getEndFrequencyHz() {
-        return mEndFrequencyHz;
+    public float getEndFrequency() {
+        return mEndFrequency;
     }
 
     @Override
@@ -93,29 +87,20 @@ public final class RampSegment extends VibrationEffectSegment {
         return mDuration;
     }
 
-    /** @hide */
-    @Override
-    public boolean isHapticFeedbackCandidate() {
-        return true;
-    }
-
-    /** @hide */
     @Override
     public boolean hasNonZeroAmplitude() {
         return mStartAmplitude > 0 || mEndAmplitude > 0;
     }
 
-    /** @hide */
     @Override
     public void validate() {
-        VibrationEffectSegment.checkFrequencyArgument(mStartFrequencyHz, "startFrequencyHz");
-        VibrationEffectSegment.checkFrequencyArgument(mEndFrequencyHz, "endFrequencyHz");
-        VibrationEffectSegment.checkDurationArgument(mDuration, "duration");
+        Preconditions.checkArgumentNonnegative(mDuration,
+                "Durations must all be >= 0, got " + mDuration);
         Preconditions.checkArgumentInRange(mStartAmplitude, 0f, 1f, "startAmplitude");
         Preconditions.checkArgumentInRange(mEndAmplitude, 0f, 1f, "endAmplitude");
     }
 
-    /** @hide */
+
     @NonNull
     @Override
     public RampSegment resolve(int defaultAmplitude) {
@@ -123,7 +108,6 @@ public final class RampSegment extends VibrationEffectSegment {
         return this;
     }
 
-    /** @hide */
     @NonNull
     @Override
     public RampSegment scale(float scaleFactor) {
@@ -133,12 +117,10 @@ public final class RampSegment extends VibrationEffectSegment {
                 && Float.compare(mEndAmplitude, newEndAmplitude) == 0) {
             return this;
         }
-        return new RampSegment(newStartAmplitude, newEndAmplitude, mStartFrequencyHz,
-                mEndFrequencyHz,
+        return new RampSegment(newStartAmplitude, newEndAmplitude, mStartFrequency, mEndFrequency,
                 mDuration);
     }
 
-    /** @hide */
     @NonNull
     @Override
     public RampSegment applyEffectStrength(int effectStrength) {
@@ -147,7 +129,7 @@ public final class RampSegment extends VibrationEffectSegment {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStartAmplitude, mEndAmplitude, mStartFrequencyHz, mEndFrequencyHz,
+        return Objects.hash(mStartAmplitude, mEndAmplitude, mStartFrequency, mEndFrequency,
                 mDuration);
     }
 
@@ -155,8 +137,8 @@ public final class RampSegment extends VibrationEffectSegment {
     public String toString() {
         return "Ramp{startAmplitude=" + mStartAmplitude
                 + ", endAmplitude=" + mEndAmplitude
-                + ", startFrequencyHz=" + mStartFrequencyHz
-                + ", endFrequencyHz=" + mEndFrequencyHz
+                + ", startFrequency=" + mStartFrequency
+                + ", endFrequency=" + mEndFrequency
                 + ", duration=" + mDuration
                 + "}";
     }
@@ -171,8 +153,8 @@ public final class RampSegment extends VibrationEffectSegment {
         out.writeInt(PARCEL_TOKEN_RAMP);
         out.writeFloat(mStartAmplitude);
         out.writeFloat(mEndAmplitude);
-        out.writeFloat(mStartFrequencyHz);
-        out.writeFloat(mEndFrequencyHz);
+        out.writeFloat(mStartFrequency);
+        out.writeFloat(mEndFrequency);
         out.writeInt(mDuration);
     }
 

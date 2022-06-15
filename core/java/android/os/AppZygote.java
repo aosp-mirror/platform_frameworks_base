@@ -17,11 +17,9 @@
 package android.os;
 
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ProcessInfo;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.Zygote;
 
 import dalvik.system.VMRuntime;
 
@@ -57,12 +55,9 @@ public class AppZygote {
     private ChildZygoteProcess mZygote;
 
     private final ApplicationInfo mAppInfo;
-    private final ProcessInfo mProcessInfo;
 
-    public AppZygote(ApplicationInfo appInfo, ProcessInfo processInfo, int zygoteUid, int uidGidMin,
-            int uidGidMax) {
+    public AppZygote(ApplicationInfo appInfo, int zygoteUid, int uidGidMin, int uidGidMax) {
         mAppInfo = appInfo;
-        mProcessInfo = processInfo;
         mZygoteUid = zygoteUid;
         mZygoteUidGidMin = uidGidMin;
         mZygoteUidGidMax = uidGidMax;
@@ -109,15 +104,13 @@ public class AppZygote {
         String abi = mAppInfo.primaryCpuAbi != null ? mAppInfo.primaryCpuAbi :
                 Build.SUPPORTED_ABIS[0];
         try {
-            int runtimeFlags = Zygote.getMemorySafetyRuntimeFlagsForSecondaryZygote(
-                    mAppInfo, mProcessInfo);
             mZygote = Process.ZYGOTE_PROCESS.startChildZygote(
                     "com.android.internal.os.AppZygoteInit",
                     mAppInfo.processName + "_zygote",
                     mZygoteUid,
                     mZygoteUid,
                     null,  // gids
-                    runtimeFlags,
+                    0,  // runtimeFlags
                     "app_zygote",  // seInfo
                     abi,  // abi
                     abi, // acceptedAbiList

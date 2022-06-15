@@ -22,10 +22,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
+import android.content.pm.PackageParser;
 import android.content.pm.Signature;
-import android.content.pm.SigningDetails;
-import android.platform.test.annotations.Presubmit;
 import android.util.TypedXmlPullParser;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -38,6 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +47,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class PackageSignaturesTest {
     private static final String TEST_RESOURCES_FOLDER = "PackageSignaturesTest";
@@ -106,10 +107,10 @@ public class PackageSignaturesTest {
     }
 
     private static final int[] CAPABILITIES =
-            {SigningDetails.CertCapabilities.INSTALLED_DATA,
-                    SigningDetails.CertCapabilities.SHARED_USER_ID,
-                    SigningDetails.CertCapabilities.PERMISSION,
-                    SigningDetails.CertCapabilities.ROLLBACK};
+            {PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA,
+                    PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID,
+                    PackageParser.SigningDetails.CertCapabilities.PERMISSION,
+                    PackageParser.SigningDetails.CertCapabilities.ROLLBACK};
 
     @Before
     public void setUp() throws Exception {
@@ -140,11 +141,11 @@ public class PackageSignaturesTest {
         // List.
         TypedXmlPullParser parser = getXMLFromResources("xml/one-signer.xml");
         ArrayList<Signature> signatures = new ArrayList<>();
-        mPackageSetting.getSignatures().readXml(parser, signatures);
+        mPackageSetting.signatures.readXml(parser, signatures);
         Set<String> expectedSignatures = createSetOfSignatures(FIRST_EXPECTED_SIGNATURE);
         verifySignaturesContainExpectedValues(signatures, expectedSignatures);
         parser = getXMLFromResources("xml/one-signer-previous-cert.xml");
-        mPackageSetting.getSignatures().readXml(parser, signatures);
+        mPackageSetting.signatures.readXml(parser, signatures);
         expectedSignatures = createSetOfSignatures(FIRST_EXPECTED_SIGNATURE);
         verifySignaturesContainExpectedValues(signatures, expectedSignatures);
     }
@@ -168,11 +169,11 @@ public class PackageSignaturesTest {
         TypedXmlPullParser parser = getXMLFromResources(
                 "xml/one-signer-invalid-public-key-cert-key.xml");
         ArrayList<Signature> signatures = new ArrayList<>();
-        mPackageSetting.getSignatures().readXml(parser, signatures);
+        mPackageSetting.signatures.readXml(parser, signatures);
         assertEquals(
                 "The signing details was not UNKNOWN after parsing an invalid public key cert key"
                         + " attribute",
-                SigningDetails.UNKNOWN, mPackageSetting.getSigningDetails());
+                PackageParser.SigningDetails.UNKNOWN, mPackageSetting.signatures.mSigningDetails);
     }
 
     @Test
@@ -180,14 +181,14 @@ public class PackageSignaturesTest {
         // Verifies if the sigs count attribute is missing then the signature cannot be read but the
         // method does not throw an exception.
         verifyReadXmlReturnsExpectedSignatures("xml/one-signer-missing-sigs-count.xml",
-                SigningDetails.SignatureSchemeVersion.UNKNOWN);
+                PackageParser.SigningDetails.SignatureSchemeVersion.UNKNOWN);
     }
 
     @Test
     public void testReadXmlWithMissingSchemeVersion() throws Exception {
         // Verifies if the schemeVersion is an invalid value the signature can still be obtained.
         verifyReadXmlReturnsExpectedSignatures("xml/one-signer-missing-scheme-version.xml",
-                SigningDetails.SignatureSchemeVersion.UNKNOWN,
+                PackageParser.SigningDetails.SignatureSchemeVersion.UNKNOWN,
                 FIRST_EXPECTED_SIGNATURE);
     }
 
@@ -197,7 +198,7 @@ public class PackageSignaturesTest {
         // obtained.
         verifyReadXmlReturnsExpectedSignaturesAndLineage(
                 "xml/three-signers-in-lineage-missing-scheme-version.xml",
-                SigningDetails.SignatureSchemeVersion.UNKNOWN,
+                PackageParser.SigningDetails.SignatureSchemeVersion.UNKNOWN,
                 FIRST_EXPECTED_SIGNATURE, SECOND_EXPECTED_SIGNATURE, THIRD_EXPECTED_SIGNATURE);
     }
 
@@ -354,7 +355,7 @@ public class PackageSignaturesTest {
         // with the flags set to 0 does not have any capabilities.
         TypedXmlPullParser parser = getXMLFromResources("xml/two-signers-in-lineage-no-caps.xml");
         ArrayList<Signature> signatures = new ArrayList<>();
-        mPackageSetting.getSignatures().readXml(parser, signatures);
+        mPackageSetting.signatures.readXml(parser, signatures);
         // obtain the Signature in the list matching the previous signing certificate
         Signature previousSignature = null;
         for (Signature signature : signatures) {
@@ -367,7 +368,7 @@ public class PackageSignaturesTest {
         assertNotNull("Unable to find the expected previous signer", previousSignature);
         for (int capability : CAPABILITIES) {
             assertFalse("The previous signer should not have the " + capability + " capability",
-                    mPackageSetting.getSigningDetails().hasCertificate(previousSignature,
+                    mPackageSetting.signatures.mSigningDetails.hasCertificate(previousSignature,
                             capability));
         }
     }
@@ -380,12 +381,12 @@ public class PackageSignaturesTest {
             String... expectedSignatureValues) throws Exception {
         TypedXmlPullParser parser = getXMLFromResources(xmlFile);
         ArrayList<Signature> signatures = new ArrayList<>();
-        mPackageSetting.getSignatures().readXml(parser, signatures);
+        mPackageSetting.signatures.readXml(parser, signatures);
         Set<String> expectedSignatures = createSetOfSignatures(expectedSignatureValues);
         verifySignaturesContainExpectedValues(signatures, expectedSignatures);
         assertEquals("The returned signature scheme is not the expected value",
                 expectedSchemeVersion,
-                mPackageSetting.getSigningDetails().getSignatureSchemeVersion());
+                mPackageSetting.signatures.mSigningDetails.signatureSchemeVersion);
     }
 
     /**
@@ -397,11 +398,11 @@ public class PackageSignaturesTest {
             int schemeVersion, String... expectedSignatureValues) throws Exception {
         TypedXmlPullParser parser = getXMLFromResources(xmlFile);
         ArrayList<Signature> signatures = new ArrayList<>();
-        mPackageSetting.getSignatures().readXml(parser, signatures);
+        mPackageSetting.signatures.readXml(parser, signatures);
         Set<String> expectedSignatures = createSetOfSignatures(expectedSignatureValues);
         verifySignaturesContainExpectedValues(signatures, expectedSignatures);
         assertEquals("The returned signature scheme is not the expected value", schemeVersion,
-                mPackageSetting.getSigningDetails().getSignatureSchemeVersion());
+                mPackageSetting.signatures.mSigningDetails.signatureSchemeVersion);
         for (Signature signature : signatures) {
             String signatureValue = HexDump.toHexString(signature.toByteArray(), false);
             int expectedCapabilities = SIGNATURE_TO_CAPABILITY_MAP.get(signatureValue);
@@ -409,7 +410,7 @@ public class PackageSignaturesTest {
                             + " was not found with the expected capabilities of " +
                             expectedCapabilities
                             + " in the signing details",
-                    mPackageSetting.getSigningDetails().hasCertificate(signature,
+                    mPackageSetting.signatures.mSigningDetails.hasCertificate(signature,
                             expectedCapabilities));
         }
     }

@@ -69,7 +69,7 @@ public class UsbDeviceConnection {
             boolean wasOpened = native_open(name, pfd.getFileDescriptor());
 
             if (wasOpened) {
-                mCloseGuard.open("UsbDeviceConnection.close");
+                mCloseGuard.open("close");
             }
 
             return wasOpened;

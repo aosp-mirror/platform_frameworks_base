@@ -26,9 +26,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 
 /**
@@ -38,10 +35,10 @@ import android.os.UserHandle;
  */
 class AppTaskImpl extends IAppTask.Stub {
     private static final String TAG = "AppTaskImpl";
-    private final ActivityTaskManagerService mService;
+    private ActivityTaskManagerService mService;
 
-    private final int mTaskId;
-    private final int mCallingUid;
+    private int mTaskId;
+    private int mCallingUid;
 
     public AppTaskImpl(ActivityTaskManagerService service, int taskId, int callingUid) {
         mService = service;
@@ -49,27 +46,16 @@ class AppTaskImpl extends IAppTask.Stub {
         mCallingUid = callingUid;
     }
 
-    private void checkCallerOrSystemOrRoot() {
-        if (mCallingUid != Binder.getCallingUid() && Process.SYSTEM_UID != Binder.getCallingUid()
-                && Process.ROOT_UID != Binder.getCallingUid()) {
+    private void checkCaller() {
+        if (mCallingUid != Binder.getCallingUid()) {
             throw new SecurityException("Caller " + mCallingUid
                     + " does not match caller of getAppTasks(): " + Binder.getCallingUid());
         }
     }
 
     @Override
-    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
-            throws RemoteException {
-        try {
-            return super.onTransact(code, data, reply, flags);
-        } catch (RuntimeException e) {
-            throw ActivityTaskManagerService.logAndRethrowRuntimeExceptionOnTransact(TAG, e);
-        }
-    }
-
-    @Override
     public void finishAndRemoveTask() {
-        checkCallerOrSystemOrRoot();
+        checkCaller();
 
         synchronized (mService.mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
@@ -87,7 +73,7 @@ class AppTaskImpl extends IAppTask.Stub {
 
     @Override
     public ActivityManager.RecentTaskInfo getTaskInfo() {
-        checkCallerOrSystemOrRoot();
+        checkCaller();
 
         synchronized (mService.mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
@@ -107,7 +93,7 @@ class AppTaskImpl extends IAppTask.Stub {
 
     @Override
     public void moveToFront(IApplicationThread appThread, String callingPackage) {
-        checkCallerOrSystemOrRoot();
+        checkCaller();
         // Will bring task to front if it already has a root activity.
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
@@ -122,14 +108,14 @@ class AppTaskImpl extends IAppTask.Stub {
                 final ActivityStarter starter = mService.getActivityStartController().obtainStarter(
                         null /* intent */, "moveToFront");
                 if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid,
-                        callingPackage, -1, -1, callerApp, null, false, null, null)) {
+                        callingPackage, -1, -1, callerApp, null, false, null)) {
                     if (!mService.isBackgroundActivityStartsEnabled()) {
                         return;
                     }
                 }
+                mService.mTaskSupervisor.startActivityFromRecents(callingPid,
+                        callingUid, mTaskId, null);
             }
-            mService.mTaskSupervisor.startActivityFromRecents(callingPid, callingUid, mTaskId,
-                    null /* options */);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -138,7 +124,7 @@ class AppTaskImpl extends IAppTask.Stub {
     @Override
     public int startActivity(IBinder whoThread, String callingPackage, String callingFeatureId,
             Intent intent, String resolvedType, Bundle bOptions) {
-        checkCallerOrSystemOrRoot();
+        checkCaller();
         mService.assertPackageMatchesCallingUid(callingPackage);
 
         int callingUser = UserHandle.getCallingUserId();
@@ -169,7 +155,7 @@ class AppTaskImpl extends IAppTask.Stub {
 
     @Override
     public void setExcludeFromRecents(boolean exclude) {
-        checkCallerOrSystemOrRoot();
+        checkCaller();
 
         synchronized (mService.mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();

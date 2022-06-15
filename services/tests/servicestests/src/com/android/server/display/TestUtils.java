@@ -18,9 +18,7 @@ package com.android.server.display;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.os.Parcel;
 import android.os.SystemClock;
-import android.view.DisplayAddress;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -59,13 +57,4 @@ public final class TestUtils {
         return sensor;
     }
 
-    /**
-     * Create a custom {@link DisplayAddress} to ensure we're not relying on any specific
-     * display-address implementation in our code. Intentionally uses default object (reference)
-     * equality rules.
-     */
-    public static class TestDisplayAddress extends DisplayAddress {
-        @Override
-        public void writeToParcel(Parcel out, int flags) { }
-    }
 }

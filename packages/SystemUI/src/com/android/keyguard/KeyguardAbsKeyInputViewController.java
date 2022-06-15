@@ -25,7 +25,6 @@ import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
-import android.util.PluralsMessageFormatter;
 import android.view.KeyEvent;
 
 import com.android.internal.util.LatencyTracker;
@@ -38,9 +37,6 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKeyInputView>
         extends KeyguardInputViewController<T> {
@@ -102,6 +98,7 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     protected void onViewAttached() {
         super.onViewAttached();
         mView.setKeyDownListener(mKeyDownListener);
+        mView.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
         mEmergencyButtonController.setEmergencyButtonCallback(mEmergencyButtonCallback);
     }
 
@@ -156,12 +153,9 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
             @Override
             public void onTick(long millisUntilFinished) {
                 int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
-                Map<String, Object> arguments = new HashMap<>();
-                arguments.put("count", secondsRemaining);
-                mMessageAreaController.setMessage(PluralsMessageFormatter.format(
-                        mView.getResources(),
-                        arguments,
-                        R.string.kg_too_many_failed_attempts_countdown));
+                mMessageAreaController.setMessage(mView.getResources().getQuantityString(
+                        R.plurals.kg_too_many_failed_attempts_countdown,
+                        secondsRemaining, secondsRemaining));
             }
 
             @Override
@@ -194,11 +188,8 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                 mMessageAreaController.setMessage(mView.getWrongPasswordStringId());
             }
             mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
-            startErrorAnimation();
         }
     }
-
-    protected void startErrorAnimation() { /* no-op */ }
 
     protected void verifyPasswordAndUnlock() {
         if (mDismissing) return; // already verified but haven't been dismissed; don't do it again.

@@ -32,6 +32,7 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.DeviceConfigProxy;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
 
@@ -189,8 +190,8 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
-        mInternalFalsingManager.dump(pw, args);
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        mInternalFalsingManager.dump(fd, pw, args);
     }
 
     @Override

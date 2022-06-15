@@ -15,6 +15,8 @@
 package com.android.systemui.plugins.qs;
 
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 
 import com.android.systemui.plugins.FragmentBase;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -33,7 +35,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 15;
+    int VERSION = 11;
 
     String TAG = "QS";
 
@@ -45,47 +47,17 @@ public interface QS extends FragmentBase {
     void setHeightOverride(int desiredHeight);
     void setHeaderClickable(boolean qsExpansionEnabled);
     boolean isCustomizing();
-    /** Close the QS customizer, if it is open. */
-    void closeCustomizer();
     void setOverscrolling(boolean overscrolling);
     void setExpanded(boolean qsExpanded);
     void setListening(boolean listening);
-
-    /**
-     * Set whether QQS/QS is visible or not.
-     *
-     * This is different from setExpanded, as it will be true when QQS is visible. In particular,
-     * it should be false when device is locked and only notifications (in lockscreen) are visible.
-     */
-    void setQsVisible(boolean qsVisible);
     boolean isShowingDetail();
     void closeDetail();
     void animateHeaderSlidingOut();
-
-    /**
-     * Asks QS to update its presentation, according to {@code NotificationPanelViewController}.
-     * @param qsExpansionFraction How much each UI element in QS should be expanded (QQS to QS.)
-     * @param panelExpansionFraction Whats the expansion of the whole shade.
-     * @param headerTranslation How much we should vertically translate QS.
-     * @param squishinessFraction Fraction that affects tile height. 0 when collapsed,
-     *                            1 when expanded.
-     */
-    void setQsExpansion(float qsExpansionFraction, float panelExpansionFraction,
-            float headerTranslation, float squishinessFraction);
+    void setQsExpansion(float qsExpansionFraction, float headerTranslation);
     void setHeaderListening(boolean listening);
     void notifyCustomizeChanged();
-    void setContainerController(QSContainerController controller);
-
-    /**
-     * Provide an action to collapse if expanded or expand if collapsed.
-     * @param action
-     */
-    void setCollapseExpandAction(Runnable action);
-
-    /**
-     * Returns the height difference between the QSPanel container and the QuickQSPanel container
-     */
-    int getHeightDiff();
+    void setContainer(ViewGroup container);
+    void setExpandClickListener(OnClickListener onClickListener);
 
     View getHeader();
 
@@ -104,13 +76,13 @@ public interface QS extends FragmentBase {
     /**
      * If QS should translate as we pull it down, or if it should be static.
      */
-    void setInSplitShade(boolean shouldTranslate);
+    void setTranslateWhileExpanding(boolean shouldTranslate);
 
     /**
      * Set the amount of pixels we have currently dragged down if we're transitioning to the full
      * shade. 0.0f means we're not transitioning yet.
      */
-    default void setTransitionToFullShadeAmount(float pxAmount, float progress) {}
+    default void setTransitionToFullShadeAmount(float pxAmount, boolean animated) {}
 
     /**
      * A rounded corner clipping that makes QS feel as if it were behind everything.
@@ -133,11 +105,6 @@ public interface QS extends FragmentBase {
      * Set a scroll listener for the QSPanel container
      */
     default void setScrollListener(ScrollListener scrollListener) {}
-
-    /**
-     * Sets the amount of vertical over scroll that should be performed on QS.
-     */
-    default void setOverScrollAmount(int overScrollAmount) {}
 
     /**
      * Callback for when QSPanel container is scrolled

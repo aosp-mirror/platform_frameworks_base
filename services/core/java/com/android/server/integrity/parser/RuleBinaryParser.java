@@ -168,7 +168,6 @@ public class RuleBinaryParser implements RuleParser {
         switch (key) {
             case AtomicFormula.PACKAGE_NAME:
             case AtomicFormula.APP_CERTIFICATE:
-            case AtomicFormula.APP_CERTIFICATE_LINEAGE:
             case AtomicFormula.INSTALLER_NAME:
             case AtomicFormula.INSTALLER_CERTIFICATE:
             case AtomicFormula.STAMP_CERTIFICATE_HASH:

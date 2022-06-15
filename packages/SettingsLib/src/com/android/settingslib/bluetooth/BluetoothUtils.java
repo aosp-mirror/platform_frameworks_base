@@ -2,7 +2,6 @@ package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -30,9 +29,6 @@ import com.android.settingslib.widget.AdaptiveOutlineDrawable;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class BluetoothUtils {
     private static final String TAG = "BluetoothUtils";
@@ -42,8 +38,6 @@ public class BluetoothUtils {
 
     public static final int META_INT_ERROR = -1;
     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
-    private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
-    private static final String KEY_HEARABLE_CONTROL_SLICE = "HEARABLE_CONTROL_SLICE_WITH_WIDTH";
 
     private static ErrorListener sErrorListener;
 
@@ -76,12 +70,6 @@ public class BluetoothUtils {
         void onShowError(Context context, String name, int messageResId);
     }
 
-    /**
-     * @param context to access resources from
-     * @param cachedDevice to get class from
-     * @return pair containing the drawable and the description of the Bluetooth class
-     *         of the device.
-     */
     public static Pair<Drawable, String> getBtClassDrawableWithDescription(Context context,
             CachedBluetoothDevice cachedDevice) {
         BluetoothClass btClass = cachedDevice.getBtClass();
@@ -122,13 +110,13 @@ public class BluetoothUtils {
             }
         }
         if (btClass != null) {
-            if (doesClassMatch(btClass, BluetoothClass.PROFILE_HEADSET)) {
+            if (btClass.doesClassMatch(BluetoothClass.PROFILE_HEADSET)) {
                 return new Pair<>(
                         getBluetoothDrawable(context,
                                 com.android.internal.R.drawable.ic_bt_headset_hfp),
                         context.getString(R.string.bluetooth_talkback_headset));
             }
-            if (doesClassMatch(btClass, BluetoothClass.PROFILE_A2DP)) {
+            if (btClass.doesClassMatch(BluetoothClass.PROFILE_A2DP)) {
                 return new Pair<>(
                         getBluetoothDrawable(context,
                                 com.android.internal.R.drawable.ic_bt_headphones_a2dp),
@@ -387,45 +375,5 @@ public class BluetoothUtils {
             return null;
         }
         return Uri.parse(data);
-    }
-
-    /**
-     * Get URI Bluetooth metadata for extra control
-     *
-     * @param bluetoothDevice the BluetoothDevice to get metadata
-     * @return the URI metadata
-     */
-    public static String getControlUriMetaData(BluetoothDevice bluetoothDevice) {
-        String data = getStringMetaData(bluetoothDevice, METADATA_FAST_PAIR_CUSTOMIZED_FIELDS);
-        return extraTagValue(KEY_HEARABLE_CONTROL_SLICE, data);
-    }
-
-    @SuppressLint("NewApi") // Hidden API made public
-    private static boolean doesClassMatch(BluetoothClass btClass, int classId) {
-        return btClass.doesClassMatch(classId);
-    }
-
-    private static String extraTagValue(String tag, String metaData) {
-        if (TextUtils.isEmpty(metaData)) {
-            return null;
-        }
-        Pattern pattern = Pattern.compile(generateExpressionWithTag(tag, "(.*?)"));
-        Matcher matcher = pattern.matcher(metaData);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
-    private static String getTagStart(String tag) {
-        return String.format(Locale.ENGLISH, "<%s>", tag);
-    }
-
-    private static String getTagEnd(String tag) {
-        return String.format(Locale.ENGLISH, "</%s>", tag);
-    }
-
-    private static String generateExpressionWithTag(String tag, String value) {
-        return getTagStart(tag) + value + getTagEnd(tag);
     }
 }

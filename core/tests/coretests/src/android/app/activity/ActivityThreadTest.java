@@ -108,11 +108,6 @@ public class ActivityThreadTest {
     }
 
     @Test
-    public void testTemporaryDirectory() throws Exception {
-        assertEquals(System.getProperty("java.io.tmpdir"), System.getenv("TMPDIR"));
-    }
-
-    @Test
     public void testDoubleRelaunch() throws Exception {
         final Activity activity = mActivityTestRule.launchActivity(new Intent());
         final IApplicationThread appThread = activity.getActivityThread().getApplicationThread();
@@ -273,14 +268,13 @@ public class ActivityThreadTest {
             newerConfig.orientation = orientation == ORIENTATION_LANDSCAPE
                     ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
             newerConfig.seq = seq + 2;
-            activityThread.updatePendingActivityConfiguration(activity.getActivityToken(),
-                    newerConfig);
+            final ActivityClientRecord r = getActivityClientRecord(activity);
+            activityThread.updatePendingActivityConfiguration(r, newerConfig);
 
             final Configuration olderConfig = new Configuration();
             olderConfig.orientation = orientation;
             olderConfig.seq = seq + 1;
 
-            final ActivityClientRecord r = getActivityClientRecord(activity);
             activityThread.handleActivityConfigurationChanged(r, olderConfig, INVALID_DISPLAY);
             assertEquals(numOfConfig, activity.mNumOfConfigChanges);
             assertEquals(olderConfig.orientation, activity.mConfig.orientation);
@@ -292,6 +286,7 @@ public class ActivityThreadTest {
     }
 
     @Test
+    @FlakyTest(bugId = 194242735)
     public void testHandleActivityConfigurationChanged_EnsureUpdatesProcessedInOrder()
             throws Exception {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
@@ -310,22 +305,18 @@ public class ActivityThreadTest {
         final int numOfConfig = activity.mNumOfConfigChanges;
 
         final Configuration processConfigLandscape = new Configuration();
-        processConfigLandscape.orientation = ORIENTATION_LANDSCAPE;
         processConfigLandscape.windowConfiguration.setBounds(new Rect(0, 0, 100, 60));
         processConfigLandscape.seq = BASE_SEQ + 1;
 
         final Configuration activityConfigLandscape = new Configuration();
-        activityConfigLandscape.orientation = ORIENTATION_LANDSCAPE;
         activityConfigLandscape.windowConfiguration.setBounds(new Rect(0, 0, 100, 50));
         activityConfigLandscape.seq = BASE_SEQ + 2;
 
         final Configuration processConfigPortrait = new Configuration();
-        processConfigPortrait.orientation = ORIENTATION_PORTRAIT;
         processConfigPortrait.windowConfiguration.setBounds(new Rect(0, 0, 60, 100));
         processConfigPortrait.seq = BASE_SEQ + 3;
 
         final Configuration activityConfigPortrait = new Configuration();
-        activityConfigPortrait.orientation = ORIENTATION_PORTRAIT;
         activityConfigPortrait.windowConfiguration.setBounds(new Rect(0, 0, 50, 100));
         activityConfigPortrait.seq = BASE_SEQ + 4;
 
@@ -353,8 +344,7 @@ public class ActivityThreadTest {
         assertEquals(activityConfigPortrait.windowConfiguration.getBounds(), bounds);
 
         // Ensure that Activity#onConfigurationChanged() not be called because the changes in
-        // WindowConfiguration shouldn't be reported, and we only apply the latest Configuration
-        // update in transaction.
+        // WindowConfiguration shouldn't be reported.
         assertEquals(numOfConfig, activity.mNumOfConfigChanges);
     }
 
@@ -505,8 +495,7 @@ public class ActivityThreadTest {
                     ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
 
             final ActivityClientRecord r = getActivityClientRecord(activity);
-            activityThread.updatePendingActivityConfiguration(activity.getActivityToken(),
-                    newActivityConfig);
+            activityThread.updatePendingActivityConfiguration(r, newActivityConfig);
             activityThread.handleActivityConfigurationChanged(r, newActivityConfig,
                     INVALID_DISPLAY);
 

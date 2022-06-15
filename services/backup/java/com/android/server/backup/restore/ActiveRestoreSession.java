@@ -26,6 +26,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.backup.BackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
@@ -43,7 +44,7 @@ import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
-import com.android.server.backup.transport.TransportConnection;
+import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
 import java.util.function.BiFunction;
@@ -103,10 +104,10 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
         final long oldId = Binder.clearCallingIdentity();
         try {
-            TransportConnection transportConnection =
+            TransportClient transportClient =
                     mTransportManager.getTransportClient(
                                     mTransportName, "RestoreSession.getAvailableRestoreSets()");
-            if (transportConnection == null) {
+            if (transportClient == null) {
                 Slog.w(TAG, "Null transport client getting restore sets");
                 return -1;
             }
@@ -122,13 +123,12 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             // Prevent lambda from leaking 'this'
             TransportManager transportManager = mTransportManager;
             OnTaskFinishedListener listener = caller -> {
-                    transportManager.disposeOfTransportClient(transportConnection, caller);
+                    transportManager.disposeOfTransportClient(transportClient, caller);
                     wakelock.release();
             };
             Message msg = mBackupManagerService.getBackupHandler().obtainMessage(
                     MSG_RUN_GET_RESTORE_SETS,
-                    new RestoreGetSetsParams(transportConnection, this, observer, monitor,
-                            listener));
+                    new RestoreGetSetsParams(transportClient, this, observer, monitor, listener));
             mBackupManagerService.getBackupHandler().sendMessage(msg);
             return 0;
         } catch (Exception e) {
@@ -399,11 +399,11 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
      * Returns 0 if operation sent or -1 otherwise.
      */
     private int sendRestoreToHandlerLocked(
-            BiFunction<TransportConnection, OnTaskFinishedListener,
-                    RestoreParams> restoreParamsBuilder, String callerLogString) {
-        TransportConnection transportConnection =
+            BiFunction<TransportClient, OnTaskFinishedListener, RestoreParams> restoreParamsBuilder,
+            String callerLogString) {
+        TransportClient transportClient =
                 mTransportManager.getTransportClient(mTransportName, callerLogString);
-        if (transportConnection == null) {
+        if (transportClient == null) {
             Slog.e(TAG, "Transport " + mTransportName + " got unregistered");
             return -1;
         }
@@ -421,11 +421,11 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         // Prevent lambda from leaking 'this'
         TransportManager transportManager = mTransportManager;
         OnTaskFinishedListener listener = caller -> {
-                transportManager.disposeOfTransportClient(transportConnection, caller);
+                transportManager.disposeOfTransportClient(transportClient, caller);
                 wakelock.release();
         };
         Message msg = backupHandler.obtainMessage(MSG_RUN_RESTORE);
-        msg.obj = restoreParamsBuilder.apply(transportConnection, listener);
+        msg.obj = restoreParamsBuilder.apply(transportClient, listener);
         backupHandler.sendMessage(msg);
         return 0;
     }

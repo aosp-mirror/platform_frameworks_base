@@ -18,105 +18,111 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 
-import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.LIGHTS_OUT_NOTIF_VIEW;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.view.InsetsVisibilities;
+import android.annotation.Nullable;
 import android.view.View;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 
-import androidx.lifecycle.Observer;
-
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
-import com.android.systemui.util.ViewController;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
- * Apps can request a low profile mode {@link View#SYSTEM_UI_FLAG_LOW_PROFILE}
+ * Apps can request a low profile mode {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}
  * where status bar and navigation icons dim. In this mode, a notification dot appears
  * where the notification icons would appear if they would be shown outside of this mode.
  *
  * This controller shows and hides the notification dot in the status bar to indicate
- * whether there are notifications when the device is in {@link View#SYSTEM_UI_FLAG_LOW_PROFILE}.
+ * whether there are notifications when the device is in {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}.
  */
-@StatusBarFragmentScope
-public class LightsOutNotifController extends ViewController<View> {
+@SysUISingleton
+public class LightsOutNotifController {
     private final CommandQueue mCommandQueue;
-    private final NotifLiveDataStore mNotifDataStore;
+    private final NotificationEntryManager mEntryManager;
     private final WindowManager mWindowManager;
-    private final Observer<Boolean> mObserver = hasNotifs -> updateLightsOutView();
 
-    /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int, int) */
+    /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int) */
     @VisibleForTesting @Appearance int mAppearance;
 
     private int mDisplayId;
+    private View mLightsOutNotifView;
 
     @Inject
-    LightsOutNotifController(
-            @Named(LIGHTS_OUT_NOTIF_VIEW) View lightsOutNotifView,
-            WindowManager windowManager,
-            NotifLiveDataStore notifDataStore,
+    LightsOutNotifController(WindowManager windowManager,
+            NotificationEntryManager entryManager,
             CommandQueue commandQueue) {
-        super(lightsOutNotifView);
         mWindowManager = windowManager;
-        mNotifDataStore = notifDataStore;
+        mEntryManager = entryManager;
         mCommandQueue = commandQueue;
-
     }
 
-    @Override
-    protected void onViewDetached() {
-        mNotifDataStore.getHasActiveNotifs().removeObserver(mObserver);
+    /**
+     * Sets the notification dot view after it is created in the StatusBar.
+     * This is the view this controller will show and hide depending on whether:
+     * 1. there are active notifications
+     * 2. an app has requested {@link View.SYSTEM_UI_FLAG_LOW_PROFILE}
+     */
+    void setLightsOutNotifView(View lightsOutNotifView) {
+        destroy();
+        mLightsOutNotifView = lightsOutNotifView;
+
+        if (mLightsOutNotifView != null) {
+            mLightsOutNotifView.setVisibility(View.GONE);
+            mLightsOutNotifView.setAlpha(0f);
+            init();
+        }
+    }
+
+    private void destroy() {
+        mEntryManager.removeNotificationEntryListener(mEntryListener);
         mCommandQueue.removeCallback(mCallback);
     }
 
-    @Override
-    protected void onViewAttached() {
-        mView.setVisibility(View.GONE);
-        mView.setAlpha(0f);
-
+    private void init() {
         mDisplayId = mWindowManager.getDefaultDisplay().getDisplayId();
-        mNotifDataStore.getHasActiveNotifs().addSyncObserver(mObserver);
+        mEntryManager.addNotificationEntryListener(mEntryListener);
         mCommandQueue.addCallback(mCallback);
 
         updateLightsOutView();
     }
 
     private boolean hasActiveNotifications() {
-        return mNotifDataStore.getHasActiveNotifs().getValue();
+        return mEntryManager.hasActiveNotifications();
     }
 
     @VisibleForTesting
     void updateLightsOutView() {
+        if (mLightsOutNotifView == null) {
+            return;
+        }
+
         final boolean showDot = shouldShowDot();
         if (showDot != isShowingDot()) {
             if (showDot) {
-                mView.setAlpha(0f);
-                mView.setVisibility(View.VISIBLE);
+                mLightsOutNotifView.setAlpha(0f);
+                mLightsOutNotifView.setVisibility(View.VISIBLE);
             }
 
-            mView.animate()
+            mLightsOutNotifView.animate()
                     .alpha(showDot ? 1 : 0)
                     .setDuration(showDot ? 750 : 250)
                     .setInterpolator(new AccelerateInterpolator(2.0f))
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator a) {
-                            mView.setAlpha(showDot ? 1 : 0);
-                            mView.setVisibility(showDot ? View.VISIBLE : View.GONE);
-                            // Unset the listener, otherwise this may persist for
-                            // another view property animation
-                            mView.animate().setListener(null);
+                            mLightsOutNotifView.setAlpha(showDot ? 1 : 0);
+                            mLightsOutNotifView.setVisibility(showDot ? View.VISIBLE : View.GONE);
                         }
                     })
                     .start();
@@ -125,8 +131,8 @@ public class LightsOutNotifController extends ViewController<View> {
 
     @VisibleForTesting
     boolean isShowingDot() {
-        return mView.getVisibility() == View.VISIBLE
-                && mView.getAlpha() == 1.0f;
+        return mLightsOutNotifView.getVisibility() == View.VISIBLE
+                && mLightsOutNotifView.getAlpha() == 1.0f;
     }
 
     @VisibleForTesting
@@ -143,12 +149,30 @@ public class LightsOutNotifController extends ViewController<View> {
         @Override
         public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
                 AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-                @Behavior int behavior, InsetsVisibilities requestedVisibilities,
-                String packageName) {
+                @Behavior int behavior, boolean isFullscreen) {
             if (displayId != mDisplayId) {
                 return;
             }
             mAppearance = appearance;
+            updateLightsOutView();
+        }
+    };
+
+    private final NotificationEntryListener mEntryListener = new NotificationEntryListener() {
+        // Cares about notifications post-filtering
+        @Override
+        public void onNotificationAdded(NotificationEntry entry) {
+            updateLightsOutView();
+        }
+
+        @Override
+        public void onPostEntryUpdated(NotificationEntry entry) {
+            updateLightsOutView();
+        }
+
+        @Override
+        public void onEntryRemoved(@Nullable NotificationEntry entry,
+                NotificationVisibility visibility, boolean removedByUser, int reason) {
             updateLightsOutView();
         }
     };

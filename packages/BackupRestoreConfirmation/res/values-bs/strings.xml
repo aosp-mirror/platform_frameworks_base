@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Molimo vas unesite svoju lozinku za šifriranje uređaja ispod. Ona će se koristiti i za šifriranje arhive sigurnosnih kopija."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Unesite lozinku za šifriranje potpune sigurnosne kopije podataka. Ukoliko ne unesete lozinku, primijenit će se vaša trenutna lozinka za sigurnosnu kopiju:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ukoliko želite šifrirati potpunu sigurnosnu kopiju podataka, unesite lozinku ispod:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Pošto je vaš uređaj šifriran, potrebno je šifrirati sigurnosnu kopiju. Unesite šifru ispod:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ukoliko su podaci za vraćanje šifrirani, unesite lozinku ispod:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Pravljenje rezervne kopije..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Pravljenje rezervne kopije završeno"</string>

@@ -91,9 +91,23 @@ message BiometricServiceStateProto {
         STATE_CLIENT_DIED_CANCELLING = 10;
     }
 
+    enum MultiSensorState {
+        // Initializing or not yet started.
+        MULTI_SENSOR_STATE_UNKNOWN = 0;
+        // Sensors are in the process of being transitioned and there is no active sensor.
+        MULTI_SENSOR_STATE_SWITCHING = 1;
+        // Face sensor is being used as the primary input.
+        MULTI_SENSOR_STATE_FACE_SCANNING = 2;
+        // Fingerprint sensor is being used as the primary input.
+        MULTI_SENSOR_STATE_FP_SCANNING = 3;
+    }
+
     repeated SensorServiceStateProto sensor_service_states = 1;
 
     optional AuthSessionState auth_session_state = 2;
+
+    // Additional session state information, when the device has multiple sensors.
+    optional MultiSensorState auth_session_multi_sensor_state = 3;
 }
 
 // Overall state for an instance of a <Biometric>Service, for example FingerprintService or

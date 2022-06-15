@@ -26,12 +26,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.RemoteAction;
+import android.content.pm.ParceledListSlice;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
-
-import java.util.List;
 
 /**
  *  Interface to allow {@link com.android.wm.shell.pip.PipTaskOrganizer} to call into
@@ -67,7 +66,7 @@ public interface PipMenuController {
     /**
      * Given a set of actions, update the menu.
      */
-    void setAppActions(List<RemoteAction> appActions, RemoteAction closeAction);
+    void setAppActions(ParceledListSlice<RemoteAction> appActions);
 
     /**
      * Resize the PiP menu with the given bounds. The PiP SurfaceControl is given if there is a
@@ -89,11 +88,6 @@ public interface PipMenuController {
      * Update the PiP menu with the given bounds for re-layout purposes.
      */
     default void updateMenuBounds(Rect destinationBounds) {}
-
-    /**
-     * Update when the current focused task changes.
-     */
-    default void onFocusTaskChanged(RunningTaskInfo taskInfo) {}
 
     /**
      * Returns a default LayoutParams for the PIP Menu.

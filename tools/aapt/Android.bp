@@ -50,6 +50,7 @@ cc_defaults {
         "libbase",
         "libz",
     ],
+    group_static_libs: true,
 
     cflags: [
         "-Wall",
@@ -59,6 +60,16 @@ cc_defaults {
     target: {
         windows: {
             enabled: true,
+        },
+    },
+
+    // This tool is prebuilt if we're doing an app-only build.
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+        unbundled_build: {
+            enabled: false,
         },
     },
 }

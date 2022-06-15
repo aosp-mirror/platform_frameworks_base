@@ -893,8 +893,7 @@ public final class AppExitInfoTracker {
         }
         FrameworkStatsLog.write(FrameworkStatsLog.APP_PROCESS_DIED,
                 info.getPackageUid(), processName, info.getReason(), info.getSubReason(),
-                info.getImportance(), (int) info.getPss(), (int) info.getRss(),
-                info.hasForegroundServices());
+                info.getImportance(), (int) info.getPss(), (int) info.getRss());
     }
 
     @GuardedBy("mLock")
@@ -1003,13 +1002,11 @@ public final class AppExitInfoTracker {
             info.setPackageName(app.info.packageName);
             info.setPackageList(app.getPackageList());
             info.setReason(ApplicationExitInfo.REASON_UNKNOWN);
-            info.setSubReason(ApplicationExitInfo.SUBREASON_UNKNOWN);
             info.setStatus(0);
             info.setImportance(procStateToImportance(app.mState.getReportedProcState()));
             info.setPss(app.mProfile.getLastPss());
             info.setRss(app.mProfile.getLastRss());
             info.setTimestamp(timestamp);
-            info.setHasForegroundServices(app.mServices.hasReportedForegroundServices());
         }
 
         return info;
@@ -1507,20 +1504,6 @@ public final class AppExitInfoTracker {
                 set.add(isolatedUid);
 
                 mIsolatedUidToUidMap.put(isolatedUid, uid);
-            }
-        }
-
-        void removeIsolatedUid(int isolatedUid, int uid) {
-            synchronized (mLock) {
-                final int index = mUidToIsolatedUidMap.indexOfKey(uid);
-                if (index >= 0) {
-                    final ArraySet<Integer> set = mUidToIsolatedUidMap.valueAt(index);
-                    set.remove(isolatedUid);
-                    if (set.isEmpty()) {
-                        mUidToIsolatedUidMap.removeAt(index);
-                    }
-                }
-                mIsolatedUidToUidMap.remove(isolatedUid);
             }
         }
 

@@ -25,9 +25,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Objects;
 
 /**
  * Holds both a generic and package-specific userData used for
@@ -102,7 +103,7 @@ public final class CompositeUserData implements FieldClassificationUserData, Par
     @Nullable
     @Override
     public String getFieldClassificationAlgorithmForCategory(@NonNull String categoryId) {
-        Objects.requireNonNull(categoryId);
+        Preconditions.checkNotNull(categoryId);
         final ArrayMap<String, String> categoryAlgorithms = getFieldClassificationAlgorithms();
         if (categoryAlgorithms == null || !categoryAlgorithms.containsKey(categoryId)) {
             return null;
@@ -197,8 +198,8 @@ public final class CompositeUserData implements FieldClassificationUserData, Par
                     // Always go through the builder to ensure the data ingested by
                     // the system obeys the contract of the builder to avoid attacks
                     // using specially crafted parcels.
-                    final UserData genericUserData = parcel.readParcelable(null, android.service.autofill.UserData.class);
-                    final UserData packageUserData = parcel.readParcelable(null, android.service.autofill.UserData.class);
+                    final UserData genericUserData = parcel.readParcelable(null);
+                    final UserData packageUserData = parcel.readParcelable(null);
                     return new CompositeUserData(genericUserData, packageUserData);
                 }
 

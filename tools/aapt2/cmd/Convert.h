@@ -17,8 +17,6 @@
 #ifndef AAPT2_CONVERT_H
 #define AAPT2_CONVERT_H
 
-#include <optional>
-
 #include "Command.h"
 #include "LoadedApk.h"
 #include "format/binary/TableFlattener.h"
@@ -54,7 +52,7 @@ class ConvertCommand : public Command {
   TableFlattenerOptions table_flattener_options_;
   XmlFlattenerOptions xml_flattener_options_;
   std::string output_path_;
-  std::optional<std::string> output_format_;
+  Maybe<std::string> output_format_;
   bool verbose_ = false;
 };
 

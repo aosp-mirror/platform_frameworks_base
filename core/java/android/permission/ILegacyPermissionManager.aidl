@@ -49,6 +49,4 @@ interface ILegacyPermissionManager {
     void grantDefaultPermissionsToActiveLuiApp(in String packageName, int userId);
 
     void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
-
-    void grantDefaultPermissionsToCarrierServiceApp(in String packageName, int userId);
 }

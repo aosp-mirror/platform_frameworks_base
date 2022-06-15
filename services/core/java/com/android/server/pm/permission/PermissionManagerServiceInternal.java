@@ -252,14 +252,11 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
      * Callback when a package has been installed for a user.
      *
      * @param pkg the installed package
-     * @param previousAppId the previous app ID if the package is leaving a shared UID,
-     *                      or Process.INVALID_UID
      * @param params the parameters passed in for package installation
      * @param userId the user ID this package is installed for
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    void onPackageInstalled(@NonNull AndroidPackage pkg, int previousAppId,
-            @NonNull PackageInstalledParams params,
+    void onPackageInstalled(@NonNull AndroidPackage pkg, @NonNull PackageInstalledParams params,
             @UserIdInt int userId);
 
     /**
@@ -449,8 +446,8 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
 
     /**
      * Provides the uid of the currently active
-     * {@link android.service.voice.HotwordDetectionService}, which should be granted RECORD_AUDIO,
-     * CAPTURE_AUDIO_HOTWORD and CAPTURE_AUDIO_OUTPUT permissions.
+     * {@link android.service.voice.HotwordDetectionService}, which should be granted RECORD_AUDIO
+     * and CAPTURE_AUDIO_HOTWORD permissions.
      */
     interface HotwordDetectionServiceProvider {
         int getUid();

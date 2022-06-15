@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -35,15 +34,10 @@ import android.platform.test.annotations.Presubmit;
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.function.Supplier;
 
 @Presubmit
 @SmallTest
@@ -58,7 +52,7 @@ public class AcquisitionClientTest {
     @Mock
     private ClientMonitorCallbackConverter mClientCallback;
     @Mock
-    private ClientMonitorCallback mSchedulerCallback;
+    private BaseClientMonitor.Callback mSchedulerCallback;
 
     @Before
     public void setUp() {
@@ -93,15 +87,16 @@ public class AcquisitionClientTest {
         boolean mHalOperationRunning;
 
         public TestAcquisitionClient(@NonNull Context context,
-                @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
+                @NonNull LazyDaemon<Object> lazyDaemon, @NonNull IBinder token,
                 @NonNull ClientMonitorCallbackConverter callback) {
             super(context, lazyDaemon, token, callback, 0 /* userId */, "Test", 0 /* cookie */,
-                    TEST_SENSOR_ID /* sensorId */, true /* shouldVibrate */,
-                    mock(BiometricLogger.class), mock(BiometricContext.class));
+                    TEST_SENSOR_ID /* sensorId */, true /* shouldVibrate */, 0 /* statsModality */,
+                    0 /* statsAction */,
+                    0 /* statsClient */);
         }
 
         @Override
-        public void start(@NonNull ClientMonitorCallback callback) {
+        public void start(@NonNull Callback callback) {
             super.start(callback);
             startHalOperation();
         }

@@ -27,12 +27,10 @@ import android.util.Log;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
-import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 /**
  * Provides the call initiation/termination, and media exchange between two IMS endpoints.
@@ -524,7 +522,6 @@ public class ImsCallSession {
     private final IImsCallSession miSession;
     private boolean mClosed = false;
     private Listener mListener;
-    private Executor mListenerExecutor = Runnable::run;
 
     /** @hide */
     public ImsCallSession(IImsCallSession iSession) {
@@ -541,9 +538,9 @@ public class ImsCallSession {
     }
 
     /** @hide */
-    public ImsCallSession(IImsCallSession iSession, Listener listener, Executor executor) {
+    public ImsCallSession(IImsCallSession iSession, Listener listener) {
         this(iSession);
-        setListener(listener, executor);
+        setListener(listener);
     }
 
     /**
@@ -741,14 +738,10 @@ public class ImsCallSession {
      * override the previous listener.
      *
      * @param listener to listen to the session events of this object
-     * @param executor an Executor that will execute callbacks
      * @hide
      */
-    public void setListener(Listener listener, Executor executor) {
+    public void setListener(Listener listener) {
         mListener = listener;
-        if (executor != null) {
-            mListenerExecutor = executor;
-        }
     }
 
     /**
@@ -773,10 +766,7 @@ public class ImsCallSession {
      * The method is only valid to call when the session state is in
      * {@link ImsCallSession.State#IDLE}.
      *
-     * @param callee dial string to make the call to.  The platform passes the dialed number
-     *               entered by the user as-is.  The {@link ImsService} should ensure that the
-     *               number is formatted in SIP messages appropriately (e.g. using
-     *               {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}).
+     * @param callee dialed string to make the call to
      * @param profile call profile to make the call with the specified service type,
      *      call type and media information
      * @see Listener#callSessionStarted, Listener#callSessionStartFailed
@@ -798,10 +788,7 @@ public class ImsCallSession {
      * The method is only valid to call when the session state is in
      * {@link ImsCallSession.State#IDLE}.
      *
-     * @param participants participant list to initiate an IMS conference call.  The platform passes
-     *               the dialed numbers entered by the user as-is.  The {@link ImsService} should
-     *               ensure that the number is formatted in SIP messages appropriately (e.g. using
-     *               {@link android.telephony.PhoneNumberUtils#formatNumberToE164(String, String)}).
+     * @param participants participant list to initiate an IMS conference call
      * @param profile call profile to make the call with the specified service type,
      *      call type and media information
      * @see Listener#callSessionStarted, Listener#callSessionStartFailed
@@ -1212,56 +1199,44 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionInitiating(ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionInitiating(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionInitiating(ImsCallSession.this, profile);
+            }
         }
 
         @Override
         public void callSessionProgressing(ImsStreamMediaProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionProgressing(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionProgressing(ImsCallSession.this, profile);
+            }
         }
 
         @Override
         public void callSessionInitiated(ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionStarted(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionStarted(ImsCallSession.this, profile);
+            }
         }
 
         @Override
         public void callSessionInitiatingFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionStartFailed(ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionStartFailed(ImsCallSession.this, reasonInfo);
+            }
         }
 
         @Override
         public void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionStartFailed(ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionStartFailed(ImsCallSession.this, reasonInfo);
+            }
         }
 
         @Override
         public void callSessionTerminated(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionTerminated(ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionTerminated(ImsCallSession.this, reasonInfo);
+            }
         }
 
         /**
@@ -1269,56 +1244,44 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionHeld(ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionHeld(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionHeld(ImsCallSession.this, profile);
+            }
         }
 
         @Override
         public void callSessionHoldFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionHoldFailed(ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionHoldFailed(ImsCallSession.this, reasonInfo);
+            }
         }
 
         @Override
         public void callSessionHoldReceived(ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionHoldReceived(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionHoldReceived(ImsCallSession.this, profile);
+            }
         }
 
         @Override
         public void callSessionResumed(ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionResumed(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionResumed(ImsCallSession.this, profile);
+            }
         }
 
         @Override
         public void callSessionResumeFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionResumeFailed(ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionResumeFailed(ImsCallSession.this, reasonInfo);
+            }
         }
 
         @Override
         public void callSessionResumeReceived(ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionResumeReceived(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionResumeReceived(ImsCallSession.this, profile);
+            }
         }
 
         /**
@@ -1341,17 +1304,15 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionMergeComplete(IImsCallSession newSession) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    if (newSession != null) {
-                        // New session created after conference
-                        mListener.callSessionMergeComplete(new ImsCallSession(newSession));
-                    } else {
-                        // Session already exists. Hence no need to pass
-                        mListener.callSessionMergeComplete(null);
-                    }
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                if (newSession != null) {
+                    // New session created after conference
+                    mListener.callSessionMergeComplete(new ImsCallSession(newSession));
+               } else {
+                   // Session already exists. Hence no need to pass
+                   mListener.callSessionMergeComplete(null);
+               }
+            }
         }
 
         /**
@@ -1361,11 +1322,9 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionMergeFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionMergeFailed(ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionMergeFailed(ImsCallSession.this, reasonInfo);
+            }
         }
 
         /**
@@ -1373,29 +1332,23 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionUpdated(ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionUpdated(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionUpdated(ImsCallSession.this, profile);
+            }
         }
 
         @Override
         public void callSessionUpdateFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionUpdateFailed(ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionUpdateFailed(ImsCallSession.this, reasonInfo);
+            }
         }
 
         @Override
         public void callSessionUpdateReceived(ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionUpdateReceived(ImsCallSession.this, profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionUpdateReceived(ImsCallSession.this, profile);
+            }
         }
 
         /**
@@ -1404,33 +1357,26 @@ public class ImsCallSession {
         @Override
         public void callSessionConferenceExtended(IImsCallSession newSession,
                 ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionConferenceExtended(ImsCallSession.this,
-                            new ImsCallSession(newSession), profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionConferenceExtended(ImsCallSession.this,
+                        new ImsCallSession(newSession), profile);
+            }
         }
 
         @Override
         public void callSessionConferenceExtendFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionConferenceExtendFailed(
-                            ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionConferenceExtendFailed(ImsCallSession.this, reasonInfo);
+            }
         }
 
         @Override
         public void callSessionConferenceExtendReceived(IImsCallSession newSession,
                 ImsCallProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionConferenceExtendReceived(ImsCallSession.this,
-                            new ImsCallSession(newSession), profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionConferenceExtendReceived(ImsCallSession.this,
+                        new ImsCallSession(newSession), profile);
+            }
         }
 
         /**
@@ -1439,41 +1385,32 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionInviteParticipantsRequestDelivered() {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionInviteParticipantsRequestDelivered(
-                            ImsCallSession.this);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionInviteParticipantsRequestDelivered(ImsCallSession.this);
+            }
         }
 
         @Override
         public void callSessionInviteParticipantsRequestFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionInviteParticipantsRequestFailed(ImsCallSession.this,
-                            reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionInviteParticipantsRequestFailed(ImsCallSession.this,
+                        reasonInfo);
+            }
         }
 
         @Override
         public void callSessionRemoveParticipantsRequestDelivered() {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionRemoveParticipantsRequestDelivered(ImsCallSession.this);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionRemoveParticipantsRequestDelivered(ImsCallSession.this);
+            }
         }
 
         @Override
         public void callSessionRemoveParticipantsRequestFailed(ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionRemoveParticipantsRequestFailed(ImsCallSession.this,
-                            reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionRemoveParticipantsRequestFailed(ImsCallSession.this,
+                        reasonInfo);
+            }
         }
 
         /**
@@ -1481,11 +1418,9 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionConferenceStateUpdated(ImsConferenceState state) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionConferenceStateUpdated(ImsCallSession.this, state);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionConferenceStateUpdated(ImsCallSession.this, state);
+            }
         }
 
         /**
@@ -1493,12 +1428,9 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionUssdMessageReceived(ImsCallSession.this, mode,
-                            ussdMessage);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionUssdMessageReceived(ImsCallSession.this, mode, ussdMessage);
+            }
         }
 
         /**
@@ -1514,12 +1446,10 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionMayHandover(int srcNetworkType, int targetNetworkType) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionMayHandover(ImsCallSession.this, srcNetworkType,
-                            targetNetworkType);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionMayHandover(ImsCallSession.this, srcNetworkType,
+                        targetNetworkType);
+            }
         }
 
         /**
@@ -1528,12 +1458,10 @@ public class ImsCallSession {
         @Override
         public void callSessionHandover(int srcNetworkType, int targetNetworkType,
                 ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionHandover(ImsCallSession.this, srcNetworkType,
-                            targetNetworkType, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionHandover(ImsCallSession.this, srcNetworkType,
+                        targetNetworkType, reasonInfo);
+            }
         }
 
         /**
@@ -1542,12 +1470,10 @@ public class ImsCallSession {
         @Override
         public void callSessionHandoverFailed(int srcNetworkType, int targetNetworkType,
                 ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionHandoverFailed(ImsCallSession.this, srcNetworkType,
-                            targetNetworkType, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionHandoverFailed(ImsCallSession.this, srcNetworkType,
+                        targetNetworkType, reasonInfo);
+            }
         }
 
         /**
@@ -1555,11 +1481,9 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionTtyModeReceived(int mode) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionTtyModeReceived(ImsCallSession.this, mode);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionTtyModeReceived(ImsCallSession.this, mode);
+            }
         }
 
         /**
@@ -1569,22 +1493,16 @@ public class ImsCallSession {
          *      otherwise.
          */
         public void callSessionMultipartyStateChanged(boolean isMultiParty) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionMultipartyStateChanged(ImsCallSession.this,
-                            isMultiParty);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionMultipartyStateChanged(ImsCallSession.this, isMultiParty);
+            }
         }
 
         @Override
         public void callSessionSuppServiceReceived(ImsSuppServiceNotification suppServiceInfo ) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionSuppServiceReceived(ImsCallSession.this,
-                            suppServiceInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionSuppServiceReceived(ImsCallSession.this, suppServiceInfo);
+            }
         }
 
         /**
@@ -1592,12 +1510,9 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionRttModifyRequestReceived(ImsCallProfile callProfile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionRttModifyRequestReceived(ImsCallSession.this,
-                            callProfile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionRttModifyRequestReceived(ImsCallSession.this, callProfile);
+            }
         }
 
         /**
@@ -1605,11 +1520,9 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionRttModifyResponseReceived(int status) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionRttModifyResponseReceived(status);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionRttModifyResponseReceived(status);
+            }
         }
 
         /**
@@ -1617,11 +1530,9 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionRttMessageReceived(String rttMessage) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionRttMessageReceived(rttMessage);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionRttMessageReceived(rttMessage);
+            }
         }
 
         /**
@@ -1629,29 +1540,23 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionRttAudioIndicatorChanged(profile);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionRttAudioIndicatorChanged(profile);
+            }
         }
 
         @Override
         public void callSessionTransferred() {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionTransferred(ImsCallSession.this);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionTransferred(ImsCallSession.this);
+            }
         }
 
         @Override
         public void callSessionTransferFailed(@Nullable ImsReasonInfo reasonInfo) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionTransferFailed(ImsCallSession.this, reasonInfo);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionTransferFailed(ImsCallSession.this, reasonInfo);
+            }
         }
 
         /**
@@ -1660,11 +1565,9 @@ public class ImsCallSession {
          */
         @Override
         public void callSessionDtmfReceived(char dtmf) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionDtmfReceived(dtmf);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionDtmfReceived(dtmf);
+            }
         }
 
         /**
@@ -1672,11 +1575,9 @@ public class ImsCallSession {
          */
         @Override
         public void callQualityChanged(CallQuality callQuality) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callQualityChanged(callQuality);
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callQualityChanged(callQuality);
+            }
         }
 
         /**
@@ -1686,12 +1587,10 @@ public class ImsCallSession {
         @Override
         public void callSessionRtpHeaderExtensionsReceived(
                 @NonNull List<RtpHeaderExtension> extensions) {
-            TelephonyUtils.runWithCleanCallingIdentity(()-> {
-                if (mListener != null) {
-                    mListener.callSessionRtpHeaderExtensionsReceived(
-                            new ArraySet<RtpHeaderExtension>(extensions));
-                }
-            }, mListenerExecutor);
+            if (mListener != null) {
+                mListener.callSessionRtpHeaderExtensionsReceived(
+                        new ArraySet<RtpHeaderExtension>(extensions));
+            }
         }
     }
 

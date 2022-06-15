@@ -51,7 +51,6 @@ import android.platform.test.annotations.Presubmit;
 
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.OperationStorage;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.BackupHandler;
@@ -99,7 +98,6 @@ public class ActiveRestoreSessionTest {
     @Mock private IRestoreObserver mObserver;
     @Mock private IBackupManagerMonitor mMonitor;
     @Mock private BackupEligibilityRules mBackupEligibilityRules;
-    @Mock private OperationStorage mOperationStorage;
     private ShadowLooper mShadowBackupLooper;
     private ShadowApplication mShadowApplication;
     private UserBackupManagerService.BackupWakeLock mWakeLock;
@@ -134,9 +132,7 @@ public class ActiveRestoreSessionTest {
         // We need to mock BMS timeout parameters before initializing the BackupHandler since
         // the constructor of BackupHandler relies on it.
         when(mBackupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
-
-        BackupHandler backupHandler =
-                new BackupHandler(mBackupManagerService, mOperationStorage, handlerThread);
+        BackupHandler backupHandler = new BackupHandler(mBackupManagerService, handlerThread);
 
         mWakeLock = createBackupWakeLock(application);
 
@@ -206,7 +202,7 @@ public class ActiveRestoreSessionTest {
         verify(mObserver)
                 .restoreSetsAvailable(aryEq(new RestoreSet[] {mRestoreSet1, mRestoreSet2}));
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
+                .disposeOfTransportClient(eq(transportMock.transportClient), any());
         assertThat(mWakeLock.isHeld()).isFalse();
     }
 
@@ -239,7 +235,7 @@ public class ActiveRestoreSessionTest {
         verify(mObserver).restoreSetsAvailable(isNull());
         assertEventLogged(EventLogTags.RESTORE_TRANSPORT_FAILURE);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
+                .disposeOfTransportClient(eq(transportMock.transportClient), any());
         assertThat(mWakeLock.isHeld()).isFalse();
     }
 
@@ -257,7 +253,7 @@ public class ActiveRestoreSessionTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
+                .disposeOfTransportClient(eq(transportMock.transportClient), any());
         assertThat(mWakeLock.isHeld()).isFalse();
         assertThat(mBackupManagerService.isRestoreInProgress()).isFalse();
         // Verify it created the task properly
@@ -345,7 +341,7 @@ public class ActiveRestoreSessionTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
+                .disposeOfTransportClient(eq(transportMock.transportClient), any());
         assertThat(mWakeLock.isHeld()).isFalse();
         assertThat(mBackupManagerService.isRestoreInProgress()).isFalse();
         ShadowPerformUnifiedRestoreTask shadowTask =
@@ -467,7 +463,7 @@ public class ActiveRestoreSessionTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transportMock.mTransportConnection), any());
+                .disposeOfTransportClient(eq(transportMock.transportClient), any());
         assertThat(mWakeLock.isHeld()).isFalse();
         assertThat(mBackupManagerService.isRestoreInProgress()).isFalse();
         ShadowPerformUnifiedRestoreTask shadowTask =

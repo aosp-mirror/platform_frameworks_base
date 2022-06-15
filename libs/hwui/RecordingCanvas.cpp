@@ -15,7 +15,6 @@
  */
 
 #include "RecordingCanvas.h"
-#include <hwui/Paint.h>
 
 #include <GrRecordingContext.h>
 
@@ -186,11 +185,6 @@ struct ClipRegion final : Op {
     SkRegion region;
     SkClipOp op;
     void draw(SkCanvas* c, const SkMatrix&) const { c->clipRegion(region, op); }
-};
-struct ResetClip final : Op {
-    static const auto kType = Type::ResetClip;
-    ResetClip() {}
-    void draw(SkCanvas* c, const SkMatrix&) const { SkAndroidFrameworkUtils::ResetClip(c); }
 };
 
 struct DrawPaint final : Op {
@@ -501,7 +495,7 @@ struct DrawVectorDrawable final : Op {
 
     sp<VectorDrawableRoot> mRoot;
     SkRect mBounds;
-    Paint paint;
+    SkPaint paint;
     BitmapPalette palette;
 };
 
@@ -666,9 +660,6 @@ void DisplayListData::clipRRect(const SkRRect& rrect, SkClipOp op, bool aa) {
 }
 void DisplayListData::clipRegion(const SkRegion& region, SkClipOp op) {
     this->push<ClipRegion>(0, region, op);
-}
-void DisplayListData::resetClip() {
-    this->push<ResetClip>(0);
 }
 
 void DisplayListData::drawPaint(const SkPaint& paint) {
@@ -842,8 +833,7 @@ constexpr color_transform_fn colorTransformForOp() {
                 // TODO: We should be const. Or not. Or just use a different map
                 // Unclear, but this is the quick fix
                 const T* op = reinterpret_cast<const T*>(opRaw);
-                const SkPaint* paint = &op->paint;
-                transformPaint(transform, const_cast<SkPaint*>(paint), op->palette);
+                transformPaint(transform, const_cast<SkPaint*>(&(op->paint)), op->palette);
             };
         }
     else if
@@ -852,8 +842,7 @@ constexpr color_transform_fn colorTransformForOp() {
                 // TODO: We should be const. Or not. Or just use a different map
                 // Unclear, but this is the quick fix
                 const T* op = reinterpret_cast<const T*>(opRaw);
-                const SkPaint* paint = &op->paint;
-                transformPaint(transform, const_cast<SkPaint*>(paint));
+                transformPaint(transform, const_cast<SkPaint*>(&(op->paint)));
             };
         }
     else {
@@ -976,14 +965,6 @@ void RecordingCanvas::onClipRegion(const SkRegion& region, SkClipOp op) {
     }
     fDL->clipRegion(region, op);
     this->INHERITED::onClipRegion(region, op);
-}
-void RecordingCanvas::onResetClip() {
-    // This is part of "replace op" emulation, but rely on the following intersection
-    // clip to potentially mark the clip as complex. If we are already complex, we do
-    // not reset the complexity so that we don't break the contract that no higher
-    // save point has a complex clip when "not complex".
-    fDL->resetClip();
-    this->INHERITED::onResetClip();
 }
 
 void RecordingCanvas::onDrawPaint(const SkPaint& paint) {

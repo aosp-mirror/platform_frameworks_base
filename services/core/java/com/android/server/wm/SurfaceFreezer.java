@@ -17,20 +17,21 @@
 package com.android.server.wm;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
-import android.util.Slog;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+
+import java.util.function.Supplier;
 
 /**
  * This class handles "freezing" of an Animatable. The Animatable in question should implement
@@ -50,19 +51,16 @@ import com.android.internal.protolog.common.ProtoLog;
  */
 class SurfaceFreezer {
 
-    private static final String TAG = "SurfaceFreezer";
-
-    private final @NonNull Freezable mAnimatable;
-    private final @NonNull WindowManagerService mWmService;
-    @VisibleForTesting
-    SurfaceControl mLeash;
+    private final Freezable mAnimatable;
+    private final WindowManagerService mWmService;
+    private SurfaceControl mLeash;
     Snapshot mSnapshot = null;
     final Rect mFreezeBounds = new Rect();
 
     /**
      * @param animatable The object to animate.
      */
-    SurfaceFreezer(@NonNull Freezable animatable, @NonNull WindowManagerService service) {
+    SurfaceFreezer(Freezable animatable, WindowManagerService service) {
         mAnimatable = animatable;
         mWmService = service;
     }
@@ -72,34 +70,26 @@ class SurfaceFreezer {
      * above the target surface) and then taking a snapshot and placing it over the target surface.
      *
      * @param startBounds The original bounds (on screen) of the surface we are snapshotting.
-     * @param relativePosition The related position of the snapshot surface to its parent.
-     * @param freezeTarget The surface to take snapshot from. If {@code null}, we will take a
-     *                     snapshot from the {@link #mAnimatable} surface.
      */
-    void freeze(SurfaceControl.Transaction t, Rect startBounds, Point relativePosition,
-            @Nullable SurfaceControl freezeTarget) {
-        reset(t);
+    void freeze(SurfaceControl.Transaction t, Rect startBounds) {
         mFreezeBounds.set(startBounds);
 
         mLeash = SurfaceAnimator.createAnimationLeash(mAnimatable, mAnimatable.getSurfaceControl(),
                 t, ANIMATION_TYPE_SCREEN_ROTATION, startBounds.width(), startBounds.height(),
-                relativePosition.x, relativePosition.y, false /* hidden */,
+                startBounds.left, startBounds.top, false /* hidden */,
                 mWmService.mTransactionFactory);
         mAnimatable.onAnimationLeashCreated(t, mLeash);
 
-        freezeTarget = freezeTarget != null ? freezeTarget : mAnimatable.getFreezeSnapshotTarget();
+        SurfaceControl freezeTarget = mAnimatable.getFreezeSnapshotTarget();
         if (freezeTarget != null) {
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer = createSnapshotBufferInner(
+            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer = createSnapshotBuffer(
                     freezeTarget, startBounds);
             final HardwareBuffer buffer = screenshotBuffer == null ? null
                     : screenshotBuffer.getHardwareBuffer();
             if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
-                // This can happen when display is not ready.
-                Slog.w(TAG, "Failed to capture screenshot for " + mAnimatable);
-                unfreeze(t);
                 return;
             }
-            mSnapshot = new Snapshot(t, screenshotBuffer, mLeash);
+            mSnapshot = new Snapshot(mWmService.mSurfaceFactory, t, screenshotBuffer, mLeash);
         }
     }
 
@@ -114,30 +104,12 @@ class SurfaceFreezer {
     }
 
     /**
-     * Used by {@link SurfaceAnimator}. This "transfers" the snapshot leash to be used for
-     * animation. By transferring the leash, this will no longer try to clean-up the leash when
-     * finished.
-     */
-    @Nullable
-    Snapshot takeSnapshotForAnimation() {
-        final Snapshot out = mSnapshot;
-        mSnapshot = null;
-        return out;
-    }
-
-    /**
      * Clean-up the snapshot and remove leash. If the leash was taken, this just cleans-up the
      * snapshot.
      */
     void unfreeze(SurfaceControl.Transaction t) {
-        unfreezeInner(t);
-        mAnimatable.onUnfrozen();
-    }
-
-    private void unfreezeInner(SurfaceControl.Transaction t) {
         if (mSnapshot != null) {
             mSnapshot.cancelAnimation(t, false /* restarting */);
-            mSnapshot = null;
         }
         if (mLeash == null) {
             return;
@@ -145,37 +117,9 @@ class SurfaceFreezer {
         SurfaceControl leash = mLeash;
         mLeash = null;
         final boolean scheduleAnim = SurfaceAnimator.removeLeash(t, mAnimatable, leash,
-                true /* destroy */);
+                false /* destroy */);
         if (scheduleAnim) {
             mWmService.scheduleAnimationLocked();
-        }
-    }
-
-    /** Resets the snapshot before taking another one if the animation hasn't been started yet. */
-    private void reset(SurfaceControl.Transaction t) {
-        // Those would have been taken by the SurfaceAnimator if the animation has been started, so
-        // we can remove the leash directly.
-        // No need to reset the mAnimatable leash, as this is called before a new animation leash is
-        // created, so another #onAnimationLeashCreated will be called.
-        if (mSnapshot != null) {
-            mSnapshot.destroy(t);
-            mSnapshot = null;
-        }
-        if (mLeash != null) {
-            t.remove(mLeash);
-            mLeash = null;
-        }
-    }
-
-    void setLayer(SurfaceControl.Transaction t, int layer) {
-        if (mLeash != null) {
-            t.setLayer(mLeash, layer);
-        }
-    }
-
-    void setRelativeLayer(SurfaceControl.Transaction t, SurfaceControl relativeTo, int layer) {
-        if (mLeash != null) {
-            t.setRelativeLayer(mLeash, relativeTo, layer);
         }
     }
 
@@ -199,29 +143,21 @@ class SurfaceFreezer {
         return SurfaceControl.captureLayers(captureArgs);
     }
 
-    @VisibleForTesting
-    SurfaceControl.ScreenshotHardwareBuffer createSnapshotBufferInner(
-            SurfaceControl target, Rect bounds) {
-        return createSnapshotBuffer(target, bounds);
-    }
-
-    @VisibleForTesting
-    GraphicBuffer createFromHardwareBufferInner(
-            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer) {
-        return GraphicBuffer.createFromHardwareBuffer(screenshotBuffer.getHardwareBuffer());
-    }
-
     class Snapshot {
         private SurfaceControl mSurfaceControl;
         private AnimationAdapter mAnimation;
+        private SurfaceAnimator.OnAnimationFinishedCallback mFinishedCallback;
 
         /**
          * @param t Transaction to create the thumbnail in.
          * @param screenshotBuffer A thumbnail or placeholder for thumbnail to initialize with.
          */
-        Snapshot(SurfaceControl.Transaction t,
+        Snapshot(Supplier<Surface> surfaceFactory, SurfaceControl.Transaction t,
                 SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer, SurfaceControl parent) {
-            GraphicBuffer graphicBuffer = createFromHardwareBufferInner(screenshotBuffer);
+            // We can't use a delegating constructor since we need to
+            // reference this::onAnimationFinished
+            GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                    screenshotBuffer.getHardwareBuffer());
 
             mSurfaceControl = mAnimatable.makeAnimationLeash()
                     .setName("snapshot anim: " + mAnimatable.toString())
@@ -258,15 +194,19 @@ class SurfaceFreezer {
          *             component responsible for running the animation. It runs the animation with
          *             {@link AnimationAdapter#startAnimation} once the hierarchy with
          *             the Leash has been set up.
+         * @param animationFinishedCallback The callback being triggered when the animation
+         *                                  finishes.
          */
-        void startAnimation(SurfaceControl.Transaction t, AnimationAdapter anim, int type) {
+        void startAnimation(SurfaceControl.Transaction t, AnimationAdapter anim, int type,
+                @Nullable SurfaceAnimator.OnAnimationFinishedCallback animationFinishedCallback) {
             cancelAnimation(t, true /* restarting */);
             mAnimation = anim;
+            mFinishedCallback = animationFinishedCallback;
             if (mSurfaceControl == null) {
                 cancelAnimation(t, false /* restarting */);
                 return;
             }
-            mAnimation.startAnimation(mSurfaceControl, t, type, (typ, ani) -> { });
+            mAnimation.startAnimation(mSurfaceControl, t, type, animationFinishedCallback);
         }
 
         /**
@@ -278,9 +218,18 @@ class SurfaceFreezer {
         void cancelAnimation(SurfaceControl.Transaction t, boolean restarting) {
             final SurfaceControl leash = mSurfaceControl;
             final AnimationAdapter animation = mAnimation;
+            final SurfaceAnimator.OnAnimationFinishedCallback animationFinishedCallback =
+                    mFinishedCallback;
             mAnimation = null;
+            mFinishedCallback = null;
             if (animation != null) {
                 animation.onAnimationCancelled(leash);
+                if (!restarting) {
+                    if (animationFinishedCallback != null) {
+                        animationFinishedCallback.onAnimationFinished(
+                                ANIMATION_TYPE_APP_TRANSITION, animation);
+                    }
+                }
             }
             if (!restarting) {
                 destroy(t);
@@ -295,8 +244,5 @@ class SurfaceFreezer {
          *         will be generated (but the rest of the freezing logic will still happen).
          */
         @Nullable SurfaceControl getFreezeSnapshotTarget();
-
-        /** Called when the {@link #unfreeze(SurfaceControl.Transaction)} is called. */
-        void onUnfrozen();
     }
 }

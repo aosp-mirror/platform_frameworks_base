@@ -19,13 +19,12 @@ package com.android.wm.shell.animation
 import android.util.ArrayMap
 import android.util.Log
 import android.view.View
+import androidx.dynamicanimation.animation.AnimationHandler
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FlingAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
-import androidx.dynamicanimation.animation.FrameCallbackScheduler
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-
 import com.android.wm.shell.animation.PhysicsAnimator.Companion.getInstance
 import java.lang.ref.WeakReference
 import java.util.WeakHashMap
@@ -125,10 +124,10 @@ class PhysicsAnimator<T> private constructor (target: T) {
     private var defaultFling: FlingConfig = globalDefaultFling
 
     /**
-     * FrameCallbackScheduler to use if it need custom FrameCallbackScheduler, if this is null,
-     * it will use the default FrameCallbackScheduler in the DynamicAnimation.
+     * AnimationHandler to use if it need custom AnimationHandler, if this is null, it will use
+     * the default AnimationHandler in the DynamicAnimation.
      */
-    private var customScheduler: FrameCallbackScheduler? = null
+    private var customAnimationHandler: AnimationHandler? = null
 
     /**
      * Internal listeners that respond to DynamicAnimations updating and ending, and dispatch to
@@ -455,11 +454,11 @@ class PhysicsAnimator<T> private constructor (target: T) {
     }
 
     /**
-     * Set the custom FrameCallbackScheduler for all aniatmion in this animator. Set this with null for
-     * restoring to default FrameCallbackScheduler.
+     * Set the custom AnimationHandler for all aniatmion in this animator. Set this with null for
+     * restoring to default AnimationHandler.
      */
-    fun setCustomScheduler(scheduler: FrameCallbackScheduler) {
-        this.customScheduler = scheduler
+    fun setCustomAnimationHandler(handler: AnimationHandler) {
+        this.customAnimationHandler = handler
     }
 
     /** Starts the animations! */
@@ -511,9 +510,10 @@ class PhysicsAnimator<T> private constructor (target: T) {
                     // springs) on this property before flinging.
                     cancel(animatedProperty)
 
-                    // Apply the custom animation scheduler if it not null
+                    // Apply the custom animation handler if it not null
                     val flingAnim = getFlingAnimation(animatedProperty, target)
-                    flingAnim.scheduler = customScheduler ?: flingAnim.scheduler
+                    flingAnim.animationHandler =
+                            customAnimationHandler ?: flingAnim.animationHandler
 
                     // Apply the configuration and start the animation.
                     flingAnim.also { flingConfig.applyToAnimation(it) }.start()
@@ -529,16 +529,17 @@ class PhysicsAnimator<T> private constructor (target: T) {
                     // Apply the configuration and start the animation.
                     val springAnim = getSpringAnimation(animatedProperty, target)
 
-                    // If customScheduler is exist and has not been set to the animation,
+                    // If customAnimationHander is exist and has not been set to the animation,
                     // it should set here.
-                    if (customScheduler != null &&
-                            springAnim.scheduler != customScheduler) {
+                    if (customAnimationHandler != null &&
+                            springAnim.animationHandler != customAnimationHandler) {
                         // Cancel the animation before set animation handler
                         if (springAnim.isRunning) {
                             cancel(animatedProperty)
                         }
-                        // Apply the custom scheduler handler if it not null
-                        springAnim.scheduler = customScheduler ?: springAnim.scheduler
+                        // Apply the custom animation handler if it not null
+                        springAnim.animationHandler =
+                                customAnimationHandler ?: springAnim.animationHandler
                     }
 
                     // Apply the configuration and start the animation.
@@ -596,9 +597,10 @@ class PhysicsAnimator<T> private constructor (target: T) {
                                     }
                                 }
 
-                                // Apply the custom animation scheduler if it not null
+                                // Apply the custom animation handler if it not null
                                 val springAnim = getSpringAnimation(animatedProperty, target)
-                                springAnim.scheduler = customScheduler ?: springAnim.scheduler
+                                springAnim.animationHandler =
+                                        customAnimationHandler ?: springAnim.animationHandler
 
                                 // Apply the configuration and start the spring animation.
                                 springAnim.also { springConfig.applyToAnimation(it) }.start()

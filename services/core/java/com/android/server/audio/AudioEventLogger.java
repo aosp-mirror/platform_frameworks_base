@@ -16,12 +16,9 @@
 
 package com.android.server.audio;
 
-import android.annotation.IntDef;
 import android.util.Log;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -66,16 +63,6 @@ public class AudioEventLogger {
             return printLog(ALOGI, tag);
         }
 
-        /** @hide */
-        @IntDef(flag = false, value = {
-                ALOGI,
-                ALOGE,
-                ALOGW,
-                ALOGV }
-        )
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface LogType {}
-
         public static final int ALOGI = 0;
         public static final int ALOGE = 1;
         public static final int ALOGW = 2;
@@ -87,7 +74,7 @@ public class AudioEventLogger {
          * @param tag
          * @return
          */
-        public Event printLog(@LogType int type, String tag) {
+        public Event printLog(int type, String tag) {
             switch (type) {
                 case ALOGI:
                     Log.i(tag, eventToString());
@@ -146,27 +133,6 @@ public class AudioEventLogger {
             mEvents.removeFirst();
         }
         mEvents.add(evt);
-    }
-
-    /**
-     * Add a string-based event to the log, and print it to logcat as info.
-     * @param msg the message for the logs
-     * @param tag the logcat tag to use
-     */
-    public synchronized void loglogi(String msg, String tag) {
-        final Event event = new StringEvent(msg);
-        log(event.printLog(tag));
-    }
-
-    /**
-     * Same as {@link #loglogi(String, String)} but specifying the logcat type
-     * @param msg the message for the logs
-     * @param logType the type of logcat entry
-     * @param tag the logcat tag to use
-     */
-    public synchronized void loglog(String msg, @Event.LogType int logType, String tag) {
-        final Event event = new StringEvent(msg);
-        log(event.printLog(logType, tag));
     }
 
     public synchronized void dump(PrintWriter pw) {

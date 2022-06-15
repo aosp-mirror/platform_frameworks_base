@@ -58,7 +58,6 @@ import android.os.RemoteException;
 import android.os.image.DynamicSystemClient;
 import android.os.image.DynamicSystemManager;
 import android.text.TextUtils;
-import android.util.EventLog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -105,43 +104,6 @@ public class DynamicSystemInstallationService extends Service
     private static final int NOTIFICATION_ID = 1;
 
     /*
-     * Event log tags
-     */
-    private static final int EVENT_DSU_PROGRESS_UPDATE = 120000;
-    private static final int EVENT_DSU_INSTALL_COMPLETE = 120001;
-    private static final int EVENT_DSU_INSTALL_FAILED = 120002;
-    private static final int EVENT_DSU_INSTALL_INSUFFICIENT_SPACE = 120003;
-
-    protected static void logEventProgressUpdate(
-            String partitionName,
-            long installedBytes,
-            long totalBytes,
-            int partitionNumber,
-            int totalPartitionNumber,
-            int totalProgressPercentage) {
-        EventLog.writeEvent(
-                EVENT_DSU_PROGRESS_UPDATE,
-                partitionName,
-                installedBytes,
-                totalBytes,
-                partitionNumber,
-                totalPartitionNumber,
-                totalProgressPercentage);
-    }
-
-    protected static void logEventComplete() {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_COMPLETE);
-    }
-
-    protected static void logEventFailed(String cause) {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_FAILED, cause);
-    }
-
-    protected static void logEventInsufficientSpace() {
-        EventLog.writeEvent(EVENT_DSU_INSTALL_INSUFFICIENT_SPACE);
-    }
-
-    /*
      * IPC
      */
     /** Keeps track of all current registered clients. */
@@ -170,10 +132,15 @@ public class DynamicSystemInstallationService extends Service
     private DynamicSystemManager mDynSystem;
     private NotificationManager mNM;
 
+    private int mNumInstalledPartitions;
+
+    private String mCurrentPartitionName;
+    private long mCurrentPartitionSize;
+    private long mCurrentPartitionInstalledSize;
+
     // This is for testing only now
     private boolean mEnableWhenCompleted;
 
-    private InstallationAsyncTask.Progress mInstallTaskProgress;
     private InstallationAsyncTask mInstallTask;
 
 
@@ -236,22 +203,17 @@ public class DynamicSystemInstallationService extends Service
 
     @Override
     public void onProgressUpdate(InstallationAsyncTask.Progress progress) {
-        logEventProgressUpdate(
-                progress.partitionName,
-                progress.installedBytes,
-                progress.totalBytes,
-                progress.partitionNumber,
-                progress.totalPartitionNumber,
-                progress.totalProgressPercentage);
+        mCurrentPartitionName = progress.partitionName;
+        mCurrentPartitionSize = progress.partitionSize;
+        mCurrentPartitionInstalledSize = progress.installedSize;
+        mNumInstalledPartitions = progress.numInstalledPartitions;
 
-        mInstallTaskProgress = progress;
         postStatus(STATUS_IN_PROGRESS, CAUSE_NOT_SPECIFIED, null);
     }
 
     @Override
     public void onResult(int result, Throwable detail) {
         if (result == RESULT_OK) {
-            logEventComplete();
             postStatus(STATUS_READY, CAUSE_INSTALL_COMPLETED, null);
 
             // For testing: enable DSU and restart the device when install completed
@@ -259,14 +221,6 @@ public class DynamicSystemInstallationService extends Service
                 executeRebootToDynSystemCommand();
             }
             return;
-        }
-
-        if (result == RESULT_CANCELLED) {
-            logEventFailed("Dynamic System installation task is canceled by the user.");
-        } else if (detail instanceof InstallationAsyncTask.InsufficientSpaceException) {
-            logEventInsufficientSpace();
-        } else {
-            logEventFailed("error: " + detail);
         }
 
         boolean removeNotification = false;
@@ -297,20 +251,16 @@ public class DynamicSystemInstallationService extends Service
     private void executeInstallCommand(Intent intent) {
         if (!verifyRequest(intent)) {
             Log.e(TAG, "Verification failed. Did you use VerificationActivity?");
-            logEventFailed("VerificationActivity");
             return;
         }
 
         if (mInstallTask != null) {
             Log.e(TAG, "There is already an installation task running");
-            logEventFailed("There is already an ongoing installation task.");
             return;
         }
 
         if (isInDynamicSystem()) {
             Log.e(TAG, "We are already running in DynamicSystem");
-            logEventFailed(
-                    "Cannot start a Dynamic System installation task within a Dynamic System.");
             return;
         }
 
@@ -493,47 +443,21 @@ public class DynamicSystemInstallationService extends Service
 
         switch (status) {
             case STATUS_IN_PROGRESS:
-                String msgInProgress = getString(R.string.notification_install_inprogress);
+                builder.setContentText(getString(R.string.notification_install_inprogress));
 
-                if (mInstallTaskProgress == null) {
-                    builder.setContentText(msgInProgress);
-                } else {
-                    if (mInstallTaskProgress.totalPartitionNumber > 0) {
-                        builder.setContentText(
-                                String.format(
-                                        "%s: %s partition [%d/%d]",
-                                        msgInProgress,
-                                        mInstallTaskProgress.partitionName,
-                                        mInstallTaskProgress.partitionNumber,
-                                        mInstallTaskProgress.totalPartitionNumber));
+                int max = 1024;
+                int progress = 0;
 
-                        // totalProgressPercentage is defined iff totalPartitionNumber is defined
-                        builder.setProgress(
-                                100,
-                                mInstallTaskProgress.totalProgressPercentage,
-                                /* indeterminate = */ false);
-                    } else {
-                        builder.setContentText(
-                                String.format(
-                                        "%s: %s partition",
-                                        msgInProgress, mInstallTaskProgress.partitionName));
+                int currentMax = max >> (mNumInstalledPartitions + 1);
+                progress = max - currentMax * 2;
 
-                        int max = 1024;
-                        int progress = 0;
+                long currentProgress = (mCurrentPartitionInstalledSize >> 20) * currentMax
+                        / Math.max(mCurrentPartitionSize >> 20, 1);
 
-                        int currentMax = max >> mInstallTaskProgress.partitionNumber;
-                        progress = max - currentMax * 2;
+                progress += (int) currentProgress;
 
-                        long currentProgress =
-                                (mInstallTaskProgress.installedBytes >> 20)
-                                        * currentMax
-                                        / Math.max(mInstallTaskProgress.totalBytes >> 20, 1);
+                builder.setProgress(max, progress, false);
 
-                        progress += (int) currentProgress;
-
-                        builder.setProgress(max, progress, false);
-                    }
-                }
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_cancel),
                         createPendingIntent(ACTION_CANCEL_INSTALL)).build());
@@ -639,14 +563,13 @@ public class DynamicSystemInstallationService extends Service
 
         StringBuilder msg = new StringBuilder();
         msg.append("status: " + statusString + ", cause: " + causeString);
-        if (status == STATUS_IN_PROGRESS && mInstallTaskProgress != null) {
+        if (status == STATUS_IN_PROGRESS) {
             msg.append(
                     String.format(
-                            ", partition name: %s, progress: %d/%d, total_progress: %d%%",
-                            mInstallTaskProgress.partitionName,
-                            mInstallTaskProgress.installedBytes,
-                            mInstallTaskProgress.totalBytes,
-                            mInstallTaskProgress.totalProgressPercentage));
+                            ", partition name: %s, progress: %d/%d",
+                            mCurrentPartitionName,
+                            mCurrentPartitionInstalledSize,
+                            mCurrentPartitionSize));
         }
         if (detail != null) {
             msg.append(", detail: " + detail);
@@ -671,10 +594,7 @@ public class DynamicSystemInstallationService extends Service
         Bundle bundle = new Bundle();
 
         // TODO: send more info to the clients
-        if (mInstallTaskProgress != null) {
-            bundle.putLong(
-                    DynamicSystemClient.KEY_INSTALLED_SIZE, mInstallTaskProgress.installedBytes);
-        }
+        bundle.putLong(DynamicSystemClient.KEY_INSTALLED_SIZE, mCurrentPartitionInstalledSize);
 
         if (detail != null) {
             bundle.putSerializable(DynamicSystemClient.KEY_EXCEPTION_DETAIL,

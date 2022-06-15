@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-// TODO(b/225012970): should be moved to com.android.server
 package com.android.server.devicepolicy;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.FactoryResetter.isFactoryResetting;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -50,7 +48,7 @@ import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 /**
- * Run it as {@code atest FrameworksMockingServicesTests:FactoryResetterTest}
+ * Run it as {@code atest FrameworksMockingCoreTests:FactoryResetterTest}
  */
 @Presubmit
 public final class FactoryResetterTest {
@@ -167,7 +165,6 @@ public final class FactoryResetterTest {
                 .factoryReset();
 
         assertThat(success).isTrue();
-        assertThat(isFactoryResetting()).isTrue();
         verifyWipeAdoptableStorageCalled();
         verifyWipeFactoryResetProtectionNotCalled();
         verifyRebootWipeUserDataMinimumArgsCalled();
@@ -182,7 +179,6 @@ public final class FactoryResetterTest {
                 .build().factoryReset();
 
         assertThat(success).isTrue();
-        assertThat(isFactoryResetting()).isTrue();
         verifyWipeAdoptableStorageNotCalled();
         verifyWipeFactoryResetProtectionCalled();
         verifyRebootWipeUserDataMinimumArgsCalled();
@@ -202,7 +198,6 @@ public final class FactoryResetterTest {
                 .build().factoryReset();
 
         assertThat(success).isTrue();
-        assertThat(isFactoryResetting()).isTrue();
         verifyWipeAdoptableStorageCalled();
         verifyWipeFactoryResetProtectionCalled();
         verifyRebootWipeUserDataAllArgsCalled();
@@ -216,7 +211,6 @@ public final class FactoryResetterTest {
                 .setSafetyChecker(mSafetyChecker).build().factoryReset();
 
         assertThat(success).isFalse();
-        assertThat(isFactoryResetting()).isTrue();
         verifyWipeAdoptableStorageNotCalled();
         verifyWipeFactoryResetProtectionNotCalled();
         verifyRebootWipeUserDataNotCalled();
@@ -244,7 +238,6 @@ public final class FactoryResetterTest {
                 .build().factoryReset();
 
         assertThat(success).isFalse();
-        assertThat(isFactoryResetting()).isTrue();
         verifyWipeAdoptableStorageCalled();
         verifyWipeFactoryResetProtectionCalled();
         verifyRebootWipeUserDataAllArgsCalled();

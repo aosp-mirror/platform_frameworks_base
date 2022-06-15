@@ -17,11 +17,9 @@
 package com.android.systemui.qs.tiles;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,7 +34,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -44,12 +41,10 @@ import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -72,10 +67,6 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     @Mock
     private QSLogger mQSLogger;
-    @Mock
-    private KeyguardStateController mKeyguardStateController;
-    @Mock
-    private DialogLaunchAnimator mDialogLaunchAnimator;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -98,9 +89,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mActivityStarter,
                 mQSLogger,
                 mController,
-                mKeyguardDismissUtil,
-                mKeyguardStateController,
-                mDialogLaunchAnimator
+                mKeyguardDismissUtil
         );
 
         mTile.initialize();
@@ -123,15 +112,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         mTile.handleClick(null /* view */);
         mTestableLooper.processAllMessages();
-
-        ArgumentCaptor<Runnable> onStartRecordingClicked = ArgumentCaptor.forClass(Runnable.class);
-        verify(mController).createScreenRecordDialog(any(), onStartRecordingClicked.capture());
-
-        // When starting the recording, we collapse the shade and disable the dialog animation.
-        assertNotNull(onStartRecordingClicked.getValue());
-        onStartRecordingClicked.getValue().run();
-        verify(mDialogLaunchAnimator).disableAllCurrentDialogsExitAnimations();
-        verify(mHost).collapsePanels();
+        verify(mController, times(1)).getPromptIntent();
     }
 
     // Test that the tile is active and labeled correctly when the controller is starting

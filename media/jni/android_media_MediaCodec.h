@@ -55,7 +55,7 @@ using hardware::cas::native::V1_0::IDescrambler;
 struct JMediaCodec : public AHandler {
     JMediaCodec(
             JNIEnv *env, jobject thiz,
-            const char *name, bool nameIsType, bool encoder, int pid, int uid);
+            const char *name, bool nameIsType, bool encoder);
 
     status_t initCheck() const;
 

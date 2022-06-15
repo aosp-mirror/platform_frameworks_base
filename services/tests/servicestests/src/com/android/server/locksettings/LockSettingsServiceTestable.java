@@ -22,7 +22,6 @@ import android.app.IActivityManager;
 import android.app.admin.DeviceStateCache;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.UserInfo;
 import android.hardware.authsecret.V1_0.IAuthSecret;
 import android.os.Handler;
 import android.os.Parcel;
@@ -214,11 +213,5 @@ public class LockSettingsServiceTestable extends LockSettingsService {
     @Override
     void setKeystorePassword(byte[] password, int userHandle) {
 
-    }
-
-    @Override
-    protected boolean isCredentialSharableWithParent(int userId) {
-        UserInfo userInfo = mUserManager.getUserInfo(userId);
-        return userInfo.isCloneProfile() || userInfo.isManagedProfile();
     }
 }

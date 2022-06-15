@@ -114,8 +114,7 @@ protected:
     virtual ~SpriteController();
 
 public:
-    using ParentSurfaceProvider = std::function<sp<SurfaceControl>(int /*displayId*/)>;
-    SpriteController(const sp<Looper>& looper, int32_t overlayLayer, ParentSurfaceProvider parent);
+    SpriteController(const sp<Looper>& looper, int32_t overlayLayer);
 
     /* Creates a new sprite, initially invisible. */
     virtual sp<Sprite> createSprite();
@@ -246,13 +245,12 @@ private:
     sp<Looper> mLooper;
     const int32_t mOverlayLayer;
     sp<WeakMessageHandler> mHandler;
-    ParentSurfaceProvider mParentSurfaceProvider;
 
     sp<SurfaceComposerClient> mSurfaceComposerClient;
 
     struct Locked {
-        std::vector<sp<SpriteImpl>> invalidatedSprites;
-        std::vector<sp<SurfaceControl>> disposedSurfaces;
+        Vector<sp<SpriteImpl> > invalidatedSprites;
+        Vector<sp<SurfaceControl> > disposedSurfaces;
         uint32_t transactionNestingCount;
         bool deferredSpriteUpdate;
     } mLocked; // guarded by mLock

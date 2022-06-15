@@ -45,7 +45,6 @@ import android.service.usb.UsbUidPermissionProto;
 import android.service.usb.UsbUserPermissionsManagerProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
-import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.TypedXmlPullParser;
@@ -74,8 +73,6 @@ import java.io.IOException;
 class UsbUserPermissionManager {
     private static final String TAG = UsbUserPermissionManager.class.getSimpleName();
     private static final boolean DEBUG = false;
-
-    private static final int SNET_EVENT_LOG_ID = 0x534e4554;
 
     @GuardedBy("mLock")
     /** Mapping of USB device name to list of UIDs with permissions for the device
@@ -246,13 +243,9 @@ class UsbUserPermissionManager {
      * @param uid to check permission for
      * @return {@code true} if caller has permssion
      */
-    boolean hasPermission(@NonNull UsbAccessory accessory, int pid, int uid) {
+    boolean hasPermission(@NonNull UsbAccessory accessory, int uid) {
         synchronized (mLock) {
-            if (uid == Process.SYSTEM_UID
-                    || mDisablePermissionDialogs
-                    || mContext.checkPermission(
-                        android.Manifest.permission.MANAGE_USB, pid, uid)
-                         == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
                 return true;
             }
             AccessoryFilter filter = new AccessoryFilter(accessory);
@@ -679,8 +672,8 @@ class UsbUserPermissionManager {
         }
     }
 
-    public void checkPermission(UsbAccessory accessory, int pid, int uid) {
-        if (!hasPermission(accessory, pid, uid)) {
+    public void checkPermission(UsbAccessory accessory, int uid) {
+        if (!hasPermission(accessory, uid)) {
             throw new SecurityException("User has not given " + uid + " permission to accessory "
                     + accessory);
         }
@@ -692,22 +685,15 @@ class UsbUserPermissionManager {
             String packageName,
             PendingIntent pi,
             int uid) {
-        boolean throwException = false;
-
         // compare uid with packageName to foil apps pretending to be someone else
         try {
             ApplicationInfo aInfo = mContext.getPackageManager().getApplicationInfo(packageName, 0);
             if (aInfo.uid != uid) {
-                Slog.w(TAG, "package " + packageName
+                throw new IllegalArgumentException("package " + packageName
                         + " does not match caller's uid " + uid);
-                EventLog.writeEvent(SNET_EVENT_LOG_ID, "180104273", -1, "");
-                throwException = true;
             }
         } catch (PackageManager.NameNotFoundException e) {
-            throwException = true;
-        } finally {
-            if (throwException)
-                throw new IllegalArgumentException("package " + packageName + " not found");
+            throw new IllegalArgumentException("package " + packageName + " not found");
         }
 
         requestPermissionDialog(device, accessory, canBeDefault, packageName, uid, mContext, pi);
@@ -749,9 +735,9 @@ class UsbUserPermissionManager {
     }
 
     public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi,
-            int pid, int uid) {
+            int uid) {
         // respond immediately if permission has already been granted
-        if (hasPermission(accessory, pid, uid)) {
+        if (hasPermission(accessory, uid)) {
             Intent intent = new Intent();
             intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
             intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);

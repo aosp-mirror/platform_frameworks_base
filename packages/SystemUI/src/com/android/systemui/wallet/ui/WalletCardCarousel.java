@@ -82,12 +82,6 @@ public class WalletCardCarousel extends RecyclerView {
 
     interface OnSelectionListener {
         /**
-         * A non-centered card was clicked.
-         * @param position
-         */
-        void onUncenteredClick(int position);
-
-        /**
          * The card was moved to the center, thus selecting it.
          */
         void onCardSelected(@NonNull WalletCardViewInfo card);
@@ -193,15 +187,6 @@ public class WalletCardCarousel extends RecyclerView {
 
     int getCardHeightPx() {
         return mCardHeightPx;
-    }
-
-    /**
-     * Sets the adapter again in the RecyclerView, updating the ViewHolders children's layout.
-     * This is needed when changing the state of the device (eg fold/unfold) so the ViewHolders are
-     * recreated.
-     */
-    void resetAdapter() {
-        setAdapter(mWalletCardCarouselAdapter);
     }
 
     /**
@@ -391,8 +376,8 @@ public class WalletCardCarousel extends RecyclerView {
             CardView cardView = viewHolder.mCardView;
             cardView.setRadius(mCornerRadiusPx);
             ViewGroup.LayoutParams layoutParams = cardView.getLayoutParams();
-            layoutParams.width = getCardWidthPx();
-            layoutParams.height = getCardHeightPx();
+            layoutParams.width = mCardWidthPx;
+            layoutParams.height = mCardHeightPx;
             view.setTag(viewHolder);
             return viewHolder;
         }
@@ -409,7 +394,7 @@ public class WalletCardCarousel extends RecyclerView {
             viewHolder.mCardView.setOnClickListener(
                     v -> {
                         if (position != mCenteredAdapterPosition) {
-                            mSelectionListener.onUncenteredClick(position);
+                            smoothScrollToPosition(position);
                         } else {
                             mSelectionListener.onCardClicked(cardViewInfo);
                         }

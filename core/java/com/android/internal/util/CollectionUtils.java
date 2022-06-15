@@ -227,13 +227,6 @@ public class CollectionUtils {
     }
 
     /**
-     * Returns whether the given map {@link Map#isEmpty is empty} or {@code null}
-     */
-    public static boolean isEmpty(@Nullable Map<?, ?> cur) {
-        return size(cur) == 0;
-    }
-
-    /**
      * Returns the elements of the given list that are of type {@code c}
      */
     public static @NonNull <T> List<T> filter(@Nullable List<?> list, Class<T> c) {

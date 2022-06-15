@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -23,13 +24,15 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
+import com.android.server.wm.flicker.appWindowBecomesInVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.exitSplitScreenFromBottom
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER_COMPONENT
+import com.android.server.wm.flicker.layerBecomesInvisible
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.wm.shell.flicker.DOCKED_STACK_DIVIDER
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -49,9 +52,9 @@ import org.junit.runners.Parameterized
 class ExitLegacySplitScreenFromBottom(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            super.transition(this)
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+        get() = { configuration ->
+            super.transition(this, configuration)
             setup {
                 eachRun {
                     splitScreenApp.launchViaIntent(wmHelper)
@@ -64,52 +67,31 @@ class ExitLegacySplitScreenFromBottom(
                 }
             }
             transitions {
-                device.exitSplitScreenFromBottom(wmHelper)
+                device.exitSplitScreenFromBottom()
             }
         }
 
-    override val ignoredWindows: List<FlickerComponentName>
-        get() = listOf(LAUNCHER_COMPONENT, FlickerComponentName.SPLASH_SCREEN,
-            splitScreenApp.component, secondaryApp.component,
-            FlickerComponentName.SNAPSHOT)
+    override val ignoredWindows: List<String>
+        get() = listOf(LAUNCHER_PACKAGE_NAME, WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+            splitScreenApp.defaultWindowName, secondaryApp.defaultWindowName,
+            WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME)
+
+    @Presubmit
+    @Test
+    fun layerBecomesInvisible() = testSpec.layerBecomesInvisible(DOCKED_STACK_DIVIDER)
 
     @FlakyTest
     @Test
-    fun layerBecomesInvisible() {
-        testSpec.assertLayers {
-            this.isVisible(DOCKED_STACK_DIVIDER_COMPONENT)
-                    .then()
-                    .isInvisible(DOCKED_STACK_DIVIDER_COMPONENT)
-        }
-    }
+    fun appWindowBecomesInVisible() =
+        testSpec.appWindowBecomesInVisible(secondaryApp.defaultWindowName)
 
-    @FlakyTest
+    @Presubmit
     @Test
-    fun appWindowBecomesInVisible() {
-        testSpec.assertWm {
-            this.isAppWindowVisible(secondaryApp.component)
-                    .then()
-                    .isAppWindowInvisible(secondaryApp.component)
-        }
-    }
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
 
-    @FlakyTest
+    @Presubmit
     @Test
-    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
-
-    @FlakyTest
-    @Test
-    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
-
-    @FlakyTest
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-            super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    @FlakyTest
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

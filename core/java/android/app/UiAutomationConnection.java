@@ -36,10 +36,7 @@ import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.util.Log;
 import android.view.IWindowManager;
-import android.view.InputDevice;
 import android.view.InputEvent;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
@@ -135,36 +132,13 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
-
-        final boolean syncTransactionsBefore;
-        final boolean syncTransactionsAfter;
-        if (event instanceof KeyEvent) {
-            KeyEvent keyEvent = (KeyEvent) event;
-            syncTransactionsBefore = keyEvent.getAction() == KeyEvent.ACTION_DOWN;
-            syncTransactionsAfter = keyEvent.getAction() == KeyEvent.ACTION_UP;
-        } else {
-            MotionEvent motionEvent = (MotionEvent) event;
-            syncTransactionsBefore = motionEvent.getAction() == MotionEvent.ACTION_DOWN
-                    || motionEvent.isFromSource(InputDevice.SOURCE_MOUSE);
-            syncTransactionsAfter = motionEvent.getAction() == MotionEvent.ACTION_UP;
-        }
-
+        final int mode = (sync) ? InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
+                : InputManager.INJECT_INPUT_EVENT_MODE_ASYNC;
         final long identity = Binder.clearCallingIdentity();
         try {
-            if (syncTransactionsBefore) {
-                mWindowManager.syncInputTransactions(waitForAnimations);
-            }
-
-            final boolean result = InputManager.getInstance().injectInputEvent(event,
-                    sync ? InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH
-                            : InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-
-            if (syncTransactionsAfter) {
-                mWindowManager.syncInputTransactions(waitForAnimations);
-            }
-            return result;
+            return mWindowManager.injectInputAfterTransactionsApplied(event, mode,
+                    waitForAnimations);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

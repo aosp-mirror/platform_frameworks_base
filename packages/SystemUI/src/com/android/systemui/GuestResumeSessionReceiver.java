@@ -128,7 +128,7 @@ public class GuestResumeSessionReceiver extends BroadcastReceiver {
                 UserSwitcherController userSwitcherController,
                 UiEventLogger uiEventLogger,
                 int userId) {
-            super(context, false /* dismissOnDeviceLock */);
+            super(context);
 
             setTitle(context.getString(R.string.guest_wipe_session_title));
             setMessage(context.getString(R.string.guest_wipe_session_message));

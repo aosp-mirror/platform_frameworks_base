@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static android.os.Process.SYSTEM_UID;
-
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -51,7 +49,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.MemoryPressureUtil;
-import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.wm.WindowProcessController;
 
 import java.io.File;
@@ -118,18 +115,6 @@ class ProcessErrorStateRecord {
      */
     @CompositeRWLock({"mService", "mProcLock"})
     private ComponentName mErrorReportReceiver;
-
-    /**
-     * ANR dialog data used to dismiss any visible ANR dialogs if the app becomes responsive.
-     */
-    @CompositeRWLock({"mService", "mProcLock"})
-    private AppNotRespondingDialog.Data mAnrData;
-
-    /**
-     * Annotation from process killed due to an ANR.
-     */
-    @GuardedBy("mService")
-    private String mAnrAnnotation;
 
     /**
      * Optional local handler to be invoked in the process crash.
@@ -199,16 +184,6 @@ class ProcessErrorStateRecord {
         mCrashingReport = crashingReport;
     }
 
-    @GuardedBy("mService")
-    String getAnrAnnotation() {
-        return mAnrAnnotation;
-    }
-
-    @GuardedBy("mService")
-    void setAnrAnnotation(String anrAnnotation) {
-        mAnrAnnotation = anrAnnotation;
-    }
-
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     ActivityManager.ProcessErrorStateInfo getNotRespondingReport() {
         return mNotRespondingReport;
@@ -234,16 +209,6 @@ class ProcessErrorStateRecord {
         return mDialogController;
     }
 
-    @GuardedBy({"mService", "mProcLock"})
-    void setAnrData(AppNotRespondingDialog.Data data) {
-        mAnrData = data;
-    }
-
-    @GuardedBy(anyOf = {"mService", "mProcLock"})
-    AppNotRespondingDialog.Data getAnrData() {
-        return mAnrData;
-    }
-
     ProcessErrorStateRecord(ProcessRecord app) {
         mApp = app;
         mService = app.mService;
@@ -259,8 +224,6 @@ class ProcessErrorStateRecord {
 
         mApp.getWindowProcessController().appEarlyNotResponding(annotation, () -> {
             synchronized (mService) {
-                // Store annotation here as instance below races with this killLocked.
-                setAnrAnnotation(annotation);
                 mApp.killLocked("anr", ApplicationExitInfo.REASON_ANR, true);
             }
         });
@@ -274,9 +237,6 @@ class ProcessErrorStateRecord {
         final int pid = mApp.getPid();
         final UUID errorId;
         synchronized (mService) {
-            // Store annotation here as instance above will not be hit on all paths.
-            setAnrAnnotation(annotation);
-
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
             if (mService.mAtmInternal.isShuttingDown()) {
                 Slog.i(TAG, "During shutdown skipping ANR: " + this + " " + annotation);
@@ -305,11 +265,9 @@ class ProcessErrorStateRecord {
             EventLog.writeEvent(EventLogTags.AM_ANR, mApp.userId, pid, mApp.processName,
                     mApp.info.flags, annotation);
 
-            if (mService.mTraceErrorLogger != null
-                    && mService.mTraceErrorLogger.isAddErrorIdEnabled()) {
+            if (mService.mTraceErrorLogger.isAddErrorIdEnabled()) {
                 errorId = mService.mTraceErrorLogger.generateErrorId();
                 mService.mTraceErrorLogger.addErrorIdToTrace(mApp.processName, errorId);
-                mService.mTraceErrorLogger.addSubjectToTrace(annotation, errorId);
             } else {
                 errorId = null;
             }
@@ -355,13 +313,6 @@ class ProcessErrorStateRecord {
                 });
             }
         }
-
-        // Get critical event log before logging the ANR so that it doesn't occur in the log.
-        final String criticalEventLog =
-                CriticalEventLog.getInstance().logLinesForTraceFile(
-                        mApp.getProcessClassEnum(), mApp.processName, mApp.uid);
-        CriticalEventLog.getInstance().logAnr(annotation, mApp.getProcessClassEnum(),
-                mApp.processName, mApp.uid, mApp.mPid);
 
         // Log the ANR to the main log.
         StringBuilder info = new StringBuilder();
@@ -434,7 +385,7 @@ class ProcessErrorStateRecord {
         final long[] offsets = new long[2];
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 isSilentAnr ? null : processCpuTracker, isSilentAnr ? null : lastPids,
-                nativePids, tracesFileException, offsets, annotation, criticalEventLog);
+                nativePids, tracesFileException, offsets, annotation);
 
         if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
@@ -460,10 +411,10 @@ class ProcessErrorStateRecord {
         float loadingProgress = 1;
         IncrementalMetrics incrementalMetrics = null;
         final PackageManagerInternal packageManagerInternal = mService.getPackageManagerInternal();
-        if (mApp.info != null && mApp.info.packageName != null && packageManagerInternal != null) {
+        if (mApp.info != null && mApp.info.packageName != null) {
             IncrementalStatesInfo incrementalStatesInfo =
                     packageManagerInternal.getIncrementalStatesInfo(
-                            mApp.info.packageName, SYSTEM_UID, mApp.userId);
+                            mApp.info.packageName, mApp.uid, mApp.userId);
             if (incrementalStatesInfo != null) {
                 loadingProgress = incrementalStatesInfo.getProgress();
             }

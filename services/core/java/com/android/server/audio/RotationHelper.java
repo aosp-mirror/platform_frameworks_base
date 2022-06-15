@@ -17,47 +17,33 @@
 package com.android.server.audio;
 
 import android.content.Context;
-import android.hardware.devicestate.DeviceStateManager;
-import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
-import android.hardware.display.DisplayManagerGlobal;
 import android.media.AudioSystem;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.util.Log;
-import android.view.Display;
 import android.view.Surface;
+import android.view.WindowManager;
 
 /**
  * Class to handle device rotation events for AudioService, and forward device rotation
- * and folded state to the audio HALs through AudioSystem.
+ * to the audio HALs through AudioSystem.
  *
  * The role of this class is to monitor device orientation changes, and upon rotation,
  * verify the UI orientation. In case of a change, send the new orientation, in increments
  * of 90deg, through AudioSystem.
  *
- * Another role of this class is to track device folded state changes. In case of a
- * change, send the new folded state through AudioSystem.
- *
  * Note that even though we're responding to device orientation events, we always
  * query the display rotation so audio stays in sync with video/dialogs. This is
  * done with .getDefaultDisplay().getRotation() from WINDOW_SERVICE.
- *
- * We also monitor current display ID and audio is able to know which display is active.
  */
 class RotationHelper {
 
     private static final String TAG = "AudioService.RotationHelper";
 
-    private static final boolean DEBUG_ROTATION = false;
-
     private static AudioDisplayListener sDisplayListener;
-    private static FoldStateListener sFoldStateListener;
 
     private static final Object sRotationLock = new Object();
-    private static final Object sFoldStateLock = new Object();
     private static int sDeviceRotation = Surface.ROTATION_0; // R/W synchronized on sRotationLock
-    private static boolean sDeviceFold = true; // R/W synchronized on sFoldStateLock
 
     private static Context sContext;
     private static Handler sHandler;
@@ -81,17 +67,11 @@ class RotationHelper {
         ((DisplayManager) sContext.getSystemService(Context.DISPLAY_SERVICE))
                 .registerDisplayListener(sDisplayListener, sHandler);
         updateOrientation();
-
-        sFoldStateListener = new FoldStateListener(sContext, folded -> updateFoldState(folded));
-        sContext.getSystemService(DeviceStateManager.class)
-                .registerCallback(new HandlerExecutor(sHandler), sFoldStateListener);
     }
 
     static void disable() {
         ((DisplayManager) sContext.getSystemService(Context.DISPLAY_SERVICE))
                 .unregisterDisplayListener(sDisplayListener);
-        sContext.getSystemService(DeviceStateManager.class)
-                .unregisterCallback(sFoldStateListener);
     }
 
     /**
@@ -101,8 +81,8 @@ class RotationHelper {
         // Even though we're responding to device orientation events,
         // use display rotation so audio stays in sync with video/dialogs
         // TODO(b/148458001): Support multi-display
-        int newRotation = DisplayManagerGlobal.getInstance()
-                .getDisplayInfo(Display.DEFAULT_DISPLAY).rotation;
+        int newRotation = ((WindowManager) sContext.getSystemService(
+                Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
         synchronized(sRotationLock) {
             if (newRotation != sDeviceRotation) {
                 sDeviceRotation = newRotation;
@@ -112,9 +92,7 @@ class RotationHelper {
     }
 
     private static void publishRotation(int rotation) {
-        if (DEBUG_ROTATION) {
-            Log.i(TAG, "publishing device rotation =" + rotation + " (x90deg)");
-        }
+        Log.v(TAG, "publishing device rotation =" + rotation + " (x90deg)");
         switch (rotation) {
             case Surface.ROTATION_0:
                 AudioSystem.setParameters("rotation=0");
@@ -134,22 +112,6 @@ class RotationHelper {
     }
 
     /**
-     * publish the change of device folded state if any.
-     */
-    static void updateFoldState(boolean newFolded) {
-        synchronized (sFoldStateLock) {
-            if (sDeviceFold != newFolded) {
-                sDeviceFold = newFolded;
-                if (newFolded) {
-                    AudioSystem.setParameters("device_folded=on");
-                } else {
-                    AudioSystem.setParameters("device_folded=off");
-                }
-            }
-        }
-    }
-
-    /**
      * Uses android.hardware.display.DisplayManager.DisplayListener
      */
     final static class AudioDisplayListener implements DisplayManager.DisplayListener {
@@ -164,9 +126,6 @@ class RotationHelper {
 
         @Override
         public void onDisplayChanged(int displayId) {
-            if (DEBUG_ROTATION) {
-                Log.i(TAG, "onDisplayChanged diplayId:" + displayId);
-            }
             updateOrientation();
         }
     }

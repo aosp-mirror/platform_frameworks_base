@@ -17,8 +17,7 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@drawable/ic_chooser_pin"
-          android:gravity="start|top"
-          android:top="4dp"
+          android:gravity="start|center_vertical"
           android:width="12dp"
           android:height="12dp"
           android:start="0dp"

@@ -57,13 +57,12 @@ class MediaCarouselScrollHandler(
     private val scrollView: MediaScrollView,
     private val pageIndicator: PageIndicator,
     private val mainExecutor: DelayableExecutor,
-    val dismissCallback: () -> Unit,
+    private val dismissCallback: () -> Unit,
     private var translationChangedListener: () -> Unit,
     private val closeGuts: (immediate: Boolean) -> Unit,
     private val falsingCollector: FalsingCollector,
     private val falsingManager: FalsingManager,
-    private val logSmartspaceImpression: (Boolean) -> Unit,
-    private val logger: MediaUiEventLogger
+    private val logSmartspaceImpression: (Boolean) -> Unit
 ) {
     /**
      * Is the view in RTL
@@ -477,7 +476,6 @@ class MediaCarouselScrollHandler(
             visibleMediaIndex = newIndex
             if (oldIndex != visibleMediaIndex && visibleToUser) {
                 logSmartspaceImpression(qsExpanded)
-                logger.logMediaCarouselPage(newIndex)
             }
             closeGuts(false)
             updatePlayerVisibilities()
@@ -530,7 +528,7 @@ class MediaCarouselScrollHandler(
      * where it was and update our scroll position.
      */
     fun onPrePlayerRemoved(removed: MediaControlPanel) {
-        val removedIndex = mediaContent.indexOfChild(removed.mediaViewHolder?.player)
+        val removedIndex = mediaContent.indexOfChild(removed.playerViewHolder?.player)
         // If the removed index is less than the visibleMediaIndex, then we need to decrement it.
         // RTL has no effect on this, because indices are always relative (start-to-end).
         // Update the index 'manually' since we won't always get a call to onMediaScrollingChanged

@@ -55,20 +55,12 @@ class MediaHost constructor(
             return field
         }
 
-    /**
-     * Set the clipping that this host should use, based on its parent's bounds.
-     *
-     * Use [Rect.set].
-     */
-    val currentClipping = Rect()
-
     private val listener = object : MediaDataManager.Listener {
         override fun onMediaDataLoaded(
             key: String,
             oldKey: String?,
             data: MediaData,
             immediately: Boolean,
-            receivedSmartspaceCardLatency: Int,
             isSsReactivated: Boolean
         ) {
             if (immediately) {
@@ -169,9 +161,9 @@ class MediaHost constructor(
 
     private fun updateViewVisibility() {
         state.visible = if (showsOnlyActiveMedia) {
-            mediaDataManager.hasActiveMediaOrRecommendation()
+            mediaDataManager.hasActiveMedia()
         } else {
-            mediaDataManager.hasAnyMediaOrRecommendation()
+            mediaDataManager.hasAnyMedia()
         }
         val newVisibility = if (visible) View.VISIBLE else View.GONE
         if (newVisibility != hostView.visibility) {

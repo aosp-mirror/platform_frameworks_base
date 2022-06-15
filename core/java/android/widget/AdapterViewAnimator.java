@@ -412,29 +412,24 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     }
 
     void refreshChildren() {
-        final int adapterCount = mAdapter == null ? 0 : getCount();
+        if (mAdapter == null) return;
         for (int i = mCurrentWindowStart; i <= mCurrentWindowEnd; i++) {
             int index = modulo(i, getWindowSize());
 
-            final View updatedChild;
-            if (i < adapterCount) {
-                // get the fresh child from the adapter
-                updatedChild = mAdapter.getView(modulo(i, adapterCount), null, this);
+            int adapterCount = getCount();
+            // get the fresh child from the adapter
+            final View updatedChild = mAdapter.getView(modulo(i, adapterCount), null, this);
 
-                if (updatedChild.getImportantForAccessibility()
-                        == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
-                    updatedChild.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-                }
-            } else {
-                updatedChild = null;
+            if (updatedChild.getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
+                updatedChild.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
             }
 
             if (mViewsMap.containsKey(index)) {
                 final FrameLayout fl = (FrameLayout) mViewsMap.get(index).view;
-                // flush out the old child
-                fl.removeAllViewsInLayout();
+                // add the new child to the frame, if it exists
                 if (updatedChild != null) {
-                    // add the new child to the frame, if it exists
+                    // flush out the old child
+                    fl.removeAllViewsInLayout();
                     fl.addView(updatedChild);
                 }
             }

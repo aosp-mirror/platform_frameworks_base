@@ -71,7 +71,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     public void testIsImeShowing() {
         WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
         makeWindowVisibleAndDrawn(ime);
-        mImeProvider.setWindowContainer(ime, null, null);
+        mImeProvider.setWindow(ime, null, null);
 
         WindowState target = createWindow(null, TYPE_APPLICATION, "app");
         mDisplayContent.setImeLayeringTarget(target);

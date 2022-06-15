@@ -107,13 +107,6 @@ public class TestHandler extends Handler {
         }
     }
 
-    /**
-     * Deletes all messages in queue.
-     */
-    public void clear() {
-        mMessages.clear();
-    }
-
     public PriorityQueue<MsgInfo> getPendingMessages() {
         return new PriorityQueue<>(mMessages);
     }

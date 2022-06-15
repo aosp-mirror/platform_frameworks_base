@@ -41,25 +41,11 @@ public interface ViewTranslationCallback {
      * method will not be called before {@link View#onViewTranslationResponse} or
      * {@link View#onVirtualViewTranslationResponses}.
      *
-     * <p> NOTE: It is possible the user changes text that causes a new
-     * {@link ViewTranslationResponse} returns to show the new translation. If you cache the
-     * {@link ViewTranslationResponse} here, you should remember to keep the cached value up
-     * to date.
-     *
      * <p> NOTE: For TextView implementation, {@link ContentCaptureSession#notifyViewTextChanged}
      * shouldn't be called with the translated text, simply calling setText() here will trigger the
      * method. You should either override {@code View#onProvideContentCaptureStructure()} to report
      * the original text instead of the translated text or use a different approach to display the
      * translated text.
-     *
-     * <p> NOTE: In Android version {@link android.os.Build.VERSION_CODES#TIRAMISU} and later,
-     * the implementation must be able to handle a selectable {@link android.widget.TextView}
-     * (i.e., {@link android.widget.TextView#isTextSelectable()} returns {@code true}. The default
-     * callback implementation for TextView uses a {@link android.text.method.TransformationMethod}
-     * to show the translated text, which will cause a crash when the translated text is selected.
-     * Therefore, the default callback temporarily makes the TextView non-selectable while the
-     * translation text is shown. This is one approach for handling selectable TextViews a
-     * TransformationMethod is used.
      *
      * See {@link View#onViewTranslationResponse} for how to get the translated information.
      *
@@ -69,7 +55,7 @@ public interface ViewTranslationCallback {
     /**
      * Called when user wants to view the original content instead of the translated content. This
      * method will not be called before {@link View#onViewTranslationResponse} or
-     * {@link View#onVirtualViewTranslationResponses}.
+     * {@link View#onViewTranslationResponse}.
      *
      * @return {@code true} if the View handles hiding the translation.
      */

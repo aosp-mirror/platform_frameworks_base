@@ -16,8 +16,6 @@
 
 package android.view;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
@@ -69,7 +67,7 @@ public class ScaleGestureDetector {
          *          only wants to update scaling factors if the change is
          *          greater than 0.01.
          */
-        public boolean onScale(@NonNull ScaleGestureDetector detector);
+        public boolean onScale(ScaleGestureDetector detector);
 
         /**
          * Responds to the beginning of a scaling gesture. Reported by
@@ -83,7 +81,7 @@ public class ScaleGestureDetector {
          *          sense, onScaleBegin() may return false to ignore the
          *          rest of the gesture.
          */
-        public boolean onScaleBegin(@NonNull ScaleGestureDetector detector);
+        public boolean onScaleBegin(ScaleGestureDetector detector);
 
         /**
          * Responds to the end of a scale gesture. Reported by existing
@@ -96,7 +94,7 @@ public class ScaleGestureDetector {
          * @param detector The detector reporting the event - use this to
          *          retrieve extended info about event state.
          */
-        public void onScaleEnd(@NonNull ScaleGestureDetector detector);
+        public void onScaleEnd(ScaleGestureDetector detector);
     }
 
     /**
@@ -111,15 +109,15 @@ public class ScaleGestureDetector {
      */
     public static class SimpleOnScaleGestureListener implements OnScaleGestureListener {
 
-        public boolean onScale(@NonNull ScaleGestureDetector detector) {
+        public boolean onScale(ScaleGestureDetector detector) {
             return false;
         }
 
-        public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
             return true;
         }
 
-        public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
+        public void onScaleEnd(ScaleGestureDetector detector) {
             // Intentionally empty
         }
     }
@@ -182,8 +180,7 @@ public class ScaleGestureDetector {
      *
      * @throws NullPointerException if {@code listener} is null.
      */
-    public ScaleGestureDetector(@NonNull Context context,
-            @NonNull OnScaleGestureListener listener) {
+    public ScaleGestureDetector(Context context, OnScaleGestureListener listener) {
         this(context, listener, null);
     }
 
@@ -198,8 +195,8 @@ public class ScaleGestureDetector {
      *
      * @throws NullPointerException if {@code listener} is null.
      */
-    public ScaleGestureDetector(@NonNull Context context, @NonNull OnScaleGestureListener listener,
-                                @Nullable Handler handler) {
+    public ScaleGestureDetector(Context context, OnScaleGestureListener listener,
+                                Handler handler) {
         mContext = context;
         mListener = listener;
         final ViewConfiguration viewConfiguration = ViewConfiguration.get(context);
@@ -229,7 +226,7 @@ public class ScaleGestureDetector {
      * @return true if the event was processed and the detector wants to receive the
      *         rest of the MotionEvents in this event stream.
      */
-    public boolean onTouchEvent(@NonNull MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event) {
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onTouchEvent(event, 0);
         }

@@ -751,43 +751,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREEN_WIDTH_DP_UNDEFINED = 0;
 
     /**
-     * The width of the available screen space in dp units excluding the area
-     * occupied by {@link android.view.WindowInsets window insets}.
-     *
-     * <aside class="note"><b>Note:</b> The width measurement excludes window
-     * insets even when the app is displayed edge to edge using
-     * {@link android.view.Window#setDecorFitsSystemWindows(boolean)
-     * Window#setDecorFitsSystemWindows(boolean)}.</aside>
-     *
-     * <p>Corresponds to the
-     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#AvailableWidthHeightQualifier">
-     * available width</a> resource qualifier. Defaults to
+     * The current width of the available screen space, in dp units,
+     * corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenWidthQualifier">screen
+     * width</a> resource qualifier.  Set to
      * {@link #SCREEN_WIDTH_DP_UNDEFINED} if no width is specified.
-     *
-     * <p>In multi-window mode, equals the width of the available display area
-     * of the app window, not the available display area of the device screen
-     * (for example, when apps are displayed side by side in split-screen mode
-     * in landscape orientation).
-     *
-     * <p>For embedded activities, equals the width of the individual
-     * activities, not the width of the app window or the device screen.
-     *
-     * <p>In multiple-screen scenarios, the width measurement can span screens.
-     * For example, if the app is spanning both screens of a dual-screen device
-     * (with the screens side by side), {@code screenWidthDp} represents the
-     * width of both screens excluding the area occupied by window insets. When
-     * the app is restricted to a single screen in a multiple-screen
-     * environment, {@code screenWidthDp} is the width of the screen on which
-     * the app is displayed excluding window insets.
-     *
-     * <p>Differs from {@link android.view.WindowMetrics} by not including
-     * window insets in the width measurement and by expressing the measurement
-     * in dp rather than px. Use {@code screenWidthDp} to obtain the width of
-     * the display area available to an app or embedded activity excluding the
-     * area occupied by window insets. Use
-     * {@link android.view.WindowMetrics#getBounds()} to obtain the horizontal
-     * display area available to an app or embedded activity including the area
-     * occupied by window insets.
      */
     public int screenWidthDp;
 
@@ -798,44 +766,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SCREEN_HEIGHT_DP_UNDEFINED = 0;
 
     /**
-     * The height of the available screen space in dp units excluding the area
-     * occupied by {@link android.view.WindowInsets window insets}, such as the
-     * status bar, navigation bar, and cutouts.
-     *
-     * <aside class="note"><b>Note:</b> The height measurement excludes window
-     * insets even when the app is displayed edge to edge using
-     * {@link android.view.Window#setDecorFitsSystemWindows(boolean)
-     * Window#setDecorFitsSystemWindows(boolean)}.</aside>
-     *
-     * <p>Corresponds to the
-     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#AvailableWidthHeightQualifier">
-     * available height</a> resource qualifier. Defaults to
+     * The current height of the available screen space, in dp units,
+     * corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#ScreenHeightQualifier">screen
+     * height</a> resource qualifier.  Set to
      * {@link #SCREEN_HEIGHT_DP_UNDEFINED} if no height is specified.
-     *
-     * <p>In multi-window mode, equals the height of the available display area
-     * of the app window, not the available display area of the device screen
-     * (for example, when apps are displayed one above another in split-screen
-     * mode in portrait orientation).
-     *
-     * <p>For embedded activities, equals the height of the individual
-     * activities, not the height of the app window or the device screen.
-     *
-     * <p>In multiple-screen scenarios, the height measurement can span screens.
-     * For example, if the app is spanning both screens of a dual-screen device
-     * rotated 90 degrees (one screen above the other), {@code screenHeightDp}
-     * represents the height of both screens excluding the area occupied by
-     * window insets. When the app is restricted to a single screen in a
-     * multiple-screen environment, {@code screenHeightDp} is the height of the
-     * screen on which the app is displayed excluding window insets.
-     *
-     * <p>Differs from {@link android.view.WindowMetrics} by not including
-     * window insets in the height measurement and by expressing the measurement
-     * in dp rather than px. Use {@code screenHeightDp} to obtain the height of
-     * the display area available to an app or embedded activity excluding the
-     * area occupied by window insets. Use
-     * {@link android.view.WindowMetrics#getBounds()} to obtain the vertical
-     * display area available to an app or embedded activity including the area
-     * occupied by window insets.
      */
     public int screenHeightDp;
 
@@ -846,12 +781,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int SMALLEST_SCREEN_WIDTH_DP_UNDEFINED = 0;
 
     /**
-     * The smallest screen size an application will see in normal operation.
-     * Corresponds to the
-     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#SmallestScreenWidthQualifier">
-     * smallest width</a> resource qualifier. This is the smallest value of
-     * {@link #screenWidthDp} and {@link #screenHeightDp} in both portrait and
-     * landscape orientations. Defaults to
+     * The smallest screen size an application will see in normal operation,
+     * corresponding to
+     * <a href="{@docRoot}guide/topics/resources/providing-resources.html#SmallestScreenWidthQualifier">smallest
+     * screen width</a> resource qualifier.
+     * This is the smallest value of both screenWidthDp and screenHeightDp
+     * in both portrait and landscape.  Set to
      * {@link #SMALLEST_SCREEN_WIDTH_DP_UNDEFINED} if no width is specified.
      */
     public int smallestScreenWidthDp;
@@ -1801,9 +1736,35 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * object and the given one.  Does not change the values of either.  Any
      * undefined fields in <var>delta</var> are ignored.
      * @return Returns a bit mask indicating which configuration
-     * values have changed.
+     * values has changed, containing any combination of
+     * {@link android.content.pm.ActivityInfo#CONFIG_FONT_SCALE
+     * PackageManager.ActivityInfo.CONFIG_FONT_SCALE},
+     * {@link android.content.pm.ActivityInfo#CONFIG_MCC
+     * PackageManager.ActivityInfo.CONFIG_MCC},
+     * {@link android.content.pm.ActivityInfo#CONFIG_MNC
+     * PackageManager.ActivityInfo.CONFIG_MNC},
+     * {@link android.content.pm.ActivityInfo#CONFIG_LOCALE
+     * PackageManager.ActivityInfo.CONFIG_LOCALE},
+     * {@link android.content.pm.ActivityInfo#CONFIG_TOUCHSCREEN
+     * PackageManager.ActivityInfo.CONFIG_TOUCHSCREEN},
+     * {@link android.content.pm.ActivityInfo#CONFIG_KEYBOARD
+     * PackageManager.ActivityInfo.CONFIG_KEYBOARD},
+     * {@link android.content.pm.ActivityInfo#CONFIG_NAVIGATION
+     * PackageManager.ActivityInfo.CONFIG_NAVIGATION},
+     * {@link android.content.pm.ActivityInfo#CONFIG_ORIENTATION
+     * PackageManager.ActivityInfo.CONFIG_ORIENTATION},
+     * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_LAYOUT
+     * PackageManager.ActivityInfo.CONFIG_SCREEN_LAYOUT}, or
+     * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_SIZE
+     * PackageManager.ActivityInfo.CONFIG_SCREEN_SIZE}, or
+     * {@link android.content.pm.ActivityInfo#CONFIG_SMALLEST_SCREEN_SIZE
+     * PackageManager.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE}.
+     * {@link android.content.pm.ActivityInfo#CONFIG_LAYOUT_DIRECTION
+     * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
+     * {@link android.content.pm.ActivityInfo#CONFIG_FONT_WEIGHT_ADJUSTMENT
+     *  PackageManager.ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT.
      */
-    public @Config int diff(Configuration delta) {
+    public int diff(Configuration delta) {
         return diff(delta, false /* compareUndefined */, false /* publicOnly */);
     }
 
@@ -2497,10 +2458,27 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
         }
 
-        final String uiModeTypeString =
-                getUiModeTypeString(config.uiMode & Configuration.UI_MODE_TYPE_MASK);
-        if (uiModeTypeString != null) {
-            parts.add(uiModeTypeString);
+        switch (config.uiMode & Configuration.UI_MODE_TYPE_MASK) {
+            case Configuration.UI_MODE_TYPE_APPLIANCE:
+                parts.add("appliance");
+                break;
+            case Configuration.UI_MODE_TYPE_DESK:
+                parts.add("desk");
+                break;
+            case Configuration.UI_MODE_TYPE_TELEVISION:
+                parts.add("television");
+                break;
+            case Configuration.UI_MODE_TYPE_CAR:
+                parts.add("car");
+                break;
+            case Configuration.UI_MODE_TYPE_WATCH:
+                parts.add("watch");
+                break;
+            case Configuration.UI_MODE_TYPE_VR_HEADSET:
+                parts.add("vrheadset");
+                break;
+            default:
+                break;
         }
 
         switch (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) {
@@ -2635,28 +2613,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
 
     /**
-     * @hide
-     */
-    public static String getUiModeTypeString(int uiModeType) {
-        switch (uiModeType) {
-            case Configuration.UI_MODE_TYPE_APPLIANCE:
-                return "appliance";
-            case Configuration.UI_MODE_TYPE_DESK:
-                return "desk";
-            case Configuration.UI_MODE_TYPE_TELEVISION:
-                return "television";
-            case Configuration.UI_MODE_TYPE_CAR:
-                return "car";
-            case Configuration.UI_MODE_TYPE_WATCH:
-                return "watch";
-            case Configuration.UI_MODE_TYPE_VR_HEADSET:
-                return "vrheadset";
-            default:
-                return null;
-        }
-    }
-
-    /**
      * Generate a delta Configuration between <code>base</code> and <code>change</code>. The
      * resulting delta can be used with {@link #updateFrom(Configuration)}.
      * <p />
@@ -2664,10 +2620,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link #updateFrom(Configuration)} will treat it as a no-op and not update that member.
      *
      * This is fine for device configurations as no member is ever undefined.
+     * {@hide}
      */
-    @NonNull
-    public static Configuration generateDelta(
-            @NonNull Configuration base, @NonNull Configuration change) {
+    @UnsupportedAppUsage
+    public static Configuration generateDelta(Configuration base, Configuration change) {
         final Configuration delta = new Configuration();
         if (base.fontScale != change.fontScale) {
             delta.fontScale = change.fontScale;

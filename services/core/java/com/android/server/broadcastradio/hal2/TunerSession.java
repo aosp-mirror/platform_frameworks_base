@@ -40,7 +40,7 @@ class TunerSession extends ITuner.Stub {
     private static final String TAG = "BcRadio2Srv.session";
     private static final String kAudioDeviceName = "Radio tuner source";
 
-    private final Object mLock;
+    private final Object mLock = new Object();
 
     private final RadioModule mModule;
     private final ITunerSession mHwSession;
@@ -53,12 +53,10 @@ class TunerSession extends ITuner.Stub {
     private RadioManager.BandConfig mDummyConfig = null;
 
     TunerSession(@NonNull RadioModule module, @NonNull ITunerSession hwSession,
-            @NonNull android.hardware.radio.ITunerCallback callback,
-            @NonNull Object lock) {
+            @NonNull android.hardware.radio.ITunerCallback callback) {
         mModule = Objects.requireNonNull(module);
         mHwSession = Objects.requireNonNull(hwSession);
         mCallback = Objects.requireNonNull(callback);
-        mLock = Objects.requireNonNull(lock);
     }
 
     @Override
@@ -301,7 +299,7 @@ class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public Map<String, String> setParameters(Map<String, String> parameters) {
+    public Map setParameters(Map parameters) {
         synchronized (mLock) {
             checkNotClosedLocked();
             return Convert.vendorInfoFromHal(Utils.maybeRethrow(
@@ -310,7 +308,7 @@ class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public Map<String, String> getParameters(List<String> keys) {
+    public Map getParameters(List<String> keys) {
         synchronized (mLock) {
             checkNotClosedLocked();
             return Convert.vendorInfoFromHal(Utils.maybeRethrow(

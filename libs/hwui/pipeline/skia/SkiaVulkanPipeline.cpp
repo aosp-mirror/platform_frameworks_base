@@ -16,15 +16,7 @@
 
 #include "SkiaVulkanPipeline.h"
 
-#include <GrDirectContext.h>
-#include <GrTypes.h>
-#include <SkSurface.h>
-#include <SkTypes.h>
-#include <cutils/properties.h>
 #include <gui/TraceUtils.h>
-#include <strings.h>
-#include <vk/GrVkTypes.h>
-
 #include "DeferredLayerUpdater.h"
 #include "LightingInfo.h"
 #include "Readback.h"
@@ -34,7 +26,16 @@
 #include "VkInteropFunctorDrawable.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
-#include "renderthread/IRenderPipeline.h"
+
+#include <SkSurface.h>
+#include <SkTypes.h>
+
+#include <GrDirectContext.h>
+#include <GrTypes.h>
+#include <vk/GrVkTypes.h>
+
+#include <cutils/properties.h>
+#include <strings.h>
 
 using namespace android::uirenderer::renderthread;
 
@@ -63,24 +64,17 @@ Frame SkiaVulkanPipeline::getFrame() {
     return vulkanManager().dequeueNextBuffer(mVkSurface);
 }
 
-IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
-        const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-        const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
-        const Rect& contentDrawBounds, bool opaque, const LightInfo& lightInfo,
-        const std::vector<sp<RenderNode>>& renderNodes, FrameInfoVisualizer* profiler) {
+bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
+                              const LightGeometry& lightGeometry,
+                              LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
+                              bool opaque, const LightInfo& lightInfo,
+                              const std::vector<sp<RenderNode>>& renderNodes,
+                              FrameInfoVisualizer* profiler) {
     sk_sp<SkSurface> backBuffer = mVkSurface->getCurrentSkSurface();
     if (backBuffer.get() == nullptr) {
-        return {false, -1};
+        return false;
     }
-
-    // update the coordinates of the global light position based on surface rotation
-    SkPoint lightCenter = mVkSurface->getCurrentPreTransform().mapXY(lightGeometry.center.x,
-                                                                     lightGeometry.center.y);
-    LightGeometry localGeometry = lightGeometry;
-    localGeometry.center.x = lightCenter.fX;
-    localGeometry.center.y = lightCenter.fY;
-
-    LightingInfo::updateLighting(localGeometry, lightInfo);
+    LightingInfo::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer,
                 mVkSurface->getCurrentPreTransform());
 
@@ -92,10 +86,9 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
         profiler->draw(profileRenderer);
     }
 
-    nsecs_t submissionTime = IRenderPipeline::DrawResult::kUnknownTime;
     {
         ATRACE_NAME("flush commands");
-        submissionTime = vulkanManager().finishFrame(backBuffer.get());
+        vulkanManager().finishFrame(backBuffer.get());
     }
     layerUpdateQueue->clear();
 
@@ -104,7 +97,7 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
         dumpResourceCacheUsage();
     }
 
-    return {true, submissionTime};
+    return true;
 }
 
 bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,

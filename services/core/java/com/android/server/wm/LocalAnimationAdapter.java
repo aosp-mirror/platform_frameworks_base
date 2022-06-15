@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static com.android.server.wm.AnimationAdapterProto.LOCAL;
 import static com.android.server.wm.LocalAnimationAdapterProto.ANIMATION_SPEC;
 
-import android.annotation.NonNull;
 import android.os.SystemClock;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -51,18 +50,8 @@ class LocalAnimationAdapter implements AnimationAdapter {
     }
 
     @Override
-    public boolean getShowBackground() {
-        return mSpec.getShowBackground();
-    }
-
-    @Override
-    public int getBackgroundColor() {
-        return mSpec.getBackgroundColor();
-    }
-
-    @Override
     public void startAnimation(SurfaceControl animationLeash, Transaction t,
-            @AnimationType int type, @NonNull OnAnimationFinishedCallback finishCallback) {
+            @AnimationType int type, OnAnimationFinishedCallback finishCallback) {
         mAnimator.startAnimation(mSpec, animationLeash, t,
                 () -> finishCallback.onAnimationFinished(type, this));
     }
@@ -104,20 +93,6 @@ class LocalAnimationAdapter implements AnimationAdapter {
          */
         default boolean getShowWallpaper() {
             return false;
-        }
-
-        /**
-         * @see AnimationAdapter#getShowBackground
-         */
-        default boolean getShowBackground() {
-            return false;
-        }
-
-        /**
-         * @see AnimationAdapter#getBackgroundColor
-         */
-        default int getBackgroundColor() {
-            return 0;
         }
 
         /**
@@ -174,9 +149,5 @@ class LocalAnimationAdapter implements AnimationAdapter {
         }
 
         void dumpDebugInner(ProtoOutputStream proto);
-
-        default WindowAnimationSpec asWindowAnimationSpec() {
-            return null;
-        }
     }
 }

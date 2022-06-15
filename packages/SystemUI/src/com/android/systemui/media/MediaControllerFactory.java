@@ -16,7 +16,6 @@
 
 package com.android.systemui.media;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -40,7 +39,7 @@ public class MediaControllerFactory {
      *
      * @param token The token for the session. This value must never be null.
      */
-    public MediaController create(@NonNull MediaSession.Token token) {
+    public MediaController create(MediaSession.Token token) {
         return new MediaController(mContext, token);
     }
 }

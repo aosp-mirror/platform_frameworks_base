@@ -1117,7 +1117,6 @@ public final class KeyChain {
                     intent, keyChainServiceConnection, Context.BIND_AUTO_CREATE, user);
         }
         if (!bindSucceed) {
-            context.unbindService(keyChainServiceConnection);
             throw new AssertionError("could not bind to KeyChainService");
         }
         countDownLatch.await();

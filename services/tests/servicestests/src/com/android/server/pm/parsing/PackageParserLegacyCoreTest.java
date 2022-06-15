@@ -17,20 +17,24 @@
 package com.android.server.pm.parsing;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.apex.ApexInfo;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
-import android.content.pm.SigningDetails;
-import android.content.pm.parsing.FrameworkParsingPackageUtils;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.component.ParsedComponent;
+import android.content.pm.parsing.component.ParsedPermission;
 import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -44,17 +48,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.component.ParsedActivityUtils;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedPermissionUtils;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import com.google.common.truth.Expect;
 
@@ -66,7 +61,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -84,15 +78,15 @@ import java.util.function.Function;
 @RunWith(AndroidJUnit4.class)
 public class PackageParserLegacyCoreTest {
     private static final String RELEASED = null;
-    private static final String OLDER_PRE_RELEASE = "Q";
-    private static final String PRE_RELEASE = "R";
-    private static final String NEWER_PRE_RELEASE = "Z";
+    private static final String OLDER_PRE_RELEASE = "A";
+    private static final String PRE_RELEASE = "B";
+    private static final String NEWER_PRE_RELEASE = "C";
 
     // Codenames with a fingerprint attached to them. These may only be present in the apps
     // declared min SDK and not as platform codenames.
-    private static final String OLDER_PRE_RELEASE_WITH_FINGERPRINT = "Q.fingerprint";
-    private static final String PRE_RELEASE_WITH_FINGERPRINT = "R.fingerprint";
-    private static final String NEWER_PRE_RELEASE_WITH_FINGERPRINT = "Z.fingerprint";
+    private static final String OLDER_PRE_RELEASE_WITH_FINGERPRINT = "A.fingerprint";
+    private static final String PRE_RELEASE_WITH_FINGERPRINT = "B.fingerprint";
+    private static final String NEWER_PRE_RELEASE_WITH_FINGERPRINT = "C.fingerprint";
 
     private static final String[] CODENAMES_RELEASED = { /* empty */};
     private static final String[] CODENAMES_PRE_RELEASE = {PRE_RELEASE};
@@ -105,19 +99,20 @@ public class PackageParserLegacyCoreTest {
 
     private void verifyComputeMinSdkVersion(int minSdkVersion, String minSdkCodename,
             boolean isPlatformReleased, int expectedMinSdk) {
-        final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
-        final ParseResult<Integer> result = FrameworkParsingPackageUtils.computeMinSdkVersion(
+        final String[] outError = new String[1];
+        final int result = PackageParser.computeMinSdkVersion(
                 minSdkVersion,
                 minSdkCodename,
                 PLATFORM_VERSION,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                input);
+                outError);
+
+        assertEquals("Error msg: " + outError[0], expectedMinSdk, result);
 
         if (expectedMinSdk == -1) {
-            assertTrue(result.isError());
+            assertNotNull(outError[0]);
         } else {
-            assertTrue(result.isSuccess());
-            assertEquals(expectedMinSdk, (int) result.getResult());
+            assertNull(outError[0]);
         }
     }
 
@@ -199,20 +194,20 @@ public class PackageParserLegacyCoreTest {
     }
 
     private void verifyComputeTargetSdkVersion(int targetSdkVersion, String targetSdkCodename,
-            boolean isPlatformReleased, boolean allowUnknownCodenames, int expectedTargetSdk) {
-        final ParseTypeImpl input = ParseTypeImpl.forParsingWithoutPlatformCompat();
-        final ParseResult<Integer> result = FrameworkParsingPackageUtils.computeTargetSdkVersion(
+            boolean isPlatformReleased, int expectedTargetSdk) {
+        final String[] outError = new String[1];
+        final int result = PackageParser.computeTargetSdkVersion(
                 targetSdkVersion,
                 targetSdkCodename,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                input,
-                allowUnknownCodenames);
+                outError);
+
+        assertEquals(result, expectedTargetSdk);
 
         if (expectedTargetSdk == -1) {
-            assertTrue(result.isError());
+            assertNotNull(outError[0]);
         } else {
-            assertTrue(result.isSuccess());
-            assertEquals(expectedTargetSdk, (int) result.getResult());
+            assertNull(outError[0]);
         }
     }
 
@@ -221,61 +216,40 @@ public class PackageParserLegacyCoreTest {
         // Do allow older release targetSdkVersion on pre-release platform.
         // APP: Released API 10
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, false, false, OLDER_VERSION);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, false, OLDER_VERSION);
 
         // Do allow same release targetSdkVersion on pre-release platform.
         // APP: Released API 20
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, false, false, PLATFORM_VERSION);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, false, PLATFORM_VERSION);
 
         // Do allow newer release targetSdkVersion on pre-release platform.
         // APP: Released API 30
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, false, false, NEWER_VERSION);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, false, NEWER_VERSION);
 
         // Don't allow older pre-release targetSdkVersion on pre-release platform.
         // APP: Pre-release API 10
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, false, false, -1);
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, false,
-                false, -1
-        );
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, false, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, false, -1);
 
-        // Don't allow older pre-release targetSdkVersion on pre-release platform when
-        // allowUnknownCodenames is true.
-        // APP: Pre-release API 10
-        // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, false,
-                true, -1);
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, false,
-                true, -1);
 
         // Do allow same pre-release targetSdkVersion on pre-release platform,
         // but overwrite the specified version with CUR_DEVELOPMENT.
         // APP: Pre-release API 20
         // DEV: Pre-release API 20
         verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, false,
-                false, Build.VERSION_CODES.CUR_DEVELOPMENT);
+                Build.VERSION_CODES.CUR_DEVELOPMENT);
         verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, false,
-                false, Build.VERSION_CODES.CUR_DEVELOPMENT);
+                Build.VERSION_CODES.CUR_DEVELOPMENT);
+
 
         // Don't allow newer pre-release targetSdkVersion on pre-release platform.
         // APP: Pre-release API 30
         // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false, false, -1);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false,
-                false, -1
-        );
-
-        // Do allow newer pre-release targetSdkVersion on pre-release platform when
-        // allowUnknownCodenames is true.
-        // APP: Pre-release API 30
-        // DEV: Pre-release API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false,
-                true, Build.VERSION_CODES.CUR_DEVELOPMENT);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false,
-                true, Build.VERSION_CODES.CUR_DEVELOPMENT);
-
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, false, -1);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, false, -1);
     }
 
     @Test
@@ -283,58 +257,36 @@ public class PackageParserLegacyCoreTest {
         // Do allow older release targetSdkVersion on released platform.
         // APP: Released API 10
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, true, false, OLDER_VERSION);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, RELEASED, true, OLDER_VERSION);
 
         // Do allow same release targetSdkVersion on released platform.
         // APP: Released API 20
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, true, false, PLATFORM_VERSION);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, RELEASED, true, PLATFORM_VERSION);
 
         // Do allow newer release targetSdkVersion on released platform.
         // APP: Released API 30
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, true, false, NEWER_VERSION);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, RELEASED, true, NEWER_VERSION);
 
         // Don't allow older pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 10
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, true, false, -1);
-        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, true,
-                false, -1
-        );
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE, true, -1);
+        verifyComputeTargetSdkVersion(OLDER_VERSION, OLDER_PRE_RELEASE_WITH_FINGERPRINT, true, -1);
 
         // Don't allow same pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 20
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, true, false, -1);
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, true, false,
-                -1
-        );
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, true, -1);
+        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, true, -1);
 
-        // Don't allow same pre-release targetSdkVersion on released platform when
-        // allowUnknownCodenames is true.
-        // APP: Pre-release API 20
-        // DEV: Released API 20
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE, true, true,
-                -1);
-        verifyComputeTargetSdkVersion(PLATFORM_VERSION, PRE_RELEASE_WITH_FINGERPRINT, true, true,
-                -1);
 
         // Don't allow newer pre-release targetSdkVersion on released platform.
         // APP: Pre-release API 30
         // DEV: Released API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, true, false, -1);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, true,
-                false, -1
-        );
-        // Do allow newer pre-release targetSdkVersion on released platform when
-        // allowUnknownCodenames is true.
-        // APP: Pre-release API 30
-        // DEV: Released API 20
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, true, true,
-                Build.VERSION_CODES.CUR_DEVELOPMENT);
-        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, true,
-                true, Build.VERSION_CODES.CUR_DEVELOPMENT);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE, true, -1);
+        verifyComputeTargetSdkVersion(NEWER_VERSION, NEWER_PRE_RELEASE_WITH_FINGERPRINT, true, -1);
     }
 
     /**
@@ -348,34 +300,34 @@ public class PackageParserLegacyCoreTest {
         // Not set in either configChanges or recreateOnConfigChanges.
         int configChanges = 0x0000; // 00000000.
         int recreateOnConfigChanges = 0x0000; // 00000000.
-        int finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        int finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should be 00000011.
 
         // Not set in configChanges, but set in recreateOnConfigChanges.
         configChanges = 0x0000; // 00000000.
         recreateOnConfigChanges = 0x0003; // 00000011.
-        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0000, finalConfigChanges); // Should be 00000000.
 
         // Set in configChanges.
         configChanges = 0x0003; // 00000011.
         recreateOnConfigChanges = 0X0000; // 00000000.
-        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should be 00000011.
 
         recreateOnConfigChanges = 0x0003; // 00000011.
-        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0003, finalConfigChanges); // Should still be 00000011.
 
         // Other bit set in configChanges.
         configChanges = 0x0080; // 10000000, orientation.
         recreateOnConfigChanges = 0x0000; // 00000000.
-        finalConfigChanges = ParsedActivityUtils.getActivityConfigChanges(configChanges,
-                recreateOnConfigChanges);
+        finalConfigChanges =
+                PackageParser.getActivityConfigChanges(configChanges, recreateOnConfigChanges);
         assertEquals(0x0083, finalConfigChanges); // Should be 10000011.
     }
 
@@ -383,7 +335,7 @@ public class PackageParserLegacyCoreTest {
      * Copies a specified {@code resourceId} to a file. Returns a non-null file if the copy
      * succeeded, or {@code null} otherwise.
      */
-    File copyRawResourceToFile(String baseName, int resourceId) {
+    File copyRawResourceToFile(String baseName, int resourceId) throws Exception {
         // Copy the resource to a file.
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         InputStream is = context.getResources().openRawResource(resourceId);
@@ -455,7 +407,7 @@ public class PackageParserLegacyCoreTest {
 
     private void assertPermission(String name, int protectionLevel, ParsedPermission permission) {
         assertEquals(name, permission.getName());
-        assertEquals(protectionLevel, ParsedPermissionUtils.getProtection(permission));
+        assertEquals(protectionLevel, permission.getProtection());
     }
 
     private void assertMetadata(Bundle b, String... keysAndValues) {
@@ -558,13 +510,12 @@ public class PackageParserLegacyCoreTest {
         findAndRemoveAppDetailsActivity(p);
 
         assertEquals("Expected exactly one activity", 1, p.getActivities().size());
-        List<ParsedIntentInfo> intentInfos = p.getActivities().get(0).getIntents();
-        assertEquals("Expected exactly one intent filter", 1, intentInfos.size());
-        IntentFilter intentFilter = intentInfos.get(0).getIntentFilter();
-        assertEquals("Expected exactly one mime group in intent filter", 1,
-                intentFilter.countMimeGroups());
+        assertEquals("Expected exactly one intent filter",
+                1, p.getActivities().get(0).getIntents().size());
+        assertEquals("Expected exactly one mime group in intent filter",
+                1, p.getActivities().get(0).getIntents().get(0).countMimeGroups());
         assertTrue("Did not find expected mime group 'mime_group_1'",
-                intentFilter.hasMimeGroup("mime_group_1"));
+                p.getActivities().get(0).getIntents().get(0).hasMimeGroup("mime_group_1"));
     }
 
     @Test
@@ -586,14 +537,8 @@ public class PackageParserLegacyCoreTest {
             throw new IllegalStateException(result.getErrorMessage(), result.getException());
         }
 
-        ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
         ParsingPackage pkg = result.getResult();
-        ParseResult<SigningDetails> ret = ParsingPackageUtils.getSigningDetails(
-                input, pkg, false /*skipVerify*/);
-        if (ret.isError()) {
-            throw new IllegalStateException(ret.getErrorMessage(), ret.getException());
-        }
-        pkg.setSigningDetails(ret.getResult());
+        pkg.setSigningDetails(ParsingPackageUtils.getSigningDetails(pkg, false));
         PackageInfo pi = PackageInfoWithoutStateUtils.generate(pkg, apexInfo, flags);
 
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
@@ -651,7 +596,7 @@ public class PackageParserLegacyCoreTest {
             try {
                 parsePackage(filename, resId, x -> x);
                 expect.withMessage("Expected parsing error %d from %s", result, filename).fail();
-            } catch (PackageManagerException expected) {
+            } catch (PackageParser.PackageParserException expected) {
                 expect.that(expected.error).isEqualTo(result);
             }
         }

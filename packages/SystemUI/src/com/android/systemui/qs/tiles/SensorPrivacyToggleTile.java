@@ -36,6 +36,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
@@ -92,15 +93,15 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
 
     @Override
     protected void handleClick(@Nullable View view) {
-        boolean blocked = mSensorPrivacyController.isSensorBlocked(getSensorId());
-        if (mSensorPrivacyController.requiresAuthentication()
-                && mKeyguard.isMethodSecure()
-                && mKeyguard.isShowing()) {
-            mActivityStarter.postQSRunnableDismissingKeyguard(() ->
-                    mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(), !blocked));
+        if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
+            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(),
+                        !mSensorPrivacyController.isSensorBlocked(getSensorId()));
+            });
             return;
         }
-        mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(), !blocked);
+        mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(),
+                !mSensorPrivacyController.isSensorBlocked(getSensorId()));
     }
 
     @Override
@@ -131,6 +132,11 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
     @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_PRIVACY_SETTINGS);
+    }
+
+    @Override
+    public DetailAdapter getDetailAdapter() {
+        return super.getDetailAdapter();
     }
 
     @Override

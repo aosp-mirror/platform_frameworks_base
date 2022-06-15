@@ -73,6 +73,7 @@ class NtpTimeHelper {
     private final WakeLock mWakeLock;
     private final Handler mHandler;
 
+    @GuardedBy("this")
     private final InjectNtpTimeCallback mCallback;
 
     // flags to trigger NTP when network becomes available
@@ -128,8 +129,6 @@ class NtpTimeHelper {
             return;
         }
         if (!isNetworkConnected()) {
-            // try to inject the cached NTP time
-            injectCachedNtpTime();
             // try again when network is up
             mInjectNtpTimeState = STATE_PENDING_NETWORK;
             return;
@@ -158,7 +157,23 @@ class NtpTimeHelper {
 
             // only update when NTP time is fresh
             // If refreshSuccess is false, cacheAge does not drop down.
-            if (injectCachedNtpTime()) {
+            ntpResult = mNtpTime.getCachedTimeResult();
+            if (ntpResult != null && ntpResult.getAgeMillis() < NTP_INTERVAL) {
+                long time = ntpResult.getTimeMillis();
+                long timeReference = ntpResult.getElapsedRealtimeMillis();
+                long certainty = ntpResult.getCertaintyMillis();
+
+                if (DEBUG) {
+                    long now = System.currentTimeMillis();
+                    Log.d(TAG, "NTP server returned: "
+                            + time + " (" + new Date(time) + ")"
+                            + " ntpResult: " + ntpResult
+                            + " system time offset: " + (time - now));
+                }
+
+                // Ok to cast to int, as can't rollover in practice
+                mHandler.post(() -> mCallback.injectTime(time, timeReference, (int) certainty));
+
                 delay = NTP_INTERVAL;
                 mNtpBackOff.reset();
             } else {
@@ -185,27 +200,5 @@ class NtpTimeHelper {
         }
         // release wake lock held by task
         mWakeLock.release();
-    }
-
-    /** Returns true if successfully inject cached NTP time. */
-    private synchronized boolean injectCachedNtpTime() {
-        NtpTrustedTime.TimeResult ntpResult = mNtpTime.getCachedTimeResult();
-        if (ntpResult == null || ntpResult.getAgeMillis() >= NTP_INTERVAL) {
-            return false;
-        }
-
-        long time = ntpResult.getTimeMillis();
-        long timeReference = ntpResult.getElapsedRealtimeMillis();
-        long certainty = ntpResult.getCertaintyMillis();
-
-        if (DEBUG) {
-            long now = System.currentTimeMillis();
-            Log.d(TAG, "NTP server returned: " + time + " (" + new Date(time) + ")"
-                    + " ntpResult: " + ntpResult + " system time offset: " + (time - now));
-        }
-
-        // Ok to cast to int, as can't rollover in practice
-        mHandler.post(() -> mCallback.injectTime(time, timeReference, (int) certainty));
-        return true;
     }
 }

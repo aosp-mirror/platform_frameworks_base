@@ -26,7 +26,6 @@ import android.text.Editable;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextWatcher;
-import android.util.PluralsMessageFormatter;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,11 +34,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import com.android.internal.R;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @hide
@@ -186,14 +180,9 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         if (mNumberOfMatches == 0) {
             mMatches.setText(com.android.internal.R.string.no_matches);
         } else {
-            Map<String, Object> arguments = new HashMap<>();
-            arguments.put("count", mActiveMatchIndex + 1);
-            arguments.put("total", mNumberOfMatches);
-
-            mMatches.setText(PluralsMessageFormatter.format(
-                    mResources,
-                    arguments,
-                    R.string.matches_found));
+            mMatches.setText(mResources.getQuantityString(
+                com.android.internal.R.plurals.matches_found, mNumberOfMatches,
+                mActiveMatchIndex + 1, mNumberOfMatches));
         }
         mMatches.setVisibility(View.VISIBLE);
     }

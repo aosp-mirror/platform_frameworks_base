@@ -68,7 +68,7 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 
       const Attribute* attribute = &default_attribute;
 
-      if (std::optional<xml::ExtractedPackage> maybe_package =
+      if (Maybe<xml::ExtractedPackage> maybe_package =
               xml::ExtractPackageFromNamespace(attr.namespace_uri)) {
         // There is a valid package name for this attribute. We will look this up.
         Reference attr_ref(

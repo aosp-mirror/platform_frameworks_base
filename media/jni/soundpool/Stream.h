@@ -18,7 +18,6 @@
 
 #include "Sound.h"
 
-#include <any>
 #include <android-base/thread_annotations.h>
 #include <audio_utils/clock.h>
 #include <media/AudioTrack.h>
@@ -91,9 +90,8 @@ public:
     void mute(bool muting);
     void dump() const NO_THREAD_SAFETY_ANALYSIS; // disable for ALOGV (see func for details).
 
-    // returns the pair stream if successful, nullptr otherwise.
-    // garbage is used to release tracks and data outside of any lock.
-    Stream* playPairStream(std::vector<std::any>& garbage);
+    // returns the pair stream if successful, nullptr otherwise
+    Stream* playPairStream();
 
     // These parameters are explicitly checked in the SoundPool class
     // so never deviate from the Java API specified values.
@@ -124,45 +122,17 @@ public:
     // This never changes.  See top of header.
     Stream* getPairStream() const;
 
-    // Stream ID of ourselves, or the pair depending on who holds the AudioTrack
-    int getCorrespondingStreamID();
-
-protected:
-    // AudioTrack callback interface implementation
-    class StreamCallback : public AudioTrack::IAudioTrackCallback {
-      public:
-        StreamCallback(Stream * stream, bool toggle) : mStream(stream), mToggle(toggle) {}
-        size_t onMoreData(const AudioTrack::Buffer& buffer) override;
-        void onUnderrun() override;
-        void onLoopEnd(int32_t loopsRemaining) override;
-        void onMarker(uint32_t markerPosition) override;
-        void onNewPos(uint32_t newPos) override;
-        void onBufferEnd() override;
-        void onNewIAudioTrack() override;
-        void onStreamEnd() override;
-        size_t onCanWriteMoreData(const AudioTrack::Buffer& buffer) override;
-
-        // Holding a raw ptr is technically unsafe, but, Stream objects persist
-        // through the lifetime of the StreamManager through the use of a
-        // unique_ptr<Stream[]>. Ensuring lifetime will cause us to give up
-        // locality as well as pay RefBase/sp performance cost, which we are
-        // unwilling to do. Non-owning refs to unique_ptrs are idiomatically raw
-        // ptrs, as below.
-        Stream * const mStream;
-        const bool mToggle;
-    };
-
-    sp<StreamCallback> mCallback;
 private:
-    // garbage is used to release tracks and data outside of any lock.
     void play_l(const std::shared_ptr<Sound>& sound, int streamID,
             float leftVolume, float rightVolume, int priority, int loop, float rate,
-            std::vector<std::any>& garbage) REQUIRES(mLock);
+            sp<AudioTrack> releaseTracks[2]) REQUIRES(mLock);
     void stop_l() REQUIRES(mLock);
     void setVolume_l(float leftVolume, float rightVolume) REQUIRES(mLock);
 
     // For use with AudioTrack callback.
-    void onBufferEnd(int toggle, int tries) NO_THREAD_SAFETY_ANALYSIS;
+    static void staticCallback(int event, void* user, void* info);
+    void callback(int event, void* info, int toggle, int tries)
+            NO_THREAD_SAFETY_ANALYSIS; // uses unique_lock
 
     // StreamManager should be set on construction and not changed.
     // release mLock before calling into StreamManager

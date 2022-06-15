@@ -33,8 +33,7 @@ import javax.inject.Inject
 interface SectionHeaderController {
     fun reinflateView(parent: ViewGroup)
     val headerView: SectionHeaderView?
-    fun setClearSectionEnabled(enabled: Boolean)
-    fun setOnClearSectionClickListener(listener: View.OnClickListener)
+    fun setOnClearAllClickListener(listener: View.OnClickListener)
 }
 
 @SectionHeaderScope
@@ -47,7 +46,6 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
 ) : NodeController, SectionHeaderController {
 
     private var _view: SectionHeaderView? = null
-    private var clearAllButtonEnabled = false
     private var clearAllClickListener: View.OnClickListener? = null
     private val onHeaderClickListener = View.OnClickListener {
         activityStarter.startActivity(
@@ -60,7 +58,7 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
     override fun reinflateView(parent: ViewGroup) {
         var oldPos = -1
         _view?.let { _view ->
-            _view.removeFromTransientContainer()
+            _view.transientContainer?.removeView(_view)
             if (_view.parent === parent) {
                 oldPos = parent.indexOfChild(_view)
                 parent.removeView(_view)
@@ -78,24 +76,14 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
             parent.addView(inflated, oldPos)
         }
         _view = inflated
-        _view?.setClearSectionButtonEnabled(clearAllButtonEnabled)
     }
 
     override val headerView: SectionHeaderView?
         get() = _view
 
-    override fun setClearSectionEnabled(enabled: Boolean) {
-        clearAllButtonEnabled = enabled
-        _view?.setClearSectionButtonEnabled(enabled)
-    }
-
-    override fun setOnClearSectionClickListener(listener: View.OnClickListener) {
+    override fun setOnClearAllClickListener(listener: View.OnClickListener) {
         clearAllClickListener = listener
         _view?.setOnClearAllClickListener(listener)
-    }
-
-    override fun onViewAdded() {
-        headerView?.isContentVisible = true
     }
 
     override val view: View

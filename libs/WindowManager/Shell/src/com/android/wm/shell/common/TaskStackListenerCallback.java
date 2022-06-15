@@ -38,7 +38,7 @@ public interface TaskStackListenerCallback {
 
     default void onTaskStackChanged() { }
 
-    default void onTaskProfileLocked(RunningTaskInfo taskInfo) { }
+    default void onTaskProfileLocked(int taskId, int userId) { }
 
     default void onTaskDisplayChanged(int taskId, int newDisplayId) { }
 
@@ -54,13 +54,7 @@ public interface TaskStackListenerCallback {
 
     default void onTaskDescriptionChanged(RunningTaskInfo taskInfo) { }
 
-    /**
-     * @return whether the snapshot is consumed and the lifecycle of the snapshot extends beyond
-     *         the lifecycle of this callback.
-     */
-    default boolean onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) {
-        return false;
-    }
+    default void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
 
     default void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) { }
 

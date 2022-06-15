@@ -63,9 +63,8 @@ public final class ImsConfigurationTracker {
      */
     @MainThread
     public void onBindInput(@Nullable Resources resources) {
-        if (!mInitialized) {
-            return;
-        }
+        Preconditions.checkState(mInitialized,
+                "onBindInput can be called only after onInitialize().");
         if (mLastKnownConfig == null && resources != null) {
             mLastKnownConfig = new Configuration(resources.getConfiguration());
         }

@@ -22,7 +22,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -81,7 +80,7 @@ public class PendingIntentControllerTest {
         doReturn(mActivityManagerInternal).when(
                 () -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mIPackageManager).when(() -> AppGlobals.getPackageManager());
-        when(mIPackageManager.getPackageUid(eq(TEST_PACKAGE_NAME), anyLong(), anyInt())).thenReturn(
+        when(mIPackageManager.getPackageUid(eq(TEST_PACKAGE_NAME), anyInt(), anyInt())).thenReturn(
                 TEST_CALLING_UID);
         ActivityManagerConstants constants = mock(ActivityManagerConstants.class);
         constants.PENDINGINTENT_WARNING_THRESHOLD = 2000;

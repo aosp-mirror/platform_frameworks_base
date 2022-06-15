@@ -213,8 +213,7 @@ public class PackageInfo implements Parcelable {
      * or null if there were none.  This is only filled in if the flag
      * {@link PackageManager#GET_PERMISSIONS} was set.  Each value matches
      * the corresponding entry in {@link #requestedPermissions}, and will have
-     * the flags {@link #REQUESTED_PERMISSION_GRANTED} and
-     * {@link #REQUESTED_PERMISSION_NEVER_FOR_LOCATION} set as appropriate.
+     * the flag {@link #REQUESTED_PERMISSION_GRANTED} set as appropriate.
      */
     public int[] requestedPermissionsFlags;
 
@@ -347,44 +346,20 @@ public class PackageInfo implements Parcelable {
      */
     public int installLocation = INSTALL_LOCATION_INTERNAL_ONLY;
 
-    /**
-     * Whether or not the package is a stub and should be replaced by a full version of the app.
-     *
-     * @hide
-     */
+    /** @hide */
     public boolean isStub;
 
-    /**
-     * Whether the app is included when the device is booted into a minimal state. Set through the
-     * non-namespaced "coreApp" attribute of the manifest tag.
-     *
-     * @hide
-     */
+    /** @hide */
     @UnsupportedAppUsage
     public boolean coreApp;
 
-    /**
-     * Signals that this app is required for all users on the device.
-     *
-     * When a restricted user profile is created, the user is prompted with a list of apps to
-     * install on that user. Settings uses this field to determine obligatory apps which cannot be
-     * deselected.
-     *
-     * This restriction is not handled by the framework itself.
-     * @hide
-     */
+    /** @hide */
     public boolean requiredForAllUsers;
 
-    /**
-     * The restricted account authenticator type that is used by this application.
-     * @hide
-     */
+    /** @hide */
     public String restrictedAccountType;
 
-    /**
-     * The required account type without which this application will not function.
-     * @hide
-     */
+    /** @hide */
     public String requiredAccountType;
 
     /**

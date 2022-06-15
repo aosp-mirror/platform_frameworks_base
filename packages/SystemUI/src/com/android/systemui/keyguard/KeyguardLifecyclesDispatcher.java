@@ -18,11 +18,8 @@ package com.android.systemui.keyguard;
 
 import android.os.Handler;
 import android.os.Message;
-import android.os.RemoteException;
-import android.os.Trace;
-import android.util.Log;
+import android.os.PowerManager;
 
-import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.systemui.dagger.SysUISingleton;
 
 import javax.inject.Inject;
@@ -42,7 +39,6 @@ public class KeyguardLifecyclesDispatcher {
     static final int FINISHED_WAKING_UP = 5;
     static final int STARTED_GOING_TO_SLEEP = 6;
     static final int FINISHED_GOING_TO_SLEEP = 7;
-    private static final String TAG = "KeyguardLifecyclesDispatcher";
 
     private final ScreenLifecycle mScreenLifecycle;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
@@ -69,45 +65,12 @@ public class KeyguardLifecyclesDispatcher {
         message.sendToTarget();
     }
 
-    /**
-     * @param what Message to send.
-     * @param object Object to send with the message
-     */
-    void dispatch(int what, Object object) {
-        mHandler.obtainMessage(what, object).sendToTarget();
-    }
-
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            final Object obj = msg.obj;
             switch (msg.what) {
                 case SCREEN_TURNING_ON:
-                    Trace.beginSection("KeyguardLifecyclesDispatcher#SCREEN_TURNING_ON");
-                    final String onDrawWaitingTraceTag =
-                            "Waiting for KeyguardDrawnCallback#onDrawn";
-                    int traceCookie = System.identityHashCode(msg);
-                    Trace.beginAsyncSection(onDrawWaitingTraceTag, traceCookie);
-                    // Ensure the drawn callback is only ever called once
-                    mScreenLifecycle.dispatchScreenTurningOn(new Runnable() {
-                            boolean mInvoked;
-                            @Override
-                            public void run() {
-                                if (obj == null) return;
-                                if (!mInvoked) {
-                                    mInvoked = true;
-                                    try {
-                                        Trace.endAsyncSection(onDrawWaitingTraceTag, traceCookie);
-                                        ((IKeyguardDrawnCallback) obj).onDrawn();
-                                    } catch (RemoteException e) {
-                                        Log.w(TAG, "Exception calling onDrawn():", e);
-                                    }
-                                } else {
-                                    Log.w(TAG, "KeyguardDrawnCallback#onDrawn() invoked > 1 times");
-                                }
-                            }
-                        });
-                    Trace.endSection();
+                    mScreenLifecycle.dispatchScreenTurningOn();
                     break;
                 case SCREEN_TURNED_ON:
                     mScreenLifecycle.dispatchScreenTurnedOn();

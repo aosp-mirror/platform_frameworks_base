@@ -56,9 +56,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.WindowManagerGlobal;
-import android.window.OnBackInvokedCallback;
-import android.window.OnBackInvokedDispatcher;
-import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 
@@ -279,8 +276,6 @@ public class PopupWindow {
     private boolean mOverlapAnchor;
 
     private boolean mPopupViewInitialLayoutDirectionInherited;
-
-    private OnBackInvokedCallback mBackCallback;
 
     /**
      * <p>Create a new empty, non focusable popup window of dimension (0,0).</p>
@@ -2033,8 +2028,6 @@ public class PopupWindow {
         final PopupDecorView decorView = mDecorView;
         final View contentView = mContentView;
 
-        unregisterBackCallback(decorView.findOnBackInvokedDispatcher());
-
         final ViewGroup contentHolder;
         final ViewParent contentParent = contentView.getParent();
         if (contentParent instanceof ViewGroup) {
@@ -2086,15 +2079,6 @@ public class PopupWindow {
 
         if (mOnDismissListener != null) {
             mOnDismissListener.onDismiss();
-        }
-    }
-
-    private void unregisterBackCallback(@Nullable OnBackInvokedDispatcher onBackInvokedDispatcher) {
-        OnBackInvokedCallback backCallback = mBackCallback;
-        mBackCallback = null;
-        if (onBackInvokedDispatcher != null && backCallback != null) {
-            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(
-                    backCallback);
         }
     }
 
@@ -2537,8 +2521,7 @@ public class PopupWindow {
 
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
-            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK
-                      || event.getKeyCode() == KeyEvent.KEYCODE_ESCAPE) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
                 if (getKeyDispatcherState() == null) {
                     return super.dispatchKeyEvent(event);
                 }
@@ -2740,30 +2723,6 @@ public class PopupWindow {
                     parentRoot.requestKeyboardShortcuts(list, deviceId);
                 }
             }
-        }
-
-        @Override
-        protected void onAttachedToWindow() {
-            super.onAttachedToWindow();
-            if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
-                return;
-            }
-
-            OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
-            if (dispatcher == null) {
-                return;
-            }
-
-            mBackCallback = PopupWindow.this::dismiss;
-
-            dispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                    mBackCallback);
-        }
-
-        @Override
-        protected void onDetachedFromWindow() {
-            super.onDetachedFromWindow();
-            unregisterBackCallback(findOnBackInvokedDispatcher());
         }
     }
 

@@ -47,7 +47,6 @@ public class InsetsSource implements Parcelable {
     private final Rect mFrame;
     private @Nullable Rect mVisibleFrame;
     private boolean mVisible;
-    private boolean mInsetsRoundedCornerFrame;
 
     private final Rect mTmpFrame = new Rect();
 
@@ -64,7 +63,6 @@ public class InsetsSource implements Parcelable {
         mVisibleFrame = other.mVisibleFrame != null
                 ? new Rect(other.mVisibleFrame)
                 : null;
-        mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
     public void set(InsetsSource other) {
@@ -73,7 +71,6 @@ public class InsetsSource implements Parcelable {
         mVisibleFrame = other.mVisibleFrame != null
                 ? new Rect(other.mVisibleFrame)
                 : null;
-        mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
     public void setFrame(int left, int top, int right, int bottom) {
@@ -111,14 +108,6 @@ public class InsetsSource implements Parcelable {
     boolean isUserControllable() {
         // If mVisibleFrame is null, it will be the same area as mFrame.
         return mVisibleFrame == null || !mVisibleFrame.isEmpty();
-    }
-
-    public boolean getInsetsRoundedCornerFrame() {
-        return mInsetsRoundedCornerFrame;
-    }
-
-    public void setInsetsRoundedCornerFrame(boolean insetsRoundedCornerFrame) {
-        mInsetsRoundedCornerFrame = insetsRoundedCornerFrame;
     }
 
     /**
@@ -236,7 +225,6 @@ public class InsetsSource implements Parcelable {
             pw.print(" visibleFrame="); pw.print(mVisibleFrame.toShortString());
         }
         pw.print(" visible="); pw.print(mVisible);
-        pw.print(" insetsRoundedCornerFrame="); pw.print(mInsetsRoundedCornerFrame);
         pw.println();
     }
 
@@ -259,7 +247,6 @@ public class InsetsSource implements Parcelable {
         if (mVisible != that.mVisible) return false;
         if (excludeInvisibleImeFrames && !mVisible && mType == ITYPE_IME) return true;
         if (!Objects.equals(mVisibleFrame, that.mVisibleFrame)) return false;
-        if (mInsetsRoundedCornerFrame != that.mInsetsRoundedCornerFrame) return false;
         return mFrame.equals(that.mFrame);
     }
 
@@ -269,7 +256,6 @@ public class InsetsSource implements Parcelable {
         result = 31 * result + mFrame.hashCode();
         result = 31 * result + (mVisibleFrame != null ? mVisibleFrame.hashCode() : 0);
         result = 31 * result + (mVisible ? 1 : 0);
-        result = 31 * result + (mInsetsRoundedCornerFrame ? 1 : 0);
         return result;
     }
 
@@ -282,7 +268,6 @@ public class InsetsSource implements Parcelable {
             mVisibleFrame = null;
         }
         mVisible = in.readBoolean();
-        mInsetsRoundedCornerFrame = in.readBoolean();
     }
 
     @Override
@@ -301,7 +286,6 @@ public class InsetsSource implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeBoolean(mVisible);
-        dest.writeBoolean(mInsetsRoundedCornerFrame);
     }
 
     @Override
@@ -310,7 +294,6 @@ public class InsetsSource implements Parcelable {
                 + "mType=" + InsetsState.typeToString(mType)
                 + ", mFrame=" + mFrame.toShortString()
                 + ", mVisible=" + mVisible
-                + ", mInsetsRoundedCornerFrame=" + mInsetsRoundedCornerFrame
                 + "}";
     }
 

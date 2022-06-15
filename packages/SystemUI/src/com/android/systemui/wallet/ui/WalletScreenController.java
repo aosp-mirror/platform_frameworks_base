@@ -181,14 +181,6 @@ public class WalletScreenController implements
     }
 
     @Override
-    public void onUncenteredClick(int position) {
-        if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-            return;
-        }
-        mCardCarousel.smoothScrollToPosition(position);
-    }
-
-    @Override
     public void onCardSelected(@NonNull WalletCardViewInfo card) {
         if (mIsDismissed) {
             return;
@@ -216,7 +208,8 @@ public class WalletScreenController implements
 
     @Override
     public void onCardClicked(@NonNull WalletCardViewInfo cardInfo) {
-        if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+        if (!mKeyguardStateController.isUnlocked()
+                && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return;
         }
         if (!(cardInfo instanceof QAWalletCardViewInfo)
@@ -230,7 +223,8 @@ public class WalletScreenController implements
         }
         mUiEventLogger.log(WalletUiEvent.QAW_CLICK_CARD);
 
-        mActivityStarter.startPendingIntentDismissingKeyguard(cardInfo.getPendingIntent());
+        mActivityStarter.startActivity(
+                ((QAWalletCardViewInfo) cardInfo).mWalletCard.getPendingIntent().getIntent(), true);
     }
 
     @Override

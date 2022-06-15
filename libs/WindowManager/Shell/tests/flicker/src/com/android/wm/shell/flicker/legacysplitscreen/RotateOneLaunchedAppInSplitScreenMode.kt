@@ -24,15 +24,18 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
+import com.android.server.wm.flicker.appWindowBecomesVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.navBarWindowIsVisible
+import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
-import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
-import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisibleAtEnd
+import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.wm.shell.flicker.dockedStackDividerIsVisible
+import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -52,54 +55,46 @@ import org.junit.runners.Parameterized
 class RotateOneLaunchedAppInSplitScreenMode(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenRotateTransition(testSpec) {
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            super.transition(this)
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+        get() = { configuration ->
+            super.transition(this, configuration)
             transitions {
-                this.setRotation(testSpec.startRotation)
+                this.setRotation(testSpec.config.startRotation)
                 device.launchSplitScreen(wmHelper)
             }
         }
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisibleAtEnd()
+    fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
 
     @Presubmit
     @Test
-    fun dockedStackPrimaryBoundsIsVisibleAtEnd() = testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(
-        testSpec.startRotation, splitScreenApp.component)
+    fun dockedStackPrimaryBoundsIsVisible() = testSpec.dockedStackPrimaryBoundsIsVisible(
+        testSpec.config.startRotation, splitScreenApp.defaultWindowName)
+
+    @FlakyTest(bugId = 169271943)
+    @Test
+    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales(
+        testSpec.config.startRotation, testSpec.config.endRotation)
+
+    @FlakyTest(bugId = 169271943)
+    @Test
+    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales(
+        testSpec.config.startRotation, testSpec.config.endRotation)
 
     @Presubmit
     @Test
-    fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
-
-    @FlakyTest(bugId = 206753786)
-    @Test
-    fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
+    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
 
     @Presubmit
     @Test
-    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
-
-    @Presubmit
-    @Test
-    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
+    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
 
     @FlakyTest
     @Test
-    fun appWindowBecomesVisible() {
-        testSpec.assertWm {
-            this.isAppWindowInvisible(splitScreenApp.component)
-                    .then()
-                    .isAppWindowVisible(splitScreenApp.component)
-        }
-    }
-
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    fun appWindowBecomesVisible() =
+        testSpec.appWindowBecomesVisible(splitScreenApp.defaultWindowName)
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

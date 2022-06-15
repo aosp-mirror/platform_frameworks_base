@@ -34,7 +34,7 @@ import android.view.ViewStructure.HtmlInfo.Builder;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
-import java.util.Objects;
+import com.android.internal.util.Preconditions;
 
 //TODO(b/122484602): add javadocs / implement Parcelable / implement
 //TODO(b/122484602): for now it's extending ViewNode directly as it needs most of its properties,
@@ -124,10 +124,10 @@ public final class ViewNode extends AssistStructure.ViewNode {
         mFlags = nodeFlags;
 
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_ID) != 0) {
-            mAutofillId = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
+            mAutofillId = parcel.readParcelable(null);
         }
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_PARENT_ID) != 0) {
-            mParentAutofillId = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
+            mParentAutofillId = parcel.readParcelable(null);
         }
         if ((nodeFlags & FLAGS_HAS_TEXT) != 0) {
             mText = new ViewNodeText(parcel, (nodeFlags & FLAGS_HAS_COMPLEX_TEXT) == 0);
@@ -169,7 +169,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
             mExtras = parcel.readBundle();
         }
         if ((nodeFlags & FLAGS_HAS_LOCALE_LIST) != 0) {
-            mLocaleList = parcel.readParcelable(null, android.os.LocaleList.class);
+            mLocaleList = parcel.readParcelable(null);
         }
         if ((nodeFlags & FLAGS_HAS_MIME_TYPES) != 0) {
             mReceiveContentMimeTypes = parcel.readStringArray();
@@ -196,7 +196,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
             mAutofillHints = parcel.readStringArray();
         }
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_VALUE) != 0) {
-            mAutofillValue = parcel.readParcelable(null, android.view.autofill.AutofillValue.class);
+            mAutofillValue = parcel.readParcelable(null);
         }
         if ((nodeFlags & FLAGS_HAS_AUTOFILL_OPTIONS) != 0) {
             mAutofillOptions = parcel.readCharSequenceArray();
@@ -659,7 +659,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
         /** @hide */
         @TestApi
         public ViewStructureImpl(@NonNull View view) {
-            mNode.mAutofillId = Objects.requireNonNull(view).getAutofillId();
+            mNode.mAutofillId = Preconditions.checkNotNull(view).getAutofillId();
             final ViewParent parent = view.getParent();
             if (parent instanceof View) {
                 mNode.mParentAutofillId = ((View) parent).getAutofillId();
@@ -669,7 +669,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
         /** @hide */
         @TestApi
         public ViewStructureImpl(@NonNull AutofillId parentId, long virtualId, int sessionId) {
-            mNode.mParentAutofillId = Objects.requireNonNull(parentId);
+            mNode.mParentAutofillId = Preconditions.checkNotNull(parentId);
             mNode.mAutofillId = new AutofillId(parentId, virtualId, sessionId);
         }
 
@@ -830,7 +830,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
 
         @Override
         public void setTextIdEntry(@NonNull String entryName) {
-            mNode.mTextIdEntry = Objects.requireNonNull(entryName);
+            mNode.mTextIdEntry = Preconditions.checkNotNull(entryName);
         }
 
         @Override
@@ -840,7 +840,7 @@ public final class ViewNode extends AssistStructure.ViewNode {
 
         @Override
         public void setHintIdEntry(String entryName) {
-            mNode.mHintIdEntry = Objects.requireNonNull(entryName);
+            mNode.mHintIdEntry = Preconditions.checkNotNull(entryName);
         }
 
         @Override
@@ -913,13 +913,13 @@ public final class ViewNode extends AssistStructure.ViewNode {
 
         @Override
         public void setAutofillId(AutofillId id) {
-            mNode.mAutofillId = Objects.requireNonNull(id);
+            mNode.mAutofillId = Preconditions.checkNotNull(id);
         }
 
 
         @Override
         public void setAutofillId(AutofillId parentId, int virtualId) {
-            mNode.mParentAutofillId = Objects.requireNonNull(parentId);
+            mNode.mParentAutofillId = Preconditions.checkNotNull(parentId);
             mNode.mAutofillId = new AutofillId(parentId, virtualId);
         }
 

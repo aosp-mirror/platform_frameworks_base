@@ -16,7 +16,7 @@
 
 package com.android.server.pm.dex;
 
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.util.Log;

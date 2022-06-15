@@ -18,7 +18,8 @@ package com.android.wm.shell.startingsurface;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
-import android.animation.AnimatorListenerAdapter;
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,18 +35,13 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Trace;
-import android.util.Log;
 import android.util.PathParser;
 import android.window.SplashScreenView;
 
 import com.android.internal.R;
-
-import java.util.function.LongConsumer;
 
 /**
  * Creating a lightweight Drawable object used for splash screen.
@@ -54,15 +50,13 @@ import java.util.function.LongConsumer;
  */
 public class SplashscreenIconDrawableFactory {
 
-    private static final String TAG = StartingWindowController.TAG;
-
     /**
      * @return An array containing the foreground drawable at index 0 and if needed a background
      * drawable at index 1.
      */
     static Drawable[] makeIconDrawable(@ColorInt int backgroundColor, @ColorInt int themeColor,
             @NonNull Drawable foregroundDrawable, int srcIconSize, int iconSize,
-            boolean loadInDetail, Handler splashscreenWorkerHandler) {
+            Handler splashscreenWorkerHandler) {
         Drawable foreground;
         Drawable background = null;
         boolean drawBackground =
@@ -74,13 +68,13 @@ public class SplashscreenIconDrawableFactory {
             // If the icon is Adaptive, we already use the icon background.
             drawBackground = false;
             foreground = new ImmobileIconDrawable(foregroundDrawable,
-                    srcIconSize, iconSize, loadInDetail, splashscreenWorkerHandler);
+                    srcIconSize, iconSize, splashscreenWorkerHandler);
         } else {
             // Adaptive icon don't handle transparency so we draw the background of the adaptive
             // icon with the same color as the window background color instead of using two layers
             foreground = new ImmobileIconDrawable(
                     new AdaptiveForegroundDrawable(foregroundDrawable),
-                    srcIconSize, iconSize, loadInDetail, splashscreenWorkerHandler);
+                    srcIconSize, iconSize, splashscreenWorkerHandler);
         }
 
         if (drawBackground) {
@@ -91,9 +85,9 @@ public class SplashscreenIconDrawableFactory {
     }
 
     static Drawable[] makeLegacyIconDrawable(@NonNull Drawable iconDrawable, int srcIconSize,
-            int iconSize, boolean loadInDetail, Handler splashscreenWorkerHandler) {
+            int iconSize, Handler splashscreenWorkerHandler) {
         return new Drawable[]{new ImmobileIconDrawable(iconDrawable, srcIconSize, iconSize,
-                loadInDetail, splashscreenWorkerHandler)};
+                splashscreenWorkerHandler)};
     }
 
     /**
@@ -106,16 +100,11 @@ public class SplashscreenIconDrawableFactory {
         private final Matrix mMatrix = new Matrix();
         private Bitmap mIconBitmap;
 
-        ImmobileIconDrawable(Drawable drawable, int srcIconSize, int iconSize, boolean loadInDetail,
+        ImmobileIconDrawable(Drawable drawable, int srcIconSize, int iconSize,
                 Handler splashscreenWorkerHandler) {
-            // This icon has lower density, don't scale it.
-            if (loadInDetail) {
-                splashscreenWorkerHandler.post(() -> preDrawIcon(drawable, iconSize));
-            } else {
-                final float scale = (float) iconSize / srcIconSize;
-                mMatrix.setScale(scale, scale);
-                splashscreenWorkerHandler.post(() -> preDrawIcon(drawable, srcIconSize));
-            }
+            final float scale = (float) iconSize / srcIconSize;
+            mMatrix.setScale(scale, scale);
+            splashscreenWorkerHandler.post(() -> preDrawIcon(drawable, srcIconSize));
         }
 
         private void preDrawIcon(Drawable drawable, int size) {
@@ -271,102 +260,73 @@ public class SplashscreenIconDrawableFactory {
      * A lightweight AdaptiveIconDrawable which support foreground to be Animatable, and keep this
      * drawable masked by config_icon_mask.
      */
-    public static class AnimatableIconAnimateListener extends AdaptiveForegroundDrawable
+    private static class AnimatableIconAnimateListener extends AdaptiveForegroundDrawable
             implements SplashScreenView.IconAnimateListener {
-        private final Animatable mAnimatableIcon;
+        private Animatable mAnimatableIcon;
+        private Animator mIconAnimator;
         private boolean mAnimationTriggered;
-        private AnimatorListenerAdapter mJankMonitoringListener;
-        private boolean mRunning;
-        private LongConsumer mStartListener;
 
         AnimatableIconAnimateListener(@NonNull Drawable foregroundDrawable) {
             super(foregroundDrawable);
-            Callback callback = new Callback() {
-                @Override
-                public void invalidateDrawable(@NonNull Drawable who) {
-                    invalidateSelf();
-                }
+            mForegroundDrawable.setCallback(mCallback);
+        }
 
-                @Override
-                public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what,
-                        long when) {
-                    scheduleSelf(what, when);
-                }
-
-                @Override
-                public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
-                    unscheduleSelf(what);
-                }
-            };
-            mForegroundDrawable.setCallback(callback);
+        @Override
+        public boolean prepareAnimate(long duration, Runnable startListener) {
             mAnimatableIcon = (Animatable) mForegroundDrawable;
-        }
-
-        @Override
-        public void setAnimationJankMonitoring(AnimatorListenerAdapter listener) {
-            mJankMonitoringListener = listener;
-        }
-
-        @Override
-        public void prepareAnimate(LongConsumer startListener) {
-            stopAnimation();
-            mStartListener = startListener;
-        }
-
-        private void startAnimation() {
-            if (mJankMonitoringListener != null) {
-                mJankMonitoringListener.onAnimationStart(null);
-            }
-            try {
-                mAnimatableIcon.start();
-            } catch (Exception ex) {
-                Log.e(TAG, "Error while running the splash screen animated icon", ex);
-                mRunning = false;
-                if (mJankMonitoringListener != null) {
-                    mJankMonitoringListener.onAnimationCancel(null);
+            mIconAnimator = ValueAnimator.ofInt(0, 1);
+            mIconAnimator.setDuration(duration);
+            mIconAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    if (startListener != null) {
+                        startListener.run();
+                    }
+                    mAnimatableIcon.start();
                 }
-                if (mStartListener != null) {
-                    mStartListener.accept(0);
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mAnimatableIcon.stop();
                 }
-                return;
-            }
-            long animDuration = 0;
-            if (mAnimatableIcon instanceof AnimatedVectorDrawable
-                    && ((AnimatedVectorDrawable) mAnimatableIcon).getTotalDuration() > 0) {
-                animDuration = ((AnimatedVectorDrawable) mAnimatableIcon).getTotalDuration();
-            } else if (mAnimatableIcon instanceof AnimationDrawable
-                    && ((AnimationDrawable) mAnimatableIcon).getTotalDuration() > 0) {
-                animDuration = ((AnimationDrawable) mAnimatableIcon).getTotalDuration();
-            }
-            mRunning = true;
-            if (mStartListener != null) {
-                mStartListener.accept(animDuration);
-            }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mAnimatableIcon.stop();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+                    // do not repeat
+                    mAnimatableIcon.stop();
+                }
+            });
+            return true;
         }
 
-        private void onAnimationEnd() {
-            mAnimatableIcon.stop();
-            if (mJankMonitoringListener != null) {
-                mJankMonitoringListener.onAnimationEnd(null);
+        private final Callback mCallback = new Callback() {
+            @Override
+            public void invalidateDrawable(@NonNull Drawable who) {
+                invalidateSelf();
             }
-            mStartListener = null;
-            mRunning = false;
-        }
 
-        @Override
-        public void stopAnimation() {
-            if (mRunning) {
-                onAnimationEnd();
-                mJankMonitoringListener = null;
+            @Override
+            public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
+                scheduleSelf(what, when);
             }
-        }
+
+            @Override
+            public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
+                unscheduleSelf(what);
+            }
+        };
 
         private void ensureAnimationStarted() {
             if (mAnimationTriggered) {
                 return;
             }
-            if (!mRunning) {
-                startAnimation();
+            if (mIconAnimator != null && !mIconAnimator.isRunning()) {
+                mIconAnimator.start();
             }
             mAnimationTriggered = true;
         }

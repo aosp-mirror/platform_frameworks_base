@@ -291,10 +291,10 @@ public class ContrastColorUtil {
      * Finds a suitable color such that there's enough contrast.
      *
      * @param color the color to start searching from.
-     * @param other the color to ensure contrast against. Assumed to be lighter than {@code color}
-     * @param findFg if true, we assume {@code color} is a foreground, otherwise a background.
+     * @param other the color to ensure contrast against. Assumed to be lighter than {@param color}
+     * @param findFg if true, we assume {@param color} is a foreground, otherwise a background.
      * @param minRatio the minimum contrast ratio required.
-     * @return a color with the same hue as {@code color}, potentially darkened to meet the
+     * @return a color with the same hue as {@param color}, potentially darkened to meet the
      *          contrast ratio.
      */
     public static int findContrastColor(int color, int other, boolean findFg, double minRatio) {
@@ -331,7 +331,7 @@ public class ContrastColorUtil {
      * @param color the color to start searching from.
      * @param backgroundColor the color to ensure contrast against.
      * @param minRatio the minimum contrast ratio required.
-     * @return the same color as {@code color} with potentially modified alpha to meet contrast
+     * @return the same color as {@param color} with potentially modified alpha to meet contrast
      */
     public static int findAlphaToMeetContrast(int color, int backgroundColor, double minRatio) {
         int fg = color;
@@ -361,10 +361,10 @@ public class ContrastColorUtil {
      * Finds a suitable color such that there's enough contrast.
      *
      * @param color the color to start searching from.
-     * @param other the color to ensure contrast against. Assumed to be darker than {@code color}
-     * @param findFg if true, we assume {@code color} is a foreground, otherwise a background.
+     * @param other the color to ensure contrast against. Assumed to be darker than {@param color}
+     * @param findFg if true, we assume {@param color} is a foreground, otherwise a background.
      * @param minRatio the minimum contrast ratio required.
-     * @return a color with the same hue as {@code color}, potentially lightened to meet the
+     * @return a color with the same hue as {@param color}, potentially darkened to meet the
      *          contrast ratio.
      */
     public static int findContrastColorAgainstDark(int color, int other, boolean findFg,
@@ -393,8 +393,7 @@ public class ContrastColorUtil {
                 low = l;
             }
         }
-        hsl[2] = high;
-        return ColorUtilsFromCompat.HSLToColor(hsl);
+        return findFg ? fg : bg;
     }
 
     public static int ensureTextContrastOnBlack(int color) {
@@ -453,7 +452,7 @@ public class ContrastColorUtil {
     }
 
     /**
-     * Resolves {@code color} to an actual color if it is {@link Notification#COLOR_DEFAULT}
+     * Resolves {@param color} to an actual color if it is {@link Notification#COLOR_DEFAULT}
      */
     public static int resolveColor(Context context, int color, boolean defaultBackgroundIsDark) {
         if (color == Notification.COLOR_DEFAULT) {
@@ -627,7 +626,7 @@ public class ContrastColorUtil {
     }
 
     /**
-     * Framework copy of functions needed from androidx.core.graphics.ColorUtils.
+     * Framework copy of functions needed from android.support.v4.graphics.ColorUtils.
      */
     private static class ColorUtilsFromCompat {
         private static final double XYZ_WHITE_REFERENCE_X = 95.047;

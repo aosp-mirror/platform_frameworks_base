@@ -190,9 +190,6 @@ final class ContentCapturePerUserService
         Slog.w(TAG, "remote service died: " + service);
         synchronized (mLock) {
             mZombie = true;
-            writeServiceEvent(
-                    FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_REMOTE_SERVICE_DIED,
-                    getServiceComponentName());
         }
     }
 
@@ -283,7 +280,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
-                    /* isChildSession= */ false);
+                    componentName, /* isChildSession= */ false);
             return;
         }
         if (serviceComponentName == null) {
@@ -307,7 +304,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NOT_WHITELISTED, serviceComponentName,
-                    /* isChildSession= */ false);
+                    componentName, /* isChildSession= */ false);
             return;
         }
 
@@ -321,7 +318,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_DUPLICATED_ID,
-                    serviceComponentName, /* isChildSession= */ false);
+                    serviceComponentName, componentName, /* isChildSession= */ false);
             return;
         }
 
@@ -338,7 +335,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
-                    /* isChildSession= */ false);
+                    componentName, /* isChildSession= */ false);
             return;
         }
 
@@ -691,7 +688,7 @@ final class ContentCapturePerUserService
         @Override
         public void writeSessionFlush(int sessionId, ComponentName app, FlushMetrics flushMetrics,
                 ContentCaptureOptions options, int flushReason) {
-            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(),
+            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(), app,
                     flushMetrics, options, flushReason);
         }
 

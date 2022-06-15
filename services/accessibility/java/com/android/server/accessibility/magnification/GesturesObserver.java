@@ -114,7 +114,7 @@ public final class GesturesObserver implements GestureMatcher.StateChangeListene
      * Clears all states to default.
      */
     @MainThread
-    private void clear() {
+    public void clear() {
         for (GestureMatcher matcher : mGestureMatchers) {
             matcher.clear();
         }

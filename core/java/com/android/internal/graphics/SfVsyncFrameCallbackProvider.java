@@ -24,7 +24,6 @@ import android.view.Choreographer;
  *
  * @hide
  */
-// TODO(b/222698397): remove getSfInstance/this class usage and use vsyncId for transactions
 public final class SfVsyncFrameCallbackProvider implements AnimationFrameCallbackProvider {
 
     private final Choreographer mChoreographer;

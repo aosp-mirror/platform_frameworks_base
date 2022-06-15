@@ -52,17 +52,22 @@ public class WorkLockActivityController {
         tscl.registerTaskStackListener(mLockListener);
     }
 
-    private void startWorkChallengeInTask(ActivityManager.RunningTaskInfo info) {
-        String packageName = info.baseActivity != null ? info.baseActivity.getPackageName() : "";
+    private void startWorkChallengeInTask(int taskId, int userId) {
+        ActivityManager.TaskDescription taskDescription = null;
+        try {
+            taskDescription = mIatm.getTaskDescription(taskId);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to get description for task=" + taskId);
+        }
         Intent intent = new Intent(KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER)
                 .setComponent(new ComponentName(mContext, WorkLockActivity.class))
-                .putExtra(Intent.EXTRA_USER_ID, info.userId)
-                .putExtra(Intent.EXTRA_PACKAGE_NAME, packageName)
+                .putExtra(Intent.EXTRA_USER_ID, userId)
+                .putExtra(WorkLockActivity.EXTRA_TASK_DESCRIPTION, taskDescription)
                 .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                         | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchTaskId(info.taskId);
+        options.setLaunchTaskId(taskId);
         options.setTaskOverlay(true, false /* canResume */);
 
         final int result = startActivityAsUser(intent, options.toBundle(), UserHandle.USER_CURRENT);
@@ -72,9 +77,9 @@ public class WorkLockActivityController {
             // Starting the activity inside the task failed. We can't be sure why, so to be
             // safe just remove the whole task if it still exists.
             try {
-                mIatm.removeTask(info.taskId);
+                mIatm.removeTask(taskId);
             } catch (RemoteException e) {
-                Log.w(TAG, "Failed to get description for task=" + info.taskId);
+                Log.w(TAG, "Failed to get description for task=" + taskId);
             }
         }
     }
@@ -107,8 +112,8 @@ public class WorkLockActivityController {
 
     private final TaskStackChangeListener mLockListener = new TaskStackChangeListener() {
         @Override
-        public void onTaskProfileLocked(ActivityManager.RunningTaskInfo info) {
-            startWorkChallengeInTask(info);
+        public void onTaskProfileLocked(int taskId, int userId) {
+            startWorkChallengeInTask(taskId, userId);
         }
     };
 }

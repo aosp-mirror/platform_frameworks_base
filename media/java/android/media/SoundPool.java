@@ -29,6 +29,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -155,7 +156,8 @@ public class SoundPool extends PlayerBase {
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_SOUNDPOOL);
 
         // do native setup
-        if (native_setup(maxStreams, attributes, getCurrentOpPackageName()) != 0) {
+        if (native_setup(new WeakReference<SoundPool>(this),
+                maxStreams, attributes, getCurrentOpPackageName()) != 0) {
             throw new RuntimeException("Native setup failed");
         }
         mAttributes = attributes;
@@ -508,7 +510,7 @@ public class SoundPool extends PlayerBase {
 
     private native final int _load(FileDescriptor fd, long offset, long length, int priority);
 
-    private native int native_setup(int maxStreams,
+    private native final int native_setup(Object weakRef, int maxStreams,
             @NonNull Object/*AudioAttributes*/ attributes, @NonNull String opPackageName);
 
     private native final int _play(int soundID, float leftVolume, float rightVolume,
@@ -520,11 +522,17 @@ public class SoundPool extends PlayerBase {
 
     // post event from native code to message handler
     @SuppressWarnings("unchecked")
-    private void postEventFromNative(int msg, int arg1, int arg2, Object obj) {
-        Handler eventHandler = mEventHandler.get();
+    private static void postEventFromNative(Object ref, int msg, int arg1, int arg2, Object obj) {
+        SoundPool soundPool = ((WeakReference<SoundPool>) ref).get();
+        if (soundPool == null) {
+            return;
+        }
+
+        Handler eventHandler = soundPool.mEventHandler.get();
         if (eventHandler == null) {
             return;
         }
+
         Message message = eventHandler.obtainMessage(msg, arg1, arg2, obj);
         eventHandler.sendMessage(message);
     }

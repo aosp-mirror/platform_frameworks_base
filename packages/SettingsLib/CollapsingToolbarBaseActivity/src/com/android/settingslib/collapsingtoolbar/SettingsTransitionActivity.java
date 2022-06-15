@@ -23,6 +23,7 @@ import androidx.fragment.app.FragmentActivity;
  * Settings transition applied.
  */
 public abstract class SettingsTransitionActivity extends FragmentActivity {
+    private static final String TAG = "SettingsTransitionActivity";
 
     protected boolean isSettingsTransitionEnabled() {
         return false;

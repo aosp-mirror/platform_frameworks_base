@@ -21,9 +21,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -44,7 +42,6 @@ import java.util.function.Consumer;
 /**
  * Manages IMS Service registration state for associated {@link ImsFeature}s.
  */
-@RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public interface RegistrationManager {
 
     /**

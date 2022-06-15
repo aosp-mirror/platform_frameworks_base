@@ -64,11 +64,6 @@ public class DimmerTests extends WindowTestsBase {
         }
 
         @Override
-        public SurfaceControl.Transaction getSyncTransaction() {
-            return mTransaction;
-        }
-
-        @Override
         public SurfaceControl.Transaction getPendingTransaction() {
             return mTransaction;
         }
@@ -104,11 +99,6 @@ public class DimmerTests extends WindowTestsBase {
         @Override
         public SurfaceControl getSurfaceControl() {
             return mHostControl;
-        }
-
-        @Override
-        public SurfaceControl.Transaction getSyncTransaction() {
-            return mHostTransaction;
         }
 
         @Override

@@ -23,19 +23,15 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group4
+import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
-import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
-import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
-import com.android.wm.shell.flicker.helpers.SplitScreenHelper
+import com.android.wm.shell.flicker.helpers.FixedAppHelper
+import com.android.server.wm.flicker.repetitions
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.testapp.Components.PipActivity.EXTRA_ENTER_PIP
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,21 +46,16 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group4
+@FlakyTest(bugId = 161435597)
+@Group3
 class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val imeApp = ImeAppHelper(instrumentation)
     private val testApp = FixedAppHelper(instrumentation)
 
-    @Before
-    open fun setup() {
-        // Only run legacy split tests when the system is using legacy split screen.
-        assumeTrue(SplitScreenHelper.isUsingLegacySplit())
-        // Legacy split is having some issue with Shell transition, and will be deprecated soon.
-        assumeFalse(isShellTransitionsEnabled())
-    }
-
-    override val transition: FlickerBuilder.() -> Unit
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
         get() = {
+            withTestName { testSpec.name }
+            repeat { testSpec.config.repetitions }
             setup {
                 test {
                     removeAllTasksButHome()
@@ -89,16 +80,11 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
             }
         }
 
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
-    @FlakyTest(bugId = 161435597)
+    @Presubmit
     @Test
     fun pipWindowInsideDisplayBounds() {
-        testSpec.assertWmVisibleRegion(pipApp.component) {
-            coversAtMost(displayBounds)
+        testSpec.assertWm {
+            coversAtMost(displayBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -106,17 +92,25 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
-            isAppWindowVisible(testApp.component)
-            isAppWindowVisible(imeApp.component)
-            doNotOverlap(testApp.component, imeApp.component)
+            isVisible(testApp.defaultWindowName)
+            isVisible(imeApp.defaultWindowName)
+            noWindowsOverlap(testApp.defaultWindowName, imeApp.defaultWindowName)
         }
     }
 
-    @FlakyTest(bugId = 161435597)
+    @Presubmit
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
+
+    @Presubmit
     @Test
     fun pipLayerInsideDisplayBounds() {
-        testSpec.assertLayersVisibleRegion(pipApp.component) {
-            coversAtMost(displayBounds)
+        testSpec.assertLayers {
+            coversAtMost(displayBounds, pipApp.defaultWindowName)
         }
     }
 
@@ -124,14 +118,18 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @Test
     fun bothAppLayersVisible() {
         testSpec.assertLayersEnd {
-            visibleRegion(testApp.component).coversAtMost(displayBounds)
-            visibleRegion(imeApp.component).coversAtMost(displayBounds)
+            visibleRegion(testApp.defaultWindowName).coversAtMost(displayBounds)
+            visibleRegion(imeApp.defaultWindowName).coversAtMost(displayBounds)
         }
     }
 
-    @FlakyTest(bugId = 161435597)
+    @Presubmit
     @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    override fun navBarLayerIsAlwaysVisible() = super.navBarLayerIsAlwaysVisible()
+
+    @Presubmit
+    @Test
+    override fun statusBarLayerIsAlwaysVisible() = super.statusBarLayerIsAlwaysVisible()
 
     companion object {
         const val TEST_REPETITIONS = 2

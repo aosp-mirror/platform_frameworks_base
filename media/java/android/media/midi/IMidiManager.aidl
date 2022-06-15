@@ -31,8 +31,6 @@ interface IMidiManager
 {
     MidiDeviceInfo[] getDevices();
 
-    MidiDeviceInfo[] getDevicesForTransport(int transport);
-
     // for device creation & removal notifications
     void registerListener(IBinder clientToken, in IMidiDeviceListener listener);
     void unregisterListener(IBinder clientToken, in IMidiDeviceListener listener);
@@ -45,7 +43,7 @@ interface IMidiManager
     // for registering built-in MIDI devices
     MidiDeviceInfo registerDeviceServer(in IMidiDeviceServer server, int numInputPorts,
             int numOutputPorts, in String[] inputPortNames, in String[] outputPortNames,
-            in Bundle properties, int type, int defaultProtocol);
+            in Bundle properties, int type);
 
     // for unregistering built-in MIDI devices
     void unregisterDeviceServer(in IMidiDeviceServer server);

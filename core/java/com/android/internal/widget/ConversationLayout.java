@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * A custom-built layout for the Notification.MessagingStyle allows dynamic addition and removal
@@ -75,6 +76,8 @@ import java.util.Objects;
 public class ConversationLayout extends FrameLayout
         implements ImageMessageConsumer, IMessagingLayout {
 
+    private static final Consumer<MessagingMessage> REMOVE_MESSAGE
+            = MessagingMessage::removeMessage;
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
     public static final Interpolator FAST_OUT_LINEAR_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
     public static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
@@ -147,7 +150,6 @@ public class ConversationLayout extends FrameLayout
     private Icon mShortcutIcon;
     private View mAppNameDivider;
     private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
-    private ArrayList<MessagingLinearLayout.MessagingChild> mToRecycle = new ArrayList<>();
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -460,12 +462,8 @@ public class ConversationLayout extends FrameLayout
         removeGroups(oldGroups);
 
         // Let's remove the remaining messages
-        for (MessagingMessage message : mMessages) {
-            message.removeMessage(mToRecycle);
-        }
-        for (MessagingMessage historicMessage : mHistoricMessages) {
-            historicMessage.removeMessage(mToRecycle);
-        }
+        mMessages.forEach(REMOVE_MESSAGE);
+        mHistoricMessages.forEach(REMOVE_MESSAGE);
 
         mMessages = messages;
         mHistoricMessages = historicMessages;
@@ -474,12 +472,6 @@ public class ConversationLayout extends FrameLayout
         updateTitleAndNamesDisplay();
 
         updateConversationLayout();
-
-        // Recycle everything at the end of the update, now that we know it's no longer needed.
-        for (MessagingLinearLayout.MessagingChild child : mToRecycle) {
-            child.recycle();
-        }
-        mToRecycle.clear();
     }
 
     /**
@@ -753,18 +745,18 @@ public class ConversationLayout extends FrameLayout
             MessagingGroup group = oldGroups.get(i);
             if (!mGroups.contains(group)) {
                 List<MessagingMessage> messages = group.getMessages();
+                Runnable endRunnable = () -> {
+                    mMessagingLinearLayout.removeTransientView(group);
+                    group.recycle();
+                };
+
                 boolean wasShown = group.isShown();
                 mMessagingLinearLayout.removeView(group);
                 if (wasShown && !MessagingLinearLayout.isGone(group)) {
                     mMessagingLinearLayout.addTransientView(group, 0);
-                    group.removeGroupAnimated(() -> {
-                        mMessagingLinearLayout.removeTransientView(group);
-                        group.recycle();
-                    });
+                    group.removeGroupAnimated(endRunnable);
                 } else {
-                    // Defer recycling until after the update is done, since we may still need the
-                    // old group around to perform other updates.
-                    mToRecycle.add(group);
+                    endRunnable.run();
                 }
                 mMessages.removeAll(messages);
                 mHistoricMessages.removeAll(messages);
@@ -879,10 +871,6 @@ public class ConversationLayout extends FrameLayout
             if (newGroup == null) {
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
                 mAddedGroups.add(newGroup);
-            } else if (newGroup.getParent() != mMessagingLinearLayout) {
-                throw new IllegalStateException(
-                        "group parent was " + newGroup.getParent() + " but expected "
-                                + mMessagingLinearLayout);
             }
             newGroup.setImageDisplayLocation(mIsCollapsed
                     ? IMAGE_DISPLAY_LOCATION_EXTERNAL

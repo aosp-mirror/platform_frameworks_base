@@ -29,6 +29,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.storage.StorageManager;
@@ -100,7 +101,6 @@ public class Environment {
     private static final File DIR_ANDROID_EXPAND = getDirectory(ENV_ANDROID_EXPAND, "/mnt/expand");
     private static final File DIR_ANDROID_STORAGE = getDirectory(ENV_ANDROID_STORAGE, "/storage");
     private static final File DIR_DOWNLOAD_CACHE = getDirectory(ENV_DOWNLOAD_CACHE, "/cache");
-    private static final File DIR_METADATA = new File("/metadata");
     private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
     private static final File DIR_ODM_ROOT = getDirectory(ENV_ODM_ROOT, "/odm");
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
@@ -189,11 +189,13 @@ public class Environment {
         }
 
         @UnsupportedAppUsage
+        @Deprecated
         public File getExternalStorageDirectory() {
             return getExternalDirs()[0];
         }
 
         @UnsupportedAppUsage
+        @Deprecated
         public File getExternalStoragePublicDirectory(String type) {
             return buildExternalStoragePublicDirs(type)[0];
         }
@@ -478,32 +480,8 @@ public class Environment {
     }
 
     /** {@hide} */
-    private static File getDataMiscCeDirectory(String volumeUuid, int userId) {
-        return buildPath(getDataDirectory(volumeUuid), "misc_ce", String.valueOf(userId));
-    }
-
-    /** {@hide} */
-    public static File getDataMiscCeSharedSdkSandboxDirectory(String volumeUuid, int userId,
-            String packageName) {
-        return buildPath(getDataMiscCeDirectory(volumeUuid, userId), "sdksandbox",
-                packageName, "shared");
-    }
-
-    /** {@hide} */
     public static File getDataMiscDeDirectory(int userId) {
         return buildPath(getDataDirectory(), "misc_de", String.valueOf(userId));
-    }
-
-    /** {@hide} */
-    private static File getDataMiscDeDirectory(String volumeUuid, int userId) {
-        return buildPath(getDataDirectory(volumeUuid), "misc_de", String.valueOf(userId));
-    }
-
-    /** {@hide} */
-    public static File getDataMiscDeSharedSdkSandboxDirectory(String volumeUuid, int userId,
-            String packageName) {
-        return buildPath(getDataMiscDeDirectory(volumeUuid, userId), "sdksandbox",
-                packageName, "shared");
     }
 
     private static File getDataProfilesDeDirectory(int userId) {
@@ -717,13 +695,14 @@ public class Environment {
      * <p>
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * monitor_storage}
-     * <p>
-     * Note that alternatives such as {@link Context#getExternalFilesDir(String)} or
-     * {@link MediaStore} offer better performance.
      *
      * @see #getExternalStorageState()
      * @see #isExternalStorageRemovable()
+     * @deprecated Alternatives such as {@link Context#getExternalFilesDir(String)},
+     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT} offer better
+     *             performance.
      */
+    @Deprecated
     public static File getExternalStorageDirectory() {
         throwIfUserRequired();
         return sCurrentUser.getExternalDirs()[0];
@@ -1020,9 +999,6 @@ public class Environment {
      * </p>
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * public_picture}
-     * <p>
-     * Note that alternatives such as {@link Context#getExternalFilesDir(String)} or
-     * {@link MediaStore} offer better performance.
      *
      * @param type The type of storage directory to return. Should be one of
      *            {@link #DIRECTORY_MUSIC}, {@link #DIRECTORY_PODCASTS},
@@ -1033,7 +1009,11 @@ public class Environment {
      * @return Returns the File path for the directory. Note that this directory
      *         may not yet exist, so you must make sure it exists before using
      *         it such as with {@link File#mkdirs File.mkdirs()}.
+     * @deprecated Alternatives such as {@link Context#getExternalFilesDir(String)},
+     *             {@link MediaStore}, or {@link Intent#ACTION_OPEN_DOCUMENT} offer better
+     *             performance.
      */
+    @Deprecated
     public static File getExternalStoragePublicDirectory(String type) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStoragePublicDirs(type)[0];
@@ -1119,15 +1099,6 @@ public class Environment {
      */
     public static File getDownloadCacheDirectory() {
         return DIR_DOWNLOAD_CACHE;
-    }
-
-    /**
-     * Return the metadata directory.
-     *
-     * @hide
-     */
-    public static @NonNull File getMetadataDirectory() {
-        return DIR_METADATA;
     }
 
     /**
@@ -1366,25 +1337,13 @@ public class Environment {
         final Context context = AppGlobals.getInitialApplication();
         final int uid = context.getApplicationInfo().uid;
         // Isolated processes and Instant apps are never allowed to be in scoped storage
-        if (Process.isIsolated(uid) || Process.isSdkSandboxUid(uid)) {
+        if (Process.isIsolated(uid)) {
             return false;
         }
 
         final PackageManager packageManager = context.getPackageManager();
         if (packageManager.isInstantApp()) {
             return false;
-        }
-
-        // Apps with PROPERTY_NO_APP_DATA_STORAGE should not be allowed in scoped storage
-        final String packageName = AppGlobals.getInitialPackage();
-        try {
-            final PackageManager.Property noAppStorageProp = packageManager.getProperty(
-                    PackageManager.PROPERTY_NO_APP_DATA_STORAGE, packageName);
-            if (noAppStorageProp != null && noAppStorageProp.getBoolean()) {
-                return false;
-            }
-        } catch (PackageManager.NameNotFoundException ignore) {
-            // Property not defined for the package
         }
 
         boolean defaultScopedStorage = Compatibility.isChangeEnabled(DEFAULT_SCOPED_STORAGE);

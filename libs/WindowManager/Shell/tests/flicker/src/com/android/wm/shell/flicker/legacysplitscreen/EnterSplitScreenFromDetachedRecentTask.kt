@@ -22,11 +22,10 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.wm.shell.flicker.dockedStackDividerIsVisibleAtEnd
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
+import com.android.wm.shell.flicker.dockedStackDividerIsVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -43,14 +42,13 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@Group4
 class EnterSplitScreenFromDetachedRecentTask(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
 
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            cleanSetup(this)
+    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+        get() = { configuration ->
+            cleanSetup(this, configuration)
             setup {
                 eachRun {
                     splitScreenApp.launchViaIntent(wmHelper)
@@ -63,33 +61,23 @@ class EnterSplitScreenFromDetachedRecentTask(
             }
         }
 
-    override val ignoredWindows: List<FlickerComponentName>
-        get() = listOf(LAUNCHER_COMPONENT,
-                FlickerComponentName.SPLASH_SCREEN,
-                FlickerComponentName.SNAPSHOT,
-                splitScreenApp.component)
+    override val ignoredWindows: List<String>
+        get() = listOf(LAUNCHER_PACKAGE_NAME,
+                WindowManagerStateHelper.SPLASH_SCREEN_NAME,
+                WindowManagerStateHelper.SNAPSHOT_WINDOW_NAME,
+                splitScreenApp.defaultWindowName)
 
     @Presubmit
     @Test
-    fun dockedStackDividerIsVisibleAtEnd() = testSpec.dockedStackDividerIsVisibleAtEnd()
+    fun dockedStackDividerIsVisible() = testSpec.dockedStackDividerIsVisible()
 
     @Presubmit
     @Test
     fun appWindowIsVisible() {
         testSpec.assertWmEnd {
-            isAppWindowVisible(splitScreenApp.component)
+            isVisible(splitScreenApp.defaultWindowName)
         }
     }
-
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-            super.visibleLayersShownMoreThanOneConsecutiveEntry()
-
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-            super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

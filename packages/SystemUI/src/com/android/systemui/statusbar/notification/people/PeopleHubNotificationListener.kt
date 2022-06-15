@@ -31,6 +31,7 @@ import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.MessagingGroup
 import com.android.settingslib.notification.ConversationIconFactory
 import com.android.systemui.R
@@ -40,9 +41,9 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.NotificationPersonExtractorPlugin
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.notification.NotificationEntryListener
+import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_NON_PERSON
 import com.android.systemui.statusbar.policy.ExtensionController
 import java.util.ArrayDeque
@@ -88,7 +89,7 @@ class NotificationPersonExtractorPluginBoundary @Inject constructor(
 
 @SysUISingleton
 class PeopleHubDataSourceImpl @Inject constructor(
-    private val notifCollection: CommonNotifCollection,
+    private val notificationEntryManager: NotificationEntryManager,
     private val extractor: NotificationPersonExtractor,
     private val userManager: UserManager,
     launcherApps: LauncherApps,
@@ -118,11 +119,19 @@ class PeopleHubDataSourceImpl @Inject constructor(
         )
     }
 
-    private val notifCollectionListener = object : NotifCollectionListener {
-        override fun onEntryAdded(entry: NotificationEntry) = addVisibleEntry(entry)
-        override fun onEntryUpdated(entry: NotificationEntry) = addVisibleEntry(entry)
-        override fun onEntryRemoved(entry: NotificationEntry, reason: Int) =
-            removeVisibleEntry(entry, reason)
+    private val notificationEntryListener = object : NotificationEntryListener {
+        override fun onEntryInflated(entry: NotificationEntry) = addVisibleEntry(entry)
+
+        override fun onEntryReinflated(entry: NotificationEntry) = addVisibleEntry(entry)
+
+        override fun onPostEntryUpdated(entry: NotificationEntry) = addVisibleEntry(entry)
+
+        override fun onEntryRemoved(
+            entry: NotificationEntry,
+            visibility: NotificationVisibility?,
+            removedByUser: Boolean,
+            reason: Int
+        ) = removeVisibleEntry(entry, reason)
     }
 
     private fun removeVisibleEntry(entry: NotificationEntry, reason: Int) {
@@ -170,7 +179,7 @@ class PeopleHubDataSourceImpl @Inject constructor(
                             currentProfiles: SparseArray<UserInfo>?
                         ) = updateUi()
                     })
-            notifCollection.addCollectionListener(notifCollectionListener)
+            notificationEntryManager.addNotificationEntryListener(notificationEntryListener)
         } else {
             getPeopleHubModelForCurrentUser()?.let(listener::onDataChanged)
         }
@@ -180,7 +189,8 @@ class PeopleHubDataSourceImpl @Inject constructor(
                 if (dataListeners.isEmpty()) {
                     userChangeSubscription?.unsubscribe()
                     userChangeSubscription = null
-                    notifCollection.removeCollectionListener(notifCollectionListener)
+                    notificationEntryManager
+                            .removeNotificationEntryListener(notificationEntryListener)
                 }
             }
         }

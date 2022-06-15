@@ -73,11 +73,6 @@ public class InstallerAllowedByManifestFormula extends IntegrityFormula implemen
     }
 
     @Override
-    public boolean isAppCertificateLineageFormula() {
-        return false;
-    }
-
-    @Override
     public boolean isInstallerFormula() {
         return true;
     }

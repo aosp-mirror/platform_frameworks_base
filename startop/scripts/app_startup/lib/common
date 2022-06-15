@@ -1,0 +1,198 @@
+#!/bin/bash
+# Copyright 2018, The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+if [[ -z $ANDROID_BUILD_TOP ]]; then
+  echo "Please run source build/envsetup.sh first" >&2
+  exit 1
+fi
+
+source $ANDROID_BUILD_TOP/build/envsetup.sh
+
+verbose_print() {
+  if [[ "$verbose" == "y" ]]; then
+    echo "$@" >&2
+  fi
+}
+
+remote_pidof() {
+  local procname="$1"
+  adb shell ps | grep "$procname" | awk '{print $2;}'
+}
+
+remote_pkill() {
+  local procname="$1"
+  shift
+
+  local the_pids=$(remote_pidof "$procname")
+  local pid
+
+  for pid in $the_pids; do
+    verbose_print adb shell kill "$@" "$pid"
+    adb shell kill "$@" "$pid"
+  done
+}
+
+get_activity_name() {
+  local package="$1"
+  local action_key="android.intent.action.MAIN:"
+
+  # Example query-activities output being parsed:
+  #
+  #  Activity #14:
+  #    priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true
+  #    com.google.android.videos/com.google.android.youtube.videos.EntryPoint
+  #  Activity #15:
+  #    priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true
+  #    com.google.android.youtube/.app.honeycomb.Shell$HomeActivity
+
+  # Given package 'com.google.android.youtube' return '.app.honeycomb.Shell$HomeActivity'
+
+  local activity_line="$(adb shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | grep "$package/")"
+  IFS="/" read -a array <<< "$activity_line"
+  local activity_name="${array[1]}"
+
+  # Activities starting with '.' are shorthand for having their package name prefixed.
+  if [[ $activity_name == .* ]]; then
+    activity_name="${package}${activity_name}"
+  fi
+  echo "$activity_name"
+}
+
+# Use with logcat_from_timestamp to skip all past log-lines.
+logcat_save_timestamp() {
+  adb shell 'date -u +"%Y-%m-%d %H:%M:%S.%N"'
+}
+
+# Roll forward logcat to only show events
+# since the specified timestamp.
+#
+# i.e. don't look at historical logcat,
+# only look at FUTURE logcat.
+#
+# First use 'logcat_save_timestamp'
+# Then do whatever action you want.
+# Then use 'logcat_from_timestamp_bg $timestamp'
+logcat_from_timestamp_bg() {
+  local timestamp="$1"
+  shift # drop timestamp from args.
+  verbose_print adb logcat -T \"$timestamp\" \"$@\"
+  adb logcat -v UTC -T "$timestamp" "$@" &
+  logcat_from_timestamp_pid=$!
+}
+
+# Starting at timestamp $2, wait until we seen pattern $3
+# or until a timeout happens in $1 seconds.
+# If successful, also echo the line that matched the pattern.
+#
+# Set VERBOSE_LOGCAT=1 to debug every line of logcat it tries to parse.
+logcat_select_pattern() {
+  local timeout="$1"
+  local timestamp="$2"
+  local pattern="$3"
+
+  local logcat_fd
+
+  coproc logcat_fd {
+    kill_children_quietly() {
+      kill "$logcat_pidd"
+      wait "$logcat_pidd" 2>/dev/null
+    }
+
+    trap 'kill_children_quietly' EXIT # kill logcat when this coproc is killed.
+
+    # run logcat in the background so it can be killed.
+    logcat_from_timestamp_bg "$timestamp"
+    logcat_pidd=$logcat_from_timestamp_pid
+    wait "$logcat_pidd"
+  }
+  local logcat_pid="$!"
+  verbose_print "[LOGCAT] Spawn pid $logcat_pid"
+
+  local timeout_ts="$(date -d "now + ${timeout} seconds" '+%s')"
+  local now_ts="0"
+
+  local return_code=1
+
+  verbose_print "logcat_wait_for_pattern begin"
+
+  while read -t "$timeout" -r -u "${logcat_fd[0]}" logcat_output; do
+    if (( $VERBOSE_LOGCAT )); then
+      verbose_print "LOGCAT: $logcat_output"
+    fi
+    if [[ "$logcat_output:" == *"$pattern"* ]]; then
+      verbose_print "LOGCAT: " "$logcat_output"
+      verbose_print "WE DID SEE PATTERN" '<<' "$pattern" '>>.'
+      echo "$logcat_output"
+      return_code=0
+      break
+    fi
+    now_ts="$(date -d "now" '+%s')"
+    if (( now_ts >= timeout_ts )); then
+      verbose_print "DID TIMEOUT BEFORE SEEING ANYTHING (timeout=$timeout seconds) " '<<' "$pattern" '>>.'
+      break
+    fi
+  done
+
+  # Don't leave logcat lying around since it will keep going.
+  kill "$logcat_pid"
+  # Suppress annoying 'Terminated...' message.
+  wait "$logcat_pid" 2>/dev/null
+
+  verbose_print "[LOGCAT] $logcat_pid should be killed"
+
+  return $return_code
+}
+
+# Starting at timestamp $2, wait until we seen pattern $3
+# or until a timeout happens in $1 seconds.
+#
+# Set VERBOSE_LOGCAT=1 to debug every line of logcat it tries to parse.
+logcat_wait_for_pattern() {
+  logcat_select_pattern "$@" > /dev/null
+}
+
+# Starting at timestamp $2, wait until we seen pattern $3
+# or until a timeout happens in $1 seconds.
+# If successful, extract with the regular expression pattern in #4
+# and return the first capture group.
+#
+# Set VERBOSE_LOGCAT=1 to debug every line of logcat it tries to parse.
+logcat_extract_pattern() {
+  local timeout="$1"
+  local timestamp="$2"
+  local pattern="$3"
+  local re_pattern="$4"
+
+  local result
+  local exit_code
+
+  result="$(logcat_select_pattern "$@")"
+  exit_code=$?
+
+  if [[ $exit_code -ne 0 ]]; then
+    return $exit_code
+  fi
+
+  echo "$result" | sed 's/'"$re_pattern"'/\1/g'
+}
+
+# Join array
+#   FOO=(a b c)
+#   join_by , "${FOO[@]}" #a,b,c
+join_by() {
+  local IFS="$1"
+  shift
+  echo "$*"
+}

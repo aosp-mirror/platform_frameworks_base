@@ -10,12 +10,10 @@
 #include "SkColor.h"
 #include "SkColorPriv.h"
 #include "SkStream.h"
+#include "SkTemplates.h"
+#include "SkUtils.h"
 
 #include "gif_lib.h"
-
-#include <log/log.h>
-
-#include <string.h>
 
 #if GIFLIB_MAJOR < 5 || (GIFLIB_MAJOR == 5 && GIFLIB_MINOR == 0)
 #define DGifCloseFile(a, b) DGifCloseFile(a)
@@ -219,9 +217,8 @@ static void fillRect(SkBitmap* bm, GifWord left, GifWord top, GifWord width, Gif
         copyHeight = bmHeight - top;
     }
 
-    size_t bytes = copyWidth * SkColorTypeBytesPerPixel(bm->colorType());
     for (; copyHeight > 0; copyHeight--) {
-        memset(dst, col, bytes);
+        sk_memset32(dst, col, copyWidth);
         dst += bmWidth;
     }
 }
@@ -247,7 +244,7 @@ static void drawFrame(SkBitmap* bm, const SavedImage* frame, const ColorMapObjec
     }
 
     if (cmap == nullptr || cmap->ColorCount != (1 << cmap->BitsPerPixel)) {
-        ALOGD("bad colortable setup");
+        SkDEBUGFAIL("bad colortable setup");
         return;
     }
 

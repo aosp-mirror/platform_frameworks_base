@@ -202,7 +202,9 @@ public abstract class SmartspaceService extends Service {
         }
 
         final CallbackWrapper wrapper = findCallbackWrapper(callbacks, callback);
-        removeCallbackWrapper(callbacks, wrapper);
+        if (wrapper != null) {
+            removeCallbackWrapper(callbacks, wrapper);
+        }
     }
 
     private void doRequestPredictionUpdate(@NonNull SmartspaceSessionId sessionId) {
@@ -229,13 +231,12 @@ public abstract class SmartspaceService extends Service {
         return null;
     }
 
-    private void removeCallbackWrapper(@Nullable ArrayList<CallbackWrapper> callbacks,
-            @Nullable CallbackWrapper wrapper) {
-        if (callbacks == null || wrapper == null) {
+    private void removeCallbackWrapper(
+            ArrayList<CallbackWrapper> callbacks, CallbackWrapper wrapper) {
+        if (callbacks == null) {
             return;
         }
         callbacks.remove(wrapper);
-        wrapper.destroy();
     }
 
     /**
@@ -244,13 +245,9 @@ public abstract class SmartspaceService extends Service {
     public abstract void onDestroySmartspaceSession(@NonNull SmartspaceSessionId sessionId);
 
     private void doDestroy(@NonNull SmartspaceSessionId sessionId) {
-        if (DEBUG) {
-            Log.d(TAG, "doDestroy mSessionCallbacks: " + mSessionCallbacks);
-        }
+        Log.d(TAG, "doDestroy mSessionCallbacks: " + mSessionCallbacks);
         super.onDestroy();
-
-        final ArrayList<CallbackWrapper> callbacks = mSessionCallbacks.remove(sessionId);
-        if (callbacks != null) callbacks.forEach(CallbackWrapper::destroy);
+        mSessionCallbacks.remove(sessionId);
         onDestroySmartspaceSession(sessionId);
     }
 
@@ -288,12 +285,10 @@ public abstract class SmartspaceService extends Service {
                 @Nullable Consumer<CallbackWrapper> onBinderDied) {
             mCallback = callback;
             mOnBinderDied = onBinderDied;
-            if (mOnBinderDied != null) {
-                try {
-                    mCallback.asBinder().linkToDeath(this, 0);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to link to death: " + e);
-                }
+            try {
+                mCallback.asBinder().linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to link to death: " + e);
             }
         }
 
@@ -320,15 +315,9 @@ public abstract class SmartspaceService extends Service {
             }
         }
 
-        public void destroy() {
-            if (mCallback != null && mOnBinderDied != null) {
-                mCallback.asBinder().unlinkToDeath(this, 0);
-            }
-        }
-
         @Override
         public void binderDied() {
-            destroy();
+            mCallback.asBinder().unlinkToDeath(this, 0);
             mCallback = null;
             if (mOnBinderDied != null) {
                 mOnBinderDied.accept(this);

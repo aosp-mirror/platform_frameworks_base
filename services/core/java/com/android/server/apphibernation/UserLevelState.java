@@ -28,8 +28,6 @@ final class UserLevelState {
 
     public String packageName;
     public boolean hibernated;
-    // Saved bytes from user level hibernation.
-    public long savedByte;
     @CurrentTimeMillisLong
     public long lastUnhibernatedMs;
 
@@ -38,7 +36,6 @@ final class UserLevelState {
     UserLevelState(UserLevelState state) {
         packageName = state.packageName;
         hibernated = state.hibernated;
-        savedByte = state.savedByte;
         lastUnhibernatedMs = state.lastUnhibernatedMs;
     }
 
@@ -47,7 +44,6 @@ final class UserLevelState {
         return "UserLevelState{"
                 + "packageName='" + packageName + '\''
                 + ", hibernated=" + hibernated + '\''
-                + ", savedByte=" + savedByte + '\''
                 + ", lastUnhibernated=" + DATE_FORMAT.format(lastUnhibernatedMs)
                 + '}';
     }

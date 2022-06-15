@@ -61,7 +61,7 @@ import java.util.List;
  * </p>
  * <p class="note"><strong>Note:</strong>
  * If you are considering using array adapter with a ListView, consider using
- * {@link androidx.recyclerview.widget.RecyclerView} instead.
+ * {@link android.support.v7.widget.RecyclerView} instead.
  * RecyclerView offers similar features with better performance and more flexibility than
  * ListView provides.
  * See the

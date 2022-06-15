@@ -38,7 +38,6 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.security.identity.IdentityCredential;
-import android.security.identity.PresentationSession;
 import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
 import android.util.Log;
@@ -464,16 +463,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     }
 
     private class OnAuthenticationCancelListener implements CancellationSignal.OnCancelListener {
-        private final long mAuthRequestId;
-
-        OnAuthenticationCancelListener(long id) {
-            mAuthRequestId = id;
-        }
-
         @Override
         public void onCancel() {
-            Log.d(TAG, "Cancel BP authentication requested for: " + mAuthRequestId);
-            cancelAuthentication(mAuthRequestId);
+            cancelAuthentication();
         }
     }
 
@@ -679,8 +671,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * A wrapper class for the cryptographic operations supported by BiometricPrompt.
      *
-     * <p>Currently the framework supports {@link Signature}, {@link Cipher}, {@link Mac},
-     * {@link IdentityCredential}, and {@link PresentationSession}.
+     * <p>Currently the framework supports {@link Signature}, {@link Cipher}, {@link Mac}, and
+     * {@link IdentityCredential}.
      *
      * <p>Cryptographic operations in Android can be split into two categories: auth-per-use and
      * time-based. This is specified during key creation via the timeout parameter of the
@@ -710,19 +702,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             super(mac);
         }
 
-        /**
-         * Create from a {@link IdentityCredential} object.
-         *
-         * @param credential a {@link IdentityCredential} object.
-         * @deprecated Use {@link PresentationSession} instead of {@link IdentityCredential}.
-         */
-        @Deprecated
         public CryptoObject(@NonNull IdentityCredential credential) {
             super(credential);
-        }
-
-        public CryptoObject(@NonNull PresentationSession session) {
-            super(session);
         }
 
         /**
@@ -752,19 +733,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         /**
          * Get {@link IdentityCredential} object.
          * @return {@link IdentityCredential} object or null if this doesn't contain one.
-         * @deprecated Use {@link PresentationSession} instead of {@link IdentityCredential}.
          */
-        @Deprecated
         public @Nullable IdentityCredential getIdentityCredential() {
             return super.getIdentityCredential();
-        }
-
-        /**
-         * Get {@link PresentationSession} object.
-         * @return {@link PresentationSession} object or null if this doesn't contain one.
-         */
-        public @Nullable PresentationSession getPresentationSession() {
-            return super.getPresentationSession();
         }
     }
 
@@ -916,12 +887,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @param callback An object to receive authentication events
      * @param operationId The keystore operation associated with authentication
      *
-     * @return A requestId that can be used to cancel this operation.
-     *
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC)
-    public long authenticateForOperation(
+    public void authenticateForOperation(
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull AuthenticationCallback callback,
@@ -936,7 +905,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             throw new IllegalArgumentException("Must supply a callback");
         }
 
-        return authenticateInternal(operationId, cancel, executor, callback, mContext.getUserId());
+        authenticateInternal(operationId, cancel, executor, callback, mContext.getUserId());
     }
 
     /**
@@ -1067,10 +1036,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         authenticateInternal(null /* crypto */, cancel, executor, callback, mContext.getUserId());
     }
 
-    private void cancelAuthentication(long requestId) {
+    private void cancelAuthentication() {
         if (mService != null) {
             try {
-                mService.cancelAuthentication(mToken, mContext.getPackageName(), requestId);
+                mService.cancelAuthentication(mToken, mContext.getPackageName());
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to cancel authentication", e);
             }
@@ -1089,7 +1058,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         authenticateInternal(operationId, cancel, executor, callback, userId);
     }
 
-    private long authenticateInternal(
+    private void authenticateInternal(
             long operationId,
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
@@ -1105,7 +1074,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         try {
             if (cancel.isCanceled()) {
                 Log.w(TAG, "Authentication already canceled");
-                return -1;
+                return;
+            } else {
+                cancel.setOnCancelListener(new OnAuthenticationCancelListener());
             }
 
             mExecutor = executor;
@@ -1128,16 +1099,13 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
                 promptInfo = mPromptInfo;
             }
 
-            final long authId = mService.authenticate(mToken, operationId, userId,
+            mService.authenticate(mToken, operationId, userId,
                     mBiometricServiceReceiver, mContext.getPackageName(), promptInfo);
-            cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
-            return authId;
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> callback.onAuthenticationError(
                     BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                     mContext.getString(R.string.biometric_error_hw_unavailable)));
-            return -1;
         }
     }
 

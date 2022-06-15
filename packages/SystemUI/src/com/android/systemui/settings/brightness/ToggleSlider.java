@@ -35,8 +35,4 @@ public interface ToggleSlider {
     int getMax();
     void setValue(int value);
     int getValue();
-
-    void showView();
-    void hideView();
-    boolean isVisible();
 }

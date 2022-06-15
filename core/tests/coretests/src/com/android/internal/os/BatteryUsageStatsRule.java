@@ -40,7 +40,6 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.mockito.stubbing.Answer;
 
-import java.io.File;
 import java.util.Arrays;
 
 public class BatteryUsageStatsRule implements TestRule {
@@ -51,25 +50,21 @@ public class BatteryUsageStatsRule implements TestRule {
                     .build();
 
     private final PowerProfile mPowerProfile;
-    private final MockClock mMockClock = new MockClock();
+    private final MockClocks mMockClocks = new MockClocks();
     private final MockBatteryStatsImpl mBatteryStats;
 
     private BatteryUsageStats mBatteryUsageStats;
     private boolean mScreenOn;
 
     public BatteryUsageStatsRule() {
-        this(0, null);
+        this(0);
     }
 
     public BatteryUsageStatsRule(long currentTime) {
-        this(currentTime, null);
-    }
-
-    public BatteryUsageStatsRule(long currentTime, File historyDir) {
         Context context = InstrumentationRegistry.getContext();
         mPowerProfile = spy(new PowerProfile(context, true /* forTest */));
-        mMockClock.currentTime = currentTime;
-        mBatteryStats = new MockBatteryStatsImpl(mMockClock, historyDir);
+        mMockClocks.currentTime = currentTime;
+        mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.onSystemReady();
     }
@@ -112,20 +107,6 @@ public class BatteryUsageStatsRule implements TestRule {
 
     public BatteryUsageStatsRule setAveragePowerForCpuCore(int cluster, int step, double value) {
         when(mPowerProfile.getAveragePowerForCpuCore(cluster, step)).thenReturn(value);
-        return this;
-    }
-
-    public BatteryUsageStatsRule setAveragePowerForOrdinal(String group, int ordinal,
-            double value) {
-        when(mPowerProfile.getAveragePowerForOrdinal(group, ordinal)).thenReturn(value);
-        when(mPowerProfile.getAveragePowerForOrdinal(eq(group), eq(ordinal),
-                anyDouble())).thenReturn(value);
-        return this;
-    }
-
-    public BatteryUsageStatsRule setNumDisplays(int value) {
-        when(mPowerProfile.getNumDisplays()).thenReturn(value);
-        mBatteryStats.setDisplayCountLocked(value);
         return this;
     }
 
@@ -185,12 +166,12 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     public void setTime(long realtimeMs, long uptimeMs) {
-        mMockClock.realtime = realtimeMs;
-        mMockClock.uptime = uptimeMs;
+        mMockClocks.realtime = realtimeMs;
+        mMockClocks.uptime = uptimeMs;
     }
 
     public void setCurrentTime(long currentTimeMs) {
-        mMockClock.currentTime = currentTimeMs;
+        mMockClocks.currentTime = currentTimeMs;
     }
 
     BatteryUsageStats apply(PowerCalculator... calculators) {
@@ -202,18 +183,16 @@ public class BatteryUsageStatsRule implements TestRule {
         final String[] customPowerComponentNames = mBatteryStats.getCustomEnergyConsumerNames();
         final boolean includePowerModels = (query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_MODELS) != 0;
-        final boolean includeProcessStateData = (query.getFlags()
-                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_PROCESS_STATE_DATA) != 0;
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(
-                customPowerComponentNames, includePowerModels, includeProcessStateData);
+                customPowerComponentNames, includePowerModels);
         SparseArray<? extends BatteryStats.Uid> uidStats = mBatteryStats.getUidStats();
         for (int i = 0; i < uidStats.size(); i++) {
             builder.getOrCreateUidBatteryConsumerBuilder(uidStats.valueAt(i));
         }
 
         for (PowerCalculator calculator : calculators) {
-            calculator.calculate(builder, mBatteryStats, mMockClock.realtime * 1000,
-                    mMockClock.uptime * 1000, query);
+            calculator.calculate(builder, mBatteryStats, mMockClocks.realtime, mMockClocks.uptime,
+                    query);
         }
 
         mBatteryUsageStats = builder.build();

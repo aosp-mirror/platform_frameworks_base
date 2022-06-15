@@ -114,7 +114,7 @@ public final class VcnNetworkPolicyResult implements Parcelable {
     public static final @NonNull Creator<VcnNetworkPolicyResult> CREATOR =
             new Creator<VcnNetworkPolicyResult>() {
                 public VcnNetworkPolicyResult createFromParcel(Parcel in) {
-                    return new VcnNetworkPolicyResult(in.readBoolean(), in.readParcelable(null, android.net.NetworkCapabilities.class));
+                    return new VcnNetworkPolicyResult(in.readBoolean(), in.readParcelable(null));
                 }
 
                 public VcnNetworkPolicyResult[] newArray(int size) {

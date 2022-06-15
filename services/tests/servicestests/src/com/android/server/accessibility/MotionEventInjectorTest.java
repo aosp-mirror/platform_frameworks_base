@@ -122,7 +122,6 @@ public class MotionEventInjectorTest {
 
     MotionEventInjector mMotionEventInjector;
     IAccessibilityServiceClient mServiceInterface;
-    AccessibilityTraceManager mTrace;
     List<GestureStep> mLineList = new ArrayList<>();
     List<GestureStep> mClickList = new ArrayList<>();
     List<GestureStep> mContinuedLineList1 = new ArrayList<>();
@@ -149,8 +148,7 @@ public class MotionEventInjectorTest {
                 return mMotionEventInjector.handleMessage(msg);
             }
         });
-        mTrace = mock(AccessibilityTraceManager.class);
-        mMotionEventInjector = new MotionEventInjector(mMessageCapturingHandler, mTrace);
+        mMotionEventInjector = new MotionEventInjector(mMessageCapturingHandler);
         mServiceInterface = mock(IAccessibilityServiceClient.class);
 
         mLineList = createSimpleGestureFromPoints(0, 0, false, LINE_DURATION, LINE_START, LINE_END);

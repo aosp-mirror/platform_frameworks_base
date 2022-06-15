@@ -18,6 +18,7 @@ package com.android.settingslib.net;
 
 import android.app.usage.NetworkStats;
 import android.content.Context;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class NetworkCycleChartDataLoader
                     .setTotalUsage(total);
                 mData.add(builder.build());
             }
-        } catch (RuntimeException e) {
+        } catch (RemoteException e) {
             Log.e(TAG, "Exception querying network detail.", e);
         }
     }
@@ -84,7 +85,7 @@ public class NetworkCycleChartDataLoader
                 if (bucket != null) {
                     usage = bucket.getRxBytes() + bucket.getTxBytes();
                 }
-            } catch (RuntimeException e) {
+            } catch (RemoteException e) {
                 Log.e(TAG, "Exception querying network detail.", e);
             }
             data.add(new NetworkCycleData.Builder()

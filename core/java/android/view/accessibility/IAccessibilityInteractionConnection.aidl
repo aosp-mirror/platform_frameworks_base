@@ -34,24 +34,23 @@ oneway interface IAccessibilityInteractionConnection {
     void findAccessibilityNodeInfoByAccessibilityId(long accessibilityNodeId, in Region bounds,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
         int interrogatingPid, long interrogatingTid, in MagnificationSpec spec,
-        in float[] matrixValues, in Bundle arguments);
+        in Bundle arguments);
 
     void findAccessibilityNodeInfosByViewId(long accessibilityNodeId, String viewId,
         in Region bounds, int interactionId, IAccessibilityInteractionConnectionCallback callback,
-        int flags, int interrogatingPid, long interrogatingTid, in MagnificationSpec spec,
-         in float[] matrix);
+        int flags, int interrogatingPid, long interrogatingTid, in MagnificationSpec spec);
 
     void findAccessibilityNodeInfosByText(long accessibilityNodeId, String text, in Region bounds,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
-        int interrogatingPid, long interrogatingTid, in MagnificationSpec spec, in float[] matrixValues);
+        int interrogatingPid, long interrogatingTid, in MagnificationSpec spec);
 
     void findFocus(long accessibilityNodeId, int focusType, in Region bounds, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid, in MagnificationSpec spec, in float[] matrixValues);
+        long interrogatingTid, in MagnificationSpec spec);
 
     void focusSearch(long accessibilityNodeId, int direction, in Region bounds, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, int interrogatingPid,
-        long interrogatingTid, in MagnificationSpec spec, in float[] matrixValues);
+        long interrogatingTid, in MagnificationSpec spec);
 
     void performAccessibilityAction(long accessibilityNodeId, int action, in Bundle arguments,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,

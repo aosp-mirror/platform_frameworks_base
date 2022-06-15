@@ -22,10 +22,7 @@
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
     android:layout_gravity="center_vertical|end"
-    android:focusable="true"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    >
+    android:focusable="true" >
 
         <LinearLayout
             android:id="@+id/icons_container"

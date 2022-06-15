@@ -55,7 +55,6 @@ public class KeyguardPasswordViewController
     private final KeyguardSecurityCallback mKeyguardSecurityCallback;
     private final InputMethodManager mInputMethodManager;
     private final DelayableExecutor mMainExecutor;
-    private final KeyguardViewController mKeyguardViewController;
     private final boolean mShowImeAtScreenOn;
     private EditText mPasswordEntry;
     private ImageView mSwitchImeButton;
@@ -117,15 +116,13 @@ public class KeyguardPasswordViewController
             EmergencyButtonController emergencyButtonController,
             @Main DelayableExecutor mainExecutor,
             @Main Resources resources,
-            FalsingCollector falsingCollector,
-            KeyguardViewController keyguardViewController) {
+            FalsingCollector falsingCollector) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
                 emergencyButtonController);
         mKeyguardSecurityCallback = keyguardSecurityCallback;
         mInputMethodManager = inputMethodManager;
         mMainExecutor = mainExecutor;
-        mKeyguardViewController = keyguardViewController;
         mShowImeAtScreenOn = resources.getBoolean(R.bool.kg_show_ime_at_screen_on);
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
         mSwitchImeButton = mView.findViewById(R.id.switch_ime_button);
@@ -208,14 +205,11 @@ public class KeyguardPasswordViewController
     }
 
     private void showInput() {
-        if (!mKeyguardViewController.isBouncerShowing()) {
-            return;
-        }
-
         mView.post(() -> {
             if (mView.isShown()) {
                 mPasswordEntry.requestFocus();
-                mPasswordEntry.getWindowInsetsController().show(WindowInsets.Type.ime());
+                mInputMethodManager.showSoftInput(
+                        mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
             }
         });
     }

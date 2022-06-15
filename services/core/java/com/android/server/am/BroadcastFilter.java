@@ -34,12 +34,10 @@ final class BroadcastFilter extends IntentFilter {
     final int owningUserId;
     final boolean instantApp;
     final boolean visibleToInstantApp;
-    final boolean exported;
 
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
             String _packageName, String _featureId, String _receiverId, String _requiredPermission,
-            int _owningUid, int _userId, boolean _instantApp, boolean _visibleToInstantApp,
-            boolean _exported) {
+            int _owningUid, int _userId, boolean _instantApp, boolean _visibleToInstantApp) {
         super(_filter);
         receiverList = _receiverList;
         packageName = _packageName;
@@ -50,7 +48,6 @@ final class BroadcastFilter extends IntentFilter {
         owningUserId = _userId;
         instantApp = _instantApp;
         visibleToInstantApp = _visibleToInstantApp;
-        exported = _exported;
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {

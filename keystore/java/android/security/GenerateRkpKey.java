@@ -16,8 +16,6 @@
 
 package android.security;
 
-import android.annotation.CheckResult;
-import android.annotation.IntDef;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,8 +24,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -61,21 +57,6 @@ public class GenerateRkpKey {
     private Context mContext;
     private CountDownLatch mCountDownLatch;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
-            IGenerateRkpKeyService.Status.OK,
-            IGenerateRkpKeyService.Status.NO_NETWORK_CONNECTIVITY,
-            IGenerateRkpKeyService.Status.NETWORK_COMMUNICATION_ERROR,
-            IGenerateRkpKeyService.Status.DEVICE_NOT_REGISTERED,
-            IGenerateRkpKeyService.Status.HTTP_CLIENT_ERROR,
-            IGenerateRkpKeyService.Status.HTTP_SERVER_ERROR,
-            IGenerateRkpKeyService.Status.HTTP_UNKNOWN_ERROR,
-            IGenerateRkpKeyService.Status.INTERNAL_ERROR,
-    })
-    public @interface Status {
-    }
-
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -100,14 +81,12 @@ public class GenerateRkpKey {
         mContext = context;
     }
 
-    @Status
-    private int bindAndSendCommand(int command, int securityLevel) throws RemoteException {
+    private void bindAndSendCommand(int command, int securityLevel) throws RemoteException {
         Intent intent = new Intent(IGenerateRkpKeyService.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
-        int returnCode = IGenerateRkpKeyService.Status.OK;
         if (comp == null) {
             // On a system that does not use RKP, the RemoteProvisioner app won't be installed.
-            return returnCode;
+            return;
         }
         intent.setComponent(comp);
         mCountDownLatch = new CountDownLatch(1);
@@ -123,7 +102,7 @@ public class GenerateRkpKey {
         if (mBinder != null) {
             switch (command) {
                 case NOTIFY_EMPTY:
-                    returnCode = mBinder.generateKey(securityLevel);
+                    mBinder.generateKey(securityLevel);
                     break;
                 case NOTIFY_KEY_GENERATED:
                     mBinder.notifyKeyGenerated(securityLevel);
@@ -133,21 +112,16 @@ public class GenerateRkpKey {
             }
         } else {
             Log.e(TAG, "Binder object is null; failed to bind to GenerateRkpKeyService.");
-            returnCode = IGenerateRkpKeyService.Status.INTERNAL_ERROR;
         }
         mContext.unbindService(mConnection);
-        return returnCode;
     }
 
     /**
      * Fulfills the use case of (2) described in the class documentation. Blocks until the
      * RemoteProvisioner application can get new attestation keys signed by the server.
-     * @return the status of the key generation
      */
-    @CheckResult
-    @Status
-    public int notifyEmpty(int securityLevel) throws RemoteException {
-        return bindAndSendCommand(NOTIFY_EMPTY, securityLevel);
+    public void notifyEmpty(int securityLevel) throws RemoteException {
+        bindAndSendCommand(NOTIFY_EMPTY, securityLevel);
     }
 
     /**

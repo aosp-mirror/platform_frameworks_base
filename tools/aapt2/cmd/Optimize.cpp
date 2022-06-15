@@ -354,7 +354,7 @@ bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
     return false;
   }
 
-  auto app_info = ExtractAppInfoFromBinaryManifest(*manifest, context->GetDiagnostics());
+  Maybe<AppInfo> app_info = ExtractAppInfoFromBinaryManifest(*manifest, context->GetDiagnostics());
   if (!app_info) {
     context->GetDiagnostics()->Error(DiagMessage()
                                      << "failed to extract data from AndroidManifest.xml");
@@ -362,7 +362,7 @@ bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
   }
 
   out_options->app_info = std::move(app_info.value());
-  context->SetMinSdkVersion(out_options->app_info.min_sdk_version.value_or(0));
+  context->SetMinSdkVersion(out_options->app_info.min_sdk_version.value_or_default(0));
   return true;
 }
 
@@ -380,7 +380,7 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
 
   if (config_path_) {
     std::string& path = config_path_.value();
-    std::optional<ConfigurationParser> for_path = ConfigurationParser::ForPath(path);
+    Maybe<ConfigurationParser> for_path = ConfigurationParser::ForPath(path);
     if (for_path) {
       options_.apk_artifacts = for_path.value().WithDiagnostics(diag).Parse(apk_path);
       if (!options_.apk_artifacts) {
@@ -427,7 +427,7 @@ int OptimizeCommand::Action(const std::vector<std::string>& args) {
   if (target_densities_) {
     // Parse the target screen densities.
     for (const StringPiece& config_str : util::Tokenize(target_densities_.value(), ',')) {
-      std::optional<uint16_t> target_density = ParseTargetDensityParameter(config_str, diag);
+      Maybe<uint16_t> target_density = ParseTargetDensityParameter(config_str, diag);
       if (!target_density) {
         return 1;
       }

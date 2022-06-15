@@ -65,12 +65,10 @@ public class SyncRtSurfaceTransactionApplier {
         applyParams(t, params);
 
         mTargetViewRootImpl.registerRtFrameCallback(frame -> {
-            if (mTargetSc != null && mTargetSc.isValid()) {
-                applyTransaction(t, frame);
+            if (mTargetSc == null || !mTargetSc.isValid()) {
+                return;
             }
-            // The transaction was either dropped, successfully applied, or merged with a future
-            // transaction, so we can safely release its resources.
-            t.close();
+            applyTransaction(t, frame);
         });
 
         // Make sure a frame gets scheduled.

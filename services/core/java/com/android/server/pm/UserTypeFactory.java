@@ -121,8 +121,7 @@ public final class UserTypeFactory {
                 .setMaxAllowedPerParent(1)
                 .setLabel(0)
                 .setDefaultRestrictions(null)
-                .setIsMediaSharedWithParent(true)
-                .setIsCredentialSharableWithParent(true);
+                .setIsMediaSharedWithParent(true);
     }
 
     /**
@@ -153,8 +152,7 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_3_dark)
                 .setDefaultRestrictions(getDefaultManagedProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultManagedProfileSecureSettings())
-                .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter())
-                .setIsCredentialSharableWithParent(true);
+                .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter());
     }
 
     /**
@@ -332,13 +330,13 @@ public final class UserTypeFactory {
                 }
 
                 String typeName = parser.getAttributeValue(null, "name");
-                if (typeName == null || typeName.equals("")) {
+                if (typeName == null) {
                     Slog.w(LOG_TAG, "Skipping user type with no name in "
                             + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
-                typeName = typeName.intern();
+                typeName.intern();
 
                 UserTypeDetails.Builder builder;
                 if (typeName.startsWith("android.")) {
@@ -377,8 +375,6 @@ public final class UserTypeFactory {
                     setResAttribute(parser, "badge-plain", builder::setBadgePlain);
                     setResAttribute(parser, "badge-no-background", builder::setBadgeNoBackground);
                 }
-
-                setIntAttribute(parser, "enabled", builder::setEnabled);
 
                 // Process child elements.
                 final int depth = parser.getDepth();

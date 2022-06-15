@@ -365,7 +365,6 @@ public class MessagingLinearLayout extends ViewGroup {
         default int getExtraSpacing() {
             return 0;
         }
-        void recycle();
     }
 
     public static class LayoutParams extends MarginLayoutParams {

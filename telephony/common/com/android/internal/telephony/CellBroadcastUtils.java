@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -62,18 +61,5 @@ public class CellBroadcastUtils {
         }
 
         return packageName;
-    }
-
-    /**
-     * Utility method to get cellbroadcast alert dialog component name
-     */
-    public static ComponentName getDefaultCellBroadcastAlertDialogComponent(Context context) {
-        String cellBroadcastReceiverPackageName =
-                getDefaultCellBroadcastReceiverPackageName(context);
-        if (TextUtils.isEmpty(cellBroadcastReceiverPackageName)) {
-            return null;
-        }
-        return ComponentName.createRelative(cellBroadcastReceiverPackageName,
-                "com.android.cellbroadcastreceiver.CellBroadcastAlertDialog");
     }
 }

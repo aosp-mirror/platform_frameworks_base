@@ -18,31 +18,28 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.face.ISession;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
-import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
-class FaceGetAuthenticatorIdClient extends HalClientMonitor<AidlSession> {
+class FaceGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
 
     private static final String TAG = "FaceGetAuthenticatorIdClient";
 
     private final Map<Integer, Long> mAuthenticatorIds;
 
-    FaceGetAuthenticatorIdClient(@NonNull Context context,
-            @NonNull Supplier<AidlSession> lazyDaemon,
+    FaceGetAuthenticatorIdClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
             int userId, @NonNull String opPackageName, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, opPackageName,
-                0 /* cookie */, sensorId, logger, biometricContext);
+                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_FACE,
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mAuthenticatorIds = authenticatorIds;
     }
 
@@ -51,7 +48,7 @@ class FaceGetAuthenticatorIdClient extends HalClientMonitor<AidlSession> {
         // Nothing to do here
     }
 
-    public void start(@NonNull ClientMonitorCallback callback) {
+    public void start(@NonNull Callback callback) {
         super.start(callback);
         startHalOperation();
     }
@@ -59,7 +56,7 @@ class FaceGetAuthenticatorIdClient extends HalClientMonitor<AidlSession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getSession().getAuthenticatorId();
+            getFreshDaemon().getAuthenticatorId();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }

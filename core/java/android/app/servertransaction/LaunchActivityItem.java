@@ -38,6 +38,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.Trace;
+import android.view.DisplayAdjustments.FixedRotationAdjustments;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -72,16 +73,21 @@ public class LaunchActivityItem extends ClientTransactionItem {
     private IBinder mAssistToken;
     private IBinder mShareableActivityToken;
     private boolean mLaunchedFromBubble;
-    private IBinder mTaskFragmentToken;
     /**
      * It is only non-null if the process is the first time to launch activity. It is only an
      * optimization for quick look up of the interface so the field is ignored for comparison.
      */
     private IActivityClientController mActivityClientController;
+    private FixedRotationAdjustments mFixedRotationAdjustments;
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
-        client.countLaunchingActivities(1);
+        ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
+                mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
+                mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
+                client, mAssistToken, mFixedRotationAdjustments, mShareableActivityToken,
+                mLaunchedFromBubble);
+        client.addLaunchingActivity(token, r);
         client.updateProcessState(mProcState, false);
         client.updatePendingConfiguration(mCurConfig);
         if (mActivityClientController != null) {
@@ -93,11 +99,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-        ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
-                mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
-                mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
-                client, mAssistToken, mShareableActivityToken, mLaunchedFromBubble,
-                mTaskFragmentToken);
+        ActivityClientRecord r = client.getLaunchingActivity(token);
         client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -105,7 +107,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void postExecute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
-        client.countLaunchingActivities(-1);
+        client.removeLaunchingActivity(token);
     }
 
 
@@ -120,8 +122,9 @@ public class LaunchActivityItem extends ClientTransactionItem {
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
             List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
             boolean isForward, ProfilerInfo profilerInfo, IBinder assistToken,
-            IActivityClientController activityClientController, IBinder shareableActivityToken,
-            boolean launchedFromBubble, IBinder taskFragmentToken) {
+            IActivityClientController activityClientController,
+            FixedRotationAdjustments fixedRotationAdjustments, IBinder shareableActivityToken,
+            boolean launchedFromBubble) {
         LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
         if (instance == null) {
             instance = new LaunchActivityItem();
@@ -129,8 +132,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
         setValues(instance, intent, ident, info, curConfig, overrideConfig, compatInfo, referrer,
                 voiceInteractor, procState, state, persistentState, pendingResults,
                 pendingNewIntents, activityOptions, isForward, profilerInfo, assistToken,
-                activityClientController, shareableActivityToken,
-                launchedFromBubble, taskFragmentToken);
+                activityClientController, fixedRotationAdjustments, shareableActivityToken,
+                launchedFromBubble);
 
         return instance;
     }
@@ -138,7 +141,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void recycle() {
         setValues(this, null, 0, null, null, null, null, null, null, 0, null, null, null, null,
-                null, false, null, null, null, null, false, null);
+                null, false, null, null, null, null, null, false);
         ObjectPool.recycle(this);
     }
 
@@ -166,9 +169,9 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeTypedObject(mProfilerInfo, flags);
         dest.writeStrongBinder(mAssistToken);
         dest.writeStrongInterface(mActivityClientController);
+        dest.writeTypedObject(mFixedRotationAdjustments, flags);
         dest.writeStrongBinder(mShareableActivityToken);
         dest.writeBoolean(mLaunchedFromBubble);
-        dest.writeStrongBinder(mTaskFragmentToken);
     }
 
     /** Read from Parcel. */
@@ -186,9 +189,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.readTypedObject(ProfilerInfo.CREATOR),
                 in.readStrongBinder(),
                 IActivityClientController.Stub.asInterface(in.readStrongBinder()),
-                in.readStrongBinder(),
-                in.readBoolean(),
-                in.readStrongBinder());
+                in.readTypedObject(FixedRotationAdjustments.CREATOR), in.readStrongBinder(),
+                in.readBoolean());
     }
 
     public static final @NonNull Creator<LaunchActivityItem> CREATOR =
@@ -226,8 +228,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 && mIsForward == other.mIsForward
                 && Objects.equals(mProfilerInfo, other.mProfilerInfo)
                 && Objects.equals(mAssistToken, other.mAssistToken)
-                && Objects.equals(mShareableActivityToken, other.mShareableActivityToken)
-                && Objects.equals(mTaskFragmentToken, other.mTaskFragmentToken);
+                && Objects.equals(mFixedRotationAdjustments, other.mFixedRotationAdjustments)
+                && Objects.equals(mShareableActivityToken, other.mShareableActivityToken);
     }
 
     @Override
@@ -248,8 +250,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
         result = 31 * result + (mIsForward ? 1 : 0);
         result = 31 * result + Objects.hashCode(mProfilerInfo);
         result = 31 * result + Objects.hashCode(mAssistToken);
+        result = 31 * result + Objects.hashCode(mFixedRotationAdjustments);
         result = 31 * result + Objects.hashCode(mShareableActivityToken);
-        result = 31 * result + Objects.hashCode(mTaskFragmentToken);
         return result;
     }
 
@@ -286,6 +288,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 + ",persistentState=" + mPersistentState + ",pendingResults=" + mPendingResults
                 + ",pendingNewIntents=" + mPendingNewIntents + ",options=" + mActivityOptions
                 + ",profilerInfo=" + mProfilerInfo + ",assistToken=" + mAssistToken
+                + ",rotationAdj=" + mFixedRotationAdjustments
                 + ",shareableActivityToken=" + mShareableActivityToken + "}";
     }
 
@@ -297,7 +300,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
             ActivityOptions activityOptions, boolean isForward, ProfilerInfo profilerInfo,
             IBinder assistToken, IActivityClientController activityClientController,
-            IBinder shareableActivityToken, boolean launchedFromBubble, IBinder taskFragmentToken) {
+            FixedRotationAdjustments fixedRotationAdjustments, IBinder shareableActivityToken,
+            boolean launchedFromBubble) {
         instance.mIntent = intent;
         instance.mIdent = ident;
         instance.mInfo = info;
@@ -316,8 +320,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
         instance.mProfilerInfo = profilerInfo;
         instance.mAssistToken = assistToken;
         instance.mActivityClientController = activityClientController;
+        instance.mFixedRotationAdjustments = fixedRotationAdjustments;
         instance.mShareableActivityToken = shareableActivityToken;
         instance.mLaunchedFromBubble = launchedFromBubble;
-        instance.mTaskFragmentToken = taskFragmentToken;
     }
 }

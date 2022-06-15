@@ -40,7 +40,8 @@ using ::android::base::StringPrintf;
 namespace aapt {
 namespace ResourceUtils {
 
-std::optional<ResourceName> ToResourceName(const android::ResTable::resource_name& name_in) {
+Maybe<ResourceName> ToResourceName(
+    const android::ResTable::resource_name& name_in) {
   // TODO: Remove this when ResTable and AssetManager(1) are removed from AAPT2
   ResourceName name_out;
   if (!name_in.package) {
@@ -50,11 +51,12 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
   name_out.package =
       util::Utf16ToUtf8(StringPiece16(name_in.package, name_in.packageLen));
 
-  std::optional<ResourceNamedTypeRef> type;
+  const ResourceType* type;
   if (name_in.type) {
-    type = ParseResourceNamedType(util::Utf16ToUtf8(StringPiece16(name_in.type, name_in.typeLen)));
+    type = ParseResourceType(
+        util::Utf16ToUtf8(StringPiece16(name_in.type, name_in.typeLen)));
   } else if (name_in.type8) {
-    type = ParseResourceNamedType(StringPiece(name_in.type8, name_in.typeLen));
+    type = ParseResourceType(StringPiece(name_in.type8, name_in.typeLen));
   } else {
     return {};
   }
@@ -63,7 +65,7 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
     return {};
   }
 
-  name_out.type = type->ToResourceNamedType();
+  name_out.type = *type;
 
   if (name_in.name) {
     name_out.entry =
@@ -76,7 +78,7 @@ std::optional<ResourceName> ToResourceName(const android::ResTable::resource_nam
   return name_out;
 }
 
-std::optional<ResourceName> ToResourceName(const android::AssetManager2::ResourceName& name_in) {
+Maybe<ResourceName> ToResourceName(const android::AssetManager2::ResourceName& name_in) {
   ResourceName name_out;
   if (!name_in.package) {
     return {};
@@ -84,12 +86,12 @@ std::optional<ResourceName> ToResourceName(const android::AssetManager2::Resourc
 
   name_out.package = std::string(name_in.package, name_in.package_len);
 
-  std::optional<ResourceNamedTypeRef> type;
+  const ResourceType* type;
   if (name_in.type16) {
-    type =
-        ParseResourceNamedType(util::Utf16ToUtf8(StringPiece16(name_in.type16, name_in.type_len)));
+    type = ParseResourceType(
+        util::Utf16ToUtf8(StringPiece16(name_in.type16, name_in.type_len)));
   } else if (name_in.type) {
-    type = ParseResourceNamedType(StringPiece(name_in.type, name_in.type_len));
+    type = ParseResourceType(StringPiece(name_in.type, name_in.type_len));
   } else {
     return {};
   }
@@ -98,7 +100,7 @@ std::optional<ResourceName> ToResourceName(const android::AssetManager2::Resourc
     return {};
   }
 
-  name_out.type = type->ToResourceNamedType();
+  name_out.type = *type;
 
   if (name_in.entry16) {
     name_out.entry =
@@ -132,7 +134,7 @@ bool ParseResourceName(const StringPiece& str, ResourceNameRef* out_ref,
     return false;
   }
 
-  std::optional<ResourceNamedTypeRef> parsed_type = ParseResourceNamedType(type);
+  const ResourceType* parsed_type = ParseResourceType(type);
   if (!parsed_type) {
     return false;
   }
@@ -180,7 +182,7 @@ bool ParseReference(const StringPiece& str, ResourceNameRef* out_ref,
       return false;
     }
 
-    if (create && name.type.type != ResourceType::kId) {
+    if (create && name.type != ResourceType::kId) {
       return false;
     }
 
@@ -229,7 +231,7 @@ bool ParseAttributeReference(const StringPiece& str, ResourceNameRef* out_ref) {
 
     if (out_ref) {
       out_ref->package = package;
-      out_ref->type = ResourceNamedTypeWithDefaultName(ResourceType::kAttr);
+      out_ref->type = ResourceType::kAttr;
       out_ref->entry = entry;
     }
     return true;
@@ -249,7 +251,8 @@ bool IsAttributeReference(const StringPiece& str) {
  * <[*]package>:[style/]<entry>
  * [[*]package:style/]<entry>
  */
-std::optional<Reference> ParseStyleParentReference(const StringPiece& str, std::string* out_error) {
+Maybe<Reference> ParseStyleParentReference(const StringPiece& str,
+                                           std::string* out_error) {
   if (str.empty()) {
     return {};
   }
@@ -271,7 +274,7 @@ std::optional<Reference> ParseStyleParentReference(const StringPiece& str, std::
   }
 
   ResourceNameRef ref;
-  ref.type = ResourceNamedTypeWithDefaultName(ResourceType::kStyle);
+  ref.type = ResourceType::kStyle;
 
   StringPiece type_str;
   android::ExtractResourceName(name, &ref.package, &type_str, &ref.entry);
@@ -298,7 +301,7 @@ std::optional<Reference> ParseStyleParentReference(const StringPiece& str, std::
   return result;
 }
 
-std::optional<Reference> ParseXmlAttributeName(const StringPiece& str) {
+Maybe<Reference> ParseXmlAttributeName(const StringPiece& str) {
   StringPiece trimmed_str = util::TrimWhitespace(str);
   const char* start = trimmed_str.data();
   const char* const end = start + trimmed_str.size();
@@ -322,9 +325,8 @@ std::optional<Reference> ParseXmlAttributeName(const StringPiece& str) {
     p++;
   }
 
-  ref.name = ResourceName(package, ResourceNamedTypeWithDefaultName(ResourceType::kAttr),
-                          name.empty() ? trimmed_str : name);
-  return std::optional<Reference>(std::move(ref));
+  ref.name = ResourceName(package, ResourceType::kAttr, name.empty() ? trimmed_str : name);
+  return Maybe<Reference>(std::move(ref));
 }
 
 std::unique_ptr<Reference> TryParseReference(const StringPiece& str,
@@ -486,18 +488,18 @@ std::unique_ptr<BinaryPrimitive> TryParseColor(const StringPiece& str) {
                : util::make_unique<BinaryPrimitive>(value);
 }
 
-std::optional<bool> ParseBool(const StringPiece& str) {
+Maybe<bool> ParseBool(const StringPiece& str) {
   StringPiece trimmed_str(util::TrimWhitespace(str));
   if (trimmed_str == "true" || trimmed_str == "TRUE" || trimmed_str == "True") {
-    return std::optional<bool>(true);
+    return Maybe<bool>(true);
   } else if (trimmed_str == "false" || trimmed_str == "FALSE" ||
              trimmed_str == "False") {
-    return std::optional<bool>(false);
+    return Maybe<bool>(false);
   }
   return {};
 }
 
-std::optional<uint32_t> ParseInt(const StringPiece& str) {
+Maybe<uint32_t> ParseInt(const StringPiece& str) {
   std::u16string str16 = util::Utf8ToUtf16(str);
   android::Res_value value;
   if (android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
@@ -506,7 +508,7 @@ std::optional<uint32_t> ParseInt(const StringPiece& str) {
   return {};
 }
 
-std::optional<ResourceId> ParseResourceId(const StringPiece& str) {
+Maybe<ResourceId> ParseResourceId(const StringPiece& str) {
   StringPiece trimmed_str(util::TrimWhitespace(str));
 
   std::u16string str16 = util::Utf8ToUtf16(trimmed_str);
@@ -522,7 +524,7 @@ std::optional<ResourceId> ParseResourceId(const StringPiece& str) {
   return {};
 }
 
-std::optional<int> ParseSdkVersion(const StringPiece& str) {
+Maybe<int> ParseSdkVersion(const StringPiece& str) {
   StringPiece trimmed_str(util::TrimWhitespace(str));
 
   std::u16string str16 = util::Utf8ToUtf16(trimmed_str);
@@ -532,7 +534,7 @@ std::optional<int> ParseSdkVersion(const StringPiece& str) {
   }
 
   // Try parsing the code name.
-  std::optional<int> entry = GetDevelopmentSdkCodeNameVersion(trimmed_str);
+  Maybe<int> entry = GetDevelopmentSdkCodeNameVersion(trimmed_str);
   if (entry) {
     return entry.value();
   }
@@ -549,7 +551,7 @@ std::optional<int> ParseSdkVersion(const StringPiece& str) {
 }
 
 std::unique_ptr<BinaryPrimitive> TryParseBool(const StringPiece& str) {
-  if (std::optional<bool> maybe_result = ParseBool(str)) {
+  if (Maybe<bool> maybe_result = ParseBool(str)) {
     const uint32_t data = maybe_result.value() ? 0xffffffffu : 0u;
     return util::make_unique<BinaryPrimitive>(android::Res_value::TYPE_INT_BOOLEAN, data);
   }

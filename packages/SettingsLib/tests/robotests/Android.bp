@@ -63,7 +63,6 @@ java_library {
 
     libs: [
         "Robolectric_all-target",
-        "mockito-robolectric-prebuilt",
         "truth-prebuilt",
     ],
 }

@@ -32,6 +32,7 @@ import android.media.MediaRouter2Manager;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
+import com.android.settingslib.bluetooth.BluetoothUtils;
 
 /**
  * PhoneMediaDevice extends MediaDevice to represents Phone device.
@@ -47,12 +48,10 @@ public class PhoneMediaDevice extends MediaDevice {
 
     private String mSummary = "";
 
-    private final DeviceIconUtil mDeviceIconUtil;
-
     PhoneMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
             String packageName) {
         super(context, routerManager, info, packageName);
-        mDeviceIconUtil = new DeviceIconUtil();
+
         initDeviceRecord();
     }
 
@@ -86,7 +85,9 @@ public class PhoneMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        return getIconWithoutBackground();
+        final Drawable drawable = getIconWithoutBackground();
+        setColorFilter(drawable);
+        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
     }
 
     @Override
@@ -96,7 +97,23 @@ public class PhoneMediaDevice extends MediaDevice {
 
     @VisibleForTesting
     int getDrawableResId() {
-        return mDeviceIconUtil.getIconResIdFromMediaRouteType(mRouteInfo.getType());
+        int resId;
+        switch (mRouteInfo.getType()) {
+            case TYPE_USB_DEVICE:
+            case TYPE_USB_HEADSET:
+            case TYPE_USB_ACCESSORY:
+            case TYPE_DOCK:
+            case TYPE_HDMI:
+            case TYPE_WIRED_HEADSET:
+            case TYPE_WIRED_HEADPHONES:
+                resId = R.drawable.ic_headphone;
+                break;
+            case TYPE_BUILTIN_SPEAKER:
+            default:
+                resId = R.drawable.ic_smartphone;
+                break;
+        }
+        return resId;
     }
 
     @Override

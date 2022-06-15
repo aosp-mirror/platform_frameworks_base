@@ -99,13 +99,17 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         mCardCarousel.setExpectedViewWidth(getWidth());
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        updateViewForOrientation(newConfig.orientation);
+    }
+
     private void updateViewForOrientation(@Configuration.Orientation int orientation) {
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             renderViewPortrait();
         } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             renderViewLandscape();
         }
-        mCardCarousel.resetAdapter(); // necessary to update cards width
         ViewGroup.LayoutParams params = mCardCarouselContainer.getLayoutParams();
         if (params instanceof MarginLayoutParams) {
             ((MarginLayoutParams) params).topMargin =
@@ -215,7 +219,6 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
         logoView.setImageDrawable(mContext.getDrawable(R.drawable.ic_qs_plus));
         mEmptyStateView.<TextView>requireViewById(R.id.empty_state_title).setText(label);
         mEmptyStateView.setOnClickListener(clickListener);
-        mAppButton.setOnClickListener(clickListener);
     }
 
     void showErrorMessage(@Nullable CharSequence message) {
@@ -254,11 +257,6 @@ public class WalletView extends FrameLayout implements WalletCardCarousel.OnCard
 
     Button getActionButton() {
         return mActionButton;
-    }
-
-    @VisibleForTesting
-    Button getAppButton() {
-        return mAppButton;
     }
 
     @VisibleForTesting

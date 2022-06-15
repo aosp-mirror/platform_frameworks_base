@@ -31,6 +31,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 
+import com.android.settingslib.R;
+
 /**
  * Converts the user avatar icon to a circularly clipped one.
  * TODO: Move this to an internal framework class and share with the one in Keyguard.
@@ -47,9 +49,9 @@ public class CircleFramedDrawable extends Drawable {
 
     public static CircleFramedDrawable getInstance(Context context, Bitmap icon) {
         Resources res = context.getResources();
-        int iconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.user_icon_size);
+        float iconSize = res.getDimension(R.dimen.circle_avatar_size);
 
-        CircleFramedDrawable instance = new CircleFramedDrawable(icon, iconSize);
+        CircleFramedDrawable instance = new CircleFramedDrawable(icon, (int) iconSize);
         return instance;
     }
 

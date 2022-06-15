@@ -244,10 +244,6 @@ class DisplayWindowSettings {
     }
 
     void applySettingsToDisplayLocked(DisplayContent dc) {
-        applySettingsToDisplayLocked(dc, /* includeRotationSettings */ true);
-    }
-
-    void applySettingsToDisplayLocked(DisplayContent dc, boolean includeRotationSettings) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
 
@@ -269,6 +265,10 @@ class DisplayWindowSettings {
         dc.mIsDensityForced = hasDensityOverride;
         dc.mIsSizeForced = hasSizeOverride;
 
+        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
+                ? settings.mIgnoreOrientationRequest : false;
+        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
+
         final boolean ignoreDisplayCutout = settings.mIgnoreDisplayCutout != null
                 ? settings.mIgnoreDisplayCutout : false;
         dc.mIgnoreDisplayCutout = ignoreDisplayCutout;
@@ -277,8 +277,7 @@ class DisplayWindowSettings {
         final int height = hasSizeOverride ? settings.mForcedHeight : dc.mInitialDisplayHeight;
         final int density = hasDensityOverride ? settings.mForcedDensity
                 : dc.mInitialDisplayDensity;
-        dc.updateBaseDisplayMetrics(width, height, density, dc.mBaseDisplayPhysicalXDpi,
-                dc.mBaseDisplayPhysicalYDpi);
+        dc.updateBaseDisplayMetrics(width, height, density);
 
         final int forcedScalingMode = settings.mForcedScalingMode != null
                 ? settings.mForcedScalingMode : FORCE_SCALING_MODE_AUTO;
@@ -287,19 +286,6 @@ class DisplayWindowSettings {
         boolean dontMoveToTop = settings.mDontMoveToTop != null
                 ? settings.mDontMoveToTop : false;
         dc.mDontMoveToTop = dontMoveToTop;
-
-        if (includeRotationSettings) applyRotationSettingsToDisplayLocked(dc);
-    }
-
-    void applyRotationSettingsToDisplayLocked(DisplayContent dc) {
-        final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
-
-        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
-                ? settings.mIgnoreOrientationRequest : false;
-        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
-
-        dc.getDisplayRotation().resetAllowAllRotations();
     }
 
     /**

@@ -21,13 +21,12 @@ import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
-import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 
 import javax.inject.Inject;
 
@@ -50,8 +49,8 @@ public class RemoteInputUriController {
      * that RemoteInput URI grants are cleaned up when the notification entry is removed from
      * the shade.
      */
-    public void attach(CommonNotifCollection manager) {
-        manager.addCollectionListener(mInlineUriListener);
+    public void attach(NotificationEntryManager manager) {
+        manager.addNotificationEntryListener(mInlineUriListener);
     }
 
     /**
@@ -71,9 +70,10 @@ public class RemoteInputUriController {
      * Ensures that inline URI permissions are cleared when notification entries are removed from
      * the shade.
      */
-    private final NotifCollectionListener mInlineUriListener = new NotifCollectionListener() {
+    private final NotificationEntryListener mInlineUriListener = new NotificationEntryListener() {
         @Override
-        public void onEntryRemoved(@NonNull NotificationEntry entry, int reason) {
+        public void onEntryRemoved(NotificationEntry entry, NotificationVisibility visibility,
+                boolean removedByUser, int reason) {
             try {
                 mStatusBarManagerService.clearInlineReplyUriPermissions(entry.getKey());
             } catch (RemoteException ex) {

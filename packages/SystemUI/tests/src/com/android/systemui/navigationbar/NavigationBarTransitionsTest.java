@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -36,8 +37,8 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.BarTransitions;
-import com.android.systemui.statusbar.phone.LightBarTransitionsController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
@@ -52,16 +53,9 @@ import org.mockito.MockitoAnnotations;
 public class NavigationBarTransitionsTest extends SysuiTestCase {
 
     @Mock
-    LightBarTransitionsController.Factory mLightBarTransitionsFactory;
-    @Mock
-    LightBarTransitionsController mLightBarTransitions;
-    @Mock
     EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     @Mock
     EdgeBackGestureHandler mEdgeBackGestureHandler;
-    @Mock
-    IWindowManager mIWindowManager;
-
     private NavigationBarTransitions mTransitions;
 
     @Before
@@ -70,6 +64,7 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
 
         when(mEdgeBackGestureHandlerFactory.create(any(Context.class)))
                 .thenReturn(mEdgeBackGestureHandler);
+        mDependency.injectMockDependency(IWindowManager.class);
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(OverviewProxyService.class);
         mDependency.injectMockDependency(StatusBarStateController.class);
@@ -81,12 +76,10 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
                 .when(mDependency.injectMockDependency(NavigationModeController.class))
                 .getCurrentUserContext();
 
-        when(mLightBarTransitionsFactory.create(any())).thenReturn(mLightBarTransitions);
         NavigationBarView navBar = spy(new NavigationBarView(mContext, null));
         when(navBar.getCurrentView()).thenReturn(navBar);
         when(navBar.findViewById(anyInt())).thenReturn(navBar);
-        mTransitions = new NavigationBarTransitions(
-                navBar, mIWindowManager, mLightBarTransitionsFactory);
+        mTransitions = new NavigationBarTransitions(navBar, mock(CommandQueue.class));
     }
 
     @Test

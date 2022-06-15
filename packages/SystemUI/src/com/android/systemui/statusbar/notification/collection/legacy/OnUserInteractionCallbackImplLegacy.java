@@ -18,19 +18,17 @@ package com.android.systemui.statusbar.notification.collection.legacy;
 
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import android.annotation.Nullable;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
-import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -39,7 +37,6 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
  */
 public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCallback {
     private final NotificationEntryManager mNotificationEntryManager;
-    private final NotificationVisibilityProvider mVisibilityProvider;
     private final HeadsUpManager mHeadsUpManager;
     private final StatusBarStateController mStatusBarStateController;
     private final VisualStabilityManager mVisualStabilityManager;
@@ -47,14 +44,12 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
 
     public OnUserInteractionCallbackImplLegacy(
             NotificationEntryManager notificationEntryManager,
-            NotificationVisibilityProvider visibilityProvider,
             HeadsUpManager headsUpManager,
             StatusBarStateController statusBarStateController,
             VisualStabilityManager visualStabilityManager,
             GroupMembershipManager groupMembershipManager
     ) {
         mNotificationEntryManager = notificationEntryManager;
-        mVisibilityProvider = visibilityProvider;
         mHeadsUpManager = headsUpManager;
         mStatusBarStateController = statusBarStateController;
         mVisualStabilityManager = visualStabilityManager;
@@ -71,7 +66,8 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
      *                              along with this dismissal. If null, does not additionally
      *                              dismiss any notifications.
      */
-    private void onDismiss(
+    @Override
+    public void onDismiss(
             NotificationEntry entry,
             @NotificationListenerService.NotificationCancelReason int cancellationReason,
             @Nullable NotificationEntry groupSummaryToDismiss
@@ -92,7 +88,12 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
                 new DismissedByUserStats(
                         dismissalSurface,
                         DISMISS_SENTIMENT_NEUTRAL,
-                        mVisibilityProvider.obtain(entry, true)),
+                        NotificationVisibility.obtain(
+                                entry.getKey(),
+                                entry.getRanking().getRank(),
+                                mNotificationEntryManager.getActiveNotificationsCount(),
+                                true,
+                                NotificationLogger.getNotificationLocation(entry))),
                 cancellationReason
         );
 
@@ -108,21 +109,14 @@ public class OnUserInteractionCallbackImplLegacy implements OnUserInteractionCal
      * @return the group summary to dismiss along with this entry if this is the last entry in
      * the group. Else, returns null.
      */
+    @Override
     @Nullable
-    private NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
+    public NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry) {
         if (mGroupMembershipManager.isOnlyChildInGroup(entry)) {
             NotificationEntry groupSummary = mGroupMembershipManager.getLogicalGroupSummary(entry);
-            return groupSummary.isDismissable() ? groupSummary : null;
+            return groupSummary.isClearable() ? groupSummary : null;
         }
         return null;
-    }
-
-    @Override
-    @NonNull
-    public Runnable registerFutureDismissal(@NonNull NotificationEntry entry,
-            @CancellationReason int cancellationReason) {
-        NotificationEntry groupSummaryToDismiss = getGroupSummaryToDismiss(entry);
-        return () -> onDismiss(entry, cancellationReason, groupSummaryToDismiss);
     }
 }
 

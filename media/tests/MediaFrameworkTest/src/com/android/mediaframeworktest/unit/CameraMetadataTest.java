@@ -927,7 +927,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         };
         assertArrayEquals(expectedRaw16Outputs, map.getOutputs(ImageFormat.RAW_SENSOR));
 
-        // Finally, do a round-trip check for consistency
+        // Finally, do a round-trip check as a sanity
         checkKeyMarshal(
                 "android.scaler.availableInputOutputFormatsMap",
                 new ReprocessFormatsMap(contents),

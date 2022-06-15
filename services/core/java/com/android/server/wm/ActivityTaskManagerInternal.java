@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -31,14 +30,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.LocaleList;
 import android.os.RemoteException;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.IntArray;
 import android.util.proto.ProtoOutputStream;
 import android.window.TaskSnapshot;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.UserState;
@@ -243,6 +240,21 @@ public abstract class ActivityTaskManagerInternal {
             int startFlags, @Nullable Bundle options, int userId);
 
     /**
+     * Called when Keyguard flags might have changed.
+     *
+     * @param callback Callback to run after activity visibilities have been reevaluated. This can
+     *                 be used from window manager so that when the callback is called, it's
+     *                 guaranteed that all apps have their visibility updated accordingly.
+     * @param displayId The id of the display where the keyguard flags changed.
+     */
+    public abstract void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId);
+
+    /**
+     * Called when the trusted state of Keyguard has changed.
+     */
+    public abstract void notifyKeyguardTrustedChanged();
+
+    /**
      * Called after virtual display Id is updated by
      * {@link com.android.server.vr.Vr2dDisplay} with a specific
      * {@param vr2dDisplayId}.
@@ -251,7 +263,7 @@ public abstract class ActivityTaskManagerInternal {
 
     /**
      * Set focus on an activity.
-     * @param token The activity token.
+     * @param token The IApplicationToken for the activity
      */
     public abstract void setFocusedActivity(IBinder token);
 
@@ -316,6 +328,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
     public abstract void finishHeavyWeightApp();
 
+    public abstract boolean isDreaming();
     public abstract boolean isSleeping();
     public abstract boolean isShuttingDown();
     public abstract boolean shuttingDown(boolean booted, int timeout);
@@ -326,8 +339,8 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onProcessMapped(int pid, WindowProcessController proc);
     public abstract void onProcessUnMapped(int pid);
 
-    public abstract void onPackageDataCleared(String name, int userId);
-    public abstract void onPackageUninstalled(String name, int userId);
+    public abstract void onPackageDataCleared(String name);
+    public abstract void onPackageUninstalled(String name);
     public abstract void onPackageAdded(String name, boolean replacing);
     public abstract void onPackageReplaced(ApplicationInfo aInfo);
 
@@ -338,16 +351,14 @@ public abstract class ActivityTaskManagerInternal {
         private final @NonNull IBinder mAssistToken;
         private final @NonNull IBinder mShareableActivityToken;
         private final @NonNull IApplicationThread mAppThread;
-        private final int mUid;
 
         public ActivityTokens(@NonNull IBinder activityToken,
                 @NonNull IBinder assistToken, @NonNull IApplicationThread appThread,
-                @NonNull IBinder shareableActivityToken, int uid) {
+                @NonNull IBinder shareableActivityToken) {
             mActivityToken = activityToken;
             mAssistToken = assistToken;
             mAppThread = appThread;
             mShareableActivityToken = shareableActivityToken;
-            mUid = uid;
         }
 
         /**
@@ -377,13 +388,6 @@ public abstract class ActivityTaskManagerInternal {
         public @NonNull IApplicationThread getApplicationThread() {
             return mAppThread;
         }
-
-        /**
-         * @return The UID of the activity
-         */
-        public int getUid() {
-            return mUid;
-        }
     }
 
     public abstract void sendActivityResult(int callingUid, IBinder activityToken,
@@ -396,16 +400,11 @@ public abstract class ActivityTaskManagerInternal {
     public abstract ComponentName getActivityName(IBinder activityToken);
 
     /**
-     * Returns non-finishing Activity that have a process attached for the given task and the token
-     * with the activity token and the IApplicationThread or null if there is no Activity with a
-     * valid process. Given the null token for the task will return the top Activity in the task.
-     *
-     * @param taskId the Activity task id.
-     * @param token the Activity token, set null if get top Activity for the given task id.
+     * @return the activity token and IApplicationThread for the top activity in the task or null
+     * if there isn't a top activity with a valid process.
      */
     @Nullable
-    public abstract ActivityTokens getAttachedNonFinishingActivityForTask(int taskId,
-            IBinder token);
+    public abstract ActivityTokens getTopActivityForTask(int taskId);
 
     public abstract IIntentSender getIntentSender(int type, String packageName,
             @Nullable String featureId, int callingUid, int userId, IBinder token, String resultWho,
@@ -469,6 +468,15 @@ public abstract class ActivityTaskManagerInternal {
     /** Writes current activity states to the proto stream. */
     public abstract void writeActivitiesToProto(ProtoOutputStream proto);
 
+    /**
+     * Saves the current activity manager state and includes the saved state in the next dump of
+     * activity manager.
+     */
+    public abstract void saveANRState(String reason);
+
+    /** Clears the previously saved activity manager ANR state. */
+    public abstract void clearSavedANRState();
+
     /** Dump the current state based on the command. */
     public abstract void dump(String cmd, FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll, boolean dumpClient, String dumpPackage);
@@ -485,7 +493,7 @@ public abstract class ActivityTaskManagerInternal {
     /** Dump the current activities state. */
     public abstract boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
             String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly, @UserIdInt int userId);
+            boolean dumpFocusedRootTaskOnly);
 
     /** Dump the current state for inclusion in oom dump. */
     public abstract void dumpForOom(PrintWriter pw);
@@ -520,6 +528,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onUidActive(int uid, int procState);
     public abstract void onUidInactive(int uid);
     public abstract void onUidProcStateChanged(int uid, int procState);
+
+    public abstract void onUidAddedToPendingTempAllowlist(int uid, String tag);
+    public abstract void onUidRemovedFromPendingTempAllowlist(int uid);
 
     /** Handle app crash event in {@link android.app.IActivityController} if there is one. */
     public abstract boolean handleAppCrashInActivityController(String processName, int pid,
@@ -584,55 +595,9 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean isBaseOfLockedTask(String packageName);
 
     /**
-     * Creates an interface to update configuration for the calling application.
+     * Create an interface to update configuration for an application.
      */
     public abstract PackageConfigurationUpdater createPackageConfigurationUpdater();
-
-    /**
-     * Creates an interface to update configuration for an arbitrary application specified by it's
-     * packageName and userId.
-     */
-    public abstract PackageConfigurationUpdater createPackageConfigurationUpdater(
-            String packageName, int userId);
-
-    /**
-     * Retrieves and returns the app-specific configuration for an arbitrary application specified
-     * by its packageName and userId. Returns null if no app-specific configuration has been set.
-     */
-    @Nullable
-    public abstract PackageConfig getApplicationConfig(String packageName,
-            int userId);
-
-    /**
-     * Holds app-specific configurations.
-     */
-    public static class PackageConfig {
-        /**
-         * nightMode for the application, null if app-specific nightMode is not set.
-         */
-        @Nullable
-        public final Integer mNightMode;
-
-        /**
-         * {@link LocaleList} for the application, null if app-specific locales are not set.
-         */
-        @Nullable
-        public final LocaleList mLocales;
-
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public PackageConfig(Integer nightMode, LocaleList locales) {
-            mNightMode = nightMode;
-            mLocales = locales;
-        }
-
-        /**
-         * Returns the string representation of the app-specific configuration.
-         */
-        @Override
-        public String toString() {
-            return "PackageConfig: nightMode " + mNightMode + " locales " + mLocales;
-        }
-    }
 
     /**
      * An interface to update configuration for an application, and will persist override
@@ -646,27 +611,9 @@ public abstract class ActivityTaskManagerInternal {
         PackageConfigurationUpdater setNightMode(int nightMode);
 
         /**
-         * Sets the app-specific locales for the application referenced by this updater.
-         * This setting is persisted and will overlay on top of the system locales for
-         * the said application.
-         * @return the current {@link PackageConfigurationUpdater} updated with the provided locale.
-         *
-         * <p>NOTE: This method should not be called by clients directly to set app locales,
-         * instead use the {@link LocaleManagerService#setApplicationLocales}
-         */
-        PackageConfigurationUpdater setLocales(LocaleList locales);
-
-        /**
          * Commit changes.
-         * @return true if the configuration changes were persisted,
-         * false if there were no changes, or if erroneous inputs were provided, such as:
-         * <ui>
-         *     <li>Invalid packageName</li>
-         *     <li>Invalid userId</li>
-         *     <li>no WindowProcessController found for the package</li>
-         * </ui>
          */
-        boolean commit();
+        void commit();
     }
 
     /**
@@ -674,43 +621,4 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
             String callingPackage);
-
-    /** Called when the device is waking up */
-    public abstract void notifyWakingUp();
-
-    /**
-     * Registers a callback which can intercept activity starts.
-     * @throws IllegalArgumentException if duplicate ids are provided
-     */
-    public abstract void registerActivityStartInterceptor(
-            @ActivityInterceptorCallback.OrderedId int id,
-            ActivityInterceptorCallback callback);
-
-    /** Get the most recent task excluding the first running task (the one on the front most). */
-    public abstract ActivityManager.RecentTaskInfo getMostRecentTaskFromBackground();
-
-    /** Get the app tasks for a package */
-    public abstract List<ActivityManager.AppTask> getAppTasks(String pkgName, int uid);
-
-    /**
-     * Determine if there exists a task which meets the criteria set by the PermissionPolicyService
-     * to show a system-owned permission dialog over, for a given package
-     * @see PermissionPolicyInternal.shouldShowNotificationDialogForTask
-     *
-     * @param pkgName The package whose activity must be top
-     * @param uid The uid that must have a top activity
-     * @return a task ID if a valid task ID is found. Otherwise, return INVALID_TASK_ID
-     */
-    public abstract int getTaskToShowPermissionDialogOn(String pkgName, int uid);
-
-    /**
-     * Attempts to restart the process associated with the top most Activity associated with the
-     * given {@code packageName} in the task associated with the given {@code taskId}.
-     *
-     * This will request the process of the activity to restart with its saved state (via
-     * {@link android.app.Activity#onSaveInstanceState(Bundle)}) if possible. If the activity is in
-     * background the process will be killed keeping its record.
-     */
-    public abstract void restartTaskActivityProcessIfVisible(
-            int taskId, @NonNull String packageName);
 }

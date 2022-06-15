@@ -16,6 +16,8 @@
 
 package com.android.systemui.globalactions;
 
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -31,9 +33,15 @@ import com.android.systemui.R;
  * ConstraintLayout implementation of the button layout created by the global actions dialog.
  */
 public class GlobalActionsLayoutLite extends GlobalActionsLayout {
+    private final int mMaxColumns;
+    private final int mMaxRows;
 
     public GlobalActionsLayoutLite(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mMaxColumns = getResources().getInteger(
+                com.android.systemui.R.integer.power_menu_lite_max_columns);
+        mMaxRows = getResources().getInteger(
+                com.android.systemui.R.integer.power_menu_lite_max_rows);
         setOnClickListener(v -> { }); // Prevent parent onClickListener from triggering
     }
 
@@ -52,13 +60,10 @@ public class GlobalActionsLayoutLite extends GlobalActionsLayout {
     @Override
     public void onUpdateList() {
         super.onUpdateList();
-        int nElementsWrap = getResources().getInteger(
-                com.android.systemui.R.integer.power_menu_lite_max_columns);
+        int nElementsWrap = (getCurrentRotation() == ROTATION_NONE) ? mMaxColumns : mMaxRows;
         int nChildren = getListView().getChildCount() - 1; // don't count flow element
-
-        // Avoid having just one action on the last row if there are more than 2 columns because
-        // it looks unbalanced. Instead, bring the column size down to balance better.
-        if (nChildren == nElementsWrap + 1 && nElementsWrap > 2) {
+        if (getCurrentRotation() != ROTATION_NONE && nChildren > mMaxRows) {
+            // up to 4 elements can fit in a row in landscape, otherwise limit for balance
             nElementsWrap -= 1;
         }
         Flow flow = findViewById(R.id.list_flow);

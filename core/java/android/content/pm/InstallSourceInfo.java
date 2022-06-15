@@ -35,26 +35,14 @@ public final class InstallSourceInfo implements Parcelable {
 
     @Nullable private final String mInstallingPackageName;
 
-    @Nullable private final int mPackageSource;
-
     /** @hide */
     public InstallSourceInfo(@Nullable String initiatingPackageName,
             @Nullable SigningInfo initiatingPackageSigningInfo,
             @Nullable String originatingPackageName, @Nullable String installingPackageName) {
-        this(initiatingPackageName, initiatingPackageSigningInfo, originatingPackageName,
-                installingPackageName, PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
-    }
-
-    /** @hide */
-    public InstallSourceInfo(@Nullable String initiatingPackageName,
-            @Nullable SigningInfo initiatingPackageSigningInfo,
-            @Nullable String originatingPackageName, @Nullable String installingPackageName,
-            int packageSource) {
         mInitiatingPackageName = initiatingPackageName;
         mInitiatingPackageSigningInfo = initiatingPackageSigningInfo;
         mOriginatingPackageName = originatingPackageName;
         mInstallingPackageName = installingPackageName;
-        mPackageSource = packageSource;
     }
 
     @Override
@@ -69,15 +57,13 @@ public final class InstallSourceInfo implements Parcelable {
         dest.writeParcelable(mInitiatingPackageSigningInfo, flags);
         dest.writeString(mOriginatingPackageName);
         dest.writeString(mInstallingPackageName);
-        dest.writeInt(mPackageSource);
     }
 
     private InstallSourceInfo(Parcel source) {
         mInitiatingPackageName = source.readString();
-        mInitiatingPackageSigningInfo = source.readParcelable(SigningInfo.class.getClassLoader(), android.content.pm.SigningInfo.class);
+        mInitiatingPackageSigningInfo = source.readParcelable(SigningInfo.class.getClassLoader());
         mOriginatingPackageName = source.readString();
         mInstallingPackageName = source.readString();
-        mPackageSource = source.readInt();
     }
 
     /**
@@ -134,13 +120,6 @@ public final class InstallSourceInfo implements Parcelable {
     @Nullable
     public String getInstallingPackageName() {
         return mInstallingPackageName;
-    }
-
-    /**
-     * Information about the package source when installer installed this app.
-     */
-    public @PackageInstaller.PackageSourceType int getPackageSource() {
-        return mPackageSource;
     }
 
     @NonNull

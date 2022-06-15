@@ -414,12 +414,6 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         final File parent = getFileForDocId(parentDocumentId);
         final MatrixCursor result = new DirectoryCursor(
                 resolveProjection(projection), parentDocumentId, parent);
-
-        if (!filter.test(parent)) {
-            Log.w(TAG, "No permission to access parentDocumentId: " + parentDocumentId);
-            return result;
-        }
-
         if (parent.isDirectory()) {
             for (File file : FileUtils.listFilesOrEmpty(parent)) {
                 if (filter.test(file)) {

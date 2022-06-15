@@ -44,8 +44,9 @@ public class NotificationBigPictureTemplateViewWrapper extends NotificationTempl
 
     private void updateImageTag(StatusBarNotification sbn) {
         final Bundle extras = sbn.getNotification().extras;
-        Icon bigLargeIcon = extras.getParcelable(Notification.EXTRA_LARGE_ICON_BIG, Icon.class);
-        if (bigLargeIcon != null) {
+        boolean bigLargeIconSet = extras.containsKey(Notification.EXTRA_LARGE_ICON_BIG);
+        if (bigLargeIconSet) {
+            Icon bigLargeIcon = extras.getParcelable(Notification.EXTRA_LARGE_ICON_BIG);
             mRightIcon.setTag(ImageTransformState.ICON_TAG, bigLargeIcon);
             mLeftIcon.setTag(ImageTransformState.ICON_TAG, bigLargeIcon);
         } else {

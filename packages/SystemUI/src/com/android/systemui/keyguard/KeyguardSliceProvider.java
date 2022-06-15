@@ -49,6 +49,7 @@ import androidx.slice.builders.SliceAction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -138,8 +139,6 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public StatusBarStateController mStatusBarStateController;
     @Inject
     public KeyguardBypassController mKeyguardBypassController;
-    @Inject
-    public KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private CharSequence mMediaTitle;
     private CharSequence mMediaArtist;
     protected boolean mDozing;
@@ -334,7 +333,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
             mAlarmManager.cancel(mUpdateNextAlarm);
             if (mRegistered) {
                 mRegistered = false;
-                mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
+                getKeyguardUpdateMonitor().removeCallback(mKeyguardUpdateMonitorCallback);
                 getContext().unregisterReceiver(mIntentReceiver);
             }
             KeyguardSliceProvider.sInstance = null;
@@ -390,7 +389,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
             filter.addAction(Intent.ACTION_LOCALE_CHANGED);
             getContext().registerReceiver(mIntentReceiver, filter, null /* permission*/,
                     null /* scheduler */);
-            mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
+            getKeyguardUpdateMonitor().registerCallback(mKeyguardUpdateMonitorCallback);
             mRegistered = true;
         }
     }
@@ -440,6 +439,10 @@ public class KeyguardSliceProvider extends SliceProvider implements
             }
         }
         updateNextAlarm();
+    }
+
+    private KeyguardUpdateMonitor getKeyguardUpdateMonitor() {
+        return Dependency.get(KeyguardUpdateMonitor.class);
     }
 
     /**

@@ -35,7 +35,8 @@ public class ActivityTile extends Tile {
     private static final String TAG = "ActivityTile";
 
     public ActivityTile(ActivityInfo info, String category) {
-        super(info, category, info.metaData);
+        super(info, category);
+        setMetaData(info.metaData);
     }
 
     ActivityTile(Parcel in) {

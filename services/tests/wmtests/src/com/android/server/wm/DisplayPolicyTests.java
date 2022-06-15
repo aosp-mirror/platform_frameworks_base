@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
@@ -38,6 +37,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
+import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 import static com.android.server.wm.utils.WmDisplayCutout.NO_CUTOUT;
 
 import static org.junit.Assert.assertEquals;
@@ -107,7 +107,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testChooseNavigationColorWindowLw() {
-        final WindowState candidate = createOpaqueFullscreen(false);
+        final WindowState opaque = createOpaqueFullscreen(false);
+
         final WindowState dimmingImTarget = createDimmingDialogWindow(true);
         final WindowState dimmingNonImTarget = createDimmingDialogWindow(false);
 
@@ -115,51 +116,45 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final WindowState invisibleIme = createInputMethodWindow(false, true, false);
         final WindowState imeNonDrawNavBar = createInputMethodWindow(true, false, false);
 
-        // If everything is null, return null.
+        // If everything is null, return null
         assertNull(null, DisplayPolicy.chooseNavigationColorWindowLw(
-                null, null, NAV_BAR_BOTTOM));
+                null, null, null, NAV_BAR_BOTTOM));
 
-        // If no IME windows, return candidate window.
-        assertEquals(candidate, DisplayPolicy.chooseNavigationColorWindowLw(
-                candidate, null, NAV_BAR_BOTTOM));
+        assertEquals(opaque, DisplayPolicy.chooseNavigationColorWindowLw(
+                opaque, opaque, null, NAV_BAR_BOTTOM));
         assertEquals(dimmingImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingImTarget, null, NAV_BAR_BOTTOM));
+                opaque, dimmingImTarget, null, NAV_BAR_BOTTOM));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingNonImTarget, null, NAV_BAR_BOTTOM));
+                opaque, dimmingNonImTarget, null, NAV_BAR_BOTTOM));
 
-        // If IME is not visible, return candidate window.
-        assertEquals(null, DisplayPolicy.chooseNavigationColorWindowLw(
-                null, invisibleIme, NAV_BAR_BOTTOM));
-        assertEquals(candidate, DisplayPolicy.chooseNavigationColorWindowLw(
-                candidate, invisibleIme, NAV_BAR_BOTTOM));
-        assertEquals(dimmingImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingImTarget, invisibleIme, NAV_BAR_BOTTOM));
+        assertEquals(visibleIme, DisplayPolicy.chooseNavigationColorWindowLw(
+                null, null, visibleIme, NAV_BAR_BOTTOM));
+        assertEquals(visibleIme, DisplayPolicy.chooseNavigationColorWindowLw(
+                null, dimmingImTarget, visibleIme, NAV_BAR_BOTTOM));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingNonImTarget, invisibleIme, NAV_BAR_BOTTOM));
-
-        // If IME is visible, return candidate when the candidate window is not dimming.
+                null, dimmingNonImTarget, visibleIme, NAV_BAR_BOTTOM));
         assertEquals(visibleIme, DisplayPolicy.chooseNavigationColorWindowLw(
-                null, visibleIme, NAV_BAR_BOTTOM));
+                opaque, opaque, visibleIme, NAV_BAR_BOTTOM));
         assertEquals(visibleIme, DisplayPolicy.chooseNavigationColorWindowLw(
-                candidate, visibleIme, NAV_BAR_BOTTOM));
-
-        // If IME is visible and the candidate window is dimming, checks whether the dimming window
-        // can be IME tartget or not.
-        assertEquals(visibleIme, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingImTarget, visibleIme, NAV_BAR_BOTTOM));
+                opaque, dimmingImTarget, visibleIme, NAV_BAR_BOTTOM));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingNonImTarget, visibleIme, NAV_BAR_BOTTOM));
+                opaque, dimmingNonImTarget, visibleIme, NAV_BAR_BOTTOM));
+
+        assertEquals(opaque, DisplayPolicy.chooseNavigationColorWindowLw(
+                opaque, opaque, invisibleIme, NAV_BAR_BOTTOM));
+        assertEquals(opaque, DisplayPolicy.chooseNavigationColorWindowLw(
+                opaque, opaque, invisibleIme, NAV_BAR_BOTTOM));
+        assertEquals(opaque, DisplayPolicy.chooseNavigationColorWindowLw(
+                opaque, opaque, visibleIme, NAV_BAR_RIGHT));
 
         // Only IME windows that have FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS should be navigation color
         // window.
-        assertEquals(null, DisplayPolicy.chooseNavigationColorWindowLw(
-                null, imeNonDrawNavBar, NAV_BAR_BOTTOM));
-        assertEquals(candidate, DisplayPolicy.chooseNavigationColorWindowLw(
-                candidate, imeNonDrawNavBar, NAV_BAR_BOTTOM));
+        assertEquals(opaque, DisplayPolicy.chooseNavigationColorWindowLw(
+                opaque, opaque, imeNonDrawNavBar, NAV_BAR_BOTTOM));
         assertEquals(dimmingImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
+                opaque, dimmingImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
         assertEquals(dimmingNonImTarget, DisplayPolicy.chooseNavigationColorWindowLw(
-                dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
+                opaque, dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
     }
 
     @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
@@ -187,27 +182,59 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         // If there is no window, APPEARANCE_LIGHT_NAVIGATION_BARS is not allowed.
         assertEquals(0,
-                displayPolicy.updateLightNavigationBarLw(APPEARANCE_LIGHT_NAVIGATION_BARS, null));
+                displayPolicy.updateLightNavigationBarLw(
+                        APPEARANCE_LIGHT_NAVIGATION_BARS, null, null,
+                        null, null));
 
-        // Control window overrides APPEARANCE_LIGHT_NAVIGATION_BARS flag.
-        assertEquals(0, displayPolicy.updateLightNavigationBarLw(0, opaqueDarkNavBar));
+        // Opaque top fullscreen window overrides APPEARANCE_LIGHT_NAVIGATION_BARS flag.
         assertEquals(0, displayPolicy.updateLightNavigationBarLw(
-                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueDarkNavBar));
-        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS, displayPolicy.updateLightNavigationBarLw(
-                0, opaqueLightNavBar));
-        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS, displayPolicy.updateLightNavigationBarLw(
-                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar));
+                0, opaqueDarkNavBar, opaqueDarkNavBar, null, opaqueDarkNavBar));
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueDarkNavBar, opaqueDarkNavBar, null,
+                opaqueDarkNavBar));
+        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS,
+                displayPolicy.updateLightNavigationBarLw(0, opaqueLightNavBar,
+                        opaqueLightNavBar, null, opaqueLightNavBar));
+        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS,
+                displayPolicy.updateLightNavigationBarLw(APPEARANCE_LIGHT_NAVIGATION_BARS,
+                        opaqueLightNavBar, opaqueLightNavBar, null, opaqueLightNavBar));
+
+        // Dimming window clears APPEARANCE_LIGHT_NAVIGATION_BARS.
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                0, opaqueDarkNavBar, dimming, null, dimming));
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                0, opaqueLightNavBar, dimming, null, dimming));
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueDarkNavBar, dimming, null, dimming));
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar, dimming, null, dimming));
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar, dimming, imeDrawLightNavBar,
+                dimming));
+
+        // IME window clears APPEARANCE_LIGHT_NAVIGATION_BARS
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, null, null, imeDrawDarkNavBar,
+                imeDrawDarkNavBar));
+
+        // Even if the top fullscreen has APPEARANCE_LIGHT_NAVIGATION_BARS, IME window wins.
+        assertEquals(0, displayPolicy.updateLightNavigationBarLw(
+                APPEARANCE_LIGHT_NAVIGATION_BARS, opaqueLightNavBar, opaqueLightNavBar,
+                imeDrawDarkNavBar, imeDrawDarkNavBar));
+
+        // IME window should be able to use APPEARANCE_LIGHT_NAVIGATION_BARS.
+        assertEquals(APPEARANCE_LIGHT_NAVIGATION_BARS,
+                displayPolicy.updateLightNavigationBarLw(0, opaqueDarkNavBar,
+                        opaqueDarkNavBar, imeDrawLightNavBar, imeDrawLightNavBar));
     }
 
-    @UseTestDisplay(addWindows = {W_ACTIVITY, W_STATUS_BAR})
+    @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testComputeTopFullscreenOpaqueWindow() {
         final WindowManager.LayoutParams attrs = mAppWindow.mAttrs;
         attrs.x = attrs.y = 0;
         attrs.height = attrs.width = WindowManager.LayoutParams.MATCH_PARENT;
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
-        policy.addWindowLw(mStatusBarWindow, mStatusBarWindow.mAttrs);
-
         policy.applyPostLayoutPolicyLw(
                 mAppWindow, attrs, null /* attached */, null /* imeTarget */);
 
@@ -247,38 +274,28 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOverlappingWithNavBar() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR);
-        navSource.setFrame(new Rect(100, 200, 200, 300));
-        testOverlappingWithNavBarType(navSource);
-    }
-
-    @Test
-    public void testOverlappingWithExtraNavBar() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
-        navSource.setFrame(new Rect(100, 200, 200, 300));
-        testOverlappingWithNavBarType(navSource);
-    }
-
-    private void testOverlappingWithNavBarType(InsetsSource navSource) {
         final WindowState targetWin = createApplicationWindow();
         final WindowFrames winFrame = targetWin.getWindowFrames();
         winFrame.mFrame.set(new Rect(100, 100, 200, 200));
-        targetWin.mAboveInsetsState.addSource(navSource);
+
+        final WindowState navigationBar = createNavigationBarWindow();
+
+        navigationBar.getFrame().set(new Rect(100, 200, 200, 300));
 
         assertFalse("Freeform is overlapping with navigation bar",
-                DisplayPolicy.isOverlappingWithNavBar(targetWin));
+                DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
 
         winFrame.mFrame.set(new Rect(100, 101, 200, 201));
         assertTrue("Freeform should be overlapping with navigation bar (bottom)",
-                DisplayPolicy.isOverlappingWithNavBar(targetWin));
+                DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
 
         winFrame.mFrame.set(new Rect(99, 200, 199, 300));
         assertTrue("Freeform should be overlapping with navigation bar (right)",
-                DisplayPolicy.isOverlappingWithNavBar(targetWin));
+                DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
 
         winFrame.mFrame.set(new Rect(199, 200, 299, 300));
         assertTrue("Freeform should be overlapping with navigation bar (left)",
-                DisplayPolicy.isOverlappingWithNavBar(targetWin));
+                DisplayPolicy.isOverlappingWithNavBar(targetWin, navigationBar));
     }
 
     private WindowState createNavigationBarWindow() {
@@ -296,9 +313,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayInfo.logicalHeight = 2000;
         displayInfo.rotation = ROTATION_0;
 
-        WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
-        displayPolicy.addWindowLw(mNavBarWindow, attrs);
-        mNavBarWindow.setRequestedSize(attrs.width, attrs.height);
+        displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         mImeWindow.mAboveInsetsState.set(state);
@@ -321,27 +336,5 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertFalse(imeSource.getFrame().isEmpty());
         assertFalse(navBarSource.getFrame().isEmpty());
         assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
-    }
-
-    @UseTestDisplay(addWindows = { W_NAVIGATION_BAR })
-    @Test
-    public void testInsetsGivenContentFrame() {
-        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        final DisplayInfo displayInfo = new DisplayInfo();
-        displayInfo.logicalWidth = 1000;
-        displayInfo.logicalHeight = 2000;
-        displayInfo.rotation = ROTATION_0;
-
-        WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
-        displayPolicy.addWindowLw(mNavBarWindow, attrs);
-        mNavBarWindow.setRequestedSize(attrs.width, attrs.height);
-        mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
-
-        mNavBarWindow.mGivenContentInsets.set(0, 10, 0, 0);
-
-        displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
-        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
-        assertEquals(attrs.height - 10, navBarSource.getFrame().height());
     }
 }

@@ -21,7 +21,6 @@ import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
@@ -39,9 +38,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.clearInvocations
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -67,8 +63,6 @@ class BatterySaverTileTest : SysuiTestCase() {
     private lateinit var qsLogger: QSLogger
     @Mock
     private lateinit var batteryController: BatteryController
-    @Mock
-    private lateinit var view: View
     private lateinit var secureSettings: SecureSettings
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: BatterySaverTile
@@ -110,27 +104,5 @@ class BatterySaverTileTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         assertEquals(USER + 1, tile.mSetting.currentUser)
-    }
-
-    @Test
-    fun testClickingPowerSavePassesView() {
-        tile.onPowerSaveChanged(true)
-        tile.handleClick(view)
-
-        tile.onPowerSaveChanged(false)
-        tile.handleClick(view)
-
-        verify(batteryController).setPowerSaveMode(true, view)
-        verify(batteryController).setPowerSaveMode(false, view)
-    }
-
-    @Test
-    fun testStopListeningClearsViewInController() {
-        clearInvocations(batteryController)
-        tile.handleSetListening(true)
-        verify(batteryController, never()).clearLastPowerSaverStartView()
-
-        tile.handleSetListening(false)
-        verify(batteryController).clearLastPowerSaverStartView()
     }
 }

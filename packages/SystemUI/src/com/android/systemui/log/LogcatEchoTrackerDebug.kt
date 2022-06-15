@@ -41,7 +41,6 @@ class LogcatEchoTrackerDebug private constructor(
 ) : LogcatEchoTracker {
     private val cachedBufferLevels: MutableMap<String, LogLevel> = mutableMapOf()
     private val cachedTagLevels: MutableMap<String, LogLevel> = mutableMapOf()
-    override val logInBackgroundThread = true
 
     companion object Factory {
         @JvmStatic
@@ -60,7 +59,7 @@ class LogcatEchoTrackerDebug private constructor(
                 Settings.Global.getUriFor(BUFFER_PATH),
                 true,
                 object : ContentObserver(Handler(mainLooper)) {
-                    override fun onChange(selfChange: Boolean, uri: Uri?) {
+                    override fun onChange(selfChange: Boolean, uri: Uri) {
                         super.onChange(selfChange, uri)
                         cachedBufferLevels.clear()
                     }
@@ -70,7 +69,7 @@ class LogcatEchoTrackerDebug private constructor(
                 Settings.Global.getUriFor(TAG_PATH),
                 true,
                 object : ContentObserver(Handler(mainLooper)) {
-                    override fun onChange(selfChange: Boolean, uri: Uri?) {
+                    override fun onChange(selfChange: Boolean, uri: Uri) {
                         super.onChange(selfChange, uri)
                         cachedTagLevels.clear()
                     }
@@ -110,7 +109,7 @@ class LogcatEchoTrackerDebug private constructor(
     }
 
     private fun parseProp(propValue: String?): LogLevel {
-        return when (propValue?.lowercase()) {
+        return when (propValue?.toLowerCase()) {
             "verbose" -> LogLevel.VERBOSE
             "v" -> LogLevel.VERBOSE
             "debug" -> LogLevel.DEBUG

@@ -20,22 +20,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.icu.text.NumberFormat;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
-import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -45,12 +40,12 @@ import java.util.TimeZone;
  * {@link KeyguardClockSwitchController}.
  */
 public class AnimatableClockController extends ViewController<AnimatableClockView> {
-    private static final String TAG = "AnimatableClockCtrl";
     private static final int FORMAT_NUMBER = 1234567890;
 
     private final StatusBarStateController mStatusBarStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final KeyguardBypassController mBypassController;
     private final BatteryController mBatteryController;
     private final int mDozingColor = Color.WHITE;
     private int mLockScreenColor;
@@ -72,18 +67,20 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
             BroadcastDispatcher broadcastDispatcher,
             BatteryController batteryController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            @Main Resources resources
-    ) {
+            KeyguardBypassController bypassController) {
         super(view);
         mStatusBarStateController = statusBarStateController;
+        mIsDozing = mStatusBarStateController.isDozing();
+        mDozeAmount = mStatusBarStateController.getDozeAmount();
         mBroadcastDispatcher = broadcastDispatcher;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mBypassController = bypassController;
         mBatteryController = batteryController;
 
         mBurmeseNumerals = mBurmeseNf.format(FORMAT_NUMBER);
-        mBurmeseLineSpacing = resources.getFloat(
+        mBurmeseLineSpacing = getContext().getResources().getFloat(
                 R.dimen.keyguard_clock_line_spacing_scale_burmese);
-        mDefaultLineSpacing = resources.getFloat(
+        mDefaultLineSpacing = getContext().getResources().getFloat(
                 R.dimen.keyguard_clock_line_spacing_scale);
     }
 
@@ -109,7 +106,7 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         }
     };
 
-    private final StatusBarStateController.StateListener mStatusBarStateListener =
+    private final StatusBarStateController.StateListener mStatusBarStatePersistentListener =
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
@@ -147,11 +144,11 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mBroadcastDispatcher.registerReceiver(mLocaleBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
         mDozeAmount = mStatusBarStateController.getDozeAmount();
-        mIsDozing = mStatusBarStateController.isDozing() || mDozeAmount != 0;
         mBatteryController.addCallback(mBatteryCallback);
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
 
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
+        mStatusBarStateController.removeCallback(mStatusBarStatePersistentListener);
+        mStatusBarStateController.addCallback(mStatusBarStatePersistentListener);
 
         refreshTime();
         initColors();
@@ -163,30 +160,14 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mBroadcastDispatcher.unregisterReceiver(mLocaleBroadcastReceiver);
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mBatteryController.removeCallback(mBatteryCallback);
-        mStatusBarStateController.removeCallback(mStatusBarStateListener);
-    }
-
-    /**
-     * @return the number of pixels below the baseline. For fonts that support languages such as
-     * Burmese, this space can be significant.
-     */
-    public float getBottom() {
-        if (mView.getPaint() != null && mView.getPaint().getFontMetrics() != null) {
-            return mView.getPaint().getFontMetrics().bottom;
+        if (!mView.isAttachedToWindow()) {
+            mStatusBarStateController.removeCallback(mStatusBarStatePersistentListener);
         }
-
-        return 0f;
     }
 
     /** Animate the clock appearance */
     public void animateAppear() {
         if (!mIsDozing) mView.animateAppearOnLockscreen();
-    }
-
-    /** Animate the clock appearance when a foldable device goes from fully-open/half-open state to
-     * fully folded state and it goes to sleep (always on display screen) */
-    public void animateFoldAppear() {
-        mView.animateFoldAppear();
     }
 
     /**
@@ -210,14 +191,6 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mView.refreshFormat();
     }
 
-    /**
-     * Return locallly stored dozing state.
-     */
-    @VisibleForTesting
-    public boolean isDozing() {
-        return mIsDozing;
-    }
-
     private void updateLocale() {
         Locale currLocale = Locale.getDefault();
         if (!Objects.equals(currLocale, mLocale)) {
@@ -237,13 +210,5 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 com.android.systemui.R.attr.wallpaperTextColorAccent);
         mView.setColors(mDozingColor, mLockScreenColor);
         mView.animateDoze(mIsDozing, false);
-    }
-
-    /**
-     * Dump information for debugging
-     */
-    public void dump(@NonNull PrintWriter pw) {
-        pw.println(this);
-        mView.dump(pw);
     }
 }

@@ -21,7 +21,6 @@ import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionWatcherCallback;
 import android.media.projection.MediaProjectionInfo;
 import android.os.IBinder;
-import android.view.ContentRecordingSession;
 
 /** {@hide} */
 interface IMediaProjectionManager {
@@ -34,15 +33,4 @@ interface IMediaProjectionManager {
     void stopActiveProjection();
     void addCallback(IMediaProjectionWatcherCallback callback);
     void removeCallback(IMediaProjectionWatcherCallback callback);
-
-    /**
-     * Updates the content recording session. If a different session is already in progress, then
-     * the pre-existing session is stopped, and the new incoming session takes over. Only updates
-     * the session if the given projection is valid.
-     *
-     * @param incomingSession the nullable incoming content recording session
-     * @param projection      the non-null projection the session describes
-     */
-    void setContentRecordingSession(in ContentRecordingSession incomingSession,
-            in IMediaProjection projection);
 }

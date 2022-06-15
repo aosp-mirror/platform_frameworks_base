@@ -31,8 +31,6 @@ public class BootImageProfileTest implements IDeviceTest {
     private static final String SYSTEM_SERVER_PROFILE =
             "/data/misc/profiles/cur/0/android/primary.prof";
     private static final boolean USE_PHENOTYPE = false;
-    private static final String DALVIK_VM_EXTRA_OPTS =
-            "-Xusejit:false -Xint -Xjitsaveprofilinginfo";
 
     @Override
     public void setDevice(ITestDevice testDevice) {
@@ -56,10 +54,10 @@ public class BootImageProfileTest implements IDeviceTest {
     private String setProperty(String property, String value) throws Exception {
         if (USE_PHENOTYPE) {
             return mTestDevice.executeShellCommand(
-                String.format("device_config put runtime_native_boot %s '%s'", property, value));
+                "device_config put runtime_native_boot " + property + " " + value);
         } else {
             return mTestDevice.executeShellCommand(
-                String.format("setprop dalvik.vm.%s '%s'", property, value));
+                "setprop dalvik.vm." + property + " " + value);
         }
     }
 
@@ -71,8 +69,6 @@ public class BootImageProfileTest implements IDeviceTest {
         assertTrue("profile boot class path not enabled: " + res, "true".equals(res));
         res = getProperty("profilesystemserver");
         assertTrue("profile system server not enabled: " + res, "true".equals(res));
-        res = getProperty("extra-opts");
-        assertTrue("extra options not set: " + res, DALVIK_VM_EXTRA_OPTS.equals(res));
     }
 
     private boolean forceSaveProfile(String pkg) throws Exception {
@@ -95,20 +91,16 @@ public class BootImageProfileTest implements IDeviceTest {
             boolean profileBootClassPath = "true".equals(pbcp);
             String pss = getProperty("profilesystemserver");
             boolean profileSystemServer = "true".equals(pss);
-            String extraOpts = getProperty("extra-opts");
-            boolean extraOptsOk = DALVIK_VM_EXTRA_OPTS.equals(extraOpts);
-            if (profileBootClassPath && profileSystemServer && extraOptsOk) {
+            if (profileBootClassPath && profileSystemServer) {
                 break;
             }
             if (i == numIterations) {
                 assertTrue("profile system server not enabled: " + pss, profileSystemServer);
                 assertTrue("profile boot class path not enabled: " + pbcp, profileBootClassPath);
-                assertTrue("extra options not set: " + extraOpts, extraOptsOk);
             }
 
             setProperty("profilebootclasspath", "true");
             setProperty("profilesystemserver", "true");
-            setProperty("extra-opts", DALVIK_VM_EXTRA_OPTS);
             Thread.sleep(1000);
         }
 
@@ -122,15 +114,12 @@ public class BootImageProfileTest implements IDeviceTest {
             boolean profileBootClassPath = "true".equals(pbcp);
             String pss = getProperty("profilesystemserver");
             boolean profileSystemServer = "true".equals(pss);
-            String extraOpts = getProperty("extra-opts");
-            boolean extraOptsOk = DALVIK_VM_EXTRA_OPTS.equals(extraOpts);
             if (profileBootClassPath && profileSystemServer) {
                 break;
             }
             if (i == numIterations) {
                 assertTrue("profile system server not enabled: " + pss, profileSystemServer);
                 assertTrue("profile boot class path not enabled: " + pbcp, profileBootClassPath);
-                assertTrue("extra options not set: " + extraOpts, extraOptsOk);
             }
             Thread.sleep(1000);
         }

@@ -27,14 +27,11 @@ import javax.inject.Inject;
 public class ResumeMediaBrowserFactory {
     private final Context mContext;
     private final MediaBrowserFactory mBrowserFactory;
-    private final ResumeMediaBrowserLogger mLogger;
 
     @Inject
-    public ResumeMediaBrowserFactory(
-            Context context, MediaBrowserFactory browserFactory, ResumeMediaBrowserLogger logger) {
+    public ResumeMediaBrowserFactory(Context context, MediaBrowserFactory browserFactory) {
         mContext = context;
         mBrowserFactory = browserFactory;
-        mLogger = logger;
     }
 
     /**
@@ -46,6 +43,6 @@ public class ResumeMediaBrowserFactory {
      */
     public ResumeMediaBrowser create(ResumeMediaBrowser.Callback callback,
             ComponentName componentName) {
-        return new ResumeMediaBrowser(mContext, callback, componentName, mBrowserFactory, mLogger);
+        return new ResumeMediaBrowser(mContext, callback, componentName, mBrowserFactory);
     }
 }

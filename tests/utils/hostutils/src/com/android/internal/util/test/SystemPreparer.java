@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
+import com.android.tradefed.log.LogUtil;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -206,6 +207,17 @@ public class SystemPreparer extends ExternalResource {
             default:
                 device.executeShellCommand("stop");
                 device.executeShellCommand("start");
+                ITestDevice.RecoveryMode cachedRecoveryMode = device.getRecoveryMode();
+                device.setRecoveryMode(ITestDevice.RecoveryMode.ONLINE);
+
+                if (device.isEncryptionSupported()) {
+                    if (device.isDeviceEncrypted()) {
+                        LogUtil.CLog.e("Device is encrypted after userspace reboot!");
+                        device.unlockDevice();
+                    }
+                }
+
+                device.setRecoveryMode(cachedRecoveryMode);
                 device.waitForDeviceAvailable();
                 break;
         }
@@ -368,9 +380,7 @@ public class SystemPreparer extends ExternalResource {
                 device.executeShellCommand("disable-verity");
                 device.reboot();
             }
-            device.enableAdbRoot();
-            device.remountSystemWritable();
-            device.remountVendorWritable();
+            device.executeShellCommand("remount");
             device.waitForDeviceAvailable();
         }
 

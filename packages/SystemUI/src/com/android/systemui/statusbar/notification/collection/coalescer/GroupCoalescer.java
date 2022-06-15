@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.NotificationListener.NotificationHandler;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -259,8 +260,7 @@ public class GroupCoalescer implements Dumpable {
         }
         events.sort(mEventComparator);
 
-        long batchAge = mClock.uptimeMillis() - batch.mCreatedTimestamp;
-        mLogger.logEmitBatch(batch.mGroupKey, batch.mMembers.size(), batchAge);
+        mLogger.logEmitBatch(batch.mGroupKey);
 
         mHandler.onNotificationBatchPosted(events);
     }
@@ -288,7 +288,7 @@ public class GroupCoalescer implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         long now = mClock.uptimeMillis();
 
         int eventCount = 0;
@@ -337,6 +337,6 @@ public class GroupCoalescer implements Dumpable {
         void onNotificationBatchPosted(List<CoalescedEvent> events);
     }
 
-    private static final int MIN_GROUP_LINGER_DURATION = 200;
+    private static final int MIN_GROUP_LINGER_DURATION = 50;
     private static final int MAX_GROUP_LINGER_DURATION = 500;
 }

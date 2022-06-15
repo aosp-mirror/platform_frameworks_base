@@ -54,6 +54,7 @@ import android.view.contentcapture.MainContentCaptureSession;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -61,7 +62,6 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -544,8 +544,8 @@ public abstract class ContentCaptureService extends Service {
             @Override
             public void onAccept(@NonNull Executor executor,
                     @NonNull DataShareReadAdapter adapter) {
-                Objects.requireNonNull(adapter);
-                Objects.requireNonNull(executor);
+                Preconditions.checkNotNull(adapter);
+                Preconditions.checkNotNull(executor);
 
                 DataShareReadAdapterDelegate delegate =
                         new DataShareReadAdapterDelegate(executor, adapter,
@@ -661,9 +661,9 @@ public abstract class ContentCaptureService extends Service {
 
         DataShareReadAdapterDelegate(Executor executor, DataShareReadAdapter adapter,
                 LocalDataShareAdapterResourceManager resourceManager) {
-            Objects.requireNonNull(executor);
-            Objects.requireNonNull(adapter);
-            Objects.requireNonNull(resourceManager);
+            Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(adapter);
+            Preconditions.checkNotNull(resourceManager);
 
             resourceManager.initializeForDelegate(this, adapter, executor);
             mResourceManagerReference = new WeakReference<>(resourceManager);

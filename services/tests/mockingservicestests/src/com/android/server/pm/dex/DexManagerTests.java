@@ -159,8 +159,8 @@ public class DexManagerTests {
             .when(mockContext)
                 .getSystemService(PowerManager.class);
 
-        mDexManager = new DexManager(mockContext, /*PackageDexOptimizer*/ null,
-                mInstaller, mInstallLock, mPM);
+        mDexManager = new DexManager(mockContext, mPM, /*PackageDexOptimizer*/ null,
+                mInstaller, mInstallLock);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;

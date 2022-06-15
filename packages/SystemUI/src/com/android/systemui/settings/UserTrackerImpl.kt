@@ -31,6 +31,7 @@ import androidx.annotation.WorkerThread
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.Assert
+import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
@@ -108,12 +109,8 @@ class UserTrackerImpl internal constructor(
 
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_USER_SWITCHED)
-            // These get called when a managed profile goes in or out of quiet mode.
             addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
-            addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
-
             addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED)
-            addAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)
         }
         context.registerReceiverForAllUsers(this, filter, null /* permission */, backgroundHandler)
 
@@ -125,18 +122,9 @@ class UserTrackerImpl internal constructor(
             Intent.ACTION_USER_SWITCHED -> {
                 handleSwitchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL))
             }
-            Intent.ACTION_MANAGED_PROFILE_AVAILABLE,
-            Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE,
-            Intent.ACTION_MANAGED_PROFILE_REMOVED,
-            Intent.ACTION_MANAGED_PROFILE_UNLOCKED -> {
+            Intent.ACTION_MANAGED_PROFILE_AVAILABLE, Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE -> {
                 handleProfilesChanged()
             }
-        }
-    }
-
-    override fun createCurrentUserContext(context: Context): Context {
-        synchronized(mutex) {
-            return context.createContextAsUser(userHandle, 0)
         }
     }
 
@@ -211,11 +199,11 @@ class UserTrackerImpl internal constructor(
         }
     }
 
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("Initialized: $initialized")
         if (initialized) {
             pw.println("userId: $userId")
-            val ids = userProfiles.map { it.toFullString() }
+            val ids = userProfiles.map { it.id }
             pw.println("userProfiles: $ids")
         }
         val list = synchronized(callbacks) {

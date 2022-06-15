@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The Android Open Source Project
+ * Copyright 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,36 @@
 #ifndef _ANDROID_MEDIA_TV_DVR_CLIENT_H_
 #define _ANDROID_MEDIA_TV_DVR_CLIENT_H_
 
-#include <aidl/android/hardware/tv/tuner/DvrSettings.h>
-#include <aidl/android/hardware/tv/tuner/Result.h>
 #include <aidl/android/media/tv/tuner/BnTunerDvrCallback.h>
 #include <aidl/android/media/tv/tuner/ITunerDvr.h>
+#include <android/hardware/tv/tuner/1.0/IDvr.h>
+#include <android/hardware/tv/tuner/1.0/IDvrCallback.h>
+#include <android/hardware/tv/tuner/1.1/types.h>
 #include <fmq/AidlMessageQueue.h>
+#include <fmq/MessageQueue.h>
 
 #include "DvrClientCallback.h"
 #include "FilterClient.h"
 
 using Status = ::ndk::ScopedAStatus;
-using ::aidl::android::hardware::common::fmq::MQDescriptor;
 using ::aidl::android::hardware::common::fmq::SynchronizedReadWrite;
-using ::aidl::android::hardware::tv::tuner::DvrSettings;
-using ::aidl::android::hardware::tv::tuner::PlaybackStatus;
-using ::aidl::android::hardware::tv::tuner::RecordStatus;
-using ::aidl::android::hardware::tv::tuner::Result;
 using ::aidl::android::media::tv::tuner::BnTunerDvrCallback;
 using ::aidl::android::media::tv::tuner::ITunerDvr;
+using ::aidl::android::media::tv::tuner::TunerDvrSettings;
+
+using ::android::hardware::EventFlag;
+using ::android::hardware::MQDescriptorSync;
+using ::android::hardware::MessageQueue;
+using ::android::hardware::tv::tuner::V1_0::DvrSettings;
+using ::android::hardware::tv::tuner::V1_0::IDvr;
+using ::android::hardware::tv::tuner::V1_0::IDvrCallback;
 
 using namespace std;
 
 namespace android {
 
+using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
+using MQDesc = MQDescriptorSync<uint8_t>;
 using AidlMQ = AidlMessageQueue<int8_t, SynchronizedReadWrite>;
 using AidlMQDesc = MQDescriptor<int8_t, SynchronizedReadWrite>;
 
@@ -48,8 +55,19 @@ class TunerDvrCallback : public BnTunerDvrCallback {
 public:
     TunerDvrCallback(sp<DvrClientCallback> dvrClientCallback);
 
-    Status onRecordStatus(RecordStatus status);
-    Status onPlaybackStatus(PlaybackStatus status);
+    Status onRecordStatus(int status);
+    Status onPlaybackStatus(int status);
+
+private:
+    sp<DvrClientCallback> mDvrClientCallback;
+};
+
+struct HidlDvrCallback : public IDvrCallback {
+
+public:
+    HidlDvrCallback(sp<DvrClientCallback> dvrClientCallback);
+    virtual Return<void> onRecordStatus(const RecordStatus status);
+    virtual Return<void> onPlaybackStatus(const PlaybackStatus status);
 
 private:
     sp<DvrClientCallback> mDvrClientCallback;
@@ -61,35 +79,33 @@ public:
     DvrClient(shared_ptr<ITunerDvr> tunerDvr);
     ~DvrClient();
 
+    // TODO: remove after migration to Tuner Service is done.
+    void setHidlDvr(sp<IDvr> dvr);
+
     /**
      * Set the DVR file descriptor.
      */
-    void setFd(int32_t fd);
+    void setFd(int fd);
 
     /**
      * Read data from file with given size. Return the actual read size.
      */
-    int64_t readFromFile(int64_t size);
+    long readFromFile(long size);
 
     /**
      * Read data from the given buffer with given size. Return the actual read size.
      */
-    int64_t readFromBuffer(int8_t* buffer, int64_t size);
+    long readFromBuffer(int8_t* buffer, long size);
 
     /**
      * Write data to file with given size. Return the actual write size.
      */
-    int64_t writeToFile(int64_t size);
-
-    /**
-     * Seeks the Dvr file descriptor from the beginning of the file.
-     */
-    int64_t seekFile(int64_t pos);
+    long writeToFile(long size);
 
     /**
      * Write data to the given buffer with given size. Return the actual write size.
      */
-    int64_t writeToBuffer(int8_t* buffer, int64_t size);
+    long writeToBuffer(int8_t* buffer, long size);
 
     /**
      * Configure the DVR.
@@ -127,16 +143,26 @@ public:
     Result close();
 
 private:
+    Result getQueueDesc(MQDesc& dvrMQDesc);
+    TunerDvrSettings getAidlDvrSettingsFromHidl(DvrSettings settings);
+
     /**
      * An AIDL Tuner Dvr Singleton assigned at the first time the Tuner Client
      * opens a dvr. Default null when dvr is not opened.
      */
     shared_ptr<ITunerDvr> mTunerDvr;
 
+    /**
+     * A Dvr HAL interface that is ready before migrating to the TunerDvr.
+     * This is a temprary interface before Tuner Framework migrates to use TunerService.
+     * Default null when the HAL service does not exist.
+     */
+    sp<IDvr> mDvr;
+
     AidlMQ* mDvrMQ;
     EventFlag* mDvrMQEventFlag;
     string mFilePath;
-    int32_t mFd;
+    int mFd;
 };
 }  // namespace android
 

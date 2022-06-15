@@ -1,5 +1,11 @@
 # Bug component: 142675
 
-file:EnterprisePlatform_OWNERS
+# Android Enterprise team
+rubinxu@google.com
+sandness@google.com
+alexkershaw@google.com
+pgrafov@google.com
 
-yamasani@google.com #{LAST_RESORT_SUGGESTION}
+# Emeritus
+yamasani@google.com
+eranm@google.com

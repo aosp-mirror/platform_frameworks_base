@@ -23,14 +23,13 @@ import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.appops.AppOpsController;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
-import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
@@ -48,7 +47,7 @@ import javax.inject.Inject;
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceNotificationListener
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceLifetimeExtender
  */
-@CoordinatorScope
+@SysUISingleton
 public class AppOpsCoordinator implements Coordinator {
     private static final String TAG = "AppOpsCoordinator";
 
@@ -101,30 +100,19 @@ public class AppOpsCoordinator implements Coordinator {
     };
 
     /**
-     * Puts colorized foreground service and call notifications into its own section.
+     * Puts foreground service notifications into its own section.
      */
-    private final NotifSectioner mNotifSectioner = new NotifSectioner("ForegroundService",
-            NotificationPriorityBucketKt.BUCKET_FOREGROUND_SERVICE) {
+    private final NotifSectioner mNotifSectioner = new NotifSectioner("ForegroundService") {
         @Override
         public boolean isInSection(ListEntry entry) {
             NotificationEntry notificationEntry = entry.getRepresentativeEntry();
             if (notificationEntry != null) {
-                return isColorizedForegroundService(notificationEntry) || isCall(notificationEntry);
+                Notification notification = notificationEntry.getSbn().getNotification();
+                return notification.isForegroundService()
+                        && notification.isColorized()
+                        && entry.getRepresentativeEntry().getImportance() > IMPORTANCE_MIN;
             }
             return false;
-        }
-
-        private boolean isColorizedForegroundService(NotificationEntry entry) {
-            Notification notification = entry.getSbn().getNotification();
-            return notification.isForegroundService()
-                    && notification.isColorized()
-                    && entry.getImportance() > IMPORTANCE_MIN;
-        }
-
-        private boolean isCall(NotificationEntry entry) {
-            Notification notification = entry.getSbn().getNotification();
-            return entry.getImportance() > IMPORTANCE_MIN
-                    && notification.isStyle(Notification.CallStyle.class);
         }
     };
 }

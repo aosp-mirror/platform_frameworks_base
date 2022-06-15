@@ -63,8 +63,7 @@ private:
     };
 
     JavaVM* const mVm;
-    jobject mObserver;
-    bool mKeepListening = true;
+    jweak mObserverWeak;
 
     int mNextFree = 0;
     int mNextInQueue = 0;

@@ -17,7 +17,6 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.AccessibilityService;
-import android.annotation.Nullable;
 import android.os.Bundle;
 import android.view.View;
 
@@ -196,7 +195,7 @@ public abstract class AccessibilityNodeProvider {
      * @see View#createAccessibilityNodeInfo()
      * @see AccessibilityNodeInfo
      */
-    public @Nullable AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
+    public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
         return null;
     }
 
@@ -235,7 +234,7 @@ public abstract class AccessibilityNodeProvider {
      * @see #createAccessibilityNodeInfo(int)
      * @see AccessibilityNodeInfo
      */
-    public boolean performAction(int virtualViewId, int action, @Nullable Bundle arguments) {
+    public boolean performAction(int virtualViewId, int action, Bundle arguments) {
         return false;
     }
 
@@ -253,7 +252,7 @@ public abstract class AccessibilityNodeProvider {
      * @see #createAccessibilityNodeInfo(int)
      * @see AccessibilityNodeInfo
      */
-    public @Nullable List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text,
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text,
             int virtualViewId) {
         return null;
     }
@@ -269,7 +268,7 @@ public abstract class AccessibilityNodeProvider {
      * @see AccessibilityNodeInfo#FOCUS_INPUT
      * @see AccessibilityNodeInfo#FOCUS_ACCESSIBILITY
      */
-    public @Nullable AccessibilityNodeInfo findFocus(int focus) {
+    public AccessibilityNodeInfo findFocus(int focus) {
         return null;
     }
 }

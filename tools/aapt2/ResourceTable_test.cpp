@@ -162,7 +162,7 @@ TEST(ResourceTableTest, ProductVaryingValues) {
   EXPECT_THAT(test::GetValueForConfigAndProduct<Id>(&table, "android:string/foo",test::ParseConfigOrDie("land"), "tablet"), NotNull());
   EXPECT_THAT(test::GetValueForConfigAndProduct<Id>(&table, "android:string/foo",test::ParseConfigOrDie("land"), "phone"), NotNull());
 
-  std::optional<ResourceTable::SearchResult> sr =
+  Maybe<ResourceTable::SearchResult> sr =
       table.FindResource(test::ParseNameOrDie("android:string/foo"));
   ASSERT_TRUE(sr);
   std::vector<ResourceConfigValue*> values =
@@ -187,7 +187,7 @@ static ::testing::AssertionResult VisibilityOfResource(const ResourceTable& tabl
                                                        const ResourceNameRef& name,
                                                        Visibility::Level level,
                                                        const StringPiece& comment) {
-  std::optional<ResourceTable::SearchResult> result = table.FindResource(name);
+  Maybe<ResourceTable::SearchResult> result = table.FindResource(name);
   if (!result) {
     return ::testing::AssertionFailure() << "no resource '" << name << "' found in table";
   }
@@ -242,7 +242,7 @@ TEST(ResourceTableTest, SetAllowNew) {
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
 
   AllowNew allow_new;
-  std::optional<ResourceTable::SearchResult> result;
+  Maybe<ResourceTable::SearchResult> result;
 
   allow_new.comment = "first";
   ASSERT_TRUE(table.AddResource(NewResourceBuilder(name).SetAllowNew(allow_new).Build(),
@@ -274,7 +274,7 @@ TEST(ResourceTableTest, SetOverlayable) {
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
   ASSERT_TRUE(table.AddResource(NewResourceBuilder(name).SetOverlayable(overlayable_item).Build(),
                                 test::GetDiagnostics()));
-  std::optional<ResourceTable::SearchResult> search_result = table.FindResource(name);
+  Maybe<ResourceTable::SearchResult> search_result = table.FindResource(name);
 
   ASSERT_TRUE(search_result);
   ASSERT_TRUE(search_result.value().entry->overlayable_item);

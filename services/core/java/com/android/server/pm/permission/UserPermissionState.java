@@ -69,15 +69,6 @@ public final class UserPermissionState {
         return uidState;
     }
 
-    @NonNull
-    UidPermissionState createUidStateWithExisting(
-            @AppIdInt int appId, @NonNull UidPermissionState other) {
-        checkAppId(appId);
-        UidPermissionState uidState = new UidPermissionState(other);
-        mUidStates.put(appId, uidState);
-        return uidState;
-    }
-
     public void removeUidState(@AppIdInt int appId) {
         checkAppId(appId);
         mUidStates.delete(appId);

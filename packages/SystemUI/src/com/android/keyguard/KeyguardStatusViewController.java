@@ -19,13 +19,14 @@ package com.android.keyguard;
 import android.graphics.Rect;
 import android.util.Slog;
 
-import com.android.keyguard.KeyguardClockSwitch.ClockSize;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.ViewController;
@@ -48,7 +49,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final KeyguardClockSwitchController mKeyguardClockSwitchController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
+    private final DozeParameters mDozeParameters;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
+    private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+    private final KeyguardStateController mKeyguardStateController;
+    private SmartspaceTransitionController mSmartspaceTransitionController;
     private final Rect mClipBounds = new Rect();
 
     @Inject
@@ -60,14 +65,20 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController,
             DozeParameters dozeParameters,
-            ScreenOffAnimationController screenOffAnimationController) {
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController,
+            SmartspaceTransitionController smartspaceTransitionController,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mConfigurationController = configurationController;
+        mDozeParameters = dozeParameters;
+        mKeyguardStateController = keyguardStateController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
-                dozeParameters, screenOffAnimationController, /* animateYPos= */ true);
+                dozeParameters, unlockedScreenOffAnimationController, /* animateYPos= */ true);
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+        mSmartspaceTransitionController = smartspaceTransitionController;
     }
 
     @Override
@@ -79,12 +90,14 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     protected void onViewAttached() {
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mConfigurationController.addCallback(mConfigurationListener);
+        mKeyguardStateController.addCallback(mKeyguardStateControllerCallback);
     }
 
     @Override
     protected void onViewDetached() {
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
         mConfigurationController.removeCallback(mConfigurationListener);
+        mKeyguardStateController.removeCallback(mKeyguardStateControllerCallback);
     }
 
     /**
@@ -103,20 +116,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Set which clock should be displayed on the keyguard. The other one will be automatically
-     * hidden.
+     * Set whether or not the lock screen is showing notifications.
      */
-    public void displayClock(@ClockSize int clockSize, boolean animate) {
-        mKeyguardClockSwitchController.displayClock(clockSize, animate);
-    }
-
-    /**
-     * Performs fold to aod animation of the clocks (changes font weight from bold to thin).
-     * This animation is played when AOD is enabled and foldable device is fully folded, it is
-     * displayed on the outer screen
-     */
-    public void animateFoldToAod() {
-        mKeyguardClockSwitchController.animateFoldToAod();
+    public void setHasVisibleNotifications(boolean hasVisibleNotifications) {
+        mKeyguardClockSwitchController.setHasVisibleNotifications(hasVisibleNotifications);
     }
 
     /**
@@ -127,18 +130,28 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Sets a translationY on the views on the keyguard, except on the media view.
-     */
-    public void setTranslationYExcludingMedia(float translationY) {
-        mView.setChildrenTranslationYExcludingMediaView(translationY);
-    }
-
-    /**
      * Set keyguard status view alpha.
      */
     public void setAlpha(float alpha) {
         if (!mKeyguardVisibilityHelper.isVisibilityAnimating()) {
-            mView.setAlpha(alpha);
+            // If we're capable of performing the SmartSpace shared element transition, and we are
+            // going to (we're swiping to dismiss vs. bringing up the PIN screen), then fade out
+            // everything except for the SmartSpace.
+            if (mKeyguardUnlockAnimationController.isUnlockingWithSmartSpaceTransition()) {
+                mView.setChildrenAlphaExcludingClockView(alpha);
+                mKeyguardClockSwitchController.setChildrenAlphaExcludingSmartspace(alpha);
+            } else if (!mKeyguardVisibilityHelper.isVisibilityAnimating()) {
+                // Otherwise, we can just set the alpha for the entire container.
+                mView.setAlpha(alpha);
+
+                // If we previously unlocked with the shared element transition, some child views
+                // might still have alpha = 0f. Set them back to 1f since we're just using the
+                // parent container's alpha.
+                if (mView.getChildrenAlphaExcludingSmartSpace() < 1f) {
+                    mView.setChildrenAlphaExcludingClockView(1f);
+                    mKeyguardClockSwitchController.setChildrenAlphaExcludingSmartspace(1f);
+                }
+            }
         }
     }
 
@@ -169,20 +182,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      */
     public int getLockscreenHeight() {
         return mView.getHeight() - mKeyguardClockSwitchController.getNotificationIconAreaHeight();
-    }
-
-    /**
-     * Get y-bottom position of the currently visible clock.
-     */
-    public int getClockBottom(int statusBarHeaderHeight) {
-        return mKeyguardClockSwitchController.getClockBottom(statusBarHeaderHeight);
-    }
-
-    /**
-     * @return true if the currently displayed clock is top aligned (as opposed to center aligned)
-     */
-    public boolean isClockTopAligned() {
-        return mKeyguardClockSwitchController.isClockTopAligned();
     }
 
     /**
@@ -224,7 +223,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         @Override
         public void onLocaleListChanged() {
             refreshTime();
-            mKeyguardClockSwitchController.onLocaleListChanged();
         }
 
         @Override
@@ -234,6 +232,11 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     };
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onLockScreenModeChanged(int mode) {
+            mKeyguardSliceViewController.updateLockScreenMode(mode);
+        }
+
         @Override
         public void onTimeChanged() {
             refreshTime();
@@ -260,6 +263,19 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         @Override
         public void onUserSwitchComplete(int userId) {
             mKeyguardClockSwitchController.refreshFormat();
+        }
+    };
+
+    private KeyguardStateController.Callback mKeyguardStateControllerCallback =
+            new KeyguardStateController.Callback() {
+        @Override
+        public void onKeyguardShowingChanged() {
+            // If we explicitly re-show the keyguard, make sure that all the child views are
+            // visible. They might have been animating out as part of the SmartSpace shared
+            // element transition.
+            if (mKeyguardStateController.isShowing()) {
+                mView.setChildrenAlphaExcludingClockView(1f);
+            }
         }
     };
 

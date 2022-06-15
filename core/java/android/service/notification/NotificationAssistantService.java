@@ -91,8 +91,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
             = "android.service.notification.NotificationAssistantService";
 
     /**
-     * Data type: int, the feedback rating score provided by user. The score can be any integer
-     *            value depends on the experimental and feedback UX design.
+     * Data type: int, the feedback rating score provided by user
      */
     public static final String FEEDBACK_RATING = "feedback.rating";
 
@@ -130,8 +129,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * A notification was posted by an app. Called before post.
      *
      * <p>Note: this method is only called if you don't override
-     * {@link #onNotificationEnqueued(StatusBarNotification, NotificationChannel)} or
-     * {@link #onNotificationEnqueued(StatusBarNotification, NotificationChannel, RankingMap)}.</p>
+     * {@link #onNotificationEnqueued(StatusBarNotification, NotificationChannel)}.</p>
      *
      * @param sbn the new notification
      * @return an adjustment or null to take no action, within 200ms.
@@ -140,9 +138,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
 
     /**
      * A notification was posted by an app. Called before post.
-     *
-     * <p>Note: this method is only called if you don't override
-     * {@link #onNotificationEnqueued(StatusBarNotification, NotificationChannel, RankingMap)}.</p>
      *
      * @param sbn the new notification
      * @param channel the channel the notification was posted to
@@ -287,7 +282,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param key the notification key
      * @param rankingMap The current ranking map that can be used to retrieve ranking information
      *                   for active notifications.
-     * @param feedback the received feedback, such as {@link #FEEDBACK_RATING rating score}
+     * @param feedback the feedback detail
      */
     public void onNotificationFeedbackReceived(@NonNull String key, @NonNull RankingMap rankingMap,
             @NonNull Bundle feedback) {

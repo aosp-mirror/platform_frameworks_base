@@ -20,6 +20,7 @@ import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
+import android.app.backup.BackupManager;
 import android.app.backup.BackupManager.OperationType;
 import android.app.backup.RestoreSet;
 import android.os.Handler;
@@ -31,11 +32,11 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
-import com.android.server.backup.OperationStorage;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
@@ -51,8 +52,7 @@ import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
-import com.android.server.backup.transport.BackupTransportClient;
-import com.android.server.backup.transport.TransportConnection;
+import com.android.server.backup.transport.TransportClient;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,7 +85,6 @@ public class BackupHandler extends Handler {
     public static final int MSG_STOP = 22;
 
     private final UserBackupManagerService backupManagerService;
-    private final OperationStorage mOperationStorage;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     private final HandlerThread mBackupThread;
@@ -94,12 +93,10 @@ public class BackupHandler extends Handler {
     volatile boolean mIsStopping = false;
 
     public BackupHandler(
-            UserBackupManagerService backupManagerService, OperationStorage operationStorage,
-            HandlerThread backupThread) {
+            UserBackupManagerService backupManagerService, HandlerThread backupThread) {
         super(backupThread.getLooper());
         mBackupThread = backupThread;
         this.backupManagerService = backupManagerService;
-        mOperationStorage = operationStorage;
         mAgentTimeoutParameters = Objects.requireNonNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
@@ -151,16 +148,16 @@ public class BackupHandler extends Handler {
                 backupManagerService.setLastBackupPass(System.currentTimeMillis());
 
                 String callerLogString = "BH/MSG_RUN_BACKUP";
-                TransportConnection transportConnection =
+                TransportClient transportClient =
                         transportManager.getCurrentTransportClient(callerLogString);
-                BackupTransportClient transport =
-                        transportConnection != null
-                                ? transportConnection.connect(callerLogString)
+                IBackupTransport transport =
+                        transportClient != null
+                                ? transportClient.connect(callerLogString)
                                 : null;
                 if (transport == null) {
-                    if (transportConnection != null) {
+                    if (transportClient != null) {
                         transportManager
-                                .disposeOfTransportClient(transportConnection, callerLogString);
+                                .disposeOfTransportClient(transportClient, callerLogString);
                     }
                     Slog.v(TAG, "Backup requested but no transport available");
                     break;
@@ -215,12 +212,10 @@ public class BackupHandler extends Handler {
                         OnTaskFinishedListener listener =
                                 caller ->
                                         transportManager
-                                                .disposeOfTransportClient(transportConnection,
-                                                        caller);
+                                                .disposeOfTransportClient(transportClient, caller);
                         KeyValueBackupTask.start(
                                 backupManagerService,
-                                mOperationStorage,
-                                transportConnection,
+                                transportClient,
                                 transport.transportDirName(),
                                 queue,
                                 oldJournal,
@@ -245,7 +240,7 @@ public class BackupHandler extends Handler {
                 }
 
                 if (!staged) {
-                    transportManager.disposeOfTransportClient(transportConnection, callerLogString);
+                    transportManager.disposeOfTransportClient(transportClient, callerLogString);
                     // if we didn't actually hand off the wakelock, rewind until next time
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.setBackupRunning(false);
@@ -283,8 +278,8 @@ public class BackupHandler extends Handler {
                 // TODO: refactor full backup to be a looper-based state machine
                 // similar to normal backup/restore.
                 AdbBackupParams params = (AdbBackupParams) msg.obj;
-                PerformAdbBackupTask task = new PerformAdbBackupTask(
-                        backupManagerService, mOperationStorage, params.fd,
+                PerformAdbBackupTask task = new PerformAdbBackupTask(backupManagerService,
+                        params.fd,
                         params.observer, params.includeApks, params.includeObbs,
                         params.includeShared, params.doWidgets, params.curPassword,
                         params.encryptPassword, params.allApps, params.includeSystem,
@@ -301,8 +296,7 @@ public class BackupHandler extends Handler {
                 PerformUnifiedRestoreTask task =
                         new PerformUnifiedRestoreTask(
                                 backupManagerService,
-                                mOperationStorage,
-                                params.mTransportConnection,
+                                params.transportClient,
                                 params.observer,
                                 params.monitor,
                                 params.token,
@@ -338,7 +332,7 @@ public class BackupHandler extends Handler {
                 // similar to normal backup/restore.
                 AdbRestoreParams params = (AdbRestoreParams) msg.obj;
                 PerformAdbRestoreTask task = new PerformAdbRestoreTask(backupManagerService,
-                        mOperationStorage, params.fd,
+                        params.fd,
                         params.curPassword, params.encryptPassword,
                         params.observer, params.latch);
                 (new Thread(task, "adb-restore")).start();
@@ -350,7 +344,7 @@ public class BackupHandler extends Handler {
                 Runnable task =
                         new PerformClearTask(
                                 backupManagerService,
-                                params.mTransportConnection,
+                                params.transportClient,
                                 params.packageInfo,
                                 params.listener);
                 task.run();
@@ -370,8 +364,8 @@ public class BackupHandler extends Handler {
                 RestoreGetSetsParams params = (RestoreGetSetsParams) msg.obj;
                 String callerLogString = "BH/MSG_RUN_GET_RESTORE_SETS";
                 try {
-                    BackupTransportClient transport =
-                            params.mTransportConnection.connectOrThrow(callerLogString);
+                    IBackupTransport transport =
+                            params.transportClient.connectOrThrow(callerLogString);
                     sets = transport.getAvailableRestoreSets();
                     // cache the result in the active session
                     synchronized (params.session) {
@@ -465,8 +459,7 @@ public class BackupHandler extends Handler {
 
                 KeyValueBackupTask.start(
                         backupManagerService,
-                        mOperationStorage,
-                        params.mTransportConnection,
+                        params.transportClient,
                         params.dirName,
                         params.kvPackages,
                         /* dataChangedJournal */ null,

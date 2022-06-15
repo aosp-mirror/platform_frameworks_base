@@ -30,61 +30,44 @@ void CanvasStateHelper::resetState(int width, int height) {
     mClipStack.clear();
     mTransformStack.clear();
     mSaveStack.emplace_back();
-    mClipStack.emplace_back();
+    mClipStack.emplace_back().setRect(mInitialBounds);
     mTransformStack.emplace_back();
-
-    clip().bounds = mInitialBounds;
+    mCurrentClipIndex = 0;
+    mCurrentTransformIndex = 0;
 }
 
 bool CanvasStateHelper::internalSave(SaveEntry saveEntry) {
     mSaveStack.push_back(saveEntry);
     if (saveEntry.matrix) {
-        pushEntry(&mTransformStack);
+        // We need to push before accessing transform() to ensure the reference doesn't move
+        // across vector resizes
+        mTransformStack.emplace_back() = transform();
+        mCurrentTransformIndex += 1;
     }
     if (saveEntry.clip) {
-        pushEntry(&mClipStack);
+        // We need to push before accessing clip() to ensure the reference doesn't move
+        // across vector resizes
+        mClipStack.emplace_back() = clip();
+        mCurrentClipIndex += 1;
         return true;
     }
     return false;
 }
 
-void CanvasStateHelper::ConservativeClip::apply(SkClipOp op, const SkMatrix& matrix,
-                                                const SkRect& bounds, bool aa, bool fillsBounds) {
-    this->aa |= aa;
-
-    if (op == SkClipOp::kIntersect) {
-        SkRect devBounds;
-        bool rect = matrix.mapRect(&devBounds, bounds) && fillsBounds;
-        if (!this->bounds.intersect(aa ? devBounds.roundOut() : devBounds.round())) {
-            this->bounds.setEmpty();
-        }
-        this->rect &= rect;
-    } else {
-        // Difference operations subtracts a region from the clip, so conservatively
-        // the bounds remain unchanged and the shape is unlikely to remain a rect.
-        this->rect = false;
-    }
-}
+// Assert that the cast from SkClipOp to SkRegion::Op is valid
+static_assert(static_cast<int>(SkClipOp::kDifference) == SkRegion::Op::kDifference_Op);
+static_assert(static_cast<int>(SkClipOp::kIntersect) == SkRegion::Op::kIntersect_Op);
+static_assert(static_cast<int>(SkClipOp::kUnion_deprecated) == SkRegion::Op::kUnion_Op);
+static_assert(static_cast<int>(SkClipOp::kXOR_deprecated) == SkRegion::Op::kXOR_Op);
+static_assert(static_cast<int>(SkClipOp::kReverseDifference_deprecated) == SkRegion::Op::kReverseDifference_Op);
+static_assert(static_cast<int>(SkClipOp::kReplace_deprecated) == SkRegion::Op::kReplace_Op);
 
 void CanvasStateHelper::internalClipRect(const SkRect& rect, SkClipOp op) {
-    clip().apply(op, transform(), rect, /*aa=*/false, /*fillsBounds=*/true);
+    clip().opRect(rect, transform(), mInitialBounds, (SkRegion::Op)op, false);
 }
 
 void CanvasStateHelper::internalClipPath(const SkPath& path, SkClipOp op) {
-    SkRect bounds = path.getBounds();
-    if (path.isInverseFillType()) {
-        // Toggle op type if the path is inverse filled
-        op = (op == SkClipOp::kIntersect ? SkClipOp::kDifference : SkClipOp::kIntersect);
-    }
-    clip().apply(op, transform(), bounds, /*aa=*/true, /*fillsBounds=*/false);
-}
-
-CanvasStateHelper::ConservativeClip& CanvasStateHelper::clip() {
-    return writableEntry(&mClipStack);
-}
-
-SkMatrix& CanvasStateHelper::transform() {
-    return writableEntry(&mTransformStack);
+    clip().opPath(path, transform(), mInitialBounds, (SkRegion::Op)op, true);
 }
 
 bool CanvasStateHelper::internalRestore() {
@@ -97,47 +80,45 @@ bool CanvasStateHelper::internalRestore() {
     mSaveStack.pop_back();
     bool needsRestorePropagation = entry.layer;
     if (entry.matrix) {
-        popEntry(&mTransformStack);
+        mTransformStack.pop_back();
+        mCurrentTransformIndex -= 1;
     }
     if (entry.clip) {
-        popEntry(&mClipStack);
+        // We need to push before accessing clip() to ensure the reference doesn't move
+        // across vector resizes
+        mClipStack.pop_back();
+        mCurrentClipIndex -= 1;
         needsRestorePropagation = true;
     }
     return needsRestorePropagation;
 }
 
 SkRect CanvasStateHelper::getClipBounds() const {
-    SkIRect bounds = clip().bounds;
+    SkIRect ibounds = clip().getBounds();
 
-    SkMatrix inverse;
-    // if we can't invert the CTM, we can't return local clip bounds
-    if (bounds.isEmpty() || !transform().invert(&inverse)) {
+    if (ibounds.isEmpty()) {
         return SkRect::MakeEmpty();
     }
 
-    return inverse.mapRect(SkRect::Make(bounds));
-}
+    SkMatrix inverse;
+    // if we can't invert the CTM, we can't return local clip bounds
+    if (!transform().invert(&inverse)) {
+        return SkRect::MakeEmpty();
+    }
 
-bool CanvasStateHelper::ConservativeClip::quickReject(const SkMatrix& matrix,
-                                                      const SkRect& bounds) const {
-    SkRect devRect = matrix.mapRect(bounds);
-    return devRect.isFinite() &&
-           SkIRect::Intersects(this->bounds, aa ? devRect.roundOut() : devRect.round());
+    SkRect ret = SkRect::MakeEmpty();
+    inverse.mapRect(&ret, SkRect::Make(ibounds));
+    return ret;
 }
 
 bool CanvasStateHelper::quickRejectRect(float left, float top, float right, float bottom) const {
-    return clip().quickReject(transform(), SkRect::MakeLTRB(left, top, right, bottom));
+    // TODO: Implement
+    return false;
 }
 
 bool CanvasStateHelper::quickRejectPath(const SkPath& path) const {
-    if (this->isClipEmpty()) {
-        // reject everything (prioritized above path inverse fill type).
-        return true;
-    } else {
-        // Don't reject inverse-filled paths, since even if they are "empty" of points/verbs,
-        // they fill out the entire clip.
-        return !path.isInverseFillType() && clip().quickReject(transform(), path.getBounds());
-    }
+    // TODO: Implement
+    return false;
 }
 
 } // namespace android::uirenderer

@@ -21,12 +21,13 @@ import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertNotNull
 import junit.framework.Assert.assertNull
 import junit.framework.Assert.assertTrue
 import junit.framework.AssertionFailedError
-import org.junit.After
+import kotlin.concurrent.thread
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,16 +40,13 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Spy
 import org.mockito.junit.MockitoJUnit
-import kotlin.concurrent.thread
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class ActivityLaunchAnimatorTest : SysuiTestCase() {
     private val launchContainer = LinearLayout(mContext)
-    private val testLaunchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
     @Mock lateinit var callback: ActivityLaunchAnimator.Callback
-    @Mock lateinit var listener: ActivityLaunchAnimator.Listener
     @Spy private val controller = TestLaunchAnimatorController(launchContainer)
     @Mock lateinit var iCallback: IRemoteAnimationFinishedCallback
     @Mock lateinit var failHandler: Log.TerribleFailureHandler
@@ -58,14 +56,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        activityLaunchAnimator = ActivityLaunchAnimator(testLaunchAnimator, testLaunchAnimator)
-        activityLaunchAnimator.callback = callback
-        activityLaunchAnimator.addListener(listener)
-    }
-
-    @After
-    fun tearDown() {
-        activityLaunchAnimator.removeListener(listener)
+        activityLaunchAnimator = ActivityLaunchAnimator(callback, mContext)
     }
 
     private fun startIntentWithAnimation(
@@ -129,11 +120,12 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun animatesIfActivityIsAlreadyOpenAndIsOnKeyguard() {
         `when`(callback.isOnKeyguard()).thenReturn(true)
+        val animator = ActivityLaunchAnimator(callback, context)
 
         val willAnimateCaptor = ArgumentCaptor.forClass(Boolean::class.java)
         var animationAdapter: RemoteAnimationAdapter? = null
 
-        startIntentWithAnimation(activityLaunchAnimator) { adapter ->
+        startIntentWithAnimation(animator) { adapter ->
             animationAdapter = adapter
             ActivityManager.START_DELIVERED_TO_TOP
         }
@@ -182,7 +174,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         val runner = activityLaunchAnimator.createRunner(controller)
         runner.onAnimationStart(0, arrayOf(fakeWindow()), emptyArray(), emptyArray(), iCallback)
         waitForIdleSync()
-        verify(listener).onLaunchAnimationStart()
+        verify(callback).setBlursDisabledForAppLaunch(eq(true))
         verify(controller).onLaunchAnimationStart(anyBoolean())
     }
 
@@ -204,7 +196,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
         return RemoteAnimationTarget(
                 0, RemoteAnimationTarget.MODE_OPENING, SurfaceControl(), false, Rect(), Rect(), 0,
                 Point(), Rect(), bounds, WindowConfiguration(), false, SurfaceControl(), Rect(),
-                taskInfo, false
+                taskInfo
         )
     }
 }
@@ -216,7 +208,7 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
 private class TestLaunchAnimatorController(
     override var launchContainer: ViewGroup
 ) : ActivityLaunchAnimator.Controller {
-    override fun createAnimatorState() = LaunchAnimator.State(
+    override fun createAnimatorState() = ActivityLaunchAnimator.State(
             top = 100,
             bottom = 200,
             left = 300,
@@ -240,7 +232,7 @@ private class TestLaunchAnimatorController(
     }
 
     override fun onLaunchAnimationProgress(
-        state: LaunchAnimator.State,
+        state: ActivityLaunchAnimator.State,
         progress: Float,
         linearProgress: Float
     ) {

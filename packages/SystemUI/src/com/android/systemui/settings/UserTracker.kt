@@ -46,8 +46,6 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
 
     /**
      * List of profiles associated with the current user.
-     *
-     * Quiet work profiles will still appear here, but will have the `QUIET_MODE` flag.
      */
     val userProfiles: List<UserInfo>
 

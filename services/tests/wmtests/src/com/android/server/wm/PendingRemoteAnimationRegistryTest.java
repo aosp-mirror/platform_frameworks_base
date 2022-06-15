@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import android.app.ActivityOptions;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.RemoteAnimationAdapter;
 
@@ -46,7 +45,6 @@ import org.mockito.MockitoAnnotations;
 public class PendingRemoteAnimationRegistryTest {
 
     @Mock RemoteAnimationAdapter mAdapter;
-    @Mock IBinder mLaunchCookie;
     private PendingRemoteAnimationRegistry mRegistry;
     private final OffsettableClock mClock = new OffsettableClock.Stopped();
     private TestHandler mHandler;
@@ -67,7 +65,7 @@ public class PendingRemoteAnimationRegistryTest {
 
     @Test
     public void testOverrideActivityOptions() {
-        mRegistry.addPendingAnimation("com.android.test", mAdapter, null /* launchCookie */);
+        mRegistry.addPendingAnimation("com.android.test", mAdapter);
         ActivityOptions opts = ActivityOptions.makeBasic();
         opts = mRegistry.overrideOptionsIfNeeded("com.android.test", opts);
         assertEquals(mAdapter, opts.getRemoteAnimationAdapter());
@@ -75,24 +73,15 @@ public class PendingRemoteAnimationRegistryTest {
 
     @Test
     public void testOverrideActivityOptions_null() {
-        mRegistry.addPendingAnimation("com.android.test", mAdapter, null /* launchCookie */);
+        mRegistry.addPendingAnimation("com.android.test", mAdapter);
         final ActivityOptions opts = mRegistry.overrideOptionsIfNeeded("com.android.test", null);
         assertNotNull(opts);
         assertEquals(mAdapter, opts.getRemoteAnimationAdapter());
     }
 
     @Test
-    public void testOverrideLaunchCookie() {
-        mRegistry.addPendingAnimation("com.android.test", mAdapter, mLaunchCookie);
-        ActivityOptions opts = ActivityOptions.makeBasic();
-        opts = mRegistry.overrideOptionsIfNeeded("com.android.test", opts);
-        assertNotNull(opts);
-        assertEquals(mLaunchCookie, opts.getLaunchCookie());
-    }
-
-    @Test
     public void testTimeout() {
-        mRegistry.addPendingAnimation("com.android.test", mAdapter, null /* launchCookie */);
+        mRegistry.addPendingAnimation("com.android.test", mAdapter);
         mClock.fastForward(5000);
         mHandler.timeAdvance();
         assertNull(mRegistry.overrideOptionsIfNeeded("com.android.test", null));
@@ -100,10 +89,10 @@ public class PendingRemoteAnimationRegistryTest {
 
     @Test
     public void testTimeout_overridenEntry() {
-        mRegistry.addPendingAnimation("com.android.test", mAdapter, null /* launchCookie */);
+        mRegistry.addPendingAnimation("com.android.test", mAdapter);
         mClock.fastForward(2500);
         mHandler.timeAdvance();
-        mRegistry.addPendingAnimation("com.android.test", mAdapter, null /* launchCookie */);
+        mRegistry.addPendingAnimation("com.android.test", mAdapter);
         mClock.fastForward(1000);
         mHandler.timeAdvance();
         final ActivityOptions opts = mRegistry.overrideOptionsIfNeeded("com.android.test", null);

@@ -15,10 +15,7 @@
  */
 package android.accounts;
 
-import static android.app.admin.DevicePolicyResources.Strings.Core.CANT_ADD_ACCOUNT_MESSAGE;
-
 import android.app.Activity;
-import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -193,6 +190,10 @@ public class ChooseTypeAndAccountActivity extends Activity
             mAccounts = getAcceptableAccountChoices(AccountManager.get(this));
         }
 
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "selected account name is " + mSelectedAccountName);
+        }
+
         mPossiblyVisibleAccounts = new ArrayList<>(mAccounts.size());
         for (Map.Entry<Account, Integer> entry : mAccounts.entrySet()) {
             if (AccountManager.VISIBILITY_NOT_VISIBLE != entry.getValue()) {
@@ -202,14 +203,7 @@ public class ChooseTypeAndAccountActivity extends Activity
 
         if (mPossiblyVisibleAccounts.isEmpty() && mDisallowAddAccounts) {
             requestWindowFeature(Window.FEATURE_NO_TITLE);
-
             setContentView(R.layout.app_not_authorized);
-            TextView view = findViewById(R.id.description);
-            String text = getSystemService(DevicePolicyManager.class).getResources().getString(
-                    CANT_ADD_ACCOUNT_MESSAGE,
-                    () -> getString(R.string.error_message_change_not_allowed));
-            view.setText(text);
-
             mDontShowPicker = true;
         }
 
@@ -308,7 +302,7 @@ public class ChooseTypeAndAccountActivity extends Activity
             if (data != null && data.getExtras() != null) data.getExtras().keySet();
             Bundle extras = data != null ? data.getExtras() : null;
             Log.v(TAG, "ChooseTypeAndAccountActivity.onActivityResult(reqCode=" + requestCode
-                    + ", resCode=" + resultCode + ")");
+                    + ", resCode=" + resultCode + ", extras=" + extras + ")");
         }
 
         // we got our result, so clear the fact that we had a pending request
@@ -430,8 +424,8 @@ public class ChooseTypeAndAccountActivity extends Activity
     }
 
     private void onAccountSelected(Account account) {
-        Log.d(TAG, "selected account " + account.toSafeString());
-        setResultAndFinish(account.name, account.type);
+      Log.d(TAG, "selected account " + account);
+      setResultAndFinish(account.name, account.type);
     }
 
     private void setResultAndFinish(final String accountName, final String accountType) {
@@ -457,8 +451,9 @@ public class ChooseTypeAndAccountActivity extends Activity
         setResult(Activity.RESULT_OK, new Intent().putExtras(bundle));
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "ChooseTypeAndAccountActivity.setResultAndFinish: selected account "
-                    + account.toSafeString());
+                    + accountName + ", " + accountType);
         }
+
         finish();
     }
 

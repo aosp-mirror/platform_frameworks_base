@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.carrier;
 
-import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.text.TextUtils;
@@ -26,12 +25,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
-import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 
 import java.util.Objects;
@@ -43,7 +40,6 @@ public class QSCarrier extends LinearLayout {
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
     private View mSpacer;
-    @Nullable
     private CellSignalState mLastSignalState;
     private boolean mProviderModelInitialized = false;
     private boolean mIsSingleCarrier;
@@ -129,7 +125,7 @@ public class QSCarrier extends LinearLayout {
         return true;
     }
 
-    private boolean hasValidTypeContentDescription(@Nullable String typeContentDescription) {
+    private boolean hasValidTypeContentDescription(String typeContentDescription) {
         return TextUtils.equals(typeContentDescription,
                 mContext.getString(R.string.data_connection_no_internet))
                 || TextUtils.equals(typeContentDescription,
@@ -147,9 +143,5 @@ public class QSCarrier extends LinearLayout {
 
     public void setCarrierText(CharSequence text) {
         mCarrierText.setText(text);
-    }
-
-    public void updateTextAppearance(@StyleRes int resId) {
-        FontSizeUtils.updateFontSizeFromStyle(mCarrierText, resId);
     }
 }

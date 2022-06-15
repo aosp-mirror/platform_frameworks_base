@@ -19,7 +19,6 @@ package com.android.server.timezonedetector.location;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.platform.test.annotations.Presubmit;
-import android.service.timezone.TimeZoneProviderEvent;
 import android.service.timezone.TimeZoneProviderSuggestion;
 
 import org.junit.Test;
@@ -54,17 +53,14 @@ public class ZoneInfoDbTimeZoneProviderEventPreProcessorTest {
         for (String timeZone : nonExistingTimeZones) {
             TimeZoneProviderEvent event = timeZoneProviderEvent(timeZone);
 
-            TimeZoneProviderEvent expectedResultEvent =
-                    TimeZoneProviderEvent.createUncertainEvent(event.getCreationElapsedMillis());
             assertWithMessage(timeZone + " is not a valid time zone")
                     .that(mPreProcessor.preProcess(event))
-                    .isEqualTo(expectedResultEvent);
+                    .isEqualTo(TimeZoneProviderEvent.createUncertainEvent());
         }
     }
 
     private static TimeZoneProviderEvent timeZoneProviderEvent(String... timeZoneIds) {
         return TimeZoneProviderEvent.createSuggestionEvent(
-                ARBITRARY_TIME_MILLIS,
                 new TimeZoneProviderSuggestion.Builder()
                         .setTimeZoneIds(Arrays.asList(timeZoneIds))
                         .setElapsedRealtimeMillis(ARBITRARY_TIME_MILLIS)

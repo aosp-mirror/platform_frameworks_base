@@ -33,13 +33,11 @@ import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_LOCKOUT_TIMED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENABLED_FOR_APPS;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENROLLED;
 import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NO_HARDWARE;
-import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_SENSOR_PRIVACY_ENABLED;
 import static com.android.server.biometrics.PreAuthInfo.CREDENTIAL_NOT_ENROLLED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -52,6 +50,7 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
@@ -63,6 +62,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import java.util.List;
@@ -280,9 +280,6 @@ public class Utils {
             case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
                 biometricManagerCode = BiometricManager.BIOMETRIC_SUCCESS;
                 break;
-            case BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED:
-                biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
-                break;
             default:
                 Slog.e(BiometricService.TAG, "Unhandled result code: " + biometricConstantsCode);
                 biometricManagerCode = BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE;
@@ -342,8 +339,7 @@ public class Utils {
 
             case BIOMETRIC_LOCKOUT_PERMANENT:
                 return BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-            case BIOMETRIC_SENSOR_PRIVACY_ENABLED:
-                return BiometricConstants.BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED;
+
             case BIOMETRIC_DISABLED_BY_DEVICE_POLICY:
             case BIOMETRIC_HARDWARE_NOT_DETECTED:
             case BIOMETRIC_NOT_ENABLED_FOR_APPS:
@@ -546,36 +542,13 @@ public class Utils {
         }
     }
 
-    /**
-     * Checks if a client package is running in the background.
-     *
-     * @param clientPackage The name of the package to be checked.
-     * @return Whether the client package is running in background
-     */
-    public static boolean isBackground(String clientPackage) {
-        Slog.v(TAG, "Checking if the authenticating is in background,"
-                + " clientPackage:" + clientPackage);
-        final List<ActivityManager.RunningTaskInfo> tasks =
-                ActivityTaskManager.getInstance().getTasks(Integer.MAX_VALUE);
-
-        if (tasks == null || tasks.isEmpty()) {
-            Slog.d(TAG, "No running tasks reported");
-            return true;
+    public static int getUdfpsAuthReason(@NonNull AuthenticationClient<?> client) {
+        if (client.isKeyguard()) {
+            return IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
+        } else if (client.isBiometricPrompt()) {
+            return IUdfpsOverlayController.REASON_AUTH_BP;
+        } else {
+            return IUdfpsOverlayController.REASON_AUTH_FPM_OTHER;
         }
-
-        for (ActivityManager.RunningTaskInfo taskInfo : tasks) {
-            final ComponentName topActivity = taskInfo.topActivity;
-            if (topActivity != null) {
-                final String topPackage = topActivity.getPackageName();
-                if (topPackage.contentEquals(clientPackage) && taskInfo.isVisible()) {
-                    return false;
-                } else {
-                    Slog.i(TAG, "Running task, top: " + topPackage
-                            + ", isVisible: " + taskInfo.isVisible());
-                }
-            }
-        }
-
-        return true;
     }
 }

@@ -96,9 +96,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         @UiEvent(doc = "The overview button was pressed in the navigation bar.")
         NAVBAR_OVERVIEW_BUTTON_TAP(535),
 
-        @UiEvent(doc = "The ime switcher button was pressed in the navigation bar.")
-        NAVBAR_IME_SWITCHER_BUTTON_TAP(923),
-
         @UiEvent(doc = "The home button was long-pressed in the navigation bar.")
         NAVBAR_HOME_BUTTON_LONGPRESS(536),
 
@@ -171,7 +168,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         setClickable(true);
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-        mRipple = new KeyButtonRipple(context, this, R.dimen.key_button_ripple_max_width);
+        mRipple = new KeyButtonRipple(context, this);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         mInputManager = manager;
         setBackground(mRipple);
@@ -273,8 +270,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 mLongClicked = false;
                 setPressed(true);
 
-                mTouchDownX = (int) ev.getX();
-                mTouchDownY = (int) ev.getY();
+                // Use raw X and Y to detect gestures in case a parent changes the x and y values
+                mTouchDownX = (int) ev.getRawX();
+                mTouchDownY = (int) ev.getRawY();
                 if (mCode != KEYCODE_UNKNOWN) {
                     sendEvent(KeyEvent.ACTION_DOWN, 0, mDownTime);
                 } else {
@@ -288,8 +286,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_MOVE:
-                x = (int) ev.getX();
-                y = (int) ev.getY();
+                x = (int)ev.getRawX();
+                y = (int)ev.getRawY();
 
                 float slop = QuickStepContract.getQuickStepTouchSlopPx(getContext());
                 if (Math.abs(x - mTouchDownX) > slop || Math.abs(y - mTouchDownY) > slop) {

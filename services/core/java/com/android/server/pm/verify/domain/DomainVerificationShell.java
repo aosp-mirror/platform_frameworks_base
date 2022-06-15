@@ -32,7 +32,6 @@ import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 
 import com.android.modules.utils.BasicShellCommandHandler;
-import com.android.server.pm.Computer;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -40,6 +39,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 
 public class DomainVerificationShell {
 
@@ -599,8 +599,8 @@ public class DomainVerificationShell {
         void verifyPackages(@Nullable List<String> packageNames, boolean reVerify);
 
         /**
-         * @see DomainVerificationManagerInternal#printState(Computer, IndentingPrintWriter, String,
-         * Integer)
+         * @see DomainVerificationManagerInternal#printState(IndentingPrintWriter, String, Integer,
+         * Function)
          */
         void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
                 @Nullable @UserIdInt Integer userId) throws NameNotFoundException;

@@ -15,12 +15,13 @@
  */
 package com.android.keyguard;
 
+import android.app.admin.DevicePolicyManager;
+import android.graphics.Bitmap;
 import android.hardware.biometrics.BiometricSourceType;
+import android.media.AudioManager;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicyConstants;
-
-import androidx.annotation.Nullable;
 
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -67,6 +68,13 @@ public class KeyguardUpdateMonitorCallback {
     public void onRefreshCarrierInfo() { }
 
     /**
+     * Called when the ringer mode changes.
+     * @param state the current ringer state, as defined in
+     * {@link AudioManager#RINGER_MODE_CHANGED_ACTION}
+     */
+    public void onRingerModeChanged(int state) { }
+
+    /**
      * Called when the phone state changes. String will be one of:
      * {@link TelephonyManager#EXTRA_STATE_IDLE}
      * {@link TelephonyManager@EXTRA_STATE_RINGING}
@@ -80,12 +88,6 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onKeyguardVisibilityChanged(boolean showing) { }
 
-    /**
-     * Called when the keyguard occluded state changes.
-     * @param occluded Indicates if the keyguard is now occluded.
-     */
-    public void onKeyguardOccludedChanged(boolean occluded) { }
-
     public void onKeyguardVisibilityChangedRaw(boolean showing) {
         final long now = SystemClock.elapsedRealtime();
         if (showing == mShowing
@@ -97,24 +99,10 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the keyguard enters or leaves bouncer mode.
-     * @param bouncerIsOrWillBeShowing if true, keyguard is showing the bouncer or transitioning
-     *                                 from/to bouncer mode.
+     * @param bouncer if true, keyguard is showing the bouncer or transitioning from/to bouncer
+     *                mode.
      */
-    public void onKeyguardBouncerStateChanged(boolean bouncerIsOrWillBeShowing) { }
-
-    /**
-     * Called when the keyguard fully transitions to the bouncer or is no longer the bouncer
-     * @param bouncerIsFullyShowing if true, keyguard is fully showing the bouncer
-     */
-    public void onKeyguardBouncerFullyShowingChanged(boolean bouncerIsFullyShowing) { }
-
-    /**
-     * Called when the dismissing animation of keyguard and surfaces behind is finished.
-     * If the surface behind is the Launcher, we may still be playing in-window animations
-     * when this is called (since it's only called once we dismiss the keyguard and end the
-     * remote animation).
-     */
-    public void onKeyguardDismissAnimationFinished() { }
+    public void onKeyguardBouncerChanged(boolean bouncer) { }
 
     /**
      * Called when visibility of lockscreen clock changes, such as when
@@ -126,6 +114,12 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the device becomes provisioned
      */
     public void onDeviceProvisioned() { }
+
+    /**
+     * Called when the device policy changes.
+     * See {@link DevicePolicyManager#ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED}
+     */
+    public void onDevicePolicyManagerStateChanged() { }
 
     /**
      * Called when the user change begins.
@@ -166,7 +160,14 @@ public class KeyguardUpdateMonitorCallback {
     public void onEmergencyCallAction() { }
 
     /**
-     * Called when the device has started waking up and after biometric states are updated.
+     * Called when the transport background changes.
+     * @param bitmap
+     */
+    public void onSetBackground(Bitmap bitmap) {
+    }
+
+    /**
+     * Called when the device has started waking up.
      *
      * @deprecated use {@link com.android.systemui.keyguard.WakefulnessLifecycle}.
      */
@@ -174,8 +175,7 @@ public class KeyguardUpdateMonitorCallback {
     public void onStartedWakingUp() { }
 
     /**
-     * Called when the device has started going to sleep and after biometric recognized
-     * states are reset.
+     * Called when the device has started going to sleep.
      * @param why see {@link #onFinishedGoingToSleep(int)}
      *
      * @deprecated use {@link com.android.systemui.keyguard.WakefulnessLifecycle}.
@@ -195,6 +195,22 @@ public class KeyguardUpdateMonitorCallback {
     public void onFinishedGoingToSleep(int why) { }
 
     /**
+     * Called when the screen has been turned on.
+     *
+     * @deprecated use {@link com.android.systemui.keyguard.ScreenLifecycle}.
+     */
+    @Deprecated
+    public void onScreenTurnedOn() { }
+
+    /**
+     * Called when the screen has been turned off.
+     *
+     * @deprecated use {@link com.android.systemui.keyguard.ScreenLifecycle}.
+     */
+    @Deprecated
+    public void onScreenTurnedOff() { }
+
+    /**
      * Called when trust changes for a user.
      */
     public void onTrustChanged(int userId) { }
@@ -210,20 +226,13 @@ public class KeyguardUpdateMonitorCallback {
     public void onTrustGrantedWithFlags(int flags, int userId) { }
 
     /**
-     * Called when setting the trust granted message.
-     */
-    public void showTrustGrantedMessage(@Nullable CharSequence message) { }
-
-    /**
      * Called when a biometric has been acquired.
      * <p>
      * It is guaranteed that either {@link #onBiometricAuthenticated} or
      * {@link #onBiometricAuthFailed(BiometricSourceType)} is called after this method eventually.
      * @param biometricSourceType
-     * @param acquireInfo see {@link android.hardware.biometrics.BiometricFaceConstants} and
-     *                    {@link android.hardware.biometrics.BiometricFingerprintConstants}
      */
-    public void onBiometricAcquired(BiometricSourceType biometricSourceType, int acquireInfo) { }
+    public void onBiometricAcquired(BiometricSourceType biometricSourceType) { }
 
     /**
      * Called when a biometric couldn't be authenticated.
@@ -277,9 +286,9 @@ public class KeyguardUpdateMonitorCallback {
     public void onStrongAuthStateChanged(int userId) { }
 
     /**
-     * When the current user's locked out state changed.
+     * Called when the state whether we have a lockscreen wallpaper has changed.
      */
-    public void onLockedOutStateChanged(BiometricSourceType biometricSourceType) { }
+    public void onHasLockscreenWallpaperChanged(boolean hasLockscreenWallpaper) { }
 
     /**
      * Called when the dream's window state is changed.
@@ -298,6 +307,7 @@ public class KeyguardUpdateMonitorCallback {
      */
     public void onTrustAgentErrorMessage(CharSequence message) { }
 
+
     /**
      * Called when a value of logout enabled is change.
      */
@@ -314,9 +324,9 @@ public class KeyguardUpdateMonitorCallback {
     public void onSecondaryLockscreenRequirementChanged(int userId) { }
 
     /**
-     * Called when device policy manager state changes.
+     * Called to switch lock screen layout/clock layouts
      */
-    public void onDevicePolicyManagerStateChanged() { }
+    public void onLockScreenModeChanged(int mode) { }
 
     /**
      * Called when notifying user to unlock in order to use NFC.

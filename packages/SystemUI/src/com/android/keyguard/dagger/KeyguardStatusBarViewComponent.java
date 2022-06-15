@@ -19,7 +19,6 @@ package com.android.keyguard.dagger;
 import com.android.keyguard.KeyguardStatusViewController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -35,10 +34,7 @@ public interface KeyguardStatusBarViewComponent {
     /** Simple factory for {@link KeyguardStatusBarViewComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        KeyguardStatusBarViewComponent build(
-                @BindsInstance KeyguardStatusBarView view,
-                @BindsInstance NotificationPanelViewController.NotificationPanelViewStateProvider
-                        notificationPanelViewStateProvider);
+        KeyguardStatusBarViewComponent build(@BindsInstance KeyguardStatusBarView view);
     }
 
     /** Builds a {@link KeyguardStatusViewController}. */

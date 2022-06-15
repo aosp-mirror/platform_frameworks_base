@@ -305,11 +305,6 @@ public class RuleIndexingDetailsIdentifierTest {
             }
 
             @Override
-            public boolean isAppCertificateLineageFormula() {
-                return false;
-            }
-
-            @Override
             public boolean isInstallerFormula() {
                 return false;
             }

@@ -85,12 +85,8 @@ public class SectionHeaderView extends StackScrollerDecorView {
         return true;
     }
 
-    /**
-     * Show the clear section [X] button
-     * @param enabled
-     */
-    public void setClearSectionButtonEnabled(boolean enabled) {
-        mClearAllButton.setVisibility(enabled ? View.VISIBLE : View.GONE);
+    void setAreThereDismissableGentleNotifs(boolean areThereDismissableGentleNotifs) {
+        mClearAllButton.setVisibility(areThereDismissableGentleNotifs ? View.VISIBLE : View.GONE);
     }
 
     @Override

@@ -109,19 +109,15 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     public static class GnssHalBatchingMode {
 
         public final long PeriodNanos;
-        public final float MinUpdateDistanceMeters;
         public final boolean WakeOnFifoFull;
 
         GnssHalBatchingMode() {
             PeriodNanos = 0;
-            MinUpdateDistanceMeters = 0.0f;
             WakeOnFifoFull = false;
         }
 
-        public GnssHalBatchingMode(long periodNanos, float minUpdateDistanceMeters,
-                boolean wakeOnFifoFull) {
+        public GnssHalBatchingMode(long periodNanos, boolean wakeOnFifoFull) {
             PeriodNanos = periodNanos;
-            MinUpdateDistanceMeters = minUpdateDistanceMeters;
             WakeOnFifoFull = wakeOnFifoFull;
         }
 
@@ -136,13 +132,12 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
 
             GnssHalBatchingMode that = (GnssHalBatchingMode) o;
             return PeriodNanos == that.PeriodNanos
-                    && MinUpdateDistanceMeters == that.MinUpdateDistanceMeters
                     && WakeOnFifoFull == that.WakeOnFifoFull;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(PeriodNanos, MinUpdateDistanceMeters, WakeOnFifoFull);
+            return Objects.hash(PeriodNanos, WakeOnFifoFull);
         }
     }
 
@@ -239,7 +234,6 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
         private boolean mMeasurementCollectionStarted = false;
         private boolean mMeasurementCollectionFullTracking = false;
         private boolean mMeasurementCollectionCorrVecOutputsEnabled = false;
-        private int mMeasurementCollectionIntervalMillis = 0;
         private GnssHalPositionMode mPositionMode = new GnssHalPositionMode();
         private GnssHalBatchingMode mBatchingMode = new GnssHalBatchingMode();
         private final ArrayList<Location> mBatchedLocations = new ArrayList<>();
@@ -434,15 +428,11 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     }
 
     @Override
-    protected void injectLocation(@GnssLocationFlags int gnssLocationFlags, double latitude,
-            double longitude, double altitude, float speed, float bearing, float horizontalAccuracy,
-            float verticalAccuracy, float speedAccuracy, float bearingAccuracy, long timestamp,
-            @GnssRealtimeFlags int elapsedRealtimeFlags, long elapsedRealtimeNanos,
-            double elapsedRealtimeUncertaintyNanos) {
+    protected void injectLocation(double latitude, double longitude, float accuracy) {
         mState.mInjectedLocation = new Location("injected");
         mState.mInjectedLocation.setLatitude(latitude);
         mState.mInjectedLocation.setLongitude(longitude);
-        mState.mInjectedLocation.setAccuracy(horizontalAccuracy);
+        mState.mInjectedLocation.setAccuracy(accuracy);
     }
 
     @Override
@@ -533,11 +523,10 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
 
     @Override
     protected boolean startMeasurementCollection(boolean enableFullTracking,
-            boolean enableCorrVecOutputs, int intervalMillis) {
+            boolean enableCorrVecOutputs) {
         mState.mMeasurementCollectionStarted = true;
         mState.mMeasurementCollectionFullTracking = enableFullTracking;
         mState.mMeasurementCollectionCorrVecOutputsEnabled = enableCorrVecOutputs;
-        mState.mMeasurementCollectionIntervalMillis = intervalMillis;
         return true;
     }
 
@@ -546,7 +535,6 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
         mState.mMeasurementCollectionStarted = false;
         mState.mMeasurementCollectionFullTracking = false;
         mState.mMeasurementCollectionCorrVecOutputsEnabled = false;
-        mState.mMeasurementCollectionIntervalMillis = 0;
         return true;
     }
 
@@ -575,11 +563,9 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     protected void cleanupBatching() {}
 
     @Override
-    protected boolean startBatch(long periodNanos, float minUpdateDistanceMeters,
-            boolean wakeOnFifoFull) {
+    protected boolean startBatch(long periodNanos, boolean wakeOnFifoFull) {
         mState.mBatchingStarted = true;
-        mState.mBatchingMode = new GnssHalBatchingMode(periodNanos, minUpdateDistanceMeters,
-                wakeOnFifoFull);
+        mState.mBatchingMode = new GnssHalBatchingMode(periodNanos, wakeOnFifoFull);
         return true;
     }
 
@@ -680,8 +666,7 @@ public final class FakeGnssHal extends GnssNative.GnssHal {
     protected void setAgpsSetId(int type, String setId) {}
 
     @Override
-    protected void setAgpsReferenceLocationCellId(int type, int mcc, int mnc, int lac, long cid,
-            int tac, int pcid, int arfcn) {}
+    protected void setAgpsReferenceLocationCellId(int type, int mcc, int mnc, int lac, int cid) {}
 
     @Override
     protected boolean isPsdsSupported() {

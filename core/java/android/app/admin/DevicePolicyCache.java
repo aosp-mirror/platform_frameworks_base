@@ -41,7 +41,8 @@ public abstract class DevicePolicyCache {
     /**
      * See {@link DevicePolicyManager#getScreenCaptureDisabled}
      */
-    public abstract boolean isScreenCaptureAllowed(@UserIdInt int userHandle);
+    public abstract boolean isScreenCaptureAllowed(@UserIdInt int userHandle,
+            boolean ownerCanAddInternalSystemWindow);
 
     /**
      * Caches {@link DevicePolicyManager#getPasswordQuality(android.content.ComponentName)} of the
@@ -69,7 +70,8 @@ public abstract class DevicePolicyCache {
         private static final EmptyDevicePolicyCache INSTANCE = new EmptyDevicePolicyCache();
 
         @Override
-        public boolean isScreenCaptureAllowed(int userHandle) {
+        public boolean isScreenCaptureAllowed(int userHandle,
+                boolean ownerCanAddInternalSystemWindow) {
             return true;
         }
 

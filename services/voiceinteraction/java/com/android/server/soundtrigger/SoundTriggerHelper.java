@@ -36,6 +36,7 @@ import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
+import android.hardware.soundtrigger.SoundTrigger.SoundModelEvent;
 import android.hardware.soundtrigger.SoundTriggerModule;
 import android.os.Binder;
 import android.os.DeadObjectException;
@@ -108,6 +109,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private boolean mCallActive = false;
     private @SoundTriggerPowerSaveMode int mSoundTriggerPowerSaveMode =
             PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
+    // Indicates if the native sound trigger service is disabled or not.
+    // This is an indirect indication of the microphone being open in some other application.
+    private boolean mServiceDisabled = false;
 
     // Whether ANY recognition (keyphrase or generic) has been requested.
     private boolean mRecognitionRequested = false;
@@ -395,8 +399,20 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 return STATUS_OK;
             }
 
-            return updateRecognitionLocked(modelData,
+            int status = prepareForRecognition(modelData);
+            if (status != STATUS_OK) {
+                Slog.w(TAG, "startRecognition failed to prepare model for recognition");
+                return status;
+            }
+            status = startRecognitionLocked(modelData,
                     false /* Don't notify for synchronous calls */);
+
+            // Initialize power save, call active state monitoring logic.
+            if (status == STATUS_OK) {
+                initializeDeviceStateListeners();
+            }
+
+            return status;
         }
     }
 
@@ -545,7 +561,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
         }
 
-        if (unloadModel && (modelData.isModelLoaded() || modelData.isStopPending())) {
+        if (unloadModel && modelData.isModelLoaded()) {
             Slog.d(TAG, "Unloading previously loaded stale model.");
             if (mModule == null) {
                 return STATUS_ERROR;
@@ -818,7 +834,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        if (!event.recognitionStillActive) {
+        if (event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
             model.setStopped();
         }
 
@@ -846,19 +862,23 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     @Override
-    public void onModelUnloaded(int modelHandle) {
-        if (DBG) Slog.d(TAG, "onModelUnloaded: " + modelHandle);
+    public void onSoundModelUpdate(SoundModelEvent event) {
+        if (event == null) {
+            Slog.w(TAG, "Invalid sound model event!");
+            return;
+        }
+        if (DBG) Slog.d(TAG, "onSoundModelUpdate: " + event);
         synchronized (mLock) {
             MetricsLogger.count(mContext, "sth_sound_model_updated", 1);
-            onModelUnloadedLocked(modelHandle);
+            onSoundModelUpdatedLocked(event);
         }
     }
 
     @Override
-    public void onResourcesAvailable() {
-        if (DBG) Slog.d(TAG, "onResourcesAvailable");
+    public void onServiceStateChange(int state) {
+        if (DBG) Slog.d(TAG, "onServiceStateChange, state: " + state);
         synchronized (mLock) {
-            onResourcesAvailableLocked();
+            onServiceStateChangedLocked(SoundTrigger.SERVICE_STATE_DISABLED == state);
         }
     }
 
@@ -890,14 +910,15 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         updateAllRecognitionsLocked();
     }
 
-    private void onModelUnloadedLocked(int modelHandle) {
-        ModelData modelData = getModelDataForLocked(modelHandle);
-        if (modelData != null) {
-            modelData.setNotLoaded();
-        }
+    private void onSoundModelUpdatedLocked(SoundModelEvent event) {
+        // TODO: Handle sound model update here.
     }
 
-    private void onResourcesAvailableLocked() {
+    private void onServiceStateChangedLocked(boolean disabled) {
+        if (disabled == mServiceDisabled) {
+            return;
+        }
+        mServiceDisabled = disabled;
         updateAllRecognitionsLocked();
     }
 
@@ -905,19 +926,15 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         Slog.w(TAG, "Recognition aborted");
         MetricsLogger.count(mContext, "sth_recognition_aborted", 1);
         ModelData modelData = getModelDataForLocked(event.soundModelHandle);
-        if (modelData != null && (modelData.isModelStarted() || modelData.isStopPending())) {
+        if (modelData != null && modelData.isModelStarted()) {
             modelData.setStopped();
             try {
-                IRecognitionStatusCallback callback = modelData.getCallback();
-                if (callback != null) {
-                    callback.onRecognitionPaused();
-                }
+                modelData.getCallback().onRecognitionPaused();
             } catch (DeadObjectException e) {
                 forceStopAndUnloadModelLocked(modelData, e);
             } catch (RemoteException e) {
                 Slog.w(TAG, "RemoteException in onRecognitionPaused", e);
             }
-            updateRecognitionLocked(modelData, true);
         }
     }
 
@@ -963,7 +980,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
 
-        if (!event.recognitionStillActive) {
+        if (event.status != SoundTrigger.RECOGNITION_STATUS_GET_STATE_RESPONSE) {
             modelData.setStopped();
         }
 
@@ -997,22 +1014,16 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private int updateRecognitionLocked(ModelData model, boolean notifyClientOnError) {
         boolean shouldStartModel = model.isRequested() && isRecognitionAllowedByDeviceState(model);
-        if (shouldStartModel == model.isModelStarted() || model.isStopPending()) {
+        if (shouldStartModel == model.isModelStarted()) {
             // No-op.
             return STATUS_OK;
         }
         if (shouldStartModel) {
             int status = prepareForRecognition(model);
             if (status != STATUS_OK) {
-                Slog.w(TAG, "startRecognition failed to prepare model for recognition");
                 return status;
             }
-            status = startRecognitionLocked(model, notifyClientOnError);
-            // Initialize power save, call active state monitoring logic.
-            if (status == STATUS_OK) {
-                initializeDeviceStateListeners();
-            }
-            return status;
+            return startRecognitionLocked(model, notifyClientOnError);
         } else {
             return stopRecognitionLocked(model, notifyClientOnError);
         }
@@ -1028,6 +1039,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             if (mModule != null) {
                 mModule.detach();
                 mModule = null;
+                mServiceDisabled = false;
             }
         }
     }
@@ -1102,6 +1114,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             pw.print("  call active=");
             pw.println(mCallActive);
             pw.println("  SoundTrigger Power State=" + mSoundTriggerPowerSaveMode);
+            pw.print("  service disabled=");
+            pw.println(mServiceDisabled);
         }
     }
 
@@ -1195,10 +1209,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (mModule == null) {
             return;
         }
-        if (modelData.isStopPending()) {
-            // No need to wait for the stop to be confirmed.
-            modelData.setStopped();
-        } else if (modelData.isModelStarted()) {
+        if (modelData.isModelStarted()) {
             Slog.d(TAG, "Stopping previously started dangling model " + modelData.getHandle());
             if (mModule.stopRecognition(modelData.getHandle()) == STATUS_OK) {
                 modelData.setStopped();
@@ -1318,7 +1329,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mSoundTriggerPowerSaveMode = mPowerManager.getSoundTriggerPowerSaveMode();
         }
 
-        return !mCallActive && isRecognitionAllowedByPowerState(
+        return !mCallActive && !mServiceDisabled
+                && isRecognitionAllowedByPowerState(
                 modelData);
     }
 
@@ -1415,7 +1427,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
         } else {
-            modelData.setStopPending();
+            modelData.setStopped();
             MetricsLogger.count(mContext, "sth_stop_recognition_success", 1);
             // Notify of pause if needed.
             if (notify) {
@@ -1469,9 +1481,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         // Started implies model was successfully loaded and start was called.
         static final int MODEL_STARTED = 2;
-
-        // Model stop request has been sent. Waiting for an event to signal model being stopped.
-        static final int MODEL_STOP_PENDING = 3;
 
         // One of MODEL_NOTLOADED, MODEL_LOADED, MODEL_STARTED (which implies loaded).
         private int mModelState;
@@ -1550,10 +1559,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return mModelState == MODEL_NOTLOADED;
         }
 
-        synchronized boolean isStopPending() {
-            return mModelState == MODEL_STOP_PENDING;
-        }
-
         synchronized void setStarted() {
             mModelState = MODEL_STARTED;
         }
@@ -1562,16 +1567,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mModelState = MODEL_LOADED;
         }
 
-        synchronized void setStopPending() {
-            mModelState = MODEL_STOP_PENDING;
-        }
-
         synchronized void setLoaded() {
             mModelState = MODEL_LOADED;
-        }
-
-        synchronized void setNotLoaded() {
-            mModelState = MODEL_NOTLOADED;
         }
 
         synchronized boolean isModelStarted() {

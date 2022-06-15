@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArraySet;
 
-import java.util.Collection;
-
 /**
  * WatchedArraySet is an {@link android.util.ArraySet} that can report changes to itself.  If its
  * values are {@link Watchable} then the WatchedArraySet will also report changes to the values.
@@ -282,11 +280,13 @@ public class WatchedArraySet<E> extends WatchableImpl
 
     /**
      * Perform a {@link #add(Object)} of all values in <var>array</var>
-     * @param collection The collection whose contents are to be retrieved.
+     * @param array The array whose contents are to be retrieved.
      */
-    public void addAll(Collection<? extends E> collection) {
-        mStorage.addAll(collection);
-        onChanged();
+    public void addAll(ArraySet<? extends E> array) {
+        final int end = array.size();
+        for (int i = 0; i < end; i++) {
+            add(array.valueAt(i));
+        }
     }
 
     /**
@@ -427,7 +427,7 @@ public class WatchedArraySet<E> extends WatchableImpl
         dst.mStorage.ensureCapacity(end);
         for (int i = 0; i < end; i++) {
             final E val = Snapshots.maybeSnapshot(src.valueAt(i));
-            dst.mStorage.append(val);
+            dst.append(val);
         }
         dst.seal();
     }

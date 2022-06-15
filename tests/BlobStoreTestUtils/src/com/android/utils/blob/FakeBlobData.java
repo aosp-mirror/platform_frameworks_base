@@ -17,7 +17,6 @@ package com.android.utils.blob;
 
 import static com.android.utils.blob.Utils.BUFFER_SIZE_BYTES;
 import static com.android.utils.blob.Utils.copy;
-import static com.android.utils.blob.Utils.writeRandomData;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -124,7 +123,7 @@ public class FakeBlobData {
 
     public void prepare() throws Exception {
         try (RandomAccessFile file = new RandomAccessFile(mFile, "rw")) {
-            writeRandomData(file, mRandom, mFileSize);
+            writeRandomData(file, mFileSize);
         }
         mFileDigest = FileUtils.digest(mFile, "SHA-256");
         mExpiryTimeMs = System.currentTimeMillis() + mExpiryDurationMs;
@@ -239,5 +238,19 @@ public class FakeBlobData {
             bytesRead += toRead;
         }
         return digest.digest();
+    }
+
+    private void writeRandomData(RandomAccessFile file, long fileSize)
+            throws Exception {
+        long bytesWritten = 0;
+        final byte[] buffer = new byte[BUFFER_SIZE_BYTES];
+        while (bytesWritten < fileSize) {
+            mRandom.nextBytes(buffer);
+            final int toWrite = (bytesWritten + buffer.length <= fileSize)
+                    ? buffer.length : (int) (fileSize - bytesWritten);
+            file.seek(bytesWritten);
+            file.write(buffer, 0, toWrite);
+            bytesWritten += toWrite;
+        }
     }
 }

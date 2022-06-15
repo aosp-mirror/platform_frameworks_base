@@ -21,6 +21,7 @@
 #include <string>
 
 #include "Resource.h"
+#include "util/Maybe.h"
 
 namespace aapt {
 
@@ -43,7 +44,7 @@ class NameMangler {
  public:
   explicit NameMangler(NameManglerPolicy policy) : policy_(policy) {}
 
-  std::optional<ResourceName> MangleName(const ResourceName& name) {
+  Maybe<ResourceName> MangleName(const ResourceName& name) {
     if (policy_.target_package_name == name.package ||
         policy_.packages_to_mangle.count(name.package) == 0) {
       return {};

@@ -19,7 +19,10 @@ package com.android.internal.inputmethod;
 import android.net.Uri;
 import android.view.inputmethod.InputMethodSubtype;
 
-import com.android.internal.infra.AndroidFuture;
+import com.android.internal.inputmethod.IBooleanResultCallback;
+import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.internal.inputmethod.IIInputContentUriTokenResultCallback;
+import com.android.internal.inputmethod.IVoidResultCallback;
 
 /**
  * Defines priviledged operations that only the current IME is allowed to call.
@@ -29,19 +32,17 @@ oneway interface IInputMethodPrivilegedOperations {
     void setImeWindowStatusAsync(int vis, int backDisposition);
     void reportStartInputAsync(in IBinder startInputToken);
     void createInputContentUriToken(in Uri contentUri, in String packageName,
-            in AndroidFuture future /* T=IBinder */);
+            in IIInputContentUriTokenResultCallback resultCallback);
     void reportFullscreenModeAsync(boolean fullscreen);
-    void setInputMethod(String id, in AndroidFuture future /* T=Void */);
+    void setInputMethod(String id, in IVoidResultCallback resultCallback);
     void setInputMethodAndSubtype(String id, in InputMethodSubtype subtype,
-            in AndroidFuture future /* T=Void */);
-    void hideMySoftInput(int flags, in AndroidFuture future /* T=Void */);
-    void showMySoftInput(int flags, in AndroidFuture future /* T=Void */);
+            in IVoidResultCallback resultCallback);
+    void hideMySoftInput(int flags, in IVoidResultCallback resultCallback);
+    void showMySoftInput(int flags, in IVoidResultCallback resultCallback);
     void updateStatusIconAsync(String packageName, int iconId);
-    void switchToPreviousInputMethod(in AndroidFuture future /* T=Boolean */);
-    void switchToNextInputMethod(boolean onlyCurrentIme, in AndroidFuture future /* T=Boolean */);
-    void shouldOfferSwitchingToNextInputMethod(in AndroidFuture future /* T=Boolean */);
+    void switchToPreviousInputMethod(in IBooleanResultCallback resultCallback);
+    void switchToNextInputMethod(boolean onlyCurrentIme, in IBooleanResultCallback resultCallback);
+    void shouldOfferSwitchingToNextInputMethod(in IBooleanResultCallback resultCallback);
     void notifyUserActionAsync();
     void applyImeVisibilityAsync(IBinder showOrHideInputToken, boolean setVisible);
-    void onStylusHandwritingReady(int requestId, int pid);
-    void resetStylusHandwriting(int requestId);
 }

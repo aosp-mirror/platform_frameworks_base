@@ -142,7 +142,6 @@ public class IntegrityFileManagerTest {
                 new AppInstallMetadata.Builder()
                         .setPackageName(packageName)
                         .setAppCertificates(Collections.singletonList(packageCert))
-                        .setAppCertificateLineage(Collections.singletonList(packageCert))
                         .setVersionCode(version)
                         .setInstallerName("abc")
                         .setInstallerCertificates(Collections.singletonList("abc"))
@@ -184,8 +183,6 @@ public class IntegrityFileManagerTest {
                 new AppInstallMetadata.Builder()
                         .setPackageName(installedPackageName)
                         .setAppCertificates(Collections.singletonList(installedAppCertificate))
-                        .setAppCertificateLineage(
-                                Collections.singletonList(installedAppCertificate))
                         .setVersionCode(250)
                         .setInstallerName("abc")
                         .setInstallerCertificates(Collections.singletonList("abc"))

@@ -34,8 +34,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import androidx.annotation.WorkerThread;
-
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
@@ -289,7 +287,6 @@ public class TunerServiceImpl extends TunerService {
     }
 
     @Override
-    @WorkerThread
     public boolean isTunerEnabled() {
         return mUserTracker.getUserContext().getPackageManager().getComponentEnabledSetting(
                 mTunerComponent) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;

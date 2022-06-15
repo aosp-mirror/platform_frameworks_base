@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.os.Trace.TRACE_TAG_GRAPHICS;
-
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.BinderThread;
@@ -26,7 +24,6 @@ import android.annotation.UiThread;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
-import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -36,8 +33,8 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -47,16 +44,9 @@ import java.util.function.Consumer;
  *
  * @hide
  */
-public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub implements
-        IBinder.DeathRecipient {
+public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub {
 
     private static final String TAG = "ScrollCaptureConnection";
-    private static final String TRACE_TRACK = "Scroll Capture";
-    private static final String START_CAPTURE = "startCapture";
-    private static final String REQUEST_IMAGE = "requestImage";
-
-    private static final String END_CAPTURE = "endCapture";
-    private static final String SESSION = "Session";
 
     private final Object mLock = new Object();
     private final Rect mScrollBounds;
@@ -64,14 +54,15 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
     private final Executor mUiThread;
     private final CloseGuard mCloseGuard = new CloseGuard();
 
+
     private ScrollCaptureCallback mLocal;
     private IScrollCaptureCallbacks mRemote;
+
     private ScrollCaptureSession mSession;
+
     private CancellationSignal mCancellation;
 
     private volatile boolean mActive;
-    private volatile boolean mConnected;
-    private int mTraceId;
 
     /**
      * Constructs a ScrollCaptureConnection.
@@ -96,17 +87,13 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
     @Override
     public ICancellationSignal startCapture(@NonNull Surface surface,
             @NonNull IScrollCaptureCallbacks remote) throws RemoteException {
-        mTraceId = System.identityHashCode(surface);
-        Trace.asyncTraceForTrackBegin(TRACE_TAG_GRAPHICS, TRACE_TRACK, SESSION, mTraceId);
-        Trace.asyncTraceForTrackBegin(TRACE_TAG_GRAPHICS, TRACE_TRACK, START_CAPTURE, mTraceId);
-        mCloseGuard.open("ScrollCaptureConnection.close");
+
+        mCloseGuard.open("close");
 
         if (!surface.isValid()) {
             throw new RemoteException(new IllegalArgumentException("surface must be valid"));
         }
         mRemote = requireNonNull(remote, "<callbacks> must non-null");
-        mRemote.asBinder().linkToDeath(this, 0);
-        mConnected = true;
 
         ICancellationSignal cancellation = CancellationSignal.createTransport();
         mCancellation = CancellationSignal.fromTransport(cancellation);
@@ -128,29 +115,23 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
             Log.w(TAG, "Shutting down due to error: ", e);
             close();
         }
-        mCancellation = null;
-        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, START_CAPTURE, mTraceId);
     }
 
     @BinderThread
     @Override
     public ICancellationSignal requestImage(Rect requestRect) throws RemoteException {
-        Trace.asyncTraceForTrackBegin(TRACE_TAG_GRAPHICS, TRACE_TRACK, REQUEST_IMAGE, mTraceId);
+        Trace.beginSection("requestImage");
         checkActive();
-        cancelPendingAction();
+
         ICancellationSignal cancellation = CancellationSignal.createTransport();
         mCancellation = CancellationSignal.fromTransport(cancellation);
 
         Consumer<Rect> listener =
                 SafeCallback.create(mCancellation, mUiThread, this::onImageRequestCompleted);
         // -> UiThread
-        mUiThread.execute(() -> {
-            if (mLocal != null) {
-                mLocal.onScrollCaptureImageRequest(
-                        mSession, mCancellation, new Rect(requestRect), listener);
-            }
-        });
-
+        mUiThread.execute(() -> mLocal.onScrollCaptureImageRequest(
+                mSession, mCancellation, new Rect(requestRect), listener));
+        Trace.endSection();
         return cancellation;
     }
 
@@ -161,29 +142,21 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
         } catch (RemoteException e) {
             Log.w(TAG, "Shutting down due to error: ", e);
             close();
-        } finally {
-            mCancellation = null;
         }
-        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, REQUEST_IMAGE, mTraceId);
     }
 
     @BinderThread
     @Override
     public ICancellationSignal endCapture() throws RemoteException {
-        Trace.asyncTraceForTrackBegin(TRACE_TAG_GRAPHICS, TRACE_TRACK, END_CAPTURE, mTraceId);
         checkActive();
-        cancelPendingAction();
+
         ICancellationSignal cancellation = CancellationSignal.createTransport();
         mCancellation = CancellationSignal.fromTransport(cancellation);
 
         Runnable listener =
                 SafeCallback.create(mCancellation, mUiThread, this::onEndCaptureCompleted);
         // -> UiThread
-        mUiThread.execute(() -> {
-            if (mLocal != null) {
-                mLocal.onScrollCaptureEnd(listener);
-            }
-        });
+        mUiThread.execute(() -> mLocal.onScrollCaptureEnd(listener));
         return cancellation;
     }
 
@@ -197,57 +170,31 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
         } catch (RemoteException e) {
             Log.w(TAG, "Caught exception confirming capture end!", e);
         } finally {
-            mCancellation = null;
             close();
         }
-        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, END_CAPTURE, mTraceId);
-        Trace.asyncTraceForTrackEnd(TRACE_TAG_GRAPHICS, TRACE_TRACK, SESSION, mTraceId);
-    }
-
-    @Override
-    public void binderDied() {
-        Trace.instantForTrack(TRACE_TAG_GRAPHICS, TRACE_TRACK, "binderDied");
-        Log.e(TAG, "Controlling process just died.");
-        close();
-
     }
 
     @BinderThread
     @Override
     public void close() {
-        Trace.instantForTrack(TRACE_TAG_GRAPHICS, TRACE_TRACK, "close");
         if (mActive) {
+            if (mCancellation != null) {
+                Log.w(TAG, "close(): cancelling pending operation.");
+                mCancellation.cancel();
+                mCancellation = null;
+            }
             Log.w(TAG, "close(): capture session still active! Ending now.");
-            cancelPendingAction();
+            // -> UiThread
             final ScrollCaptureCallback callback = mLocal;
             mUiThread.execute(() -> callback.onScrollCaptureEnd(() -> { /* ignore */ }));
             mActive = false;
         }
-        if (mRemote != null) {
-            mRemote.asBinder().unlinkToDeath(this, 0);
-        }
         mActive = false;
-        mConnected = false;
         mSession = null;
         mRemote = null;
         mLocal = null;
         mCloseGuard.close();
-        Trace.endSection();
         Reference.reachabilityFence(this);
-    }
-
-    private void cancelPendingAction() {
-        if (mCancellation != null) {
-            Trace.instantForTrack(TRACE_TAG_GRAPHICS, TRACE_TRACK, "CancellationSignal.cancel");
-            Log.w(TAG, "cancelling pending operation.");
-            mCancellation.cancel();
-            mCancellation = null;
-        }
-    }
-
-    @VisibleForTesting
-    public boolean isConnected() {
-        return mConnected;
     }
 
     @VisibleForTesting
@@ -284,24 +231,31 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
 
     private static class SafeCallback<T> {
         private final CancellationSignal mSignal;
+        private final WeakReference<T> mTargetRef;
         private final Executor mExecutor;
-        private final AtomicReference<T> mValue;
+        private boolean mExecuted;
 
-        protected SafeCallback(CancellationSignal signal, Executor executor, T value) {
+        protected SafeCallback(CancellationSignal signal, Executor executor, T target) {
             mSignal = signal;
-            mValue = new AtomicReference<>(value);
+            mTargetRef = new WeakReference<>(target);
             mExecutor = executor;
         }
 
-        // Provide the value to the consumer to accept only once.
-        protected final void maybeAccept(Consumer<T> consumer) {
-            T value = mValue.getAndSet(null);
+        // Provide the target to the consumer to invoke, forward on handler thread ONCE,
+        // and only if noy cancelled, and the target is still available (not collected)
+        protected final void maybeAccept(Consumer<T> targetConsumer) {
+            if (mExecuted) {
+                return;
+            }
+            mExecuted = true;
             if (mSignal.isCanceled()) {
                 return;
             }
-            if (value != null) {
-                mExecutor.execute(() -> consumer.accept(value));
+            T target = mTargetRef.get();
+            if (target == null) {
+                return;
             }
+            mExecutor.execute(() -> targetConsumer.accept(target));
         }
 
         static Runnable create(CancellationSignal signal, Executor executor, Runnable target) {
@@ -310,7 +264,7 @@ public class ScrollCaptureConnection extends IScrollCaptureConnection.Stub imple
 
         static <T> Consumer<T> create(CancellationSignal signal, Executor executor,
                 Consumer<T> target) {
-            return new ConsumerCallback<>(signal, executor, target);
+            return new ConsumerCallback<T>(signal, executor, target);
         }
     }
 

@@ -24,20 +24,31 @@ package android.hardware.fingerprint;
  * @hide
  */
 oneway interface IUdfpsHbmListener {
+
+    /** HBM that applies to the whole screen. */
+    const int GLOBAL_HBM = 0;
+
+    /** HBM that only applies to a portion of the screen. */
+    const int LOCAL_HBM = 1;
+
     /**
      * UdfpsController will call this method when the HBM is enabled.
      *
+     * @param hbmType The type of HBM that was enabled. See
+     *        {@link com.android.systemui.biometrics.UdfpsHbmTypes}.
      * @param displayId The displayId for which the HBM is enabled. See
      *        {@link android.view.Display#getDisplayId()}.
      */
-    void onHbmEnabled(int displayId);
+    void onHbmEnabled(int hbmType, int displayId);
 
     /**
      * UdfpsController will call this method when the HBM is disabled.
      *
+     * @param hbmType The type of HBM that was disabled. See
+     *        {@link com.android.systemui.biometrics.UdfpsHbmTypes}.
      * @param displayId The displayId for which the HBM is disabled. See
      *        {@link android.view.Display#getDisplayId()}.
      */
-    void onHbmDisabled(int displayId);
+    void onHbmDisabled(int hbmType, int displayId);
 }
 

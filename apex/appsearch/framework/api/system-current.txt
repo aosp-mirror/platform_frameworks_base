@@ -1,0 +1,9 @@
+// Signature format: 2.0
+package android.app.appsearch {
+
+  public class AppSearchManagerFrameworkInitializer {
+    method public static void initialize();
+  }
+
+}
+

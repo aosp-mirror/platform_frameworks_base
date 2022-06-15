@@ -19,16 +19,14 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * ClientMonitor subclass for requesting authenticatorId invalidation. See
@@ -42,14 +40,13 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
     @NonNull private final IInvalidationCallback mInvalidationCallback;
 
-    public InvalidationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
-            int userId, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            @NonNull Map<Integer, Long> authenticatorIds,
+    public InvalidationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+            int userId, int sensorId, @NonNull Map<Integer, Long> authenticatorIds,
             @NonNull IInvalidationCallback callback) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId,
                 context.getOpPackageName(), 0 /* cookie */, sensorId,
-                logger, biometricContext);
+                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mAuthenticatorIds = authenticatorIds;
         mInvalidationCallback = callback;
     }
@@ -65,7 +62,7 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
     }
 
     @Override
-    public void start(@NonNull ClientMonitorCallback callback) {
+    public void start(@NonNull Callback callback) {
         super.start(callback);
 
         startHalOperation();

@@ -20,20 +20,23 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.os.Message
 import android.os.UserHandle
 import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import androidx.annotation.WorkerThread
 import com.android.internal.util.Preconditions
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.util.indentIfPossible
+import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
+private const val MSG_REGISTER_RECEIVER = 0
+private const val MSG_UNREGISTER_RECEIVER = 1
 private const val TAG = "UserBroadcastDispatcher"
 private const val DEBUG = false
 
@@ -48,8 +51,7 @@ open class UserBroadcastDispatcher(
     private val userId: Int,
     private val bgLooper: Looper,
     private val bgExecutor: Executor,
-    private val logger: BroadcastDispatcherLogger,
-    private val removalPendingStore: PendingRemovalStore
+    private val logger: BroadcastDispatcherLogger
 ) : Dumpable {
 
     companion object {
@@ -59,18 +61,19 @@ open class UserBroadcastDispatcher(
         val index = AtomicInteger(0)
     }
 
-    // Used for key in actionsToActionsReceivers
-    internal data class ReceiverProperties(
-        val action: String,
-        val flags: Int,
-        val permission: String?
-    )
-
-    private val bgHandler = Handler(bgLooper)
+    private val bgHandler = object : Handler(bgLooper) {
+        override fun handleMessage(msg: Message) {
+            when (msg.what) {
+                MSG_REGISTER_RECEIVER -> handleRegisterReceiver(msg.obj as ReceiverData)
+                MSG_UNREGISTER_RECEIVER -> handleUnregisterReceiver(msg.obj as BroadcastReceiver)
+                else -> Unit
+            }
+        }
+    }
 
     // Only modify in BG thread
     @VisibleForTesting
-    internal val actionsToActionsReceivers = ArrayMap<ReceiverProperties, ActionReceiver>()
+    internal val actionsToActionsReceivers = ArrayMap<String, ActionReceiver>()
     private val receiverToActions = ArrayMap<BroadcastReceiver, MutableSet<String>>()
 
     @VisibleForTesting
@@ -83,21 +86,19 @@ open class UserBroadcastDispatcher(
     /**
      * Register a [ReceiverData] for this user.
      */
-    @WorkerThread
-    fun registerReceiver(receiverData: ReceiverData, flags: Int) {
-        handleRegisterReceiver(receiverData, flags)
+    fun registerReceiver(receiverData: ReceiverData) {
+        bgHandler.obtainMessage(MSG_REGISTER_RECEIVER, receiverData).sendToTarget()
     }
 
     /**
      * Unregister a given [BroadcastReceiver] for this user.
      */
-    @WorkerThread
     fun unregisterReceiver(receiver: BroadcastReceiver) {
-        handleUnregisterReceiver(receiver)
+        bgHandler.obtainMessage(MSG_UNREGISTER_RECEIVER, receiver).sendToTarget()
     }
 
-    private fun handleRegisterReceiver(receiverData: ReceiverData, flags: Int) {
-        Preconditions.checkState(bgLooper.isCurrentThread,
+    private fun handleRegisterReceiver(receiverData: ReceiverData) {
+        Preconditions.checkState(bgHandler.looper.isCurrentThread,
                 "This method should only be called from BG thread")
         if (DEBUG) Log.w(TAG, "Register receiver: ${receiverData.receiver}")
         receiverToActions
@@ -105,33 +106,20 @@ open class UserBroadcastDispatcher(
                 .addAll(receiverData.filter.actionsIterator()?.asSequence() ?: emptySequence())
         receiverData.filter.actionsIterator().forEach {
             actionsToActionsReceivers
-                .getOrPut(
-                    ReceiverProperties(it, flags, receiverData.permission),
-                    { createActionReceiver(it, receiverData.permission, flags) })
-                .addReceiverData(receiverData)
+                    .getOrPut(it, { createActionReceiver(it) })
+                    .addReceiverData(receiverData)
         }
-        logger.logReceiverRegistered(userId, receiverData.receiver, flags)
+        logger.logReceiverRegistered(userId, receiverData.receiver)
     }
 
     @VisibleForTesting
-    internal open fun createActionReceiver(
-        action: String,
-        permission: String?,
-        flags: Int
-    ): ActionReceiver {
+    internal open fun createActionReceiver(action: String): ActionReceiver {
         return ActionReceiver(
                 action,
                 userId,
                 {
-                    context.registerReceiverAsUser(
-                            this,
-                            UserHandle.of(userId),
-                            it,
-                            permission,
-                            bgHandler,
-                            flags
-                    )
-                    logger.logContextReceiverRegistered(userId, flags, it)
+                    context.registerReceiverAsUser(this, UserHandle.of(userId), it, null, bgHandler)
+                    logger.logContextReceiverRegistered(userId, it)
                 },
                 {
                     try {
@@ -144,35 +132,26 @@ open class UserBroadcastDispatcher(
                     }
                 },
                 bgExecutor,
-                logger,
-                removalPendingStore::isPendingRemoval
+                logger
         )
     }
 
     private fun handleUnregisterReceiver(receiver: BroadcastReceiver) {
-        Preconditions.checkState(bgLooper.isCurrentThread,
+        Preconditions.checkState(bgHandler.looper.isCurrentThread,
                 "This method should only be called from BG thread")
         if (DEBUG) Log.w(TAG, "Unregister receiver: $receiver")
         receiverToActions.getOrDefault(receiver, mutableSetOf()).forEach {
-            actionsToActionsReceivers.forEach { (key, value) ->
-                if (key.action == it) {
-                    value.removeReceiver(receiver)
-                }
-            }
+            actionsToActionsReceivers.get(it)?.removeReceiver(receiver)
         }
         receiverToActions.remove(receiver)
         logger.logReceiverUnregistered(userId, receiver)
     }
 
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.indentIfPossible {
-            actionsToActionsReceivers.forEach { (actionFlagsPerm, actionReceiver) ->
-                println(
-                    "(${actionFlagsPerm.action}: " +
-                        BroadcastDispatcherLogger.flagToString(actionFlagsPerm.flags) +
-                        if (actionFlagsPerm.permission == null) "):"
-                            else ":${actionFlagsPerm.permission}):")
-                actionReceiver.dump(pw, args)
+            actionsToActionsReceivers.forEach { (action, actionReceiver) ->
+                println("$action:")
+                actionReceiver.dump(fd, pw, args)
             }
         }
     }

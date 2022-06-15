@@ -44,8 +44,7 @@ public interface AlarmManagerInternal {
 
     /**
      * Returns if the given package in the given user holds
-     * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM} or
-     * {@link android.Manifest.permission#USE_EXACT_ALARM}.
+     * {@link android.Manifest.permission#SCHEDULE_EXACT_ALARM}
      */
-    boolean hasExactAlarmPermission(String packageName, int uid);
+    boolean hasScheduleExactAlarm(String packageName, int uid);
 }

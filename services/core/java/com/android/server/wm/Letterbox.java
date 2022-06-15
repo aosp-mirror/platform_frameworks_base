@@ -19,25 +19,19 @@ package com.android.server.wm;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.SurfaceControl.HIDDEN;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.os.InputConfig;
 import android.os.Process;
-import android.view.GestureDetector;
 import android.view.InputChannel;
-import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
-import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.server.UiThread;
 
-import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -64,15 +58,11 @@ public class Letterbox {
     private final LetterboxSurface mLeft = new LetterboxSurface("left");
     private final LetterboxSurface mBottom = new LetterboxSurface("bottom");
     private final LetterboxSurface mRight = new LetterboxSurface("right");
-    // One surface that fills the whole window is used over multiple surfaces to:
-    // - Prevents wallpaper from peeking through near rounded corners.
-    // - For "blurred wallpaper" background, to avoid having visible border between surfaces.
-    // One surface approach isn't always preferred over multiple surfaces due to rendering cost
-    // for overlaping an app window and letterbox surfaces.
-    private final LetterboxSurface mFullWindowSurface = new LetterboxSurface("fullWindow");
+    // Prevents wallpaper from peeking through near rounded corners. It's not included in
+    // mSurfaces array since it isn't needed in methods like notIntersectsOrFullyContains
+    // or attachInput.
+    private final LetterboxSurface mBehind = new LetterboxSurface("behind");
     private final LetterboxSurface[] mSurfaces = { mLeft, mTop, mRight, mBottom };
-    // Reachability gestures.
-    private final IntConsumer mDoubleTapCallback;
 
     /**
      * Constructs a Letterbox.
@@ -85,8 +75,7 @@ public class Letterbox {
             Supplier<Color> colorSupplier,
             Supplier<Boolean> hasWallpaperBackgroundSupplier,
             Supplier<Integer> blurRadiusSupplier,
-            Supplier<Float> darkScrimAlphaSupplier,
-            IntConsumer doubleTapCallback) {
+            Supplier<Float> darkScrimAlphaSupplier) {
         mSurfaceControlFactory = surfaceControlFactory;
         mTransactionFactory = transactionFactory;
         mAreCornersRounded = areCornersRounded;
@@ -94,7 +83,6 @@ public class Letterbox {
         mHasWallpaperBackgroundSupplier = hasWallpaperBackgroundSupplier;
         mBlurRadiusSupplier = blurRadiusSupplier;
         mDarkScrimAlphaSupplier = darkScrimAlphaSupplier;
-        mDoubleTapCallback = doubleTapCallback;
     }
 
     /**
@@ -116,7 +104,7 @@ public class Letterbox {
         mLeft.layout(outer.left, outer.top, inner.left, outer.bottom, surfaceOrigin);
         mBottom.layout(outer.left, inner.bottom, outer.right, outer.bottom, surfaceOrigin);
         mRight.layout(inner.right, outer.top, outer.right, outer.bottom, surfaceOrigin);
-        mFullWindowSurface.layout(outer.left, outer.top, outer.right, outer.bottom, surfaceOrigin);
+        mBehind.layout(inner.left, inner.top, inner.right, inner.bottom, surfaceOrigin);
     }
 
 
@@ -180,46 +168,37 @@ public class Letterbox {
         for (LetterboxSurface surface : mSurfaces) {
             surface.remove();
         }
-        mFullWindowSurface.remove();
+        mBehind.remove();
     }
 
     /** Returns whether a call to {@link #applySurfaceChanges} would change the surface. */
     public boolean needsApplySurfaceChanges() {
-        if (useFullWindowSurface()) {
-            return mFullWindowSurface.needsApplySurfaceChanges();
-        }
         for (LetterboxSurface surface : mSurfaces) {
             if (surface.needsApplySurfaceChanges()) {
                 return true;
             }
         }
+        if (mAreCornersRounded.get() && mBehind.needsApplySurfaceChanges()) {
+            return true;
+        }
         return false;
     }
 
     public void applySurfaceChanges(SurfaceControl.Transaction t) {
-        if (useFullWindowSurface()) {
-            mFullWindowSurface.applySurfaceChanges(t);
-
-            for (LetterboxSurface surface : mSurfaces) {
-                surface.remove();
-            }
+        for (LetterboxSurface surface : mSurfaces) {
+            surface.applySurfaceChanges(t);
+        }
+        if (mAreCornersRounded.get()) {
+            mBehind.applySurfaceChanges(t);
         } else {
-            for (LetterboxSurface surface : mSurfaces) {
-                surface.applySurfaceChanges(t);
-            }
-
-            mFullWindowSurface.remove();
+            mBehind.remove();
         }
     }
 
     /** Enables touches to slide into other neighboring surfaces. */
     void attachInput(WindowState win) {
-        if (useFullWindowSurface()) {
-            mFullWindowSurface.attachInput(win);
-        } else {
-            for (LetterboxSurface surface : mSurfaces) {
-                surface.attachInput(win);
-            }
+        for (LetterboxSurface surface : mSurfaces) {
+            surface.attachInput(win);
         }
     }
 
@@ -229,61 +208,20 @@ public class Letterbox {
                 surface.mInputInterceptor.mWindowHandle.displayId = displayId;
             }
         }
-        if (mFullWindowSurface.mInputInterceptor != null) {
-            mFullWindowSurface.mInputInterceptor.mWindowHandle.displayId = displayId;
-        }
     }
 
-    /**
-     * Returns {@code true} when using {@link #mFullWindowSurface} instead of {@link mSurfaces}.
-     */
-    private boolean useFullWindowSurface() {
-        return mAreCornersRounded.get() || mHasWallpaperBackgroundSupplier.get();
-    }
-
-    private final class TapEventReceiver extends InputEventReceiver {
-
-        private final GestureDetector mDoubleTapDetector;
-        private final DoubleTapListener mDoubleTapListener;
-
-        TapEventReceiver(InputChannel inputChannel, Context context) {
-            super(inputChannel, UiThread.getHandler().getLooper());
-            mDoubleTapListener = new DoubleTapListener();
-            mDoubleTapDetector = new GestureDetector(
-                    context, mDoubleTapListener, UiThread.getHandler());
-        }
-
-        @Override
-        public void onInputEvent(InputEvent event) {
-            final MotionEvent motionEvent = (MotionEvent) event;
-            finishInputEvent(event, mDoubleTapDetector.onTouchEvent(motionEvent));
-        }
-    }
-
-    private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onDoubleTapEvent(MotionEvent e) {
-            if (e.getAction() == MotionEvent.ACTION_UP) {
-                mDoubleTapCallback.accept((int) e.getX());
-                return true;
-            }
-            return false;
-        }
-    }
-
-    private final class InputInterceptor {
-
-        private final InputChannel mClientChannel;
-        private final InputWindowHandle mWindowHandle;
-        private final InputEventReceiver mInputEventReceiver;
-        private final WindowManagerService mWmService;
-        private final IBinder mToken;
+    private static class InputInterceptor {
+        final InputChannel mClientChannel;
+        final InputWindowHandle mWindowHandle;
+        final InputEventReceiver mInputEventReceiver;
+        final WindowManagerService mWmService;
+        final IBinder mToken;
 
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
             final String name = namePrefix + (win.mActivityRecord != null ? win.mActivityRecord : win);
             mClientChannel = mWmService.mInputManager.createInputChannel(name);
-            mInputEventReceiver = new TapEventReceiver(mClientChannel, mWmService.mContext);
+            mInputEventReceiver = new SimpleInputReceiver(mClientChannel);
 
             mToken = mClientChannel.getToken();
 
@@ -291,12 +229,16 @@ public class Letterbox {
                     win.getDisplayId());
             mWindowHandle.name = name;
             mWindowHandle.token = mToken;
+            mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                    | WindowManager.LayoutParams.FLAG_SLIPPERY;
             mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
             mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+            mWindowHandle.visible = true;
             mWindowHandle.ownerPid = Process.myPid();
             mWindowHandle.ownerUid = Process.myUid();
             mWindowHandle.scaleFactor = 1.0f;
-            mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.SLIPPERY;
         }
 
         void updateTouchableRegion(Rect frame) {
@@ -316,6 +258,12 @@ public class Letterbox {
             mWmService.mInputManager.removeInputChannel(mToken);
             mInputEventReceiver.dispose();
             mClientChannel.dispose();
+        }
+
+        private static class SimpleInputReceiver extends InputEventReceiver {
+            SimpleInputReceiver(InputChannel inputChannel) {
+                super(inputChannel, UiThread.getHandler().getLooper());
+            }
         }
     }
 
@@ -358,10 +306,6 @@ public class Letterbox {
                 mInputInterceptor.dispose();
             }
             mInputInterceptor = new InputInterceptor("Letterbox_" + mType + "_", win);
-        }
-
-        boolean isRemoved() {
-            return mSurface != null || mInputInterceptor != null;
         }
 
         public void remove() {

@@ -36,6 +36,7 @@ import com.android.systemui.dagger.qualifiers.TestHarness;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -329,7 +330,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 || mTestHarness
                 || mDataProvider.isJustUnlockedWithFace()
                 || mDataProvider.isDocked()
-                || mAccessibilityManager.isTouchExplorationEnabled();
+                || mAccessibilityManager.isEnabled();
     }
 
     @Override
@@ -388,7 +389,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println("BRIGHTLINE FALSING MANAGER");
         ipw.print("classifierEnabled=");

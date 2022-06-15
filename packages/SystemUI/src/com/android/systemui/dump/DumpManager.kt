@@ -18,10 +18,11 @@ package com.android.systemui.dump
 
 import android.util.ArrayMap
 import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
+import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Maintains a registry of things that should be dumped when a bug report is taken
@@ -32,8 +33,8 @@ import javax.inject.Singleton
  *
  * See [DumpHandler] for more information on how and when this information is dumped.
  */
-@Singleton
-open class DumpManager @Inject constructor() {
+@SysUISingleton
+class DumpManager @Inject constructor() {
     private val dumpables: MutableMap<String, RegisteredDumpable<Dumpable>> = ArrayMap()
     private val buffers: MutableMap<String, RegisteredDumpable<LogBuffer>> = ArrayMap()
 
@@ -52,15 +53,6 @@ open class DumpManager @Inject constructor() {
         }
 
         dumpables[name] = RegisteredDumpable(name, module)
-    }
-
-    /**
-     * Same as the above override, but automatically uses the simple class name as the dumpable
-     * name.
-     */
-    @Synchronized
-    fun registerDumpable(module: Dumpable) {
-        registerDumpable(module::class.java.simpleName, module)
     }
 
     /**
@@ -88,13 +80,14 @@ open class DumpManager @Inject constructor() {
     @Synchronized
     fun dumpTarget(
         target: String,
+        fd: FileDescriptor,
         pw: PrintWriter,
         args: Array<String>,
         tailLength: Int
     ) {
         for (dumpable in dumpables.values) {
             if (dumpable.name.endsWith(target)) {
-                dumpDumpable(dumpable, pw, args)
+                dumpDumpable(dumpable, fd, pw, args)
                 return
             }
         }
@@ -111,9 +104,9 @@ open class DumpManager @Inject constructor() {
      * Dumps all registered dumpables to [pw]
      */
     @Synchronized
-    fun dumpDumpables(pw: PrintWriter, args: Array<String>) {
+    fun dumpDumpables(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
         for (module in dumpables.values) {
-            dumpDumpable(module, pw, args)
+            dumpDumpable(module, fd, pw, args)
         }
     }
 
@@ -163,13 +156,14 @@ open class DumpManager @Inject constructor() {
 
     private fun dumpDumpable(
         dumpable: RegisteredDumpable<Dumpable>,
+        fd: FileDescriptor,
         pw: PrintWriter,
         args: Array<String>
     ) {
         pw.println()
         pw.println("${dumpable.name}:")
         pw.println("----------------------------------------------------------------------------")
-        dumpable.dumpable.dump(pw, args)
+        dumpable.dumpable.dump(fd, pw, args)
     }
 
     private fun dumpBuffer(

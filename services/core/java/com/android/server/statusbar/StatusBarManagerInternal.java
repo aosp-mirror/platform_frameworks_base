@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.view.InsetsState.InternalInsetsType;
-import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
@@ -133,22 +132,21 @@ public interface StatusBarManagerInternal {
     /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAttributesChanged */
     void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName);
+            @Behavior int behavior, boolean isFullscreen);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */
-    void showTransient(int displayId, @InternalInsetsType int[] types,
-            boolean isGestureOnSystemBar);
+    void showTransient(int displayId, @InternalInsetsType int[] types);
 
     /** @see com.android.internal.statusbar.IStatusBar#abortTransient */
     void abortTransient(int displayId, @InternalInsetsType int[] types);
 
     /**
      * @see com.android.internal.statusbar.IStatusBar#showToast(String, IBinder, CharSequence,
-     * IBinder, int, ITransientNotificationCallback, int)
+     * IBinder, int, ITransientNotificationCallback)
      */
     void showToast(int uid, String packageName, IBinder token, CharSequence text,
             IBinder windowToken, int duration,
-            @Nullable ITransientNotificationCallback textCallback, int displayId);
+            @Nullable ITransientNotificationCallback textCallback);
 
     /** @see com.android.internal.statusbar.IStatusBar#hideToast(String, IBinder)  */
     void hideToast(String packageName, IBinder token);
@@ -157,7 +155,7 @@ public interface StatusBarManagerInternal {
      * @see com.android.internal.statusbar.IStatusBar#requestWindowMagnificationConnection(boolean
      * request)
      */
-    boolean requestWindowMagnificationConnection(boolean request);
+    void requestWindowMagnificationConnection(boolean request);
 
     /**
      * Handles a logging command from the WM shell command.

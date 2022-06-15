@@ -18,13 +18,18 @@ package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_HANDOVER;
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_RELIABILITY;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
+import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
+import static android.net.NetworkTemplate.SUBSCRIBER_ID_MATCH_RULE_EXACT;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
 import static com.android.server.net.NetworkPolicyManagerService.OPPORTUNISTIC_QUOTA_UNKNOWN;
@@ -65,13 +70,13 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.net.NetworkStatsManagerInternal;
 
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -91,7 +96,6 @@ public class MultipathPolicyTracker {
     private static String TAG = MultipathPolicyTracker.class.getSimpleName();
 
     private static final boolean DBG = false;
-    private static final long MIN_THRESHOLD_BYTES = 2 * 1_048_576L; // 2MiB
 
     // This context is for the current user.
     private final Context mContext;
@@ -189,25 +193,21 @@ public class MultipathPolicyTracker {
     class MultipathTracker {
         final Network network;
         final String subscriberId;
-        private final int mSubId;
 
         private long mQuota;
-        /** Current multipath budget. Nonzero iff we have budget. */
-        // The budget could be accessed by multiple threads, make it volatile to ensure the callers
-        // on a different thread will not see the stale value.
-        private volatile long mMultipathBudget;
+        /** Current multipath budget. Nonzero iff we have budget and a UsageCallback is armed. */
+        private long mMultipathBudget;
         private final NetworkTemplate mNetworkTemplate;
         private final UsageCallback mUsageCallback;
-        private boolean mUsageCallbackRegistered = false;
         private NetworkCapabilities mNetworkCapabilities;
-        private final NetworkStatsManager mStatsManager;
 
         public MultipathTracker(Network network, NetworkCapabilities nc) {
             this.network = network;
             this.mNetworkCapabilities = new NetworkCapabilities(nc);
             NetworkSpecifier specifier = nc.getNetworkSpecifier();
+            int subId = INVALID_SUBSCRIPTION_ID;
             if (specifier instanceof TelephonyNetworkSpecifier) {
-                mSubId = ((TelephonyNetworkSpecifier) specifier).getSubscriptionId();
+                subId = ((TelephonyNetworkSpecifier) specifier).getSubscriptionId();
             } else {
                 throw new IllegalStateException(String.format(
                         "Can't get subId from mobile network %s (%s)",
@@ -218,35 +218,26 @@ public class MultipathPolicyTracker {
             if (tele == null) {
                 throw new IllegalStateException(String.format("Missing TelephonyManager"));
             }
-            tele = tele.createForSubscriptionId(mSubId);
+            tele = tele.createForSubscriptionId(subId);
             if (tele == null) {
                 throw new IllegalStateException(String.format(
-                        "Can't get TelephonyManager for subId %d", mSubId));
+                        "Can't get TelephonyManager for subId %d", subId));
             }
 
             subscriberId = tele.getSubscriberId();
-            if (subscriberId == null) {
-                throw new IllegalStateException("Null subscriber Id for subId " + mSubId);
-            }
-            mNetworkTemplate = new NetworkTemplate.Builder(NetworkTemplate.MATCH_MOBILE)
-                    .setSubscriberIds(Set.of(subscriberId))
-                    .setMeteredness(NetworkStats.METERED_YES)
-                    .setDefaultNetworkStatus(NetworkStats.DEFAULT_NETWORK_NO)
-                    .build();
+            mNetworkTemplate = new NetworkTemplate(
+                    NetworkTemplate.MATCH_MOBILE, subscriberId, new String[] { subscriberId },
+                    null, NetworkStats.METERED_ALL, NetworkStats.ROAMING_ALL,
+                    NetworkStats.DEFAULT_NETWORK_NO, NETWORK_TYPE_ALL, OEM_MANAGED_ALL,
+                    SUBSCRIBER_ID_MATCH_RULE_EXACT);
             mUsageCallback = new UsageCallback() {
                 @Override
                 public void onThresholdReached(int networkType, String subscriberId) {
                     if (DBG) Log.d(TAG, "onThresholdReached for network " + network);
+                    mMultipathBudget = 0;
                     updateMultipathBudget();
                 }
             };
-            mStatsManager = mContext.getSystemService(NetworkStatsManager.class);
-            // Query stats from NetworkStatsService will trigger a poll by default.
-            // But since MultipathPolicyTracker listens NPMS events that triggered by
-            // stats updated event, and will query stats
-            // after the event. A polling -> updated -> query -> polling loop will be introduced
-            // if polls on open. Hence, set flag to false to prevent a polling loop.
-            mStatsManager.setPollOnOpen(false);
 
             updateMultipathBudget();
         }
@@ -270,9 +261,8 @@ public class MultipathPolicyTracker {
 
         private long getNetworkTotalBytes(long start, long end) {
             try {
-                final android.app.usage.NetworkStats.Bucket ret =
-                        mStatsManager.querySummaryForDevice(mNetworkTemplate, start, end);
-                return ret.getRxBytes() + ret.getTxBytes();
+                return LocalServices.getService(NetworkStatsManagerInternal.class)
+                        .getNetworkTotalBytes(mNetworkTemplate, start, end);
             } catch (RuntimeException e) {
                 Log.w(TAG, "Failed to get data usage: " + e);
                 return -1;
@@ -280,12 +270,15 @@ public class MultipathPolicyTracker {
         }
 
         private NetworkIdentity getTemplateMatchingNetworkIdentity(NetworkCapabilities nc) {
-            return new NetworkIdentity.Builder().setType(ConnectivityManager.TYPE_MOBILE)
-                    .setSubscriberId(subscriberId)
-                    .setRoaming(!nc.hasCapability(NET_CAPABILITY_NOT_ROAMING))
-                    .setMetered(!nc.hasCapability(NET_CAPABILITY_NOT_METERED))
-                    .setSubId(mSubId)
-                    .build();
+            return new NetworkIdentity(
+                    ConnectivityManager.TYPE_MOBILE,
+                    0 /* subType, unused for template matching */,
+                    subscriberId,
+                    null /* networkId, unused for matching mobile networks */,
+                    !nc.hasCapability(NET_CAPABILITY_NOT_ROAMING),
+                    !nc.hasCapability(NET_CAPABILITY_NOT_METERED),
+                    false /* defaultNetwork, templates should have DEFAULT_NETWORK_ALL */,
+                    OEM_MANAGED_ALL);
         }
 
         private long getRemainingDailyBudget(long limitBytes,
@@ -374,13 +367,13 @@ public class MultipathPolicyTracker {
             // This will only be called if the total quota for the day changed, not if usage changed
             // since last time, so even if this is called very often the budget will not snap to 0
             // as soon as there are less than 2MB left for today.
-            if (budget > MIN_THRESHOLD_BYTES) {
+            if (budget > NetworkStatsManager.MIN_THRESHOLD_BYTES) {
                 if (DBG) {
                     Log.d(TAG, "Setting callback for " + budget + " bytes on network " + network);
                 }
-                setMultipathBudget(budget);
+                registerUsageCallback(budget);
             } else {
-                clearMultipathBudget();
+                maybeUnregisterUsageCallback();
             }
         }
 
@@ -405,30 +398,23 @@ public class MultipathPolicyTracker {
             return mMultipathBudget > 0;
         }
 
-        // Sets the budget and registers a usage callback for it.
-        private void setMultipathBudget(long budget) {
+        private void registerUsageCallback(long budget) {
             maybeUnregisterUsageCallback();
-            if (DBG) Log.d(TAG, "Registering callback, budget is " + mMultipathBudget);
-            mStatsManager.registerUsageCallback(mNetworkTemplate, budget,
-                    (command) -> mHandler.post(command), mUsageCallback);
-            mUsageCallbackRegistered = true;
+            mStatsManager.registerUsageCallback(mNetworkTemplate, TYPE_MOBILE, budget,
+                    mUsageCallback, mHandler);
             mMultipathBudget = budget;
         }
 
         private void maybeUnregisterUsageCallback() {
-            if (!mUsageCallbackRegistered) return;
-            if (DBG) Log.d(TAG, "Unregistering callback, budget was " + mMultipathBudget);
-            mStatsManager.unregisterUsageCallback(mUsageCallback);
-            mUsageCallbackRegistered = false;
-        }
-
-        private void clearMultipathBudget() {
-            maybeUnregisterUsageCallback();
-            mMultipathBudget = 0;
+            if (haveMultipathBudget()) {
+                if (DBG) Log.d(TAG, "Unregistering callback, budget was " + mMultipathBudget);
+                mStatsManager.unregisterUsageCallback(mUsageCallback);
+                mMultipathBudget = 0;
+            }
         }
 
         void shutdown() {
-            clearMultipathBudget();
+            maybeUnregisterUsageCallback();
         }
     }
 

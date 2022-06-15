@@ -31,6 +31,7 @@ public interface DozeHost {
     boolean isPowerSaveActive();
     boolean isPulsingBlocked();
     boolean isProvisioned();
+    boolean isBlockingDoze();
 
     /**
      * Makes a current pulse last for twice as long.
@@ -39,6 +40,7 @@ public interface DozeHost {
     void extendPulse(int reason);
 
     void setAnimateWakeup(boolean animateWakeup);
+    void setAnimateScreenOff(boolean animateScreenOff);
 
     /**
      * Reports that a tap event happend on the Sensors Low Power Island.
@@ -79,9 +81,8 @@ public interface DozeHost {
      */
     void stopPulsing();
 
-    /** Returns whether always-on-display is suppressed. This does not include suppressing
-     * wake-up gestures. */
-    boolean isAlwaysOnSuppressed();
+    /** Returns whether doze is suppressed. */
+    boolean isDozeSuppressed();
 
     interface Callback {
         /**
@@ -97,10 +98,8 @@ public interface DozeHost {
          */
         default void onPowerSaveChanged(boolean active) {}
 
-        /**
-         * Called when the always on suppression state changes. See {@link #isAlwaysOnSuppressed()}.
-         */
-        default void onAlwaysOnSuppressedChanged(boolean suppressed) {}
+        /** Called when the doze suppression state changes. */
+        default void onDozeSuppressedChanged(boolean suppressed) {}
     }
 
     interface PulseCallback {

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.common;
 
+import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
@@ -62,6 +63,8 @@ public class ScreenshotUtils {
             if (buffer == null || buffer.getHardwareBuffer() == null) {
                 return;
             }
+            final GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
+                buffer.getHardwareBuffer());
             mScreenshot = new SurfaceControl.Builder()
                 .setName("ScreenshotUtils screenshot")
                 .setFormat(PixelFormat.TRANSLUCENT)
@@ -70,7 +73,7 @@ public class ScreenshotUtils {
                 .setBLASTLayer()
                 .build();
 
-            mTransaction.setBuffer(mScreenshot, buffer.getHardwareBuffer());
+            mTransaction.setBuffer(mScreenshot, graphicBuffer);
             mTransaction.setColorSpace(mScreenshot, buffer.getColorSpace());
             mTransaction.reparent(mScreenshot, mSurfaceControl);
             mTransaction.setLayer(mScreenshot, mLayer);

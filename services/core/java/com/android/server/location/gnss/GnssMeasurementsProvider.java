@@ -16,8 +16,6 @@
 
 package com.android.server.location.gnss;
 
-import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
-
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
@@ -34,6 +32,7 @@ import android.util.Log;
 import com.android.server.location.gnss.hal.GnssNative;
 import com.android.server.location.injector.AppOpsHelper;
 import com.android.server.location.injector.Injector;
+import com.android.server.location.injector.LocationAttributionHelper;
 import com.android.server.location.injector.LocationUsageLogger;
 import com.android.server.location.injector.SettingsHelper;
 
@@ -53,6 +52,8 @@ public final class GnssMeasurementsProvider extends
 
     private class GnssMeasurementListenerRegistration extends GnssListenerRegistration {
 
+        private static final String GNSS_MEASUREMENTS_BUCKET = "gnss_measurement";
+
         protected GnssMeasurementListenerRegistration(
                 @Nullable GnssMeasurementRequest request,
                 CallerIdentity callerIdentity,
@@ -69,23 +70,27 @@ public final class GnssMeasurementsProvider extends
         @Nullable
         @Override
         protected void onActive() {
-            mAppOpsHelper.startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, getIdentity());
+            mLocationAttributionHelper.reportHighPowerLocationStart(
+                    getIdentity(), GNSS_MEASUREMENTS_BUCKET, getKey());
         }
 
         @Nullable
         @Override
         protected void onInactive() {
-            mAppOpsHelper.finishOp(OP_MONITOR_HIGH_POWER_LOCATION, getIdentity());
+            mLocationAttributionHelper.reportHighPowerLocationStop(
+                    getIdentity(), GNSS_MEASUREMENTS_BUCKET, getKey());
         }
     }
 
     private final AppOpsHelper mAppOpsHelper;
+    private final LocationAttributionHelper mLocationAttributionHelper;
     private final LocationUsageLogger mLogger;
     private final GnssNative mGnssNative;
 
     public GnssMeasurementsProvider(Injector injector, GnssNative gnssNative) {
         super(injector);
         mAppOpsHelper = injector.getAppOpsHelper();
+        mLocationAttributionHelper = injector.getLocationAttributionHelper();
         mLogger = injector.getLocationUsageLogger();
         mGnssNative = gnssNative;
 
@@ -114,8 +119,7 @@ public final class GnssMeasurementsProvider extends
     protected boolean registerWithService(GnssMeasurementRequest request,
             Collection<GnssListenerRegistration> registrations) {
         if (mGnssNative.startMeasurementCollection(request.isFullTracking(),
-                request.isCorrelationVectorOutputsEnabled(),
-                request.getIntervalMillis())) {
+                request.isCorrelationVectorOutputsEnabled())) {
             if (D) {
                 Log.d(TAG, "starting gnss measurements (" + request + ")");
             }
@@ -158,7 +162,6 @@ public final class GnssMeasurementsProvider extends
             Collection<GnssListenerRegistration> registrations) {
         boolean fullTracking = false;
         boolean enableCorrVecOutputs = false;
-        int intervalMillis = Integer.MAX_VALUE;
 
         if (mSettingsHelper.isGnssMeasurementsFullTrackingEnabled()) {
             fullTracking = true;
@@ -172,13 +175,11 @@ public final class GnssMeasurementsProvider extends
             if (request.isCorrelationVectorOutputsEnabled()) {
                 enableCorrVecOutputs = true;
             }
-            intervalMillis = Math.min(intervalMillis, request.getIntervalMillis());
         }
 
         return new GnssMeasurementRequest.Builder()
                     .setFullTracking(fullTracking)
                     .setCorrelationVectorOutputsEnabled(enableCorrVecOutputs)
-                    .setIntervalMillis(intervalMillis)
                     .build();
     }
 

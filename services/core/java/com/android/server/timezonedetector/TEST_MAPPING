@@ -7,14 +7,6 @@
           "include-filter": "com.android.server.timezonedetector."
         }
       ]
-    },
-    {
-      "name": "CtsTimeTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
     }
   ]
 }

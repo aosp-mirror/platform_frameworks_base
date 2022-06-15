@@ -28,7 +28,6 @@ import android.widget.TextView;
 
 import com.android.internal.widget.ConversationLayout;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationFadeAware;
 
 /**
  * A hybrid view which may contain information about one ore more conversations.
@@ -138,15 +137,5 @@ public class HybridConversationNotificationView extends HybridNotificationView {
         lp.width = size;
         lp.height = size;
         view.setLayoutParams(lp);
-    }
-
-    /**
-     * Apply the faded state as a layer type change to the face pile view which needs to have
-     * overlapping contents render precisely.
-     */
-    @Override
-    public void setNotificationFaded(boolean faded) {
-        super.setNotificationFaded(faded);
-        NotificationFadeAware.setLayerTypeForFaded(mConversationFacePile, faded);
     }
 }

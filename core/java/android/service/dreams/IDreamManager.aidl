@@ -41,5 +41,4 @@ interface IDreamManager {
     void forceAmbientDisplayEnabled(boolean enabled);
     ComponentName[] getDreamComponentsForUser(int userId);
     void setDreamComponentsForUser(int userId, in ComponentName[] componentNames);
-    void registerDreamOverlayService(in ComponentName componentName);
 }

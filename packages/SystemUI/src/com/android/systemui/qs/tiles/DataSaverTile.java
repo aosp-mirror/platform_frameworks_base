@@ -14,6 +14,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -28,7 +29,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -47,7 +47,6 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
         DataSaverController.Listener{
 
     private final DataSaverController mDataSaverController;
-    private final DialogLaunchAnimator mDialogLaunchAnimator;
 
     @Inject
     public DataSaverTile(
@@ -59,13 +58,11 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            DataSaverController dataSaverController,
-            DialogLaunchAnimator dialogLaunchAnimator
+            DataSaverController dataSaverController
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mDataSaverController = dataSaverController;
-        mDialogLaunchAnimator = dialogLaunchAnimator;
         mDataSaverController.observe(getLifecycle(), this);
     }
 
@@ -86,27 +83,18 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
             toggleDataSaver();
             return;
         }
-
-        // Show a dialog to confirm first. Dialogs shown by the DialogLaunchAnimator must be created
-        // and shown on the main thread, so we post it to the UI handler.
-        mUiHandler.post(() -> {
-            SystemUIDialog dialog = new SystemUIDialog(mContext);
-            dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
-            dialog.setMessage(com.android.internal.R.string.data_saver_description);
-            dialog.setPositiveButton(com.android.internal.R.string.data_saver_enable_button,
-                    (dialogInterface, which) -> {
-                        toggleDataSaver();
-                        Prefs.putBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, true);
-                    });
-            dialog.setNeutralButton(com.android.internal.R.string.cancel, null);
-            dialog.setShowForAllUsers(true);
-
-            if (view != null) {
-                mDialogLaunchAnimator.showFromView(dialog, view);
-            } else {
-                dialog.show();
-            }
-        });
+        // Shows dialog first
+        SystemUIDialog dialog = new SystemUIDialog(mContext);
+        dialog.setTitle(com.android.internal.R.string.data_saver_enable_title);
+        dialog.setMessage(com.android.internal.R.string.data_saver_description);
+        dialog.setPositiveButton(com.android.internal.R.string.data_saver_enable_button,
+                (OnClickListener) (dialogInterface, which) -> {
+                    toggleDataSaver();
+                    Prefs.putBoolean(mContext, Prefs.Key.QS_DATA_SAVER_DIALOG_SHOWN, true);
+                });
+        dialog.setNegativeButton(com.android.internal.R.string.cancel, null);
+        dialog.setShowForAllUsers(true);
+        dialog.show();
     }
 
     private void toggleDataSaver() {
@@ -135,6 +123,15 @@ public class DataSaverTile extends QSTileImpl<BooleanState> implements
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_DATA_SAVER;
+    }
+
+    @Override
+    protected String composeChangeAnnouncement() {
+        if (mState.value) {
+            return mContext.getString(R.string.accessibility_quick_settings_data_saver_changed_on);
+        } else {
+            return mContext.getString(R.string.accessibility_quick_settings_data_saver_changed_off);
+        }
     }
 
     @Override

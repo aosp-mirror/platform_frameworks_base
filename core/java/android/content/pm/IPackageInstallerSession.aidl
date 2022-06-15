@@ -18,7 +18,6 @@ package android.content.pm;
 
 import android.content.pm.Checksum;
 import android.content.pm.DataLoaderParamsParcel;
-import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.IntentSender;
 import android.os.ParcelFileDescriptor;
@@ -37,7 +36,6 @@ interface IPackageInstallerSession {
     void stageViaHardLink(String target);
 
     void setChecksums(String name, in Checksum[] checksums, in byte[] signature);
-    void requestChecksums(in String name, int optional, int required, in List trustedInstallers, in IOnChecksumsReadyListener onChecksumsReadyListener);
 
     void removeSplit(String splitName);
 
@@ -57,5 +55,4 @@ interface IPackageInstallerSession {
     int getParentSessionId();
 
     boolean isStaged();
-    int getInstallFlags();
 }

@@ -220,7 +220,7 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
     }
 
     @Override
-    public void onParametersUpdated(Map<String, String> parameters) {
+    public void onParametersUpdated(Map parameters) {
         mHandler.post(() -> mCallback.onParametersUpdated(parameters));
     }
 }

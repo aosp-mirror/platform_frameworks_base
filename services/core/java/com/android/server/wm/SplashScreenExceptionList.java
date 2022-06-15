@@ -64,13 +64,12 @@ class SplashScreenExceptionList {
                 mOnPropertiesChangedListener);
     }
 
-    @VisibleForTesting
-    void updateDeviceConfig(String values) {
+    private void updateDeviceConfig(String values) {
         parseDeviceConfigPackageList(values);
     }
 
     /**
-     * Returns true if the packageName is in the list and the target sdk is before or including T.
+     * Returns true if the packageName is in the list and the target sdk is before S.
      *
      * @param packageName  The package name of the application to check
      * @param targetSdk    The target sdk of the application
@@ -82,7 +81,7 @@ class SplashScreenExceptionList {
     @SuppressWarnings("AndroidFrameworkCompatChange") // Target sdk check
     public boolean isException(@NonNull String packageName, int targetSdk,
             @Nullable Supplier<ApplicationInfo> infoSupplier) {
-        if (targetSdk > Build.VERSION_CODES.TIRAMISU) {
+        if (targetSdk >= Build.VERSION_CODES.S) {
             return false;
         }
 

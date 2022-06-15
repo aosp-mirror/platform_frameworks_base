@@ -16,7 +16,6 @@
 
 package com.google.errorprone.bugpatterns.android;
 
-import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.instanceMethod;
@@ -62,7 +61,6 @@ import javax.lang.model.element.Name;
 @BugPattern(
     name = "AndroidFrameworkEfficientXml",
     summary = "Verifies efficient XML best-practices",
-    linkType = NONE,
     severity = WARNING)
 public final class EfficientXmlChecker extends BugChecker
         implements MethodInvocationTreeMatcher, NewClassTreeMatcher {

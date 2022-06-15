@@ -24,6 +24,7 @@ import android.util.ArraySet
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.util.indentIfPossible
+import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
@@ -39,13 +40,6 @@ import java.util.concurrent.atomic.AtomicInteger
  *
  * This class has no sync controls, so make sure to only make modifications from the background
  * thread.
- *
- * This class takes the following actions:
- * * [registerAction]: action to register this receiver (with the proper filter) with [Context].
- * * [unregisterAction]: action to unregister this receiver with [Context].
- * * [testPendingRemovalAction]: action to check if a particular [BroadcastReceiver] registered
- *   with [BroadcastDispatcher] has been unregistered and is pending removal. See
- *   [PendingRemovalStore].
  */
 class ActionReceiver(
     private val action: String,
@@ -53,8 +47,7 @@ class ActionReceiver(
     private val registerAction: BroadcastReceiver.(IntentFilter) -> Unit,
     private val unregisterAction: BroadcastReceiver.() -> Unit,
     private val bgExecutor: Executor,
-    private val logger: BroadcastDispatcherLogger,
-    private val testPendingRemovalAction: (BroadcastReceiver, Int) -> Boolean
+    private val logger: BroadcastDispatcherLogger
 ) : BroadcastReceiver(), Dumpable {
 
     companion object {
@@ -114,8 +107,7 @@ class ActionReceiver(
         // Immediately return control to ActivityManager
         bgExecutor.execute {
             receiverDatas.forEach {
-                if (it.filter.matchCategories(intent.categories) == null &&
-                    !testPendingRemovalAction(it.receiver, userId)) {
+                if (it.filter.matchCategories(intent.categories) == null) {
                     it.executor.execute {
                         it.receiver.pendingResult = pendingResult
                         it.receiver.onReceive(context, intent)
@@ -126,7 +118,7 @@ class ActionReceiver(
         }
     }
 
-    override fun dump(pw: PrintWriter, args: Array<out String>) {
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.indentIfPossible {
             println("Registered: $registered")
             println("Receivers:")

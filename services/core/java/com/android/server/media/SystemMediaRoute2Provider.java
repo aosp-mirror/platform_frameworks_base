@@ -71,7 +71,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private final IAudioService mAudioService;
     private final Handler mHandler;
     private final Context mContext;
-    private final UserHandle mUser;
     private final BluetoothRouteProvider mBtRouteProvider;
 
     private static ComponentName sComponentName = new ComponentName(
@@ -87,9 +86,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
     int mDeviceVolume;
 
-    private final AudioManagerBroadcastReceiver mAudioReceiver =
-            new AudioManagerBroadcastReceiver();
-
     private final Object mRequestLock = new Object();
     @GuardedBy("mRequestLock")
     private volatile SessionCreationRequest mPendingSessionCreationRequest;
@@ -100,9 +96,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             mHandler.post(() -> {
                 updateDeviceRoute(newRoutes);
                 notifyProviderState();
-                if (updateSessionInfosIfNeeded()) {
-                    notifySessionInfoUpdated();
-                }
             });
         }
     };
@@ -112,7 +105,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         mIsSystemRouteProvider = true;
         mContext = context;
-        mUser = user;
         mHandler = new Handler(Looper.getMainLooper());
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -128,36 +120,27 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         // .getInstance returns null if there is no bt adapter available
         mBtRouteProvider = BluetoothRouteProvider.createInstance(context, (routes) -> {
             publishProviderState();
-            if (updateSessionInfosIfNeeded()) {
+
+            boolean sessionInfoChanged;
+            sessionInfoChanged = updateSessionInfosIfNeeded();
+            if (sessionInfoChanged) {
                 notifySessionInfoUpdated();
             }
         });
         updateSessionInfosIfNeeded();
-    }
 
-    public void start() {
         IntentFilter intentFilter = new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION);
         intentFilter.addAction(AudioManager.STREAM_DEVICES_CHANGED_ACTION);
-        mContext.registerReceiverAsUser(mAudioReceiver, mUser,
+        mContext.registerReceiverAsUser(new AudioManagerBroadcastReceiver(), user,
                 intentFilter, null, null);
 
         if (mBtRouteProvider != null) {
             mHandler.post(() -> {
-                mBtRouteProvider.start(mUser);
+                mBtRouteProvider.start(user);
                 notifyProviderState();
             });
         }
         updateVolume();
-    }
-
-    public void stop() {
-        mContext.unregisterReceiver(mAudioReceiver);
-        if (mBtRouteProvider != null) {
-            mHandler.post(() -> {
-                mBtRouteProvider.stop();
-                notifyProviderState();
-            });
-        }
     }
 
     @Override
@@ -252,23 +235,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
     public RoutingSessionInfo getDefaultSessionInfo() {
         return mDefaultSessionInfo;
-    }
-
-    public RoutingSessionInfo generateDeviceRouteSelectedSessionInfo(String packageName) {
-        synchronized (mLock) {
-            if (mSessionInfos.isEmpty()) {
-                return null;
-            }
-            RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
-                    SYSTEM_SESSION_ID, packageName).setSystemSession(true);
-            builder.addSelectedRoute(mDeviceRoute.getId());
-            if (mBtRouteProvider != null) {
-                for (MediaRoute2Info route : mBtRouteProvider.getAllBluetoothRoutes()) {
-                    builder.addTransferableRoute(route.getId());
-                }
-            }
-            return builder.setProviderId(mUniqueId).build();
-        }
     }
 
     private void updateDeviceRoute(AudioRoutesInfo newRoutes) {

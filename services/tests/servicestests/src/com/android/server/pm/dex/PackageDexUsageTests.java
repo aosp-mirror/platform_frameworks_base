@@ -28,7 +28,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.os.Build;
-import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -50,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageDexUsageTests {

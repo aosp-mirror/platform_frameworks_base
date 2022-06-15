@@ -21,7 +21,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -33,7 +32,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.dagger.qualifiers.Background;
 
 import javax.inject.Inject;
 
@@ -41,18 +39,15 @@ import javax.inject.Inject;
 public class BrightnessDialog extends Activity {
 
     private BrightnessController mBrightnessController;
-    private final BrightnessSliderController.Factory mToggleSliderFactory;
+    private final BrightnessSlider.Factory mToggleSliderFactory;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final Handler mBackgroundHandler;
 
     @Inject
     public BrightnessDialog(
             BroadcastDispatcher broadcastDispatcher,
-            BrightnessSliderController.Factory factory,
-            @Background Handler bgHandler) {
+            BrightnessSlider.Factory factory) {
         mBroadcastDispatcher = broadcastDispatcher;
         mToggleSliderFactory = factory;
-        mBackgroundHandler = bgHandler;
     }
 
 
@@ -77,12 +72,11 @@ public class BrightnessDialog extends Activity {
         // The brightness mirror container is INVISIBLE by default.
         frame.setVisibility(View.VISIBLE);
 
-        BrightnessSliderController controller = mToggleSliderFactory.create(this, frame);
+        BrightnessSlider controller = mToggleSliderFactory.create(this, frame);
         controller.init();
         frame.addView(controller.getRootView(), MATCH_PARENT, WRAP_CONTENT);
 
-        mBrightnessController = new BrightnessController(
-                this, controller, mBroadcastDispatcher, mBackgroundHandler);
+        mBrightnessController = new BrightnessController(this, controller, mBroadcastDispatcher);
     }
 
     @Override
@@ -90,12 +84,6 @@ public class BrightnessDialog extends Activity {
         super.onStart();
         mBrightnessController.registerCallbacks();
         MetricsLogger.visible(this, MetricsEvent.BRIGHTNESS_DIALOG);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     @Override

@@ -52,7 +52,7 @@ public class RankingBuilder {
     private ArrayList<Notification.Action> mSmartActions = new ArrayList<>();
     private ArrayList<CharSequence> mSmartReplies = new ArrayList<>();
     private boolean mCanBubble = false;
-    private boolean mIsTextChanged = false;
+    private boolean mIsVisuallyInterruptive = false;
     private boolean mIsConversation = false;
     private ShortcutInfo mShortcutInfo = null;
     private int mRankingAdjustment = 0;
@@ -81,7 +81,7 @@ public class RankingBuilder {
         mSmartActions = copyList(ranking.getSmartActions());
         mSmartReplies = copyList(ranking.getSmartReplies());
         mCanBubble = ranking.canBubble();
-        mIsTextChanged = ranking.isTextChanged();
+        mIsVisuallyInterruptive = ranking.visuallyInterruptive();
         mIsConversation = ranking.isConversation();
         mShortcutInfo = ranking.getConversationShortcutInfo();
         mRankingAdjustment = ranking.getRankingAdjustment();
@@ -110,7 +110,7 @@ public class RankingBuilder {
                 mSmartActions,
                 mSmartReplies,
                 mCanBubble,
-                mIsTextChanged,
+                mIsVisuallyInterruptive,
                 mIsConversation,
                 mShortcutInfo,
                 mRankingAdjustment,
@@ -189,8 +189,8 @@ public class RankingBuilder {
         return this;
     }
 
-    public RankingBuilder setTextChanged(boolean textChanged) {
-        mIsTextChanged = textChanged;
+    public RankingBuilder setVisuallyInterruptive(boolean interruptive) {
+        mIsVisuallyInterruptive = interruptive;
         return this;
     }
 

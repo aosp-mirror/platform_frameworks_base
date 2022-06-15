@@ -16,7 +16,6 @@
 package com.android.settingslib.testutils.shadow;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
@@ -34,9 +33,8 @@ public class ShadowRouter2Manager {
     private List<MediaRoute2Info> mAvailableRoutes;
     private List<MediaRoute2Info> mAllRoutes;
     private List<MediaRoute2Info> mDeselectableRoutes;
-    private List<RoutingSessionInfo> mRemoteSessions;
+    private List<RoutingSessionInfo> mActiveSessions;
     private List<RoutingSessionInfo> mRoutingSessions;
-    private RoutingSessionInfo mSystemRoutingSession;
 
     @Implementation
     protected List<MediaRoute2Info> getAvailableRoutes(String packageName) {
@@ -57,12 +55,12 @@ public class ShadowRouter2Manager {
     }
 
     @Implementation
-    protected List<RoutingSessionInfo> getRemoteSessions() {
-        return mRemoteSessions;
+    protected List<RoutingSessionInfo> getActiveSessions() {
+        return mActiveSessions;
     }
 
-    public void setRemoteSessions(List<RoutingSessionInfo> infos) {
-        mRemoteSessions = infos;
+    public void setActiveSessions(List<RoutingSessionInfo> infos) {
+        mActiveSessions = infos;
     }
 
     @Implementation
@@ -72,15 +70,6 @@ public class ShadowRouter2Manager {
 
     public void setRoutingSessions(List<RoutingSessionInfo> infos) {
         mRoutingSessions = infos;
-    }
-
-    @Implementation
-    public RoutingSessionInfo getSystemRoutingSession(@Nullable String packageName) {
-        return mSystemRoutingSession;
-    }
-
-    public void setSystemRoutingSession(RoutingSessionInfo sessionInfo) {
-        mSystemRoutingSession = sessionInfo;
     }
 
     @Implementation
@@ -95,14 +84,5 @@ public class ShadowRouter2Manager {
     public static ShadowRouter2Manager getShadow() {
         return (ShadowRouter2Manager) Shadow.extract(
                 MediaRouter2Manager.getInstance(RuntimeEnvironment.application));
-    }
-
-    @Implementation
-    protected List<MediaRoute2Info> getTransferableRoutes(String packageName) {
-        return mAvailableRoutes;
-    }
-
-    public void setTransferableRoutes(List<MediaRoute2Info> infos) {
-        mAvailableRoutes = infos;
     }
 }

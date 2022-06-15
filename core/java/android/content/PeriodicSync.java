@@ -84,7 +84,7 @@ public class PeriodicSync implements Parcelable {
     }
 
     private PeriodicSync(Parcel in) {
-        this.account = in.readParcelable(null, android.accounts.Account.class);
+        this.account = in.readParcelable(null);
         this.authority = in.readString();
         this.extras = in.readBundle();
         this.period = in.readLong();

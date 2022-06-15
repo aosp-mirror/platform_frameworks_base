@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 
 /**
  * An animation that controls the clip of an object. See the
@@ -65,43 +66,43 @@ public class ClipRectAnimation extends Animation {
                 com.android.internal.R.styleable.ClipRectAnimation);
 
         Description d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ClipRectAnimation_fromLeft), context);
+                com.android.internal.R.styleable.ClipRectAnimation_fromLeft));
         mFromLeftType = d.type;
         mFromLeftValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ClipRectAnimation_fromTop), context);
+                com.android.internal.R.styleable.ClipRectAnimation_fromTop));
         mFromTopType = d.type;
         mFromTopValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ClipRectAnimation_fromRight), context);
+                com.android.internal.R.styleable.ClipRectAnimation_fromRight));
         mFromRightType = d.type;
         mFromRightValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ClipRectAnimation_fromBottom), context);
+                com.android.internal.R.styleable.ClipRectAnimation_fromBottom));
         mFromBottomType = d.type;
         mFromBottomValue = d.value;
 
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ClipRectAnimation_toLeft), context);
+                com.android.internal.R.styleable.ClipRectAnimation_toLeft));
         mToLeftType = d.type;
         mToLeftValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ClipRectAnimation_toTop), context);
+                com.android.internal.R.styleable.ClipRectAnimation_toTop));
         mToTopType = d.type;
         mToTopValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ClipRectAnimation_toRight), context);
+                com.android.internal.R.styleable.ClipRectAnimation_toRight));
         mToRightType = d.type;
         mToRightValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ClipRectAnimation_toBottom), context);
+                com.android.internal.R.styleable.ClipRectAnimation_toBottom));
         mToBottomType = d.type;
         mToBottomValue = d.value;
 

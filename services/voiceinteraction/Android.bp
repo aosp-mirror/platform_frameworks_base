@@ -18,9 +18,5 @@ java_library_static {
     name: "services.voiceinteraction",
     defaults: ["platform_service_defaults"],
     srcs: [":services.voiceinteraction-sources"],
-    libs: [
-        "services.core",
-        "android.hardware.power-V1-java",
-        "android.hardware.power-V1.0-java",
-    ],
+    libs: ["services.core"],
 }

@@ -77,8 +77,9 @@ final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<V
      */
     private int addRampDownToZeroAmplitudeSegments(List<VibrationEffectSegment> segments,
             int repeatIndex) {
-        int segmentCount = segments.size();
-        for (int i = 1; i < segmentCount; i++) {
+        int newRepeatIndex = repeatIndex;
+        int newSegmentCount = segments.size();
+        for (int i = 1; i < newSegmentCount; i++) {
             VibrationEffectSegment previousSegment = segments.get(i - 1);
             if (!isOffSegment(segments.get(i))
                     || !endsWithNonZeroAmplitude(previousSegment)) {
@@ -90,13 +91,13 @@ final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<V
 
             if (previousSegment instanceof StepSegment) {
                 float previousAmplitude = ((StepSegment) previousSegment).getAmplitude();
-                float previousFrequency = ((StepSegment) previousSegment).getFrequencyHz();
+                float previousFrequency = ((StepSegment) previousSegment).getFrequency();
 
                 replacementSegments =
                         createStepsDown(previousAmplitude, previousFrequency, offDuration);
             } else if (previousSegment instanceof RampSegment) {
                 float previousAmplitude = ((RampSegment) previousSegment).getEndAmplitude();
-                float previousFrequency = ((RampSegment) previousSegment).getEndFrequencyHz();
+                float previousFrequency = ((RampSegment) previousSegment).getEndFrequency();
 
                 if (offDuration <= mRampDownDuration) {
                     // Replace the zero amplitude segment with a ramp down of same duration, to
@@ -115,23 +116,16 @@ final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<V
             if (replacementSegments != null) {
                 int segmentsAdded = replacementSegments.size() - 1;
 
-                VibrationEffectSegment originalOffSegment = segments.remove(i);
+                segments.remove(i);
                 segments.addAll(i, replacementSegments);
-                if (repeatIndex >= i) {
-                    if (repeatIndex == i) {
-                        // This effect is repeating to the removed off segment: add it back at the
-                        // end of the vibration so the loop timings are preserved, and skip it.
-                        segments.add(originalOffSegment);
-                        repeatIndex++;
-                        segmentCount++;
-                    }
-                    repeatIndex += segmentsAdded;
+                if (repeatIndex > i) {
+                    newRepeatIndex += segmentsAdded;
                 }
                 i += segmentsAdded;
-                segmentCount += segmentsAdded;
+                newSegmentCount += segmentsAdded;
             }
         }
-        return repeatIndex;
+        return newRepeatIndex;
     }
 
     /**
@@ -177,12 +171,12 @@ final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<V
         repeatIndex++;
         if (lastSegment instanceof StepSegment) {
             float previousAmplitude = ((StepSegment) lastSegment).getAmplitude();
-            float previousFrequency = ((StepSegment) lastSegment).getFrequencyHz();
+            float previousFrequency = ((StepSegment) lastSegment).getFrequency();
             segments.addAll(createStepsDown(previousAmplitude, previousFrequency,
                     Math.min(offDuration, mRampDownDuration)));
         } else if (lastSegment instanceof RampSegment) {
             float previousAmplitude = ((RampSegment) lastSegment).getEndAmplitude();
-            float previousFrequency = ((RampSegment) lastSegment).getEndFrequencyHz();
+            float previousFrequency = ((RampSegment) lastSegment).getEndFrequency();
             segments.add(createRampDown(previousAmplitude, previousFrequency,
                     Math.min(offDuration, mRampDownDuration)));
         }
@@ -214,10 +208,10 @@ final class RampDownAdapter implements VibrationEffectAdapters.SegmentsAdapter<V
         if (segment instanceof RampSegment) {
             RampSegment ramp = (RampSegment) segment;
             return new RampSegment(ramp.getStartAmplitude(), ramp.getEndAmplitude(),
-                    ramp.getStartFrequencyHz(), ramp.getEndFrequencyHz(), (int) newDuration);
+                    ramp.getStartFrequency(), ramp.getEndFrequency(), (int) newDuration);
         } else if (segment instanceof StepSegment) {
             StepSegment step = (StepSegment) segment;
-            return new StepSegment(step.getAmplitude(), step.getFrequencyHz(), (int) newDuration);
+            return new StepSegment(step.getAmplitude(), step.getFrequency(), (int) newDuration);
         }
         return segment;
     }

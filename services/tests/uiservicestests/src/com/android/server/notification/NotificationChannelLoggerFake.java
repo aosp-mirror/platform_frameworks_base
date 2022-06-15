@@ -28,13 +28,6 @@ public class NotificationChannelLoggerFake implements NotificationChannelLogger 
         CallRecord(NotificationChannelEvent event) {
             this.event = event;
         }
-
-        @Override
-        public String toString() {
-            return "CallRecord{" +
-                    "event=" + event +
-                    '}';
-        }
     }
 
     private List<CallRecord> mCalls = new ArrayList<>();

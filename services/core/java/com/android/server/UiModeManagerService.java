@@ -19,9 +19,6 @@ package com.android.server;
 import static android.app.UiModeManager.DEFAULT_PRIORITY;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_SCHEDULE;
-import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
 import static android.app.UiModeManager.MODE_NIGHT_NO;
 import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
@@ -38,14 +35,11 @@ import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.IOnProjectionStateChangedListener;
 import android.app.IUiModeManager;
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.UiModeManager;
-import android.app.UiModeManager.NightModeCustomReturnType;
-import android.app.UiModeManager.NightModeCustomType;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -113,9 +107,6 @@ final class UiModeManagerService extends SystemService {
     // Enable launching of applications when entering the dock.
     private static final boolean ENABLE_LAUNCH_DESK_DOCK_APP = true;
     private static final String SYSTEM_PROPERTY_DEVICE_THEME = "persist.sys.theme";
-    @VisibleForTesting
-    public static final Set<Integer> SUPPORTED_NIGHT_MODE_CUSTOM_TYPES = new ArraySet(
-            new Integer[]{MODE_NIGHT_CUSTOM_TYPE_SCHEDULE, MODE_NIGHT_CUSTOM_TYPE_BEDTIME});
 
     private final Injector mInjector;
     private final Object mLock = new Object();
@@ -124,7 +115,6 @@ final class UiModeManagerService extends SystemService {
 
     private int mLastBroadcastState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     private int mNightMode = UiModeManager.MODE_NIGHT_NO;
-    private int mNightModeCustomType = UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
     private final LocalTime DEFAULT_CUSTOM_NIGHT_START_TIME = LocalTime.of(22, 0);
     private final LocalTime DEFAULT_CUSTOM_NIGHT_END_TIME = LocalTime.of(6, 0);
     private LocalTime mCustomAutoNightModeStartMilliseconds = DEFAULT_CUSTOM_NIGHT_START_TIME;
@@ -146,12 +136,9 @@ final class UiModeManagerService extends SystemService {
     private boolean mWatch;
     private boolean mVrHeadset;
     private boolean mComputedNightMode;
-    private boolean mLastBedtimeRequestedNightMode = false;
     private int mCarModeEnableFlags;
     private boolean mSetupWizardComplete;
 
-    // flag set by resource, whether to start dream immediately upon docking even if unlocked.
-    private boolean mStartDreamImmediatelyOnDock = true;
     // flag set by resource, whether to enable Car dock launch when starting car mode.
     private boolean mEnableCarDockLaunch = true;
     // flag set by resource, whether to lock UI mode to the default one or not.
@@ -176,7 +163,6 @@ final class UiModeManagerService extends SystemService {
     private ActivityTaskManagerInternal mActivityTaskManager;
     private AlarmManager mAlarmManager;
     private PowerManager mPowerManager;
-    private KeyguardManager mKeyguardManager;
 
     // In automatic scheduling, the user is able
     // to override the computed night mode until the two match
@@ -366,9 +352,11 @@ final class UiModeManagerService extends SystemService {
         getContext().getContentResolver().unregisterContentObserver(mSetupWizardObserver);
         verifySetupWizardCompleted();
         synchronized (mLock) {
-            updateNightModeFromSettingsLocked(getContext(), getContext().getResources(),
-                    to.getUserIdentifier());
-            updateLocked(0, 0);
+            // only update if the value is actually changed
+            if (updateNightModeFromSettingsLocked(getContext(), getContext().getResources(),
+                    to.getUserIdentifier())) {
+                updateLocked(0, 0);
+            }
         }
     }
 
@@ -378,7 +366,6 @@ final class UiModeManagerService extends SystemService {
             synchronized (mLock) {
                 final Context context = getContext();
                 mSystemReady = true;
-                mKeyguardManager = context.getSystemService(KeyguardManager.class);
                 mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
                 mWakeLock = mPowerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
                 mWindowManager = LocalServices.getService(WindowManagerInternal.class);
@@ -417,8 +404,6 @@ final class UiModeManagerService extends SystemService {
         verifySetupWizardCompleted();
 
         final Resources res = context.getResources();
-        mStartDreamImmediatelyOnDock = res.getBoolean(
-                com.android.internal.R.bool.config_startDreamImmediatelyOnDock);
         mNightMode = res.getInteger(
                 com.android.internal.R.integer.config_defaultNightMode);
         mDefaultUiModeType = res.getInteger(
@@ -539,23 +524,24 @@ final class UiModeManagerService extends SystemService {
     }
 
     /**
-     * Updates the night mode setting in Settings.Secure
+     * Updates the night mode setting in Settings.Secure and returns if the value was successfully
+     * changed.
      *
      * @param context A valid context
      * @param res     A valid resource object
      * @param userId  The user to update the setting for
+     * @return True if the new value is different from the old value. False otherwise.
      */
-    private void updateNightModeFromSettingsLocked(Context context, Resources res, int userId) {
+    private boolean updateNightModeFromSettingsLocked(Context context, Resources res, int userId) {
         if (mCarModeEnabled || mCar) {
-            return;
+            return false;
         }
+        int oldNightMode = mNightMode;
         if (mSetupWizardComplete) {
             mNightMode = Secure.getIntForUser(context.getContentResolver(),
                     Secure.UI_NIGHT_MODE, res.getInteger(
                             com.android.internal.R.integer.config_defaultNightMode), userId);
-            mNightModeCustomType = Secure.getIntForUser(context.getContentResolver(),
-                    Secure.UI_NIGHT_MODE_CUSTOM_TYPE, MODE_NIGHT_CUSTOM_TYPE_UNKNOWN, userId);
-                    mOverrideNightModeOn = Secure.getIntForUser(context.getContentResolver(),
+            mOverrideNightModeOn = Secure.getIntForUser(context.getContentResolver(),
                     Secure.UI_NIGHT_MODE_OVERRIDE_ON, 0, userId) != 0;
             mOverrideNightModeOff = Secure.getIntForUser(context.getContentResolver(),
                     Secure.UI_NIGHT_MODE_OVERRIDE_OFF, 0, userId) != 0;
@@ -572,6 +558,8 @@ final class UiModeManagerService extends SystemService {
                         Secure.UI_NIGHT_MODE_LAST_COMPUTED, 0, userId) != 0;
             }
         }
+
+        return oldNightMode != mNightMode;
     }
 
     private static long toMilliSeconds(LocalTime t) {
@@ -635,13 +623,6 @@ final class UiModeManagerService extends SystemService {
                         + "permission ENTER_CAR_MODE_PRIORITIZED");
             }
 
-            // Allow the user to enable car mode using the shell,
-            // e.g. 'adb shell cmd uimode car yes'
-            boolean isShellCaller = mInjector.getCallingUid() == Process.SHELL_UID;
-            if (!isShellCaller) {
-              assertLegit(callingPackage);
-            }
-
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -681,15 +662,7 @@ final class UiModeManagerService extends SystemService {
             // If the caller is the system, we will allow the DISABLE_CAR_MODE_ALL_PRIORITIES car
             // mode flag to be specified; this is so that the user can disable car mode at all
             // priorities using the persistent notification.
-            //
-            // We also allow the user to disable car mode using the shell,
-            // e.g. 'adb shell cmd uimode car no'
-            int callingUid = mInjector.getCallingUid();
-            boolean isSystemCaller = callingUid == Process.SYSTEM_UID;
-            boolean isShellCaller = callingUid == Process.SHELL_UID;
-            if (!isSystemCaller && !isShellCaller) {
-                assertLegit(callingPackage);
-            }
+            boolean isSystemCaller = mInjector.getCallingUid() == Process.SYSTEM_UID;
             final int carModeFlags =
                     isSystemCaller ? flags : flags & ~UiModeManager.DISABLE_CAR_MODE_ALL_PRIORITIES;
 
@@ -729,14 +702,6 @@ final class UiModeManagerService extends SystemService {
 
         @Override
         public void setNightMode(int mode) {
-            // MODE_NIGHT_CUSTOM_TYPE_SCHEDULE is the default for MODE_NIGHT_CUSTOM.
-            int customModeType = mode == MODE_NIGHT_CUSTOM
-                    ? MODE_NIGHT_CUSTOM_TYPE_SCHEDULE
-                    : MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
-            setNightModeInternal(mode, customModeType);
-        }
-
-        private void setNightModeInternal(int mode, int customModeType) {
             if (isNightModeLocked() && (getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
                     != PackageManager.PERMISSION_GRANTED)) {
@@ -747,13 +712,8 @@ final class UiModeManagerService extends SystemService {
                 case UiModeManager.MODE_NIGHT_NO:
                 case UiModeManager.MODE_NIGHT_YES:
                 case MODE_NIGHT_AUTO:
-                    break;
                 case MODE_NIGHT_CUSTOM:
-                    if (SUPPORTED_NIGHT_MODE_CUSTOM_TYPES.contains(customModeType)) {
-                        break;
-                    }
-                    throw new IllegalArgumentException(
-                            "Can't set the custom type to " + customModeType);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown mode: " + mode);
             }
@@ -762,14 +722,12 @@ final class UiModeManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    if (mNightMode != mode || mNightModeCustomType != customModeType) {
+                    if (mNightMode != mode) {
                         if (mNightMode == MODE_NIGHT_AUTO || mNightMode == MODE_NIGHT_CUSTOM) {
                             unregisterScreenOffEventLocked();
                             cancelCustomAlarm();
                         }
-                        mNightModeCustomType = mode == MODE_NIGHT_CUSTOM
-                                ? customModeType
-                                : MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
+
                         mNightMode = mode;
                         resetNightModeOverrideLocked();
                         persistNightMode(user);
@@ -792,30 +750,6 @@ final class UiModeManagerService extends SystemService {
         public int getNightMode() {
             synchronized (mLock) {
                 return mNightMode;
-            }
-        }
-
-        @Override
-        public void setNightModeCustomType(@NightModeCustomType int nightModeCustomType) {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "setNightModeCustomType requires MODIFY_DAY_NIGHT_MODE permission");
-            }
-            setNightModeInternal(MODE_NIGHT_CUSTOM, nightModeCustomType);
-        }
-
-        @Override
-        public  @NightModeCustomReturnType int getNightModeCustomType() {
-            if (getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "getNightModeCustomType requires MODIFY_DAY_NIGHT_MODE permission");
-            }
-            synchronized (mLock) {
-                return mNightModeCustomType;
             }
         }
 
@@ -874,19 +808,10 @@ final class UiModeManagerService extends SystemService {
         }
 
         @Override
-        public boolean setNightModeActivatedForCustomMode(int modeNightCustomType, boolean active) {
-            return setNightModeActivatedForModeInternal(modeNightCustomType, active);
-        }
-
-        @Override
         public boolean setNightModeActivated(boolean active) {
-            return setNightModeActivatedForModeInternal(mNightModeCustomType, active);
-        }
-
-        private boolean setNightModeActivatedForModeInternal(int modeCustomType, boolean active) {
-            if (getContext().checkCallingOrSelfPermission(
+            if (isNightModeLocked() && (getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED)) {
                 Slog.e(TAG, "Night mode locked, requires MODIFY_DAY_NIGHT_MODE permission");
                 return false;
             }
@@ -898,14 +823,6 @@ final class UiModeManagerService extends SystemService {
                         + " INTERACT_ACROSS_USERS permission is required");
                 return false;
 
-            }
-            // Store the last requested bedtime night mode state so that we don't need to notify
-            // anyone if the user decides to switch to the night mode to bedtime.
-            if (modeCustomType == MODE_NIGHT_CUSTOM_TYPE_BEDTIME) {
-                mLastBedtimeRequestedNightMode = active;
-            }
-            if (modeCustomType != mNightModeCustomType) {
-                return false;
             }
             synchronized (mLock) {
                 final long ident = Binder.clearCallingIdentity();
@@ -1250,16 +1167,11 @@ final class UiModeManagerService extends SystemService {
     }
 
     private boolean doesPackageHaveCallingUid(@NonNull String packageName) {
-        int callingUid = mInjector.getCallingUid();
-        int callingUserId = UserHandle.getUserId(callingUid);
-        final long ident = Binder.clearCallingIdentity();
         try {
-            return getContext().getPackageManager().getPackageUidAsUser(packageName,
-                    callingUserId) == callingUid;
+            return getContext().getPackageManager().getPackageUid(packageName, 0)
+                    == mInjector.getCallingUid();
         } catch (PackageManager.NameNotFoundException e) {
             return false;
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -1311,10 +1223,8 @@ final class UiModeManagerService extends SystemService {
             pw.print("  mDockState="); pw.print(mDockState);
             pw.print(" mLastBroadcastState="); pw.println(mLastBroadcastState);
 
-            pw.print(" mStartDreamImmediatelyOnDock="); pw.print(mStartDreamImmediatelyOnDock);
-
             pw.print("  mNightMode="); pw.print(mNightMode); pw.print(" (");
-            pw.print(Shell.nightModeToStr(mNightMode, mNightModeCustomType)); pw.print(") ");
+            pw.print(Shell.nightModeToStr(mNightMode)); pw.print(") ");
             pw.print(" mOverrideOn/Off="); pw.print(mOverrideNightModeOn);
             pw.print("/"); pw.print(mOverrideNightModeOff);
 
@@ -1507,8 +1417,6 @@ final class UiModeManagerService extends SystemService {
         Secure.putIntForUser(getContext().getContentResolver(),
                 Secure.UI_NIGHT_MODE, mNightMode, user);
         Secure.putLongForUser(getContext().getContentResolver(),
-                Secure.UI_NIGHT_MODE_CUSTOM_TYPE, mNightModeCustomType, user);
-        Secure.putLongForUser(getContext().getContentResolver(),
                 Secure.DARK_THEME_CUSTOM_START_TIME,
                 mCustomAutoNightModeStartMilliseconds.toNanoOfDay() / 1000, user);
         Secure.putLongForUser(getContext().getContentResolver(),
@@ -1560,14 +1468,10 @@ final class UiModeManagerService extends SystemService {
         }
 
         if (mNightMode == MODE_NIGHT_CUSTOM) {
-            if (mNightModeCustomType == MODE_NIGHT_CUSTOM_TYPE_BEDTIME) {
-                updateComputedNightModeLocked(mLastBedtimeRequestedNightMode);
-            } else {
-                registerTimeChangeEvent();
-                final boolean activate = computeCustomNightMode();
-                updateComputedNightModeLocked(activate);
-                scheduleNextCustomTimeListener();
-            }
+            registerTimeChangeEvent();
+            final boolean activate = computeCustomNightMode();
+            updateComputedNightModeLocked(activate);
+            scheduleNextCustomTimeListener();
         } else {
             unregisterTimeChangeEvent();
         }
@@ -1585,7 +1489,6 @@ final class UiModeManagerService extends SystemService {
                     "updateConfigurationLocked: mDockState=" + mDockState
                     + "; mCarMode=" + mCarModeEnabled
                     + "; mNightMode=" + mNightMode
-                    + "; mNightModeCustomType=" + mNightModeCustomType
                     + "; uiMode=" + uiMode);
         }
 
@@ -1626,8 +1529,7 @@ final class UiModeManagerService extends SystemService {
     }
 
     private boolean shouldApplyAutomaticChangesImmediately() {
-        return mCar || !mPowerManager.isInteractive()
-                || mNightModeCustomType == MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
+        return mCar || !mPowerManager.isInteractive();
     }
 
     private void scheduleNextCustomTimeListener() {
@@ -1822,9 +1724,8 @@ final class UiModeManagerService extends SystemService {
         // Send the new configuration.
         applyConfigurationExternallyLocked();
 
-        // If we did not start a dock app, then start dreaming if appropriate.
-        if (category != null && !dockAppStarted && (mStartDreamImmediatelyOnDock
-                || mKeyguardManager.isKeyguardLocked())) {
+        // If we did not start a dock app, then start dreaming if supported.
+        if (category != null && !dockAppStarted) {
             Sandman.startDreamWhenDockedIfAppropriate(getContext());
         }
     }
@@ -1930,8 +1831,7 @@ final class UiModeManagerService extends SystemService {
         public static final String NIGHT_MODE_STR_YES = "yes";
         public static final String NIGHT_MODE_STR_NO = "no";
         public static final String NIGHT_MODE_STR_AUTO = "auto";
-        public static final String NIGHT_MODE_STR_CUSTOM_SCHEDULE = "custom_schedule";
-        public static final String NIGHT_MODE_STR_CUSTOM_BEDTIME = "custom_bedtime";
+        public static final String NIGHT_MODE_STR_CUSTOM = "custom";
         public static final String NIGHT_MODE_STR_UNKNOWN = "unknown";
         private final IUiModeManager mInterface;
 
@@ -1945,7 +1845,7 @@ final class UiModeManagerService extends SystemService {
             pw.println("UiModeManager service (uimode) commands:");
             pw.println("  help");
             pw.println("    Print this help text.");
-            pw.println("  night [yes|no|auto|custom_schedule|custom_bedtime]");
+            pw.println("  night [yes|no|auto|custom]");
             pw.println("    Set or read night mode.");
             pw.println("  car [yes|no]");
             pw.println("    Set or read car mode.");
@@ -2015,19 +1915,14 @@ final class UiModeManagerService extends SystemService {
             }
 
             final int mode = strToNightMode(modeStr);
-            final int customType = strToNightModeCustomType(modeStr);
             if (mode >= 0) {
                 mInterface.setNightMode(mode);
-                if (mode == UiModeManager.MODE_NIGHT_CUSTOM) {
-                    mInterface.setNightModeCustomType(customType);
-                }
                 printCurrentNightMode();
                 return 0;
             } else {
                 err.println("Error: mode must be '" + NIGHT_MODE_STR_YES + "', '"
                         + NIGHT_MODE_STR_NO + "', or '" + NIGHT_MODE_STR_AUTO
-                        +  "', or '" + NIGHT_MODE_STR_CUSTOM_SCHEDULE + "', or '"
-                        + NIGHT_MODE_STR_CUSTOM_BEDTIME + "'");
+                        +  "', or '" + NIGHT_MODE_STR_CUSTOM + "'");
                 return -1;
             }
         }
@@ -2035,12 +1930,11 @@ final class UiModeManagerService extends SystemService {
         private void printCurrentNightMode() throws RemoteException {
             final PrintWriter pw = getOutPrintWriter();
             final int currMode = mInterface.getNightMode();
-            final int customType = mInterface.getNightModeCustomType();
-            final String currModeStr = nightModeToStr(currMode, customType);
+            final String currModeStr = nightModeToStr(currMode);
             pw.println("Night mode: " + currModeStr);
         }
 
-        private static String nightModeToStr(int mode, int customType) {
+        private static String nightModeToStr(int mode) {
             switch (mode) {
                 case UiModeManager.MODE_NIGHT_YES:
                     return NIGHT_MODE_STR_YES;
@@ -2049,12 +1943,7 @@ final class UiModeManagerService extends SystemService {
                 case UiModeManager.MODE_NIGHT_AUTO:
                     return NIGHT_MODE_STR_AUTO;
                 case MODE_NIGHT_CUSTOM:
-                    if (customType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_SCHEDULE) {
-                        return NIGHT_MODE_STR_CUSTOM_SCHEDULE;
-                    }
-                    if (customType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME) {
-                        return NIGHT_MODE_STR_CUSTOM_BEDTIME;
-                    }
+                    return NIGHT_MODE_STR_CUSTOM;
                 default:
                     return NIGHT_MODE_STR_UNKNOWN;
             }
@@ -2068,20 +1957,8 @@ final class UiModeManagerService extends SystemService {
                     return UiModeManager.MODE_NIGHT_NO;
                 case NIGHT_MODE_STR_AUTO:
                     return UiModeManager.MODE_NIGHT_AUTO;
-                case NIGHT_MODE_STR_CUSTOM_SCHEDULE:
-                case NIGHT_MODE_STR_CUSTOM_BEDTIME:
+                case NIGHT_MODE_STR_CUSTOM:
                     return UiModeManager.MODE_NIGHT_CUSTOM;
-                default:
-                    return -1;
-            }
-        }
-
-        private static int strToNightModeCustomType(String customTypeStr) {
-            switch (customTypeStr) {
-                case NIGHT_MODE_STR_CUSTOM_BEDTIME:
-                    return UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
-                case NIGHT_MODE_STR_CUSTOM_SCHEDULE:
-                    return UiModeManager.MODE_NIGHT_CUSTOM_TYPE_SCHEDULE;
                 default:
                     return -1;
             }

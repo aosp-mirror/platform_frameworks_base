@@ -18,7 +18,6 @@
 #include "SkUtils.h"
 #include "SkData.h"
 
-#include <inttypes.h>
 #include <log/log.h>
 
 using namespace android;
@@ -31,7 +30,7 @@ AssetStreamAdaptor::AssetStreamAdaptor(Asset* asset)
 bool AssetStreamAdaptor::rewind() {
     off64_t pos = fAsset->seek(0, SEEK_SET);
     if (pos == (off64_t)-1) {
-        ALOGD("----- fAsset->seek(rewind) failed\n");
+        SkDebugf("----- fAsset->seek(rewind) failed\n");
         return false;
     }
     return true;
@@ -59,7 +58,7 @@ bool AssetStreamAdaptor::hasPosition() const {
 size_t AssetStreamAdaptor::getPosition() const {
     const off64_t offset = fAsset->seek(0, SEEK_CUR);
     if (offset == -1) {
-        ALOGD("---- fAsset->seek(0, SEEK_CUR) failed\n");
+        SkDebugf("---- fAsset->seek(0, SEEK_CUR) failed\n");
         return 0;
     }
 
@@ -68,7 +67,7 @@ size_t AssetStreamAdaptor::getPosition() const {
 
 bool AssetStreamAdaptor::seek(size_t position) {
     if (fAsset->seek(position, SEEK_SET) == -1) {
-        ALOGD("---- fAsset->seek(0, SEEK_SET) failed\n");
+        SkDebugf("---- fAsset->seek(0, SEEK_SET) failed\n");
         return false;
     }
 
@@ -77,7 +76,7 @@ bool AssetStreamAdaptor::seek(size_t position) {
 
 bool AssetStreamAdaptor::move(long offset) {
     if (fAsset->seek(offset, SEEK_CUR) == -1) {
-        ALOGD("---- fAsset->seek(%li, SEEK_CUR) failed\n", offset);
+        SkDebugf("---- fAsset->seek(%i, SEEK_CUR) failed\n", offset);
         return false;
     }
 
@@ -96,12 +95,12 @@ size_t AssetStreamAdaptor::read(void* buffer, size_t size) {
 
         off64_t oldOffset = fAsset->seek(0, SEEK_CUR);
         if (-1 == oldOffset) {
-            ALOGD("---- fAsset->seek(oldOffset) failed\n");
+            SkDebugf("---- fAsset->seek(oldOffset) failed\n");
             return 0;
         }
         off64_t newOffset = fAsset->seek(size, SEEK_CUR);
         if (-1 == newOffset) {
-            ALOGD("---- fAsset->seek(%zu) failed\n", size);
+            SkDebugf("---- fAsset->seek(%d) failed\n", size);
             return 0;
         }
         amount = newOffset - oldOffset;
@@ -122,20 +121,20 @@ sk_sp<SkData> android::CopyAssetToData(Asset* asset) {
 
     const off64_t seekReturnVal = asset->seek(0, SEEK_SET);
     if ((off64_t)-1 == seekReturnVal) {
-        ALOGD("---- copyAsset: asset rewind failed\n");
+        SkDebugf("---- copyAsset: asset rewind failed\n");
         return NULL;
     }
 
     const off64_t size = asset->getLength();
     if (size <= 0) {
-        ALOGD("---- copyAsset: asset->getLength() returned %" PRId64 "\n", size);
+        SkDebugf("---- copyAsset: asset->getLength() returned %d\n", size);
         return NULL;
     }
 
     sk_sp<SkData> data(SkData::MakeUninitialized(size));
     const off64_t len = asset->read(data->writable_data(), size);
     if (len != size) {
-        ALOGD("---- copyAsset: asset->read(%" PRId64 ") returned %" PRId64 "\n", size, len);
+        SkDebugf("---- copyAsset: asset->read(%d) returned %d\n", size, len);
         return NULL;
     }
 
@@ -144,7 +143,7 @@ sk_sp<SkData> android::CopyAssetToData(Asset* asset) {
 
 jobject android::nullObjectReturn(const char msg[]) {
     if (msg) {
-        ALOGD("--- %s\n", msg);
+        SkDebugf("--- %s\n", msg);
     }
     return NULL;
 }

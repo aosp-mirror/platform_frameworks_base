@@ -68,7 +68,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     ATRACE_CALL();
 
     if (canvas->recordingContext() == nullptr) {
-        ALOGD("Attempting to draw VkInteropFunctor into an unsupported surface");
+        SkDEBUGF(("Attempting to draw VkInteropFunctor into an unsupported surface"));
         return;
     }
 

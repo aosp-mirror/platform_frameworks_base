@@ -368,7 +368,7 @@ public final class ApkSigningBlockUtils {
             SignatureInfo signatureInfo) throws SecurityException {
         try {
             byte[] expectedRootHash = parseVerityDigestAndVerifySourceLength(expectedDigest,
-                    apk.getChannel().size(), signatureInfo);
+                    apk.length(), signatureInfo);
             VerityBuilder.VerityResult verity = VerityBuilder.generateApkVerityTree(apk,
                     signatureInfo, new ByteBufferFactory() {
                         @Override

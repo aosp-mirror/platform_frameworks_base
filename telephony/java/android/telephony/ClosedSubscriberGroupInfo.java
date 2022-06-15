@@ -44,6 +44,12 @@ public final class ClosedSubscriberGroupInfo implements Parcelable {
         mCsgIdentity = csgIdentity;
     }
 
+    /** @hide */
+    public ClosedSubscriberGroupInfo(
+            @NonNull android.hardware.radio.V1_5.ClosedSubscriberGroupInfo csgInfo) {
+        this(csgInfo.csgIndication, csgInfo.homeNodebName, csgInfo.csgIdentity);
+    }
+
     /**
      * Indicates whether the cell is restricted to only CSG members.
      *

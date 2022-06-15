@@ -316,11 +316,9 @@ public final class LocationAccessPolicy {
             return LocationPermissionResult.ALLOWED;
         }
 
-        // Check the system-wide requirements. If the location main switch is off and the caller is
-        // not in the allowlist of apps that always have loation access or the app's profile
-        // isn't in the foreground, return a soft denial.
-        if (!checkSystemLocationAccess(context, query.callingUid, query.callingPid,
-                query.callingPackage)) {
+        // Check the system-wide requirements. If the location main switch is off or
+        // the app's profile isn't in foreground, return a soft denial.
+        if (!checkSystemLocationAccess(context, query.callingUid, query.callingPid)) {
             return LocationPermissionResult.DENIED_SOFT;
         }
 
@@ -346,16 +344,15 @@ public final class LocationAccessPolicy {
         return LocationPermissionResult.ALLOWED;
     }
 
+
     private static boolean checkManifestPermission(Context context, int pid, int uid,
             String permissionToCheck) {
         return context.checkPermission(permissionToCheck, pid, uid)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private static boolean checkSystemLocationAccess(@NonNull Context context, int uid, int pid,
-            @NonNull String callingPackage) {
-        if (!isLocationModeEnabled(context, UserHandle.getUserHandleForUid(uid).getIdentifier())
-                && !isLocationBypassAllowed(context, callingPackage)) {
+    private static boolean checkSystemLocationAccess(@NonNull Context context, int uid, int pid) {
+        if (!isLocationModeEnabled(context, UserHandle.getUserHandleForUid(uid).getIdentifier())) {
             if (DBG) Log.w(TAG, "Location disabled, failed, (" + uid + ")");
             return false;
         }
@@ -374,16 +371,6 @@ public final class LocationAccessPolicy {
             return false;
         }
         return locationManager.isLocationEnabledForUser(UserHandle.of(userId));
-    }
-
-    private static boolean isLocationBypassAllowed(@NonNull Context context,
-            @NonNull String callingPackage) {
-        for (String bypassPackage : getLocationBypassPackages(context)) {
-            if (callingPackage.equals(bypassPackage)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

@@ -35,69 +35,70 @@ public class TransactionCompat {
         mTransaction.apply();
     }
 
-    public TransactionCompat show(SurfaceControl surfaceControl) {
-        mTransaction.show(surfaceControl);
+    public TransactionCompat show(SurfaceControlCompat surfaceControl) {
+        mTransaction.show(surfaceControl.mSurfaceControl);
         return this;
     }
 
-    public TransactionCompat hide(SurfaceControl surfaceControl) {
-        mTransaction.hide(surfaceControl);
+    public TransactionCompat hide(SurfaceControlCompat surfaceControl) {
+        mTransaction.hide(surfaceControl.mSurfaceControl);
         return this;
     }
 
-    public TransactionCompat setPosition(SurfaceControl surfaceControl, float x, float y) {
-        mTransaction.setPosition(surfaceControl, x, y);
+    public TransactionCompat setPosition(SurfaceControlCompat surfaceControl, float x, float y) {
+        mTransaction.setPosition(surfaceControl.mSurfaceControl, x, y);
         return this;
     }
 
-    public TransactionCompat setSize(SurfaceControl surfaceControl, int w, int h) {
-        mTransaction.setBufferSize(surfaceControl, w, h);
+    public TransactionCompat setSize(SurfaceControlCompat surfaceControl, int w, int h) {
+        mTransaction.setBufferSize(surfaceControl.mSurfaceControl, w, h);
         return this;
     }
 
-    public TransactionCompat setLayer(SurfaceControl surfaceControl, int z) {
-        mTransaction.setLayer(surfaceControl, z);
+    public TransactionCompat setLayer(SurfaceControlCompat surfaceControl, int z) {
+        mTransaction.setLayer(surfaceControl.mSurfaceControl, z);
         return this;
     }
 
-    public TransactionCompat setAlpha(SurfaceControl surfaceControl, float alpha) {
-        mTransaction.setAlpha(surfaceControl, alpha);
+    public TransactionCompat setAlpha(SurfaceControlCompat surfaceControl, float alpha) {
+        mTransaction.setAlpha(surfaceControl.mSurfaceControl, alpha);
         return this;
     }
 
-    public TransactionCompat setOpaque(SurfaceControl surfaceControl, boolean opaque) {
-        mTransaction.setOpaque(surfaceControl, opaque);
+    public TransactionCompat setOpaque(SurfaceControlCompat surfaceControl, boolean opaque) {
+        mTransaction.setOpaque(surfaceControl.mSurfaceControl, opaque);
         return this;
     }
 
-    public TransactionCompat setMatrix(SurfaceControl surfaceControl, float dsdx, float dtdx,
+    public TransactionCompat setMatrix(SurfaceControlCompat surfaceControl, float dsdx, float dtdx,
             float dtdy, float dsdy) {
-        mTransaction.setMatrix(surfaceControl, dsdx, dtdx, dtdy, dsdy);
+        mTransaction.setMatrix(surfaceControl.mSurfaceControl, dsdx, dtdx, dtdy, dsdy);
         return this;
     }
 
-    public TransactionCompat setMatrix(SurfaceControl surfaceControl, Matrix matrix) {
-        mTransaction.setMatrix(surfaceControl, matrix, mTmpValues);
+    public TransactionCompat setMatrix(SurfaceControlCompat surfaceControl, Matrix matrix) {
+        mTransaction.setMatrix(surfaceControl.mSurfaceControl, matrix, mTmpValues);
         return this;
     }
 
-    public TransactionCompat setWindowCrop(SurfaceControl surfaceControl, Rect crop) {
-        mTransaction.setWindowCrop(surfaceControl, crop);
+    public TransactionCompat setWindowCrop(SurfaceControlCompat surfaceControl, Rect crop) {
+        mTransaction.setWindowCrop(surfaceControl.mSurfaceControl, crop);
         return this;
     }
 
-    public TransactionCompat setCornerRadius(SurfaceControl surfaceControl, float radius) {
-        mTransaction.setCornerRadius(surfaceControl, radius);
+    public TransactionCompat setCornerRadius(SurfaceControlCompat surfaceControl, float radius) {
+        mTransaction.setCornerRadius(surfaceControl.mSurfaceControl, radius);
         return this;
     }
 
-    public TransactionCompat setBackgroundBlurRadius(SurfaceControl surfaceControl, int radius) {
-        mTransaction.setBackgroundBlurRadius(surfaceControl, radius);
+    public TransactionCompat setBackgroundBlurRadius(SurfaceControlCompat surfaceControl,
+            int radius) {
+        mTransaction.setBackgroundBlurRadius(surfaceControl.mSurfaceControl, radius);
         return this;
     }
 
-    public TransactionCompat setColor(SurfaceControl surfaceControl, float[] color) {
-        mTransaction.setColor(surfaceControl, color);
+    public TransactionCompat setColor(SurfaceControlCompat surfaceControl, float[] color) {
+        mTransaction.setColor(surfaceControl.mSurfaceControl, color);
         return this;
     }
 

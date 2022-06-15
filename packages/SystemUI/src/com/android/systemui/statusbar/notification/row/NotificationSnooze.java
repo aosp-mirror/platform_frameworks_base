@@ -146,7 +146,6 @@ public class NotificationSnooze extends LinearLayout
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         logOptionSelection(MetricsEvent.NOTIFICATION_SNOOZE_CLICKED, mDefaultOption);
-        dispatchConfigurationChanged(getResources().getConfiguration());
     }
 
     @Override
@@ -255,7 +254,7 @@ public class NotificationSnooze extends LinearLayout
             return new NotificationSnoozeOption(null, minutes, description, resultText, action);
         }
         SpannableString string = new SpannableString(resultText);
-        string.setSpan(new StyleSpan(Typeface.BOLD, res.getConfiguration().fontWeightAdjustment),
+        string.setSpan(new StyleSpan(Typeface.BOLD),
                 index, index + description.length(), 0 /* flags */);
         return new NotificationSnoozeOption(null, minutes, description, string,
                 action);

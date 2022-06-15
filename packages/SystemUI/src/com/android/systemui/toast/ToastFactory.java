@@ -28,6 +28,7 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.ToastPlugin;
 import com.android.systemui.shared.plugins.PluginManager;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
@@ -83,7 +84,7 @@ public class ToastFactory implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("ToastFactory:");
         pw.println("    mAttachedPlugin=" + mPlugin);
     }

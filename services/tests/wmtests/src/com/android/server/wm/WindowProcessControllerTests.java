@@ -21,21 +21,13 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.ActivityRecord.State.PAUSED;
-import static com.android.server.wm.ActivityRecord.State.PAUSING;
-import static com.android.server.wm.ActivityRecord.State.RESUMED;
-import static com.android.server.wm.ActivityRecord.State.STARTED;
-import static com.android.server.wm.ActivityRecord.State.STOPPED;
-import static com.android.server.wm.ActivityRecord.State.STOPPING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,7 +43,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
@@ -320,17 +311,17 @@ public class WindowProcessControllerTests extends WindowTestsBase {
 
         callbackResult[0] = 0;
         activity.mVisibleRequested = false;
-        activity.setState(PAUSED, "test");
+        activity.setState(Task.ActivityState.PAUSED, "test");
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(paused, callbackResult[0]);
 
         callbackResult[0] = 0;
-        activity.setState(STOPPING, "test");
+        activity.setState(Task.ActivityState.STOPPING, "test");
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(stopping, callbackResult[0]);
 
         callbackResult[0] = 0;
-        activity.setState(STOPPED, "test");
+        activity.setState(Task.ActivityState.STOPPED, "test");
         mWpc.computeOomAdjFromActivities(callback);
         assertEquals(other, callbackResult[0]);
     }
@@ -341,25 +332,25 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         spyOn(tracker);
         final ActivityRecord activity = createActivityRecord(mWpc);
         activity.mVisibleRequested = true;
-        activity.setState(STARTED, "test");
+        activity.setState(Task.ActivityState.STARTED, "test");
 
         verify(tracker).onAnyActivityVisible(mWpc);
         assertTrue(mWpc.hasVisibleActivities());
 
-        activity.setState(RESUMED, "test");
+        activity.setState(Task.ActivityState.RESUMED, "test");
 
         verify(tracker).onActivityResumedWhileVisible(mWpc);
         assertTrue(tracker.hasResumedActivity(mWpc.mUid));
 
         activity.makeFinishingLocked();
-        activity.setState(PAUSING, "test");
+        activity.setState(Task.ActivityState.PAUSING, "test");
 
         assertFalse(tracker.hasResumedActivity(mWpc.mUid));
         assertTrue(mWpc.hasForegroundActivities());
 
         activity.setVisibility(false);
         activity.mVisibleRequested = false;
-        activity.setState(STOPPED, "test");
+        activity.setState(Task.ActivityState.STOPPED, "test");
 
         verify(tracker).onAllActivitiesInvisible(mWpc);
         assertFalse(mWpc.hasVisibleActivities());
@@ -374,20 +365,9 @@ public class WindowProcessControllerTests extends WindowTestsBase {
     public void testTopActivityUiModeChangeScheduleConfigChange() {
         final ActivityRecord activity = createActivityRecord(mWpc);
         activity.mVisibleRequested = true;
-        doReturn(true).when(activity).applyAppSpecificConfig(anyInt(), any());
-        mWpc.updateAppSpecificSettingsForAllActivitiesInPackage(DEFAULT_COMPONENT_PACKAGE_NAME,
-                Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"));
+        doReturn(true).when(activity).setOverrideNightMode(anyInt());
+        mWpc.updateNightModeForAllActivities(Configuration.UI_MODE_NIGHT_YES);
         verify(activity).ensureActivityConfiguration(anyInt(), anyBoolean());
-    }
-
-    @Test
-    public void testTopActivityUiModeChangeForDifferentPackage_noScheduledConfigChange() {
-        final ActivityRecord activity = createActivityRecord(mWpc);
-        activity.mVisibleRequested = true;
-        mWpc.updateAppSpecificSettingsForAllActivitiesInPackage("com.different.package",
-                Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"));
-        verify(activity, never()).applyAppSpecificConfig(anyInt(), any());
-        verify(activity, never()).ensureActivityConfiguration(anyInt(), anyBoolean());
     }
 
     @Test

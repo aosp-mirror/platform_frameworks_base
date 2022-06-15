@@ -47,8 +47,6 @@ import com.android.internal.compat.ChangeReporter;
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.internal.compat.CompatibilityOverrideConfig;
-import com.android.internal.compat.CompatibilityOverridesByPackageConfig;
-import com.android.internal.compat.CompatibilityOverridesToRemoveByPackageConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
 import com.android.internal.compat.IOverrideValidator;
 import com.android.internal.compat.IPlatformCompat;
@@ -207,8 +205,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             overridesMap.put(change, new PackageOverride.Builder().setEnabled(false)
                     .build());
         }
-        mCompatConfig.addPackageOverrides(new CompatibilityOverrideConfig(overridesMap),
-                packageName, /* skipUnknownChangeIds */ false);
+        mCompatConfig.addOverrides(new CompatibilityOverrideConfig(overridesMap), packageName);
         killPackage(packageName);
     }
 
@@ -223,27 +220,16 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             overridesMap.put(change, new PackageOverride.Builder().setEnabled(false)
                     .build());
         }
-        mCompatConfig.addPackageOverrides(new CompatibilityOverrideConfig(overridesMap),
-                packageName, /* skipUnknownChangeIds */ false);
-    }
-
-    @Override
-    public void putAllOverridesOnReleaseBuilds(
-            CompatibilityOverridesByPackageConfig overridesByPackage) {
-        checkCompatChangeOverrideOverridablePermission();
-        for (CompatibilityOverrideConfig overrides :
-                overridesByPackage.packageNameToOverrides.values()) {
-            checkAllCompatOverridesAreOverridable(overrides.overrides.keySet());
-        }
-        mCompatConfig.addAllPackageOverrides(overridesByPackage, /* skipUnknownChangeIds= */ true);
+        mCompatConfig.addOverrides(new CompatibilityOverrideConfig(overridesMap), packageName);
     }
 
     @Override
     public void putOverridesOnReleaseBuilds(CompatibilityOverrideConfig overrides,
             String packageName) {
+        // TODO(b/183630314): Unify the permission enforcement with the other setOverrides* methods.
         checkCompatChangeOverrideOverridablePermission();
         checkAllCompatOverridesAreOverridable(overrides.overrides.keySet());
-        mCompatConfig.addPackageOverrides(overrides, packageName, /* skipUnknownChangeIds= */ true);
+        mCompatConfig.addOverrides(overrides, packageName);
     }
 
     @Override
@@ -292,20 +278,10 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
-    public void removeAllOverridesOnReleaseBuilds(
-            CompatibilityOverridesToRemoveByPackageConfig overridesToRemoveByPackage) {
-        checkCompatChangeOverrideOverridablePermission();
-        for (CompatibilityOverridesToRemoveConfig overridesToRemove :
-                overridesToRemoveByPackage.packageNameToOverridesToRemove.values()) {
-            checkAllCompatOverridesAreOverridable(overridesToRemove.changeIds);
-        }
-        mCompatConfig.removeAllPackageOverrides(overridesToRemoveByPackage);
-    }
-
-    @Override
     public void removeOverridesOnReleaseBuilds(
             CompatibilityOverridesToRemoveConfig overridesToRemove,
             String packageName) {
+        // TODO(b/183630314): Unify the permission enforcement with the other setOverrides* methods.
         checkCompatChangeOverrideOverridablePermission();
         checkAllCompatOverridesAreOverridable(overridesToRemove.changeIds);
         mCompatConfig.removePackageOverrides(overridesToRemove, packageName);
@@ -459,7 +435,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     private void checkAllCompatOverridesAreOverridable(Collection<Long> changeIds) {
         for (Long changeId : changeIds) {
-            if (isKnownChangeId(changeId) && !mCompatConfig.isOverridable(changeId)) {
+            if (!mCompatConfig.isOverridable(changeId)) {
                 throw new SecurityException("Only change ids marked as Overridable can be "
                         + "overridden.");
             }

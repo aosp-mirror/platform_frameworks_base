@@ -18,14 +18,10 @@
 package android.app.admin;
 
 import android.accounts.Account;
-import android.app.admin.DevicePolicyDrawableResource;
-import android.app.admin.DevicePolicyStringResource;
-import android.app.admin.ParcelableResource;
 import android.app.admin.NetworkEvent;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.admin.ParcelableGranteeMap;
-import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
@@ -33,7 +29,6 @@ import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.FullyManagedDeviceProvisioningParams;
-import android.app.admin.WifiSsidPolicy;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -50,7 +45,6 @@ import android.os.UserHandle;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.telephony.data.ApnSetting;
-import com.android.internal.infra.AndroidFuture;
 
 import java.util.List;
 
@@ -104,6 +98,8 @@ interface IDevicePolicyManager {
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
 
+    void finalizeWorkProfileProvisioning(in UserHandle managedProfileUser, in Account migratedAccount);
+
     void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num, boolean parent);
     int getMaximumFailedPasswordsForWipe(in ComponentName admin, int userHandle, boolean parent);
 
@@ -122,8 +118,6 @@ interface IDevicePolicyManager {
     void setFactoryResetProtectionPolicy(in ComponentName who, in FactoryResetProtectionPolicy policy);
     FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(in ComponentName who);
     boolean isFactoryResetProtectionPolicySupported();
-
-    void sendLostModeLocationUpdate(in AndroidFuture<boolean> future);
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);
@@ -160,7 +154,7 @@ interface IDevicePolicyManager {
     void forceRemoveActiveAdmin(in ComponentName policyReceiver, int userHandle);
     boolean hasGrantedPolicy(in ComponentName policyReceiver, int usesPolicy, int userHandle);
 
-    void reportPasswordChanged(in PasswordMetrics metrics, int userId);
+    void reportPasswordChanged(int userId);
     void reportFailedPasswordAttempt(int userHandle);
     void reportSuccessfulPasswordAttempt(int userHandle);
     void reportFailedBiometricAttempt(int userHandle);
@@ -168,7 +162,7 @@ interface IDevicePolicyManager {
     void reportKeyguardDismissed(int userHandle);
     void reportKeyguardSecured(int userHandle);
 
-    boolean setDeviceOwner(in ComponentName who, String ownerName, int userId, boolean setProfileOwnerOnCurrentUserIfNecessary);
+    boolean setDeviceOwner(in ComponentName who, String ownerName, int userId);
     ComponentName getDeviceOwnerComponent(boolean callingUserOnly);
     boolean hasDeviceOwner();
     String getDeviceOwnerName();
@@ -245,14 +239,14 @@ interface IDevicePolicyManager {
     void addCrossProfileIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
     void clearCrossProfileIntentFilters(in ComponentName admin);
 
-    boolean setPermittedAccessibilityServices(in ComponentName admin,in List<String> packageList);
-    List<String> getPermittedAccessibilityServices(in ComponentName admin);
-    List<String> getPermittedAccessibilityServicesForUser(int userId);
+    boolean setPermittedAccessibilityServices(in ComponentName admin,in List packageList);
+    List getPermittedAccessibilityServices(in ComponentName admin);
+    List getPermittedAccessibilityServicesForUser(int userId);
     boolean isAccessibilityServicePermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
-    boolean setPermittedInputMethods(in ComponentName admin,in List<String> packageList, boolean parent);
-    List<String> getPermittedInputMethods(in ComponentName admin, boolean parent);
-    List<String> getPermittedInputMethodsAsUser(int userId);
+    boolean setPermittedInputMethods(in ComponentName admin,in List packageList, boolean parent);
+    List getPermittedInputMethods(in ComponentName admin, boolean parent);
+    List getPermittedInputMethodsForCurrentUser();
     boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId, boolean parent);
 
     boolean setPermittedCrossProfileNotificationListeners(in ComponentName admin, in List<String> packageList);
@@ -260,7 +254,6 @@ interface IDevicePolicyManager {
     boolean isNotificationListenerServicePermitted(in String packageName, int userId);
 
     Intent createAdminSupportIntent(in String restriction);
-    Bundle getEnforcingAdminAndUserDetails(int userId,String restriction);
     boolean setApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean hidden, boolean parent);
     boolean isApplicationHidden(in ComponentName admin, in String callerPackage, in String packageName, boolean parent);
 
@@ -270,11 +263,8 @@ interface IDevicePolicyManager {
     int startUserInBackground(in ComponentName who, in UserHandle userHandle);
     int stopUser(in ComponentName who, in UserHandle userHandle);
     int logoutUser(in ComponentName who);
-    int logoutUserInternal(); // AIDL doesn't allow overloading name (logoutUser())
-    int getLogoutUserId();
     List<UserHandle> getSecondaryUsers(in ComponentName who);
-    void acknowledgeNewUserDisclaimer(int userId);
-    boolean isNewUserDisclaimerAcknowledged(int userId);
+    void resetNewUserDisclaimer();
 
     void enableSystemApp(in ComponentName admin, in String callerPackage, in String packageName);
     int enableSystemAppWithIntent(in ComponentName admin, in String callerPackage, in Intent intent);
@@ -287,9 +277,8 @@ interface IDevicePolicyManager {
     void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
     boolean isSecondaryLockscreenEnabled(in UserHandle userHandle);
 
-    void setPreferentialNetworkServiceConfigs(
-            in List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs);
-    List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs();
+    void setPreferentialNetworkServiceEnabled(in boolean enabled);
+    boolean isPreferentialNetworkServiceEnabled(int userHandle);
 
     void setLockTaskPackages(in ComponentName who, in String[] packages);
     String[] getLockTaskPackages(in ComponentName who);
@@ -372,7 +361,7 @@ interface IDevicePolicyManager {
             String permission, int grantState, in RemoteCallback resultReceiver);
     int getPermissionGrantState(in ComponentName admin, in String callerPackage, String packageName, String permission);
     boolean isProvisioningAllowed(String action, String packageName);
-    int checkProvisioningPrecondition(String action, String packageName);
+    int checkProvisioningPreCondition(String action, String packageName);
     void setKeepUninstalledPackages(in ComponentName admin, in String callerPackage, in List<String> packageList);
     List<String> getKeepUninstalledPackages(in ComponentName admin, in String callerPackage);
     boolean isManagedProfile(in ComponentName admin);
@@ -387,9 +376,10 @@ interface IDevicePolicyManager {
     CharSequence getShortSupportMessageForUser(in ComponentName admin, int userHandle);
     CharSequence getLongSupportMessageForUser(in ComponentName admin, int userHandle);
 
+    boolean isSeparateProfileChallengeAllowed(int userHandle);
+
     void setOrganizationColor(in ComponentName admin, in int color);
     void setOrganizationColorForUser(in int color, in int userId);
-    void clearOrganizationIdForUser(int userHandle);
     int getOrganizationColor(in ComponentName admin);
     int getOrganizationColorForUser(int userHandle);
 
@@ -478,7 +468,7 @@ interface IDevicePolicyManager {
     int getGlobalPrivateDnsMode(in ComponentName admin);
     String getGlobalPrivateDnsHost(in ComponentName admin);
 
-    void setProfileOwnerOnOrganizationOwnedDevice(in ComponentName who, int userId, boolean isProfileOwnerOnOrganizationOwnedDevice);
+    void markProfileOwnerOnOrganizationOwnedDevice(in ComponentName who, int userId);
 
     void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
 
@@ -530,8 +520,6 @@ interface IDevicePolicyManager {
     UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
 
-    void finalizeWorkProfileProvisioning(in UserHandle managedProfileUser, in Account migratedAccount);
-
     void setDeviceOwnerType(in ComponentName admin, in int deviceOwnerType);
     int getDeviceOwnerType(in ComponentName admin);
 
@@ -543,25 +531,5 @@ interface IDevicePolicyManager {
     boolean isUsbDataSignalingEnabledForUser(int userId);
     boolean canUsbDataSignalingBeDisabled();
 
-    void setMinimumRequiredWifiSecurityLevel(int level);
-    int getMinimumRequiredWifiSecurityLevel();
-
-    void setWifiSsidPolicy(in WifiSsidPolicy policy);
-    WifiSsidPolicy getWifiSsidPolicy();
-
     List<UserHandle> listForegroundAffiliatedUsers();
-    void setDrawables(in List<DevicePolicyDrawableResource> drawables);
-    void resetDrawables(in List<String> drawableIds);
-    ParcelableResource getDrawable(String drawableId, String drawableStyle, String drawableSource);
-
-    boolean isDpcDownloaded();
-    void setDpcDownloaded(boolean downloaded);
-
-    void setStrings(in List<DevicePolicyStringResource> strings);
-    void resetStrings(in List<String> stringIds);
-    ParcelableResource getString(String stringId);
-
-    boolean shouldAllowBypassingDevicePolicyManagementRoleQualification();
-
-    List<UserHandle> getPolicyManagedProfiles(in UserHandle userHandle);
 }

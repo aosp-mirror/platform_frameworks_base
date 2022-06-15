@@ -1,7 +1,7 @@
 {
-  "imports": [
-    {
-      "path": "frameworks/native/services/inputflinger"
-    }
-  ]
+    "presubmit": [
+        {
+            "name": "libinputservice_test"
+        }
+    ]
 }

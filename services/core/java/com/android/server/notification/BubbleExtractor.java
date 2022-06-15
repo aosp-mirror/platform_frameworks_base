@@ -32,7 +32,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -50,15 +49,10 @@ public class BubbleExtractor implements NotificationSignalExtractor {
     private ActivityManager mActivityManager;
     private Context mContext;
 
-    boolean mSupportsBubble;
-
     public void initialize(Context context, NotificationUsageStats usageStats) {
         if (DBG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
         mContext = context;
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-
-        mSupportsBubble = Resources.getSystem().getBoolean(
-                com.android.internal.R.bool.config_supportsBubble);
     }
 
     public RankingReconsideration process(NotificationRecord record) {
@@ -144,10 +138,6 @@ public class BubbleExtractor implements NotificationSignalExtractor {
      */
     @VisibleForTesting
     boolean canPresentAsBubble(NotificationRecord r) {
-        if (!mSupportsBubble) {
-            return false;
-        }
-
         Notification notification = r.getNotification();
         Notification.BubbleMetadata metadata = notification.getBubbleMetadata();
         String pkg = r.getSbn().getPackageName();

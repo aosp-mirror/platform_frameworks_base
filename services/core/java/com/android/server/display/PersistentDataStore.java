@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.WifiDisplay;
-import android.os.Handler;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -32,14 +31,12 @@ import android.util.Xml;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -66,15 +63,6 @@ import java.util.Objects;
  *      &lt;display unique-id="XXXXXXX">
  *          &lt;color-mode>0&lt;/color-mode>
  *          &lt;brightness-value>0&lt;/brightness-value>
- *          &lt;brightness-configurations>
- *              &lt;brightness-configuration user-serial="0" package-name="com.example"
- *              timestamp="1234">
- *                  &lt;brightness-curve description="some text">
- *                      &lt;brightness-point lux="0" nits="13.25"/>
- *                      &lt;brightness-point lux="20" nits="35.94"/>
- *                  &lt;/brightness-curve>
- *              &lt;/brightness-configuration>
- *          &lt;/brightness-configurations>
  *      &lt;/display>
  *  &lt;/display-states>
  *  &lt;stable-device-values>
@@ -132,8 +120,7 @@ final class PersistentDataStore {
     private final StableDeviceValues mStableDeviceValues = new StableDeviceValues();
 
     // Brightness configuration by user
-    private BrightnessConfigurations mGlobalBrightnessConfigurations =
-            new BrightnessConfigurations();
+    private BrightnessConfigurations mBrightnessConfigurations = new BrightnessConfigurations();
 
     // True if the data has been loaded.
     private boolean mLoaded;
@@ -144,22 +131,13 @@ final class PersistentDataStore {
     // The interface for methods which should be replaced by the test harness.
     private Injector mInjector;
 
-    private final Handler mHandler;
-    private final Object mFileAccessLock = new Object();
-
     public PersistentDataStore() {
         this(new Injector());
     }
 
     @VisibleForTesting
     PersistentDataStore(Injector injector) {
-        this(injector, new Handler(BackgroundThread.getHandler().getLooper()));
-    }
-
-    @VisibleForTesting
-    PersistentDataStore(Injector injector, Handler handler) {
         mInjector = injector;
-        mHandler = handler;
     }
 
     public void saveIfNeeded() {
@@ -303,54 +281,6 @@ final class PersistentDataStore {
         return false;
     }
 
-    public boolean setUserPreferredRefreshRate(DisplayDevice displayDevice, float refreshRate) {
-        final String displayDeviceUniqueId = displayDevice.getUniqueId();
-        if (!displayDevice.hasStableUniqueId() || displayDeviceUniqueId == null) {
-            return false;
-        }
-        DisplayState state = getDisplayState(displayDevice.getUniqueId(), true);
-        if (state.setRefreshRate(refreshRate)) {
-            setDirty();
-            return true;
-        }
-        return false;
-    }
-
-    public float getUserPreferredRefreshRate(DisplayDevice device) {
-        if (device == null || !device.hasStableUniqueId()) {
-            return Float.NaN;
-        }
-        final DisplayState state = getDisplayState(device.getUniqueId(), false);
-        if (state == null) {
-            return Float.NaN;
-        }
-        return state.getRefreshRate();
-    }
-
-    public boolean setUserPreferredResolution(DisplayDevice displayDevice, int width, int height) {
-        final String displayDeviceUniqueId = displayDevice.getUniqueId();
-        if (!displayDevice.hasStableUniqueId() || displayDeviceUniqueId == null) {
-            return false;
-        }
-        DisplayState state = getDisplayState(displayDevice.getUniqueId(), true);
-        if (state.setResolution(width, height)) {
-            setDirty();
-            return true;
-        }
-        return false;
-    }
-
-    public Point getUserPreferredResolution(DisplayDevice displayDevice) {
-        if (displayDevice == null || !displayDevice.hasStableUniqueId()) {
-            return null;
-        }
-        final DisplayState state = getDisplayState(displayDevice.getUniqueId(), false);
-        if (state == null) {
-            return null;
-        }
-        return state.getResolution();
-    }
-
     public Point getStableDisplaySize() {
         loadIfNeeded();
         return mStableDeviceValues.getDisplaySize();
@@ -363,44 +293,18 @@ final class PersistentDataStore {
         }
     }
 
-    // Used for testing & reset
     public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userSerial,
             @Nullable String packageName) {
         loadIfNeeded();
-        if (mGlobalBrightnessConfigurations.setBrightnessConfigurationForUser(c, userSerial,
+        if (mBrightnessConfigurations.setBrightnessConfigurationForUser(c, userSerial,
                 packageName)) {
-
             setDirty();
         }
-    }
-
-    public boolean setBrightnessConfigurationForDisplayLocked(BrightnessConfiguration configuration,
-            DisplayDevice device, int userSerial, String packageName) {
-        if (device == null || !device.hasStableUniqueId()) {
-            return false;
-        }
-        DisplayState state = getDisplayState(device.getUniqueId(), /*createIfAbsent*/ true);
-        if (state.setBrightnessConfiguration(configuration, userSerial, packageName)) {
-            setDirty();
-            return true;
-        }
-        return false;
-    }
-
-
-    public BrightnessConfiguration getBrightnessConfigurationForDisplayLocked(
-            String uniqueDisplayId, int userSerial) {
-        loadIfNeeded();
-        DisplayState state = mDisplayStates.get(uniqueDisplayId);
-        if (state != null) {
-            return state.getBrightnessConfiguration(userSerial);
-        }
-        return null;
     }
 
     public BrightnessConfiguration getBrightnessConfiguration(int userSerial) {
         loadIfNeeded();
-        return mGlobalBrightnessConfigurations.getBrightnessConfiguration(userSerial);
+        return mBrightnessConfigurations.getBrightnessConfiguration(userSerial);
     }
 
     private DisplayState getDisplayState(String uniqueId, boolean createIfAbsent) {
@@ -430,60 +334,45 @@ final class PersistentDataStore {
     }
 
     private void load() {
-        synchronized (mFileAccessLock) {
+        clearState();
+
+        final InputStream is;
+        try {
+            is = mInjector.openRead();
+        } catch (FileNotFoundException ex) {
+            return;
+        }
+
+        TypedXmlPullParser parser;
+        try {
+            parser = Xml.resolvePullParser(is);
+            loadFromXml(parser);
+        } catch (IOException ex) {
+            Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
             clearState();
-
-            final InputStream is;
-            try {
-                is = mInjector.openRead();
-            } catch (FileNotFoundException ex) {
-                return;
-            }
-
-            TypedXmlPullParser parser;
-            try {
-                parser = Xml.resolvePullParser(is);
-                loadFromXml(parser);
-            } catch (IOException ex) {
-                Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
-                clearState();
-            } catch (XmlPullParserException ex) {
-                Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
-                clearState();
-            } finally {
-                IoUtils.closeQuietly(is);
-            }
+        } catch (XmlPullParserException ex) {
+            Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
+            clearState();
+        } finally {
+            IoUtils.closeQuietly(is);
         }
     }
 
     private void save() {
-        final ByteArrayOutputStream os;
+        final OutputStream os;
         try {
-            os = new ByteArrayOutputStream();
-
-            TypedXmlSerializer serializer = Xml.resolveSerializer(os);
-            saveToXml(serializer);
-            serializer.flush();
-
-            mHandler.removeCallbacksAndMessages(/* token */ null);
-            mHandler.post(() -> {
-                synchronized (mFileAccessLock) {
-                    OutputStream fileOutput = null;
-                    try {
-                        fileOutput = mInjector.startWrite();
-                        os.writeTo(fileOutput);
-                        fileOutput.flush();
-                    } catch (IOException ex) {
-                        Slog.w(TAG, "Failed to save display manager persistent store data.", ex);
-                    } finally {
-                        if (fileOutput != null) {
-                            mInjector.finishWrite(fileOutput, true);
-                        }
-                    }
-                }
-            });
+            os = mInjector.startWrite();
+            boolean success = false;
+            try {
+                TypedXmlSerializer serializer = Xml.resolveSerializer(os);
+                saveToXml(serializer);
+                serializer.flush();
+                success = true;
+            } finally {
+                mInjector.finishWrite(os, success);
+            }
         } catch (IOException ex) {
-            Slog.w(TAG, "Failed to process the XML serializer.", ex);
+            Slog.w(TAG, "Failed to save display manager persistent store data.", ex);
         }
     }
 
@@ -502,7 +391,7 @@ final class PersistentDataStore {
                 mStableDeviceValues.loadFromXml(parser);
             }
             if (parser.getName().equals(TAG_BRIGHTNESS_CONFIGURATIONS)) {
-                mGlobalBrightnessConfigurations.loadFromXml(parser);
+                mBrightnessConfigurations.loadFromXml(parser);
             }
         }
     }
@@ -581,7 +470,7 @@ final class PersistentDataStore {
         mStableDeviceValues.saveToXml(serializer);
         serializer.endTag(null, TAG_STABLE_DEVICE_VALUES);
         serializer.startTag(null, TAG_BRIGHTNESS_CONFIGURATIONS);
-        mGlobalBrightnessConfigurations.saveToXml(serializer);
+        mBrightnessConfigurations.saveToXml(serializer);
         serializer.endTag(null, TAG_BRIGHTNESS_CONFIGURATIONS);
         serializer.endTag(null, TAG_DISPLAY_MANAGER_STATE);
         serializer.endDocument();
@@ -604,20 +493,13 @@ final class PersistentDataStore {
         }
         pw.println("  StableDeviceValues:");
         mStableDeviceValues.dump(pw, "      ");
-        pw.println("  GlobalBrightnessConfigurations:");
-        mGlobalBrightnessConfigurations.dump(pw, "      ");
+        pw.println("  BrightnessConfigurations:");
+        mBrightnessConfigurations.dump(pw, "      ");
     }
 
     private static final class DisplayState {
         private int mColorMode;
         private float mBrightness;
-        private int mWidth;
-        private int mHeight;
-        private float mRefreshRate;
-
-        // Brightness configuration by user
-        private BrightnessConfigurations mDisplayBrightnessConfigurations =
-                new BrightnessConfigurations();
 
         public boolean setColorMode(int colorMode) {
             if (colorMode == mColorMode) {
@@ -643,41 +525,6 @@ final class PersistentDataStore {
             return mBrightness;
         }
 
-        public boolean setBrightnessConfiguration(BrightnessConfiguration configuration,
-                int userSerial, String packageName) {
-            mDisplayBrightnessConfigurations.setBrightnessConfigurationForUser(
-                    configuration, userSerial, packageName);
-            return true;
-        }
-
-        public BrightnessConfiguration getBrightnessConfiguration(int userSerial) {
-            return mDisplayBrightnessConfigurations.mConfigurations.get(userSerial);
-        }
-
-        public boolean setResolution(int width, int height) {
-            if (width == mWidth && height == mHeight) {
-                return false;
-            }
-            mWidth = width;
-            mHeight = height;
-            return true;
-        }
-
-        public Point getResolution() {
-            return new Point(mWidth, mHeight);
-        }
-
-        public boolean setRefreshRate(float refreshRate) {
-            if (refreshRate == mRefreshRate) {
-                return false;
-            }
-            mRefreshRate = refreshRate;
-            return true;
-        }
-
-        public float getRefreshRate() {
-            return mRefreshRate;
-        }
 
         public void loadFromXml(TypedXmlPullParser parser)
                 throws IOException, XmlPullParserException {
@@ -693,9 +540,6 @@ final class PersistentDataStore {
                         String brightness = parser.nextText();
                         mBrightness = Float.parseFloat(brightness);
                         break;
-                    case TAG_BRIGHTNESS_CONFIGURATIONS:
-                        mDisplayBrightnessConfigurations.loadFromXml(parser);
-                        break;
                 }
             }
         }
@@ -704,21 +548,15 @@ final class PersistentDataStore {
             serializer.startTag(null, TAG_COLOR_MODE);
             serializer.text(Integer.toString(mColorMode));
             serializer.endTag(null, TAG_COLOR_MODE);
-
             serializer.startTag(null, TAG_BRIGHTNESS_VALUE);
             serializer.text(Float.toString(mBrightness));
             serializer.endTag(null, TAG_BRIGHTNESS_VALUE);
 
-            serializer.startTag(null, TAG_BRIGHTNESS_CONFIGURATIONS);
-            mDisplayBrightnessConfigurations.saveToXml(serializer);
-            serializer.endTag(null, TAG_BRIGHTNESS_CONFIGURATIONS);
         }
 
         public void dump(final PrintWriter pw, final String prefix) {
             pw.println(prefix + "ColorMode=" + mColorMode);
             pw.println(prefix + "BrightnessValue=" + mBrightness);
-            pw.println(prefix + "DisplayBrightnessConfigurations: ");
-            mDisplayBrightnessConfigurations.dump(pw, prefix);
         }
     }
 
@@ -783,11 +621,11 @@ final class PersistentDataStore {
 
     private static final class BrightnessConfigurations {
         // Maps from a user ID to the users' given brightness configuration
-        private final SparseArray<BrightnessConfiguration> mConfigurations;
+        private SparseArray<BrightnessConfiguration> mConfigurations;
         // Timestamp of time the configuration was set.
-        private final SparseLongArray mTimeStamps;
+        private SparseLongArray mTimeStamps;
         // Package that set the configuration.
-        private final SparseArray<String> mPackageNames;
+        private SparseArray<String> mPackageNames;
 
         public BrightnessConfigurations() {
             mConfigurations = new SparseArray<>();

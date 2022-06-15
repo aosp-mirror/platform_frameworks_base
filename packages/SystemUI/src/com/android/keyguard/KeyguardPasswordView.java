@@ -20,7 +20,6 @@ import static android.view.WindowInsets.Type.ime;
 
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NONE;
-import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_PREPARE_FOR_UPDATE;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_RESTART;
 import static com.android.keyguard.KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
@@ -32,7 +31,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
-import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
@@ -45,7 +43,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
-import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 /**
@@ -104,8 +101,6 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                 return R.string.kg_prompt_reason_user_request;
             case PROMPT_REASON_PREPARE_FOR_UPDATE:
                 return R.string.kg_prompt_reason_timeout_password;
-            case PROMPT_REASON_NON_STRONG_BIOMETRIC_TIMEOUT:
-                return R.string.kg_prompt_reason_timeout_password;
             case PROMPT_REASON_NONE:
                 return 0;
             default:
@@ -161,7 +156,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
         setAlpha(0f);
         animate()
             .alpha(1f)
-            .setDuration(300)
+            .setDuration(500)
+            .setStartDelay(300)
             .start();
 
         setTranslationY(0f);
@@ -196,17 +192,9 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
 
                             @Override
                             public void onAnimationEnd(Animator animation) {
-                                // Run this in the next frame since it results in a slow binder call
-                                // to InputMethodManager#hideSoftInput()
-                                DejankUtils.postAfterTraversal(() -> {
-                                    Trace.beginSection("KeyguardPasswordView#onAnimationEnd");
-                                    // // TODO(b/230620476): Make hideSoftInput oneway
-                                    // controller.finish() eventually calls hideSoftInput
-                                    controller.finish(false);
-                                    runOnFinishImeAnimationRunnable();
-                                    finishRunnable.run();
-                                    Trace.endSection();
-                                });
+                                controller.finish(false);
+                                runOnFinishImeAnimationRunnable();
+                                finishRunnable.run();
                             }
                         });
                         anim.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
@@ -229,6 +217,15 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView {
                     }
                 });
         return true;
+    }
+
+
+    @Override
+    public void animateForIme(float interpolatedFraction, boolean appearingAnim) {
+        animate().cancel();
+        setAlpha(appearingAnim
+                ? Math.max(interpolatedFraction, getAlpha())
+                : 1 - interpolatedFraction);
     }
 
     @Override

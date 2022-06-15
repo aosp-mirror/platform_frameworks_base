@@ -48,6 +48,10 @@ public abstract class KeyguardInputView extends LinearLayout {
 
     abstract CharSequence getTitle();
 
+    void animateForIme(float interpolatedFraction, boolean appearingAnim) {
+        return;
+    }
+
     boolean disallowInterceptTouch(MotionEvent event) {
         return false;
     }

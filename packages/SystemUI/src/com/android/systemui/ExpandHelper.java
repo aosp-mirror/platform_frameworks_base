@@ -17,13 +17,10 @@
 
 package com.android.systemui;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_ROW_EXPAND;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.util.FloatProperty;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -35,7 +32,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
@@ -69,19 +65,6 @@ public class ExpandHelper implements Gefingerpoken {
     // amount of overstretch for maximum brightness expressed in U
     // 2f: maximum brightness is stretching a 1U to 3U, or a 4U to 6U
     private static final float STRETCH_INTERVAL = 2f;
-
-    private static final FloatProperty<ViewScaler> VIEW_SCALER_HEIGHT_PROPERTY =
-            new FloatProperty<ViewScaler>("ViewScalerHeight") {
-        @Override
-        public void setValue(ViewScaler object, float value) {
-            object.setHeight(value);
-        }
-
-        @Override
-        public Float get(ViewScaler object) {
-            return object.getHeight();
-        }
-    };
 
     @SuppressWarnings("unused")
     private Context mContext;
@@ -161,7 +144,6 @@ public class ExpandHelper implements Gefingerpoken {
         public void setView(ExpandableView v) {
             mView = v;
         }
-
         public void setHeight(float h) {
             if (DEBUG_SCALE) Log.v(TAG, "SetHeight: setting to " + h);
             mView.setActualHeight((int) h);
@@ -191,7 +173,7 @@ public class ExpandHelper implements Gefingerpoken {
         mCallback = callback;
         mScaler = new ViewScaler();
         mGravity = Gravity.TOP;
-        mScaleAnimation = ObjectAnimator.ofFloat(mScaler, VIEW_SCALER_HEIGHT_PROPERTY, 0f);
+        mScaleAnimation = ObjectAnimator.ofFloat(mScaler, "height", 0f);
         mPullGestureMinXSpan = mContext.getResources().getDimension(R.dimen.pull_span_min);
 
         final ViewConfiguration configuration = ViewConfiguration.get(mContext);
@@ -562,7 +544,6 @@ public class ExpandHelper implements Gefingerpoken {
         }
         if (DEBUG) Log.d(TAG, "got mOldHeight: " + mOldHeight +
                     " mNaturalHeight: " + mNaturalHeight);
-        InteractionJankMonitor.getInstance().begin(v, CUJ_NOTIFICATION_SHADE_ROW_EXPAND);
         return true;
     }
 
@@ -627,9 +608,6 @@ public class ExpandHelper implements Gefingerpoken {
                     }
                     mCallback.setUserLockedChild(scaledView, false);
                     mScaleAnimation.removeListener(this);
-                    if (wasClosed) {
-                        InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_ROW_EXPAND);
-                    }
                 }
 
                 @Override
@@ -647,9 +625,6 @@ public class ExpandHelper implements Gefingerpoken {
             mCallback.setUserExpandedChild(mResizedView, nowExpanded);
             mCallback.setUserLockedChild(mResizedView, false);
             mScaler.setView(null);
-            if (wasClosed) {
-                InteractionJankMonitor.getInstance().end(CUJ_NOTIFICATION_SHADE_ROW_EXPAND);
-            }
         }
 
         mExpanding = false;

@@ -19,20 +19,19 @@ package com.android.settingslib.net;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
+import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
-import android.annotation.NonNull;
-import android.app.usage.NetworkStats;
-import android.app.usage.NetworkStatsManager;
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.net.INetworkStatsSession;
+import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.Bundle;
 import android.os.RemoteException;
 
 import com.android.settingslib.AppItem;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Framework loader is deprecated, use the compat version instead.
@@ -43,20 +42,26 @@ import java.util.List;
 public class ChartDataLoader extends AsyncTaskLoader<ChartData> {
     private static final String KEY_TEMPLATE = "template";
     private static final String KEY_APP = "app";
+    private static final String KEY_FIELDS = "fields";
 
-    private final NetworkStatsManager mNetworkStatsManager;
+    private final INetworkStatsSession mSession;
     private final Bundle mArgs;
 
     public static Bundle buildArgs(NetworkTemplate template, AppItem app) {
+        return buildArgs(template, app, FIELD_RX_BYTES | FIELD_TX_BYTES);
+    }
+
+    public static Bundle buildArgs(NetworkTemplate template, AppItem app, int fields) {
         final Bundle args = new Bundle();
         args.putParcelable(KEY_TEMPLATE, template);
         args.putParcelable(KEY_APP, app);
+        args.putInt(KEY_FIELDS, fields);
         return args;
     }
 
-    public ChartDataLoader(Context context, NetworkStatsManager statsManager, Bundle args) {
+    public ChartDataLoader(Context context, INetworkStatsSession session, Bundle args) {
         super(context);
-        mNetworkStatsManager = statsManager;
+        mSession = session;
         mArgs = args;
     }
 
@@ -70,9 +75,10 @@ public class ChartDataLoader extends AsyncTaskLoader<ChartData> {
     public ChartData loadInBackground() {
         final NetworkTemplate template = mArgs.getParcelable(KEY_TEMPLATE);
         final AppItem app = mArgs.getParcelable(KEY_APP);
+        final int fields = mArgs.getInt(KEY_FIELDS);
 
         try {
-            return loadInBackground(template, app);
+            return loadInBackground(template, app, fields);
         } catch (RemoteException e) {
             // since we can't do much without history, and we don't want to
             // leave with half-baked UI, we bail hard.
@@ -80,22 +86,10 @@ public class ChartDataLoader extends AsyncTaskLoader<ChartData> {
         }
     }
 
-    @NonNull
-    private List<NetworkStats.Bucket> convertToBuckets(@NonNull NetworkStats stats) {
-        final List<NetworkStats.Bucket> ret = new ArrayList<>();
-        while (stats.hasNextBucket()) {
-            final NetworkStats.Bucket bucket = new NetworkStats.Bucket();
-            stats.getNextBucket(bucket);
-            ret.add(bucket);
-        }
-        return ret;
-    }
-
-    private ChartData loadInBackground(NetworkTemplate template, AppItem app)
+    private ChartData loadInBackground(NetworkTemplate template, AppItem app, int fields)
             throws RemoteException {
         final ChartData data = new ChartData();
-        data.network = convertToBuckets(mNetworkStatsManager.queryDetailsForDevice(
-                template, Long.MIN_VALUE, Long.MAX_VALUE));
+        data.network = mSession.getHistoryForNetwork(template, fields);
 
         if (app != null) {
             // load stats for current uid and template
@@ -109,13 +103,13 @@ public class ChartDataLoader extends AsyncTaskLoader<ChartData> {
             }
 
             if (size > 0) {
-                data.detail = new ArrayList<>();
-                data.detail.addAll(data.detailDefault);
-                data.detail.addAll(data.detailForeground);
+                data.detail = new NetworkStatsHistory(data.detailForeground.getBucketDuration());
+                data.detail.recordEntireHistory(data.detailDefault);
+                data.detail.recordEntireHistory(data.detailForeground);
             } else {
-                data.detailDefault = new ArrayList<>();
-                data.detailForeground = new ArrayList<>();
-                data.detail = new ArrayList<>();
+                data.detailDefault = new NetworkStatsHistory(HOUR_IN_MILLIS);
+                data.detailForeground = new NetworkStatsHistory(HOUR_IN_MILLIS);
+                data.detail = new NetworkStatsHistory(HOUR_IN_MILLIS);
             }
         }
 
@@ -135,17 +129,17 @@ public class ChartDataLoader extends AsyncTaskLoader<ChartData> {
     }
 
     /**
-     * Collect {@link List<NetworkStats.Bucket>} for the requested UID, combining with
-     * an existing {@link List<NetworkStats.Bucket>} if provided.
+     * Collect {@link NetworkStatsHistory} for the requested UID, combining with
+     * an existing {@link NetworkStatsHistory} if provided.
      */
-    private List<NetworkStats.Bucket> collectHistoryForUid(
-            NetworkTemplate template, int uid, int set, List<NetworkStats.Bucket> existing) {
-        final List<NetworkStats.Bucket> history = convertToBuckets(
-                mNetworkStatsManager.queryDetailsForUidTagState(template,
-                        Long.MIN_VALUE, Long.MAX_VALUE, uid, TAG_NONE, set));
+    private NetworkStatsHistory collectHistoryForUid(
+            NetworkTemplate template, int uid, int set, NetworkStatsHistory existing)
+            throws RemoteException {
+        final NetworkStatsHistory history = mSession.getHistoryForUid(
+                template, uid, set, TAG_NONE, FIELD_RX_BYTES | FIELD_TX_BYTES);
 
         if (existing != null) {
-            existing.addAll(history);
+            existing.recordEntireHistory(history);
             return existing;
         } else {
             return history;

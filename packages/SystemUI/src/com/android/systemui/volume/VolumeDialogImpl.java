@@ -32,8 +32,6 @@ import static android.view.View.LAYOUT_DIRECTION_RTL;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
-import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
 import android.animation.Animator;
@@ -70,7 +68,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -104,13 +101,11 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
-import com.android.internal.jank.InteractionJankMonitor;
-import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -153,13 +148,6 @@ public class VolumeDialogImpl implements VolumeDialog,
 
     private static final int DRAWER_ANIMATION_DURATION_SHORT = 175;
     private static final int DRAWER_ANIMATION_DURATION = 250;
-
-    /** Shows volume dialog show animation. */
-    private static final String TYPE_SHOW = "show";
-    /** Dismiss volume dialog animation.  */
-    private static final String TYPE_DISMISS = "dismiss";
-    /** Volume dialog slider animation. */
-    private static final String TYPE_UPDATE = "update";
 
     private final int mDialogShowAnimationDurationMs;
     private final int mDialogHideAnimationDurationMs;
@@ -246,10 +234,6 @@ public class VolumeDialogImpl implements VolumeDialog,
     private final Object mSafetyWarningLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
 
-    private final ConfigurationController mConfigurationController;
-    private final MediaOutputDialogFactory mMediaOutputDialogFactory;
-    private final ActivityStarter mActivityStarter;
-
     private boolean mShowing;
     private boolean mShowA11yStream;
 
@@ -260,7 +244,7 @@ public class VolumeDialogImpl implements VolumeDialog,
     private State mState;
     private SafetyWarningDialog mSafetyWarning;
     private boolean mHovering = false;
-    private final boolean mShowActiveStreamOnly;
+    private boolean mShowActiveStreamOnly;
     private boolean mConfigChanged = false;
     private boolean mIsAnimatingDismiss = false;
     private boolean mHasSeenODICaptionsTooltip;
@@ -270,27 +254,15 @@ public class VolumeDialogImpl implements VolumeDialog,
     private final boolean mUseBackgroundBlur;
     private Consumer<Boolean> mCrossWindowBlurEnabledListener;
     private BackgroundBlurDrawable mDialogRowsViewBackground;
-    private final InteractionJankMonitor mInteractionJankMonitor;
 
-    public VolumeDialogImpl(
-            Context context,
-            VolumeDialogController volumeDialogController,
-            AccessibilityManagerWrapper accessibilityManagerWrapper,
-            DeviceProvisionedController deviceProvisionedController,
-            ConfigurationController configurationController,
-            MediaOutputDialogFactory mediaOutputDialogFactory,
-            ActivityStarter activityStarter,
-            InteractionJankMonitor interactionJankMonitor) {
+    public VolumeDialogImpl(Context context) {
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
-        mController = volumeDialogController;
+        mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        mAccessibilityMgr = accessibilityManagerWrapper;
-        mDeviceProvisionedController = deviceProvisionedController;
-        mConfigurationController = configurationController;
-        mMediaOutputDialogFactory = mediaOutputDialogFactory;
-        mActivityStarter = activityStarter;
+        mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
+        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mShowActiveStreamOnly = showActiveStreamOnly();
         mHasSeenODICaptionsTooltip =
                 Prefs.getBoolean(context, Prefs.Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP, false);
@@ -304,7 +276,6 @@ public class VolumeDialogImpl implements VolumeDialog,
             mContext.getResources().getInteger(R.integer.config_dialogHideAnimationDurationMs);
         mUseBackgroundBlur =
             mContext.getResources().getBoolean(R.bool.config_volumeDialogUseBackgroundBlur);
-        mInteractionJankMonitor = interactionJankMonitor;
 
         if (mUseBackgroundBlur) {
             final int dialogRowsViewColorAboveBlur = mContext.getColor(
@@ -327,21 +298,21 @@ public class VolumeDialogImpl implements VolumeDialog,
     }
 
     public void init(int windowType, Callback callback) {
-        initDialog(mActivityManager.getLockTaskModeState());
+        initDialog();
 
         mAccessibility.init();
 
         mController.addCallback(mControllerCallbackH, mHandler);
         mController.getState();
 
-        mConfigurationController.addCallback(this);
+        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     @Override
     public void destroy() {
         mController.removeCallback(mControllerCallbackH);
         mHandler.removeCallbacksAndMessages(null);
-        mConfigurationController.removeCallback(this);
+        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     @Override
@@ -394,7 +365,7 @@ public class VolumeDialogImpl implements VolumeDialog,
                 Region.Op.UNION);
     }
 
-    private void initDialog(int lockTaskModeState) {
+    private void initDialog() {
         mDialog = new CustomDialog(mContext);
 
         initDimens();
@@ -429,15 +400,12 @@ public class VolumeDialogImpl implements VolumeDialog,
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setOnShowListener(dialog -> {
             mDialogView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
-            if (!shouldSlideInVolumeTray()) {
-                mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
-            }
+            if (!isLandscape()) mDialogView.setTranslationX(mDialogView.getWidth() / 2.0f);
             mDialogView.setAlpha(0);
             mDialogView.animate()
                     .alpha(1)
                     .translationX(0)
                     .setDuration(mDialogShowAnimationDurationMs)
-                    .setListener(getJankListener(getDialogView(), TYPE_SHOW, DIALOG_TIMEOUT_MILLIS))
                     .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
                     .withEndAction(() -> {
                         if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
@@ -589,7 +557,7 @@ public class VolumeDialogImpl implements VolumeDialog,
 
         updateRowsH(getActiveRow());
         initRingerH();
-        initSettingsH(lockTaskModeState);
+        initSettingsH();
         initODICaptionsH();
     }
 
@@ -617,10 +585,6 @@ public class VolumeDialogImpl implements VolumeDialog,
         float alpha = ta.getFloat(0, 0);
         ta.recycle();
         return (int) (alpha * 255);
-    }
-
-    private boolean shouldSlideInVolumeTray() {
-        return mContext.getDisplay().getRotation() != RotationPolicy.NATURAL_ROTATION;
     }
 
     private boolean isLandscape() {
@@ -708,7 +672,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         final int m = seekBar.getMax();
         final int n = m / 100 - 1;
         final int level = progress == 0 ? 0
-                : progress == m ? (m / 100) : (1 + (int) ((progress / (float) m) * n));
+                : progress == m ? (m / 100) : (1 + (int)((progress / (float) m) * n));
         return level;
     }
 
@@ -1034,19 +998,21 @@ public class VolumeDialogImpl implements VolumeDialog,
         mIsRingerDrawerOpen = false;
     }
 
-    private void initSettingsH(int lockTaskModeState) {
+    public void initSettingsH() {
         if (mSettingsView != null) {
             mSettingsView.setVisibility(
                     mDeviceProvisionedController.isCurrentUserSetup() &&
-                            lockTaskModeState == LOCK_TASK_MODE_NONE ? VISIBLE : GONE);
+                            mActivityManager.getLockTaskModeState() == LOCK_TASK_MODE_NONE ?
+                            VISIBLE : GONE);
         }
         if (mSettingsIcon != null) {
             mSettingsIcon.setOnClickListener(v -> {
                 Events.writeEvent(Events.EVENT_SETTINGS_CLICK);
                 Intent intent = new Intent(Settings.Panel.ACTION_VOLUME);
                 dismissH(DISMISS_REASON_SETTINGS_CLICKED);
-                mMediaOutputDialogFactory.dismiss();
-                mActivityStarter.startActivity(intent, true /* dismissShade */);
+                Dependency.get(MediaOutputDialogFactory.class).dismiss();
+                Dependency.get(ActivityStarter.class).startActivity(intent,
+                        true /* dismissShade */);
             });
         }
     }
@@ -1195,6 +1161,11 @@ public class VolumeDialogImpl implements VolumeDialog,
         if (mODICaptionsIcon.getCaptionsEnabled() != captionsEnabled) {
             mHandler.post(mODICaptionsIcon.setCaptionsEnabled(captionsEnabled));
         }
+
+        boolean isOptedOut = mController.isCaptionStreamOptedOut();
+        if (mODICaptionsIcon.getOptedOut() != isOptedOut) {
+            mHandler.post(() -> mODICaptionsIcon.setOptedOut(isOptedOut));
+        }
     }
 
     private void onCaptionIconClicked() {
@@ -1266,58 +1237,27 @@ public class VolumeDialogImpl implements VolumeDialog,
         mHandler.obtainMessage(H.DISMISS, reason, 0).sendToTarget();
     }
 
-    private Animator.AnimatorListener getJankListener(View v, String type, long timeout) {
-        return new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(@NonNull Animator animation) {
-                if (!v.isAttachedToWindow()) {
-                    if (D.BUG) Log.d(TAG, "onAnimationStart view do not attached to window:" + v);
-                    return;
-                }
-                mInteractionJankMonitor.begin(Builder.withView(CUJ_VOLUME_CONTROL, v).setTag(type)
-                        .setTimeout(timeout));
-            }
-
-            @Override
-            public void onAnimationEnd(@NonNull Animator animation) {
-                mInteractionJankMonitor.end(CUJ_VOLUME_CONTROL);
-            }
-
-            @Override
-            public void onAnimationCancel(@NonNull Animator animation) {
-                mInteractionJankMonitor.cancel(CUJ_VOLUME_CONTROL);
-            }
-
-            @Override
-            public void onAnimationRepeat(@NonNull Animator animation) {
-                // no-op
-            }
-        };
-    }
-
-    private void showH(int reason, boolean keyguardLocked, int lockTaskModeState) {
-        Trace.beginSection("VolumeDialogImpl#showH");
+    private void showH(int reason) {
         if (D.BUG) Log.d(TAG, "showH r=" + Events.SHOW_REASONS[reason]);
         mHandler.removeMessages(H.SHOW);
         mHandler.removeMessages(H.DISMISS);
         rescheduleTimeoutH();
 
         if (mConfigChanged) {
-            initDialog(lockTaskModeState); // resets mShowing to false
+            initDialog(); // resets mShowing to false
             mConfigurableTexts.update();
             mConfigChanged = false;
         }
 
-        initSettingsH(lockTaskModeState);
+        initSettingsH();
         mShowing = true;
         mIsAnimatingDismiss = false;
         mDialog.show();
-        Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, keyguardLocked);
+        Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
         mController.notifyVisible(true);
         mController.getCaptionsComponentState(false);
         checkODICaptionsTooltip(false);
         updateBackgroundForDrawerClosedAmount();
-        Trace.endSection();
     }
 
     protected void rescheduleTimeoutH() {
@@ -1351,7 +1291,6 @@ public class VolumeDialogImpl implements VolumeDialog,
     }
 
     protected void dismissH(int reason) {
-        Trace.beginSection("VolumeDialogImpl#dismissH");
         if (D.BUG) {
             Log.d(TAG, "mDialog.dismiss() reason: " + Events.DISMISS_REASONS[reason]
                     + " from: " + Debug.getCaller());
@@ -1381,9 +1320,8 @@ public class VolumeDialogImpl implements VolumeDialog,
 
                     hideRingerDrawer();
                 }, 50));
-        if (!shouldSlideInVolumeTray()) animator.translationX(mDialogView.getWidth() / 2.0f);
-        animator.setListener(getJankListener(getDialogView(), TYPE_DISMISS,
-                mDialogHideAnimationDurationMs)).start();
+        if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2.0f);
+        animator.start();
         checkODICaptionsTooltip(true);
         mController.notifyVisible(false);
         synchronized (mSafetyWarningLock) {
@@ -1392,7 +1330,6 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mSafetyWarning.dismiss();
             }
         }
-        Trace.endSection();
     }
 
     private boolean showActiveStreamOnly() {
@@ -1432,7 +1369,6 @@ public class VolumeDialogImpl implements VolumeDialog,
     }
 
     private void updateRowsH(final VolumeRow activeRow) {
-        Trace.beginSection("VolumeDialogImpl#updateRowsH");
         if (D.BUG) Log.d(TAG, "updateRowsH");
         if (!mShowing) {
             trimObsoleteH();
@@ -1496,7 +1432,6 @@ public class VolumeDialogImpl implements VolumeDialog,
         }
 
         updateBackgroundForDrawerClosedAmount();
-        Trace.endSection();
     }
 
     protected void updateRingerH() {
@@ -1781,9 +1716,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         final boolean enableSlider = !zenMuted;
         final int vlevel = row.ss.muted && (!isRingStream && !zenMuted) ? 0
                 : row.ss.level;
-        Trace.beginSection("VolumeDialogImpl#updateVolumeRowSliderH");
         updateVolumeRowSliderH(row, enableSlider, vlevel);
-        Trace.endSection();
         if (row.number != null) row.number.setText(Integer.toString(vlevel));
     }
 
@@ -1813,6 +1746,14 @@ public class VolumeDialogImpl implements VolumeDialog,
                 mContext, com.android.internal.R.attr.textColorOnAccent);
 
         row.sliderProgressSolid.setTintList(colorTint);
+        if (row.sliderBgIcon != null) {
+            row.sliderBgIcon.setTintList(colorTint);
+        }
+
+        if (row.sliderBgSolid != null) {
+            row.sliderBgSolid.setTintList(bgTint);
+        }
+
         if (row.sliderProgressIcon != null) {
             row.sliderProgressIcon.setTintList(bgTint);
         }
@@ -1869,8 +1810,6 @@ public class VolumeDialogImpl implements VolumeDialog,
                 }
                 row.animTargetProgress = newProgress;
                 row.anim.setDuration(UPDATE_ANIMATION_DURATION);
-                row.anim.addListener(
-                        getJankListener(row.view, TYPE_UPDATE, UPDATE_ANIMATION_DURATION));
                 row.anim.start();
             } else {
                 // update slider directly to clamped value
@@ -2041,8 +1980,8 @@ public class VolumeDialogImpl implements VolumeDialog,
     private final VolumeDialogController.Callbacks mControllerCallbackH
             = new VolumeDialogController.Callbacks() {
         @Override
-        public void onShowRequested(int reason, boolean keyguardLocked, int lockTaskModeState) {
-            showH(reason, keyguardLocked, lockTaskModeState);
+        public void onShowRequested(int reason) {
+            showH(reason);
         }
 
         @Override
@@ -2125,8 +2064,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case SHOW: showH(msg.arg1, VolumeDialogImpl.this.mKeyguard.isKeyguardLocked(),
-                        VolumeDialogImpl.this.mActivityManager.getLockTaskModeState()); break;
+                case SHOW: showH(msg.arg1); break;
                 case DISMISS: dismissH(msg.arg1); break;
                 case RECHECK: recheckH((VolumeRow) msg.obj); break;
                 case RECHECK_ALL: recheckH(null); break;
@@ -2148,7 +2086,7 @@ public class VolumeDialogImpl implements VolumeDialog,
          * within the bounds of the volume dialog, will fall through to the window below.
          */
         @Override
-        public boolean dispatchTouchEvent(@NonNull MotionEvent ev) {
+        public boolean dispatchTouchEvent(MotionEvent ev) {
             rescheduleTimeoutH();
             return super.dispatchTouchEvent(ev);
         }
@@ -2172,7 +2110,7 @@ public class VolumeDialogImpl implements VolumeDialog,
          * volume dialog.
          */
         @Override
-        public boolean onTouchEvent(@NonNull MotionEvent event) {
+        public boolean onTouchEvent(MotionEvent event) {
             if (mShowing) {
                 if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
                     dismissH(Events.DISMISS_REASON_TOUCH_OUTSIDE);
@@ -2261,6 +2199,8 @@ public class VolumeDialogImpl implements VolumeDialog,
         private View view;
         private TextView header;
         private ImageButton icon;
+        private Drawable sliderBgSolid;
+        private AlphaTintDrawableWrapper sliderBgIcon;
         private Drawable sliderProgressSolid;
         private AlphaTintDrawableWrapper sliderProgressIcon;
         private SeekBar slider;
@@ -2274,6 +2214,7 @@ public class VolumeDialogImpl implements VolumeDialog,
         private int iconMuteRes;
         private boolean important;
         private boolean defaultStream;
+        private ColorStateList cachedTint;
         private int iconState;  // from Events
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
@@ -2287,6 +2228,9 @@ public class VolumeDialogImpl implements VolumeDialog,
 
             if (sliderProgressIcon != null) {
                 sliderProgressIcon.setDrawable(view.getResources().getDrawable(iconRes, theme));
+            }
+            if (sliderBgIcon != null) {
+                sliderBgIcon.setDrawable(view.getResources().getDrawable(iconRes, theme));
             }
         }
     }

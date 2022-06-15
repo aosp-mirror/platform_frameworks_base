@@ -19,6 +19,7 @@ package com.android.server.rotationresolver;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.os.CancellationSignal;
 import android.os.ShellCommand;
 import android.rotationresolver.RotationResolverInternal.RotationResolverCallbackInternal;
 import android.service.rotationresolver.RotationResolutionRequest;
@@ -30,9 +31,9 @@ final class RotationResolverShellCommand extends ShellCommand {
     private static final int INITIAL_RESULT_CODE = -1;
 
     @NonNull
-    private final RotationResolverManagerService mService;
+    private final RotationResolverManagerPerUserService mService;
 
-    RotationResolverShellCommand(@NonNull RotationResolverManagerService service) {
+    RotationResolverShellCommand(@NonNull RotationResolverManagerPerUserService service) {
         mService = service;
     }
 
@@ -76,7 +77,7 @@ final class RotationResolverShellCommand extends ShellCommand {
             case "get-bound-package":
                 return getBoundPackageName();
             case "set-temporary-service":
-                return setTemporaryService();
+                return setTemporaryService(getNextArgRequired());
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -84,33 +85,31 @@ final class RotationResolverShellCommand extends ShellCommand {
 
     private int getBoundPackageName() {
         final PrintWriter out = getOutPrintWriter();
-        final int userId = Integer.parseInt(getNextArgRequired());
-        final ComponentName componentName = mService.getComponentNameShellCommand(userId);
+        final ComponentName componentName = mService.getComponentName();
         out.println(componentName == null ? "" : componentName.getPackageName());
         return 0;
     }
 
-    private int setTemporaryService() {
+    private int setTemporaryService(String serviceName) {
         final PrintWriter out = getOutPrintWriter();
-        final int userId = Integer.parseInt(getNextArgRequired());
-        final String serviceName = getNextArg();
         if (serviceName == null) {
-            mService.resetTemporaryService(userId);
+            mService.getMaster().resetTemporaryService(mService.getUserId());
             out.println("RotationResolverService temporary reset. ");
             return 0;
         }
+
         final int duration = Integer.parseInt(getNextArgRequired());
-        mService.setTemporaryService(userId, serviceName, duration);
+        mService.getMaster().setTemporaryService(mService.getUserId(), serviceName, duration);
         out.println("RotationResolverService temporarily set to " + serviceName
                 + " for " + duration + "ms");
         return 0;
     }
 
     private int runResolveRotation() {
-        final int userId = Integer.parseInt(getNextArgRequired());
         final RotationResolutionRequest request = new RotationResolutionRequest("",
-                Surface.ROTATION_0, Surface.ROTATION_0, true, 2000L);
-        mService.resolveRotationShellCommand(userId, sTestableRotationCallbackInternal, request);
+                Surface.ROTATION_0, Surface.ROTATION_0,  true, 2000L);
+        mService.resolveRotationLocked(sTestableRotationCallbackInternal, request,
+                new CancellationSignal());
         return 0;
     }
 
@@ -127,12 +126,11 @@ final class RotationResolverShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println();
-        pw.println("  resolve-rotation USER_ID: request a rotation resolution.");
+        pw.println("  resolve-rotation: request a rotation resolution.");
         pw.println("  get-last-resolution: show the last rotation resolution result.");
-        pw.println("  get-bound-package USER_ID:");
-        pw.println("    Print the bound package that implements the service.");
-        pw.println("  set-temporary-service USER_ID [COMPONENT_NAME DURATION]");
+        pw.println("  get-bound-package: print the bound package that implements the service.");
+        pw.println("  set-temporary-service [COMPONENT_NAME DURATION]");
         pw.println("    Temporarily (for DURATION ms) changes the service implementation.");
-        pw.println("    To reset, call with just the USER_ID argument.");
+        pw.println("    To reset, call with no argument.");
     }
 }

@@ -545,7 +545,7 @@ void Text::Accept(ConstVisitor* visitor) const {
 void PackageAwareVisitor::BeforeVisitElement(Element* el) {
   std::vector<PackageDecl> decls;
   for (const NamespaceDecl& decl : el->namespace_decls) {
-    if (std::optional<ExtractedPackage> maybe_package = ExtractPackageFromNamespace(decl.uri)) {
+    if (Maybe<ExtractedPackage> maybe_package = ExtractPackageFromNamespace(decl.uri)) {
       decls.push_back(PackageDecl{decl.prefix, std::move(maybe_package.value())});
     }
   }
@@ -556,8 +556,7 @@ void PackageAwareVisitor::AfterVisitElement(Element* el) {
   package_decls_.pop_back();
 }
 
-std::optional<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
-    const StringPiece& alias) const {
+Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(const StringPiece& alias) const {
   if (alias.empty()) {
     return ExtractedPackage{{}, false /*private*/};
   }

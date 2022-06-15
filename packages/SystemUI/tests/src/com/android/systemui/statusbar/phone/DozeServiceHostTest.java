@@ -59,7 +59,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -82,7 +81,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private PowerManager mPowerManager;
     @Mock private WakefulnessLifecycle mWakefullnessLifecycle;
-    @Mock private CentralSurfaces mCentralSurfaces;
+    @Mock private StatusBar mStatusBar;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -98,12 +97,12 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 mStatusBarStateController, mDeviceProvisionedController, mHeadsUpManager,
                 mBatteryController, mScrimController, () -> mBiometricUnlockController,
                 mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
-                mKeyguardUpdateMonitor, mPulseExpansionHandler, Optional.empty(),
+                mKeyguardUpdateMonitor, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
                 mAuthController, mNotificationIconAreaController);
 
         mDozeServiceHost.initialize(
-                mCentralSurfaces,
+                mStatusBar,
                 mStatusBarKeyguardViewManager,
                 mNotificationShadeWindowViewController,
                 mNotificationPanel,
@@ -119,7 +118,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
 
         mDozeServiceHost.startDozing();
         verify(mStatusBarStateController).setIsDozing(eq(true));
-        verify(mCentralSurfaces).updateIsKeyguard();
+        verify(mStatusBar).updateIsKeyguard();
 
         mDozeServiceHost.stopDozing();
         verify(mStatusBarStateController).setIsDozing(eq(false));
@@ -128,8 +127,8 @@ public class DozeServiceHostTest extends SysuiTestCase {
 
     @Test
     public void testPulseWhileDozing_updatesScrimController() {
-        mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
-        mCentralSurfaces.showKeyguardImpl();
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        mStatusBar.showKeyguardImpl();
 
         // Keep track of callback to be able to stop the pulse
 //        DozeHost.PulseCallback[] pulseCallback = new DozeHost.PulseCallback[1];
@@ -154,18 +153,18 @@ public class DozeServiceHostTest extends SysuiTestCase {
 
         verify(mDozeScrimController).pulse(
                 pulseCallbackArgumentCaptor.capture(), eq(DozeLog.PULSE_REASON_NOTIFICATION));
-        verify(mCentralSurfaces).updateScrimController();
-        reset(mCentralSurfaces);
+        verify(mStatusBar).updateScrimController();
+        reset(mStatusBar);
 
         pulseCallbackArgumentCaptor.getValue().onPulseFinished();
         assertFalse(mDozeScrimController.isPulsing());
-        verify(mCentralSurfaces).updateScrimController();
+        verify(mStatusBar).updateScrimController();
     }
 
     @Test
     public void testPulseWhileDozing_notifyAuthInterrupt() {
         HashSet<Integer> reasonsWantingAuth = new HashSet<>(
-                Collections.singletonList(DozeLog.PULSE_REASON_SENSOR_WAKE_REACH));
+                Collections.singletonList(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN));
         HashSet<Integer> reasonsSkippingAuth = new HashSet<>(
                 Arrays.asList(DozeLog.PULSE_REASON_INTENT,
                         DozeLog.PULSE_REASON_NOTIFICATION,
@@ -174,7 +173,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                         DozeLog.REASON_SENSOR_DOUBLE_TAP,
                         DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
                         DozeLog.PULSE_REASON_DOCKING,
-                        DozeLog.REASON_SENSOR_WAKE_UP_PRESENCE,
+                        DozeLog.REASON_SENSOR_WAKE_UP,
                         DozeLog.REASON_SENSOR_QUICK_PICKUP,
                         DozeLog.REASON_SENSOR_TAP));
         HashSet<Integer> reasonsThatDontPulse = new HashSet<>(

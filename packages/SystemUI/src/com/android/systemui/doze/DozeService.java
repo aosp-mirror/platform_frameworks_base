@@ -136,8 +136,6 @@ public class DozeService extends DreamService
     @Override
     public void setDozeScreenState(int state) {
         super.setDozeScreenState(state);
-        if (mDozeMachine != null) {
-            mDozeMachine.onScreenState(state);
-        }
+        mDozeMachine.onScreenState(state);
     }
 }

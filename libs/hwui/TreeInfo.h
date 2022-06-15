@@ -100,8 +100,6 @@ public:
 
     int stretchEffectCount = 0;
 
-    bool forceDrawFrame = false;
-
     struct Out {
         bool hasFunctors = false;
         // This is only updated if evaluateAnimations is true

@@ -18,7 +18,6 @@ package com.android.settingslib.drawer;
 
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
-import static com.android.settingslib.drawer.TileUtils.META_DATA_NEW_TASK;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
@@ -71,19 +70,16 @@ public abstract class Tile implements Parcelable {
     private Bundle mMetaData;
     private String mCategory;
 
-    public Tile(ComponentInfo info, String category, Bundle metaData) {
+    public Tile(ComponentInfo info, String category) {
         mComponentInfo = info;
         mComponentPackage = mComponentInfo.packageName;
         mComponentName = mComponentInfo.name;
         mCategory = category;
-        mMetaData = metaData;
         mIntent = new Intent().setClassName(mComponentPackage, mComponentName);
-        if (isNewTask()) {
-            mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
     }
 
     Tile(Parcel in) {
+        final boolean isProviderTile = in.readBoolean();
         mComponentPackage = in.readString();
         mComponentName = in.readString();
         mIntent = new Intent().setClassName(mComponentPackage, mComponentName);
@@ -93,9 +89,6 @@ public abstract class Tile implements Parcelable {
         }
         mCategory = in.readString();
         mMetaData = in.readBundle();
-        if (isNewTask()) {
-            mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
     }
 
     @Override
@@ -331,17 +324,6 @@ public abstract class Tile implements Parcelable {
         if (mMetaData != null
                 && mMetaData.containsKey(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE)) {
             return mMetaData.getBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE);
-        }
-        return false;
-    }
-
-    /**
-     * Whether the {@link Activity} should be launched in a separate task.
-     */
-    public boolean isNewTask() {
-        if (mMetaData != null
-                && mMetaData.containsKey(META_DATA_NEW_TASK)) {
-            return mMetaData.getBoolean(META_DATA_NEW_TASK);
         }
         return false;
     }

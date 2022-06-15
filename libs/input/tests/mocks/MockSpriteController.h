@@ -26,8 +26,7 @@ namespace android {
 class MockSpriteController : public SpriteController {
 
 public:
-    MockSpriteController(sp<Looper> looper)
-          : SpriteController(looper, 0, [](int) { return nullptr; }) {}
+    MockSpriteController(sp<Looper> looper) : SpriteController(looper, 0) {}
     ~MockSpriteController() {}
 
     MOCK_METHOD(sp<Sprite>, createSprite, (), (override));

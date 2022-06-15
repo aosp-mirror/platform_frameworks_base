@@ -125,16 +125,15 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
         if (mApplier == null) {
             mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
         }
-        if (mViewRoot.mView.isHardwareAccelerated() && isVisibleToUser()) {
+        if (mViewRoot.mView.isHardwareAccelerated()) {
             mApplier.scheduleApply(params);
         } else {
-            // Synchronization requires hardware acceleration for now.
-            // If the window isn't visible, drawing is paused and the applier won't run.
+            // Window doesn't support hardware acceleration, no synchronization for now.
             // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
             //  frame instead.
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             mApplier.applyParams(t, params);
-            t.apply();
+            mApplier.applyTransaction(t, -1);
         }
     }
 
@@ -150,10 +149,10 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     }
 
     @Override
-    public void updateRequestedVisibilities(InsetsVisibilities vis) {
+    public void onInsetsModified(InsetsState insetsState) {
         try {
             if (mViewRoot.mAdded) {
-                mViewRoot.mWindowSession.updateRequestedVisibilities(mViewRoot.mWindow, vis);
+                mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, insetsState);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call insetsModified", e);
@@ -172,9 +171,8 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     public void setSystemBarsAppearance(int appearance, int mask) {
         mViewRoot.mWindowAttributes.privateFlags |= PRIVATE_FLAG_APPEARANCE_CONTROLLED;
         final InsetsFlags insetsFlags = mViewRoot.mWindowAttributes.insetsFlags;
-        final int newAppearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
-        if (insetsFlags.appearance != newAppearance) {
-            insetsFlags.appearance = newAppearance;
+        if (insetsFlags.appearance != appearance) {
+            insetsFlags.appearance = (insetsFlags.appearance & ~mask) | (appearance & mask);
             mViewRoot.mWindowAttributesChanged = true;
             mViewRoot.scheduleTraversals();
         }
@@ -269,9 +267,5 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             return mViewRoot.mTranslator;
         }
         return null;
-    }
-
-    private boolean isVisibleToUser() {
-        return mViewRoot.getHostVisibility() == View.VISIBLE;
     }
 }

@@ -15,8 +15,6 @@
  */
 package com.android.server.tv.tunerresourcemanager;
 
-import android.media.tv.tunerresourcemanager.TunerResourceManager;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,6 +50,8 @@ public final class ClientProfile {
      */
     private final int mProcessId;
 
+    private boolean mIsForeground;
+
     /**
      * All the clients that share the same resource would be under the same group id.
      *
@@ -63,11 +63,6 @@ public final class ClientProfile {
      * Optional nice value for TRM to reduce client’s priority.
      */
     private int mNiceValue;
-
-    /**
-     * The handle of the primary frontend resource
-     */
-    private int mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
 
     /**
      * List of the frontend handles that are used by the current client.
@@ -93,12 +88,6 @@ public final class ClientProfile {
      * CiCam id that is used by the client.
      */
     private int mUsingCiCamId = INVALID_RESOURCE_ID;
-
-    /**
-     * If the priority is overwritten through
-     * {@link TunerResourceManagerService#setPriority(int, int)}.
-     */
-    private boolean mIsPriorityOverwritten = false;
 
     /**
      * Optional arbitrary priority value given by the client.
@@ -132,10 +121,17 @@ public final class ClientProfile {
     }
 
     /**
-     * If the client priority is overwrttien.
+     * Set the current isForeground status.
      */
-    public boolean isPriorityOverwritten() {
-        return mIsPriorityOverwritten;
+    public void setForeground(boolean isForeground) {
+        mIsForeground = isForeground;
+    }
+
+    /**
+     * Get the previous recorded isForeground status.
+     */
+    public boolean isForeground() {
+        return mIsForeground;
     }
 
     public int getGroupId() {
@@ -157,17 +153,6 @@ public final class ClientProfile {
         mPriority = priority;
     }
 
-    /**
-     * Overwrite the client priority.
-     */
-    public void overwritePriority(int priority) {
-        if (priority < 0) {
-            return;
-        }
-        mIsPriorityOverwritten = true;
-        mPriority = priority;
-    }
-
     public void setNiceValue(int niceValue) {
         mNiceValue = niceValue;
     }
@@ -179,22 +164,6 @@ public final class ClientProfile {
      */
     public void useFrontend(int frontendHandle) {
         mUsingFrontendHandles.add(frontendHandle);
-    }
-
-    /**
-     * Set the primary frontend used by the client
-     *
-     * @param frontendHandle being used.
-     */
-    public void setPrimaryFrontend(int frontendHandle) {
-        mPrimaryUsingFrontendHandle = frontendHandle;
-    }
-
-    /**
-     * Get the primary frontend used by the client
-     */
-    public int getPrimaryFrontend() {
-        return mPrimaryUsingFrontendHandle;
     }
 
     /**
@@ -229,7 +198,6 @@ public final class ClientProfile {
     public void releaseFrontend() {
         mUsingFrontendHandles.clear();
         mShareFeClientIds.clear();
-        mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
     }
 
     /**
@@ -300,7 +268,6 @@ public final class ClientProfile {
     public void reclaimAllResources() {
         mUsingFrontendHandles.clear();
         mShareFeClientIds.clear();
-        mPrimaryUsingFrontendHandle = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         mUsingLnbHandles.clear();
         mUsingCasSystemId = INVALID_RESOURCE_ID;
         mUsingCiCamId = INVALID_RESOURCE_ID;

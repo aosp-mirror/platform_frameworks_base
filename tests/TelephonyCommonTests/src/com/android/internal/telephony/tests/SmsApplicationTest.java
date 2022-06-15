@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -215,7 +214,7 @@ public class SmsApplicationTest {
         ApplicationInfo bluetoothApplicationInfo = new ApplicationInfo();
         bluetoothApplicationInfo.uid = FAKE_BT_UID;
         bluetoothPackageInfo.applicationInfo = bluetoothApplicationInfo;
-        when(mPackageManager.getPackageInfo(matches(".*android.bluetooth.services"), anyInt()))
+        when(mPackageManager.getPackageInfo(eq(SmsApplication.BLUETOOTH_PACKAGE_NAME), anyInt()))
                 .thenReturn(bluetoothPackageInfo);
 
         PackageInfo telephonyProviderPackageInfo = new PackageInfo();

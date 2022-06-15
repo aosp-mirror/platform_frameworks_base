@@ -24,8 +24,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import javax.inject.Inject;
-
 /**
  * Tracks the size of collections.
  */
@@ -35,10 +33,6 @@ public class TrackedCollections {
 
     private final WeakIdentityHashMap<Collection<?>, CollectionState> mCollections
             = new WeakIdentityHashMap<>();
-
-    @Inject
-    TrackedCollections() {
-    }
 
     /**
      * @see LeakDetector#trackCollection(Collection, String)

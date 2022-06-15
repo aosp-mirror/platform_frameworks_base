@@ -36,7 +36,8 @@ public class Point implements Parcelable {
     }
 
     public Point(@NonNull Point src) {
-        set(src);
+        this.x = src.x;
+        this.y = src.y;
     }
 
     /**
@@ -45,15 +46,6 @@ public class Point implements Parcelable {
     public void set(int x, int y) {
         this.x = x;
         this.y = y;
-    }
-
-    /**
-     * Sets the point's from {@code src}'s coordinates
-     * @hide
-     */
-    public void set(@NonNull Point src) {
-        this.x = src.x;
-        this.y = src.y;
     }
 
     /**

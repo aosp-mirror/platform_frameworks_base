@@ -36,9 +36,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.people.PeopleSpaceUtils;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
-import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubble;
 
@@ -51,8 +50,7 @@ public class LaunchConversationActivity extends Activity {
     private static final String TAG = "PeopleSpaceLaunchConv";
     private static final boolean DEBUG = PeopleSpaceUtils.DEBUG;
     private UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
-    private NotificationVisibilityProvider mVisibilityProvider;
-    private CommonNotifCollection mCommonNotifCollection;
+    private NotificationEntryManager mNotificationEntryManager;
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private final UserManager mUserManager;
     private boolean mIsForTesting;
@@ -62,16 +60,11 @@ public class LaunchConversationActivity extends Activity {
     private NotificationEntry mEntryToBubble;
 
     @Inject
-    public LaunchConversationActivity(
-            NotificationVisibilityProvider visibilityProvider,
-            CommonNotifCollection commonNotifCollection,
-            Optional<BubblesManager> bubblesManagerOptional,
-            UserManager userManager,
-            CommandQueue commandQueue
-    ) {
+    public LaunchConversationActivity(NotificationEntryManager notificationEntryManager,
+            Optional<BubblesManager> bubblesManagerOptional, UserManager userManager,
+            CommandQueue commandQueue) {
         super();
-        mVisibilityProvider = visibilityProvider;
-        mCommonNotifCollection = commonNotifCollection;
+        mNotificationEntryManager = notificationEntryManager;
         mBubblesManagerOptional = bubblesManagerOptional;
         mUserManager = userManager;
         mCommandQueue = commandQueue;
@@ -135,7 +128,8 @@ public class LaunchConversationActivity extends Activity {
                 // shortcutId, fallback to notificationKey if it exists.
                 if (mBubblesManagerOptional.isPresent()) {
                     mBubble = mBubblesManagerOptional.get().getBubbleWithShortcutId(tileId);
-                    NotificationEntry entry = mCommonNotifCollection.getEntry(notificationKey);
+                    NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
+                            notificationKey);
                     if (mBubble != null || (entry != null && entry.canBubble())) {
                         mEntryToBubble = entry;
                         if (DEBUG) {
@@ -173,14 +167,14 @@ public class LaunchConversationActivity extends Activity {
         }
 
         try {
-            if (mIStatusBarService == null || mCommonNotifCollection == null) {
+            if (mIStatusBarService == null || mNotificationEntryManager == null) {
                 if (DEBUG) {
                     Log.d(TAG, "Skipping clear notification: null services, key: " + notifKey);
                 }
                 return;
             }
 
-            NotificationEntry entry = mCommonNotifCollection.getEntry(notifKey);
+            NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(notifKey);
             if (entry == null || entry.getRanking() == null) {
                 if (DEBUG) {
                     Log.d(TAG, "Skipping clear notification: NotificationEntry or its Ranking"
@@ -189,8 +183,10 @@ public class LaunchConversationActivity extends Activity {
                 return;
             }
 
-            NotificationVisibility notifVisibility = mVisibilityProvider.obtain(entry, true);
-            int rank = notifVisibility.rank;
+            int count = mNotificationEntryManager.getActiveNotificationsCount();
+            int rank = entry.getRanking().getRank();
+            NotificationVisibility notifVisibility = NotificationVisibility.obtain(notifKey,
+                    rank, count, true);
 
             if (DEBUG) Log.d(TAG, "Clearing notification, key: " + notifKey + ", rank: " + rank);
             mIStatusBarService.onNotificationClear(

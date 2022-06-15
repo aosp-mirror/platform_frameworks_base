@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "libiorap-java-tests"
+    }
+  ],
+  "imports": [
+    {
+      "path": "system/iorap"
+    }
+  ]
+}

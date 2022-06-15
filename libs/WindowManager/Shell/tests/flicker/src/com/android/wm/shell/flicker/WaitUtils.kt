@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-@file:JvmName("WaitUtils")
 package com.android.wm.shell.flicker
 
 import android.os.SystemClock

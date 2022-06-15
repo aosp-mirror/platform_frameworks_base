@@ -52,8 +52,6 @@ protected:
         mOutput << mIdent << "clipRegion" << std::endl;
     }
 
-    void onResetClip() override { mOutput << mIdent << "resetClip" << std::endl; }
-
     void onDrawPaint(const SkPaint&) override { mOutput << mIdent << "drawPaint" << std::endl; }
 
     void onDrawPath(const SkPath&, const SkPaint&) override {

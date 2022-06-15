@@ -44,11 +44,6 @@ public class AudioPowerCalculator extends PowerCalculator {
     }
 
     @Override
-    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
-        return powerComponent == BatteryConsumer.POWER_COMPONENT_AUDIO;
-    }
-
-    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final PowerAndDuration total = new PowerAndDuration();
@@ -78,9 +73,7 @@ public class AudioPowerCalculator extends PowerCalculator {
         final double powerMah = mPowerEstimator.calculatePower(durationMs);
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AUDIO, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO, powerMah);
-        if (!app.isVirtualUid()) {
-            total.durationMs += durationMs;
-            total.powerMah += powerMah;
-        }
+        total.durationMs += durationMs;
+        total.powerMah += powerMah;
     }
 }

@@ -24,6 +24,8 @@ import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static org.junit.Assert.assertTrue;
+
 import android.annotation.UiThread;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -37,7 +39,6 @@ import android.perftests.utils.PerfManualStatusReporter;
 import android.perftests.utils.TraceMarkParser;
 import android.perftests.utils.TraceMarkParser.TraceMarkSlice;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,6 @@ import androidx.annotation.Nullable;
 import androidx.test.filters.LargeTest;
 
 import com.android.compatibility.common.util.PollingCheck;
-import com.android.compatibility.common.util.SystemUtil;
 
 import junit.framework.Assert;
 
@@ -185,6 +185,7 @@ public class ImePerfTest extends ImePerfTestBase
     public static class BaselineIme extends InputMethodService {
 
         public static final int HEIGHT_DP = 100;
+        private static int sPid;
 
         @Override
         public View onCreateInputView() {
@@ -195,8 +196,12 @@ public class ImePerfTest extends ImePerfTestBase
             view.setPadding(0, 0, 0, 0);
             view.addView(inner, new FrameLayout.LayoutParams(MATCH_PARENT, height));
             inner.setBackgroundColor(0xff01fe10); // green
-            Log.v(TAG, "onCreateInputView");
+            sPid = Process.myPid();
             return view;
+        }
+
+        static int getPid() {
+            return sPid;
         }
 
         static ComponentName getName(Context context) {
@@ -276,16 +281,9 @@ public class ImePerfTest extends ImePerfTestBase
     }
 
     private void killBaselineIme() {
-        // pidof returns a space separated list of numeric PIDs.
-        String result = SystemUtil.runShellCommand(
-                "pidof com.android.perftests.inputmethod:BaselineIME");
-        for (String pid : result.trim().split(" ")) {
-            // The output may be empty if there is no process with the name.
-            if (TextUtils.isEmpty(pid)) {
-                continue;
-            }
-            Process.killProcess(Integer.parseInt(pid));
-        }
+        assertTrue("PID of test and IME can't be same",
+                Process.myPid() != BaselineIme.getPid());
+        Process.killProcess(BaselineIme.getPid());
     }
 
     private void testShowOrHideImeWarm(final boolean show) throws Throwable {

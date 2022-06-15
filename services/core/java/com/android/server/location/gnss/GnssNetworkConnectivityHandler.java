@@ -16,8 +16,6 @@
 
 package com.android.server.location.gnss;
 
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
-
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
@@ -48,6 +46,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * Handles network connection requests and network state change updates for AGPS data download.
@@ -201,7 +200,7 @@ class GnssNetworkConnectivityHandler {
         mHandler = new Handler(looper);
         mNiHandler = niHandler;
         mConnMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mSuplConnectivityCallback = null;
+        mSuplConnectivityCallback = createSuplConnectivityCallback();
     }
 
     /**
@@ -216,9 +215,7 @@ class GnssNetworkConnectivityHandler {
         }
         @Override
         public void onPreciseCallStateChanged(PreciseCallState state) {
-            if (PreciseCallState.PRECISE_CALL_STATE_ACTIVE == state.getForegroundCallState()
-                    || PreciseCallState.PRECISE_CALL_STATE_DIALING
-                    == state.getForegroundCallState()) {
+            if (state.PRECISE_CALL_STATE_ACTIVE == state.getForegroundCallState()) {
                 mActiveSubId = mSubId;
                 if (DEBUG) Log.d(TAG, "mActiveSubId: " + mActiveSubId);
             }
@@ -447,11 +444,12 @@ class GnssNetworkConnectivityHandler {
         capabilities = networkAttributes.mCapabilities;
         Log.i(TAG, String.format(
                 "updateNetworkState, state=%s, connected=%s, network=%s, capabilities=%s"
-                        + ", availableNetworkCount: %d",
+                        + ", apn: %s, availableNetworkCount: %d",
                 agpsDataConnStateAsString(),
                 isConnected,
                 network,
                 capabilities,
+                apn,
                 mAvailableNetworkAttributes.size()));
 
         if (native_is_agps_ril_supported()) {
@@ -583,25 +581,13 @@ class GnssNetworkConnectivityHandler {
         if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
             if (DEBUG) Log.d(TAG, "Adding Network Specifier: " + Integer.toString(mActiveSubId));
             networkRequestBuilder.setNetworkSpecifier(Integer.toString(mActiveSubId));
-            networkRequestBuilder.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
         NetworkRequest networkRequest = networkRequestBuilder.build();
-        // Make sure we only have a single request.
-        if (mSuplConnectivityCallback != null) {
-            mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
-        }
-        mSuplConnectivityCallback = createSuplConnectivityCallback();
-        try {
-            mConnMgr.requestNetwork(
-                    networkRequest,
-                    mSuplConnectivityCallback,
-                    mHandler,
-                    SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
-        } catch (RuntimeException e) {
-            Log.e(TAG, "Failed to request network.", e);
-            mSuplConnectivityCallback = null;
-            handleReleaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
-        }
+        mConnMgr.requestNetwork(
+                networkRequest,
+                mSuplConnectivityCallback,
+                mHandler,
+                SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
     }
 
     private int getNetworkCapability(int agpsType) {
@@ -632,10 +618,7 @@ class GnssNetworkConnectivityHandler {
         }
 
         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
-        if (mSuplConnectivityCallback != null) {
-            mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
-            mSuplConnectivityCallback = null;
-        }
+        mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
         switch (agpsDataConnStatus) {
             case GPS_AGPS_DATA_CONN_FAILED:
                 native_agps_data_conn_failed();

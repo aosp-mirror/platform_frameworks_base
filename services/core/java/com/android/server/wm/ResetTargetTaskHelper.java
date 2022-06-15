@@ -25,13 +25,14 @@ import android.content.pm.ActivityInfo;
 import android.os.Debug;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledFunction;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /** Helper class for processing the reset of a task. */
-class ResetTargetTaskHelper implements Consumer<Task>, Predicate<ActivityRecord> {
+class ResetTargetTaskHelper {
     private Task mTask;
     private Task mTargetTask;
     private Task mTargetRootTask;
@@ -39,7 +40,6 @@ class ResetTargetTaskHelper implements Consumer<Task>, Predicate<ActivityRecord>
     private boolean mForceReset;
     private boolean mCanMoveOptions;
     private boolean mTargetTaskFound;
-    private boolean mIsTargetTask;
     private int mActivityReparentPosition;
     private ActivityOptions mTopOptions;
     private ArrayList<ActivityRecord> mResultActivities = new ArrayList<>();
@@ -62,27 +62,32 @@ class ResetTargetTaskHelper implements Consumer<Task>, Predicate<ActivityRecord>
         mTargetRootTask = targetTask.getRootTask();
         mActivityReparentPosition = -1;
 
-        targetTask.mWmService.mRoot.forAllLeafTasks(this, true /* traverseTopToBottom */);
+        final PooledConsumer c = PooledLambda.obtainConsumer(
+                ResetTargetTaskHelper::processTask, this, PooledLambda.__(Task.class));
+        targetTask.mWmService.mRoot.forAllLeafTasks(c, true /*traverseTopToBottom*/);
+        c.recycle();
 
         processPendingReparentActivities();
         reset(null);
         return mTopOptions;
     }
 
-    @Override
-    public void accept(Task task) {
+    private void processTask(Task task) {
         reset(task);
         mRoot = task.getRootActivity(true);
         if (mRoot == null) return;
 
-        mIsTargetTask = task == mTargetTask;
-        if (mIsTargetTask) mTargetTaskFound = true;
+        final boolean isTargetTask = task == mTargetTask;
+        if (isTargetTask) mTargetTaskFound = true;
 
-        task.forAllActivities(this);
+        final PooledFunction f = PooledLambda.obtainFunction(
+                ResetTargetTaskHelper::processActivity, this,
+                PooledLambda.__(ActivityRecord.class), isTargetTask);
+        task.forAllActivities(f);
+        f.recycle();
     }
 
-    @Override
-    public boolean test(ActivityRecord r) {
+    private boolean processActivity(ActivityRecord r, boolean isTargetTask) {
         // End processing if we have reached the root.
         if (r == mRoot) return true;
 
@@ -95,7 +100,7 @@ class ResetTargetTaskHelper implements Consumer<Task>, Predicate<ActivityRecord>
         final boolean clearWhenTaskReset =
                 (r.intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0;
 
-        if (mIsTargetTask) {
+        if (isTargetTask) {
             if (!finishOnTaskLaunch && !clearWhenTaskReset) {
                 if (r.resultTo != null) {
                     // If this activity is sending a reply to a previous activity, we can't do

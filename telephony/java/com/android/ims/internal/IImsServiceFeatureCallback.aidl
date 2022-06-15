@@ -23,11 +23,11 @@ import com.android.ims.ImsFeatureContainer;
  * {@hide}
  */
 oneway interface IImsServiceFeatureCallback {
-    void imsFeatureCreated(in ImsFeatureContainer feature, int subId);
+    void imsFeatureCreated(in ImsFeatureContainer feature);
     // Reason defined in FeatureConnector.UnavailableReason
     void imsFeatureRemoved(int reason);
     // Status defined in ImsFeature.ImsState.
-    void imsStatusChanged(int status, int subId);
+    void imsStatusChanged(int status);
     //Capabilities defined in ImsService.ImsServiceCapability
     void updateCapabilities(long capabilities);
 }

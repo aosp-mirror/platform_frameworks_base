@@ -98,13 +98,10 @@ public final class ContentProviderConnection extends Binder {
         }
     }
 
-    /**
-     * Track the given proc state change.
-     */
-    public void trackProcState(int procState, int seq) {
+    public void trackProcState(int procState, int seq, long now) {
         if (association != null) {
             synchronized (mProcStatsLock) {
-                association.trackProcState(procState, seq, SystemClock.uptimeMillis());
+                association.trackProcState(procState, seq, now);
             }
         }
     }

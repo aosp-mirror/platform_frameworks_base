@@ -1,3 +1,5 @@
-set noparent
+# Bug component: 20868
 
-file:platform/frameworks/base:/telecomm/OWNERS
+rgreenwalt@google.com
+tgunn@google.com
+shuoq@google.com

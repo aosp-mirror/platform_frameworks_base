@@ -25,35 +25,36 @@ import static android.content.pm.ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import android.content.pm.PackageParser;
+import android.content.pm.PackageUserState;
+import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.os.Build;
-import android.platform.test.annotations.Presubmit;
 
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.pkg.PackageUserStateImpl;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-@Presubmit
 public class CompatibilityModeTest {
 
     private boolean mCompatibilityModeEnabled;;
-    private PackageImpl mMockAndroidPackage;
-    private PackageUserStateImpl mMockUserState;
+    private AndroidPackage mMockAndroidPackage;
+    private PackageUserState mMockUserState;
 
     @Before
     public void setUp() {
-        mCompatibilityModeEnabled = ParsingPackageUtils.sCompatibilityModeEnabled;
-        mMockAndroidPackage = mock(PackageImpl.class);
-        mMockUserState = new PackageUserStateImpl();
-        mMockUserState.setInstalled(true);
+        mCompatibilityModeEnabled = PackageParser.sCompatibilityModeEnabled;
+        mMockAndroidPackage = mock(AndroidPackage.class);
+        mMockUserState = mock(PackageUserState.class);
+        mMockUserState.installed = true;
+        when(mMockUserState.isAvailable(anyInt())).thenReturn(true);
+        when(mMockUserState.getAllOverlayPaths()).thenReturn(null);
     }
 
     @After
@@ -225,9 +226,9 @@ public class CompatibilityModeTest {
     }
 
     private void setGlobalCompatibilityMode(boolean enabled) {
-        if (ParsingPackageUtils.sCompatibilityModeEnabled == enabled) {
+        if (PackageParser.sCompatibilityModeEnabled == enabled) {
             return;
         }
-        ParsingPackageUtils.setCompatibilityModeEnabled(enabled);
+        PackageParser.setCompatibilityModeEnabled(enabled);
     }
 }

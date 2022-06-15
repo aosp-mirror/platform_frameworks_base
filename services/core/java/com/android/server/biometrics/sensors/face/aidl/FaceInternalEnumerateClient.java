@@ -18,39 +18,37 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
+import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.log.BiometricContext;
-import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Face-specific internal enumerate client for the {@link IFace} AIDL HAL interface.
  */
-class FaceInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
+class FaceInternalEnumerateClient extends InternalEnumerateClient<ISession> {
     private static final String TAG = "FaceInternalEnumerateClient";
 
     FaceInternalEnumerateClient(@NonNull Context context,
-            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, int userId,
+            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Face> enrolledList,
-            @NonNull BiometricUtils<Face> utils, int sensorId,
-            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            @NonNull BiometricUtils<Face> utils, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
-                logger, biometricContext);
+                BiometricsProtoEnums.MODALITY_FACE);
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getSession().enumerateEnrollments();
+            getFreshDaemon().enumerateEnrollments();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enumerate", e);
             mCallback.onClientFinished(this, false /* success */);

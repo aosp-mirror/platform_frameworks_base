@@ -24,7 +24,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.Pair;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.NotificationHeaderView;
@@ -33,19 +33,14 @@ import android.view.ViewGroup;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
-import com.android.systemui.statusbar.notification.FeedbackIcon;
-import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.HybridGroupManager;
 import com.android.systemui.statusbar.notification.row.HybridNotificationView;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
@@ -56,10 +51,7 @@ import java.util.List;
 /**
  * A container containing child notifications
  */
-public class NotificationChildrenContainer extends ViewGroup
-        implements NotificationFadeAware {
-
-    private static final String TAG = "NotificationChildrenContainer";
+public class NotificationChildrenContainer extends ViewGroup {
 
     @VisibleForTesting
     static final int NUMBER_OF_CHILDREN_WHEN_COLLAPSED = 2;
@@ -83,8 +75,8 @@ public class NotificationChildrenContainer extends ViewGroup
     private float mDividerAlpha;
     private int mNotificationHeaderMargin;
 
-    private int mNotificationTopPadding;
-    private float mCollapsedBottomPadding;
+    private int mNotificatonTopPadding;
+    private float mCollapsedBottompadding;
     private boolean mChildrenExpanded;
     private ExpandableNotificationRow mContainingNotification;
     private TextView mOverflowNumber;
@@ -119,7 +111,6 @@ public class NotificationChildrenContainer extends ViewGroup
     private int mCurrentHeaderTranslation = 0;
     private float mHeaderVisibleAmount = 1.0f;
     private int mUntruncatedChildCount;
-    private boolean mContainingNotificationIsFaded = false;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -143,17 +134,17 @@ public class NotificationChildrenContainer extends ViewGroup
 
     private void initDimens() {
         Resources res = getResources();
-        mChildPadding = res.getDimensionPixelOffset(R.dimen.notification_children_padding);
-        mDividerHeight = res.getDimensionPixelOffset(
+        mChildPadding = res.getDimensionPixelSize(R.dimen.notification_children_padding);
+        mDividerHeight = res.getDimensionPixelSize(
                 R.dimen.notification_children_container_divider_height);
         mDividerAlpha = res.getFloat(R.dimen.notification_divider_alpha);
-        mNotificationHeaderMargin = res.getDimensionPixelOffset(
+        mNotificationHeaderMargin = res.getDimensionPixelSize(
                 R.dimen.notification_children_container_margin_top);
-        mNotificationTopPadding = res.getDimensionPixelOffset(
+        mNotificatonTopPadding = res.getDimensionPixelSize(
                 R.dimen.notification_children_container_top_padding);
-        mHeaderHeight = mNotificationHeaderMargin + mNotificationTopPadding;
-        mCollapsedBottomPadding = res.getDimensionPixelOffset(
-                R.dimen.notification_children_collapsed_bottom_padding);
+        mHeaderHeight = mNotificationHeaderMargin + mNotificatonTopPadding;
+        mCollapsedBottompadding = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin);
         mEnableShadowOnChildNotifications =
                 res.getBoolean(R.bool.config_enableShadowOnChildNotifications);
         mShowGroupCountInExpander =
@@ -162,7 +153,7 @@ public class NotificationChildrenContainer extends ViewGroup
                 res.getBoolean(R.bool.config_showDividersWhenGroupNotificationExpanded);
         mHideDividersDuringExpand =
                 res.getBoolean(R.bool.config_hideDividersDuringExpand);
-        mTranslationForHeader = res.getDimensionPixelOffset(
+        mTranslationForHeader = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin)
                 - mNotificationHeaderMargin;
         mHybridGroupManager.initDimens();
@@ -212,7 +203,7 @@ public class NotificationChildrenContainer extends ViewGroup
                     newHeightSpec);
         }
         int dividerHeightSpec = MeasureSpec.makeMeasureSpec(mDividerHeight, MeasureSpec.EXACTLY);
-        int height = mNotificationHeaderMargin + mNotificationTopPadding;
+        int height = mNotificationHeaderMargin + mNotificatonTopPadding;
         int childCount =
                 Math.min(mAttachedChildren.size(), NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
         int collapsedChildren = getMaxAllowedVisibleChildren(true /* likeCollapsed */);
@@ -276,7 +267,6 @@ public class NotificationChildrenContainer extends ViewGroup
      * @param childIndex the index to add it at, if -1 it will be added at the end
      */
     public void addNotification(ExpandableNotificationRow row, int childIndex) {
-        ensureRemovedFromTransientContainer(row);
         int newIndex = childIndex < 0 ? mAttachedChildren.size() : childIndex;
         mAttachedChildren.add(newIndex, row);
         addView(row);
@@ -287,22 +277,11 @@ public class NotificationChildrenContainer extends ViewGroup
         mDividers.add(newIndex, divider);
 
         row.setContentTransformationAmount(0, false /* isLastChild */);
-        row.setNotificationFaded(mContainingNotificationIsFaded);
         // It doesn't make sense to keep old animations around, lets cancel them!
         ExpandableViewState viewState = row.getViewState();
         if (viewState != null) {
             viewState.cancelAnimations(row);
             row.cancelAppearDrawing();
-        }
-    }
-
-    private void ensureRemovedFromTransientContainer(View v) {
-        if (v.getParent() != null && v instanceof ExpandableView) {
-            // If the child is animating away, it will still have a parent, so detach it first
-            // TODO: We should really cancel the active animations here. This will
-            //  happen automatically when the view's intro animation starts, but
-            //  it's a fragile link.
-            ((ExpandableView) v).removeFromTransientContainerForAdditionTo(this);
         }
     }
 
@@ -322,7 +301,6 @@ public class NotificationChildrenContainer extends ViewGroup
         });
 
         row.setSystemChildExpanded(false);
-        row.setNotificationFaded(false);
         row.setUserLocked(false);
         if (!row.isRemoved()) {
             mGroupingUtil.restoreChildNotification(row);
@@ -495,8 +473,7 @@ public class NotificationChildrenContainer extends ViewGroup
         return result;
     }
 
-    /** To be called any time the rows have been updated */
-    public void updateExpansionStates() {
+    private void updateExpansionStates() {
         if (mChildrenExpanded || mUserLocked) {
             // we don't modify it the group is expanded or if we are expanding it
             return;
@@ -549,11 +526,11 @@ public class NotificationChildrenContainer extends ViewGroup
                 if (mUserLocked) {
                     intrinsicHeight += NotificationUtils.interpolate(
                             0,
-                            mNotificationTopPadding + mDividerHeight,
+                            mNotificatonTopPadding + mDividerHeight,
                             expandFactor);
                 } else {
                     intrinsicHeight += childrenExpanded
-                            ? mNotificationTopPadding + mDividerHeight
+                            ? mNotificatonTopPadding + mDividerHeight
                             : 0;
                 }
                 firstChild = false;
@@ -563,10 +540,10 @@ public class NotificationChildrenContainer extends ViewGroup
             visibleChildren++;
         }
         if (mUserLocked) {
-            intrinsicHeight += NotificationUtils.interpolate(mCollapsedBottomPadding, 0.0f,
+            intrinsicHeight += NotificationUtils.interpolate(mCollapsedBottompadding, 0.0f,
                     expandFactor);
         } else if (!childrenExpanded) {
-            intrinsicHeight += mCollapsedBottomPadding;
+            intrinsicHeight += mCollapsedBottompadding;
         }
         return intrinsicHeight;
     }
@@ -606,10 +583,10 @@ public class NotificationChildrenContainer extends ViewGroup
                 if (expandingToExpandedGroup) {
                     yPosition += NotificationUtils.interpolate(
                             0,
-                            mNotificationTopPadding + mDividerHeight,
+                            mNotificatonTopPadding + mDividerHeight,
                             expandFactor);
                 } else {
-                    yPosition += mChildrenExpanded ? mNotificationTopPadding + mDividerHeight : 0;
+                    yPosition += mChildrenExpanded ? mNotificatonTopPadding + mDividerHeight : 0;
                 }
                 firstChild = false;
             }
@@ -858,7 +835,7 @@ public class NotificationChildrenContainer extends ViewGroup
         for (int childIdx = 0; childIdx < count; childIdx++) {
             ExpandableNotificationRow slidingChild = mAttachedChildren.get(childIdx);
             float childTop = slidingChild.getTranslationY();
-            float top = childTop + Math.max(0, slidingChild.getClipTopAmount());
+            float top = childTop + slidingChild.getClipTopAmount();
             float bottom = childTop + slidingChild.getActualHeight();
             if (y >= top && y <= bottom) {
                 return slidingChild;
@@ -1032,7 +1009,7 @@ public class NotificationChildrenContainer extends ViewGroup
                     /* likeHighPriority */);
         }
         int maxContentHeight = mNotificationHeaderMargin + mCurrentHeaderTranslation
-                + mNotificationTopPadding;
+                + mNotificatonTopPadding;
         int visibleChildren = 0;
         int childCount = mAttachedChildren.size();
         for (int i = 0; i < childCount; i++) {
@@ -1095,7 +1072,7 @@ public class NotificationChildrenContainer extends ViewGroup
 
     private int getVisibleChildrenExpandHeight() {
         int intrinsicHeight = mNotificationHeaderMargin + mCurrentHeaderTranslation
-                + mNotificationTopPadding + mDividerHeight;
+                + mNotificatonTopPadding + mDividerHeight;
         int visibleChildren = 0;
         int childCount = mAttachedChildren.size();
         int maxAllowedVisibleChildren = getMaxAllowedVisibleChildren(true /* forceCollapsed */);
@@ -1147,10 +1124,6 @@ public class NotificationChildrenContainer extends ViewGroup
     private int getMinHeight(int maxAllowedVisibleChildren, boolean likeHighPriority,
             int headerTranslation) {
         if (!likeHighPriority && showingAsLowPriority()) {
-            if (mNotificationHeaderLowPriority == null) {
-                Log.e(TAG, "getMinHeight: low priority header is null", new Exception());
-                return 0;
-            }
             return mNotificationHeaderLowPriority.getHeight();
         }
         int minExpandHeight = mNotificationHeaderMargin + headerTranslation;
@@ -1167,16 +1140,10 @@ public class NotificationChildrenContainer extends ViewGroup
                 firstChild = false;
             }
             ExpandableNotificationRow child = mAttachedChildren.get(i);
-            View singleLineView = child.getSingleLineView();
-            if (singleLineView != null) {
-                minExpandHeight += singleLineView.getHeight();
-            } else {
-                Log.e(TAG, "getMinHeight: child " + child + " single line view is null",
-                        new Exception());
-            }
+            minExpandHeight += child.getSingleLineView().getHeight();
             visibleChildren++;
         }
-        minExpandHeight += mCollapsedBottomPadding;
+        minExpandHeight += mCollapsedBottompadding;
         return minExpandHeight;
     }
 
@@ -1245,7 +1212,7 @@ public class NotificationChildrenContainer extends ViewGroup
 
     public int getPositionInLinearLayout(View childInGroup) {
         int position = mNotificationHeaderMargin + mCurrentHeaderTranslation
-                + mNotificationTopPadding;
+                + mNotificatonTopPadding;
 
         for (int i = 0; i < mAttachedChildren.size(); i++) {
             ExpandableNotificationRow child = mAttachedChildren.get(i);
@@ -1321,13 +1288,15 @@ public class NotificationChildrenContainer extends ViewGroup
         mCurrentHeaderTranslation = (int) ((1.0f - headerVisibleAmount) * mTranslationForHeader);
     }
 
-    /** Shows the given feedback icon, or hides the icon if null. */
-    public void setFeedbackIcon(@Nullable FeedbackIcon icon) {
+    /**
+     * Shows or hides feedback icon.
+     */
+    public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
         if (mNotificationHeaderWrapper != null) {
-            mNotificationHeaderWrapper.setFeedbackIcon(icon);
+            mNotificationHeaderWrapper.showFeedbackIcon(show, resIds);
         }
         if (mNotificationHeaderWrapperLowPriority != null) {
-            mNotificationHeaderWrapperLowPriority.setFeedbackIcon(icon);
+            mNotificationHeaderWrapperLowPriority.showFeedbackIcon(show, resIds);
         }
     }
 
@@ -1337,20 +1306,6 @@ public class NotificationChildrenContainer extends ViewGroup
         }
         if (mNotificationHeaderWrapperLowPriority != null) {
             mNotificationHeaderWrapperLowPriority.setRecentlyAudiblyAlerted(audiblyAlertedRecently);
-        }
-    }
-
-    @Override
-    public void setNotificationFaded(boolean faded) {
-        mContainingNotificationIsFaded = faded;
-        if (mNotificationHeaderWrapper != null) {
-            mNotificationHeaderWrapper.setNotificationFaded(faded);
-        }
-        if (mNotificationHeaderWrapperLowPriority != null) {
-            mNotificationHeaderWrapperLowPriority.setNotificationFaded(faded);
-        }
-        for (ExpandableNotificationRow child : mAttachedChildren) {
-            child.setNotificationFaded(faded);
         }
     }
 }

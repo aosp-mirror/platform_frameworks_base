@@ -104,16 +104,16 @@ public class BiometricManager {
     public static final int BIOMETRIC_MULTI_SENSOR_DEFAULT = 0;
 
     /**
-     * Use face and fingerprint sensors together.
+     * Prefer the face sensor and fall back to fingerprint when needed.
      * @hide
      */
-    public static final int BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE = 1;
+    public static final int BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT = 1;
 
     /**
      * @hide
      */
     @IntDef({BIOMETRIC_MULTI_SENSOR_DEFAULT,
-            BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE})
+            BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface BiometricMultiSensorMode {}
 

@@ -74,7 +74,7 @@ public abstract class HotwordDetectionService extends Service {
     private static final String TAG = "HotwordDetectionService";
     private static final boolean DBG = false;
 
-    private static final long UPDATE_TIMEOUT_MILLIS = 20000;
+    private static final long UPDATE_TIMEOUT_MILLIS = 5000;
 
     /** @hide */
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
@@ -140,7 +140,9 @@ public abstract class HotwordDetectionService extends Service {
                 Log.d(TAG, "#detectFromDspSource");
             }
             HotwordDetectionService.this.onDetect(
-                    new AlwaysOnHotwordDetector.EventPayload.Builder(event).build(),
+                    new AlwaysOnHotwordDetector.EventPayload(
+                            event.triggerInData, event.captureAvailable,
+                            event.captureFormat, event.captureSession, event.data),
                     timeoutMillis,
                     new Callback(callback));
         }

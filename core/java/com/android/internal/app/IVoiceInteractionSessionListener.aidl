@@ -30,11 +30,6 @@
     void onVoiceSessionHidden();
 
     /**
-     * Called when a voice session window is shown/hidden.
-     */
-    void onVoiceSessionWindowVisibilityChanged(boolean visible);
-
-    /**
      * Called when UI hints were received.
      */
     void onSetUiHints(in Bundle args);

@@ -47,8 +47,6 @@ import java.util.List;
 public class AccessibilityShortcutChooserActivity extends Activity {
     @ShortcutType
     private final int mShortcutType = ACCESSIBILITY_SHORTCUT_KEY;
-    private static final String KEY_ACCESSIBILITY_SHORTCUT_MENU_MODE =
-            "accessibility_shortcut_menu_mode";
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
     private AlertDialog mMenuDialog;
     private AlertDialog mPermissionDialog;
@@ -68,28 +66,12 @@ public class AccessibilityShortcutChooserActivity extends Activity {
         mMenuDialog = createMenuDialog();
         mMenuDialog.setOnShowListener(dialog -> updateDialogListeners());
         mMenuDialog.show();
-
-        if (savedInstanceState != null) {
-            final int restoreShortcutMenuMode =
-                    savedInstanceState.getInt(KEY_ACCESSIBILITY_SHORTCUT_MENU_MODE,
-                            ShortcutMenuMode.LAUNCH);
-            if (restoreShortcutMenuMode == ShortcutMenuMode.EDIT) {
-                onEditButtonClicked();
-            }
-        }
     }
 
     @Override
     protected void onDestroy() {
-        mMenuDialog.setOnDismissListener(null);
         mMenuDialog.dismiss();
         super.onDestroy();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(KEY_ACCESSIBILITY_SHORTCUT_MENU_MODE, mTargetAdapter.getShortcutMenuMode());
     }
 
     private void onTargetSelected(AdapterView<?> parent, View view, int position, long id) {

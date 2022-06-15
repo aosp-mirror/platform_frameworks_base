@@ -16,21 +16,8 @@
 
 #include "RenderThread.h"
 
-#include <GrContextOptions.h>
-#include <android-base/properties.h>
-#include <dlfcn.h>
-#include <gl/GrGLInterface.h>
 #include <gui/TraceUtils.h>
-#include <sys/resource.h>
-#include <ui/FatVector.h>
-#include <utils/Condition.h>
-#include <utils/Log.h>
-#include <utils/Mutex.h>
-
-#include <thread>
-
 #include "../HardwareBitmapUploader.h"
-#include "CacheManager.h"
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
 #include "EglManager.h"
@@ -43,6 +30,19 @@
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
 #include "utils/TimeUtils.h"
+
+#include <GrContextOptions.h>
+#include <gl/GrGLInterface.h>
+
+#include <dlfcn.h>
+#include <sys/resource.h>
+#include <utils/Condition.h>
+#include <utils/Log.h>
+#include <utils/Mutex.h>
+#include <thread>
+
+#include <android-base/properties.h>
+#include <ui/FatVector.h>
 
 namespace android {
 namespace uirenderer {
@@ -112,31 +112,18 @@ ASurfaceControlFunctions::ASurfaceControlFunctions() {
                         "Failed to find required symbol ASurfaceTransaction_setZOrder!");
 }
 
-void RenderThread::extendedFrameCallback(const AChoreographerFrameCallbackData* cbData,
-                                         void* data) {
+void RenderThread::frameCallback(int64_t frameTimeNanos, void* data) {
     RenderThread* rt = reinterpret_cast<RenderThread*>(data);
-    size_t preferredFrameTimelineIndex =
-            AChoreographerFrameCallbackData_getPreferredFrameTimelineIndex(cbData);
-    AVsyncId vsyncId = AChoreographerFrameCallbackData_getFrameTimelineVsyncId(
-            cbData, preferredFrameTimelineIndex);
-    int64_t frameDeadline = AChoreographerFrameCallbackData_getFrameTimelineDeadlineNanos(
-            cbData, preferredFrameTimelineIndex);
-    int64_t frameTimeNanos = AChoreographerFrameCallbackData_getFrameTimeNanos(cbData);
-    // TODO(b/193273294): Remove when shared memory in use w/ expected present time always current.
+    int64_t vsyncId = AChoreographer_getVsyncId(rt->mChoreographer);
+    int64_t frameDeadline = AChoreographer_getFrameDeadline(rt->mChoreographer);
     int64_t frameInterval = AChoreographer_getFrameInterval(rt->mChoreographer);
-    rt->frameCallback(vsyncId, frameDeadline, frameTimeNanos, frameInterval);
-}
-
-void RenderThread::frameCallback(int64_t vsyncId, int64_t frameDeadline, int64_t frameTimeNanos,
-                                 int64_t frameInterval) {
-    mVsyncRequested = false;
-    if (timeLord().vsyncReceived(frameTimeNanos, frameTimeNanos, vsyncId, frameDeadline,
-                                 frameInterval) &&
-        !mFrameCallbackTaskPending) {
+    rt->mVsyncRequested = false;
+    if (rt->timeLord().vsyncReceived(frameTimeNanos, frameTimeNanos, vsyncId, frameDeadline,
+            frameInterval) && !rt->mFrameCallbackTaskPending) {
         ATRACE_NAME("queue mFrameCallbackTask");
-        mFrameCallbackTaskPending = true;
-        nsecs_t runAt = (frameTimeNanos + mDispatchFrameDelay);
-        queue().postAt(runAt, [=]() { dispatchFrameCallbacks(); });
+        rt->mFrameCallbackTaskPending = true;
+        nsecs_t runAt = (frameTimeNanos + rt->mDispatchFrameDelay);
+        rt->queue().postAt(runAt, [=]() { rt->dispatchFrameCallbacks(); });
     }
 }
 
@@ -152,8 +139,8 @@ public:
     ChoreographerSource(RenderThread* renderThread) : mRenderThread(renderThread) {}
 
     virtual void requestNextVsync() override {
-        AChoreographer_postVsyncCallback(mRenderThread->mChoreographer,
-                                         RenderThread::extendedFrameCallback, mRenderThread);
+        AChoreographer_postFrameCallback64(mRenderThread->mChoreographer,
+                                           RenderThread::frameCallback, mRenderThread);
     }
 
     virtual void drainPendingEvents() override {
@@ -170,16 +157,12 @@ public:
 
     virtual void requestNextVsync() override {
         mRenderThread->queue().postDelayed(16_ms, [this]() {
-            mRenderThread->frameCallback(UiFrameInfoBuilder::INVALID_VSYNC_ID,
-                                         std::numeric_limits<int64_t>::max(),
-                                         systemTime(SYSTEM_TIME_MONOTONIC), 16_ms);
+            RenderThread::frameCallback(systemTime(SYSTEM_TIME_MONOTONIC), mRenderThread);
         });
     }
 
     virtual void drainPendingEvents() override {
-        mRenderThread->frameCallback(UiFrameInfoBuilder::INVALID_VSYNC_ID,
-                                     std::numeric_limits<int64_t>::max(),
-                                     systemTime(SYSTEM_TIME_MONOTONIC), 16_ms);
+        RenderThread::frameCallback(systemTime(SYSTEM_TIME_MONOTONIC), mRenderThread);
     }
 
 private:

@@ -20,6 +20,8 @@ import android.accounts.Account;
 import android.util.LruCache;
 import android.util.Pair;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,8 +35,7 @@ import java.util.Objects;
 
     private static final int MAX_CACHE_CHARS = 64000;
 
-    /** Package private*/
-    static class Value {
+    private static class Value {
         public final String token;
         public final long expiryEpochMillis;
 
@@ -216,12 +217,12 @@ import java.util.Objects;
     /**
      * Gets a token from the cache if possible.
      */
-    public Value get(Account account, String tokenType, String packageName, byte[] sigDigest) {
+    public String get(Account account, String tokenType, String packageName, byte[] sigDigest) {
         Key k = new Key(account, tokenType, packageName, sigDigest);
         Value v = mCachedTokens.get(k);
         long currentTime = System.currentTimeMillis();
         if (v != null && currentTime < v.expiryEpochMillis) {
-            return v;
+            return v.token;
         } else if (v != null) {
             remove(account.type, v.token);
         }

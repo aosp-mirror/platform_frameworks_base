@@ -18,7 +18,6 @@ package android.content.res;
 
 import android.os.FileUtils;
 import android.os.LocaleList;
-import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 import android.util.DisplayMetrics;
 
@@ -31,7 +30,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Locale;
 
-@Presubmit
 public class ResourcesLocaleTest extends AndroidTestCase {
 
     private String extractApkAndGetPath(int id) throws Exception {

@@ -20,10 +20,8 @@ import android.os.ResultReceiver;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
-import android.window.ImeOnBackInvokedDispatcher;
 
-import com.android.internal.inputmethod.InputBindResult;
-import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
+import com.android.internal.view.InputBindResult;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -37,7 +35,6 @@ interface IInputMethodManager {
 
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getInputMethodList(int userId);
-    List<InputMethodInfo> getAwareLockedInputMethodList(int userId, int directBootAwareness);
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getEnabledInputMethodList(int userId);
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
@@ -56,9 +53,9 @@ interface IInputMethodManager {
             in IInputMethodClient client, in IBinder windowToken,
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
-            int windowFlags, in EditorInfo attribute, in IInputContext inputContext,
-            in IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
-            int unverifiedTargetSdkVersion, in ImeOnBackInvokedDispatcher imeDispatcher);
+            int windowFlags, in EditorInfo attribute, IInputContext inputContext,
+            /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags,
+            int unverifiedTargetSdkVersion);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
@@ -72,9 +69,6 @@ interface IInputMethodManager {
     // TODO(Bug 113914148): Consider removing this.
     int getInputMethodWindowVisibleHeight(in IInputMethodClient client);
 
-    oneway void reportVirtualDisplayGeometryAsync(in IInputMethodClient parentClient,
-            int childDisplayId, in float[] matrixValues);
-
     oneway void reportPerceptibleAsync(in IBinder windowToken, boolean perceptible);
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
     void removeImeSurface();
@@ -87,7 +81,4 @@ interface IInputMethodManager {
     void startImeTrace();
     // Stops an ime trace.
     void stopImeTrace();
-
-    /** Start Stylus handwriting session **/
-    void startStylusHandwriting(in IInputMethodClient client);
 }

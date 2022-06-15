@@ -38,17 +38,12 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.media.dialog.MediaOutputDialogFactory;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
-import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,37 +68,23 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     View mDrawerNormal;
 
     @Mock
-    VolumeDialogController mVolumeDialogController;
+    VolumeDialogController mController;
+
     @Mock
     KeyguardManager mKeyguard;
+
     @Mock
     AccessibilityManagerWrapper mAccessibilityMgr;
-    @Mock
-    DeviceProvisionedController mDeviceProvisionedController;
-    @Mock
-    ConfigurationController mConfigurationController;
-    @Mock
-    MediaOutputDialogFactory mMediaOutputDialogFactory;
-    @Mock
-    ActivityStarter mActivityStarter;
-    @Mock
-    InteractionJankMonitor mInteractionJankMonitor;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mController = mDependency.injectMockDependency(VolumeDialogController.class);
+        mAccessibilityMgr = mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
         getContext().addMockSystemService(KeyguardManager.class, mKeyguard);
 
-        mDialog = new VolumeDialogImpl(
-                getContext(),
-                mVolumeDialogController,
-                mAccessibilityMgr,
-                mDeviceProvisionedController,
-                mConfigurationController,
-                mMediaOutputDialogFactory,
-                mActivityStarter,
-                mInteractionJankMonitor);
+        mDialog = new VolumeDialogImpl(getContext());
         mDialog.init(0, null);
         State state = createShellState();
         mDialog.onStateChangedH(state);
@@ -189,7 +170,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         Mockito.reset(mAccessibilityMgr);
         ArgumentCaptor<VolumeDialogController.Callbacks> controllerCallbackCapture =
                 ArgumentCaptor.forClass(VolumeDialogController.Callbacks.class);
-        verify(mVolumeDialogController).addCallback(controllerCallbackCapture.capture(), any());
+        verify(mController).addCallback(controllerCallbackCapture.capture(), any());
         VolumeDialogController.Callbacks callbacks = controllerCallbackCapture.getValue();
         callbacks.onShowSafetyWarning(AudioManager.FLAG_SHOW_UI);
         verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
@@ -220,13 +201,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDialog.onStateChangedH(initialSilentState);
 
         // expected: shouldn't call vibrate yet
-        verify(mVolumeDialogController, never()).vibrate(any());
+        verify(mController, never()).vibrate(any());
 
         // changed ringer to vibrate
         mDialog.onStateChangedH(vibrateState);
 
         // expected: vibrate device
-        verify(mVolumeDialogController).vibrate(any());
+        verify(mController).vibrate(any());
     }
 
     @Test
@@ -244,7 +225,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDialog.onStateChangedH(vibrateState);
 
         // shouldn't call vibrate
-        verify(mVolumeDialogController, never()).vibrate(any());
+        verify(mController, never()).vibrate(any());
     }
 
     @Test
@@ -257,7 +238,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDrawerVibrate.performClick();
 
         // Make sure we've actually changed the ringer mode.
-        verify(mVolumeDialogController, times(1)).setRingerMode(
+        verify(mController, times(1)).setRingerMode(
                 AudioManager.RINGER_MODE_VIBRATE, false);
     }
 
@@ -271,7 +252,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDrawerMute.performClick();
 
         // Make sure we've actually changed the ringer mode.
-        verify(mVolumeDialogController, times(1)).setRingerMode(
+        verify(mController, times(1)).setRingerMode(
                 AudioManager.RINGER_MODE_SILENT, false);
     }
 
@@ -285,7 +266,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         mDrawerNormal.performClick();
 
         // Make sure we've actually changed the ringer mode.
-        verify(mVolumeDialogController, times(1)).setRingerMode(
+        verify(mController, times(1)).setRingerMode(
                 AudioManager.RINGER_MODE_NORMAL, false);
     }
 

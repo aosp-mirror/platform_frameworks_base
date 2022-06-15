@@ -135,7 +135,8 @@
                 android:layout_height="match_parent"
                 android:tint="?android:attr/colorAccent"
                 android:layout_gravity="center"
-                android:soundEffectsEnabled="false"/>
+                android:soundEffectsEnabled="false"
+                sysui:optedOut="false"/>
         </FrameLayout>
     </LinearLayout>
 

@@ -92,7 +92,7 @@ public class GpsNavigationMessageEvent implements Parcelable {
                 @Override
                 public GpsNavigationMessageEvent createFromParcel(Parcel in) {
                     ClassLoader classLoader = getClass().getClassLoader();
-                    GpsNavigationMessage navigationMessage = in.readParcelable(classLoader, android.location.GpsNavigationMessage.class);
+                    GpsNavigationMessage navigationMessage = in.readParcelable(classLoader);
                     return new GpsNavigationMessageEvent(navigationMessage);
                 }
 

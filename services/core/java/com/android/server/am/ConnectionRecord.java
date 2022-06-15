@@ -18,12 +18,9 @@ package com.android.server.am;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
-import android.annotation.Nullable;
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
-import android.os.SystemClock;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -51,12 +48,6 @@ final class ConnectionRecord {
     String stringName;              // Caching of toString.
     boolean serviceDead;            // Well is it?
     private Object mProcStatsLock;  // Internal lock for accessing AssociationState
-    /**
-     * If the connection was made against an alias, then the alias conponent name. Otherwise, null.
-     * We return this component name to the client.
-     */
-    @Nullable
-    final ComponentName aliasComponent;
 
     // Please keep the following two enum list synced.
     private static final int[] BIND_ORIG_ENUMS = new int[] {
@@ -72,7 +63,7 @@ final class ConnectionRecord {
             Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
             Context.BIND_FOREGROUND_SERVICE,
             Context.BIND_TREAT_LIKE_ACTIVITY,
-            Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE,
+            Context.BIND_VISIBLE,
             Context.BIND_SHOWING_UI,
             Context.BIND_NOT_VISIBLE,
             Context.BIND_NOT_PERCEPTIBLE,
@@ -111,8 +102,7 @@ final class ConnectionRecord {
             ActivityServiceConnectionsHolder<ConnectionRecord> _activity,
             IServiceConnection _conn, int _flags,
             int _clientLabel, PendingIntent _clientIntent,
-            int _clientUid, String _clientProcessName, String _clientPackageName,
-            ComponentName _aliasComponent) {
+            int _clientUid, String _clientProcessName, String _clientPackageName) {
         binding = _binding;
         activity = _activity;
         conn = _conn;
@@ -122,7 +112,6 @@ final class ConnectionRecord {
         clientUid = _clientUid;
         clientProcessName = _clientProcessName;
         clientPackageName = _clientPackageName;
-        aliasComponent = _aliasComponent;
     }
 
     public boolean hasFlag(final int flag) {
@@ -159,10 +148,10 @@ final class ConnectionRecord {
         }
     }
 
-    public void trackProcState(int procState, int seq) {
+    public void trackProcState(int procState, int seq, long now) {
         if (association != null) {
             synchronized (mProcStatsLock) {
-                association.trackProcState(procState, seq, SystemClock.uptimeMillis());
+                association.trackProcState(procState, seq, now);
             }
         }
     }
@@ -225,8 +214,8 @@ final class ConnectionRecord {
         if ((flags & Context.BIND_SCHEDULE_LIKE_TOP_APP) != 0) {
             sb.append("SLTA ");
         }
-        if ((flags & Context.BIND_TREAT_LIKE_VISIBLE_FOREGROUND_SERVICE) != 0) {
-            sb.append("VFGS ");
+        if ((flags&Context.BIND_VISIBLE) != 0) {
+            sb.append("VIS ");
         }
         if ((flags&Context.BIND_SHOWING_UI) != 0) {
             sb.append("UI ");

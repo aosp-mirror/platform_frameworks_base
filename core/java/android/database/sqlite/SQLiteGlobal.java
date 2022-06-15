@@ -84,7 +84,7 @@ public final class SQLiteGlobal {
     /**
      * Gets the default journal mode when WAL is not in use.
      */
-    public static @SQLiteDatabase.JournalMode String getDefaultJournalMode() {
+    public static String getDefaultJournalMode() {
         return SystemProperties.get("debug.sqlite.journalmode",
                 Resources.getSystem().getString(
                 com.android.internal.R.string.db_default_journal_mode));
@@ -102,7 +102,7 @@ public final class SQLiteGlobal {
     /**
      * Gets the default database synchronization mode when WAL is not in use.
      */
-    public static @SQLiteDatabase.SyncMode String getDefaultSyncMode() {
+    public static String getDefaultSyncMode() {
         // Use the FULL synchronous mode for system processes by default.
         String defaultMode = sDefaultSyncMode;
         if (defaultMode != null) {
@@ -116,7 +116,7 @@ public final class SQLiteGlobal {
     /**
      * Gets the database synchronization mode when in WAL mode.
      */
-    public static @SQLiteDatabase.SyncMode String getWALSyncMode() {
+    public static String getWALSyncMode() {
         // Use the FULL synchronous mode for system processes by default.
         String defaultMode = sDefaultSyncMode;
         if (defaultMode != null) {

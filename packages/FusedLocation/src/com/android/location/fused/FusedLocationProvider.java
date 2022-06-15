@@ -44,7 +44,6 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /** Basic fused location provider implementation. */
 public class FusedLocationProvider extends LocationProviderBase {
@@ -68,12 +67,6 @@ public class FusedLocationProvider extends LocationProviderBase {
     private final ChildLocationListener mGpsListener;
     private final ChildLocationListener mNetworkListener;
     private final BroadcastReceiver mUserChangeReceiver;
-
-    @GuardedBy("mLock")
-    boolean mGpsPresent;
-
-    @GuardedBy("mLock")
-    boolean mNlpPresent;
 
     @GuardedBy("mLock")
     private ProviderRequest mRequest;
@@ -126,28 +119,19 @@ public class FusedLocationProvider extends LocationProviderBase {
 
     @Override
     public void onFlush(OnFlushCompleteCallback callback) {
-        synchronized (mLock) {
-            AtomicInteger flushCount = new AtomicInteger(0);
-            if (mGpsPresent) {
-                flushCount.incrementAndGet();
-            }
-            if (mNlpPresent) {
-                flushCount.incrementAndGet();
-            }
+        OnFlushCompleteCallback wrapper = new OnFlushCompleteCallback() {
+            private int mFlushCount = 2;
 
-            OnFlushCompleteCallback wrapper = () -> {
-                if (flushCount.decrementAndGet() == 0) {
+            @Override
+            public void onFlushComplete() {
+                if (--mFlushCount == 0) {
                     callback.onFlushComplete();
                 }
-            };
+            }
+        };
 
-            if (mGpsPresent) {
-                mGpsListener.flush(wrapper);
-            }
-            if (mNlpPresent) {
-                mNetworkListener.flush(wrapper);
-            }
-        }
+        mGpsListener.flush(wrapper);
+        mNetworkListener.flush(wrapper);
     }
 
     @Override
@@ -155,19 +139,9 @@ public class FusedLocationProvider extends LocationProviderBase {
 
     @GuardedBy("mLock")
     private void updateRequirementsLocked() {
-        // it's possible there might be race conditions on device start where a provider doesn't
-        // appear to be present yet, but once a provider is present it shouldn't go away.
-        if (!mGpsPresent) {
-            mGpsPresent = mLocationManager.hasProvider(GPS_PROVIDER);
-        }
-        if (!mNlpPresent) {
-            mNlpPresent = mLocationManager.hasProvider(NETWORK_PROVIDER);
-        }
-
-        long gpsInterval =
-                mGpsPresent && (!mNlpPresent || mRequest.getQuality() < QUALITY_LOW_POWER)
-                        ? mRequest.getIntervalMillis() : INTERVAL_DISABLED;
-        long networkInterval = mNlpPresent ? mRequest.getIntervalMillis() : INTERVAL_DISABLED;
+        long gpsInterval = mRequest.getQuality() < QUALITY_LOW_POWER ? mRequest.getIntervalMillis()
+                : INTERVAL_DISABLED;
+        long networkInterval = mRequest.getIntervalMillis();
 
         mGpsListener.resetProviderRequest(gpsInterval);
         mNetworkListener.resetProviderRequest(networkInterval);

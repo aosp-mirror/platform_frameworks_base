@@ -157,6 +157,7 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
         lazyPaint.emplace();
         lazyPaint->setAlpha(mProperties.mAlpha);
         lazyPaint->setColorFilter(mProperties.mColorFilter);
+        lazyPaint->setFilterQuality(kLow_SkFilterQuality);
     }
 
     canvas->concat(matrix);

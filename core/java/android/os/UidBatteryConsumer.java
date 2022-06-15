@@ -38,9 +38,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public final class UidBatteryConsumer extends BatteryConsumer {
-
-    static final int CONSUMER_TYPE_UID = 1;
+public final class UidBatteryConsumer extends BatteryConsumer implements Parcelable {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
@@ -68,27 +66,19 @@ public final class UidBatteryConsumer extends BatteryConsumer {
      */
     public static final int STATE_BACKGROUND = 1;
 
-    static final int COLUMN_INDEX_UID = BatteryConsumer.COLUMN_COUNT;
-    static final int COLUMN_INDEX_PACKAGE_WITH_HIGHEST_DRAIN = COLUMN_INDEX_UID + 1;
-    static final int COLUMN_INDEX_TIME_IN_FOREGROUND = COLUMN_INDEX_UID + 2;
-    static final int COLUMN_INDEX_TIME_IN_BACKGROUND = COLUMN_INDEX_UID + 3;
-    static final int COLUMN_COUNT = BatteryConsumer.COLUMN_COUNT + 4;
-
-    UidBatteryConsumer(BatteryConsumerData data) {
-        super(data);
-    }
-
-    private UidBatteryConsumer(@NonNull Builder builder) {
-        super(builder.mData, builder.mPowerComponentsBuilder.build());
-    }
+    private final int mUid;
+    @Nullable
+    private final String mPackageWithHighestDrain;
+    private final long mTimeInForegroundMs;
+    private final long mTimeInBackgroundMs;
 
     public int getUid() {
-        return mData.getInt(COLUMN_INDEX_UID);
+        return mUid;
     }
 
     @Nullable
     public String getPackageWithHighestDrain() {
-        return mData.getString(COLUMN_INDEX_PACKAGE_WITH_HIGHEST_DRAIN);
+        return mPackageWithHighestDrain;
     }
 
     /**
@@ -97,52 +87,67 @@ public final class UidBatteryConsumer extends BatteryConsumer {
     public long getTimeInStateMs(@State int state) {
         switch (state) {
             case STATE_BACKGROUND:
-                return mData.getInt(COLUMN_INDEX_TIME_IN_BACKGROUND);
+                return mTimeInBackgroundMs;
             case STATE_FOREGROUND:
-                return mData.getInt(COLUMN_INDEX_TIME_IN_FOREGROUND);
+                return mTimeInForegroundMs;
         }
         return 0;
     }
 
+    private UidBatteryConsumer(@NonNull Builder builder) {
+        super(builder.mPowerComponentsBuilder.build());
+        mUid = builder.mUid;
+        mPackageWithHighestDrain = builder.mPackageWithHighestDrain;
+        mTimeInForegroundMs = builder.mTimeInForegroundMs;
+        mTimeInBackgroundMs = builder.mTimeInBackgroundMs;
+    }
+
+    private UidBatteryConsumer(@NonNull Parcel source) {
+        super(new PowerComponents(source));
+        mUid = source.readInt();
+        mPackageWithHighestDrain = source.readString();
+        mTimeInForegroundMs = source.readLong();
+        mTimeInBackgroundMs = source.readLong();
+    }
+
+    /**
+     * Writes the contents into a Parcel.
+     */
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(mUid);
+        dest.writeString(mPackageWithHighestDrain);
+        dest.writeLong(mTimeInForegroundMs);
+        dest.writeLong(mTimeInBackgroundMs);
+    }
+
     @Override
     public void dump(PrintWriter pw, boolean skipEmptyComponents) {
+        final double consumedPower = getConsumedPower();
         pw.print("UID ");
         UserHandle.formatUid(pw, getUid());
         pw.print(": ");
-        PowerCalculator.printPowerMah(pw, getConsumedPower());
-
-        if (mData.layout.processStateDataIncluded) {
-            StringBuilder sb = new StringBuilder();
-            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_FOREGROUND,
-                    skipEmptyComponents);
-            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_BACKGROUND,
-                    skipEmptyComponents);
-            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
-                    skipEmptyComponents);
-            appendProcessStateData(sb, BatteryConsumer.PROCESS_STATE_CACHED,
-                    skipEmptyComponents);
-            pw.print(sb);
-        }
-
+        PowerCalculator.printPowerMah(pw, consumedPower);
         pw.print(" ( ");
         mPowerComponents.dump(pw, skipEmptyComponents  /* skipTotalPowerComponent */);
         pw.print(" ) ");
     }
 
-    private void appendProcessStateData(StringBuilder sb, @ProcessState int processState,
-            boolean skipEmptyComponents) {
-        Dimensions dimensions = new Dimensions(POWER_COMPONENT_ANY, processState);
-        final double power = mPowerComponents.getConsumedPower(dimensions);
-        if (power == 0 && skipEmptyComponents) {
-            return;
+    @NonNull
+    public static final Creator<UidBatteryConsumer> CREATOR = new Creator<UidBatteryConsumer>() {
+        public UidBatteryConsumer createFromParcel(@NonNull Parcel source) {
+            return new UidBatteryConsumer(source);
         }
 
-        sb.append(" ").append(processStateToString(processState)).append(": ")
-                .append(BatteryStats.formatCharge(power));
-    }
+        public UidBatteryConsumer[] newArray(int size) {
+            return new UidBatteryConsumer[size];
+        }
+    };
 
-    static UidBatteryConsumer create(BatteryConsumerData data) {
-        return new UidBatteryConsumer(data);
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     /** Serializes this object to XML */
@@ -153,15 +158,14 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
         serializer.startTag(null, BatteryUsageStats.XML_TAG_UID);
         serializer.attributeInt(null, BatteryUsageStats.XML_ATTR_UID, getUid());
-        final String packageWithHighestDrain = getPackageWithHighestDrain();
-        if (!TextUtils.isEmpty(packageWithHighestDrain)) {
+        if (!TextUtils.isEmpty(mPackageWithHighestDrain)) {
             serializer.attribute(null, BatteryUsageStats.XML_ATTR_HIGHEST_DRAIN_PACKAGE,
-                    packageWithHighestDrain);
+                    mPackageWithHighestDrain);
         }
         serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND,
-                getTimeInStateMs(STATE_FOREGROUND));
+                mTimeInForegroundMs);
         serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND,
-                getTimeInStateMs(STATE_BACKGROUND));
+                mTimeInBackgroundMs);
         mPowerComponents.writeToXml(serializer);
         serializer.endTag(null, BatteryUsageStats.XML_TAG_UID);
     }
@@ -204,25 +208,23 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         private static final String PACKAGE_NAME_UNINITIALIZED = "";
         private final BatteryStats.Uid mBatteryStatsUid;
         private final int mUid;
-        private final boolean mIsVirtualUid;
         private String mPackageWithHighestDrain = PACKAGE_NAME_UNINITIALIZED;
+        public long mTimeInForegroundMs;
+        public long mTimeInBackgroundMs;
         private boolean mExcludeFromBatteryUsageStats;
 
-        public Builder(BatteryConsumerData data, @NonNull BatteryStats.Uid batteryStatsUid) {
-            this(data, batteryStatsUid, batteryStatsUid.getUid());
-        }
-
-        public Builder(BatteryConsumerData data, int uid) {
-            this(data, null, uid);
-        }
-
-        private Builder(BatteryConsumerData data, @Nullable BatteryStats.Uid batteryStatsUid,
-                int uid) {
-            super(data, CONSUMER_TYPE_UID);
+        public Builder(@NonNull String[] customPowerComponentNames,
+                boolean includePowerModels, @NonNull BatteryStats.Uid batteryStatsUid) {
+            super(customPowerComponentNames, includePowerModels);
             mBatteryStatsUid = batteryStatsUid;
+            mUid = batteryStatsUid.getUid();
+        }
+
+        public Builder(@NonNull String[] customPowerComponentNames, boolean includePowerModels,
+                int uid) {
+            super(customPowerComponentNames, includePowerModels);
+            mBatteryStatsUid = null;
             mUid = uid;
-            mIsVirtualUid = mUid == Process.SDK_SANDBOX_VIRTUAL_UID;
-            data.putLong(COLUMN_INDEX_UID, mUid);
         }
 
         @NonNull
@@ -236,10 +238,6 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
         public int getUid() {
             return mUid;
-        }
-
-        public boolean isVirtualUid() {
-            return mIsVirtualUid;
         }
 
         /**
@@ -260,10 +258,10 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         public Builder setTimeInStateMs(@State int state, long timeInStateMs) {
             switch (state) {
                 case STATE_FOREGROUND:
-                    mData.putLong(COLUMN_INDEX_TIME_IN_FOREGROUND, timeInStateMs);
+                    mTimeInForegroundMs = timeInStateMs;
                     break;
                 case STATE_BACKGROUND:
-                    mData.putLong(COLUMN_INDEX_TIME_IN_BACKGROUND, timeInStateMs);
+                    mTimeInBackgroundMs = timeInStateMs;
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported state: " + state);
@@ -284,18 +282,13 @@ public final class UidBatteryConsumer extends BatteryConsumer {
          */
         public Builder add(UidBatteryConsumer consumer) {
             mPowerComponentsBuilder.addPowerAndDuration(consumer.mPowerComponents);
-
-            setTimeInStateMs(STATE_FOREGROUND,
-                    mData.getLong(COLUMN_INDEX_TIME_IN_FOREGROUND)
-                            + consumer.getTimeInStateMs(STATE_FOREGROUND));
-            setTimeInStateMs(STATE_BACKGROUND,
-                    mData.getLong(COLUMN_INDEX_TIME_IN_BACKGROUND)
-                            + consumer.getTimeInStateMs(STATE_BACKGROUND));
+            mTimeInBackgroundMs += consumer.mTimeInBackgroundMs;
+            mTimeInForegroundMs += consumer.mTimeInForegroundMs;
 
             if (mPackageWithHighestDrain == PACKAGE_NAME_UNINITIALIZED) {
-                mPackageWithHighestDrain = consumer.getPackageWithHighestDrain();
+                mPackageWithHighestDrain = consumer.mPackageWithHighestDrain;
             } else if (!TextUtils.equals(mPackageWithHighestDrain,
-                    consumer.getPackageWithHighestDrain())) {
+                    consumer.mPackageWithHighestDrain)) {
                 // Consider combining two UidBatteryConsumers with this distribution
                 // of power drain between packages:
                 // (package1=100, package2=10) and (package1=100, package2=101).
@@ -323,9 +316,6 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         public UidBatteryConsumer build() {
             if (mPackageWithHighestDrain == PACKAGE_NAME_UNINITIALIZED) {
                 mPackageWithHighestDrain = null;
-            }
-            if (mPackageWithHighestDrain != null) {
-                mData.putString(COLUMN_INDEX_PACKAGE_WITH_HIGHEST_DRAIN, mPackageWithHighestDrain);
             }
             return new UidBatteryConsumer(this);
         }

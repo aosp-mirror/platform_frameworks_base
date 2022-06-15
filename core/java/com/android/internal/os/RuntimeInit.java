@@ -22,7 +22,6 @@ import android.app.ApplicationErrorReport;
 import android.app.IActivityManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.type.DefaultMimeMapFactory;
-import android.net.TrafficStats;
 import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.IBinder;
@@ -33,6 +32,7 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.logging.AndroidConfig;
+import com.android.server.NetworkManagementSocketTagger;
 
 import dalvik.system.RuntimeHooks;
 import dalvik.system.VMRuntime;
@@ -254,7 +254,7 @@ public class RuntimeInit {
         /*
          * Wire socket tagging to traffic stats.
          */
-        TrafficStats.attachSocketTagger();
+        NetworkManagementSocketTagger.install();
 
         initialized = true;
     }

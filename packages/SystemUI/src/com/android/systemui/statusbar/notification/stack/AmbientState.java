@@ -16,17 +16,13 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.util.MathUtils;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -35,9 +31,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-
-import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
@@ -45,17 +38,13 @@ import javax.inject.Inject;
  * A global state to track all input states for the algorithm.
  */
 @SysUISingleton
-public class AmbientState implements Dumpable {
+public class AmbientState {
 
     private static final float MAX_PULSE_HEIGHT = 100000f;
     private static final boolean NOTIFICATIONS_HAVE_SHADOWS = false;
 
     private final SectionProvider mSectionProvider;
     private final BypassController mBypassController;
-    /**
-     *  Used to read bouncer states.
-     */
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mScrollY;
     private boolean mDimmed;
     private ActivatableNotificationView mActivatedChild;
@@ -68,9 +57,8 @@ public class AmbientState implements Dumpable {
     private int mTopPadding;
     private boolean mShadeExpanded;
     private float mMaxHeadsUpTranslation;
-    private boolean mClearAllInProgress;
+    private boolean mDismissAllInProgress;
     private int mLayoutMinHeight;
-    private int mLayoutMaxHeight;
     private NotificationShelf mShelf;
     private int mZDistanceBetweenElements;
     private int mBaseZHeight;
@@ -84,35 +72,17 @@ public class AmbientState implements Dumpable {
     private boolean mPanelFullWidth;
     private boolean mPulsing;
     private boolean mUnlockHintRunning;
+    private boolean mQsCustomizerShowing;
+    private int mIntrinsicPadding;
     private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
-
-    /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
-    private float mFractionToShade;
-
-    /**
-     * @param fractionToShade Fraction of lockscreen to shade transition
-     */
-    public void setFractionToShade(float fractionToShade) {
-        mFractionToShade = fractionToShade;
-    }
-
-    /**
-     * @return fractionToShade Fraction of lockscreen to shade transition
-     */
-    public float getFractionToShade() {
-        return mFractionToShade;
-    }
-
-    /** How we much we are sleeping. 1f fully dozing (AOD), 0f fully awake (for all other states) */
     private float mDozeAmount = 0.0f;
-
     private Runnable mOnPulseHeightChangedListener;
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
+    private boolean mIsShadeOpening;
     private float mOverExpansion;
-    private int mStackTopMargin;
 
     /** Distance of top of notifications panel from top of screen. */
     private float mStackY = 0;
@@ -125,19 +95,7 @@ public class AmbientState implements Dumpable {
 
     /** Height of the notifications panel without top padding when expansion completes. */
     private float mStackEndHeight;
-
-    /** Whether we are swiping up. */
-    private boolean mIsSwipingUp;
-
-    /** Whether we are flinging the shade open or closed. */
-    private boolean mIsFlinging;
-
-    /**
-     * Whether we need to do a fling down after swiping up on lockscreen.
-     * True right after we swipe up on lockscreen and have not finished the fling down that follows.
-     * False when we stop flinging or leave lockscreen.
-     */
-    private boolean mNeedFlingAfterLockscreenSwipeUp = false;
+    private float mTransitionToFullShadeAmount;
 
     /**
      * @return Height of the notifications panel without top padding when expansion completes.
@@ -176,35 +134,6 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @param isSwipingUp Whether we are swiping up.
-     */
-    public void setSwipingUp(boolean isSwipingUp) {
-        if (!isSwipingUp && mIsSwipingUp) {
-            // Just stopped swiping up.
-            mNeedFlingAfterLockscreenSwipeUp = true;
-        }
-        mIsSwipingUp = isSwipingUp;
-    }
-
-    /**
-     * @return Whether we are swiping up.
-     */
-    public boolean isSwipingUp() {
-        return mIsSwipingUp;
-    }
-
-    /**
-     * @param isFlinging Whether we are flinging the shade open or closed.
-     */
-    public void setIsFlinging(boolean isFlinging) {
-        if (isOnKeyguard() && !isFlinging && mIsFlinging) {
-            // Just stopped flinging.
-            mNeedFlingAfterLockscreenSwipeUp = false;
-        }
-        mIsFlinging = isFlinging;
-    }
-
-    /**
      * @return Fraction of shade expansion.
      */
     public float getExpansionFraction() {
@@ -230,16 +159,12 @@ public class AmbientState implements Dumpable {
 
     @Inject
     public AmbientState(
-            @NonNull Context context,
-            @NonNull DumpManager dumpManager,
+            Context context,
             @NonNull SectionProvider sectionProvider,
-            @NonNull BypassController bypassController,
-            @Nullable StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
+            @NonNull BypassController bypassController) {
         mSectionProvider = sectionProvider;
         mBypassController = bypassController;
-        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         reload(context);
-        dumpManager.registerDumpable(this);
     }
 
     /**
@@ -248,6 +173,14 @@ public class AmbientState implements Dumpable {
     public void reload(Context context) {
         mZDistanceBetweenElements = getZDistanceBetweenElements(context);
         mBaseZHeight = getBaseHeight(mZDistanceBetweenElements);
+    }
+
+    public void setIsShadeOpening(boolean isOpening) {
+        mIsShadeOpening = isOpening;
+    }
+
+    public boolean isShadeOpening() {
+        return mIsShadeOpening;
     }
 
     void setOverExpansion(float overExpansion) {
@@ -395,14 +328,6 @@ public class AmbientState implements Dumpable {
         mLayoutHeight = layoutHeight;
     }
 
-    public void setLayoutMaxHeight(int maxLayoutHeight) {
-        mLayoutMaxHeight = maxLayoutHeight;
-    }
-
-    public int getLayoutMaxHeight() {
-        return mLayoutMaxHeight;
-    }
-
     public float getTopPadding() {
         return mTopPadding;
     }
@@ -452,12 +377,12 @@ public class AmbientState implements Dumpable {
         return mMaxHeadsUpTranslation;
     }
 
-    public void setClearAllInProgress(boolean clearAllInProgress) {
-        mClearAllInProgress = clearAllInProgress;
+    public void setDismissAllInProgress(boolean dismissAllInProgress) {
+        mDismissAllInProgress = dismissAllInProgress;
     }
 
-    public boolean isClearAllInProgress() {
-        return mClearAllInProgress;
+    public boolean isDismissAllInProgress() {
+        return mDismissAllInProgress;
     }
 
     public void setLayoutMinHeight(int layoutMinHeight) {
@@ -507,9 +432,6 @@ public class AmbientState implements Dumpable {
     }
 
     public void setStatusBarState(int statusBarState) {
-        if (mStatusBarState != StatusBarState.KEYGUARD) {
-            mNeedFlingAfterLockscreenSwipeUp = false;
-        }
         mStatusBarState = statusBarState;
     }
 
@@ -572,11 +494,20 @@ public class AmbientState implements Dumpable {
         return mUnlockHintRunning;
     }
 
-    /**
-     * @return Whether we need to do a fling down after swiping up on lockscreen.
-     */
-    public boolean isFlingingAfterSwipeUpOnLockscreen() {
-        return mIsFlinging && mNeedFlingAfterLockscreenSwipeUp;
+    public boolean isQsCustomizerShowing() {
+        return mQsCustomizerShowing;
+    }
+
+    public void setQsCustomizerShowing(boolean qsCustomizerShowing) {
+        mQsCustomizerShowing = qsCustomizerShowing;
+    }
+
+    public void setIntrinsicPadding(int intrinsicPadding) {
+        mIntrinsicPadding = intrinsicPadding;
+    }
+
+    public int getIntrinsicPadding() {
+        return mIntrinsicPadding;
     }
 
     /**
@@ -643,10 +574,6 @@ public class AmbientState implements Dumpable {
         }
     }
 
-    public float getDozeAmount() {
-        return mDozeAmount;
-    }
-
     /**
      * Is the device fully awake, which is different from not tark at all when there are pulsing
      * notifications.
@@ -659,8 +586,27 @@ public class AmbientState implements Dumpable {
         mOnPulseHeightChangedListener = onPulseHeightChangedListener;
     }
 
+    public Runnable getOnPulseHeightChangedListener() {
+        return mOnPulseHeightChangedListener;
+    }
+
     public void setTrackedHeadsUpRow(ExpandableNotificationRow row) {
         mTrackedHeadsUpRow = row;
+    }
+
+    /**
+     * Set the amount of pixels we have currently dragged down if we're transitioning to the full
+     * shade. 0.0f means we're not transitioning yet.
+     */
+    public void setTransitionToFullShadeAmount(float transitionToFullShadeAmount) {
+        mTransitionToFullShadeAmount = transitionToFullShadeAmount;
+    }
+
+    /**
+     * get
+     */
+    public float getTransitionToFullShadeAmount() {
+        return mTransitionToFullShadeAmount;
     }
 
     /**
@@ -684,68 +630,5 @@ public class AmbientState implements Dumpable {
 
     public void setHasAlertEntries(boolean hasAlertEntries) {
         mHasAlertEntries = hasAlertEntries;
-    }
-
-    public void setStackTopMargin(int stackTopMargin) {
-        mStackTopMargin = stackTopMargin;
-    }
-
-    public int getStackTopMargin() {
-        return mStackTopMargin;
-    }
-
-    /**
-     * Check to see if we are about to show bouncer.
-     *
-     * @return if bouncer expansion is between 0 and 1.
-     */
-    public boolean isBouncerInTransit() {
-        return mStatusBarKeyguardViewManager != null
-                && mStatusBarKeyguardViewManager.isBouncerInTransit();
-    }
-
-    @Override
-    public void dump(PrintWriter pw, String[] args) {
-        pw.println("mTopPadding=" + mTopPadding);
-        pw.println("mStackTopMargin=" + mStackTopMargin);
-        pw.println("mStackTranslation=" + mStackTranslation);
-        pw.println("mLayoutMinHeight=" + mLayoutMinHeight);
-        pw.println("mLayoutMaxHeight=" + mLayoutMaxHeight);
-        pw.println("mLayoutHeight=" + mLayoutHeight);
-        pw.println("mContentHeight=" + mContentHeight);
-        pw.println("mHideSensitive=" + mHideSensitive);
-        pw.println("mShadeExpanded=" + mShadeExpanded);
-        pw.println("mClearAllInProgress=" + mClearAllInProgress);
-        pw.println("mDimmed=" + mDimmed);
-        pw.println("mStatusBarState=" + mStatusBarState);
-        pw.println("mExpansionChanging=" + mExpansionChanging);
-        pw.println("mPanelFullWidth=" + mPanelFullWidth);
-        pw.println("mPulsing=" + mPulsing);
-        pw.println("mPulseHeight=" + mPulseHeight);
-        pw.println("mTrackedHeadsUpRow.key=" + logKey(mTrackedHeadsUpRow));
-        pw.println("mMaxHeadsUpTranslation=" + mMaxHeadsUpTranslation);
-        pw.println("mUnlockHintRunning=" + mUnlockHintRunning);
-        pw.println("mDozeAmount=" + mDozeAmount);
-        pw.println("mDozing=" + mDozing);
-        pw.println("mFractionToShade=" + mFractionToShade);
-        pw.println("mHideAmount=" + mHideAmount);
-        pw.println("mAppearFraction=" + mAppearFraction);
-        pw.println("mAppearing=" + mAppearing);
-        pw.println("mExpansionFraction=" + mExpansionFraction);
-        pw.println("mExpandingVelocity=" + mExpandingVelocity);
-        pw.println("mOverScrollTopAmount=" + mOverScrollTopAmount);
-        pw.println("mOverScrollBottomAmount=" + mOverScrollBottomAmount);
-        pw.println("mOverExpansion=" + mOverExpansion);
-        pw.println("mStackHeight=" + mStackHeight);
-        pw.println("mStackEndHeight=" + mStackEndHeight);
-        pw.println("mStackY=" + mStackY);
-        pw.println("mScrollY=" + mScrollY);
-        pw.println("mCurrentScrollVelocity=" + mCurrentScrollVelocity);
-        pw.println("mIsSwipingUp=" + mIsSwipingUp);
-        pw.println("mPanelTracking=" + mPanelTracking);
-        pw.println("mIsFlinging=" + mIsFlinging);
-        pw.println("mNeedFlingAfterLockscreenSwipeUp=" + mNeedFlingAfterLockscreenSwipeUp);
-        pw.println("mZDistanceBetweenElements=" + mZDistanceBetweenElements);
-        pw.println("mBaseZHeight=" + mBaseZHeight);
     }
 }

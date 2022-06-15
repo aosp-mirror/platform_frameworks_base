@@ -28,7 +28,6 @@ import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService
 import android.util.Log
-import java.lang.ClassCastException
 
 /**
  * Proxy to launch in user 0
@@ -60,29 +59,20 @@ class ControlsRequestReceiver : BroadcastReceiver() {
             return
         }
 
-        val targetComponent = try {
-            intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
-        } catch (e: ClassCastException) {
-            Log.e(TAG, "Malformed intent extra ComponentName", e)
-            return
-        }
-
-        val control = try {
-            intent.getParcelableExtra<Control>(ControlsProviderService.EXTRA_CONTROL)
-        } catch (e: ClassCastException) {
-            Log.e(TAG, "Malformed intent extra Control", e)
-            return
-        }
-
-        val packageName = targetComponent?.packageName
+        val packageName = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
+                ?.packageName
 
         if (packageName == null || !isPackageInForeground(context, packageName)) {
             return
         }
 
         val activityIntent = Intent(context, ControlsRequestDialog::class.java).apply {
-            putExtra(Intent.EXTRA_COMPONENT_NAME, targetComponent)
-            putExtra(ControlsProviderService.EXTRA_CONTROL, control)
+            Intent.EXTRA_COMPONENT_NAME.let {
+                putExtra(it, intent.getParcelableExtra<ComponentName>(it))
+            }
+            ControlsProviderService.EXTRA_CONTROL.let {
+                putExtra(it, intent.getParcelableExtra<Control>(it))
+            }
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         }
         activityIntent.putExtra(Intent.EXTRA_USER_ID, context.userId)

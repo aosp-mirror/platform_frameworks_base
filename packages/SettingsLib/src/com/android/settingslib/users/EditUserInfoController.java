@@ -25,7 +25,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -37,8 +36,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.R;
-import com.android.settingslib.RestrictedLockUtils;
-import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 
 import java.io.File;
@@ -54,7 +51,6 @@ public class EditUserInfoController {
 
     private Dialog mEditUserInfoDialog;
     private Bitmap mSavedPhoto;
-    private Drawable mSavedDrawable;
     private EditUserPhotoController mEditUserPhotoController;
     private boolean mWaitingForActivityResult = false;
     private final String mFileAuthority;
@@ -69,7 +65,6 @@ public class EditUserInfoController {
         }
         mEditUserInfoDialog = null;
         mSavedPhoto = null;
-        mSavedDrawable = null;
     }
 
     /**
@@ -144,20 +139,13 @@ public class EditUserInfoController {
         Drawable userIcon = getUserIcon(activity, defaultUserIcon);
         userPhotoView.setImageDrawable(userIcon);
 
-        if (isChangePhotoRestrictedByBase(activity)) {
-            // some users can't change their photos so we need to remove the suggestive icon
-            content.findViewById(R.id.add_a_photo_icon).setVisibility(View.GONE);
+        if (canChangePhoto(activity)) {
+            mEditUserPhotoController = createEditUserPhotoController(activity, activityStarter,
+                    userPhotoView);
         } else {
-            RestrictedLockUtils.EnforcedAdmin adminRestriction =
-                    getChangePhotoAdminRestriction(activity);
-            if (adminRestriction != null) {
-                userPhotoView.setOnClickListener(view ->
-                        RestrictedLockUtils.sendShowAdminSupportDetailsIntent(
-                                activity, adminRestriction));
-            } else {
-                mEditUserPhotoController = createEditUserPhotoController(activity, activityStarter,
-                        userPhotoView);
-            }
+            // some users can't change their photos so we need to remove suggestive
+            // background from the photoView
+            userPhotoView.setBackground(null);
         }
 
         mEditUserInfoDialog = buildDialog(activity, content, userNameView, oldUserIcon,
@@ -172,8 +160,7 @@ public class EditUserInfoController {
 
     private Drawable getUserIcon(Activity activity, Drawable defaultUserIcon) {
         if (mSavedPhoto != null) {
-            mSavedDrawable = CircleFramedDrawable.getInstance(activity, mSavedPhoto);
-            return mSavedDrawable;
+            return CircleFramedDrawable.getInstance(activity, mSavedPhoto);
         }
         return defaultUserIcon;
     }
@@ -217,21 +204,16 @@ public class EditUserInfoController {
     }
 
     @VisibleForTesting
-    boolean isChangePhotoRestrictedByBase(Context context) {
-        return RestrictedLockUtilsInternal.hasBaseUserRestriction(
-                context, UserManager.DISALLOW_SET_USER_ICON, UserHandle.myUserId());
-    }
-
-    @VisibleForTesting
-    RestrictedLockUtils.EnforcedAdmin getChangePhotoAdminRestriction(Context context) {
-        return RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
-                context, UserManager.DISALLOW_SET_USER_ICON, UserHandle.myUserId());
+    boolean canChangePhoto(Context context) {
+        return (PhotoCapabilityUtils.canCropPhoto(context)
+                && PhotoCapabilityUtils.canChoosePhoto(context))
+                || PhotoCapabilityUtils.canTakePhoto(context);
     }
 
     @VisibleForTesting
     EditUserPhotoController createEditUserPhotoController(Activity activity,
             ActivityStarter activityStarter, ImageView userPhotoView) {
         return new EditUserPhotoController(activity, activityStarter, userPhotoView,
-                mSavedPhoto, mSavedDrawable, mFileAuthority);
+                mSavedPhoto, mWaitingForActivityResult, mFileAuthority);
     }
 }

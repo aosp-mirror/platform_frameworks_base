@@ -20,12 +20,13 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.common.split.SplitLayout.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 
 import android.app.ActivityManager;
+import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -38,11 +39,9 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
-import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.SurfaceUtils;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.SplitLayout;
-import com.android.wm.shell.common.split.SplitWindowManager;
 
 import java.io.PrintWriter;
 
@@ -68,33 +67,13 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
     private final SyncTransactionQueue mSyncQueue;
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
-    private final DisplayInsetsController mDisplayInsetsController;
     private SplitLayout mSplitLayout;
-
-    private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
-            new SplitWindowManager.ParentContainerCallbacks() {
-        @Override
-        public void attachToParentSurface(SurfaceControl.Builder b) {
-            b.setParent(mRootTaskLeash);
-        }
-
-        @Override
-        public void onLeashReady(SurfaceControl leash) {
-            mSyncQueue.runInSync(t -> t
-                    .show(leash)
-                    .setLayer(leash, Integer.MAX_VALUE)
-                    .setPosition(leash,
-                            mSplitLayout.getDividerBounds().left,
-                            mSplitLayout.getDividerBounds().top));
-        }
-    };
 
     AppPair(AppPairsController controller) {
         mController = controller;
         mSyncQueue = controller.getSyncTransactionQueue();
         mDisplayController = controller.getDisplayController();
         mDisplayImeController = controller.getDisplayImeController();
-        mDisplayInsetsController = controller.getDisplayInsetsController();
     }
 
     int getRootTaskId() {
@@ -130,9 +109,8 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         mSplitLayout = new SplitLayout(TAG + "SplitDivider",
                 mDisplayController.getDisplayContext(mRootTaskInfo.displayId),
                 mRootTaskInfo.configuration, this /* layoutChangeListener */,
-                mParentContainerCallbacks, mDisplayImeController, mController.getTaskOrganizer(),
-                SplitLayout.PARALLAX_DISMISSING);
-        mDisplayInsetsController.addInsetsChangedListener(mRootTaskInfo.displayId, mSplitLayout);
+                b -> b.setParent(mRootTaskLeash), mDisplayImeController,
+                mController.getTaskOrganizer());
 
         final WindowContainerToken token1 = task1.token;
         final WindowContainerToken token2 = task2.token;
@@ -198,17 +176,21 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         if (mTaskLeash1 == null || mTaskLeash2 == null) return;
 
         mSplitLayout.init();
+        final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
+        final Rect dividerBounds = mSplitLayout.getDividerBounds();
 
-        mSyncQueue.runInSync(t -> t
-                .show(mRootTaskLeash)
-                .show(mTaskLeash1)
-                .show(mTaskLeash2)
-                .setPosition(mTaskLeash1,
-                        mTaskInfo1.positionInParent.x,
-                        mTaskInfo1.positionInParent.y)
-                .setPosition(mTaskLeash2,
-                        mTaskInfo2.positionInParent.x,
-                        mTaskInfo2.positionInParent.y));
+        // TODO: Is there more we need to do here?
+        mSyncQueue.runInSync(t -> {
+            t.setLayer(dividerLeash, Integer.MAX_VALUE)
+                    .setPosition(mTaskLeash1, mTaskInfo1.positionInParent.x,
+                            mTaskInfo1.positionInParent.y)
+                    .setPosition(mTaskLeash2, mTaskInfo2.positionInParent.x,
+                            mTaskInfo2.positionInParent.y)
+                    .setPosition(dividerLeash, dividerBounds.left, dividerBounds.top)
+                    .show(mRootTaskLeash)
+                    .show(mTaskLeash1)
+                    .show(mTaskLeash2);
+        });
     }
 
     @Override
@@ -232,7 +214,7 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
 
             if (mSplitLayout != null
                     && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)) {
-                onLayoutSizeChanged(mSplitLayout);
+                onBoundsChanged(mSplitLayout);
             }
         } else if (taskInfo.taskId == getTaskId1()) {
             mTaskInfo1 = taskInfo;
@@ -274,22 +256,12 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
 
     @Override
     public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
-        b.setParent(findTaskSurface(taskId));
-    }
-
-    @Override
-    public void reparentChildSurfaceToTask(int taskId, SurfaceControl sc,
-            SurfaceControl.Transaction t) {
-        t.reparent(sc, findTaskSurface(taskId));
-    }
-
-    private SurfaceControl findTaskSurface(int taskId) {
         if (getRootTaskId() == taskId) {
-            return mRootTaskLeash;
+            b.setParent(mRootTaskLeash);
         } else if (getTaskId1() == taskId) {
-            return mTaskLeash1;
+            b.setParent(mTaskLeash1);
         } else if (getTaskId2() == taskId) {
-            return mTaskLeash2;
+            b.setParent(mTaskLeash2);
         } else {
             throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
         }
@@ -300,10 +272,8 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
         final String innerPrefix = prefix + "  ";
         final String childPrefix = innerPrefix + "  ";
         pw.println(prefix + this);
-        if (mRootTaskInfo != null) {
-            pw.println(innerPrefix + "Root taskId=" + mRootTaskInfo.taskId
-                    + " winMode=" + mRootTaskInfo.getWindowingMode());
-        }
+        pw.println(innerPrefix + "Root taskId=" + getRootTaskId()
+                + " winMode=" + mRootTaskInfo.getWindowingMode());
         if (mTaskInfo1 != null) {
             pw.println(innerPrefix + "1 taskId=" + mTaskInfo1.taskId
                     + " winMode=" + mTaskInfo1.getWindowingMode());
@@ -325,33 +295,17 @@ class AppPair implements ShellTaskOrganizer.TaskListener, SplitLayout.SplitLayou
     }
 
     @Override
-    public void onLayoutPositionChanging(SplitLayout layout) {
+    public void onBoundsChanging(SplitLayout layout) {
         mSyncQueue.runInSync(t ->
-                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2,
-                        true /* applyResizingOffset */));
+                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
     }
 
     @Override
-    public void onLayoutSizeChanging(SplitLayout layout) {
-        mSyncQueue.runInSync(t ->
-                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2,
-                        true /* applyResizingOffset */));
-    }
-
-    @Override
-    public void onLayoutSizeChanged(SplitLayout layout) {
+    public void onBoundsChanged(SplitLayout layout) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         layout.applyTaskChanges(wct, mTaskInfo1, mTaskInfo2);
         mSyncQueue.queue(wct);
         mSyncQueue.runInSync(t ->
-                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2,
-                        false /* applyResizingOffset */));
-    }
-
-    @Override
-    public void setLayoutOffsetTarget(int offsetX, int offsetY, SplitLayout layout) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-        layout.applyLayoutOffsetTarget(wct, offsetX, offsetY, mTaskInfo1, mTaskInfo2);
-        mController.getTaskOrganizer().applyTransaction(wct);
+                layout.applySurfaceChanges(t, mTaskLeash1, mTaskLeash2, mDimLayer1, mDimLayer2));
     }
 }

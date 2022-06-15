@@ -221,8 +221,8 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
-        public void addVendorCommandListener(IHdmiVendorCommandListener listener, int vendorId) {
-            HdmiControlServiceWrapper.this.addVendorCommandListener(listener, vendorId);
+        public void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType) {
+            HdmiControlServiceWrapper.this.addVendorCommandListener(listener, deviceType);
         }
 
         @Override
@@ -292,16 +292,6 @@ public final class HdmiControlServiceWrapper {
         public void removeHdmiCecVolumeControlFeatureListener(
                 IHdmiCecVolumeControlFeatureListener listener) {
             HdmiControlServiceWrapper.this.removeHdmiCecVolumeControlFeatureListener(listener);
-        }
-
-        @Override
-        public int getMessageHistorySize() {
-            return HdmiControlServiceWrapper.this.getMessageHistorySize();
-        }
-
-        @Override
-        public boolean setMessageHistorySize(int newSize) {
-            return HdmiControlServiceWrapper.this.setMessageHistorySize(newSize);
         }
 
         @Override
@@ -481,7 +471,7 @@ public final class HdmiControlServiceWrapper {
             boolean hasVendorId) {}
 
     /** @hide */
-    public void addVendorCommandListener(IHdmiVendorCommandListener listener, int vendorId) {}
+    public void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType) {}
 
     /** @hide */
     public void sendStandby(int deviceType, int deviceId) {}
@@ -531,16 +521,6 @@ public final class HdmiControlServiceWrapper {
     /** @hide */
     public void removeHdmiCecVolumeControlFeatureListener(
             IHdmiCecVolumeControlFeatureListener listener) {}
-
-    /** @hide */
-    public int getMessageHistorySize() {
-        return 0;
-    }
-
-    /** @hide */
-    public boolean setMessageHistorySize(int newSize) {
-        return true;
-    }
 
     /** @hide */
     public void addCecSettingChangeListener(String name,

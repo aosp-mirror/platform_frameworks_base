@@ -53,9 +53,8 @@ public class NetworkCycleDataForUidLoader extends
             long totalUsage = 0L;
             long totalForeground = 0L;
             for (int uid : mUids) {
-                final NetworkStats stats = mNetworkStatsManager.queryDetailsForUidTagState(
-                        mNetworkTemplate, start, end, uid, NetworkStats.Bucket.TAG_NONE,
-                        NetworkStats.Bucket.STATE_ALL);
+                final NetworkStats stats = mNetworkStatsManager.queryDetailsForUid(
+                        mNetworkTemplate, start, end, uid);
                 final long usage = getTotalUsage(stats);
                 if (usage > 0L) {
                     totalUsage += usage;

@@ -37,7 +37,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
-import com.android.systemui.util.sensors.ThresholdSensorEvent;
 import com.android.systemui.util.time.SystemClock;
 
 import java.util.Collections;
@@ -77,7 +76,7 @@ class FalsingCollectorImpl implements FalsingCollector {
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onStateChanged(int newState) {
-                    logDebug("StatusBarState=" + StatusBarState.toString(newState));
+                    logDebug("StatusBarState=" + StatusBarState.toShortString(newState));
                     mState = newState;
                     updateSessionActive();
                 }
@@ -309,10 +308,6 @@ class FalsingCollectorImpl implements FalsingCollector {
             avoidGesture();
             return;
         }
-        if (ev.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
-            return;
-        }
-
         // We delay processing down events to see if another component wants to process them.
         // If #avoidGesture is called after a MotionEvent.ACTION_DOWN, all following motion events
         // will be ignored by the collector until another MotionEvent.ACTION_DOWN is passed in.
@@ -410,7 +405,7 @@ class FalsingCollectorImpl implements FalsingCollector {
         mProximitySensor.unregister(mSensorEventListener);
     }
 
-    private void onProximityEvent(ThresholdSensorEvent proximityEvent) {
+    private void onProximityEvent(ThresholdSensor.ThresholdSensorEvent proximityEvent) {
         // TODO: some of these classifiers might allow us to abort early, meaning we don't have to
         // make these calls.
         mFalsingManager.onProximityEvent(new ProximityEventImpl(proximityEvent));
@@ -428,9 +423,9 @@ class FalsingCollectorImpl implements FalsingCollector {
     }
 
     private static class ProximityEventImpl implements FalsingManager.ProximityEvent {
-        private ThresholdSensorEvent mThresholdSensorEvent;
+        private ThresholdSensor.ThresholdSensorEvent mThresholdSensorEvent;
 
-        ProximityEventImpl(ThresholdSensorEvent thresholdSensorEvent) {
+        ProximityEventImpl(ThresholdSensor.ThresholdSensorEvent thresholdSensorEvent) {
             mThresholdSensorEvent = thresholdSensorEvent;
         }
         @Override
