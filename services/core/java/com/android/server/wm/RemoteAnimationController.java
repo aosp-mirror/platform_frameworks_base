@@ -57,7 +57,7 @@ import java.util.function.Consumer;
  */
 class RemoteAnimationController implements DeathRecipient {
     private static final String TAG = TAG_WITH_CLASS_NAME
-                    ? "RemoteAnimationController" : TAG_WM;
+            ? "RemoteAnimationController" : TAG_WM;
     private static final long TIMEOUT_MS = 10000;
 
     private final WindowManagerService mService;
@@ -72,35 +72,40 @@ class RemoteAnimationController implements DeathRecipient {
     private final Runnable mTimeoutRunnable = () -> cancelAnimation("timeoutRunnable");
 
     private FinishedCallback mFinishedCallback;
+    private final boolean mIsActivityEmbedding;
     private boolean mCanceled;
     private boolean mLinkedToDeathOfRunner;
     @Nullable
     private Runnable mOnRemoteAnimationReady;
 
     RemoteAnimationController(WindowManagerService service, DisplayContent displayContent,
-            RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
+            RemoteAnimationAdapter remoteAnimationAdapter, Handler handler,
+            boolean isActivityEmbedding) {
         mService = service;
         mDisplayContent = displayContent;
         mRemoteAnimationAdapter = remoteAnimationAdapter;
         mHandler = handler;
+        mIsActivityEmbedding = isActivityEmbedding;
     }
 
     /**
      * Creates an animation record for each individual {@link WindowContainer}.
      *
      * @param windowContainer The windows to animate.
-     * @param position The position app bounds relative to its parent.
-     * @param localBounds The bounds of the app relative to its parent.
-     * @param endBounds The end bounds after the transition, in screen coordinates.
-     * @param startBounds The start bounds before the transition, in screen coordinates.
+     * @param position        The position app bounds relative to its parent.
+     * @param localBounds     The bounds of the app relative to its parent.
+     * @param endBounds       The end bounds after the transition, in screen coordinates.
+     * @param startBounds     The start bounds before the transition, in screen coordinates.
+     * @param showBackdrop    To show background behind a window during animation.
      * @return The record representing animation(s) to run on the app.
      */
     RemoteAnimationRecord createRemoteAnimationRecord(WindowContainer windowContainer,
-            Point position, Rect localBounds, Rect endBounds, Rect startBounds) {
+            Point position, Rect localBounds, Rect endBounds, Rect startBounds,
+            boolean showBackdrop) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "createAnimationAdapter(): container=%s",
                 windowContainer);
         final RemoteAnimationRecord adapters = new RemoteAnimationRecord(windowContainer, position,
-                localBounds, endBounds, startBounds);
+                localBounds, endBounds, startBounds, showBackdrop);
         mPendingAnimations.add(adapters);
         return adapters;
     }
@@ -108,6 +113,15 @@ class RemoteAnimationController implements DeathRecipient {
     /** Sets callback to run before starting remote animation. */
     void setOnRemoteAnimationReady(@Nullable Runnable onRemoteAnimationReady) {
         mOnRemoteAnimationReady = onRemoteAnimationReady;
+    }
+
+    /**
+     * We use isFromActivityEmbedding() in the server process to tell if we're running an
+     * Activity Embedding type remote animation, where animations are driven by the client.
+     * This is currently supporting features like showBackdrop where we need to load App XML.
+     */
+    public boolean isFromActivityEmbedding() {
+        return mIsActivityEmbedding;
     }
 
     /**
@@ -416,26 +430,28 @@ class RemoteAnimationController implements DeathRecipient {
         RemoteAnimationTarget mTarget;
         final WindowContainer mWindowContainer;
         final Rect mStartBounds;
+        final boolean mShowBackdrop;
         private @RemoteAnimationTarget.Mode int mMode = RemoteAnimationTarget.MODE_CHANGING;
 
         RemoteAnimationRecord(WindowContainer windowContainer, Point endPos, Rect localBounds,
-                Rect endBounds, Rect startBounds) {
+                Rect endBounds, Rect startBounds, boolean showBackdrop) {
             mWindowContainer = windowContainer;
+            mShowBackdrop = showBackdrop;
             if (startBounds != null) {
                 mStartBounds = new Rect(startBounds);
                 mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds,
-                        mStartBounds);
+                        mStartBounds, mShowBackdrop);
                 if (mRemoteAnimationAdapter.getChangeNeedsSnapshot()) {
                     final Rect thumbnailLocalBounds = new Rect(startBounds);
                     thumbnailLocalBounds.offsetTo(0, 0);
                     // Snapshot is located at (0,0) of the animation leash. It doesn't have size
                     // change, so the startBounds is its end bounds, and no start bounds for it.
                     mThumbnailAdapter = new RemoteAnimationAdapterWrapper(this, new Point(0, 0),
-                            thumbnailLocalBounds, startBounds, new Rect());
+                            thumbnailLocalBounds, startBounds, new Rect(), mShowBackdrop);
                 }
             } else {
                 mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds,
-                        new Rect());
+                        new Rect(), mShowBackdrop);
                 mStartBounds = null;
             }
         }
@@ -481,14 +497,21 @@ class RemoteAnimationController implements DeathRecipient {
         final Rect mLocalBounds;
         final Rect mEndBounds = new Rect();
         final Rect mStartBounds = new Rect();
+        final boolean mShowBackdrop;
 
         RemoteAnimationAdapterWrapper(RemoteAnimationRecord record, Point position,
-                Rect localBounds, Rect endBounds, Rect startBounds) {
+                Rect localBounds, Rect endBounds, Rect startBounds, boolean showBackdrop) {
             mRecord = record;
             mPosition.set(position.x, position.y);
             mLocalBounds = localBounds;
             mEndBounds.set(endBounds);
             mStartBounds.set(startBounds);
+            mShowBackdrop = showBackdrop;
+        }
+
+        @Override
+        public boolean getShowBackground() {
+            return mShowBackdrop;
         }
 
         @Override
