@@ -32,7 +32,7 @@ import com.android.internal.inputmethod.IRemoteInputConnection;
  * Using current {@link IInputMethodSession} object to communicate with
  * {@link android.inputmethodservice.InputMethodService}.
  */
-final class InputMethodSessionWrapper {
+final class IInputMethodSessionInvoker {
 
     private static final String TAG = "InputMethodSessionWrapper";
 
@@ -42,21 +42,21 @@ final class InputMethodSessionWrapper {
     @NonNull
     private final IInputMethodSession mSession;
 
-    private InputMethodSessionWrapper(@NonNull IInputMethodSession inputMethodSession) {
+    private IInputMethodSessionInvoker(@NonNull IInputMethodSession inputMethodSession) {
         mSession = inputMethodSession;
     }
 
     /**
-     * Create a {@link InputMethodSessionWrapper} instance if applicability.
+     * Create a {@link IInputMethodSessionInvoker} instance if applicability.
      *
      * @param inputMethodSession {@link IInputMethodSession} object to be wrapped.
-     * @return an instance of {@link InputMethodSessionWrapper} if {@code inputMethodSession} is not
-     *         {@code null}. {@code null} otherwise.
+     * @return an instance of {@link IInputMethodSessionInvoker} if {@code inputMethodSession} is
+     *         not {@code null}. {@code null} otherwise.
      */
     @Nullable
-    public static InputMethodSessionWrapper createOrNull(
+    public static IInputMethodSessionInvoker createOrNull(
             @NonNull IInputMethodSession inputMethodSession) {
-        return inputMethodSession != null ? new InputMethodSessionWrapper(inputMethodSession)
+        return inputMethodSession != null ? new IInputMethodSessionInvoker(inputMethodSession)
                 : null;
     }
 
