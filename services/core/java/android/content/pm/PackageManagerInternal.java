@@ -737,28 +737,49 @@ public abstract class PackageManagerInternal {
     public abstract @Nullable String getInstantAppPackageName(int uid);
 
     /**
-     * Returns whether or not access to the application should be filtered.
+     * Returns whether or not access to the application should be filtered. The access is not
+     * allowed if the application is not installed under the given user.
      * <p>
      * Access may be limited based upon whether the calling or target applications
      * are instant applications.
      *
      * @see #canAccessInstantApps
+     *
+     * @param pkg The package to be accessed.
+     * @param callingUid The uid that attempts to access the package.
+     * @param userId The user id where the package resides.
      */
     public abstract boolean filterAppAccess(
             @NonNull AndroidPackage pkg, int callingUid, int userId);
 
     /**
-     * Returns whether or not access to the application should be filtered.
+     * Returns whether or not access to the application should be filtered. The access is not
+     * allowed if the application is not installed under the given user.
      *
      * @see #filterAppAccess(AndroidPackage, int, int)
      */
+    public boolean filterAppAccess(@NonNull String packageName, int callingUid, int userId) {
+        return filterAppAccess(packageName, callingUid, userId, true /* filterUninstalled */);
+    }
+
+    /**
+     * Returns whether or not access to the application should be filtered.
+     *
+     * @param packageName The package to be accessed.
+     * @param callingUid The uid that attempts to access the package.
+     * @param userId The user id where the package resides.
+     * @param filterUninstalled Set to true to filter the access if the package is not installed
+     *                        under the given user.
+     * @see #filterAppAccess(AndroidPackage, int, int)
+     */
     public abstract boolean filterAppAccess(
-            @NonNull String packageName, int callingUid, int userId);
+            @NonNull String packageName, int callingUid, int userId, boolean filterUninstalled);
 
     /**
      * Returns whether or not access to the application which belongs to the given UID should be
      * filtered. If the UID is part of a shared user ID, return {@code true} if all applications
-     * belong to the shared user ID should be filtered.
+     * belong to the shared user ID should be filtered. The access is not allowed if the uid does
+     * not exist in the device.
      *
      * @see #filterAppAccess(AndroidPackage, int, int)
      */
