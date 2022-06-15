@@ -186,10 +186,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
      * @param notifyListeners Whether the listener should be informed about the change.
      */
     public void setActualHeight(int actualHeight, boolean notifyListeners) {
-        mActualHeight = actualHeight;
-        updateClipping();
-        if (notifyListeners) {
-            notifyHeightChanged(false  /* needsAnimation */);
+        if (mActualHeight != actualHeight) {
+            mActualHeight = actualHeight;
+            updateClipping();
+            if (notifyListeners) {
+                notifyHeightChanged(false  /* needsAnimation */);
+            }
         }
     }
 
