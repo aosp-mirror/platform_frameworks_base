@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.In
 import com.android.systemui.statusbar.notification.collection.notifcollection.InternalNotifUpdater;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLoggerKt;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
@@ -110,6 +111,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -156,6 +158,8 @@ public class NotifCollection implements Dumpable {
     private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
     private final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
     private final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
+
+    private Set<String> mNotificationsWithoutRankings = Collections.emptySet();
 
     private Queue<NotifEvent> mEventQueue = new ArrayDeque<>();
 
@@ -560,6 +564,7 @@ public class NotifCollection implements Dumpable {
     }
 
     private void applyRanking(@NonNull RankingMap rankingMap) {
+        ArrayMap<String, NotificationEntry> currentEntriesWithoutRankings = null;
         for (NotificationEntry entry : mNotificationSet.values()) {
             if (!isCanceled(entry)) {
 
@@ -581,10 +586,21 @@ public class NotifCollection implements Dumpable {
                         }
                     }
                 } else {
-                    mLogger.logRankingMissing(entry, rankingMap);
+                    if (currentEntriesWithoutRankings == null) {
+                        currentEntriesWithoutRankings = new ArrayMap<>();
+                    }
+                    currentEntriesWithoutRankings.put(entry.getKey(), entry);
                 }
             }
         }
+        NotifCollectionLoggerKt.maybeLogInconsistentRankings(
+                mLogger,
+                mNotificationsWithoutRankings,
+                currentEntriesWithoutRankings,
+                rankingMap
+        );
+        mNotificationsWithoutRankings = currentEntriesWithoutRankings == null
+                ? Collections.emptySet() : currentEntriesWithoutRankings.keySet();
         mEventQueue.add(new RankingAppliedEvent());
     }
 
@@ -836,6 +852,11 @@ public class NotifCollection implements Dumpable {
                         entries,
                         true,
                         "\t\t"));
+
+        pw.println("\n\tmNotificationsWithoutRankings: " + mNotificationsWithoutRankings.size());
+        for (String key : mNotificationsWithoutRankings) {
+            pw.println("\t * : " + key);
+        }
     }
 
     private final BatchableNotificationHandler mNotifHandler = new BatchableNotificationHandler() {
