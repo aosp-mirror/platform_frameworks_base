@@ -129,7 +129,8 @@ constructor(
                     previousOverscrollAmount: $previousOverscrollAmount
                     dragDownAmount: $dragDownAmount
                     panelState: $panelState
-            """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     @AssistedFactory

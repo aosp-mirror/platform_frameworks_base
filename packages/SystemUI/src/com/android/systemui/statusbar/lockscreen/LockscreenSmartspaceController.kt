@@ -37,6 +37,8 @@ import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
@@ -44,13 +46,11 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.settings.SecureSettings
-import java.lang.RuntimeException
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -71,6 +71,7 @@ class LockscreenSmartspaceController @Inject constructor(
     private val configurationController: ConfigurationController,
     private val statusBarStateController: StatusBarStateController,
     private val deviceProvisionedController: DeviceProvisionedController,
+    private val bypassController: KeyguardBypassController,
     private val execution: Execution,
     @Main private val uiExecutor: Executor,
     @Main private val handler: Handler,
@@ -154,6 +155,13 @@ class LockscreenSmartspaceController @Inject constructor(
             }
         }
 
+    private val bypassStateChangedListener =
+        object : KeyguardBypassController.OnBypassStateChangedListener {
+            override fun onBypassStateChanged(isEnabled: Boolean) {
+                updateBypassEnabled()
+            }
+        }
+
     init {
         deviceProvisionedController.addCallback(deviceProvisionedListener)
     }
@@ -162,6 +170,11 @@ class LockscreenSmartspaceController @Inject constructor(
         execution.assertIsMainThread()
 
         return featureFlags.isEnabled(Flags.SMARTSPACE) && plugin != null
+    }
+
+    private fun updateBypassEnabled() {
+        val bypassEnabled = bypassController.bypassEnabled
+        smartspaceViews.forEach { it.setKeyguardBypassEnabled(bypassEnabled) }
     }
 
     /**
@@ -211,6 +224,7 @@ class LockscreenSmartspaceController @Inject constructor(
             }
         })
         ssView.setFalsingManager(falsingManager)
+        ssView.setKeyguardBypassEnabled(bypassController.bypassEnabled)
         return (ssView as View).apply { addOnAttachStateChangeListener(stateChangeListener) }
     }
 
@@ -248,11 +262,13 @@ class LockscreenSmartspaceController @Inject constructor(
         )
         configurationController.addCallback(configChangeListener)
         statusBarStateController.addCallback(statusBarStateListener)
+        bypassController.registerOnBypassStateChangedListener(bypassStateChangedListener)
 
         plugin.registerSmartspaceEventNotifier {
                 e -> session?.notifySmartspaceEvent(e)
         }
 
+        updateBypassEnabled()
         reloadSmartspace()
     }
 
@@ -276,6 +292,7 @@ class LockscreenSmartspaceController @Inject constructor(
         contentResolver.unregisterContentObserver(settingsObserver)
         configurationController.removeCallback(configChangeListener)
         statusBarStateController.removeCallback(statusBarStateListener)
+        bypassController.unregisterOnBypassStateChangedListener(bypassStateChangedListener)
         session = null
 
         plugin?.registerSmartspaceEventNotifier(null)

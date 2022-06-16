@@ -1040,7 +1040,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void handleFaceError(int msgId, String errString) {
         Assert.isMainThread();
-        if (DEBUG_FACE) Log.d(TAG, "Face error received: " + errString);
+        if (DEBUG_FACE) Log.d(TAG, "Face error received: " + errString + " msgId=" + msgId);
         if (mHandler.hasCallbacks(mFaceCancelNotReceived)) {
             mHandler.removeCallbacks(mFaceCancelNotReceived);
         }
@@ -2183,6 +2183,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         && mBiometricEnabledForUser.get(userId));
     }
 
+    public boolean isFaceSupported() {
+        return mFaceManager != null && mFaceManager.isHardwareDetected();
+    }
+
     /**
      * @return true if there's at least one udfps enrolled for the current user.
      */
@@ -2307,6 +2311,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void cancelFaceAuth() {
         stopListeningForFace();
+    }
+
+    public boolean isFaceScanning() {
+        return mFaceRunningState == BIOMETRIC_STATE_RUNNING;
     }
 
     private void updateFaceListeningState(int action) {

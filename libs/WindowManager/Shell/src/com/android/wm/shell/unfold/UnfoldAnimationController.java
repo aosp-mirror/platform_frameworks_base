@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.unfold;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -211,6 +213,10 @@ public class UnfoldAnimationController implements UnfoldListener {
     }
 
     private void resetTask(UnfoldTaskAnimator animator, TaskInfo taskInfo) {
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            // PiP task has its own cleanup path, ignore surface reset to avoid conflict.
+            return;
+        }
         final SurfaceControl.Transaction transaction = mTransactionPool.acquire();
         animator.resetSurface(taskInfo, transaction);
         transaction.apply();

@@ -22,7 +22,8 @@ constructor(
     panelExpansionStateManager: PanelExpansionStateManager,
     private val context: Context,
     private val splitShadeOverScrollerFactory: SplitShadeOverScroller.Factory,
-    private val noOpOverScroller: NoOpOverScroller
+    private val noOpOverScroller: NoOpOverScroller,
+    private val scrimShadeTransitionController: ScrimShadeTransitionController
 ) {
 
     lateinit var notificationPanelViewController: NotificationPanelViewController
@@ -64,6 +65,7 @@ constructor(
 
     private fun onPanelExpansionChanged(event: PanelExpansionChangeEvent) {
         shadeOverScroller.onDragDownAmountChanged(event.dragDownPxAmount)
+        scrimShadeTransitionController.onPanelExpansionChanged(event)
     }
 
     private fun propertiesInitialized() =
