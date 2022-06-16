@@ -36,10 +36,10 @@ import java.util.Collection;
 
 @RunWith(Parameterized.class)
 @LargeTest
-public class ByteBufferBulkPerfTest {
+public class BulkPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mAligned({0}), mSrcBufferType({1}), mDataBufferType({2}), mBufferSize({3})")
+    @Parameters(name = "mAlign({0}), mSBuf({1}), mDBuf({2}), mSize({3})")
     public static Collection<Object[]> data() {
         return Arrays.asList(
                 new Object[][] {
@@ -83,7 +83,7 @@ public class ByteBufferBulkPerfTest {
     }
 
     @Parameterized.Parameter(0)
-    public boolean mAligned;
+    public boolean mAlign;
 
     enum MyBufferType {
         DIRECT,
@@ -92,13 +92,13 @@ public class ByteBufferBulkPerfTest {
     }
 
     @Parameterized.Parameter(1)
-    public MyBufferType mSrcBufferType;
+    public MyBufferType mSBuf;
 
     @Parameterized.Parameter(2)
-    public MyBufferType mDataBufferType;
+    public MyBufferType mDBuf;
 
     @Parameterized.Parameter(3)
-    public int mBufferSize;
+    public int mSize;
 
     public static ByteBuffer newBuffer(boolean aligned, MyBufferType bufferType, int bsize)
             throws IOException {
@@ -126,13 +126,13 @@ public class ByteBufferBulkPerfTest {
     }
 
     @Test
-    public void timeByteBuffer_putByteBuffer() throws Exception {
-        ByteBuffer src = ByteBufferBulkPerfTest.newBuffer(mAligned, mSrcBufferType, mBufferSize);
-        ByteBuffer data = ByteBufferBulkPerfTest.newBuffer(mAligned, mDataBufferType, mBufferSize);
+    public void timePut() throws Exception {
+        ByteBuffer src = BulkPerfTest.newBuffer(mAlign, mSBuf, mSize);
+        ByteBuffer data = BulkPerfTest.newBuffer(mAlign, mDBuf, mSize);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            src.position(mAligned ? 0 : 1);
-            data.position(mAligned ? 0 : 1);
+            src.position(mAlign ? 0 : 1);
+            data.position(mAlign ? 0 : 1);
             src.put(data);
         }
     }
