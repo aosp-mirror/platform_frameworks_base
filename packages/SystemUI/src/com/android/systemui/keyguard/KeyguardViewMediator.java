@@ -486,6 +486,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      */
     private IRemoteAnimationRunner mKeyguardExitAnimationRunner;
 
+    private CentralSurfaces mCentralSurfaces;
+
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
             @Override
@@ -844,6 +846,13 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                     setOccluded(true /* occluded */, false /* animate */);
                     Log.d(TAG, "Occlude launch animation cancelled. Occluded state is now: "
                             + mOccluded);
+                }
+
+                @Override
+                public void onLaunchAnimationEnd(boolean launchIsFullScreen) {
+                    if (launchIsFullScreen) {
+                        mCentralSurfaces.instantCollapseNotificationPanel();
+                    }
                 }
 
                 @NonNull
@@ -2847,6 +2856,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             @Nullable PanelExpansionStateManager panelExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer, KeyguardBypassController bypassController) {
+        mCentralSurfaces = centralSurfaces;
         mKeyguardViewControllerLazy.get().registerCentralSurfaces(
                 centralSurfaces,
                 panelView,
