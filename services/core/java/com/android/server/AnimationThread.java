@@ -40,7 +40,7 @@ public final class AnimationThread extends ServiceThread {
             sInstance = new AnimationThread();
             sInstance.start();
             sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_WINDOW_MANAGER);
-            sHandler = new Handler(sInstance.getLooper());
+            sHandler = makeSharedHandler(sInstance.getLooper());
         }
     }
 
