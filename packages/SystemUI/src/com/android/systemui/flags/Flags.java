@@ -196,6 +196,8 @@ public class Flags {
     public static final SysPropBooleanFlag WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
             new SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false);
 
+    public static final BooleanFlag NEW_BACK_AFFORDANCE = new BooleanFlag(1203, true);
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
