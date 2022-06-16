@@ -2019,13 +2019,10 @@ public final class ViewRootImpl implements ViewParent,
                 renderer.setStopped(mStopped);
             }
             if (!mStopped) {
-                // Unnecessary to traverse if the window is not yet visible.
-                if (getHostVisibility() == View.VISIBLE) {
-                    // Make sure that relayoutWindow will be called to get valid surface because
-                    // the previous surface may have been released.
-                    mAppVisibilityChanged = true;
-                    scheduleTraversals();
-                }
+                // Make sure that relayoutWindow will be called to get valid surface because
+                // the previous surface may have been released.
+                mAppVisibilityChanged = true;
+                scheduleTraversals();
             } else {
                 if (renderer != null) {
                     renderer.destroyHardwareResources(mView);
@@ -2048,6 +2045,7 @@ public final class ViewRootImpl implements ViewParent,
         void surfaceCreated(Transaction t);
         void surfaceReplaced(Transaction t);
         void surfaceDestroyed();
+        default void surfaceSyncStarted() {};
     }
 
     private final ArrayList<SurfaceChangedCallback> mSurfaceChangedCallbacks = new ArrayList<>();
@@ -2079,6 +2077,12 @@ public final class ViewRootImpl implements ViewParent,
     private void notifySurfaceDestroyed() {
         for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
             mSurfaceChangedCallbacks.get(i).surfaceDestroyed();
+        }
+    }
+
+    private void notifySurfaceSyncStarted() {
+        for (int i = 0; i < mSurfaceChangedCallbacks.size(); i++) {
+            mSurfaceChangedCallbacks.get(i).surfaceSyncStarted();
         }
     }
 
@@ -3541,6 +3545,7 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "Setup new sync id=" + mSyncId);
         }
         mSurfaceSyncer.addToSync(mSyncId, mSyncTarget);
+        notifySurfaceSyncStarted();
     }
 
     private void notifyContentCatpureEvents() {
@@ -10964,5 +10969,12 @@ public final class ViewRootImpl implements ViewParent,
         if (!mIsInTraversal && !mTraversalScheduled) {
             scheduleTraversals();
         }
+    }
+
+    void mergeSync(int syncId, SurfaceSyncer otherSyncer) {
+        if (!isInLocalSync()) {
+            return;
+        }
+        mSurfaceSyncer.merge(mSyncId, syncId, otherSyncer);
     }
 }

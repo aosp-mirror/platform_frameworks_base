@@ -23,8 +23,10 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -66,7 +68,7 @@ public final class TaskFragmentInfo implements Parcelable {
     private final List<IBinder> mActivities = new ArrayList<>();
 
     /** Relative position of the fragment's top left corner in the parent container. */
-    private final Point mPositionInParent;
+    private final Point mPositionInParent = new Point();
 
     /**
      * Whether the last running activity in the TaskFragment was finished due to clearing task while
@@ -80,21 +82,31 @@ public final class TaskFragmentInfo implements Parcelable {
      */
     private final boolean mIsTaskFragmentClearedForPip;
 
+    /**
+     * The maximum {@link ActivityInfo.WindowLayout#minWidth} and
+     * {@link ActivityInfo.WindowLayout#minHeight} aggregated from the TaskFragment's child
+     * activities.
+     */
+    @NonNull
+    private final Point mMinimumDimensions = new Point();
+
     /** @hide */
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
             @NonNull Configuration configuration, int runningActivityCount,
             boolean isVisible, @NonNull List<IBinder> activities, @NonNull Point positionInParent,
-            boolean isTaskClearedForReuse, boolean isTaskFragmentClearedForPip) {
+            boolean isTaskClearedForReuse, boolean isTaskFragmentClearedForPip,
+            @NonNull Point minimumDimensions) {
         mFragmentToken = requireNonNull(fragmentToken);
         mToken = requireNonNull(token);
         mConfiguration.setTo(configuration);
         mRunningActivityCount = runningActivityCount;
         mIsVisible = isVisible;
         mActivities.addAll(activities);
-        mPositionInParent = requireNonNull(positionInParent);
+        mPositionInParent.set(positionInParent);
         mIsTaskClearedForReuse = isTaskClearedForReuse;
         mIsTaskFragmentClearedForPip = isTaskFragmentClearedForPip;
+        mMinimumDimensions.set(minimumDimensions);
     }
 
     @NonNull
@@ -154,6 +166,26 @@ public final class TaskFragmentInfo implements Parcelable {
     }
 
     /**
+     * Returns the minimum width this TaskFragment can be resized to.
+     * Client side must not {@link WindowContainerTransaction#setBounds(WindowContainerToken, Rect)}
+     * that {@link Rect#width()} is shorter than the reported value.
+     * @hide pending unhide
+     */
+    public int getMinimumWidth() {
+        return mMinimumDimensions.x;
+    }
+
+    /**
+     * Returns the minimum width this TaskFragment can be resized to.
+     * Client side must not {@link WindowContainerTransaction#setBounds(WindowContainerToken, Rect)}
+     * that {@link Rect#height()} is shorter than the reported value.
+     * @hide pending unhide
+     */
+    public int getMinimumHeight() {
+        return mMinimumDimensions.y;
+    }
+
+    /**
      * Returns {@code true} if the parameters that are important for task fragment organizers are
      * equal between this {@link TaskFragmentInfo} and {@param that}.
      */
@@ -170,7 +202,8 @@ public final class TaskFragmentInfo implements Parcelable {
                 && mActivities.equals(that.mActivities)
                 && mPositionInParent.equals(that.mPositionInParent)
                 && mIsTaskClearedForReuse == that.mIsTaskClearedForReuse
-                && mIsTaskFragmentClearedForPip == that.mIsTaskFragmentClearedForPip;
+                && mIsTaskFragmentClearedForPip == that.mIsTaskFragmentClearedForPip
+                && mMinimumDimensions.equals(that.mMinimumDimensions);
     }
 
     private TaskFragmentInfo(Parcel in) {
@@ -180,9 +213,10 @@ public final class TaskFragmentInfo implements Parcelable {
         mRunningActivityCount = in.readInt();
         mIsVisible = in.readBoolean();
         in.readBinderList(mActivities);
-        mPositionInParent = requireNonNull(in.readTypedObject(Point.CREATOR));
+        mPositionInParent.readFromParcel(in);
         mIsTaskClearedForReuse = in.readBoolean();
         mIsTaskFragmentClearedForPip = in.readBoolean();
+        mMinimumDimensions.readFromParcel(in);
     }
 
     /** @hide */
@@ -194,9 +228,10 @@ public final class TaskFragmentInfo implements Parcelable {
         dest.writeInt(mRunningActivityCount);
         dest.writeBoolean(mIsVisible);
         dest.writeBinderList(mActivities);
-        dest.writeTypedObject(mPositionInParent, flags);
+        mPositionInParent.writeToParcel(dest, flags);
         dest.writeBoolean(mIsTaskClearedForReuse);
         dest.writeBoolean(mIsTaskFragmentClearedForPip);
+        mMinimumDimensions.writeToParcel(dest, flags);
     }
 
     @NonNull
@@ -224,6 +259,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 + " positionInParent=" + mPositionInParent
                 + " isTaskClearedForReuse=" + mIsTaskClearedForReuse
                 + " isTaskFragmentClearedForPip" + mIsTaskFragmentClearedForPip
+                + " minimumDimensions" + mMinimumDimensions
                 + "}";
     }
 
