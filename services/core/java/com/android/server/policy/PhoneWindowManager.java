@@ -68,8 +68,6 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
-import static com.android.server.policy.SingleKeyGestureDetector.KEY_LONGPRESS;
-import static com.android.server.policy.SingleKeyGestureDetector.KEY_VERYLONGPRESS;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
@@ -2246,9 +2244,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Rule for single power key gesture.
      */
     private final class PowerKeyRule extends SingleKeyGestureDetector.SingleKeyRule {
-        PowerKeyRule(int gestures) {
-            super(KEYCODE_POWER, gestures);
+        PowerKeyRule() {
+            super(KEYCODE_POWER);
         }
+
+        @Override
+        boolean supportLongPress() {
+            return hasLongPressOnPowerBehavior();
+        }
+
+        @Override
+        boolean supportVeryLongPress() {
+            return hasVeryLongPressOnPowerBehavior();
+        }
+
 
         @Override
         int getMaxMultiPressCount() {
@@ -2297,8 +2306,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Rule for single back key gesture.
      */
     private final class BackKeyRule extends SingleKeyGestureDetector.SingleKeyRule {
-        BackKeyRule(int gestures) {
-            super(KEYCODE_BACK, gestures);
+        BackKeyRule() {
+            super(KEYCODE_BACK);
+        }
+
+        @Override
+        boolean supportLongPress() {
+            return hasLongPressOnBackBehavior();
         }
 
         @Override
@@ -2321,8 +2335,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Rule for single stem primary key gesture.
      */
     private final class StemPrimaryKeyRule extends SingleKeyGestureDetector.SingleKeyRule {
-        StemPrimaryKeyRule(int gestures) {
-            super(KeyEvent.KEYCODE_STEM_PRIMARY, gestures);
+        StemPrimaryKeyRule() {
+            super(KeyEvent.KEYCODE_STEM_PRIMARY);
+        }
+
+        @Override
+        boolean supportLongPress() {
+            return hasLongPressOnStemPrimaryBehavior();
         }
 
         @Override
@@ -2348,25 +2367,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void initSingleKeyGestureRules() {
         mSingleKeyGestureDetector = SingleKeyGestureDetector.get(mContext);
-
-        int powerKeyGestures = 0;
-        if (hasVeryLongPressOnPowerBehavior()) {
-            powerKeyGestures |= KEY_VERYLONGPRESS;
-        }
-        if (hasLongPressOnPowerBehavior()) {
-            powerKeyGestures |= KEY_LONGPRESS;
-        }
-        mSingleKeyGestureDetector.addRule(new PowerKeyRule(powerKeyGestures));
-
+        mSingleKeyGestureDetector.addRule(new PowerKeyRule());
         if (hasLongPressOnBackBehavior()) {
-            mSingleKeyGestureDetector.addRule(new BackKeyRule(KEY_LONGPRESS));
+            mSingleKeyGestureDetector.addRule(new BackKeyRule());
         }
         if (hasStemPrimaryBehavior()) {
-            int stemPrimaryKeyGestures = 0;
-            if (hasLongPressOnStemPrimaryBehavior()) {
-                stemPrimaryKeyGestures |= KEY_LONGPRESS;
-            }
-            mSingleKeyGestureDetector.addRule(new StemPrimaryKeyRule(stemPrimaryKeyGestures));
+            mSingleKeyGestureDetector.addRule(new StemPrimaryKeyRule());
         }
     }
 
@@ -2456,19 +2462,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateRotation = true;
             }
 
-            mLongPressOnPowerBehavior = Settings.Global.getInt(resolver,
+            final int longPressOnPowerBehavior = Settings.Global.getInt(resolver,
                     Settings.Global.POWER_BUTTON_LONG_PRESS,
                     mContext.getResources().getInteger(
                             com.android.internal.R.integer.config_longPressOnPowerBehavior));
+            final int veryLongPressOnPowerBehavior = Settings.Global.getInt(resolver,
+                    Settings.Global.POWER_BUTTON_VERY_LONG_PRESS,
+                    mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_veryLongPressOnPowerBehavior));
+            if (mLongPressOnPowerBehavior != longPressOnPowerBehavior
+                    || mVeryLongPressOnPowerBehavior != veryLongPressOnPowerBehavior) {
+                mLongPressOnPowerBehavior = longPressOnPowerBehavior;
+                mVeryLongPressOnPowerBehavior = veryLongPressOnPowerBehavior;
+            }
+
             mLongPressOnPowerAssistantTimeoutMs = Settings.Global.getLong(
                     mContext.getContentResolver(),
                     Settings.Global.POWER_BUTTON_LONG_PRESS_DURATION_MS,
                     mContext.getResources().getInteger(
                             com.android.internal.R.integer.config_longPressOnPowerDurationMs));
-            mVeryLongPressOnPowerBehavior = Settings.Global.getInt(resolver,
-                    Settings.Global.POWER_BUTTON_VERY_LONG_PRESS,
-                    mContext.getResources().getInteger(
-                            com.android.internal.R.integer.config_veryLongPressOnPowerBehavior));
+
             mPowerVolUpBehavior = Settings.Global.getInt(resolver,
                     Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
                     mContext.getResources().getInteger(
