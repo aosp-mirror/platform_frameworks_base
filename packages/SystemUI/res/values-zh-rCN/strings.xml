@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"相机"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"电话"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"语音助理"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"电子钱包"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"钱包"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"二维码扫描器"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"解锁"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"设备已锁定"</string>
@@ -462,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"显示演示模式"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"以太网"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"闹钟"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"电子钱包"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"钱包"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"开始设置，享受更加快捷安全的手机购物体验"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"全部显示"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"点按即可打开"</string>
@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"文本已复制"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"图片已复制"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"内容已复制"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"剪贴板编辑器"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"剪贴板"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"图片预览"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"修改"</string>
     <string name="add" msgid="81036585205287996">"添加"</string>
     <string name="manage_users" msgid="1823875311934643849">"管理用户"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"此通知不支持拖动到分屏中。"</string>
