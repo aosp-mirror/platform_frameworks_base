@@ -41,6 +41,7 @@ public class KeyguardCoordinator implements Coordinator {
     private final HighPriorityProvider mHighPriorityProvider;
     private final SectionHeaderVisibilityProvider mSectionHeaderVisibilityProvider;
     private final KeyguardNotificationVisibilityProvider mKeyguardNotificationVisibilityProvider;
+    private final SharedCoordinatorLogger mLogger;
 
     @Inject
     public KeyguardCoordinator(
@@ -48,12 +49,14 @@ public class KeyguardCoordinator implements Coordinator {
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             HighPriorityProvider highPriorityProvider,
             SectionHeaderVisibilityProvider sectionHeaderVisibilityProvider,
-            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider) {
+            KeyguardNotificationVisibilityProvider keyguardNotificationVisibilityProvider,
+            SharedCoordinatorLogger logger) {
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mHighPriorityProvider = highPriorityProvider;
         mSectionHeaderVisibilityProvider = sectionHeaderVisibilityProvider;
         mKeyguardNotificationVisibilityProvider = keyguardNotificationVisibilityProvider;
+        mLogger = logger;
     }
 
     @Override
@@ -81,6 +84,7 @@ public class KeyguardCoordinator implements Coordinator {
     }
 
     private void invalidateListFromFilter(String reason) {
+        mLogger.logKeyguardCoordinatorInvalidated(reason);
         updateSectionHeadersVisibility();
         mNotifFilter.invalidateList();
     }
