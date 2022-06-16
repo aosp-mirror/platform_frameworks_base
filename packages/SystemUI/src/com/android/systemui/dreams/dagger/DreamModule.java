@@ -20,8 +20,12 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.android.settingslib.dream.DreamBackend;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
+
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -48,6 +52,18 @@ public interface DreamModule {
     @Provides
     static DreamBackend providesDreamBackend(Context context) {
         return DreamBackend.getInstance(context);
+    }
+
+    /**
+     * Provides an instance of a {@link DreamOverlayNotificationCountProvider}.
+     */
+    @SysUISingleton
+    @Provides
+    static Optional<DreamOverlayNotificationCountProvider>
+            providesDreamOverlayNotificationCountProvider() {
+        // If we decide to bring this back, we should gate it on a config that can be changed in
+        // an overlay.
+        return Optional.empty();
     }
 
     /** */
