@@ -1016,6 +1016,7 @@ public class EditorInfo implements InputType, Parcelable {
         newEditorInfo.mInitialSurroundingText = mInitialSurroundingText;
         newEditorInfo.hintLocales = hintLocales;
         newEditorInfo.contentMimeTypes = ArrayUtils.cloneOrNull(contentMimeTypes);
+        newEditorInfo.targetInputMethodUser = targetInputMethodUser;
         return newEditorInfo;
     }
 
