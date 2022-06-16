@@ -141,7 +141,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
     private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
 
-    private boolean mUpdateBackgroundOnUpdate;
+    private boolean mUpdateSelfBackgroundOnUpdate;
     private boolean mNotificationTranslationFinished = false;
     private boolean mIsSnoozed;
     private boolean mIsFaded;
@@ -553,9 +553,28 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateLimits();
         updateShelfIconColor();
         updateRippleAllowed();
-        if (mUpdateBackgroundOnUpdate) {
-            mUpdateBackgroundOnUpdate = false;
-            updateBackgroundColors();
+        if (mUpdateSelfBackgroundOnUpdate) {
+            // Because this is triggered by UiMode change which we already propagated to children,
+            // we know that child rows will receive the same event, and will update their own
+            // backgrounds when they finish inflating, so propagating again would be redundant.
+            mUpdateSelfBackgroundOnUpdate = false;
+            updateBackgroundColorsOfSelf();
+        }
+    }
+
+    private void updateBackgroundColorsOfSelf() {
+        super.updateBackgroundColors();
+    }
+
+    @Override
+    public void updateBackgroundColors() {
+        // Because this call is made by the NSSL only on attached rows at the moment of the
+        // UiMode or Theme change, we have to propagate to our child views.
+        updateBackgroundColorsOfSelf();
+        if (mIsSummaryWithChildren) {
+            for (ExpandableNotificationRow child : mChildrenContainer.getAttachedChildren()) {
+                child.updateBackgroundColors();
+            }
         }
     }
 
@@ -1242,7 +1261,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void onUiModeChanged() {
-        mUpdateBackgroundOnUpdate = true;
+        mUpdateSelfBackgroundOnUpdate = true;
         reInflateViews();
         if (mChildrenContainer != null) {
             for (ExpandableNotificationRow child : mChildrenContainer.getAttachedChildren()) {
