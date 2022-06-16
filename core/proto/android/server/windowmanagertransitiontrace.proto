@@ -58,6 +58,8 @@ message Transition {
   State state = 5;
   int32 flags = 6;
   repeated ChangeInfo change = 7;
+  uint64 start_transaction_id = 8;
+  uint64 finish_transaction_id = 9;
 }
 
 message ChangeInfo {
