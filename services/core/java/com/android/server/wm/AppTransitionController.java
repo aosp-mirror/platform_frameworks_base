@@ -465,6 +465,16 @@ public class AppTransitionController {
             return TRANSIT_OLD_WALLPAPER_OPEN;
         }
 
+        // Some devices don't show a wallpaper. In that case we should still trigger wallpaper
+        // transitions when animating to/from the home activity
+        if (wallpaperTarget == null) {
+            if (topOpeningApp != null && topOpeningApp.isActivityTypeHome()) {
+                return TRANSIT_OLD_WALLPAPER_OPEN;
+            } else if (topClosingApp != null && topClosingApp.isActivityTypeHome()) {
+                return TRANSIT_OLD_WALLPAPER_CLOSE;
+            }
+        }
+
         final ArraySet<WindowContainer> openingWcs = getAnimationTargets(
                 openingApps, closingApps, true /* visible */);
         final ArraySet<WindowContainer> closingWcs = getAnimationTargets(
