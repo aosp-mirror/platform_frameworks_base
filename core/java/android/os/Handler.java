@@ -230,6 +230,7 @@ public class Handler {
         mQueue = mLooper.mQueue;
         mCallback = callback;
         mAsynchronous = async;
+        mIsShared = false;
     }
 
     /**
@@ -253,10 +254,17 @@ public class Handler {
      */
     @UnsupportedAppUsage
     public Handler(@NonNull Looper looper, @Nullable Callback callback, boolean async) {
+        this(looper, callback, async, /* shared= */ false);
+    }
+
+    /** @hide */
+    public Handler(@NonNull Looper looper, @Nullable Callback callback, boolean async,
+            boolean shared) {
         mLooper = looper;
         mQueue = looper.mQueue;
         mCallback = callback;
         mAsynchronous = async;
+        mIsShared = shared;
     }
 
     /**
@@ -778,6 +786,14 @@ public class Handler {
         return queue.enqueueMessage(msg, uptimeMillis);
     }
 
+    private Object disallowNullArgumentIfShared(@Nullable Object arg) {
+        if (mIsShared && arg == null) {
+            throw new IllegalArgumentException("Null argument disallowed for shared handler."
+                    + " Consider creating your own Handler instance.");
+        }
+        return arg;
+    }
+
     /**
      * Remove any pending posts of messages with code 'what' that are in the
      * message queue.
@@ -792,7 +808,7 @@ public class Handler {
      * all messages will be removed.
      */
     public final void removeMessages(int what, @Nullable Object object) {
-        mQueue.removeMessages(this, what, object);
+        mQueue.removeMessages(this, what, disallowNullArgumentIfShared(object));
     }
 
     /**
@@ -807,7 +823,7 @@ public class Handler {
      *@hide
      */
     public final void removeEqualMessages(int what, @Nullable Object object) {
-        mQueue.removeEqualMessages(this, what, object);
+        mQueue.removeEqualMessages(this, what, disallowNullArgumentIfShared(object));
     }
 
     /**
@@ -816,7 +832,7 @@ public class Handler {
      * all callbacks and messages will be removed.
      */
     public final void removeCallbacksAndMessages(@Nullable Object token) {
-        mQueue.removeCallbacksAndMessages(this, token);
+        mQueue.removeCallbacksAndMessages(this, disallowNullArgumentIfShared(token));
     }
 
     /**
@@ -827,7 +843,7 @@ public class Handler {
      *@hide
      */
     public final void removeCallbacksAndEqualMessages(@Nullable Object token) {
-        mQueue.removeCallbacksAndEqualMessages(this, token);
+        mQueue.removeCallbacksAndEqualMessages(this, disallowNullArgumentIfShared(token));
     }
     /**
      * Check if there are any pending posts of messages with code 'what' in
@@ -950,6 +966,9 @@ public class Handler {
     final boolean mAsynchronous;
     @UnsupportedAppUsage
     IMessenger mMessenger;
+
+    /** If it's a shared handler, we disallow certain dangeraous operations. */
+    private final boolean mIsShared;
 
     private static final class BlockingRunnable implements Runnable {
         private final Runnable mTask;
