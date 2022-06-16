@@ -47,7 +47,9 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
@@ -55,6 +57,7 @@ private const val KEY = "TEST_KEY"
 private const val KEY_OLD = "TEST_KEY_OLD"
 private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
+private const val DEVICE_ID = "DEVICE_ID"
 private const val DEVICE_NAME = "DEVICE_NAME"
 private const val REMOTE_DEVICE_NAME = "REMOTE_DEVICE_NAME"
 
@@ -454,6 +457,89 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         captor.value.onAudioInfoChanged(playbackInfo)
         // THEN the route is not checked
         verify(mr2, never()).getRoutingSessionForMediaController(eq(controller))
+    }
+
+    @Test
+    fun deviceIdChanged_informListener() {
+        // GIVEN a notification is added, with a particular device connected
+        whenever(device.id).thenReturn(DEVICE_ID)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        // and later the manager gets a new device ID
+        val deviceCallback = captureCallback()
+        val updatedId = DEVICE_ID + "_new"
+        whenever(device.id).thenReturn(updatedId)
+        deviceCallback.onDeviceListUpdate(mutableListOf(device))
+
+        // THEN the listener gets the updated info
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val dataCaptor = ArgumentCaptor.forClass(MediaDeviceData::class.java)
+        verify(listener, times(2)).onMediaDeviceChanged(eq(KEY), any(), dataCaptor.capture())
+
+        val firstDevice = dataCaptor.allValues.get(0)
+        assertThat(firstDevice.id).isEqualTo(DEVICE_ID)
+
+        val secondDevice = dataCaptor.allValues.get(1)
+        assertThat(secondDevice.id).isEqualTo(updatedId)
+    }
+
+    @Test
+    fun deviceNameChanged_informListener() {
+        // GIVEN a notification is added, with a particular device connected
+        whenever(device.id).thenReturn(DEVICE_ID)
+        whenever(device.name).thenReturn(DEVICE_NAME)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        // and later the manager gets a new device name
+        val deviceCallback = captureCallback()
+        val updatedName = DEVICE_NAME + "_new"
+        whenever(device.name).thenReturn(updatedName)
+        deviceCallback.onDeviceListUpdate(mutableListOf(device))
+
+        // THEN the listener gets the updated info
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val dataCaptor = ArgumentCaptor.forClass(MediaDeviceData::class.java)
+        verify(listener, times(2)).onMediaDeviceChanged(eq(KEY), any(), dataCaptor.capture())
+
+        val firstDevice = dataCaptor.allValues.get(0)
+        assertThat(firstDevice.name).isEqualTo(DEVICE_NAME)
+
+        val secondDevice = dataCaptor.allValues.get(1)
+        assertThat(secondDevice.name).isEqualTo(updatedName)
+    }
+
+    @Test
+    fun deviceIconChanged_doesNotCallListener() {
+        // GIVEN a notification is added, with a particular device connected
+        whenever(device.id).thenReturn(DEVICE_ID)
+        whenever(device.name).thenReturn(DEVICE_NAME)
+        val firstIcon = mock(Drawable::class.java)
+        whenever(device.icon).thenReturn(firstIcon)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val dataCaptor = ArgumentCaptor.forClass(MediaDeviceData::class.java)
+        verify(listener).onMediaDeviceChanged(eq(KEY), any(), dataCaptor.capture())
+
+        // and later the manager gets a callback with only the icon changed
+        val deviceCallback = captureCallback()
+        val secondIcon = mock(Drawable::class.java)
+        whenever(device.icon).thenReturn(secondIcon)
+        deviceCallback.onDeviceListUpdate(mutableListOf(device))
+
+        // THEN the listener is not called again
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        verifyNoMoreInteractions(listener)
     }
 
     @Test
