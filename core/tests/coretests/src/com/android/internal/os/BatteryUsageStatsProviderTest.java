@@ -306,7 +306,8 @@ public class BatteryUsageStatsProviderTest {
 
         int expectedUid = 1;
         while (iterator.next(item)) {
-            if (item.eventCode == BatteryStats.HistoryItem.EVENT_NONE) {
+            while (item.cmd != BatteryStats.HistoryItem.CMD_UPDATE
+                    || item.eventCode == BatteryStats.HistoryItem.EVENT_NONE) {
                 assertThat(iterator.next(item)).isTrue();
             }
             int uid = item.eventTag.uid;
