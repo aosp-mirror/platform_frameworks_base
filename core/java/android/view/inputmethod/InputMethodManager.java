@@ -525,7 +525,7 @@ public final class InputMethodManager {
      */
     @Nullable
     @GuardedBy("mH")
-    private InputMethodSessionWrapper mCurrentInputMethodSession = null;
+    private IInputMethodSessionInvoker mCurrentInputMethodSession = null;
     /**
      * Encapsulates IPCs to the currently connected AccessibilityServices.
      */
@@ -932,7 +932,7 @@ public final class InputMethodManager {
                         setInputChannelLocked(res.channel);
                         mCurMethod = res.method; // for @UnsupportedAppUsage
                         mCurrentInputMethodSession =
-                                InputMethodSessionWrapper.createOrNull(res.method);
+                                IInputMethodSessionInvoker.createOrNull(res.method);
                         mCurId = res.id;
                         mBindSequence = res.sequence;
                         mVirtualDisplayToScreenMatrix = res.getVirtualDisplayToScreenMatrix();
@@ -2419,7 +2419,7 @@ public final class InputMethodManager {
                 setInputChannelLocked(res.channel);
                 mBindSequence = res.sequence;
                 mCurMethod = res.method; // for @UnsupportedAppUsage
-                mCurrentInputMethodSession = InputMethodSessionWrapper.createOrNull(res.method);
+                mCurrentInputMethodSession = IInputMethodSessionInvoker.createOrNull(res.method);
                 mAccessibilityInputMethodSession.clear();
                 if (res.accessibilitySessions != null) {
                     for (int i = 0; i < res.accessibilitySessions.size(); i++) {
