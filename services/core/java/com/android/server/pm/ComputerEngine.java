@@ -58,6 +58,7 @@ import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
 import static com.android.server.pm.PackageManagerService.HIDE_EPHEMERAL_APIS;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+import static com.android.server.pm.PackageManagerServiceUtils.isSystemOrRootOrShell;
 import static com.android.server.pm.resolution.ComponentResolver.RESOLVE_PRIORITY_SORTER;
 
 import android.Manifest;
@@ -2737,9 +2738,13 @@ public class ComputerEngine implements Computer {
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         final boolean callerIsInstantApp = instantAppPkgName != null;
         // Don't treat hiddenUntilInstalled as an uninstalled state, phone app needs to access
-        // these hidden application details to customize carrier apps.
-        if (ps == null || (filterUninstall && !ps.isHiddenUntilInstalled()
-                && !ps.getUserStateOrDefault(userId).isInstalled())) {
+        // these hidden application details to customize carrier apps. Also, allowing the system
+        // caller accessing to application across users.
+        if (ps == null
+                || (filterUninstall
+                        && !isSystemOrRootOrShell(callingUid)
+                        && !ps.isHiddenUntilInstalled()
+                        && !ps.getUserStateOrDefault(userId).isInstalled())) {
             // If caller is instant app or sdk sandbox and ps is null, pretend the application
             // exists, but, needs to be filtered
             return (callerIsInstantApp || filterUninstall || Process.isSdkSandboxUid(callingUid));
@@ -2836,6 +2841,9 @@ public class ComputerEngine implements Computer {
             @NonNull SharedUserSetting sus, int callingUid, int userId) {
         if (shouldFilterApplication(sus, callingUid, userId)) {
             return true;
+        }
+        if (isSystemOrRootOrShell(callingUid)) {
+            return false;
         }
         final ArraySet<PackageStateInternal> packageStates =
                 (ArraySet<PackageStateInternal>) sus.getPackageStates();
