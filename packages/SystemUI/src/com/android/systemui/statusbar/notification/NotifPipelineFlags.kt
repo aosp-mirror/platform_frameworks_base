@@ -48,8 +48,7 @@ class NotifPipelineFlags @Inject constructor(
     fun assertLegacyPipelineEnabled(): Unit =
         check(!isNewPipelineEnabled()) { "Old pipeline code running w/ new pipeline enabled" }
 
-    fun isNewPipelineEnabled(): Boolean =
-        featureFlags.isEnabled(Flags.NEW_NOTIFICATION_PIPELINE_RENDERING)
+    fun isNewPipelineEnabled(): Boolean = true
 
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
