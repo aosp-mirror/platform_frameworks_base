@@ -110,9 +110,6 @@ aidl_interface {
             ],
         },
         ndk: {
-            vndk: {
-                enabled: true,
-            },
             min_sdk_version: "29",
             apex_available: [
                 "//apex_available:platform",
@@ -163,11 +160,6 @@ aidl_interface {
         },
         java: {
             sdk_version: "module_current",
-        },
-        ndk: {
-            vndk: {
-                enabled: true,
-            },
         },
     },
     imports: [
