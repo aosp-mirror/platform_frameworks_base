@@ -19,6 +19,12 @@
     <string translatable="false" name="config_mainBuiltInDisplayCutout"></string>
     <string translatable="false" name="config_mainBuiltInDisplayCutoutRectApproximation"></string>
 
+    <!-- Height of the status bar in portrait. The height should be
+         Max((status bar content height + waterfall top size), top cutout size) -->
+    <dimen name="status_bar_height_portrait">28dp</dimen>
+    <!-- Max((28 + 20), 0) = 48 -->
+    <dimen name="status_bar_height_landscape">48dp</dimen>
+
     <dimen name="waterfall_display_left_edge_size">20dp</dimen>
     <dimen name="waterfall_display_top_edge_size">0dp</dimen>
     <dimen name="waterfall_display_right_edge_size">20dp</dimen>

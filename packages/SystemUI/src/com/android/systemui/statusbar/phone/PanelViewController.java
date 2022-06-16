@@ -54,6 +54,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -177,6 +178,7 @@ public abstract class PanelViewController {
     private boolean mExpandLatencyTracking;
     private final PanelView mView;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     protected final Resources mResources;
     protected final KeyguardStateController mKeyguardStateController;
     protected final SysuiStatusBarStateController mStatusBarStateController;
@@ -215,6 +217,7 @@ public abstract class PanelViewController {
             DozeLog dozeLog,
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController,
+            NotificationShadeWindowController notificationShadeWindowController,
             VibratorHelper vibratorHelper,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             LatencyTracker latencyTracker,
@@ -247,6 +250,7 @@ public abstract class PanelViewController {
         mResources = mView.getResources();
         mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
+        mNotificationShadeWindowController = notificationShadeWindowController;
         mFlingAnimationUtils = flingAnimationUtilsBuilder
                 .reset()
                 .setMaxLengthSeconds(0.6f)
@@ -743,34 +747,36 @@ public abstract class PanelViewController {
         if (isNaN(h)) {
             Log.wtf(TAG, "ExpandedHeight set to NaN");
         }
-        if (mExpandLatencyTracking && h != 0f) {
-            DejankUtils.postAfterTraversal(
-                    () -> mLatencyTracker.onActionEnd(LatencyTracker.ACTION_EXPAND_PANEL));
-            mExpandLatencyTracking = false;
-        }
-        float maxPanelHeight = getMaxPanelHeight();
-        if (mHeightAnimator == null) {
-            if (mTracking) {
-                float overExpansionPixels = Math.max(0, h - maxPanelHeight);
-                setOverExpansionInternal(overExpansionPixels, true /* isFromGesture */);
+        mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
+            if (mExpandLatencyTracking && h != 0f) {
+                DejankUtils.postAfterTraversal(
+                        () -> mLatencyTracker.onActionEnd(LatencyTracker.ACTION_EXPAND_PANEL));
+                mExpandLatencyTracking = false;
             }
-            mExpandedHeight = Math.min(h, maxPanelHeight);
-        } else {
-            mExpandedHeight = h;
-        }
+            float maxPanelHeight = getMaxPanelHeight();
+            if (mHeightAnimator == null) {
+                if (mTracking) {
+                    float overExpansionPixels = Math.max(0, h - maxPanelHeight);
+                    setOverExpansionInternal(overExpansionPixels, true /* isFromGesture */);
+                }
+                mExpandedHeight = Math.min(h, maxPanelHeight);
+            } else {
+                mExpandedHeight = h;
+            }
 
-        // If we are closing the panel and we are almost there due to a slow decelerating
-        // interpolator, abort the animation.
-        if (mExpandedHeight < 1f && mExpandedHeight != 0f && mClosing) {
-            mExpandedHeight = 0f;
-            if (mHeightAnimator != null) {
-                mHeightAnimator.end();
+            // If we are closing the panel and we are almost there due to a slow decelerating
+            // interpolator, abort the animation.
+            if (mExpandedHeight < 1f && mExpandedHeight != 0f && mClosing) {
+                mExpandedHeight = 0f;
+                if (mHeightAnimator != null) {
+                    mHeightAnimator.end();
+                }
             }
-        }
-        mExpandedFraction = Math.min(1f,
-                maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
-        onHeightUpdated(mExpandedHeight);
-        updatePanelExpansionAndVisibility();
+            mExpandedFraction = Math.min(1f,
+                    maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
+            onHeightUpdated(mExpandedHeight);
+            updatePanelExpansionAndVisibility();
+        });
     }
 
     /**
