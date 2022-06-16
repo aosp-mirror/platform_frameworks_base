@@ -3445,9 +3445,14 @@ class PackageManagerShellCommand extends ShellCommand {
         // Remove the first arg "art" and forward to ART module.
         String[] args = getAllArgs();
         args = Arrays.copyOfRange(args, 1, args.length);
-        return LocalManagerRegistry.getManagerOrThrow(ArtManagerLocal.class)
-                .handleShellCommand(getTarget(), getInFileDescriptor(), getOutFileDescriptor(),
-                        getErrFileDescriptor(), args);
+        try (var in = ParcelFileDescriptor.dup(getInFileDescriptor());
+                var out = ParcelFileDescriptor.dup(getOutFileDescriptor());
+                var err = ParcelFileDescriptor.dup(getErrFileDescriptor())) {
+            return LocalManagerRegistry.getManagerOrThrow(ArtManagerLocal.class)
+                    .handleShellCommand(getTarget(), in, out, err, args);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private static String checkAbiArgument(String abi) {
