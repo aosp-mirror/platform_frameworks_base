@@ -46,6 +46,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -1165,7 +1166,8 @@ public class DisplayPolicy {
                                             continue;
                                         }
                                         calculateInsetsFrame(displayFrames, win, inOutFrame,
-                                                provider.source, provider.insetsSize
+                                                provider.source, provider.insetsSize,
+                                                lp.privateFlags, lp.gravity
                                         );
                                     }
                                 }
@@ -1240,21 +1242,25 @@ public class DisplayPolicy {
                                 provider.insetsSize != null
                                         ? (displayFrames, windowContainer, inOutFrame) -> {
                                             inOutFrame.inset(win.mGivenContentInsets);
+                                            final LayoutParams lp =
+                                                    win.mAttrs.forRotation(displayFrames.mRotation);
                                             final InsetsFrameProvider ifp =
-                                                    win.mAttrs.forRotation(displayFrames.mRotation)
-                                                            .providedInsets[index];
+                                                    lp.providedInsets[index];
                                             calculateInsetsFrame(displayFrames, windowContainer,
-                                                    inOutFrame, ifp.source, ifp.insetsSize);
+                                                    inOutFrame, ifp.source, ifp.insetsSize,
+                                                    lp.privateFlags, lp.gravity);
                                         } : null;
                         final TriConsumer<DisplayFrames, WindowContainer, Rect> imeFrameProvider =
                                 provider.imeInsetsSize != null
                                         ? (displayFrames, windowContainer, inOutFrame) -> {
                                             inOutFrame.inset(win.mGivenContentInsets);
+                                            final LayoutParams lp =
+                                                    win.mAttrs.forRotation(displayFrames.mRotation);
                                             final InsetsFrameProvider ifp =
-                                                    win.mAttrs.forRotation(displayFrames.mRotation)
-                                                            .providedInsets[index];
+                                                    lp.providedInsets[index];
                                             calculateInsetsFrame(displayFrames, windowContainer,
-                                                    inOutFrame, ifp.source, ifp.imeInsetsSize);
+                                                    inOutFrame, ifp.source, ifp.imeInsetsSize,
+                                                    lp.privateFlags, lp.gravity);
                                         } : null;
                         mDisplayContent.setInsetProvider(provider.type, win, frameProvider,
                                 imeFrameProvider);
@@ -1266,11 +1272,15 @@ public class DisplayPolicy {
     }
 
     private void calculateInsetsFrame(DisplayFrames df, WindowContainer container, Rect inOutFrame,
-            int source, Insets insetsSize) {
+            int source, Insets insetsSize, @LayoutParams.PrivateFlags int privateFlags,
+            int windowGravity) {
+        boolean extendByCutout = false;
         if (source == InsetsFrameProvider.SOURCE_DISPLAY) {
             inOutFrame.set(df.mUnrestricted);
         } else if (source == InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS) {
             inOutFrame.set(container.getBounds());
+        } else {
+            extendByCutout = (privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0;
         }
         if (insetsSize == null) {
             return;
@@ -1287,6 +1297,11 @@ public class DisplayPolicy {
             inOutFrame.top = inOutFrame.bottom - insetsSize.bottom;
         } else {
             inOutFrame.setEmpty();
+        }
+
+        if (extendByCutout) {
+            WindowLayout.extendFrameByCutout(windowGravity, df.mDisplayCutoutSafe,
+                    df.mUnrestricted, inOutFrame, sTmpRect);
         }
     }
 
