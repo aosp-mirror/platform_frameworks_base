@@ -180,9 +180,18 @@ class TaskFragmentAnimationSpec {
     Animation loadOpenAnimation(@NonNull RemoteAnimationTarget target,
             @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = target.mode != MODE_CLOSING;
-        final Animation animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
-                ? com.android.internal.R.anim.task_fragment_open_enter
-                : com.android.internal.R.anim.task_fragment_open_exit);
+        final Animation animation;
+        // Background color on TaskDisplayArea has already been set earlier in
+        // WindowContainer#getAnimationAdapter.
+        if (target.showBackdrop) {
+            animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                    ? com.android.internal.R.anim.task_fragment_clear_top_open_enter
+                    : com.android.internal.R.anim.task_fragment_clear_top_open_exit);
+        } else {
+            animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                    ? com.android.internal.R.anim.task_fragment_open_enter
+                    : com.android.internal.R.anim.task_fragment_open_exit);
+        }
         animation.initialize(target.localBounds.width(), target.localBounds.height(),
                 wholeAnimationBounds.width(), wholeAnimationBounds.height());
         animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);
@@ -192,9 +201,16 @@ class TaskFragmentAnimationSpec {
     Animation loadCloseAnimation(@NonNull RemoteAnimationTarget target,
             @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = target.mode != MODE_CLOSING;
-        final Animation animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
-                ? com.android.internal.R.anim.task_fragment_close_enter
-                : com.android.internal.R.anim.task_fragment_close_exit);
+        final Animation animation;
+        if (target.showBackdrop) {
+            animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                    ? com.android.internal.R.anim.task_fragment_clear_top_close_enter
+                    : com.android.internal.R.anim.task_fragment_clear_top_close_exit);
+        } else {
+            animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                    ? com.android.internal.R.anim.task_fragment_close_enter
+                    : com.android.internal.R.anim.task_fragment_close_exit);
+        }
         animation.initialize(target.localBounds.width(), target.localBounds.height(),
                 wholeAnimationBounds.width(), wholeAnimationBounds.height());
         animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);

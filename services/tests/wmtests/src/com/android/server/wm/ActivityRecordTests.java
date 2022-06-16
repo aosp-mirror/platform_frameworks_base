@@ -2820,11 +2820,17 @@ public class ActivityRecordTests extends WindowTestsBase {
                 true, false, false, false);
         waitUntilHandlersIdle();
 
+        final WindowState startingWindow = activityTop.mStartingWindow;
+        assertNotNull(startingWindow);
+
         // Make the top one invisible, and try transferring the starting window from the top to the
         // bottom one.
         activityTop.setVisibility(false, false);
         activityBottom.transferStartingWindowFromHiddenAboveTokenIfNeeded();
         waitUntilHandlersIdle();
+
+        // Expect getFrozenInsetsState will be null when transferring the starting window.
+        assertNull(startingWindow.getFrozenInsetsState());
 
         // Assert that the bottom window now has the starting window.
         assertNoStartingWindow(activityTop);

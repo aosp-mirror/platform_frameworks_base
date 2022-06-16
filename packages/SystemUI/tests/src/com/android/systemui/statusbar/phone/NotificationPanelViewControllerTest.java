@@ -60,6 +60,7 @@ import android.view.View;
 import android.view.ViewParent;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
+import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -349,6 +350,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private View mQsHeader;
     @Mock
     private ViewParent mViewParent;
+    @Mock
+    private ViewTreeObserver mViewTreeObserver;
     private NotificationPanelViewController.PanelEventsEmitter mPanelEventsEmitter;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -474,6 +477,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
             return null;
         }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
 
+        when(mView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
         when(mView.getParent()).thenReturn(mViewParent);
         when(mQs.getHeader()).thenReturn(mQsHeader);
 
@@ -1296,6 +1300,43 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 false/*goingToFullShade*/, SHADE/*oldStatusBarState*/);
     }
 
+    @Test
+    public void getMaxPanelHeight_expanding_inSplitShade_returnsSplitShadeFullTransitionDistance() {
+        int splitShadeFullTransitionDistance = 123456;
+        enableSplitShade(true);
+        setSplitShadeFullTransitionDistance(splitShadeFullTransitionDistance);
+        mNotificationPanelViewController.expandWithQs();
+
+        int maxPanelHeight = mNotificationPanelViewController.getMaxPanelHeight();
+
+        assertThat(maxPanelHeight).isEqualTo(splitShadeFullTransitionDistance);
+    }
+
+    @Test
+    public void getMaxPanelHeight_expandingSplitShade_keyguard_returnsNonSplitShadeValue() {
+        mStatusBarStateController.setState(KEYGUARD);
+        int splitShadeFullTransitionDistance = 123456;
+        enableSplitShade(true);
+        setSplitShadeFullTransitionDistance(splitShadeFullTransitionDistance);
+        mNotificationPanelViewController.expandWithQs();
+
+        int maxPanelHeight = mNotificationPanelViewController.getMaxPanelHeight();
+
+        assertThat(maxPanelHeight).isNotEqualTo(splitShadeFullTransitionDistance);
+    }
+
+    @Test
+    public void getMaxPanelHeight_expanding_notSplitShade_returnsNonSplitShadeValue() {
+        int splitShadeFullTransitionDistance = 123456;
+        enableSplitShade(false);
+        setSplitShadeFullTransitionDistance(splitShadeFullTransitionDistance);
+        mNotificationPanelViewController.expandWithQs();
+
+        int maxPanelHeight = mNotificationPanelViewController.getMaxPanelHeight();
+
+        assertThat(maxPanelHeight).isNotEqualTo(splitShadeFullTransitionDistance);
+    }
+
     private static MotionEvent createMotionEvent(int x, int y, int action) {
         return MotionEvent.obtain(
                 /* downTime= */ 0, /* eventTime= */ 0, action, x, y, /* metaState= */ 0);
@@ -1354,5 +1395,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
 
     private void onTouchEvent(MotionEvent ev) {
         mTouchHandler.onTouch(mView, ev);
+    }
+
+    private void setSplitShadeFullTransitionDistance(int splitShadeFullTransitionDistance) {
+        when(mResources.getDimensionPixelSize(R.dimen.split_shade_full_transition_distance))
+                .thenReturn(splitShadeFullTransitionDistance);
+        mNotificationPanelViewController.updateResources();
     }
 }

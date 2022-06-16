@@ -59,7 +59,6 @@ import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.scrim.ScrimView;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -121,8 +120,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
-    @Mock
-    private PanelExpansionStateManager mPanelExpansionStateManager;
     @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -237,7 +234,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
-                mPanelExpansionStateManager,
                 mKeyguardUnlockAnimationController,
                 mStatusBarKeyguardViewManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
@@ -860,7 +856,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
-                mPanelExpansionStateManager,
                 mKeyguardUnlockAnimationController,
                 mStatusBarKeyguardViewManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);

@@ -328,7 +328,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 adapter.setCallingPidUid(caller.mPid, caller.mUid);
                 dc.prepareAppTransition(type);
-                dc.mAppTransition.overridePendingAppTransitionRemote(adapter, true /* sync */);
+                dc.mAppTransition.overridePendingAppTransitionRemote(adapter, true /* sync */,
+                        false /* isActivityEmbedding */);
                 syncId = startSyncWithOrganizer(callback);
                 applyTransaction(t, syncId, null /* transition */, caller);
                 setSyncReady(syncId);

@@ -727,4 +727,25 @@
         <item>com.android.keyguard</item>
         <item>com.android.systemui</item>
     </string-array>
+
+    <!-- The thresholds which determine the color used by the AQI dream overlay.
+         NOTE: This must always be kept sorted from low to high -->
+    <integer-array name="config_dreamAqiThresholds">
+        <item>-1</item>
+        <item>50</item>
+        <item>100</item>
+        <item>150</item>
+        <item>200</item>
+        <item>300</item>
+    </integer-array>
+
+    <!-- The color values which correspond to the thresholds above -->
+    <integer-array name="config_dreamAqiColorValues">
+        <item>@color/dream_overlay_aqi_good</item>
+        <item>@color/dream_overlay_aqi_moderate</item>
+        <item>@color/dream_overlay_aqi_unhealthy_sensitive</item>
+        <item>@color/dream_overlay_aqi_unhealthy</item>
+        <item>@color/dream_overlay_aqi_very_unhealthy</item>
+        <item>@color/dream_overlay_aqi_hazardous</item>
+    </integer-array>
 </resources>
