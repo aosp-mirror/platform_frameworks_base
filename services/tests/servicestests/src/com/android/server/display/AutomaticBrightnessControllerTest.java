@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -258,29 +259,36 @@ public class AutomaticBrightnessControllerTest {
     @Test
     public void testRecalculateSplines() throws Exception {
         // Enabling the light sensor, and setting the ambient lux to 1000
+        int currentLux = 1000;
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
         verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(mLightSensor),
                 eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
         SensorEventListener listener = listenerCaptor.getValue();
-        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 1000));
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, currentLux));
 
-        //Setting the brightnessFloat to 0.5f
-        float currentBrightnessFloat = 0.5f;
-        when(mBrightnessMappingStrategy.getBrightness(1000,
-                null, ApplicationInfo.CATEGORY_UNDEFINED)).thenReturn(currentBrightnessFloat);
+        // User sets brightness to 0.5f
+        when(mBrightnessMappingStrategy.getBrightness(currentLux,
+                null, ApplicationInfo.CATEGORY_UNDEFINED)).thenReturn(0.5f);
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration */,
-                currentBrightnessFloat /* brightness */, false /* userChangedBrightness */,
-                0 /* adjustment */, false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
+                0.5f /* brightness */, true /* userChangedBrightness */, 0 /* adjustment */,
+                false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
 
-        // Adjusting spline, and accordingly remapping the current 0.5f brightnessFloat to 0.3f
-        float updatedBrightnessFloat = 0.3f;
-        when(mBrightnessMappingStrategy.getBrightness(1000,
-                null, ApplicationInfo.CATEGORY_UNDEFINED)).thenReturn(updatedBrightnessFloat);
-        float[] adjustments = new float[]{0.2f, 0.5f};
+        //Recalculating the spline with RBC enabled, verifying that the short term model is reset,
+        //and the interaction is learnt in short term model
+        float[] adjustments = new float[]{0.2f, 0.6f};
         mController.recalculateSplines(true, adjustments);
+        verify(mBrightnessMappingStrategy).clearUserDataPoints();
         verify(mBrightnessMappingStrategy).recalculateSplines(true, adjustments);
-        assertEquals(mController.getAutomaticScreenBrightness(), updatedBrightnessFloat, EPSILON);
+        verify(mBrightnessMappingStrategy, times(2)).addUserDataPoint(currentLux, 0.5f);
+
+        clearInvocations(mBrightnessMappingStrategy);
+
+        // Verify short term model is not learnt when RBC is disabled
+        mController.recalculateSplines(false, adjustments);
+        verify(mBrightnessMappingStrategy).clearUserDataPoints();
+        verify(mBrightnessMappingStrategy).recalculateSplines(false, adjustments);
+        verifyNoMoreInteractions(mBrightnessMappingStrategy);
     }
 
     @Test
