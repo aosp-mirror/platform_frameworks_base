@@ -207,16 +207,6 @@ public final class DisplayManagerGlobal {
      */
     @UnsupportedAppUsage
     public int[] getDisplayIds() {
-        return getDisplayIds(/* includeDisabledDisplays= */ false);
-    }
-
-    /**
-     * Gets all valid logical display ids and invalid ones if specified.
-     *
-     * @return An array containing all display ids.
-     */
-    @UnsupportedAppUsage
-    public int[] getDisplayIds(boolean includeDisabledDisplays) {
         try {
             synchronized (mLock) {
                 if (USE_CACHE) {
@@ -225,8 +215,7 @@ public final class DisplayManagerGlobal {
                     }
                 }
 
-                int[] displayIds =
-                        mDm.getDisplayIds(includeDisabledDisplays);
+                int[] displayIds = mDm.getDisplayIds();
                 if (USE_CACHE) {
                     mDisplayIdCache = displayIds;
                 }

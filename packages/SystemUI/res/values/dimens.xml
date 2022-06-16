@@ -1251,6 +1251,15 @@
     <!-- Maximum overshoot for the pulse expansion -->
     <dimen name="pulse_expansion_max_top_overshoot">32dp</dimen>
 
+    <!-- The drag amount required for the split shade to fully expand. -->
+    <dimen name="split_shade_full_transition_distance">200dp</dimen>
+    <!--
+        The drag amount required for the scrim to fully fade in when expanding the split shade.
+        Currently setting it a little longer than the full shade transition distance, to avoid
+        having a state where the screen is fully black without any content showing.
+    -->
+    <dimen name="split_shade_scrim_transition_distance">300dp</dimen>
+
     <!-- Alpha in duration in ms for the auth ripple to become fully vislble. If set to 0,
          it is immediately visible. -->
     <integer name="auth_ripple_alpha_in_duration">100</integer>
@@ -1498,6 +1507,10 @@
     <dimen name="dream_overlay_complication_margin">0dp</dimen>
 
     <dimen name="dream_overlay_y_offset">80dp</dimen>
+
+    <dimen name="dream_aqi_badge_corner_radius">28dp</dimen>
+    <dimen name="dream_aqi_badge_padding_vertical">6dp</dimen>
+    <dimen name="dream_aqi_badge_padding_horizontal">16dp</dimen>
 
     <dimen name="status_view_margin_horizontal">0dp</dimen>
 

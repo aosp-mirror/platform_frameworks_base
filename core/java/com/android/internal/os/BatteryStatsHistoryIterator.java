@@ -62,7 +62,7 @@ public class BatteryStatsHistoryIterator {
 
     void readHistoryDelta(Parcel src, BatteryStats.HistoryItem cur) {
         int firstToken = src.readInt();
-        int deltaTimeToken = firstToken & BatteryStatsImpl.DELTA_TIME_MASK;
+        int deltaTimeToken = firstToken & BatteryStatsHistory.DELTA_TIME_MASK;
         cur.cmd = BatteryStats.HistoryItem.CMD_UPDATE;
         cur.numReadInts = 1;
         if (DEBUG) {
@@ -70,13 +70,13 @@ public class BatteryStatsHistoryIterator {
                     + " deltaTimeToken=" + deltaTimeToken);
         }
 
-        if (deltaTimeToken < BatteryStatsImpl.DELTA_TIME_ABS) {
+        if (deltaTimeToken < BatteryStatsHistory.DELTA_TIME_ABS) {
             cur.time += deltaTimeToken;
-        } else if (deltaTimeToken == BatteryStatsImpl.DELTA_TIME_ABS) {
+        } else if (deltaTimeToken == BatteryStatsHistory.DELTA_TIME_ABS) {
             cur.readFromParcel(src);
             if (DEBUG) Slog.i(TAG, "READ DELTA: ABS time=" + cur.time);
             return;
-        } else if (deltaTimeToken == BatteryStatsImpl.DELTA_TIME_INT) {
+        } else if (deltaTimeToken == BatteryStatsHistory.DELTA_TIME_INT) {
             int delta = src.readInt();
             cur.time += delta;
             cur.numReadInts += 1;
@@ -89,7 +89,7 @@ public class BatteryStatsHistoryIterator {
         }
 
         final int batteryLevelInt;
-        if ((firstToken & BatteryStatsImpl.DELTA_BATTERY_LEVEL_FLAG) != 0) {
+        if ((firstToken & BatteryStatsHistory.DELTA_BATTERY_LEVEL_FLAG) != 0) {
             batteryLevelInt = src.readInt();
             readBatteryLevelInt(batteryLevelInt, cur);
             cur.numReadInts += 1;
@@ -104,16 +104,16 @@ public class BatteryStatsHistoryIterator {
             batteryLevelInt = 0;
         }
 
-        if ((firstToken & BatteryStatsImpl.DELTA_STATE_FLAG) != 0) {
+        if ((firstToken & BatteryStatsHistory.DELTA_STATE_FLAG) != 0) {
             int stateInt = src.readInt();
-            cur.states = (firstToken & BatteryStatsImpl.DELTA_STATE_MASK) | (stateInt
-                    & (~BatteryStatsImpl.STATE_BATTERY_MASK));
-            cur.batteryStatus = (byte) ((stateInt >> BatteryStatsImpl.STATE_BATTERY_STATUS_SHIFT)
-                    & BatteryStatsImpl.STATE_BATTERY_STATUS_MASK);
-            cur.batteryHealth = (byte) ((stateInt >> BatteryStatsImpl.STATE_BATTERY_HEALTH_SHIFT)
-                    & BatteryStatsImpl.STATE_BATTERY_HEALTH_MASK);
-            cur.batteryPlugType = (byte) ((stateInt >> BatteryStatsImpl.STATE_BATTERY_PLUG_SHIFT)
-                    & BatteryStatsImpl.STATE_BATTERY_PLUG_MASK);
+            cur.states = (firstToken & BatteryStatsHistory.DELTA_STATE_MASK) | (stateInt
+                    & (~BatteryStatsHistory.STATE_BATTERY_MASK));
+            cur.batteryStatus = (byte) ((stateInt >> BatteryStatsHistory.STATE_BATTERY_STATUS_SHIFT)
+                    & BatteryStatsHistory.STATE_BATTERY_STATUS_MASK);
+            cur.batteryHealth = (byte) ((stateInt >> BatteryStatsHistory.STATE_BATTERY_HEALTH_SHIFT)
+                    & BatteryStatsHistory.STATE_BATTERY_HEALTH_MASK);
+            cur.batteryPlugType = (byte) ((stateInt >> BatteryStatsHistory.STATE_BATTERY_PLUG_SHIFT)
+                    & BatteryStatsHistory.STATE_BATTERY_PLUG_MASK);
             switch (cur.batteryPlugType) {
                 case 1:
                     cur.batteryPlugType = BatteryManager.BATTERY_PLUGGED_AC;
@@ -135,11 +135,11 @@ public class BatteryStatsHistoryIterator {
                         + " states=0x" + Integer.toHexString(cur.states));
             }
         } else {
-            cur.states = (firstToken & BatteryStatsImpl.DELTA_STATE_MASK) | (cur.states
-                    & (~BatteryStatsImpl.STATE_BATTERY_MASK));
+            cur.states = (firstToken & BatteryStatsHistory.DELTA_STATE_MASK) | (cur.states
+                    & (~BatteryStatsHistory.STATE_BATTERY_MASK));
         }
 
-        if ((firstToken & BatteryStatsImpl.DELTA_STATE2_FLAG) != 0) {
+        if ((firstToken & BatteryStatsHistory.DELTA_STATE2_FLAG) != 0) {
             cur.states2 = src.readInt();
             if (DEBUG) {
                 Slog.i(TAG, "READ DELTA: states2=0x"
@@ -147,7 +147,7 @@ public class BatteryStatsHistoryIterator {
             }
         }
 
-        if ((firstToken & BatteryStatsImpl.DELTA_WAKELOCK_FLAG) != 0) {
+        if ((firstToken & BatteryStatsHistory.DELTA_WAKELOCK_FLAG) != 0) {
             final int indexes = src.readInt();
             final int wakeLockIndex = indexes & 0xffff;
             final int wakeReasonIndex = (indexes >> 16) & 0xffff;
@@ -167,7 +167,7 @@ public class BatteryStatsHistoryIterator {
             cur.wakeReasonTag = null;
         }
 
-        if ((firstToken & BatteryStatsImpl.DELTA_EVENT_FLAG) != 0) {
+        if ((firstToken & BatteryStatsHistory.DELTA_EVENT_FLAG) != 0) {
             cur.eventTag = cur.localEventTag;
             final int codeAndIndex = src.readInt();
             cur.eventCode = (codeAndIndex & 0xffff);
@@ -187,14 +187,14 @@ public class BatteryStatsHistoryIterator {
             cur.eventCode = BatteryStats.HistoryItem.EVENT_NONE;
         }
 
-        if ((batteryLevelInt & BatteryStatsImpl.BATTERY_DELTA_LEVEL_FLAG) != 0) {
+        if ((batteryLevelInt & BatteryStatsHistory.BATTERY_DELTA_LEVEL_FLAG) != 0) {
             cur.stepDetails = mReadHistoryStepDetails;
             cur.stepDetails.readFromParcel(src);
         } else {
             cur.stepDetails = null;
         }
 
-        if ((firstToken & BatteryStatsImpl.DELTA_BATTERY_CHARGE_FLAG) != 0) {
+        if ((firstToken & BatteryStatsHistory.DELTA_BATTERY_CHARGE_FLAG) != 0) {
             cur.batteryChargeUah = src.readInt();
         }
         cur.modemRailChargeMah = src.readDouble();
@@ -206,10 +206,10 @@ public class BatteryStatsHistoryIterator {
             return false;
         }
 
-        if ((index & BatteryStatsImpl.TAG_FIRST_OCCURRENCE_FLAG) != 0) {
+        if ((index & BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG) != 0) {
             BatteryStats.HistoryTag tag = new BatteryStats.HistoryTag();
             tag.readFromParcel(src);
-            tag.poolIdx = index & ~BatteryStatsImpl.TAG_FIRST_OCCURRENCE_FLAG;
+            tag.poolIdx = index & ~BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG;
             mHistoryTags.put(tag.poolIdx, tag);
 
             outTag.setTo(tag);

@@ -16,9 +16,15 @@
 
 package com.android.systemui.dreams.complication.dagger;
 
+import android.content.Context;
+
+import com.android.systemui.R;
 import com.android.systemui.dagger.SystemUIBinder;
 
+import javax.inject.Named;
+
 import dagger.Module;
+import dagger.Provides;
 
 /**
  * Module for all components with corresponding dream layer complications registered in
@@ -30,6 +36,17 @@ import dagger.Module;
         },
         subcomponents = {
                 DreamWeatherComplicationComponent.class,
+                DreamAirQualityComplicationComponent.class,
         })
 public interface RegisteredComplicationsModule {
+    String SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT = "smartspace_trampoline_activity";
+
+    /**
+     * Provides the smartspace trampoline activity component.
+     */
+    @Provides
+    @Named(SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT)
+    static String provideSmartspaceTrampolineActivityComponent(Context context) {
+        return context.getString(R.string.config_smartspaceTrampolineActivityComponent);
+    }
 }

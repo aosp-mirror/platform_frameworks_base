@@ -43,6 +43,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.HandlerThread;
 import android.os.PowerManager;
+import android.os.Process;
 import android.util.Log;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -118,6 +119,7 @@ public final class BackgroundDexOptServiceUnitTest {
 
     @Before
     public void setUp() throws Exception {
+        when(mInjector.getCallingUid()).thenReturn(Process.FIRST_APPLICATION_UID);
         when(mInjector.getContext()).thenReturn(mContext);
         when(mInjector.getDexOptHelper()).thenReturn(mDexOptHelper);
         when(mInjector.getDexManager()).thenReturn(mDexManager);
@@ -452,6 +454,21 @@ public final class BackgroundDexOptServiceUnitTest {
     public void testCancelShellCommandWithInvalidUid() {
         // Test uid cannot execute the command APIs
         assertThrows(SecurityException.class, () -> mService.cancelBackgroundDexoptJob());
+    }
+
+    @Test
+    public void testDisableJobSchedulerJobs() {
+        when(mInjector.getCallingUid()).thenReturn(Process.SHELL_UID);
+        mService.setDisableJobSchedulerJobs(true);
+        assertThat(mService.onStartJob(mJobServiceForIdle, mJobParametersForIdle)).isFalse();
+        verify(mDexOptHelper, never()).performDexOpt(any());
+        verify(mDexOptHelper, never()).performDexOptWithStatus(any());
+    }
+
+    @Test
+    public void testSetDisableJobSchedulerJobsWithInvalidUid() {
+        // Test uid cannot execute the command APIs
+        assertThrows(SecurityException.class, () -> mService.setDisableJobSchedulerJobs(true));
     }
 
     private void initUntilBootCompleted() {

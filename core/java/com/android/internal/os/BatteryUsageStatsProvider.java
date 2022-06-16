@@ -227,7 +227,7 @@ public class BatteryUsageStatsProvider {
             final File systemDir =
                     batteryStatsImpl.mBatteryStatsHistory.getHistoryDirectory().getParentFile();
             final BatteryStatsHistory batteryStatsHistory =
-                    new BatteryStatsHistory(batteryStatsImpl, systemDir, historyBuffer);
+                    new BatteryStatsHistory(historyBuffer, systemDir, null);
 
             batteryUsageStatsBuilder.setBatteryHistory(batteryStatsHistory);
         }

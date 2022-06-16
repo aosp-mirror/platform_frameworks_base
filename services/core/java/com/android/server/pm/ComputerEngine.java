@@ -3162,30 +3162,31 @@ public class ComputerEngine implements Computer {
 
     public boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId) {
         PackageStateInternal ps = getPackageStateInternal(pkg.getPackageName());
-        return shouldFilterApplication(ps, callingUid,
-                userId);
+        return shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId);
     }
 
-    public boolean filterAppAccess(String packageName, int callingUid, int userId) {
+    public boolean filterAppAccess(String packageName, int callingUid, int userId,
+            boolean filterUninstalled) {
         PackageStateInternal ps = getPackageStateInternal(packageName);
-        return shouldFilterApplication(ps, callingUid,
-                userId);
+        return shouldFilterApplication(
+                ps, callingUid, null /* component */, TYPE_UNKNOWN, userId, filterUninstalled);
     }
 
     public boolean filterAppAccess(int uid, int callingUid) {
         final int userId = UserHandle.getUserId(uid);
         final int appId = UserHandle.getAppId(uid);
         final Object setting = mSettings.getSettingBase(appId);
-
+        if (setting == null) {
+            return true;
+        }
         if (setting instanceof SharedUserSetting) {
-            return shouldFilterApplication(
+            return shouldFilterApplicationIncludingUninstalled(
                     (SharedUserSetting) setting, callingUid, userId);
-        } else if (setting == null
-                || setting instanceof PackageStateInternal) {
-            return shouldFilterApplication(
+        } else if (setting instanceof PackageStateInternal) {
+            return shouldFilterApplicationIncludingUninstalled(
                     (PackageStateInternal) setting, callingUid, userId);
         }
-        return false;
+        return true;
     }
 
     public void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState) {

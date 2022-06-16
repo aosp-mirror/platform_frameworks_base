@@ -130,7 +130,6 @@ public interface Computer extends PackageDataSnapshot {
      */
     ActivityInfo getActivityInfoInternal(ComponentName component, long flags,
             int filterCallingUid, int userId);
-    @Override
     AndroidPackage getPackage(String packageName);
     AndroidPackage getPackage(int uid);
     ApplicationInfo generateApplicationInfoFromSettings(String packageName, long flags,
@@ -305,7 +304,8 @@ public interface Computer extends PackageDataSnapshot {
     SigningDetails getSigningDetails(@NonNull String packageName);
     SigningDetails getSigningDetails(int uid);
     boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId);
-    boolean filterAppAccess(String packageName, int callingUid, int userId);
+    boolean filterAppAccess(String packageName, int callingUid, int userId,
+            boolean filterUninstalled);
     boolean filterAppAccess(int uid, int callingUid);
     void dump(int type, FileDescriptor fd, PrintWriter pw, DumpState dumpState);
     PackageManagerService.FindPreferredActivityBodyResult findPreferredActivityInternal(
@@ -317,7 +317,6 @@ public interface Computer extends PackageDataSnapshot {
     PreferredIntentResolver getPreferredActivities(@UserIdInt int userId);
 
     @NonNull
-    @Override
     ArrayMap<String, ? extends PackageStateInternal> getPackageStates();
 
     @Nullable
@@ -644,11 +643,9 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     List<? extends PackageStateInternal> getVolumePackages(@NonNull String volumeUuid);
 
-    @Override
     @NonNull
     UserInfo[] getUserInfos();
 
-    @Override
     @NonNull
     Collection<SharedUserSetting> getAllSharedUsers();
 }

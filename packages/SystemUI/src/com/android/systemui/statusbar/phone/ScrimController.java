@@ -55,7 +55,6 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.notification.stack.ViewState;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.AlarmTimeout;
@@ -265,7 +264,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             KeyguardUpdateMonitor keyguardUpdateMonitor, DockManager dockManager,
             ConfigurationController configurationController, @Main Executor mainExecutor,
             ScreenOffAnimationController screenOffAnimationController,
-            PanelExpansionStateManager panelExpansionStateManager,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mScrimStateListener = lightBarController::setScrimState;
@@ -305,10 +303,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                 ScrimController.this.onThemeChanged();
             }
         });
-        panelExpansionStateManager.addExpansionListener(
-                event -> setRawPanelExpansionFraction(event.getFraction())
-        );
-
         mColors = new GradientColors();
     }
 
@@ -553,13 +547,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      *
      * The expansion fraction is tied to the scrim opacity.
      *
-     * See {@link PanelExpansionListener#onPanelExpansionChanged}.
+     * See {@link ScrimShadeTransitionController#onPanelExpansionChanged}.
      *
      * @param rawPanelExpansionFraction From 0 to 1 where 0 means collapsed and 1 expanded.
      */
-     @VisibleForTesting
-     void setRawPanelExpansionFraction(
-            @FloatRange(from = 0.0, to = 1.0) float rawPanelExpansionFraction) {
+    public void setRawPanelExpansionFraction(
+             @FloatRange(from = 0.0, to = 1.0) float rawPanelExpansionFraction) {
         if (isNaN(rawPanelExpansionFraction)) {
             throw new IllegalArgumentException("rawPanelExpansionFraction should not be NaN");
         }

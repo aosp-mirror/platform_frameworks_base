@@ -4184,6 +4184,11 @@ public final class Settings implements Watchable, Snappable {
                         UNINSTALL_REASON_USER_TYPE : UNINSTALL_REASON_UNKNOWN;
                 ps.setUninstallReason(uninstallReason, userHandle);
                 if (shouldReallyInstall) {
+                    if (ps.getAppId() < 0) {
+                        // No need to create data directories for packages with invalid app id
+                        // such as APEX
+                        continue;
+                    }
                     // Need to create a data directory for all apps installed for this user.
                     // Accumulate all required args and call the installer after mPackages lock
                     // has been released

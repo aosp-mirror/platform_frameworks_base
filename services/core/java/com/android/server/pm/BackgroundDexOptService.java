@@ -147,6 +147,9 @@ public final class BackgroundDexOptService {
     // Tells whether post boot update is completed or not.
     @GuardedBy("mLock") private boolean mFinishedPostBootUpdate;
 
+    // True if JobScheduler invocations of dexopt have been disabled.
+    @GuardedBy("mLock") private boolean mDisableJobSchedulerJobs;
+
     @GuardedBy("mLock") @Status private int mLastExecutionStatus = STATUS_OK;
 
     @GuardedBy("mLock") private long mLastExecutionStartTimeMs;
@@ -227,6 +230,8 @@ public final class BackgroundDexOptService {
             writer.println(mDexOptCancellingThread);
             writer.print("mFinishedPostBootUpdate:");
             writer.println(mFinishedPostBootUpdate);
+            writer.print("mDisableJobSchedulerJobs:");
+            writer.println(mDisableJobSchedulerJobs);
             writer.print("mLastExecutionStatus:");
             writer.println(mLastExecutionStatus);
             writer.print("mLastExecutionStartTimeMs:");
@@ -298,6 +303,22 @@ public final class BackgroundDexOptService {
         Binder.withCleanCallingIdentity(() -> cancelDexOptAndWaitForCompletion());
     }
 
+    /**
+     * Sets a flag that disables jobs from being started from JobScheduler.
+     *
+     * This state is not persistent and is only retained in this service instance.
+     *
+     * This is intended for shell command use and only root or shell users can call it.
+     *
+     * @param disable True if JobScheduler invocations should be disabled, false otherwise.
+     */
+    public void setDisableJobSchedulerJobs(boolean disable) {
+        enforceRootOrShell();
+        synchronized (mLock) {
+            mDisableJobSchedulerJobs = disable;
+        }
+    }
+
     /** Adds listener for package update */
     public void addPackagesUpdatedListener(PackagesUpdatedListener listener) {
         synchronized (mLock) {
@@ -351,6 +372,10 @@ public final class BackgroundDexOptService {
         mThermalStatusCutoff = mInjector.getDexOptThermalCutoff();
 
         synchronized (mLock) {
+            if (mDisableJobSchedulerJobs) {
+                Slog.i(TAG, "JobScheduler invocations disabled");
+                return false;
+            }
             if (mDexOptThread != null && mDexOptThread.isAlive()) {
                 // Other task is already running.
                 return false;
@@ -475,7 +500,7 @@ public final class BackgroundDexOptService {
     }
 
     private void enforceRootOrShell() {
-        int uid = Binder.getCallingUid();
+        int uid = mInjector.getCallingUid();
         if (uid != Process.ROOT_UID && uid != Process.SHELL_UID) {
             throw new SecurityException("Should be shell or root user");
         }
@@ -972,6 +997,10 @@ public final class BackgroundDexOptService {
             mContext = context;
             mDexManager = dexManager;
             mPackageManagerService = pm;
+        }
+
+        int getCallingUid() {
+            return Binder.getCallingUid();
         }
 
         Context getContext() {

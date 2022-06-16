@@ -41,7 +41,7 @@ public interface DreamClockDateComplicationModule {
             "clock_date_complication_layout_params";
     // Order weight of insert into parent container
     //TODO(b/217199227): move to a single location.
-    int INSERT_ORDER_WEIGHT = 2;
+    int INSERT_ORDER_WEIGHT = 3;
 
     /**
      * Provides the complication view.
@@ -66,6 +66,6 @@ public interface DreamClockDateComplicationModule {
                 ComplicationLayoutParams.POSITION_BOTTOM
                         | ComplicationLayoutParams.POSITION_START,
                 ComplicationLayoutParams.DIRECTION_END,
-                INSERT_ORDER_WEIGHT);
+                INSERT_ORDER_WEIGHT, /* snapToGuide= */ true);
     }
 }

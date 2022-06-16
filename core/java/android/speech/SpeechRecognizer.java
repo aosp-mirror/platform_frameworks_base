@@ -96,6 +96,23 @@ public class SpeechRecognizer {
     public static final String CONFIDENCE_SCORES = "confidence_scores";
 
     /**
+     * Key used to retrieve an ArrayList&lt;{@link AlternativeSpans}&gt; from the {@link Bundle}
+     * passed to the {@link RecognitionListener#onResults(Bundle)} and
+     * {@link RecognitionListener#onPartialResults(Bundle)} methods. The list should be the same
+     * size as the ArrayList provided in {@link #RESULTS_RECOGNITION}.
+     *
+     * <p> A single {@link SpeechRecognizer} result is represented as a {@link String}. For a
+     * specific span (substring) of the originally recognized result string the recognizer provides
+     * a list of alternative hypotheses in the form of an {@link AlternativeSpan} object.
+     * Alternatives for different spans of a result string are listed in an {@link AlternativeSpans}
+     * object. Each item from the ArrayList retrieved by this key corresponds to a single result
+     * string provided in {@link #RESULTS_RECOGNITION}.
+     *
+     * <p> This value is optional and might not be provided.
+     */
+    public static final String RESULTS_ALTERNATIVES = "results_alternatives";
+
+    /**
      * The reason speech recognition failed.
      *
      * @hide

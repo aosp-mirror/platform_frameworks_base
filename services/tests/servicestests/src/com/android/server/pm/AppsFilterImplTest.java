@@ -56,7 +56,6 @@ import com.android.server.pm.pkg.component.ParsedInstrumentationImpl;
 import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
 import com.android.server.pm.pkg.component.ParsedProviderImpl;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.snapshot.PackageDataSnapshot;
 import com.android.server.utils.WatchableTester;
 
 import org.junit.Before;
@@ -102,7 +101,7 @@ public class AppsFilterImplTest {
     @Mock
     FeatureConfig mFeatureConfigMock;
     @Mock
-    PackageDataSnapshot mSnapshot;
+    Computer mSnapshot;
     @Mock
     Handler mMockHandler;
     @Mock

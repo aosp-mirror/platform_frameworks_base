@@ -16,7 +16,6 @@
 
 package com.android.internal.os;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.BatteryStats;
 import android.os.Parcel;
@@ -36,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * BatteryStatsHistory encapsulates battery history files.
@@ -60,12 +60,51 @@ import java.util.Set;
 public class BatteryStatsHistory {
     private static final boolean DEBUG = false;
     private static final String TAG = "BatteryStatsHistory";
+
+    // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
+    public static final int VERSION = 208;
+
     public static final String HISTORY_DIR = "battery-history";
     public static final String FILE_SUFFIX = ".bin";
     private static final int MIN_FREE_SPACE = 100 * 1024 * 1024;
+    // Part of initial delta int that specifies the time delta.
+    public static final int DELTA_TIME_MASK = 0x7ffff;
+    public static final int DELTA_TIME_LONG = 0x7ffff;   // The delta is a following long
+    public static final int DELTA_TIME_INT = 0x7fffe;    // The delta is a following int
+    public static final int DELTA_TIME_ABS = 0x7fffd;    // Following is an entire abs update.
+    // Flag in delta int: a new battery level int follows.
+    public static final int DELTA_BATTERY_LEVEL_FLAG  = 0x00080000;
+    // Flag in delta int: a new full state and battery status int follows.
+    public static final int DELTA_STATE_FLAG          = 0x00100000;
+    // Flag in delta int: a new full state2 int follows.
+    public static final int DELTA_STATE2_FLAG         = 0x00200000;
+    // Flag in delta int: contains a wakelock or wakeReason tag.
+    public static final int DELTA_WAKELOCK_FLAG       = 0x00400000;
+    // Flag in delta int: contains an event description.
+    public static final int DELTA_EVENT_FLAG          = 0x00800000;
+    // Flag in delta int: contains the battery charge count in uAh.
+    public static final int DELTA_BATTERY_CHARGE_FLAG = 0x01000000;
+    // These upper bits are the frequently changing state bits.
+    public static final int DELTA_STATE_MASK          = 0xfe000000;
+    // These are the pieces of battery state that are packed in to the upper bits of
+    // the state int that have been packed in to the first delta int.  They must fit
+    // in STATE_BATTERY_MASK.
+    public static final int STATE_BATTERY_MASK         = 0xff000000;
+    public static final int STATE_BATTERY_STATUS_MASK  = 0x00000007;
+    public static final int STATE_BATTERY_STATUS_SHIFT = 29;
+    public static final int STATE_BATTERY_HEALTH_MASK  = 0x00000007;
+    public static final int STATE_BATTERY_HEALTH_SHIFT = 26;
+    public static final int STATE_BATTERY_PLUG_MASK    = 0x00000003;
+    public static final int STATE_BATTERY_PLUG_SHIFT   = 24;
+    // We use the low bit of the battery state int to indicate that we have full details
+    // from a battery level change.
+    public static final int BATTERY_DELTA_LEVEL_FLAG   = 0x00000001;
+    // Flag in history tag index: indicates that this is the first occurrence of this tag,
+    // therefore the tag value is written in the parcel
+    public static final int TAG_FIRST_OCCURRENCE_FLAG = 0x8000;
 
     @Nullable
-    private final BatteryStatsImpl mStats;
+    private final Supplier<Integer> mMaxHistoryFiles;
     private final Parcel mHistoryBuffer;
     private final File mHistoryDir;
     /**
@@ -107,15 +146,17 @@ public class BatteryStatsHistory {
 
     /**
      * Constructor
-     * @param stats BatteryStatsImpl object.
-     * @param systemDir typically /data/system
-     * @param historyBuffer The in-memory history buffer.
+     *
+     * @param historyBuffer   The in-memory history buffer.
+     * @param systemDir       typically /data/system
+     * @param maxHistoryFiles the largest number of history buffer files to keep
      */
-    public BatteryStatsHistory(@NonNull BatteryStatsImpl stats, File systemDir,
-            Parcel historyBuffer) {
-        mStats = stats;
+    public BatteryStatsHistory(Parcel historyBuffer, File systemDir,
+            Supplier<Integer> maxHistoryFiles) {
         mHistoryBuffer = historyBuffer;
         mHistoryDir = new File(systemDir, HISTORY_DIR);
+        mMaxHistoryFiles = maxHistoryFiles;
+
         mHistoryDir.mkdirs();
         if (!mHistoryDir.exists()) {
             Slog.wtf(TAG, "HistoryDir does not exist:" + mHistoryDir.getPath());
@@ -157,9 +198,9 @@ public class BatteryStatsHistory {
      * @param historyBuffer the history buffer
      */
     public BatteryStatsHistory(Parcel historyBuffer) {
-        mStats = null;
         mHistoryDir = null;
         mHistoryBuffer = historyBuffer;
+        mMaxHistoryFiles = null;
     }
 
     public File getHistoryDirectory() {
@@ -193,8 +234,8 @@ public class BatteryStatsHistory {
      * create next history file.
      */
     public void startNextFile() {
-        if (mStats == null) {
-            Slog.wtf(TAG, "mStats should not be null when writing history");
+        if (mMaxHistoryFiles == null) {
+            Slog.wtf(TAG, "mMaxHistoryFiles should not be zero when writing history");
             return;
         }
 
@@ -221,8 +262,9 @@ public class BatteryStatsHistory {
         }
 
         // if there are more history files than allowed, delete oldest history files.
-        // MAX_HISTORY_FILES can be updated by GService config at run time.
-        while (mFileNumbers.size() > mStats.mConstants.MAX_HISTORY_FILES) {
+        // mMaxHistoryFiles comes from Constants.MAX_HISTORY_FILES and can be updated by GService
+        // config at run time.
+        while (mFileNumbers.size() > mMaxHistoryFiles.get()) {
             int oldest = mFileNumbers.get(0);
             getFile(oldest).delete();
             mFileNumbers.remove(0);
@@ -377,7 +419,7 @@ public class BatteryStatsHistory {
     private boolean skipHead(Parcel p) {
         p.setDataPosition(0);
         final int version = p.readInt();
-        if (version != BatteryStatsImpl.VERSION) {
+        if (version != VERSION) {
             return false;
         }
         // skip historyBaseTime field.

@@ -18,7 +18,7 @@ package com.android.systemui.dreams.complication;
 
 import static com.android.systemui.dreams.complication.dagger.DreamWeatherComplicationComponent.DreamWeatherComplicationModule.DREAM_WEATHER_COMPLICATION_LAYOUT_PARAMS;
 import static com.android.systemui.dreams.complication.dagger.DreamWeatherComplicationComponent.DreamWeatherComplicationModule.DREAM_WEATHER_COMPLICATION_VIEW;
-import static com.android.systemui.dreams.complication.dagger.DreamWeatherComplicationComponent.DreamWeatherComplicationModule.SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT;
+import static com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule.SMARTSPACE_TRAMPOLINE_ACTIVITY_COMPONENT;
 
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;

@@ -9282,6 +9282,21 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Checks if the specified component is the supervision component.
+     * @hide
+     */
+    public boolean isSupervisionComponent(@NonNull ComponentName who) {
+        if (mService != null) {
+            try {
+                return getService().isSupervisionComponent(who);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * @hide
      * @return the human readable name of the organisation associated with this DPM or {@code null}
      *         if one is not set.
