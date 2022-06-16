@@ -263,7 +263,7 @@ public class KeyguardService extends Service {
                         // already finished (or not started yet), so do nothing.
                         return;
                     }
-                    runner.onAnimationCancelled();
+                    runner.onAnimationCancelled(false /* isKeyguardOccluded */);
                     origFinishCB.onTransitionFinished(null /* wct */, null /* t */);
                 } catch (RemoteException e) {
                     // nothing, we'll just let it finish on its own I guess.
@@ -396,7 +396,7 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onAnimationCancelled() {
+        public void onAnimationCancelled(boolean isKeyguardOccluded) {
             mKeyguardViewMediator.cancelKeyguardExitAnimation();
         }
     };

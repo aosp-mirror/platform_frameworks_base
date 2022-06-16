@@ -6194,6 +6194,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 .getKeyguardController().isAodShowing(mDisplayId);
     }
 
+    /**
+     * @return whether the keyguard is occluded on this display
+     */
+    boolean isKeyguardOccluded() {
+        return mRootWindowContainer.mTaskSupervisor
+                .getKeyguardController().isDisplayOccluded(mDisplayId);
+    }
+
     @VisibleForTesting
     void removeAllTasks() {
         forAllTasks((t) -> { t.getRootTask().removeChild(t, "removeAllTasks"); });
