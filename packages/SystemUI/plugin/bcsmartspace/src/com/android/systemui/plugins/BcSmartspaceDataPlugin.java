@@ -105,6 +105,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setDozeAmount(float amount);
 
         /**
+         * Set the current keyguard bypass enabled status.
+         */
+        default void setKeyguardBypassEnabled(boolean enabled) {}
+
+        /**
          * Overrides how Intents/PendingIntents gets launched. Mostly to support auth from
          * the lockscreen.
          */

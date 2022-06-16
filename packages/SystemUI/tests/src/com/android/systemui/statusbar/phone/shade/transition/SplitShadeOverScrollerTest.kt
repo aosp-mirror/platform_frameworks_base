@@ -1,6 +1,5 @@
 package com.android.systemui.statusbar.phone.shade.transition
 
-import org.mockito.Mockito.`when` as whenever
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -21,6 +20,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -43,7 +43,8 @@ class SplitShadeOverScrollerTest : SysuiTestCase() {
         whenever(nsslController.height).thenReturn(1000)
         overScroller =
             SplitShadeOverScroller(
-                configurationController, dumpManager, context, scrimController, qs, nsslController)
+                configurationController, dumpManager, context, scrimController, qs, nsslController
+            )
     }
 
     @Test

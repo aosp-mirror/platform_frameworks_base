@@ -1706,6 +1706,10 @@
   <java-symbol type="anim" name="task_fragment_close_exit" />
   <java-symbol type="anim" name="task_fragment_open_enter" />
   <java-symbol type="anim" name="task_fragment_open_exit" />
+  <java-symbol type="anim" name="task_fragment_clear_top_close_enter" />
+  <java-symbol type="anim" name="task_fragment_clear_top_close_exit" />
+  <java-symbol type="anim" name="task_fragment_clear_top_open_enter" />
+  <java-symbol type="anim" name="task_fragment_clear_top_open_exit" />
 
   <java-symbol type="array" name="config_autoRotationTiltTolerance" />
   <java-symbol type="array" name="config_longPressVibePattern" />

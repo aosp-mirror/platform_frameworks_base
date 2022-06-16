@@ -2940,18 +2940,27 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         getAnimationPosition(mTmpPoint);
         mTmpRect.offsetTo(0, 0);
 
-        final RemoteAnimationController controller =
-                getDisplayContent().mAppTransition.getRemoteAnimationController();
+        final AppTransition appTransition = getDisplayContent().mAppTransition;
+        final RemoteAnimationController controller = appTransition.getRemoteAnimationController();
         final boolean isChanging = AppTransition.isChangeTransitOld(transit) && enter
                 && isChangingAppTransition();
 
         // Delaying animation start isn't compatible with remote animations at all.
         if (controller != null && !mSurfaceAnimator.isAnimationStartDelayed()) {
+            // Here we load App XML in order to read com.android.R.styleable#Animation_showBackdrop.
+            boolean showBackdrop = false;
+            if (controller.isFromActivityEmbedding()) {
+                final int animAttr = AppTransition.mapOpenCloseTransitTypes(transit, enter);
+                final Animation a = animAttr != 0
+                        ? appTransition.loadAnimationAttr(lp, animAttr, transit) : null;
+                showBackdrop = a != null && a.getShowBackdrop();
+            }
             final Rect localBounds = new Rect(mTmpRect);
             localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
             final RemoteAnimationController.RemoteAnimationRecord adapters =
-                    controller.createRemoteAnimationRecord(this, mTmpPoint, localBounds,
-                            screenBounds, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
+                    controller.createRemoteAnimationRecord(
+                            this, mTmpPoint, localBounds, screenBounds,
+                            (isChanging ? mSurfaceFreezer.mFreezeBounds : null), showBackdrop);
             if (!isChanging) {
                 adapters.setMode(enter
                         ? RemoteAnimationTarget.MODE_OPENING
