@@ -25,12 +25,15 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.ListenerSet
+import com.android.systemui.util.asIndenting
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.withIncreasedIndent
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import java.io.PrintWriter
 import java.util.function.Consumer
 import javax.inject.Inject
 
@@ -207,6 +210,16 @@ private class KeyguardNotificationVisibilityProviderImpl @Inject constructor(
             notifUser == currentUser -> false
             else -> disallowForUser(notifUser)
         }
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) = pw.asIndenting().run {
+        println("isLockedOrLocking=$isLockedOrLocking")
+        withIncreasedIndent {
+            println("keyguardStateController.isShowing=${keyguardStateController.isShowing}")
+            println("statusBarStateController.currentOrUpcomingState=" +
+                    "${statusBarStateController.currentOrUpcomingState}")
+        }
+        println("hideSilentNotificationsOnLockscreen=$hideSilentNotificationsOnLockscreen")
     }
 
     private val isLockedOrLocking get() =
