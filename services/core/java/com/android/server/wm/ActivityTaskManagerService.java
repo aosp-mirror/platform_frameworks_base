@@ -2179,14 +2179,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     : null;
             mTaskSupervisor.findTaskToMoveToFront(task, flags, realOptions, "moveTaskToFront",
                     false /* forceNonResizable */);
-
-            final ActivityRecord topActivity = task.getTopNonFinishingActivity();
-            if (topActivity != null) {
-
-                // We are reshowing a task, use a starting window to hide the initial draw delay
-                // so the transition can start earlier.
-                topActivity.showStartingWindow(true /* taskSwitch */);
-            }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
