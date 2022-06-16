@@ -178,7 +178,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     val touchHelper = DragDownHelper(falsingManager, falsingCollector, this, context)
 
     private val splitShadeOverScroller: SplitShadeLockScreenOverScroller by lazy {
-        splitShadeOverScrollerFactory.create(qS, nsslController)
+        splitShadeOverScrollerFactory.create({ qS }, { nsslController })
     }
 
     private val phoneShadeOverScroller: SingleShadeLockScreenOverScroller by lazy {
