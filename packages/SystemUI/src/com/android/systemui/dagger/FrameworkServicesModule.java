@@ -42,6 +42,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
@@ -89,6 +90,7 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Prefs;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.TestHarness;
@@ -393,6 +395,12 @@ public class FrameworkServicesModule {
     @Main
     static Resources provideResources(Context context) {
         return context.getResources();
+    }
+
+    @Provides
+    @Application
+    static AssetManager provideAssetManager(@Application Context context) {
+        return context.getAssets();
     }
 
     @Provides
