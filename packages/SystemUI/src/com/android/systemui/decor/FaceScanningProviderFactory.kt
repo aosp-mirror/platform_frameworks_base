@@ -51,15 +51,17 @@ class FaceScanningProviderFactory @Inject constructor(
 
     override val hasProviders: Boolean
         get() {
-            // update display info:
+            if (!featureFlags.isEnabled(Flags.FACE_SCANNING_ANIM) ||
+                    authController.faceAuthSensorLocation == null) {
+                return false
+            }
+
+            // update display info
             display?.getDisplayInfo(displayInfo) ?: run {
                 Log.w(TAG, "display is null, can't update displayInfo")
             }
-            val hasDisplayCutout = DisplayCutout.getFillBuiltInDisplayCutout(
+            return DisplayCutout.getFillBuiltInDisplayCutout(
                     context.resources, displayInfo.uniqueId)
-            return hasDisplayCutout &&
-                    authController.faceAuthSensorLocation != null &&
-                    featureFlags.isEnabled(Flags.FACE_SCANNING_ANIM)
         }
 
     override val providers: List<DecorProvider>
@@ -110,7 +112,10 @@ class FaceScanningOverlayProviderImpl(
         rotation: Int,
         displayUniqueId: String?
     ) {
-        // no need to handle rotation changes
+        (view.layoutParams as FrameLayout.LayoutParams).let {
+            updateLayoutParams(it, rotation)
+            view.layoutParams = it
+        }
     }
 
     override fun inflateView(
@@ -124,16 +129,39 @@ class FaceScanningOverlayProviderImpl(
                 statusBarStateController,
                 keyguardUpdateMonitor)
         view.id = viewId
-        view.visibility = View.INVISIBLE // only show this view when face scanning is happening
-        var heightLayoutParam = ViewGroup.LayoutParams.MATCH_PARENT
-        authController.faceAuthSensorLocation?.y?.let {
-            heightLayoutParam = (it * 3).toInt()
+        FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT).let {
+            updateLayoutParams(it, rotation)
+            parent.addView(view, it)
         }
-        parent.addView(view, FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                heightLayoutParam,
-                Gravity.TOP or Gravity.START))
         return view
+    }
+
+    private fun updateLayoutParams(
+        layoutParams: FrameLayout.LayoutParams,
+        @Surface.Rotation rotation: Int
+    ) {
+        layoutParams.let { lp ->
+            lp.width = ViewGroup.LayoutParams.MATCH_PARENT
+            lp.height = ViewGroup.LayoutParams.MATCH_PARENT
+            authController.faceAuthSensorLocation?.y?.let { faceAuthSensorHeight ->
+                val faceScanningHeight = (faceAuthSensorHeight * 2).toInt()
+                when (rotation) {
+                    Surface.ROTATION_0, Surface.ROTATION_180 ->
+                        lp.height = faceScanningHeight
+                    Surface.ROTATION_90, Surface.ROTATION_270 ->
+                        lp.width = faceScanningHeight
+                }
+            }
+
+            lp.gravity = when (rotation) {
+                Surface.ROTATION_0 -> Gravity.TOP or Gravity.START
+                Surface.ROTATION_90 -> Gravity.LEFT or Gravity.START
+                Surface.ROTATION_180 -> Gravity.BOTTOM or Gravity.END
+                Surface.ROTATION_270 -> Gravity.RIGHT or Gravity.END
+                else -> -1 /* invalid rotation */
+            }
+        }
     }
 }
 
