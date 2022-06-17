@@ -54,6 +54,13 @@ package com.android.server.pm {
 
 }
 
+package com.android.server.pm.snapshot {
+
+  public interface PackageDataSnapshot {
+  }
+
+}
+
 package com.android.server.role {
 
   public interface RoleServicePlatformHelper {

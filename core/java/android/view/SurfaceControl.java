@@ -937,10 +937,14 @@ public final class SurfaceControl implements Parcelable {
 
             /**
              * The portion of the screen to capture into the buffer. Caller may pass  in
-             * 'new Rect()' if no cropping is desired.
+             * 'new Rect()' or null if no cropping is desired.
              */
-            public T setSourceCrop(Rect sourceCrop) {
-                mSourceCrop.set(sourceCrop);
+            public T setSourceCrop(@Nullable Rect sourceCrop) {
+                if (sourceCrop == null) {
+                    mSourceCrop.setEmpty();
+                } else {
+                    mSourceCrop.set(sourceCrop);
+                }
                 return getThis();
             }
 
@@ -2520,8 +2524,8 @@ public final class SurfaceControl implements Parcelable {
      * @return Returns a HardwareBuffer that contains the layer capture.
      * @hide
      */
-    public static ScreenshotHardwareBuffer captureLayers(SurfaceControl layer, Rect sourceCrop,
-            float frameScale, int format) {
+    public static ScreenshotHardwareBuffer captureLayers(@NonNull SurfaceControl layer,
+            @Nullable Rect sourceCrop, float frameScale, int format) {
         LayerCaptureArgs captureArgs = new LayerCaptureArgs.Builder(layer)
                 .setSourceCrop(sourceCrop)
                 .setFrameScale(frameScale)

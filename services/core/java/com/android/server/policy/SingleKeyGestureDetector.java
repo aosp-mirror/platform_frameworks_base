@@ -16,7 +16,6 @@
 
 package com.android.server.policy;
 
-import android.annotation.IntDef;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,8 +25,6 @@ import android.view.KeyEvent;
 import android.view.ViewConfiguration;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -56,21 +53,9 @@ public final class SingleKeyGestureDetector {
     private final Handler mHandler;
     private long mLastDownTime = 0;
 
-    /** Supported gesture flags */
-    public static final int KEY_LONGPRESS = 1 << 1;
-    public static final int KEY_VERYLONGPRESS = 1 << 2;
-
     static final long MULTI_PRESS_TIMEOUT = ViewConfiguration.getMultiPressTimeout();
     static long sDefaultLongPressTimeout;
     static long sDefaultVeryLongPressTimeout;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "KEY_" }, value = {
-            KEY_LONGPRESS,
-            KEY_VERYLONGPRESS,
-    })
-    public @interface KeyGestureFlag {}
 
     /**
      *  Rule definition for single keys gesture.
@@ -88,11 +73,9 @@ public final class SingleKeyGestureDetector {
      */
     abstract static class SingleKeyRule {
         private final int mKeyCode;
-        private final int mSupportedGestures;
 
-        SingleKeyRule(int keyCode, @KeyGestureFlag int supportedGestures) {
+        SingleKeyRule(int keyCode) {
             mKeyCode = keyCode;
-            mSupportedGestures = supportedGestures;
         }
 
         /**
@@ -105,15 +88,15 @@ public final class SingleKeyGestureDetector {
         /**
          *  True if the rule support long press.
          */
-        private boolean supportLongPress() {
-            return (mSupportedGestures & KEY_LONGPRESS) != 0;
+        boolean supportLongPress() {
+            return false;
         }
 
         /**
          *  True if the rule support very long press.
          */
-        private boolean supportVeryLongPress() {
-            return (mSupportedGestures & KEY_VERYLONGPRESS) != 0;
+        boolean supportVeryLongPress() {
+            return false;
         }
 
         /**

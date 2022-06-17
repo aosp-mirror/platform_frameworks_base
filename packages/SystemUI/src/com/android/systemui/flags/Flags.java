@@ -81,6 +81,11 @@ public class Flags {
 
     public static final ResourceBooleanFlag FACE_SCANNING_ANIM =
             new ResourceBooleanFlag(205, R.bool.config_enableFaceScanningAnimation);
+    /**
+     * Whether the KeyguardBottomArea(View|Controller) should use the modern architecture or the old
+     * one.
+     */
+    public static final BooleanFlag MODERN_BOTTOM_AREA = new BooleanFlag(206, false);
 
     /***************************************/
     // 300 - power menu
@@ -190,6 +195,8 @@ public class Flags {
     @Keep
     public static final SysPropBooleanFlag WM_ALWAYS_ENFORCE_PREDICTIVE_BACK =
             new SysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", false);
+
+    public static final BooleanFlag NEW_BACK_AFFORDANCE = new BooleanFlag(1203, true);
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

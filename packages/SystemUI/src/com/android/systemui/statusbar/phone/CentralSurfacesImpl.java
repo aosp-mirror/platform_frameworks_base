@@ -1581,7 +1581,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
                         }
                     }
                 });
-        mStatusBarKeyguardViewManager.registerCentralSurfaces(
+        mKeyguardViewMediator.registerCentralSurfaces(
                 /* statusBar= */ this,
                 mNotificationPanelViewController,
                 mPanelExpansionStateManager,

@@ -223,6 +223,12 @@ public class RemoteAnimationTarget implements Parcelable {
     public boolean hasAnimatingParent;
 
     /**
+     * Whether an activity has enabled {@link android.R.styleable#Animation_showBackdrop} for
+     * transition.
+     */
+    public boolean showBackdrop;
+
+    /**
      * The background color of animation in case the task info is not available if the transition
      * is activity level.
      */
@@ -287,6 +293,11 @@ public class RemoteAnimationTarget implements Parcelable {
         windowType = in.readInt();
         hasAnimatingParent = in.readBoolean();
         backgroundColor = in.readInt();
+        showBackdrop = in.readBoolean();
+    }
+
+    public void setShowBackdrop(boolean shouldShowBackdrop) {
+        showBackdrop = shouldShowBackdrop;
     }
 
     @Override
@@ -316,6 +327,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeInt(windowType);
         dest.writeBoolean(hasAnimatingParent);
         dest.writeInt(backgroundColor);
+        dest.writeBoolean(showBackdrop);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -337,6 +349,7 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
         pw.print(prefix); pw.print("hasAnimatingParent="); pw.print(hasAnimatingParent);
         pw.print(prefix); pw.print("backgroundColor="); pw.print(backgroundColor);
+        pw.print(prefix); pw.print("showBackdrop="); pw.print(showBackdrop);
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
