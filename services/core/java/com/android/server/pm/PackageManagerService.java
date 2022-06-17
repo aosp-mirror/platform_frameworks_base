@@ -2838,12 +2838,15 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDexOptHelper.performPackageDexOptUpgradeIfNeeded();
     }
 
-
     private void notifyPackageUseInternal(String packageName, int reason) {
         long time = System.currentTimeMillis();
-        commitPackageStateMutation(null, packageName, packageState -> {
-            packageState.setLastPackageUsageTime(reason, time);
-        });
+        synchronized (mLock) {
+            final PackageSetting pkgSetting = mSettings.getPackageLPr(packageName);
+            if (pkgSetting == null) {
+                return;
+            }
+            pkgSetting.getPkgState().setLastPackageUsageTimeInMills(reason, time);
+        }
     }
 
     /*package*/ DexManager getDexManager() {

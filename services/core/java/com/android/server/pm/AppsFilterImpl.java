@@ -417,7 +417,9 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
         } else if (changed) {
             invalidateCache("grantImplicitAccess: " + recipientUid + " -> " + visibleUid);
         }
-        onChanged();
+        if (changed) {
+            onChanged();
+        }
         return changed;
     }
 
