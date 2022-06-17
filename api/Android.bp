@@ -130,6 +130,7 @@ combined_apis {
         "i18n.module.public.api",
     ],
     system_server_classpath: [
+        "service-art",
         "service-media-s",
         "service-permission",
         "service-sdksandbox",
