@@ -30,7 +30,8 @@ import com.android.systemui.compose.theme.SystemUITheme
 enum class Screen {
     Home,
     Typography,
-    Colors,
+    MaterialColors,
+    AndroidColors,
     ExampleFeature,
 }
 
@@ -49,7 +50,8 @@ private fun MainContent() {
                 )
             }
             composable(Screen.Typography.name) { TypographyScreen() }
-            composable(Screen.Colors.name) { ColorsScreen() }
+            composable(Screen.MaterialColors.name) { MaterialColorsScreen() }
+            composable(Screen.AndroidColors.name) { AndroidColorsScreen() }
             composable(Screen.ExampleFeature.name) { ExampleFeatureScreen() }
         }
     }
