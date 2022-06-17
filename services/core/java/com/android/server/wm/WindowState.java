@@ -809,7 +809,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     };
 
     private final Consumer<SurfaceControl.Transaction> mSetSurfacePositionConsumer = t -> {
-        if (mSurfaceControl != null && mSurfaceControl.isValid()) {
+        // Only apply the position to the surface when there's no leash created.
+        if (mSurfaceControl != null && mSurfaceControl.isValid() && !mSurfaceAnimator.hasLeash()) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
         }
     };
