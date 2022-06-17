@@ -50,6 +50,9 @@ abstract class CloseAppTransition(protected val testSpec: FlickerTestParameter) 
      */
     protected open val transition: FlickerBuilder.() -> Unit = {
         setup {
+            test {
+                tapl.setExpectedRotation(testSpec.startRotation)
+            }
             eachRun {
                 testApp.launchViaIntent(wmHelper)
                 this.setRotation(testSpec.startRotation)
