@@ -52,12 +52,20 @@ public class LogModule {
         return factory.create("NotifLog", 1000 /* maxSize */, false /* systrace */);
     }
 
-    /** Provides a logging buffer for all logs related to the data layer of notifications. */
+    /** Provides a logging buffer for logs related to heads up presentation of notifications. */
     @Provides
     @SysUISingleton
     @NotificationHeadsUpLog
     public static LogBuffer provideNotificationHeadsUpLogBuffer(LogBufferFactory factory) {
         return factory.create("NotifHeadsUpLog", 1000);
+    }
+
+    /** Provides a logging buffer for notification interruption calculations. */
+    @Provides
+    @SysUISingleton
+    @NotificationInterruptLog
+    public static LogBuffer provideNotificationInterruptLogBuffer(LogBufferFactory factory) {
+        return factory.create("NotifInterruptLog", 100);
     }
 
     /** Provides a logging buffer for all logs for lockscreen to shade transition events. */
