@@ -1014,12 +1014,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final LatencyTracker mLatencyTracker;
 
-    /**
-     * Whether the UI is currently running in touch mode (not showing
-     * navigational focus because the user is directly pressing the screen).
-     */
-    private boolean mInTouchMode;
-
     private ViewServer mViewServer;
     final ArrayList<WindowChangeListener> mWindowChangeListeners = new ArrayList<>();
     boolean mWindowsChanged = false;
@@ -1177,10 +1171,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mHasPermanentDpad = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_hasPermanentDpad);
-        mInTouchMode = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_defaultInTouchMode);
-        inputManager.setInTouchMode(mInTouchMode, MY_PID, MY_UID, /* hasPermission= */ true,
-                DEFAULT_DISPLAY);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
         mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
@@ -1798,8 +1788,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayPolicy.areSystemBarsForcedConsumedLw()) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
-
-            if (mInTouchMode) {
+            if (displayContent.isInTouchMode()) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
             }
             if (win.mActivityRecord == null || win.mActivityRecord.isClientVisible()) {
@@ -3804,17 +3793,43 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Sets the touch mode state.
      *
+     * If {@code com.android.internal.R.bool.config_perDisplayFocusEnabled} is set to true, then
+     * only the display represented by the {@code displayId} parameter will be requested to switch
+     * the touch mode state. Otherwise all all displays will be requested to switch their touch mode
+     * state (disregarding {@code displayId} parameter).
+     *
      * To be able to change touch mode state, the caller must either own the focused window, or must
      * have the {@link android.Manifest.permission#MODIFY_TOUCH_MODE_STATE} permission. Instrumented
      * process, sourced with {@link android.Manifest.permission#MODIFY_TOUCH_MODE_STATE}, may switch
      * touch mode at any time.
      *
-     * @param mode the touch mode to set
+     * @param inTouch   the touch mode to set
+     * @param displayId the target display id
      */
     @Override // Binder call
-    public void setInTouchMode(boolean mode) {
+    public void setInTouchMode(boolean inTouch, int displayId) {
+        boolean perDisplayFocusEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_perDisplayFocusEnabled);
+        setInTouchMode(inTouch, displayId, perDisplayFocusEnabled);
+    }
+
+    /**
+     * Sets the touch mode state on all displays (disregarding the value of
+     * {@code com.android.internal.R.bool.config_perDisplayFocusEnabled}).
+     *
+     * @param inTouch the touch mode to set
+     */
+    @Override // Binder call
+    public void setInTouchModeOnAllDisplays(boolean inTouch) {
+        setInTouchMode(inTouch, /* any display id */ DEFAULT_DISPLAY,
+                /* perDisplayFocusEnabled= */ false);
+    }
+
+    private void setInTouchMode(boolean inTouch, int displayId, boolean perDisplayFocusEnabled) {
         synchronized (mGlobalLock) {
-            if (mInTouchMode == mode) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (perDisplayFocusEnabled && (displayContent == null
+                    || displayContent.isInTouchMode() == inTouch)) {
                 return;
             }
             final int pid = Binder.getCallingPid();
@@ -3822,13 +3837,27 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean hasPermission =
                     mAtmService.instrumentationSourceHasPermission(pid, MODIFY_TOUCH_MODE_STATE)
                             || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()",
-                                                      /* printlog= */ false);
+                            /* printlog= */ false);
             final long token = Binder.clearCallingIdentity();
             try {
-                // TODO(b/198499018): Add displayId parameter indicating the target display.
-                // For now, will just pass DEFAULT_DISPLAY for displayId.
-                if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission, DEFAULT_DISPLAY)) {
-                    mInTouchMode = mode;
+                // If perDisplayFocusEnabled is set, then just update the display pointed by
+                // displayId
+                if (perDisplayFocusEnabled) {
+                    if (mInputManager.setInTouchMode(inTouch, pid, uid, hasPermission, displayId)) {
+                        displayContent.setInTouchMode(inTouch);
+                    }
+                } else {  // Otherwise update all displays
+                    final int displayCount = mRoot.mChildren.size();
+                    for (int i = 0; i < displayCount; ++i) {
+                        DisplayContent dc = mRoot.mChildren.get(i);
+                        if (dc.isInTouchMode() == inTouch) {
+                            continue;
+                        }
+                        if (mInputManager.setInTouchMode(inTouch, pid, uid, hasPermission,
+                                dc.mDisplayId)) {
+                            dc.setInTouchMode(inTouch);
+                        }
+                    }
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -3836,9 +3865,18 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean getInTouchMode() {
+    /**
+     * Returns the touch mode state for the display id passed as argument.
+     */
+    @Override  // Binder call
+    public boolean isInTouchMode(int displayId) {
         synchronized (mGlobalLock) {
-            return mInTouchMode;
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                throw new IllegalStateException("No touch mode is defined for displayId {"
+                        + displayId + "}");
+            }
+            return displayContent.isInTouchMode();
         }
     }
 
@@ -6645,7 +6683,6 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  Minimum task size of display#"); pw.print(displayId);
             pw.print(' '); pw.print(dc.mMinSizeOfResizeableTaskDp);
         });
-        pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mBlurEnabled="); pw.println(mBlurController.getBlurEnabled());
         pw.print("  mLastDisplayFreezeDuration=");
                 TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);

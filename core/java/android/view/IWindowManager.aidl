@@ -226,9 +226,18 @@ interface IWindowManager
 
     float getCurrentAnimatorScale();
 
-    // For testing
-    @UnsupportedAppUsage(maxTargetSdk = 28)
-    void setInTouchMode(boolean showFocus);
+    // Request to change the touch mode on the display represented by the displayId parameter.
+    //
+    // If com.android.internal.R.bool.config_perDisplayFocusEnabled is false, then it will request
+    // to change the touch mode on all displays (disregarding displayId parameter).
+    void setInTouchMode(boolean inTouch, int displayId);
+
+    // Request to change the touch mode on all displays (disregarding the value
+    // com.android.internal.R.bool.config_perDisplayFocusEnabled).
+    void setInTouchModeOnAllDisplays(boolean inTouch);
+
+    // Returns the touch mode state for the display represented by the displayId parameter.
+    boolean isInTouchMode(int displayId);
 
     // For StrictMode flashing a red border on violations from the UI
     // thread.  The uid/pid is implicit from the Binder call, and the Window

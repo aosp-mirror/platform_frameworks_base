@@ -15903,9 +15903,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns whether the device is currently in touch mode.  Touch mode is entered
+     * Returns whether the device is currently in touch mode. Touch mode is entered
      * once the user begins interacting with the device by touch, and affects various
      * things like whether focus is always visible to the user.
+     *
+     * If this view has no {@link ViewRootImpl} or {@link Display} attached, then it will return
+     * the default touch mode value defined in
+     * {@code com.android.internal.R.bool.config_defaultInTouchMode}.
      *
      * @return Whether the device is in touch mode.
      */
@@ -15913,9 +15917,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean isInTouchMode() {
         if (mAttachInfo != null) {
             return mAttachInfo.mInTouchMode;
-        } else {
-            return ViewRootImpl.isInTouchMode();
         }
+        return mResources.getBoolean(com.android.internal.R.bool.config_defaultInTouchMode);
     }
 
     /**
