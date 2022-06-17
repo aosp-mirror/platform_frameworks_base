@@ -29,7 +29,10 @@
         <activity android:label="@string/app_name"
              android:name="MediaFrameworkTest"
              android:screenOrientation="landscape"
-             android:exported="true">
+             android:exported="true"
+             android:showWhenLocked="true"
+             android:turnScreenOn="true"
+             android:keepScreenOn="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -38,7 +41,10 @@
         <activity android:label="Camera2CtsActivity"
              android:name="Camera2SurfaceViewActivity"
              android:screenOrientation="landscape"
-             android:configChanges="keyboardHidden|orientation|screenSize">
+             android:configChanges="keyboardHidden|orientation|screenSize"
+             android:showWhenLocked="true"
+             android:turnScreenOn="true"
+             android:keepScreenOn="true">
         </activity>
     </application>
 
