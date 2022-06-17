@@ -305,6 +305,16 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return mFlags;
     }
 
+    @VisibleForTesting
+    SurfaceControl.Transaction getStartTransaction() {
+        return mStartTransaction;
+    }
+
+    @VisibleForTesting
+    SurfaceControl.Transaction getFinishTransaction() {
+        return mFinishTransaction;
+    }
+
     /** Starts collecting phase. Once this starts, all relevant surface operations are sync. */
     void startCollecting(long timeoutMs) {
         if (mState != STATE_PENDING) {
@@ -771,6 +781,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
 
         mState = STATE_PLAYING;
+        mStartTransaction = transaction;
+        mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         mController.moveToPlaying(this);
 
         if (dc.isKeyguardLocked()) {
@@ -856,8 +868,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (controller != null && mTargets.contains(dc)) {
             controller.setupStartTransaction(transaction);
         }
-        mStartTransaction = transaction;
-        mFinishTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         buildFinishTransaction(mFinishTransaction, info.getRootLeash());
         if (mController.getTransitionPlayer() != null) {
             mController.dispatchLegacyAppTransitionStarting(info);
