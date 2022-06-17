@@ -73,7 +73,10 @@ android_test {
     ],
 
     sdk_version: "core_platform",
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
 
     certificate: "platform",
 
