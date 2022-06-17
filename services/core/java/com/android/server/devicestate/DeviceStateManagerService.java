@@ -40,6 +40,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
+import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -144,15 +146,30 @@ public final class DeviceStateManagerService extends SystemService {
 
     private Set<Integer> mDeviceStatesAvailableForAppRequests;
 
+    @VisibleForTesting
+    interface SystemPropertySetter {
+        void setDebugTracingDeviceStateProperty(String value);
+    }
+    @NonNull
+    private final SystemPropertySetter mSystemPropertySetter;
+
     public DeviceStateManagerService(@NonNull Context context) {
         this(context, DeviceStatePolicy.Provider
                 .fromResources(context.getResources())
                 .instantiate(context));
     }
 
+    private DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy) {
+        this(context, policy, (value) -> {
+            SystemProperties.set("debug.tracing.device_state", value);
+        });
+    }
+
     @VisibleForTesting
-    DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy) {
+    DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy,
+                @NonNull SystemPropertySetter systemPropertySetter) {
         super(context);
+        mSystemPropertySetter = systemPropertySetter;
         // We use the DisplayThread because this service indirectly drives
         // display (on/off) and window (position) events through its callbacks.
         DisplayThread displayThread = DisplayThread.get();
@@ -462,6 +479,10 @@ public final class DeviceStateManagerService extends SystemService {
 
             FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_STATE_CHANGED,
                     newState.getIdentifier(), !mCommittedState.isPresent());
+            String traceString = newState.getIdentifier() + ":" + newState.getName();
+            Trace.instantForTrack(
+                    Trace.TRACE_TAG_SYSTEM_SERVER, "DeviceStateChanged", traceString);
+            mSystemPropertySetter.setDebugTracingDeviceStateProperty(traceString);
 
             mCommittedState = Optional.of(newState);
             mPendingState = Optional.empty();
