@@ -99,19 +99,28 @@ public class DisplayFrames {
         state.setRoundedCorners(roundedCorners);
         state.setPrivacyIndicatorBounds(indicatorBounds);
         state.getDisplayCutoutSafe(safe);
-        if (!cutout.isEmpty()) {
+        if (safe.left > unrestricted.left) {
             state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
                     unrestricted.left, unrestricted.top, safe.left, unrestricted.bottom);
+        } else {
+            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
+        }
+        if (safe.top > unrestricted.top) {
             state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(
                     unrestricted.left, unrestricted.top, unrestricted.right, safe.top);
+        } else {
+            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
+        }
+        if (safe.right < unrestricted.right) {
             state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(
                     safe.right, unrestricted.top, unrestricted.right, unrestricted.bottom);
+        } else {
+            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
+        }
+        if (safe.bottom < unrestricted.bottom) {
             state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(
                     unrestricted.left, safe.bottom, unrestricted.right, unrestricted.bottom);
         } else {
-            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
-            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
-            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
             state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
         }
         return true;
