@@ -18,8 +18,6 @@ package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -107,15 +105,15 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         RemoteCallable<SplitScreenController>, ShellTaskOrganizer.FocusListener {
     private static final String TAG = SplitScreenController.class.getSimpleName();
 
-    static final int EXIT_REASON_UNKNOWN = 0;
-    static final int EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW = 1;
-    static final int EXIT_REASON_APP_FINISHED = 2;
-    static final int EXIT_REASON_DEVICE_FOLDED = 3;
-    static final int EXIT_REASON_DRAG_DIVIDER = 4;
-    static final int EXIT_REASON_RETURN_HOME = 5;
-    static final int EXIT_REASON_ROOT_TASK_VANISHED = 6;
-    static final int EXIT_REASON_SCREEN_LOCKED = 7;
-    static final int EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP = 8;
+    public static final int EXIT_REASON_UNKNOWN = 0;
+    public static final int EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW = 1;
+    public static final int EXIT_REASON_APP_FINISHED = 2;
+    public static final int EXIT_REASON_DEVICE_FOLDED = 3;
+    public static final int EXIT_REASON_DRAG_DIVIDER = 4;
+    public static final int EXIT_REASON_RETURN_HOME = 5;
+    public static final int EXIT_REASON_ROOT_TASK_VANISHED = 6;
+    public static final int EXIT_REASON_SCREEN_LOCKED = 7;
+    public static final int EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP = 8;
     public static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,

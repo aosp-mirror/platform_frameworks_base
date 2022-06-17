@@ -50,6 +50,8 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.SurfaceUtils;
 
+import java.util.function.Consumer;
+
 /**
  * Handles split decor like showing resizing hint for a specific split.
  */
@@ -212,7 +214,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 newBounds.height() / 2 - mIconSize / 2);
 
         if (animate) {
-            startFadeAnimation(show, false /* isResized */);
+            startFadeAnimation(show, null /* finishedConsumer */);
             mShown = show;
         }
     }
@@ -243,15 +245,29 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mFadeAnimator.cancel();
         }
         if (mShown) {
-            startFadeAnimation(false /* show */, true /* isResized */);
-            mShown = false;
+            fadeOutDecor(null /* finishedCallback */);
         } else {
             // Decor surface is hidden so release it directly.
             releaseDecor(t);
         }
     }
 
-    private void startFadeAnimation(boolean show, boolean isResized) {
+    /** Fade-out decor surface with animation end callback, if decor is hidden, run the callback
+     * directly. */
+    public void fadeOutDecor(Runnable finishedCallback) {
+        if (mShown) {
+            startFadeAnimation(false /* show */, transaction -> {
+                releaseDecor(transaction);
+                if (finishedCallback != null) finishedCallback.run();
+            });
+            mShown = false;
+        } else {
+            if (finishedCallback != null) finishedCallback.run();
+        }
+    }
+
+    private void startFadeAnimation(boolean show,
+            Consumer<SurfaceControl.Transaction> finishedConsumer) {
         final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
         mFadeAnimator = ValueAnimator.ofFloat(0f, 1f);
         mFadeAnimator.setDuration(FADE_DURATION);
@@ -285,8 +301,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
                         animT.hide(mIconLeash);
                     }
                 }
-                if (isResized) {
-                    releaseDecor(animT);
+                if (finishedConsumer != null) {
+                    finishedConsumer.accept(animT);
                 }
                 animT.apply();
                 animT.close();
