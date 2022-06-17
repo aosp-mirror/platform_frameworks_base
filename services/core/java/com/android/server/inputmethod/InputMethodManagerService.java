@@ -5658,11 +5658,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mHandler.removeMessages(MSG_FINISH_HANDWRITING);
             mHandler.obtainMessage(MSG_FINISH_HANDWRITING).sendToTarget();
         }
-
-        @Override
-        public boolean isStylusHandwritingAvailable() {
-            return InputMethodManagerService.this.isStylusHandwritingAvailable();
-        }
     }
 
     @BinderThread
