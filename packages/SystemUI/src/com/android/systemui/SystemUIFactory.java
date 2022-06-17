@@ -28,14 +28,12 @@ import com.android.systemui.dagger.DaggerGlobalRootComponent;
 import com.android.systemui.dagger.GlobalRootComponent;
 import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
-import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.wm.shell.dagger.WMShellConcurrencyModule;
 import com.android.wm.shell.transition.ShellTransitions;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
 
@@ -238,15 +236,5 @@ public class SystemUIFactory {
      */
     public Map<Class<?>, Provider<CoreStartable>> getStartableComponentsPerUser() {
         return mSysUIComponent.getPerUserStartables();
-    }
-
-    /**
-     * Creates an instance of ScreenshotNotificationSmartActionsProvider.
-     * This method is overridden in vendor specific implementation of Sys UI.
-     */
-    public ScreenshotNotificationSmartActionsProvider
-                createScreenshotNotificationSmartActionsProvider(
-                        Context context, Executor executor, Handler uiHandler) {
-        return new ScreenshotNotificationSmartActionsProvider();
     }
 }

@@ -263,6 +263,8 @@ public class ScreenshotController {
     private final ScrollCaptureController mScrollCaptureController;
     private final LongScreenshotData mLongScreenshotHolder;
     private final boolean mIsLowRamDevice;
+    private final ScreenshotNotificationSmartActionsProvider
+            mScreenshotNotificationSmartActionsProvider;
     private final TimeoutHandler mScreenshotHandler;
 
     private ScreenshotView mScreenshotView;
@@ -298,7 +300,9 @@ public class ScreenshotController {
             LongScreenshotData longScreenshotHolder,
             ActivityManager activityManager,
             TimeoutHandler timeoutHandler,
-            BroadcastSender broadcastSender) {
+            BroadcastSender broadcastSender,
+            ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider
+    ) {
         mScreenshotSmartActions = screenshotSmartActions;
         mNotificationsController = screenshotNotificationsController;
         mScrollCaptureClient = scrollCaptureClient;
@@ -308,6 +312,7 @@ public class ScreenshotController {
         mScrollCaptureController = scrollCaptureController;
         mLongScreenshotHolder = longScreenshotHolder;
         mIsLowRamDevice = activityManager.isLowRamDevice();
+        mScreenshotNotificationSmartActionsProvider = screenshotNotificationSmartActionsProvider;
         mBgExecutor = Executors.newSingleThreadExecutor();
         mBroadcastSender = broadcastSender;
 
@@ -956,7 +961,8 @@ public class ScreenshotController {
         }
 
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mImageExporter,
-                mScreenshotSmartActions, data, getActionTransitionSupplier());
+                mScreenshotSmartActions, data, getActionTransitionSupplier(),
+                mScreenshotNotificationSmartActionsProvider);
         mSaveInBgTask.execute();
     }
 
