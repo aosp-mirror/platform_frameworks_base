@@ -1811,13 +1811,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public BackNavigationInfo startBackNavigation() {
+    public BackNavigationInfo startBackNavigation(boolean requestAnimation) {
         mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                 "startBackNavigation()");
         if (mBackNavigationController == null) {
             return null;
         }
-        return mBackNavigationController.startBackNavigation(mWindowManager);
+        return mBackNavigationController.startBackNavigation(mWindowManager, requestAnimation);
     }
 
     /**
