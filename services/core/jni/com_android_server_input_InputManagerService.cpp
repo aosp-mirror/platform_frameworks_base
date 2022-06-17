@@ -1548,27 +1548,32 @@ static jint nativeGetSwitchState(JNIEnv* env, jobject nativeImplObj, jint device
                                                                    sw);
 }
 
+static std::vector<int32_t> getIntArray(JNIEnv* env, jintArray arr) {
+    int32_t* a = env->GetIntArrayElements(arr, nullptr);
+    jsize size = env->GetArrayLength(arr);
+    std::vector<int32_t> vec(a, a + size);
+    env->ReleaseIntArrayElements(arr, a, 0);
+    return vec;
+}
+
 static jboolean nativeHasKeys(JNIEnv* env, jobject nativeImplObj, jint deviceId, jint sourceMask,
                               jintArray keyCodes, jbooleanArray outFlags) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    int32_t* codes = env->GetIntArrayElements(keyCodes, nullptr);
+    const std::vector codes = getIntArray(env, keyCodes);
     uint8_t* flags = env->GetBooleanArrayElements(outFlags, nullptr);
-    jsize numCodes = env->GetArrayLength(keyCodes);
+    jsize numCodes = env->GetArrayLength(outFlags);
     jboolean result;
-    if (numCodes == env->GetArrayLength(keyCodes)) {
-        if (im->getInputManager()->getReader().hasKeys(deviceId, uint32_t(sourceMask), numCodes,
-                                                       codes, flags)) {
-            result = JNI_TRUE;
-        } else {
-            result = JNI_FALSE;
-        }
+    if (numCodes != codes.size()) {
+        return JNI_FALSE;
+    }
+    if (im->getInputManager()->getReader().hasKeys(deviceId, uint32_t(sourceMask), codes, flags)) {
+        result = JNI_TRUE;
     } else {
         result = JNI_FALSE;
     }
 
     env->ReleaseBooleanArrayElements(outFlags, flags, 0);
-    env->ReleaseIntArrayElements(keyCodes, codes, 0);
     return result;
 }
 
