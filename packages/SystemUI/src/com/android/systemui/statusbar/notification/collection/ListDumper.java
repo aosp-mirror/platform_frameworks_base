@@ -115,6 +115,7 @@ public class ListDumper {
     ) {
         sb.append(indent)
                 .append("[").append(index).append("] ")
+                .append(index.length() == 1 ? " " : "")
                 .append(entry.getKey());
 
         if (includeParent) {
@@ -192,7 +193,7 @@ public class ListDumper {
             if (notifEntry.getAttachState().getSuppressedChanges().getSection() != null) {
                 rksb.append("suppressedSection=")
                         .append(notifEntry.getAttachState().getSuppressedChanges()
-                                .getSection())
+                                .getSection().getLabel())
                         .append(" ");
             }
 
