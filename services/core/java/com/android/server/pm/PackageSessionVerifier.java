@@ -186,12 +186,12 @@ final class PackageSessionVerifier {
                 }
             }
         };
-        final VerificationParams verifyingSession = makeVerificationParams(session, observer);
+        final VerifyingSession verifyingSession = createVerifyingSession(session, observer);
         if (session.isMultiPackage()) {
             final List<PackageInstallerSession> childSessions = session.getChildSessions();
-            List<VerificationParams> verifyingChildSessions = new ArrayList<>(childSessions.size());
+            List<VerifyingSession> verifyingChildSessions = new ArrayList<>(childSessions.size());
             for (PackageInstallerSession child : childSessions) {
-                verifyingChildSessions.add(makeVerificationParams(child, null));
+                verifyingChildSessions.add(createVerifyingSession(child, null));
             }
             verifyingSession.verifyStage(verifyingChildSessions);
         } else {
@@ -199,7 +199,7 @@ final class PackageSessionVerifier {
         }
     }
 
-    private VerificationParams makeVerificationParams(
+    private VerifyingSession createVerifyingSession(
             PackageInstallerSession session, IPackageInstallObserver2 observer) {
         final UserHandle user;
         if ((session.params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
@@ -207,7 +207,7 @@ final class PackageSessionVerifier {
         } else {
             user = new UserHandle(session.userId);
         }
-        return new VerificationParams(user, session.stageDir, observer, session.params,
+        return new VerifyingSession(user, session.stageDir, observer, session.params,
                 session.getInstallSource(), session.getInstallerUid(), session.getSigningDetails(),
                 session.sessionId, session.getPackageLite(), session.getUserActionRequired(), mPm);
     }

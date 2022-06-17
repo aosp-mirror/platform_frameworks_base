@@ -37,7 +37,7 @@ final class MoveInstallArgs extends InstallArgs {
     private File mCodeFile;
 
     /** New install */
-    MoveInstallArgs(InstallParams params) {
+    MoveInstallArgs(InstallingSession params) {
         super(params);
     }
 

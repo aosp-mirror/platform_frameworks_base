@@ -29,9 +29,9 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 import java.util.List;
 
 abstract class InstallArgs {
-    /** @see InstallParams#mOriginInfo */
+    /** @see InstallingSession#mOriginInfo */
     final OriginInfo mOriginInfo;
-    /** @see InstallParams#mMoveInfo */
+    /** @see InstallingSession#mMoveInfo */
     final MoveInfo mMoveInfo;
 
     final IPackageInstallObserver2 mObserver;
@@ -97,7 +97,7 @@ abstract class InstallArgs {
     }
 
     /** New install */
-    InstallArgs(InstallParams params) {
+    InstallArgs(InstallingSession params) {
         this(params.mOriginInfo, params.mMoveInfo, params.mObserver, params.mInstallFlags,
                 params.mInstallSource, params.mVolumeUuid,
                 params.getUser(), null /*instructionSets*/, params.mPackageAbiOverride,
@@ -124,24 +124,6 @@ abstract class InstallArgs {
     // Need installer lock especially for dex file removal.
     abstract void cleanUpResourcesLI();
     abstract boolean doPostDeleteLI(boolean delete);
-
-    /**
-     * Called before the source arguments are copied. This is used mostly
-     * for MoveParams when it needs to read the source file to put it in the
-     * destination.
-     */
-    int doPreCopy() {
-        return PackageManager.INSTALL_SUCCEEDED;
-    }
-
-    /**
-     * Called after the source arguments are copied. This is used mostly for
-     * MoveParams when it needs to read the source file to put it in the
-     * destination.
-     */
-    int doPostCopy(int uid) {
-        return PackageManager.INSTALL_SUCCEEDED;
-    }
 
     protected boolean isEphemeral() {
         return (mInstallFlags & PackageManager.INSTALL_INSTANT_APP) != 0;

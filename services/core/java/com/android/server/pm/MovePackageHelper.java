@@ -290,10 +290,10 @@ public final class MovePackageHelper {
         final ParseResult<PackageLite> ret = ApkLiteParseUtils.parsePackageLite(input,
                 new File(origin.mResolvedPath), /* flags */ 0);
         final PackageLite lite = ret.isSuccess() ? ret.getResult() : null;
-        final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installSource, volumeUuid, user, packageAbiOverride,
+        final InstallingSession installingSession = new InstallingSession(origin, move,
+                installObserver, installFlags, installSource, volumeUuid, user, packageAbiOverride,
                 PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, lite, mPm);
-        params.movePackage();
+        installingSession.movePackage();
     }
 
     /**

@@ -68,7 +68,7 @@ class FileInstallArgs extends InstallArgs {
     // /data/app/com.example/dalvik/arm/base.apk@classes.dex
 
     /** New install */
-    FileInstallArgs(InstallParams params) {
+    FileInstallArgs(InstallingSession params) {
         super(params);
     }
 
