@@ -36,17 +36,17 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Spy
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
-import java.util.concurrent.Executor
+import org.mockito.Spy
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -86,6 +86,34 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var session: SmartspaceSession
 
     private lateinit var controller: DreamSmartspaceController
+
+    /**
+     * A class which implements SmartspaceView and extends View. This is mocked to provide the right
+     * object inheritance and interface implementation used in DreamSmartspaceController
+     */
+    private class TestView(context: Context?) : View(context), SmartspaceView {
+        override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {}
+
+        override fun setPrimaryTextColor(color: Int) {}
+
+        override fun setIsDreaming(isDreaming: Boolean) {}
+
+        override fun setDozeAmount(amount: Float) {}
+
+        override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {}
+
+        override fun setFalsingManager(falsingManager: FalsingManager?) {}
+
+        override fun setDnd(image: Drawable?, description: String?) {}
+
+        override fun setNextAlarm(image: Drawable?, description: String?) {}
+
+        override fun setMediaTarget(target: SmartspaceTarget?) {}
+
+        override fun getSelectedPage(): Int { return 0; }
+
+        override fun getCurrentCardTopPadding(): Int { return 0; }
+    }
 
     @Before
     fun setup() {
@@ -130,34 +158,6 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     }
 
     /**
-     * A class which implements SmartspaceView and extends View. This is mocked to provide the right
-     * object inheritance and interface implementation used in DreamSmartspaceController
-     */
-    private class TestView(context: Context?) : View(context), SmartspaceView {
-        override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {}
-
-        override fun setPrimaryTextColor(color: Int) {}
-
-        override fun setIsDreaming(isDreaming: Boolean) {}
-
-        override fun setDozeAmount(amount: Float) {}
-
-        override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {}
-
-        override fun setFalsingManager(falsingManager: FalsingManager?) {}
-
-        override fun setDnd(image: Drawable?, description: String?) {}
-
-        override fun setNextAlarm(image: Drawable?, description: String?) {}
-
-        override fun setMediaTarget(target: SmartspaceTarget?) {}
-
-        override fun getSelectedPage(): Int { return 0; }
-
-        override fun getCurrentCardTopPadding(): Int { return 0; }
-    }
-
-    /**
      * Ensures session begins when a view is attached.
      */
     @Test
@@ -179,17 +179,5 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
         stateChangeListener.onViewDetachedFromWindow(mockView)
 
         verify(session).close()
-    }
-
-    /**
-     * Ensures setIsDreaming(true) is called when the view is built.
-     */
-    @Test
-    fun testSetIsDreamingTrueOnViewCreate() {
-        `when`(precondition.conditionsMet()).thenReturn(true)
-
-        controller.buildAndConnectView(Mockito.mock(ViewGroup::class.java))
-
-        verify(smartspaceView).setIsDreaming(true)
     }
 }
