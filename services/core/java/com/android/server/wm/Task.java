@@ -1849,6 +1849,11 @@ class Task extends TaskFragment {
         if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_UNDEFINED) {
             nextPersistTaskBounds = newParentConfig.windowConfiguration.persistTaskBounds();
         }
+        // Only restore to the last non-fullscreen bounds when the requested override bounds
+        // have not been explicitly set already.
+        nextPersistTaskBounds &=
+                (getRequestedOverrideConfiguration().windowConfiguration.getBounds() == null
+                || getRequestedOverrideConfiguration().windowConfiguration.getBounds().isEmpty());
         if (!prevPersistTaskBounds && nextPersistTaskBounds
                 && mLastNonFullscreenBounds != null && !mLastNonFullscreenBounds.isEmpty()) {
             // Bypass onRequestedOverrideConfigurationChanged here to avoid infinite loop.
