@@ -108,6 +108,8 @@
   <java-symbol type="id" name="list_item" />
   <java-symbol type="id" name="listContainer" />
   <java-symbol type="id" name="locale" />
+  <java-symbol type="id" name="locale_native" />
+  <java-symbol type="id" name="locale_secondary" />
   <java-symbol type="id" name="matches" />
   <java-symbol type="id" name="mediacontroller_progress" />
   <java-symbol type="id" name="minute" />
@@ -3108,12 +3110,16 @@
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />
   <java-symbol type="layout" name="language_picker_item" />
+  <java-symbol type="layout" name="language_picker_bilingual_item" />
   <java-symbol type="layout" name="language_picker_section_header" />
+  <java-symbol type="layout" name="language_picker_bilingual_section_header" />
   <java-symbol type="menu" name="language_selection_list" />
   <java-symbol type="string" name="country_selection_title" />
   <java-symbol type="string" name="language_picker_section_all" />
   <java-symbol type="string" name="region_picker_section_all" />
   <java-symbol type="string" name="language_picker_section_suggested" />
+  <java-symbol type="string" name="language_picker_section_suggested_bilingual" />
+  <java-symbol type="string" name="region_picker_section_suggested_bilingual" />
   <java-symbol type="string" name="language_selection_title" />
   <java-symbol type="string" name="search_language_hint" />
 
