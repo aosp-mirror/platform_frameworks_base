@@ -69,10 +69,6 @@ public final class Face {
      * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
      * rightEyePosition, and mouthPosition may be independently null or not-null.</p>
      *
-     * <p>This constructor is public to allow for easier application testing by
-     * creating custom object instances. It's not necessary to construct these
-     * objects during normal use of the camera API.</p>
-     *
      * @param bounds Bounds of the face.
      * @param score Confidence level between {@value #SCORE_MIN}-{@value #SCORE_MAX}.
      * @param id A unique ID per face visible to the tracker.
@@ -87,6 +83,8 @@ public final class Face {
      *             or if id is {@value #ID_UNSUPPORTED} and
      *               leftEyePosition/rightEyePosition/mouthPosition aren't all null,
      *             or else if id is negative.
+     *
+     * @hide
      */
     public Face(@NonNull Rect bounds, int score, int id,
             @NonNull Point leftEyePosition, @NonNull Point rightEyePosition,
@@ -106,10 +104,6 @@ public final class Face {
      * the face id of each face is expected to be {@value #ID_UNSUPPORTED}, the leftEyePosition,
      * rightEyePosition, and mouthPositions are expected to be {@code null} for each face.</p>
      *
-     * <p>This constructor is public to allow for easier application testing by
-     * creating custom object instances. It's not necessary to construct these
-     * objects during normal use of the camera API.</p>
-     *
      * @param bounds Bounds of the face.
      * @param score Confidence level between {@value #SCORE_MIN}-{@value #SCORE_MAX}.
      *
@@ -117,6 +111,8 @@ public final class Face {
      *             if bounds is {@code null},
      *             or if the confidence is not in the range of
      *             {@value #SCORE_MIN}-{@value #SCORE_MAX}.
+     *
+     * @hide
      */
     public Face(@NonNull Rect bounds, int score) {
         init(bounds, score, ID_UNSUPPORTED,
@@ -130,16 +126,14 @@ public final class Face {
             @Nullable Point leftEyePosition, @Nullable Point rightEyePosition,
             @Nullable Point mouthPosition) {
         checkNotNull("bounds", bounds);
-        if (score < SCORE_MIN || score > SCORE_MAX) {
-            throw new IllegalArgumentException("Confidence out of range");
-        } else if (id < 0 && id != ID_UNSUPPORTED) {
-            throw new IllegalArgumentException("Id out of range");
-        }
+        checkScore(score);
+        checkId(id);
         if (id == ID_UNSUPPORTED) {
             checkNull("leftEyePosition", leftEyePosition);
             checkNull("rightEyePosition", rightEyePosition);
             checkNull("mouthPosition", mouthPosition);
         }
+        checkFace(leftEyePosition, rightEyePosition, mouthPosition);
 
         mBounds = bounds;
         mScore = score;
@@ -156,7 +150,7 @@ public final class Face {
      * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}, with (0,0)
      * representing the top-left corner of the active array rectangle.</p>
      *
-     * <p>There is no constraints on the the Rectangle value other than it
+     * <p>There is no constraints on the Rectangle value other than it
      * is not-{@code null}.</p>
      */
     public Rect getBounds() {
@@ -190,7 +184,7 @@ public final class Face {
      * If the face leaves the field-of-view and comes back, it will get a new
      * id.</p>
      *
-     * <p>This is an optional field, may not be supported on all devices.
+     * <p>This is an optional field and may not be supported on all devices.
      * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
      * mouthPositions are guaranteed to be {@code null}. Otherwise, each of leftEyePosition,
      * rightEyePosition, and mouthPosition may be independently null or not-null. When devices
@@ -212,7 +206,7 @@ public final class Face {
      *
      * <p>The coordinates are in
      * the same space as the ones for {@link #getBounds}. This is an
-     * optional field, may not be supported on all devices. If not
+     * optional field and may not be supported on all devices. If not
      * supported, the value will always be set to null.
      * This value will  always be null only if {@link #getId()} returns
      * {@value #ID_UNSUPPORTED}.</p>
@@ -228,7 +222,7 @@ public final class Face {
      *
      * <p>The coordinates are
      * in the same space as the ones for {@link #getBounds}.This is an
-     * optional field, may not be supported on all devices. If not
+     * optional field and may not be supported on all devices. If not
      * supported, the value will always be set to null.
      * This value will  always be null only if {@link #getId()} returns
      * {@value #ID_UNSUPPORTED}.</p>
@@ -244,7 +238,7 @@ public final class Face {
      *
      * <p>The coordinates are in
      * the same space as the ones for {@link #getBounds}. This is an optional
-     * field, may not be supported on all devices. If not
+     * field and may not be supported on all devices. If not
      * supported, the value will always be set to null.
      * This value will  always be null only if {@link #getId()} returns
      * {@value #ID_UNSUPPORTED}.</p>
@@ -275,6 +269,255 @@ public final class Face {
     private static void checkNull(String name, Object obj) {
         if (obj != null) {
             throw new IllegalArgumentException(name + " was required to be null, but it wasn't");
+        }
+    }
+
+    private static void checkScore(int score) {
+        if (score < SCORE_MIN || score > SCORE_MAX) {
+            throw new IllegalArgumentException("Confidence out of range");
+        }
+    }
+
+    private static void checkId(int id) {
+        if (id < 0 && id != ID_UNSUPPORTED) {
+            throw new IllegalArgumentException("Id out of range");
+        }
+    }
+
+    private static void checkFace(@Nullable Point leftEyePosition,
+            @Nullable Point rightEyePosition, @Nullable Point mouthPosition) {
+        if (leftEyePosition != null || rightEyePosition != null || mouthPosition != null) {
+            if (leftEyePosition == null || rightEyePosition == null || mouthPosition == null) {
+                throw new IllegalArgumentException("If any of leftEyePosition, rightEyePosition, "
+                        + "or mouthPosition are non-null, all three must be non-null.");
+            }
+        }
+    }
+
+    /**
+     * Builds a Face object.
+     *
+     * <p>This builder is public to allow for easier application testing by
+     * creating custom object instances. It's not necessary to construct these
+     * objects during normal use of the camera API.</p>
+     */
+    public static final class Builder {
+        private long mBuilderFieldsSet = 0L;
+
+        private static final long FIELD_BOUNDS = 1 << 1;
+        private static final long FIELD_SCORE = 1 << 2;
+        private static final long FIELD_ID = 1 << 3;
+        private static final long FIELD_LEFT_EYE = 1 << 4;
+        private static final long FIELD_RIGHT_EYE = 1 << 5;
+        private static final long FIELD_MOUTH = 1 << 6;
+        private static final long FIELD_BUILT = 1 << 0;
+
+        private static final String FIELD_NAME_BOUNDS = "bounds";
+        private static final String FIELD_NAME_SCORE = "score";
+        private static final String FIELD_NAME_LEFT_EYE = "left eye";
+        private static final String FIELD_NAME_RIGHT_EYE = "right eye";
+        private static final String FIELD_NAME_MOUTH = "mouth";
+
+        private Rect mBounds = null;
+        private int mScore = 0;
+        private int mId = ID_UNSUPPORTED;
+        private Point mLeftEye = null;
+        private Point mRightEye = null;
+        private Point mMouth = null;
+
+        public Builder() {
+            // Empty
+        }
+
+        public Builder(@NonNull Face current) {
+            mBounds = current.mBounds;
+            mScore = current.mScore;
+            mId = current.mId;
+            mLeftEye = current.mLeftEye;
+            mRightEye = current.mRightEye;
+            mMouth = current.mMouth;
+        }
+
+        /**
+         * Bounds of the face.
+         *
+         * <p>A rectangle relative to the sensor's
+         * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE}, with (0,0)
+         * representing the top-left corner of the active array rectangle.</p>
+         *
+         * <p>There is no constraints on the Rectangle value other than it
+         * is not-{@code null}.</p>
+         *
+         * @param bounds Bounds of the face.
+         * @return This builder.
+         */
+        public @NonNull Builder setBounds(@NonNull Rect bounds) {
+            checkNotUsed();
+            mBuilderFieldsSet |= FIELD_BOUNDS;
+            mBounds = bounds;
+            return this;
+        }
+
+        /**
+         * The confidence level for the detection of the face.
+         *
+         * <p>The range is {@value #SCORE_MIN} to {@value #SCORE_MAX}.
+         * {@value #SCORE_MAX} is the highest confidence.</p>
+         *
+         * <p>Depending on the device, even very low-confidence faces may be
+         * listed, so applications should filter out faces with low confidence,
+         * depending on the use case. For a typical point-and-shoot camera
+         * application that wishes to display rectangles around detected faces,
+         * filtering out faces with confidence less than half of {@value #SCORE_MAX}
+         * is recommended.</p>
+         *
+         * @see #SCORE_MAX
+         * @see #SCORE_MIN
+         *
+         * @param score Confidence level between {@value #SCORE_MIN}-{@value #SCORE_MAX}.
+         * @return This builder.
+         */
+        public @NonNull Builder setScore(int score) {
+            checkNotUsed();
+            checkScore(score);
+            mBuilderFieldsSet |= FIELD_SCORE;
+            mScore = score;
+            return this;
+        }
+
+        /**
+         * An unique id per face while the face is visible to the tracker.
+         *
+         * <p>
+         * If the face leaves the field-of-view and comes back, it will get a new
+         * id.</p>
+         *
+         * <p>This is an optional field and may not be supported on all devices.
+         * If the id is {@value #ID_UNSUPPORTED} then the leftEyePosition, rightEyePosition, and
+         * mouthPositions should be {@code null}. Otherwise, each of leftEyePosition,
+         * rightEyePosition, and mouthPosition may be independently null or not-null. When devices
+         * report the value of key {@link CaptureResult#STATISTICS_FACE_DETECT_MODE} as
+         * {@link CameraMetadata#STATISTICS_FACE_DETECT_MODE_SIMPLE} in {@link CaptureResult},
+         * the face id of each face is expected to be {@value #ID_UNSUPPORTED}.</p>
+         *
+         * <p>This value should either be {@value #ID_UNSUPPORTED} or
+         * otherwise greater than {@code 0}.</p>
+         *
+         * @see #ID_UNSUPPORTED
+         *
+         * @param id A unique ID per face visible to the tracker.
+         * @return This builder.
+         */
+        public @NonNull Builder setId(int id) {
+            checkNotUsed();
+            checkId(id);
+            mBuilderFieldsSet |= FIELD_ID;
+            mId = id;
+            return this;
+        }
+
+        /**
+         * The coordinates of the center of the left eye.
+         *
+         * <p>The coordinates should be
+         * in the same space as the ones for {@link #setBounds}. This is an
+         * optional field and may not be supported on all devices. If not
+         * supported, the value should always be unset or set to null.
+         * This value should always be null if {@link #setId} is called with
+         * {@value #ID_UNSUPPORTED}.</p>
+         *
+         * @param leftEyePosition The position of the left eye.
+         * @return This builder.
+         */
+        public @NonNull Builder setLeftEyePosition(@NonNull Point leftEyePosition) {
+            checkNotUsed();
+            mBuilderFieldsSet |= FIELD_LEFT_EYE;
+            mLeftEye = leftEyePosition;
+            return this;
+        }
+
+        /**
+         * The coordinates of the center of the right eye.
+         *
+         * <p>The coordinates should be
+         * in the same space as the ones for {@link #setBounds}.This is an
+         * optional field and may not be supported on all devices. If not
+         * supported, the value should always be set to null.
+         * This value should always be null if {@link #setId} is called with
+         * {@value #ID_UNSUPPORTED}.</p>
+         *
+         * @param rightEyePosition The position of the right eye.
+         * @return This builder.
+         */
+        public @NonNull Builder setRightEyePosition(@NonNull Point rightEyePosition) {
+            checkNotUsed();
+            mBuilderFieldsSet |= FIELD_RIGHT_EYE;
+            mRightEye = rightEyePosition;
+            return this;
+        }
+
+        /**
+         * The coordinates of the center of the mouth.
+         *
+         * <p>The coordinates should be in
+         * the same space as the ones for {@link #setBounds}. This is an optional
+         * field and may not be supported on all devices. If not
+         * supported, the value should always be set to null.
+         * This value should always be null if {@link #setId} is called with
+         * {@value #ID_UNSUPPORTED}.</p>
+         * </p>
+         *
+         * @param mouthPosition The position of the mouth.
+         * @return This builder.
+         */
+        public @NonNull Builder setMouthPosition(@NonNull Point mouthPosition) {
+            checkNotUsed();
+            mBuilderFieldsSet |= FIELD_MOUTH;
+            mMouth = mouthPosition;
+            return this;
+        }
+
+        /**
+         * Returns an instance of <code>Face</code> created from the fields set
+         * on this builder.
+         *
+         * @return A Face.
+         */
+        public @NonNull Face build() {
+            checkNotUsed();
+            checkFieldSet(FIELD_BOUNDS, FIELD_NAME_BOUNDS);
+            checkFieldSet(FIELD_SCORE, FIELD_NAME_SCORE);
+            if (mId == ID_UNSUPPORTED) {
+                checkIdUnsupportedThenNull(mLeftEye, FIELD_NAME_LEFT_EYE);
+                checkIdUnsupportedThenNull(mRightEye, FIELD_NAME_RIGHT_EYE);
+                checkIdUnsupportedThenNull(mMouth, FIELD_NAME_MOUTH);
+            }
+            checkFace(mLeftEye, mRightEye, mMouth);
+
+            mBuilderFieldsSet |= FIELD_BUILT;
+
+            return new Face(mBounds, mScore, mId, mLeftEye, mRightEye, mMouth);
+        }
+
+        private void checkNotUsed() {
+            if ((mBuilderFieldsSet & FIELD_BUILT) != 0) {
+                throw new IllegalStateException(
+                        "This Builder should not be reused. Use a new Builder instance instead");
+            }
+        }
+
+        private void checkFieldSet(long field, String fieldName) {
+            if ((mBuilderFieldsSet & field) == 0) {
+                throw new IllegalStateException(
+                        "Field \"" + fieldName + "\" must be set before building.");
+            }
+        }
+
+        private void checkIdUnsupportedThenNull(Object obj, String fieldName) {
+            if (obj != null) {
+                throw new IllegalArgumentException("Field \"" + fieldName
+                        + "\" must be unset or null if id is ID_UNSUPPORTED.");
+            }
         }
     }
 }

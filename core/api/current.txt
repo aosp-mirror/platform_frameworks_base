@@ -18205,8 +18205,6 @@ package android.hardware.camera2.params {
   }
 
   public final class Face {
-    ctor public Face(@NonNull android.graphics.Rect, int, int, @NonNull android.graphics.Point, @NonNull android.graphics.Point, @NonNull android.graphics.Point);
-    ctor public Face(@NonNull android.graphics.Rect, int);
     method public android.graphics.Rect getBounds();
     method public int getId();
     method public android.graphics.Point getLeftEyePosition();
@@ -18216,6 +18214,18 @@ package android.hardware.camera2.params {
     field public static final int ID_UNSUPPORTED = -1; // 0xffffffff
     field public static final int SCORE_MAX = 100; // 0x64
     field public static final int SCORE_MIN = 1; // 0x1
+  }
+
+  public static final class Face.Builder {
+    ctor public Face.Builder();
+    ctor public Face.Builder(@NonNull android.hardware.camera2.params.Face);
+    method @NonNull public android.hardware.camera2.params.Face build();
+    method @NonNull public android.hardware.camera2.params.Face.Builder setBounds(@NonNull android.graphics.Rect);
+    method @NonNull public android.hardware.camera2.params.Face.Builder setId(int);
+    method @NonNull public android.hardware.camera2.params.Face.Builder setLeftEyePosition(@NonNull android.graphics.Point);
+    method @NonNull public android.hardware.camera2.params.Face.Builder setMouthPosition(@NonNull android.graphics.Point);
+    method @NonNull public android.hardware.camera2.params.Face.Builder setRightEyePosition(@NonNull android.graphics.Point);
+    method @NonNull public android.hardware.camera2.params.Face.Builder setScore(int);
   }
 
   public final class InputConfiguration {
