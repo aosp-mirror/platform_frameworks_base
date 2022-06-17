@@ -82,17 +82,16 @@ open class QuickSwitchBetweenTwoAppsForwardTest(private val testSpec: FlickerTes
             setup {
                 test {
                     tapl.setExpectedRotation(testSpec.startRotation)
-                    testApp1.launchViaIntent(wmHelper)
-                    testApp2.launchViaIntent(wmHelper)
-
-                    startDisplayBounds = wmHelper.currentState.layerState
-                        .physicalDisplayBounds ?: error("Display not found")
                 }
                 eachRun {
+                    testApp1.launchViaIntent(wmHelper)
+                    testApp2.launchViaIntent(wmHelper)
                     tapl.launchedAppState.quickSwitchToPreviousApp()
                     wmHelper.StateSyncBuilder()
                         .withNavBarStatusBarVisible()
                         .waitForAndVerify()
+                    startDisplayBounds = wmHelper.currentState.layerState
+                        .physicalDisplayBounds ?: error("Display not found")
                 }
             }
             transitions {
