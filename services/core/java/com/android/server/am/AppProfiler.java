@@ -87,13 +87,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.am.LowMemDetector.MemFactor;
+import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.utils.PriorityDump;
 
 import java.io.FileDescriptor;
@@ -1879,7 +1879,8 @@ public class AppProfiler {
                                             st.rel_utime + st.rel_stime);
                                     profile.mLastCpuTime.compareAndSet(0, curCpuTime);
                                 } else {
-                                    BatteryStatsImpl.Uid.Proc ps = st.batteryStats;
+                                    BatteryStatsImpl.Uid.Proc ps =
+                                            (BatteryStatsImpl.Uid.Proc) st.batteryStats;
                                     if (ps == null || !ps.isActive()) {
                                         st.batteryStats = ps = bstats.getProcessStatsLocked(
                                                 st.uid, st.name, elapsedRealtime, uptime);

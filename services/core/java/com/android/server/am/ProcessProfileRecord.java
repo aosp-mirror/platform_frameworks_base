@@ -31,9 +31,9 @@ import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ProcessList.ProcStateMemTracker;
+import com.android.server.power.stats.BatteryStatsImpl;
 
 import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;

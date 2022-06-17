@@ -24,6 +24,7 @@ import static android.os.Process.PROC_PARENS;
 import static android.os.Process.PROC_SPACE_TERM;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.BatteryStats;
 import android.os.Build;
 import android.os.CpuUsageProto;
 import android.os.Process;
@@ -196,7 +197,7 @@ public class ProcessCpuTracker {
         final ArrayList<Stats> threadStats;
         final ArrayList<Stats> workingThreads;
 
-        public BatteryStatsImpl.Uid.Proc batteryStats;
+        public BatteryStats.Uid.Proc batteryStats;
 
         public boolean interesting;
 

@@ -45,12 +45,12 @@ import android.testing.TestableContext;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySavingStats;
+import com.android.server.power.stats.BatteryStatsImpl;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
