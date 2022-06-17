@@ -84,13 +84,16 @@ import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.back.BackAnimation;
+import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -147,16 +150,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                 mPackageName = "_UNKNOWN";
             }
         }
-
-        @Override
-        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
-            mIsInPipMode = true;
-        }
-
-        @Override
-        public void onActivityUnpinned() {
-            mIsInPipMode = false;
-        }
     };
 
     private DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
@@ -188,6 +181,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private final ViewConfiguration mViewConfiguration;
     private final WindowManager mWindowManager;
     private final IWindowManager mWindowManagerService;
+    private final Optional<Pip> mPipOptional;
     private final FalsingManager mFalsingManager;
     // Activities which should not trigger Back gesture.
     private final List<ComponentName> mGestureBlockingActivities = new ArrayList<>();
@@ -218,6 +212,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     // We temporarily disable back gesture when user is quickswitching
     // between apps of different orientations
     private boolean mDisabledForQuickstep;
+    // This gets updated when the value of PipTransitionState#isInPip changes.
+    private boolean mIsInPip;
 
     private final PointF mDownPoint = new PointF();
     private final PointF mEndPoint = new PointF();
@@ -233,7 +229,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private boolean mIsNavBarShownTransiently;
     private boolean mIsBackGestureAllowed;
     private boolean mGestureBlockingActivityRunning;
-    private boolean mIsInPipMode;
     private boolean mIsNewBackAffordanceEnabled;
 
     private InputMonitor mInputMonitor;
@@ -302,6 +297,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         }
     };
 
+    private final Consumer<Boolean> mOnIsInPipStateChangedListener =
+            (isInPip) -> mIsInPip = isInPip;
 
     EdgeBackGestureHandler(
             Context context,
@@ -316,6 +313,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             ViewConfiguration viewConfiguration,
             WindowManager windowManager,
             IWindowManager windowManagerService,
+            Optional<Pip> pipOptional,
             FalsingManager falsingManager,
             LatencyTracker latencyTracker,
             FeatureFlags featureFlags) {
@@ -332,6 +330,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         mViewConfiguration = viewConfiguration;
         mWindowManager = windowManager;
         mWindowManagerService = windowManagerService;
+        mPipOptional = pipOptional;
         mFalsingManager = falsingManager;
         mLatencyTracker = latencyTracker;
         mFeatureFlags = featureFlags;
@@ -491,6 +490,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             mPluginManager.removePluginListener(this);
             TaskStackChangeListeners.getInstance().unregisterTaskStackListener(mTaskStackListener);
             DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
+            mPipOptional.ifPresent(pip -> pip.setOnIsInPipStateChangedListener(null));
 
             try {
                 mWindowManagerService.unregisterSystemGestureExclusionListener(
@@ -508,6 +508,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             TaskStackChangeListeners.getInstance().registerTaskStackListener(mTaskStackListener);
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                     mMainExecutor::execute, mOnPropertiesChangedListener);
+            mPipOptional.ifPresent(
+                    pip -> pip.setOnIsInPipStateChangedListener(mOnIsInPipStateChangedListener));
 
             try {
                 mWindowManagerService.registerSystemGestureExclusionListener(
@@ -680,7 +682,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private boolean isWithinTouchRegion(int x, int y) {
         // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
         // gesture
-        final boolean isInsidePip = mIsInPipMode && mPipExcludedBounds.contains(x, y);
+        final boolean isInsidePip = mIsInPip && mPipExcludedBounds.contains(x, y);
         if (isInsidePip || mNavBarOverlayExcludedBounds.contains(x, y)) {
             return false;
         }
@@ -933,7 +935,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         pw.println("  mInRejectedExclusion=" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
-        pw.println("  mIsInPipMode=" + mIsInPipMode);
+        pw.println("  mIsInPip=" + mIsInPip);
         pw.println("  mPipExcludedBounds=" + mPipExcludedBounds);
         pw.println("  mNavBarOverlayExcludedBounds=" + mNavBarOverlayExcludedBounds);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
@@ -1002,6 +1004,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
         private final ViewConfiguration mViewConfiguration;
         private final WindowManager mWindowManager;
         private final IWindowManager mWindowManagerService;
+        private final Optional<Pip> mPipOptional;
         private final FalsingManager mFalsingManager;
         private final LatencyTracker mLatencyTracker;
         private final FeatureFlags mFeatureFlags;
@@ -1018,6 +1021,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                        ViewConfiguration viewConfiguration,
                        WindowManager windowManager,
                        IWindowManager windowManagerService,
+                       Optional<Pip> pipOptional,
                        FalsingManager falsingManager,
                        LatencyTracker latencyTracker,
                        FeatureFlags featureFlags) {
@@ -1032,6 +1036,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             mViewConfiguration = viewConfiguration;
             mWindowManager = windowManager;
             mWindowManagerService = windowManagerService;
+            mPipOptional = pipOptional;
             mFalsingManager = falsingManager;
             mLatencyTracker = latencyTracker;
             mFeatureFlags = featureFlags;
@@ -1052,6 +1057,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
                     mViewConfiguration,
                     mWindowManager,
                     mWindowManagerService,
+                    mPipOptional,
                     mFalsingManager,
                     mLatencyTracker,
                     mFeatureFlags);
