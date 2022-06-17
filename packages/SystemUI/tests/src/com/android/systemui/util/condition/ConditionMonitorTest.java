@@ -65,7 +65,12 @@ public class ConditionMonitorTest extends SysuiTestCase {
         mCondition3 = spy(new FakeCondition());
         mConditions = new HashSet<>(Arrays.asList(mCondition1, mCondition2, mCondition3));
 
-        mConditionMonitor = new Monitor(mExecutor, mConditions);
+        mConditionMonitor = new Monitor(mExecutor);
+    }
+
+    public Monitor.Subscription.Builder getDefaultBuilder(Monitor.Callback callback) {
+        return new Monitor.Subscription.Builder(callback)
+                .addConditions(mConditions);
     }
 
     @Test
@@ -74,11 +79,19 @@ public class ConditionMonitorTest extends SysuiTestCase {
         final Condition regularCondition = Mockito.mock(Condition.class);
         final Monitor.Callback callback = Mockito.mock(Monitor.Callback.class);
 
-        final Monitor monitor = new Monitor(
-                mExecutor,
-                new HashSet<>(Arrays.asList(overridingCondition, regularCondition)));
+        final Monitor.Callback referenceCallback = Mockito.mock(Monitor.Callback.class);
 
-        monitor.addCallback(callback);
+        final Monitor monitor = new Monitor(mExecutor);
+
+        monitor.addSubscription(getDefaultBuilder(callback)
+                .addCondition(overridingCondition)
+                .addCondition(regularCondition)
+                .build());
+
+        monitor.addSubscription(getDefaultBuilder(referenceCallback)
+                .addCondition(regularCondition)
+                .build());
+
         mExecutor.runAllReady();
 
         when(overridingCondition.isOverridingCondition()).thenReturn(true);
@@ -94,7 +107,9 @@ public class ConditionMonitorTest extends SysuiTestCase {
         mExecutor.runAllReady();
 
         verify(callback).onConditionsChanged(eq(true));
+        verify(referenceCallback).onConditionsChanged(eq(false));
         Mockito.clearInvocations(callback);
+        Mockito.clearInvocations(referenceCallback);
 
         when(regularCondition.isConditionMet()).thenReturn(true);
         when(overridingCondition.isConditionMet()).thenReturn(false);
@@ -103,12 +118,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
         mExecutor.runAllReady();
 
         verify(callback).onConditionsChanged(eq(false));
-
-        clearInvocations(callback);
-        monitor.removeCondition(overridingCondition);
-        mExecutor.runAllReady();
-
-        verify(callback).onConditionsChanged(eq(true));
+        verify(referenceCallback, never()).onConditionsChanged(anyBoolean());
     }
 
     /**
@@ -122,11 +132,13 @@ public class ConditionMonitorTest extends SysuiTestCase {
         final Condition regularCondition = Mockito.mock(Condition.class);
         final Monitor.Callback callback = Mockito.mock(Monitor.Callback.class);
 
-        final Monitor monitor = new Monitor(
-                mExecutor,
-                new HashSet<>(Arrays.asList(overridingCondition, overridingCondition2,
-                        regularCondition)));
-        monitor.addCallback(callback);
+        final Monitor monitor = new Monitor(mExecutor);
+
+        monitor.addSubscription(getDefaultBuilder(callback)
+                .addCondition(overridingCondition)
+                .addCondition(overridingCondition2)
+                .build());
+
         mExecutor.runAllReady();
 
         when(overridingCondition.isOverridingCondition()).thenReturn(true);
@@ -151,13 +163,13 @@ public class ConditionMonitorTest extends SysuiTestCase {
     public void addCallback_addFirstCallback_addCallbackToAllConditions() {
         final Monitor.Callback callback1 =
                 mock(Monitor.Callback.class);
-        mConditionMonitor.addCallback(callback1);
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback1).build());
         mExecutor.runAllReady();
         mConditions.forEach(condition -> verify(condition).addCallback(any()));
 
         final Monitor.Callback callback2 =
                 mock(Monitor.Callback.class);
-        mConditionMonitor.addCallback(callback2);
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback2).build());
         mExecutor.runAllReady();
         mConditions.forEach(condition -> verify(condition, times(1)).addCallback(any()));
     }
@@ -166,7 +178,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
     public void addCallback_addFirstCallback_reportWithDefaultValue() {
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);
-        mConditionMonitor.addCallback(callback);
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback).build());
         mExecutor.runAllReady();
         verify(callback).onConditionsChanged(false);
     }
@@ -177,66 +189,65 @@ public class ConditionMonitorTest extends SysuiTestCase {
                 mock(Monitor.Callback.class);
         final Condition condition = mock(Condition.class);
         when(condition.isConditionMet()).thenReturn(true);
-        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(condition)));
-        monitor.addCallback(callback1);
+        final Monitor monitor = new Monitor(mExecutor);
+        monitor.addSubscription(new Monitor.Subscription.Builder(callback1)
+                .addCondition(condition)
+                .build());
 
         final Monitor.Callback callback2 =
                 mock(Monitor.Callback.class);
-        monitor.addCallback(callback2);
+        monitor.addSubscription(new Monitor.Subscription.Builder(callback2)
+                .addCondition(condition)
+                .build());
         mExecutor.runAllReady();
         verify(callback2).onConditionsChanged(eq(true));
     }
 
     @Test
     public void addCallback_noConditions_reportAllConditionsMet() {
-        final Monitor monitor = new Monitor(mExecutor, new HashSet<>());
+        final Monitor monitor = new Monitor(mExecutor);
         final Monitor.Callback callback = mock(Monitor.Callback.class);
 
-        monitor.addCallback(callback);
+        monitor.addSubscription(new Monitor.Subscription.Builder(callback).build());
         mExecutor.runAllReady();
         verify(callback).onConditionsChanged(true);
     }
 
     @Test
-    public void addCallback_withMultipleInstancesOfTheSameCallback_registerOnlyOne() {
-        final Monitor monitor = new Monitor(mExecutor, new HashSet<>());
-        final Monitor.Callback callback = mock(Monitor.Callback.class);
-
-        // Adds the same instance multiple times.
-        monitor.addCallback(callback);
-        monitor.addCallback(callback);
-        monitor.addCallback(callback);
+    public void removeCallback_noFailureOnDoubleRemove() {
+        final Condition condition = mock(Condition.class);
+        final Monitor monitor = new Monitor(mExecutor);
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+        final Monitor.Subscription.Token token = monitor.addSubscription(
+                new Monitor.Subscription.Builder(callback).addCondition(condition).build()
+        );
+        monitor.removeSubscription(token);
         mExecutor.runAllReady();
-
-        // Callback should only be triggered once.
-        verify(callback, times(1)).onConditionsChanged(true);
+        // Ensure second removal doesn't cause an exception.
+        monitor.removeSubscription(token);
+        mExecutor.runAllReady();
     }
 
     @Test
     public void removeCallback_shouldNoLongerReceiveUpdate() {
         final Condition condition = mock(Condition.class);
-        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(condition)));
+        final Monitor monitor = new Monitor(mExecutor);
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);
-        monitor.addCallback(callback);
-        monitor.removeCallback(callback);
+        final Monitor.Subscription.Token token = monitor.addSubscription(
+                new Monitor.Subscription.Builder(callback).addCondition(condition).build()
+        );
+        monitor.removeSubscription(token);
         mExecutor.runAllReady();
         clearInvocations(callback);
 
         final ArgumentCaptor<Condition.Callback> conditionCallbackCaptor =
                 ArgumentCaptor.forClass(Condition.Callback.class);
         verify(condition).addCallback(conditionCallbackCaptor.capture());
+
         final Condition.Callback conditionCallback = conditionCallbackCaptor.getValue();
-
-        when(condition.isConditionMet()).thenReturn(true);
-        conditionCallback.onConditionChanged(condition);
-        mExecutor.runAllReady();
-        verify(callback, never()).onConditionsChanged(true);
-
-        when(condition.isConditionMet()).thenReturn(false);
-        conditionCallback.onConditionChanged(condition);
-        mExecutor.runAllReady();
-        verify(callback, never()).onConditionsChanged(false);
+        verify(condition).removeCallback(conditionCallback);
     }
 
     @Test
@@ -245,14 +256,16 @@ public class ConditionMonitorTest extends SysuiTestCase {
                 mock(Monitor.Callback.class);
         final Monitor.Callback callback2 =
                 mock(Monitor.Callback.class);
-        mConditionMonitor.addCallback(callback1);
-        mConditionMonitor.addCallback(callback2);
+        final Monitor.Subscription.Token subscription1 =
+                mConditionMonitor.addSubscription(getDefaultBuilder(callback1).build());
+        final Monitor.Subscription.Token subscription2 =
+                mConditionMonitor.addSubscription(getDefaultBuilder(callback2).build());
 
-        mConditionMonitor.removeCallback(callback1);
+        mConditionMonitor.removeSubscription(subscription1);
         mExecutor.runAllReady();
         mConditions.forEach(condition -> verify(condition, never()).removeCallback(any()));
 
-        mConditionMonitor.removeCallback(callback2);
+        mConditionMonitor.removeSubscription(subscription2);
         mExecutor.runAllReady();
         mConditions.forEach(condition -> verify(condition).removeCallback(any()));
     }
@@ -261,7 +274,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
     public void updateCallbacks_allConditionsMet_reportTrue() {
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);
-        mConditionMonitor.addCallback(callback);
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback).build());
         clearInvocations(callback);
 
         mCondition1.fakeUpdateCondition(true);
@@ -276,7 +289,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
     public void updateCallbacks_oneConditionStoppedMeeting_reportFalse() {
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);
-        mConditionMonitor.addCallback(callback);
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback).build());
 
         mCondition1.fakeUpdateCondition(true);
         mCondition2.fakeUpdateCondition(true);
@@ -292,7 +305,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
     public void updateCallbacks_shouldOnlyUpdateWhenValueChanges() {
         final Monitor.Callback callback =
                 mock(Monitor.Callback.class);
-        mConditionMonitor.addCallback(callback);
+        mConditionMonitor.addSubscription(getDefaultBuilder(callback).build());
         mExecutor.runAllReady();
         verify(callback).onConditionsChanged(false);
         clearInvocations(callback);
