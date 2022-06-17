@@ -4858,11 +4858,10 @@
     <permission android:name="android.permission.DISABLE_INPUT_DEVICE"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to configure and connect to Wifi displays
-         @hide
-         @SystemApi -->
+    <!-- Allows an application to configure and connect to Wifi displays -->
     <permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|knownSigner"
+        android:knownCerts="@array/wifi_known_signers" />
 
     <!-- Allows an application to control low-level features of Wifi displays
          such as opening an RTSP socket.  This permission should only be used

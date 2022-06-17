@@ -78,6 +78,7 @@ package android {
     field public static final String CHANGE_WIFI_MULTICAST_STATE = "android.permission.CHANGE_WIFI_MULTICAST_STATE";
     field public static final String CHANGE_WIFI_STATE = "android.permission.CHANGE_WIFI_STATE";
     field public static final String CLEAR_APP_CACHE = "android.permission.CLEAR_APP_CACHE";
+    field public static final String CONFIGURE_WIFI_DISPLAY = "android.permission.CONFIGURE_WIFI_DISPLAY";
     field public static final String CONTROL_LOCATION_UPDATES = "android.permission.CONTROL_LOCATION_UPDATES";
     field public static final String DELETE_CACHE_FILES = "android.permission.DELETE_CACHE_FILES";
     field public static final String DELETE_PACKAGES = "android.permission.DELETE_PACKAGES";
