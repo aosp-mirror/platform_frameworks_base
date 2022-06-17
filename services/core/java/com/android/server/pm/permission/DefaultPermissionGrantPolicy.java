@@ -912,6 +912,11 @@ final class DefaultPermissionGrantPolicy {
         grantSystemFixedPermissionsToSystemPackage(pm,
                 MidiManager.BLUETOOTH_MIDI_SERVICE_PACKAGE, userId,
                 NEARBY_DEVICES_PERMISSIONS);
+
+        // Ad Service
+        String commonServiceAction = "android.adservices.AD_SERVICES_COMMON_SERVICE";
+        grantPermissionsToSystemPackage(pm, getDefaultSystemHandlerServicePackage(pm,
+                        commonServiceAction, userId), userId, NOTIFICATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackageForCategory(PackageManagerWrapper pm,
