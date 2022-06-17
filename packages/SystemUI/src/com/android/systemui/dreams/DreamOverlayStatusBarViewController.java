@@ -49,6 +49,7 @@ import com.android.systemui.util.time.DateFormatUtil;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -65,7 +66,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private final Resources mResources;
     private final DateFormatUtil mDateFormatUtil;
     private final IndividualSensorPrivacyController mSensorPrivacyController;
-    private final DreamOverlayNotificationCountProvider mDreamOverlayNotificationCountProvider;
+    private final Optional<DreamOverlayNotificationCountProvider>
+            mDreamOverlayNotificationCountProvider;
     private final ZenModeController mZenModeController;
     private final Executor mMainExecutor;
 
@@ -125,7 +127,7 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
             NextAlarmController nextAlarmController,
             DateFormatUtil dateFormatUtil,
             IndividualSensorPrivacyController sensorPrivacyController,
-            DreamOverlayNotificationCountProvider dreamOverlayNotificationCountProvider,
+            Optional<DreamOverlayNotificationCountProvider> dreamOverlayNotificationCountProvider,
             ZenModeController zenModeController,
             StatusBarWindowStateController statusBarWindowStateController) {
         super(view);
@@ -161,7 +163,9 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mZenModeController.addCallback(mZenModeCallback);
         updatePriorityModeStatusIcon();
 
-        mDreamOverlayNotificationCountProvider.addCallback(mNotificationCountCallback);
+        mDreamOverlayNotificationCountProvider.ifPresent(
+                provider -> provider.addCallback(mNotificationCountCallback));
+
         mTouchInsetSession.addViewToTracking(mView);
     }
 
@@ -171,7 +175,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         mSensorPrivacyController.removeCallback(mSensorCallback);
         mNextAlarmController.removeCallback(mNextAlarmCallback);
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
-        mDreamOverlayNotificationCountProvider.removeCallback(mNotificationCountCallback);
+        mDreamOverlayNotificationCountProvider.ifPresent(
+                provider -> provider.removeCallback(mNotificationCountCallback));
         mTouchInsetSession.clear();
 
         mIsAttached = false;
