@@ -2686,7 +2686,7 @@ public class ComputerEngine implements Computer {
         if (Process.isSdkSandboxUid(callingUid)) {
             int clientAppUid = Process.getAppUidForSdkSandboxUid(callingUid);
             // SDK sandbox should be able to see it's client app
-            if (clientAppUid == UserHandle.getUid(userId, ps.getAppId())) {
+            if (ps != null && clientAppUid == UserHandle.getUid(userId, ps.getAppId())) {
                 return false;
             }
         }
@@ -2698,7 +2698,7 @@ public class ComputerEngine implements Computer {
         final boolean callerIsInstantApp = instantAppPkgName != null;
         if (ps == null) {
             // pretend the application exists, but, needs to be filtered
-            return callerIsInstantApp;
+            return callerIsInstantApp || Process.isSdkSandboxUid(callingUid);
         }
         // if the target and caller are the same application, don't filter
         if (isCallerSameApp(ps.getPackageName(), callingUid)) {
@@ -3089,6 +3089,19 @@ public class ComputerEngine implements Computer {
     }
 
     public boolean filterAppAccess(int uid, int callingUid) {
+        if (Process.isSdkSandboxUid(uid)) {
+            // Sdk sandbox instance should be able to see itself.
+            if (callingUid == uid) {
+                return false;
+            }
+            final int clientAppUid = Process.getAppUidForSdkSandboxUid(uid);
+            // Client app of this sdk sandbox process should be able to see it.
+            if (clientAppUid == uid) {
+                return false;
+            }
+            // Nobody else should be able to see the sdk sandbox process.
+            return true;
+        }
         final int userId = UserHandle.getUserId(uid);
         final int appId = UserHandle.getAppId(uid);
         final Object setting = mSettings.getSettingBase(appId);
