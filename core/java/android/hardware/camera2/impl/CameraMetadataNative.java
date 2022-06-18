@@ -88,8 +88,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -1734,12 +1734,12 @@ public class CameraMetadataNative implements Parcelable {
             int height = maxSizes[3 * i + 2];
             if (mode != CameraMetadata.CONTROL_EXTENDED_SCENE_MODE_DISABLED
                     && j < numExtendedSceneModeZoomRanges) {
-                capabilities[i] = new Capability(mode, width, height, zoomRanges[2 * j],
-                        zoomRanges[2 * j + 1]);
+                capabilities[i] = new Capability(mode, new Size(width, height),
+                        new Range<Float>(zoomRanges[2 * j], zoomRanges[2 * j + 1]));
                 j++;
             } else {
-                capabilities[i] = new Capability(mode, width, height, modeOffMinZoomRatio,
-                        modeOffMaxZoomRatio);
+                capabilities[i] = new Capability(mode, new Size(width, height),
+                        new Range<Float>(modeOffMinZoomRatio, modeOffMaxZoomRatio));
             }
         }
 

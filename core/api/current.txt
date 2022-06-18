@@ -18154,7 +18154,7 @@ package android.hardware.camera2.params {
   }
 
   public final class Capability {
-    ctor public Capability(int, int, int, float, float);
+    ctor public Capability(int, @NonNull android.util.Size, @NonNull android.util.Range<java.lang.Float>);
     method @NonNull public android.util.Size getMaxStreamingSize();
     method public int getMode();
     method @NonNull public android.util.Range<java.lang.Float> getZoomRatioRange();
