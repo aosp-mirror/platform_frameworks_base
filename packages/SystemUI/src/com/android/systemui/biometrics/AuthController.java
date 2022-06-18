@@ -492,6 +492,9 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         final float scaleFactor = android.util.DisplayUtils.getPhysicalPixelDisplaySizeRatio(
                 mStableDisplaySize.x, mStableDisplaySize.y, displayInfo.getNaturalWidth(),
                 displayInfo.getNaturalHeight());
+        if (scaleFactor == Float.POSITIVE_INFINITY) {
+            return new PointF(mFaceAuthSensorLocation.x, mFaceAuthSensorLocation.y);
+        }
         return new PointF(mFaceAuthSensorLocation.x * scaleFactor,
                 mFaceAuthSensorLocation.y * scaleFactor);
     }
