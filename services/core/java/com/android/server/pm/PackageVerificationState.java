@@ -26,7 +26,7 @@ import android.util.SparseBooleanArray;
  * sufficient verifiers, then package verification is considered complete.
  */
 class PackageVerificationState {
-    private final VerificationParams mParams;
+    private final VerifyingSession mVerifyingSession;
 
     private final SparseBooleanArray mSufficientVerifierUids;
 
@@ -48,14 +48,14 @@ class PackageVerificationState {
      * Create a new package verification state where {@code requiredVerifierUid} is the user ID for
      * the package that must reply affirmative before things can continue.
      */
-    PackageVerificationState(VerificationParams params) {
-        mParams = params;
+    PackageVerificationState(VerifyingSession verifyingSession) {
+        mVerifyingSession = verifyingSession;
         mSufficientVerifierUids = new SparseBooleanArray();
         mExtendedTimeout = false;
     }
 
-    VerificationParams getVerificationParams() {
-        return mParams;
+    VerifyingSession getVerifyingSession() {
+        return mVerifyingSession;
     }
 
     /** Sets the user ID of the required package verifier. */

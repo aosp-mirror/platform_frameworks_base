@@ -48,7 +48,7 @@ import java.util.Arrays;
 public class MeasuredEnergyStats {
     private static final String TAG = "MeasuredEnergyStats";
 
-    // Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} MUST be updated if standard
+    // Note: {@link BatteryStats#VERSION} MUST be updated if standard
     // power bucket integers are modified/added/removed.
     public static final int POWER_BUCKET_UNKNOWN = -1;
     public static final int POWER_BUCKET_SCREEN_ON = 0;
@@ -309,8 +309,7 @@ public class MeasuredEnergyStats {
      * Read from summary parcel.
      * Note: Measured subsystem (and therefore bucket) availability may be different from when the
      * summary parcel was written. Availability has already been correctly set in the constructor.
-     * Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} must be updated if summary
-     *       parceling changes.
+     * Note: {@link android.os.BatteryStats#VERSION} must be updated if summary parceling changes.
      *
      * Corresponding write performed by {@link #writeSummaryToParcel(Parcel)}.
      */

@@ -16,8 +16,6 @@
 
 package com.android.systemui.tv;
 
-import android.content.Context;
-
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.dagger.GlobalRootComponent;
 
@@ -27,9 +25,7 @@ import com.android.systemui.dagger.GlobalRootComponent;
  */
 public class TvSystemUIFactory extends SystemUIFactory {
     @Override
-    protected GlobalRootComponent buildGlobalRootComponent(Context context) {
-        return DaggerTvGlobalRootComponent.builder()
-                .context(context)
-                .build();
+    protected GlobalRootComponent.Builder getGlobalRootComponentBuilder() {
+        return DaggerTvGlobalRootComponent.builder();
     }
 }

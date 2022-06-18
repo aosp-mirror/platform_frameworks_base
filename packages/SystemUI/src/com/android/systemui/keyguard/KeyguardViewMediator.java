@@ -2424,7 +2424,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             RemoteAnimationTarget[] apps, RemoteAnimationTarget[] wallpapers,
             RemoteAnimationTarget[] nonApps, IRemoteAnimationFinishedCallback finishedCallback) {
         Trace.beginSection("KeyguardViewMediator#handleStartKeyguardExitAnimation");
-        if (DEBUG) Log.d(TAG, "handleStartKeyguardExitAnimation startTime=" + startTime
+        Log.d(TAG, "handleStartKeyguardExitAnimation startTime=" + startTime
                 + " fadeoutDuration=" + fadeoutDuration);
         synchronized (KeyguardViewMediator.this) {
 
@@ -2620,7 +2620,11 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      * @param cancelled {@code true} if the animation was cancelled before it finishes.
      */
     public void onKeyguardExitRemoteAnimationFinished(boolean cancelled) {
+        Log.d(TAG, "onKeyguardExitRemoteAnimationFinished");
         if (!mSurfaceBehindRemoteAnimationRunning && !mSurfaceBehindRemoteAnimationRequested) {
+            Log.d(TAG, "skip onKeyguardExitRemoteAnimationFinished cancelled=" + cancelled
+                    + " surfaceAnimationRunning=" + mSurfaceBehindRemoteAnimationRunning
+                    + " surfaceAnimationRequested=" + mSurfaceBehindRemoteAnimationRequested);
             return;
         }
 
@@ -2634,7 +2638,13 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             onKeyguardExitFinished();
 
             if (mKeyguardStateController.isDismissingFromSwipe() || wasShowing) {
+                Log.d(TAG, "onKeyguardExitRemoteAnimationFinished"
+                        + "#hideKeyguardViewAfterRemoteAnimation");
                 mKeyguardUnlockAnimationControllerLazy.get().hideKeyguardViewAfterRemoteAnimation();
+            } else {
+                Log.d(TAG, "skip hideKeyguardViewAfterRemoteAnimation"
+                        + " dismissFromSwipe=" + mKeyguardStateController.isDismissingFromSwipe()
+                        + " wasShowing=" + wasShowing);
             }
 
             finishSurfaceBehindRemoteAnimation(cancelled);

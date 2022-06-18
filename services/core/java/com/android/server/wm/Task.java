@@ -1849,6 +1849,11 @@ class Task extends TaskFragment {
         if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_UNDEFINED) {
             nextPersistTaskBounds = newParentConfig.windowConfiguration.persistTaskBounds();
         }
+        // Only restore to the last non-fullscreen bounds when the requested override bounds
+        // have not been explicitly set already.
+        nextPersistTaskBounds &=
+                (getRequestedOverrideConfiguration().windowConfiguration.getBounds() == null
+                || getRequestedOverrideConfiguration().windowConfiguration.getBounds().isEmpty());
         if (!prevPersistTaskBounds && nextPersistTaskBounds
                 && mLastNonFullscreenBounds != null && !mLastNonFullscreenBounds.isEmpty()) {
             // Bypass onRequestedOverrideConfigurationChanged here to avoid infinite loop.
@@ -4418,13 +4423,13 @@ class Task extends TaskFragment {
                     : WINDOWING_MODE_FULLSCREEN;
         }
         if (currentMode == WINDOWING_MODE_PINNED) {
+            // In the case that we've disabled affecting the SysUI flags as a part of seamlessly
+            // transferring the transform on the leash to the task, reset this state once we're
+            // moving out of pip
+            setCanAffectSystemUiFlags(true);
             mRootWindowContainer.notifyActivityPipModeChanged(this, null);
         }
         if (likelyResolvedMode == WINDOWING_MODE_PINNED) {
-            // In the case that we've disabled affecting the SysUI flags as a part of seamlessly
-            // transferring the transform on the leash to the task, reset this state once we've
-            // actually entered pip
-            setCanAffectSystemUiFlags(true);
             if (taskDisplayArea.getRootPinnedTask() != null) {
                 // Can only have 1 pip at a time, so replace an existing pip
                 taskDisplayArea.getRootPinnedTask().dismissPip();

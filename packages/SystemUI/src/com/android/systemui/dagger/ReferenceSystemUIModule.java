@@ -35,6 +35,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.media.dagger.MediaModule;
+import com.android.systemui.navigationbar.gestural.GestureModule;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
@@ -43,6 +44,7 @@ import com.android.systemui.qs.dagger.QSModule;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsImplementation;
+import com.android.systemui.screenshot.ReferenceScreenshotModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
@@ -94,9 +96,11 @@ import dagger.Provides;
  * SystemUI code that variants of SystemUI _must_ include to function correctly.
  */
 @Module(includes = {
+        GestureModule.class,
         MediaModule.class,
         PowerModule.class,
         QSModule.class,
+        ReferenceScreenshotModule.class,
         StartCentralSurfacesModule.class,
         VolumeModule.class
 })

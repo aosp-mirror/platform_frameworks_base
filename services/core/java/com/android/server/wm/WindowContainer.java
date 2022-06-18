@@ -2953,11 +2953,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (controller != null && !mSurfaceAnimator.isAnimationStartDelayed()) {
             // Here we load App XML in order to read com.android.R.styleable#Animation_showBackdrop.
             boolean showBackdrop = false;
+            // Optionally set backdrop color if App explicitly provides it through
+            // {@link Activity#overridePendingTransition(int, int, int)}.
+            @ColorInt int backdropColor = 0;
             if (controller.isFromActivityEmbedding()) {
                 final int animAttr = AppTransition.mapOpenCloseTransitTypes(transit, enter);
                 final Animation a = animAttr != 0
                         ? appTransition.loadAnimationAttr(lp, animAttr, transit) : null;
                 showBackdrop = a != null && a.getShowBackdrop();
+                backdropColor = appTransition.getNextAppTransitionBackgroundColor();
             }
             final Rect localBounds = new Rect(mTmpRect);
             localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
@@ -2965,6 +2969,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     controller.createRemoteAnimationRecord(
                             this, mTmpPoint, localBounds, screenBounds,
                             (isChanging ? mSurfaceFreezer.mFreezeBounds : null), showBackdrop);
+            if (backdropColor != 0) {
+                adapters.setBackDropColor(backdropColor);
+            }
             if (!isChanging) {
                 adapters.setMode(enter
                         ? RemoteAnimationTarget.MODE_OPENING

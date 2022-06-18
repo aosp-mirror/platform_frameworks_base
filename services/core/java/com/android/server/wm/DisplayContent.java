@@ -130,7 +130,6 @@ import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.SLEEP_TOKENS;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -758,8 +757,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         if (w.mAttrs.type == TYPE_INPUT_METHOD_DIALOG && mImeLayeringTarget != null
                 && !mImeLayeringTarget.getRequestedVisibility(ITYPE_IME)
-                && mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
-                ANIMATION_TYPE_APP_TRANSITION)) {
+                && !mImeLayeringTarget.isVisibleRequested()) {
             return false;
         }
 

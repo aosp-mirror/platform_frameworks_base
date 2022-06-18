@@ -37,4 +37,8 @@
     <color name="user_icon_6">#ff4ecde6</color><!-- cyan -->
     <color name="user_icon_7">#fffbbc04</color><!-- yellow -->
     <color name="user_icon_8">#fffa903e</color><!-- orange -->
+
+    <!-- Lily Language Picker language item view colors -->
+    <color name="language_picker_item_text_color">#F1F3F4</color>
+    <color name="language_picker_item_text_color_secondary">#BDC1C6</color>
 </resources>

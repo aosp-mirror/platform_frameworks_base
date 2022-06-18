@@ -307,6 +307,10 @@ public class AppTransition implements Dump {
         setAppTransitionState(APP_STATE_TIMEOUT);
     }
 
+    @ColorInt int getNextAppTransitionBackgroundColor() {
+        return mNextAppTransitionBackgroundColor;
+    }
+
     HardwareBuffer getAppTransitionThumbnailHeader(WindowContainer container) {
         AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(
                 container.hashCode());

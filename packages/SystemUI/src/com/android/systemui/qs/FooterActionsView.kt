@@ -22,6 +22,8 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
 import android.os.UserManager
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -101,4 +103,18 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
         }
         multiUserAvatar.setImageDrawable(pictureToSet)
     }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        if (VERBOSE) Log.d(TAG, "FooterActionsView onInterceptTouchEvent ${ev?.string}")
+        return super.onInterceptTouchEvent(ev)
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (VERBOSE) Log.d(TAG, "FooterActionsView onTouchEvent ${event?.string}")
+        return super.onTouchEvent(event)
+    }
 }
+private const val TAG = "FooterActionsView"
+private val VERBOSE = Log.isLoggable(TAG, Log.VERBOSE)
+private val MotionEvent.string
+    get() = "($id): ($x,$y)"

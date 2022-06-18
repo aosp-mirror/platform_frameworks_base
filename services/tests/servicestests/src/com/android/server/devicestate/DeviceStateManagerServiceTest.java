@@ -76,12 +76,15 @@ public final class DeviceStateManagerServiceTest {
     private TestDeviceStatePolicy mPolicy;
     private TestDeviceStateProvider mProvider;
     private DeviceStateManagerService mService;
+    private TestSystemPropertySetter mSysPropSetter;
 
     @Before
     public void setup() {
         mProvider = new TestDeviceStateProvider();
         mPolicy = new TestDeviceStatePolicy(mProvider);
-        mService = new DeviceStateManagerService(InstrumentationRegistry.getContext(), mPolicy);
+        mSysPropSetter = new TestSystemPropertySetter();
+        mService = new DeviceStateManagerService(InstrumentationRegistry.getContext(), mPolicy,
+                mSysPropSetter);
 
         // Necessary to allow us to check for top app process id in tests
         mService.mActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
@@ -107,6 +110,8 @@ public final class DeviceStateManagerServiceTest {
     public void baseStateChanged() {
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 DEFAULT_DEVICE_STATE.getIdentifier());
@@ -115,6 +120,8 @@ public final class DeviceStateManagerServiceTest {
         flushHandler();
         assertEquals(mService.getCommittedState(), Optional.of(OTHER_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                OTHER_DEVICE_STATE.getIdentifier() + ":" + OTHER_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(OTHER_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 OTHER_DEVICE_STATE.getIdentifier());
@@ -128,6 +135,8 @@ public final class DeviceStateManagerServiceTest {
         flushHandler();
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.of(OTHER_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(OTHER_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 OTHER_DEVICE_STATE.getIdentifier());
@@ -136,6 +145,8 @@ public final class DeviceStateManagerServiceTest {
         flushHandler();
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.of(OTHER_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 OTHER_DEVICE_STATE.getIdentifier());
@@ -157,6 +168,8 @@ public final class DeviceStateManagerServiceTest {
 
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 DEFAULT_DEVICE_STATE.getIdentifier());
@@ -170,6 +183,8 @@ public final class DeviceStateManagerServiceTest {
 
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 DEFAULT_DEVICE_STATE.getIdentifier());
@@ -182,6 +197,8 @@ public final class DeviceStateManagerServiceTest {
 
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
                 OTHER_DEVICE_STATE);
@@ -193,6 +210,8 @@ public final class DeviceStateManagerServiceTest {
         // supported.
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE);
 
@@ -211,6 +230,8 @@ public final class DeviceStateManagerServiceTest {
 
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
                 OTHER_DEVICE_STATE);
@@ -223,6 +244,8 @@ public final class DeviceStateManagerServiceTest {
         // supported.
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertThat(mService.getSupportedStates()).asList().containsExactly(DEFAULT_DEVICE_STATE,
                 OTHER_DEVICE_STATE);
@@ -316,6 +339,8 @@ public final class DeviceStateManagerServiceTest {
                 TestDeviceStateManagerCallback.STATUS_ACTIVE);
         // Committed state changes as there is a requested override.
         assertEquals(mService.getCommittedState(), Optional.of(OTHER_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                OTHER_DEVICE_STATE.getIdentifier() + ":" + OTHER_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getOverrideState().get(), OTHER_DEVICE_STATE);
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
@@ -334,6 +359,8 @@ public final class DeviceStateManagerServiceTest {
                 TestDeviceStateManagerCallback.STATUS_CANCELED);
         // Committed state is set back to the requested state once the override is cleared.
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertFalse(mService.getOverrideState().isPresent());
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
@@ -386,9 +413,10 @@ public final class DeviceStateManagerServiceTest {
         // callback.
         assertEquals(callback.getLastNotifiedStatus(secondRequestToken),
                 TestDeviceStateManagerCallback.STATUS_UNKNOWN);
-
         assertEquals(mService.getCommittedState(), Optional.of(OTHER_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.of(DEFAULT_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                OTHER_DEVICE_STATE.getIdentifier() + ":" + OTHER_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 DEFAULT_DEVICE_STATE.getIdentifier());
@@ -398,6 +426,8 @@ public final class DeviceStateManagerServiceTest {
 
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 DEFAULT_DEVICE_STATE.getIdentifier());
@@ -413,6 +443,8 @@ public final class DeviceStateManagerServiceTest {
 
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 DEFAULT_DEVICE_STATE.getIdentifier());
@@ -459,6 +491,8 @@ public final class DeviceStateManagerServiceTest {
         // Committed state changes as there is a requested override.
         assertEquals(mService.getCommittedState(), Optional.of(OTHER_DEVICE_STATE));
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                OTHER_DEVICE_STATE.getIdentifier() + ":" + OTHER_DEVICE_STATE.getName());
         assertEquals(mService.getOverrideState().get(), OTHER_DEVICE_STATE);
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 OTHER_DEVICE_STATE.getIdentifier());
@@ -472,6 +506,8 @@ public final class DeviceStateManagerServiceTest {
         // Committed state is set back to the requested state once the override is cleared.
         assertEquals(mService.getCommittedState(), Optional.of(OTHER_DEVICE_STATE));
         assertEquals(mService.getBaseState(), Optional.of(OTHER_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                OTHER_DEVICE_STATE.getIdentifier() + ":" + OTHER_DEVICE_STATE.getName());
         assertFalse(mService.getOverrideState().isPresent());
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
                 OTHER_DEVICE_STATE.getIdentifier());
@@ -496,6 +532,8 @@ public final class DeviceStateManagerServiceTest {
                 TestDeviceStateManagerCallback.STATUS_ACTIVE);
         // Committed state changes as there is a requested override.
         assertEquals(mService.getCommittedState(), Optional.of(OTHER_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                OTHER_DEVICE_STATE.getIdentifier() + ":" + OTHER_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getOverrideState().get(), OTHER_DEVICE_STATE);
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
@@ -510,6 +548,8 @@ public final class DeviceStateManagerServiceTest {
         // Committed state is set back to the requested state as the override state is no longer
         // supported.
         assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
+        assertEquals(mSysPropSetter.getValue(),
+                DEFAULT_DEVICE_STATE.getIdentifier() + ":" + DEFAULT_DEVICE_STATE.getName());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertFalse(mService.getOverrideState().isPresent());
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
@@ -672,6 +712,20 @@ public final class DeviceStateManagerServiceTest {
 
         int getLastNotifiedStatus(IBinder requestToken) {
             return mLastNotifiedStatus.getOrDefault(requestToken, STATUS_UNKNOWN);
+        }
+    }
+
+    private static final class TestSystemPropertySetter implements
+            DeviceStateManagerService.SystemPropertySetter {
+        private String mValue;
+
+        @Override
+        public void setDebugTracingDeviceStateProperty(String value) {
+            mValue = value;
+        }
+
+        public String getValue() {
+            return mValue;
         }
     }
 }

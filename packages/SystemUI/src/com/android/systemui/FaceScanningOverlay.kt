@@ -52,14 +52,17 @@ class FaceScanningOverlay(
     private var cameraProtectionColor = Color.BLACK
     var faceScanningAnimColor = Utils.getColorAttrDefaultColor(context,
             com.android.systemui.R.attr.wallpaperTextColorAccent)
+    private var cameraProtectionAnimator: ValueAnimator? = null
+    var hideOverlayRunnable: Runnable? = null
+
+    init {
+        visibility = View.INVISIBLE // only show this view when face scanning is happening
+    }
 
     override fun setColor(color: Int) {
         cameraProtectionColor = color
         invalidate()
     }
-
-    private var cameraProtectionAnimator: ValueAnimator? = null
-    var hideOverlayRunnable: Runnable? = null
 
     override fun drawCutoutProtection(canvas: Canvas) {
         if (rimProgress > HIDDEN_RIM_SCALE && !protectionRect.isEmpty) {
@@ -94,6 +97,10 @@ class FaceScanningOverlay(
             paint.color = cameraProtectionColor
             canvas.drawPath(scaledProtectionPath, paint)
         }
+    }
+
+    override fun updateVisOnUpdateCutout(): Boolean {
+        return false // instead, we always update the visibility whenever face scanning starts/ends
     }
 
     override fun enableShowProtection(show: Boolean) {

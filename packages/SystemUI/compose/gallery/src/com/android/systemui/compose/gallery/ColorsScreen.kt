@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,38 +33,88 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.android.systemui.compose.theme.LocalAndroidColorScheme
 
 /** The screen that shows all the Material 3 colors. */
 @Composable
-fun ColorsScreen() {
+fun MaterialColorsScreen() {
     val colors = MaterialTheme.colorScheme
-    LazyColumn {
-        item { ColorTile(colors.primary, "primary") }
-        item { ColorTile(colors.onPrimary, "onPrimary") }
-        item { ColorTile(colors.primaryContainer, "primaryContainer") }
-        item { ColorTile(colors.onPrimaryContainer, "onPrimaryContainer") }
-        item { ColorTile(colors.inversePrimary, "inversePrimary") }
-        item { ColorTile(colors.secondary, "secondary") }
-        item { ColorTile(colors.onSecondary, "onSecondary") }
-        item { ColorTile(colors.secondaryContainer, "secondaryContainer") }
-        item { ColorTile(colors.onSecondaryContainer, "onSecondaryContainer") }
-        item { ColorTile(colors.tertiary, "tertiary") }
-        item { ColorTile(colors.onTertiary, "onTertiary") }
-        item { ColorTile(colors.tertiaryContainer, "tertiaryContainer") }
-        item { ColorTile(colors.onTertiaryContainer, "onTertiaryContainer") }
-        item { ColorTile(colors.background, "background") }
-        item { ColorTile(colors.onBackground, "onBackground") }
-        item { ColorTile(colors.surface, "surface") }
-        item { ColorTile(colors.onSurface, "onSurface") }
-        item { ColorTile(colors.surfaceVariant, "surfaceVariant") }
-        item { ColorTile(colors.onSurfaceVariant, "onSurfaceVariant") }
-        item { ColorTile(colors.inverseSurface, "inverseSurface") }
-        item { ColorTile(colors.inverseOnSurface, "inverseOnSurface") }
-        item { ColorTile(colors.error, "error") }
-        item { ColorTile(colors.onError, "onError") }
-        item { ColorTile(colors.errorContainer, "errorContainer") }
-        item { ColorTile(colors.onErrorContainer, "onErrorContainer") }
-        item { ColorTile(colors.outline, "outline") }
+    ColorsScreen(
+        listOf(
+            "primary" to colors.primary,
+            "onPrimary" to colors.onPrimary,
+            "primaryContainer" to colors.primaryContainer,
+            "onPrimaryContainer" to colors.onPrimaryContainer,
+            "inversePrimary" to colors.inversePrimary,
+            "secondary" to colors.secondary,
+            "onSecondary" to colors.onSecondary,
+            "secondaryContainer" to colors.secondaryContainer,
+            "onSecondaryContainer" to colors.onSecondaryContainer,
+            "tertiary" to colors.tertiary,
+            "onTertiary" to colors.onTertiary,
+            "tertiaryContainer" to colors.tertiaryContainer,
+            "onTertiaryContainer" to colors.onTertiaryContainer,
+            "background" to colors.background,
+            "onBackground" to colors.onBackground,
+            "surface" to colors.surface,
+            "onSurface" to colors.onSurface,
+            "surfaceVariant" to colors.surfaceVariant,
+            "onSurfaceVariant" to colors.onSurfaceVariant,
+            "inverseSurface" to colors.inverseSurface,
+            "inverseOnSurface" to colors.inverseOnSurface,
+            "error" to colors.error,
+            "onError" to colors.onError,
+            "errorContainer" to colors.errorContainer,
+            "onErrorContainer" to colors.onErrorContainer,
+            "outline" to colors.outline,
+        )
+    )
+}
+
+/** The screen that shows all the Android colors. */
+@Composable
+fun AndroidColorsScreen() {
+    val colors = LocalAndroidColorScheme.current
+    ColorsScreen(
+        listOf(
+            "colorPrimary" to colors.colorPrimary,
+            "colorPrimaryDark" to colors.colorPrimaryDark,
+            "colorAccent" to colors.colorAccent,
+            "colorAccentPrimary" to colors.colorAccentPrimary,
+            "colorAccentSecondary" to colors.colorAccentSecondary,
+            "colorAccentTertiary" to colors.colorAccentTertiary,
+            "colorAccentPrimaryVariant" to colors.colorAccentPrimaryVariant,
+            "colorAccentSecondaryVariant" to colors.colorAccentSecondaryVariant,
+            "colorAccentTertiaryVariant" to colors.colorAccentTertiaryVariant,
+            "colorSurface" to colors.colorSurface,
+            "colorSurfaceHighlight" to colors.colorSurfaceHighlight,
+            "colorSurfaceVariant" to colors.colorSurfaceVariant,
+            "colorSurfaceHeader" to colors.colorSurfaceHeader,
+            "colorError" to colors.colorError,
+            "colorBackground" to colors.colorBackground,
+            "colorBackgroundFloating" to colors.colorBackgroundFloating,
+            "panelColorBackground" to colors.panelColorBackground,
+            "textColorPrimary" to colors.textColorPrimary,
+            "textColorSecondary" to colors.textColorSecondary,
+            "textColorTertiary" to colors.textColorTertiary,
+            "textColorPrimaryInverse" to colors.textColorPrimaryInverse,
+            "textColorSecondaryInverse" to colors.textColorSecondaryInverse,
+            "textColorTertiaryInverse" to colors.textColorTertiaryInverse,
+            "textColorOnAccent" to colors.textColorOnAccent,
+            "colorForeground" to colors.colorForeground,
+            "colorForegroundInverse" to colors.colorForegroundInverse,
+        )
+    )
+}
+
+@Composable
+private fun ColorsScreen(
+    colors: List<Pair<String, Color>>,
+) {
+    LazyColumn(
+        Modifier.fillMaxWidth(),
+    ) {
+        colors.forEach { (name, color) -> item { ColorTile(color, name) } }
     }
 }
 

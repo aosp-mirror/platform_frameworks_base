@@ -78,10 +78,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFORM;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
-import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -2426,7 +2424,7 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testImeMenuDialogFocusWhenImeLayeringTargetChanges() {
         final WindowState imeMenuDialog =
-                createWindow(mImeWindow, TYPE_INPUT_METHOD_DIALOG, "imeMenuDialog");
+                createWindow(null, TYPE_INPUT_METHOD_DIALOG, "imeMenuDialog");
         makeWindowVisibleAndDrawn(imeMenuDialog, mImeWindow);
         assertTrue(imeMenuDialog.canReceiveKeys());
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
@@ -2439,13 +2437,11 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(imeAppTarget).getRequestedVisibility(ITYPE_IME);
         assertEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
 
-        // Verify imeMenuDialog doesn't be focused window if the next IME target does not
-        // request IME visible.
+        // Verify imeMenuDialog doesn't be focused window if the next IME target is closing.
         final WindowState nextImeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "nextImeAppTarget");
-        spyOn(nextImeAppTarget);
-        doReturn(true).when(nextImeAppTarget).isAnimating(PARENTS | TRANSITION,
-                ANIMATION_TYPE_APP_TRANSITION);
+        makeWindowVisibleAndDrawn(nextImeAppTarget);
+        nextImeAppTarget.mActivityRecord.commitVisibility(false, false);
         mDisplayContent.setImeLayeringTarget(nextImeAppTarget);
         assertNotEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
     }

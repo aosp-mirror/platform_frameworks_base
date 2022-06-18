@@ -41697,8 +41697,15 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.ImsSs {
+    field public static final int CALL_WAITING_SYNC_FIRST_CHANGE = 3; // 0x3
+    field public static final int CALL_WAITING_SYNC_FIRST_POWER_UP = 2; // 0x2
+    field public static final int CALL_WAITING_SYNC_IMS_ONLY = 4; // 0x4
+    field public static final int CALL_WAITING_SYNC_NONE = 0; // 0x0
+    field public static final int CALL_WAITING_SYNC_USER_CHANGE = 1; // 0x1
     field public static final String KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL = "imsss.network_initiated_ussd_over_ims_supported_bool";
     field public static final String KEY_PREFIX = "imsss.";
+    field public static final String KEY_TERMINAL_BASED_CALL_WAITING_DEFAULT_ENABLED_BOOL = "imsss.terminal_based_call_waiting_default_enabled_bool";
+    field public static final String KEY_TERMINAL_BASED_CALL_WAITING_SYNC_TYPE_INT = "imsss.terminal_based_call_waiting_sync_type_int";
     field public static final String KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL = "imsss.use_csfb_on_xcap_over_ut_failure_bool";
     field public static final String KEY_UT_AS_SERVER_FQDN_STRING = "imsss.ut_as_server_fqdn_string";
     field public static final String KEY_UT_AS_SERVER_PORT_INT = "imsss.ut_as_server_port_int";

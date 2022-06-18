@@ -81,7 +81,10 @@ public class PackageStateUnserialized {
             return this;
         }
         getLastPackageUsageTimeInMills()[reason] = time;
-        mPackageSetting.onChanged();
+        // TODO(b/236180425): This method does not notify snapshot changes because it's called too
+        //  frequently, causing too many re-takes. This should be moved to a separate data structure
+        //  or merged with the general UsageStats to avoid tracking heavily mutated data in the
+        //  package data snapshot.
         return this;
     }
 

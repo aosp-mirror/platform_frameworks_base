@@ -48,6 +48,7 @@ interface IImsMmTelFeature {
     void setUiTtyMode(int uiTtyMode, in Message onCompleteMessage);
     IImsMultiEndpoint getMultiEndpointInterface();
     int queryCapabilityStatus();
+    void setTerminalBasedCallWaitingStatus(boolean enabled);
     oneway void addCapabilityCallback(IImsCapabilityCallback c);
     oneway void removeCapabilityCallback(IImsCapabilityCallback c);
     oneway void changeCapabilitiesConfiguration(in CapabilityChangeRequest request,

@@ -15,6 +15,7 @@
  */
 
 package com.android.server.stats.pull;
+
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
@@ -182,14 +183,11 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeRea
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.os.KernelSingleProcessCpuThreadReader.ProcessCpuUsage;
-import com.android.internal.os.KernelWakelockReader;
-import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.SelectedProcessCpuThreadReader;
 import com.android.internal.os.StoragedUidIoStatsReader;
-import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.net.module.util.NetworkStatsUtils;
@@ -205,6 +203,9 @@ import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.health.HealthServiceWrapper;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.power.stats.KernelWakelockReader;
+import com.android.server.power.stats.KernelWakelockStats;
+import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;

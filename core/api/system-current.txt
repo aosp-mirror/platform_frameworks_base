@@ -14650,6 +14650,7 @@ package android.telephony.ims {
     method public android.telephony.ims.stub.ImsFeatureConfiguration querySupportedImsFeatures();
     method public void readyForFeatureCreation();
     field public static final long CAPABILITY_SIP_DELEGATE_CREATION = 2L; // 0x2L
+    field public static final long CAPABILITY_TERMINAL_BASED_CALL_WAITING = 4L; // 0x4L
   }
 
   public final class ImsSsData implements android.os.Parcelable {
@@ -15280,6 +15281,7 @@ package android.telephony.ims.feature {
     method public void onFeatureRemoved();
     method public boolean queryCapabilityConfiguration(int, int);
     method @NonNull public final android.telephony.ims.feature.MmTelFeature.MmTelCapabilities queryCapabilityStatus();
+    method public void setTerminalBasedCallWaitingStatus(boolean);
     method public void setUiTtyMode(int, @Nullable android.os.Message);
     method public int shouldProcessCall(@NonNull String[]);
     field public static final String EXTRA_IS_UNKNOWN_CALL = "android.telephony.ims.feature.extra.IS_UNKNOWN_CALL";

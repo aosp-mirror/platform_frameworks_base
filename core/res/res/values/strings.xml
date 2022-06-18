@@ -5421,6 +5421,11 @@
 
     <!-- List section subheader for the language picker, containing a list of suggested languages determined by the default region [CHAR LIMIT=30] -->
     <string name="language_picker_section_suggested">Suggested</string>
+
+    <!-- List section subheader for the language picker, containing a list of suggested languages determined by the default region [CHAR LIMIT=30] -->
+    <string name="language_picker_section_suggested_bilingual">Suggested languages</string>
+    <!-- List section subheader for the language picker, containing a list of suggested regions determined by the default region [CHAR LIMIT=30] -->
+    <string name="region_picker_section_suggested_bilingual">Suggested regions</string>
     <!-- List section subheader for the language picker, containing a list of all languages available [CHAR LIMIT=30] -->
     <string name="language_picker_section_all">All languages</string>
     <!-- List section subheader for the region picker, containing a list of all regions supported for the selected language.
