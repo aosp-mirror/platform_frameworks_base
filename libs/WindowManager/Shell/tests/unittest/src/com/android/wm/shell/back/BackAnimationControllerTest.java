@@ -77,7 +77,6 @@ import org.mockito.MockitoAnnotations;
 public class BackAnimationControllerTest {
 
     private static final String ANIMATION_ENABLED = "1";
-
     private final TestShellExecutor mShellExecutor = new TestShellExecutor();
 
     @Rule
@@ -184,7 +183,8 @@ public class BackAnimationControllerTest {
         // b/207481538, we check that the surface is not moved for now, we can re-enable this once
         // we implement the animation
         verify(mTransaction, never()).setScale(eq(screenshotSurface), anyInt(), anyInt());
-        verify(mTransaction, never()).setPosition(animationTarget.leash, 100, 100);
+        verify(mTransaction, never()).setPosition(
+                animationTarget.leash, 100, 100);
         verify(mTransaction, atLeastOnce()).apply();
     }
 
@@ -218,73 +218,14 @@ public class BackAnimationControllerTest {
         // Check that back start and progress is dispatched when first move.
         doMotionEvent(MotionEvent.ACTION_MOVE, 100);
         verify(mIOnBackInvokedCallback).onBackStarted();
-
-        // Check that back progress is dispatched.
-        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
         ArgumentCaptor<BackEvent> backEventCaptor = ArgumentCaptor.forClass(BackEvent.class);
-        verify(mIOnBackInvokedCallback, atLeastOnce()).onBackProgressed(backEventCaptor.capture());
+        verify(mIOnBackInvokedCallback).onBackProgressed(backEventCaptor.capture());
         assertEquals(animationTarget, backEventCaptor.getValue().getDepartingAnimationTarget());
 
         // Check that back invocation is dispatched.
         mController.setTriggerBack(true);   // Fake trigger back
         doMotionEvent(MotionEvent.ACTION_UP, 0);
         verify(mIOnBackInvokedCallback).onBackInvoked();
-    }
-
-    @Test
-    public void ignoresGesture_transitionInProgress() throws RemoteException {
-        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
-        createNavigationInfo(animationTarget, null, null,
-                BackNavigationInfo.TYPE_RETURN_TO_HOME, null);
-
-        triggerBackGesture();
-        // Check that back invocation is dispatched.
-        verify(mIOnBackInvokedCallback).onBackInvoked();
-
-        reset(mIOnBackInvokedCallback);
-        // Verify that we prevent animation from restarting if another gestures happens before
-        // the previous transition is finished.
-        mController.onMotionEvent(
-                MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
-                MotionEvent.ACTION_DOWN,
-                BackEvent.EDGE_LEFT);
-        verifyNoMoreInteractions(mIOnBackInvokedCallback);
-
-        // Verify that we start accepting gestures again once transition finishes.
-        mController.onBackToLauncherAnimationFinished();
-        mController.onMotionEvent(
-                MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
-                MotionEvent.ACTION_DOWN,
-                BackEvent.EDGE_LEFT);
-        mController.onMotionEvent(
-                MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100, 100, 0),
-                MotionEvent.ACTION_MOVE,
-                BackEvent.EDGE_LEFT);
-        verify(mIOnBackInvokedCallback).onBackStarted();
-    }
-
-    @Test
-    public void acceptsGesture_transitionTimeout() throws RemoteException {
-        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
-        RemoteAnimationTarget animationTarget = createAnimationTarget();
-        createNavigationInfo(animationTarget, null, null,
-                BackNavigationInfo.TYPE_RETURN_TO_HOME, null);
-
-        triggerBackGesture();
-        reset(mIOnBackInvokedCallback);
-
-        // Simulate transition timeout.
-        mShellExecutor.flushAll();
-        mController.onMotionEvent(
-                MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
-                MotionEvent.ACTION_DOWN,
-                BackEvent.EDGE_LEFT);
-        mController.onMotionEvent(
-                MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100, 100, 0),
-                MotionEvent.ACTION_MOVE,
-                BackEvent.EDGE_LEFT);
-        verify(mIOnBackInvokedCallback).onBackStarted();
     }
 
     @Test
@@ -312,6 +253,47 @@ public class BackAnimationControllerTest {
         verify(mIOnBackInvokedCallback, never()).onBackStarted();
         verify(mIOnBackInvokedCallback, never()).onBackProgressed(backEventCaptor.capture());
         verify(mIOnBackInvokedCallback, never()).onBackInvoked();
+    }
+
+    @Test
+    public void ignoresGesture_transitionInProgress() throws RemoteException {
+        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
+        RemoteAnimationTarget animationTarget = createAnimationTarget();
+        createNavigationInfo(animationTarget, null, null,
+                BackNavigationInfo.TYPE_RETURN_TO_HOME, null);
+
+        triggerBackGesture();
+        // Check that back invocation is dispatched.
+        verify(mIOnBackInvokedCallback).onBackInvoked();
+
+        reset(mIOnBackInvokedCallback);
+        // Verify that we prevent animation from restarting if another gestures happens before
+        // the previous transition is finished.
+        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+        verifyNoMoreInteractions(mIOnBackInvokedCallback);
+
+        // Verify that we start accepting gestures again once transition finishes.
+        mController.onBackToLauncherAnimationFinished();
+        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        verify(mIOnBackInvokedCallback).onBackStarted();
+    }
+
+    @Test
+    public void acceptsGesture_transitionTimeout() throws RemoteException {
+        mController.setBackToLauncherCallback(mIOnBackInvokedCallback);
+        RemoteAnimationTarget animationTarget = createAnimationTarget();
+        createNavigationInfo(animationTarget, null, null,
+                BackNavigationInfo.TYPE_RETURN_TO_HOME, null);
+
+        triggerBackGesture();
+        reset(mIOnBackInvokedCallback);
+
+        // Simulate transition timeout.
+        mShellExecutor.flushAll();
+        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+        doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+        verify(mIOnBackInvokedCallback).onBackStarted();
     }
 
     private void doMotionEvent(int actionDown, int coordinate) {
