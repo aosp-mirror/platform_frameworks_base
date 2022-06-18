@@ -15,6 +15,8 @@
  */
 package com.android.systemui.dreams;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,10 +25,13 @@ import static org.mockito.Mockito.when;
 import android.app.smartspace.SmartspaceTarget;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
+import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.dreams.complication.ComplicationViewModel;
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 
@@ -54,6 +59,12 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
 
     @Mock
     private SmartSpaceComplication mComplication;
+
+    @Mock
+    private ComplicationViewModel mComplicationViewModel;
+
+    @Mock
+    private View mBcSmartspaceView;
 
     @Before
     public void setup() {
@@ -89,5 +100,14 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
         final SmartspaceTarget target = Mockito.mock(SmartspaceTarget.class);
         listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList(target));
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
+    }
+
+    @Test
+    public void testGetViewReusesSameView() {
+        final SmartSpaceComplication complication = new SmartSpaceComplication(getContext(),
+                mSmartspaceController);
+        final Complication.ViewHolder viewHolder = complication.createView(mComplicationViewModel);
+        when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mBcSmartspaceView);
+        assertEquals(viewHolder.getView(), viewHolder.getView());
     }
 }

@@ -4194,6 +4194,11 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
+                if (SPEW_LOGCAT) {
+                    Log.v(TAG,
+                            "NPVC onInterceptTouchEvent (" + event.getId() + "): (" + event.getX()
+                                    + "," + event.getY() + ")");
+                }
                 if (mBlockTouches || mQs.disallowPanelTouches()) {
                     return false;
                 }

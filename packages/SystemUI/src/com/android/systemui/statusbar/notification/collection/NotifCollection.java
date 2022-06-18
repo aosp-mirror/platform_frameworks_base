@@ -104,6 +104,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -829,11 +830,9 @@ public class NotifCollection implements Dumpable {
     @Override
     public void dump(PrintWriter pw, @NonNull String[] args) {
         final List<NotificationEntry> entries = new ArrayList<>(getAllNotifs());
+        entries.sort(Comparator.comparing(NotificationEntry::getKey));
 
-        pw.println("\t" + TAG + " unsorted/unfiltered notifications:");
-        if (entries.size() == 0) {
-            pw.println("\t\t None");
-        }
+        pw.println("\t" + TAG + " unsorted/unfiltered notifications: " + entries.size());
         pw.println(
                 ListDumper.dumpList(
                         entries,
