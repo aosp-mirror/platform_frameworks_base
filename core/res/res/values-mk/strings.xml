@@ -912,7 +912,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Запри"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Премотај назад"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Брзо премотај напред"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"Само повици за итни случаи"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"Само итни повици"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Мрежата е заклучена"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM картичката е заклучена со ПУК код."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Погледнете го Упатството за корисници или контактирајте со Грижа за корисници."</string>
