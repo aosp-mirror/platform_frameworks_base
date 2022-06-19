@@ -18,8 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"تطبيق \"مدير الجهاز المصاحب\""</string>
     <string name="confirmation_title" msgid="3785000297483688997">"‏السماح لتطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; بالوصول إلى &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="profile_name_watch" msgid="576290739483672360">"ساعة"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"‏اختَر <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ليديره تطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"الساعة"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"‏اختَر <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ليديرها تطبيق &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="3002344206574997652">"هذا التطبيق مطلوب لإدارة <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. سيتم السماح لتطبيق <xliff:g id="APP_NAME">%2$s</xliff:g> بالتفاعل مع الإشعارات والوصول إلى أذونات الهاتف والرسائل القصيرة وجهات الاتصال والتقويم وسجلّات المكالمات والأجهزة المجاورة."</string>
     <string name="permission_apps" msgid="6142133265286656158">"التطبيقات"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"بث تطبيقات هاتفك"</string>
