@@ -971,9 +971,19 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     void setBackgroundColor(@ColorInt int colorInt) {
+        setBackgroundColor(colorInt, false /* restore */);
+    }
+
+    void setBackgroundColor(@ColorInt int colorInt, boolean restore) {
         mBackgroundColor = colorInt;
         Color color = Color.valueOf(colorInt);
-        mColorLayerCounter++;
+
+        // We don't want to increment the mColorLayerCounter if we are restoring the background
+        // color after a surface migration because in that case the mColorLayerCounter already
+        // accounts for setting that background color.
+        if (!restore) {
+            mColorLayerCounter++;
+        }
 
         // Only apply the background color if the TDA is actually attached and has a valid surface
         // to set the background color on. We still want to keep track of the background color state
@@ -1002,7 +1012,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         super.migrateToNewSurfaceControl(t);
 
         if (mColorLayerCounter > 0) {
-            setBackgroundColor(mBackgroundColor);
+            setBackgroundColor(mBackgroundColor, true /* restore */);
         }
 
         // As TaskDisplayArea is getting a new surface, reparent and reorder the child surfaces.

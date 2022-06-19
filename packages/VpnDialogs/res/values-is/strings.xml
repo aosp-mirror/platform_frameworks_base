@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Beiðni um tengingu"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> vill setja upp VPN-tengingu til þess að geta fylgst með netumferð. Samþykktu þetta aðeins ef þú treystir upprunanum. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; birtist efst á skjánum þegar VPN er virkt."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> vill setja upp VPN-tengingu til að fylgjast með netumferð. Ekki samþykkja þú treystir upprunanum. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; birtist á skjánum hjá þér þegar VPN er virkt."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN er tengt"</string>
     <string name="session" msgid="6470628549473641030">"Lota:"</string>
     <string name="duration" msgid="3584782459928719435">"Tímalengd:"</string>

@@ -340,6 +340,11 @@ public class MidiService extends IMidiManager.Stub {
 
                 IBinder binder = server.asBinder();
                 mDevicesByServer.remove(binder);
+                // Clearing mDeviceStatus is needed because setDeviceStatus()
+                // relies on finding the device in mDevicesByServer.
+                // So the status can no longer be updated after we remove it.
+                // Then we can end up with input ports that are stuck open.
+                mDeviceStatus = null;
 
                 try {
                     server.closeDevice();

@@ -245,6 +245,7 @@ public final class SurfaceControl implements Parcelable {
             @SurfaceControl.BufferTransform int transformHint);
     private static native int nativeGetTransformHint(long nativeObject);
     private static native int nativeGetLayerId(long nativeObject);
+    private static native void nativeSanitize(long transactionObject);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -3541,6 +3542,13 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             nativeSetDropInputMode(mNativeObject, sc.mNativeObject, mode);
             return this;
+        }
+
+        /**
+         * @hide
+         */
+        public void sanitize() {
+            nativeSanitize(mNativeObject);
         }
 
         /**

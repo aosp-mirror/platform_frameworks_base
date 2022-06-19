@@ -23,7 +23,6 @@ import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
-import static com.android.systemui.statusbar.notification.ViewGroupFadeHelper.reset;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -107,6 +106,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
@@ -305,6 +305,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock
     private NotificationsQSContainerController mNotificationsQSContainerController;
     @Mock
+    private NotificationShadeWindowController mNotificationShadeWindowController;
+    @Mock
     private FeatureFlags mFeatureFlags;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -402,8 +404,10 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_bottom_area), any(), anyBoolean()))
                 .thenReturn(mKeyguardBottomArea);
         when(mNotificationRemoteInputManager.isRemoteInputActive()).thenReturn(false);
-
-        reset(mView);
+        doAnswer(invocation -> {
+            ((Runnable) invocation.getArgument(0)).run();
+            return null;
+        }).when(mNotificationShadeWindowController).batchApplyWindowLayoutParams(any());
 
         mNotificationPanelViewController = new NotificationPanelViewController(mView,
                 mResources,
@@ -412,8 +416,9 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, new FalsingCollectorFake(),
                 mNotificationLockscreenUserManager, mNotificationEntryManager,
-                mKeyguardStateController, mStatusBarStateController, mDozeLog,
-                mDozeParameters, mCommandQueue, mVibratorHelper,
+                mKeyguardStateController, mStatusBarStateController,
+                mNotificationShadeWindowController,
+                mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger, mActivityManager, mConfigurationController,
                 () -> flingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
@@ -824,7 +829,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void testSwitchesToBigClockInSplitShadeOnAod() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
-        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+        when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(2);
 
         mNotificationPanelViewController.setDozing(true, false, null);
@@ -836,7 +841,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     public void testDisplaysSmallClockOnLockscreenInSplitShadeWhenMediaIsPlaying() {
         mStatusBarStateController.setState(KEYGUARD);
         enableSplitShade(/* enabled= */ true);
-        when(mMediaDataManager.hasActiveMedia()).thenReturn(true);
+        when(mMediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true);
 
         // one notification + media player visible
         when(mNotificationStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);

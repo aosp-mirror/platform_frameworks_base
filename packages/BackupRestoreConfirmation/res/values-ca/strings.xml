@@ -20,7 +20,7 @@
     <string name="restore_confirm_title" msgid="5469365809567486602">"Restaura completament"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"S\'ha sol·licitat una còpia de seguretat completa de totes les dades a un equip de sobretaula connectat. Vols permetre que això passi?\n \nSi no has sol·licitat la còpia de seguretat tu mateix, no permetis que continuï l\'operació."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Còpia de seguretat de les meves dades"</string>
-    <string name="deny_backup_button_label" msgid="6009119115581097708">"No facis una còpia de seguretat"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"No en facis una còpia de seguretat"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"S\'ha sol·licitat una restauració completa de totes les dades d\'un equip d\'escriptori connectat. Vols permetre que això passi?\n \nSi no has sol·licitat la restauració tu mateix, no permetis que continuï l\'operació. Això reemplaçarà les dades que hi hagi actualment a l\'equip."</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Restaura les meves dades"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"No ho restauris"</string>
@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Introdueix la contrasenya d\'encriptació del dispositiu a continuació. També es farà servir per encriptar l\'arxiu de seguretat."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Introdueix una contrasenya que utilitzaràs per a l\'encriptació de les dades de còpia de la seguretat completa. Si es deixa en blanc, s\'utilitzarà la teva contrasenya de còpia de seguretat actual:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Si vols xifrar les dades de la còpia de seguretat completa, introdueix una contrasenya a continuació:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Com que el teu dispositiu està encriptat, has d\'encriptar el dispositiu secundari. Escriu una contrasenya a continuació:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Si la recuperació de dades està xifrada, introdueix la contrasenya a continuació:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"S\'està iniciant la còpia de seguretat..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Ha finalitzat la còpia de seguretat"</string>
