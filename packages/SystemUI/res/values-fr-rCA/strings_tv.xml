@@ -30,8 +30,6 @@
     <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"Le microphone a arrêté l\'enregistrement"</string>
     <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"L\'appareil photo a arrêté l\'enregistrement"</string>
     <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"L\'appareil photo et le microphone ont arrêté l\'enregistrement"</string>
-    <!-- no translation found for screen_recording_announcement (2996750593472241520) -->
-    <skip />
-    <!-- no translation found for screen_stopped_recording_announcement (979749439036681416) -->
-    <skip />
+    <string name="screen_recording_announcement" msgid="2996750593472241520">"L\'enregistrement d\'écran a commencé"</string>
+    <string name="screen_stopped_recording_announcement" msgid="979749439036681416">"L\'enregistrement d\'écran s\'est arrêté"</string>
 </resources>

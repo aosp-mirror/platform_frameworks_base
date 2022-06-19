@@ -30,8 +30,6 @@
     <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"マイクが録音を停止しました"</string>
     <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"カメラが録画を停止しました"</string>
     <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"カメラとマイクが録画、録音を停止しました"</string>
-    <!-- no translation found for screen_recording_announcement (2996750593472241520) -->
-    <skip />
-    <!-- no translation found for screen_stopped_recording_announcement (979749439036681416) -->
-    <skip />
+    <string name="screen_recording_announcement" msgid="2996750593472241520">"画面の録画を開始しました"</string>
+    <string name="screen_stopped_recording_announcement" msgid="979749439036681416">"画面の録画を停止しました"</string>
 </resources>

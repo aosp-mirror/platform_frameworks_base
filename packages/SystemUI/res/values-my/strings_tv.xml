@@ -30,8 +30,6 @@
     <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"မိုက်ခရိုဖုန်း မှတ်တမ်းတင်ခြင်းကို ရပ်ထားသည်"</string>
     <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"ကင်မရာ မှတ်တမ်းတင်ခြင်းကို ရပ်ထားသည်"</string>
     <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"ကင်မရာနှင့် မိုက်ခရိုဖုန်းက မှတ်တမ်းတင်ခြင်းကို ရပ်ထားသည်"</string>
-    <!-- no translation found for screen_recording_announcement (2996750593472241520) -->
-    <skip />
-    <!-- no translation found for screen_stopped_recording_announcement (979749439036681416) -->
-    <skip />
+    <string name="screen_recording_announcement" msgid="2996750593472241520">"မျက်နှာပြင် ရိုက်ကူးမှု စတင်လိုက်ပါပြီ"</string>
+    <string name="screen_stopped_recording_announcement" msgid="979749439036681416">"မျက်နှာပြင် ရိုက်ကူးမှုကို ရပ်လိုက်ပါပြီ"</string>
 </resources>
