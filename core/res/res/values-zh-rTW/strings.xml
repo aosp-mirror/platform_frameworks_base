@@ -636,7 +636,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"請洽詢維修供應商。"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"無法建立臉部模型，請再試一次。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"亮度過高，請嘗試使用較柔和的照明方式。"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"請試著提高亮度"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"請採用更明亮的光源"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"請將手機拿遠一點"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"請將手機拿近一點"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"請將手機舉高一點"</string>

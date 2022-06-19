@@ -638,7 +638,7 @@
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Demasiado clara. Experimente uma luz mais suave."</string>
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"Experimente um local com mais luz"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Afaste ainda mais o telemóvel"</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"Aproxime o telemóvel"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Aproxime o telemóvel do rosto"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Mova o telemóvel mais para cima"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Mova o telemóvel mais para baixo"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Mova o telemóvel para a sua esquerda"</string>
