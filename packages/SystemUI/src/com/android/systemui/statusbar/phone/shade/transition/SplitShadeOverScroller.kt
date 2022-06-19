@@ -28,8 +28,8 @@ constructor(
     dumpManager: DumpManager,
     private val context: Context,
     private val scrimController: ScrimController,
-    @Assisted private val qS: QS,
-    @Assisted private val nsslController: NotificationStackScrollLayoutController
+    @Assisted private val qSProvider: () -> QS,
+    @Assisted private val nsslControllerProvider: () -> NotificationStackScrollLayoutController
 ) : ShadeOverScroller {
 
     private var releaseOverScrollDuration = 0L
@@ -39,6 +39,12 @@ constructor(
     @PanelState private var panelState: Int = STATE_CLOSED
     private var releaseOverScrollAnimator: Animator? = null
 
+    private val qS: QS
+        get() = qSProvider()
+
+    private val nsslController: NotificationStackScrollLayoutController
+        get() = nsslControllerProvider()
+
     init {
         updateResources()
         configurationController.addCallback(
@@ -47,7 +53,9 @@ constructor(
                     updateResources()
                 }
             })
-        dumpManager.registerDumpable(this::dump)
+        dumpManager.registerDumpable("SplitShadeOverScroller") { printWriter, _ ->
+            dump(printWriter)
+        }
     }
 
     private fun updateResources() {
@@ -118,7 +126,7 @@ constructor(
         releaseOverScrollAnimator = null
     }
 
-    private fun dump(pw: PrintWriter, strings: Array<String>) {
+    private fun dump(pw: PrintWriter) {
         pw.println(
             """
             SplitShadeOverScroller:
@@ -129,15 +137,14 @@ constructor(
                     previousOverscrollAmount: $previousOverscrollAmount
                     dragDownAmount: $dragDownAmount
                     panelState: $panelState
-            """.trimIndent()
-        )
+            """.trimIndent())
     }
 
     @AssistedFactory
     fun interface Factory {
         fun create(
-            qS: QS,
-            nsslController: NotificationStackScrollLayoutController
+            qSProvider: () -> QS,
+            nsslControllerProvider: () -> NotificationStackScrollLayoutController
         ): SplitShadeOverScroller
     }
 }
