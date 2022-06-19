@@ -57,10 +57,10 @@
       <item quantity="one">Try again in 1 second.</item>
     </plurals>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Enter SIM PIN."</string>
-    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Enter SIM PIN for \'<xliff:g id="CARRIER">%1$s</xliff:g>\'."</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Enter SIM PIN for \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Disable eSIM to use device without mobile service."</string>
-    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM is now disabled. Enter PUK code to continue. Contact operator for details."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" is now disabled. Enter PUK code to continue. Contact operator for details."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="3005288372875367017">"SIM is now disabled. Enter PUK code to continue. Contact carrier for details."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="4876780689904862943">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" is now disabled. Enter PUK code to continue. Contact carrier for details."</string>
     <string name="kg_puk_enter_pin_hint" msgid="6028432138916150399">"Enter desired PIN code"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="4261064020391799132">"Confirm desired PIN code"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4251352015304070326">"Unlocking SIM card…"</string>
@@ -69,12 +69,12 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="544687656831558971">"You have incorrectly typed your PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> times. \n\nTry again in <xliff:g id="NUMBER_1">%2$d</xliff:g> seconds."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="190984061975729494">"You have incorrectly typed your password <xliff:g id="NUMBER_0">%1$d</xliff:g> times. \n\nTry again in <xliff:g id="NUMBER_1">%2$d</xliff:g> seconds."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. \n\nTry again in <xliff:g id="NUMBER_1">%2$d</xliff:g> seconds."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Incorrect SIM PIN code; you must now contact your operator to unlock your device."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"Incorrect SIM PIN code you must now contact your carrier to unlock your device."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
-      <item quantity="other">Incorrect SIM PIN code. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
-      <item quantity="one">Incorrect SIM PIN code. You have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before you must contact your provider to unlock your device.</item>
+      <item quantity="other">Incorrect SIM PIN code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
+      <item quantity="one">Incorrect SIM PIN code, you have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before you must contact your carrier to unlock your device.</item>
     </plurals>
-    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM is unusable. Contact your operator."</string>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"SIM is unusable. Contact your carrier."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
       <item quantity="other">Incorrect SIM PUK code. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.</item>
       <item quantity="one">Incorrect SIM PUK code. You have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before SIM becomes permanently unusable.</item>
@@ -96,11 +96,11 @@
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"To use Face Unlock, turn on "<b>"Camera access"</b>" in Settings &gt; Privacy"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Enter SIM PIN. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
-      <item quantity="one">Enter SIM PIN. You have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before you must contact your operator to unlock your device.</item>
+      <item quantity="one">Enter SIM PIN. You have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before you must contact your carrier to unlock your device.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
-      <item quantity="other">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact operator for details.</item>
-      <item quantity="one">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_0">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. Contact operator for details.</item>
+      <item quantity="other">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact carrier for details.</item>
+      <item quantity="one">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_0">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. Contact carrier for details.</item>
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"Default"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Bubble"</string>
