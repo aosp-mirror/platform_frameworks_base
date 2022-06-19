@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Càmera"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telèfon"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistència per veu"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Cartera"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Escàner de codis QR"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloqueja"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositiu bloquejat"</string>
@@ -403,8 +403,8 @@
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"L\'administrador ha activat el registre de xarxa, que monitora el trànsit al teu perfil de treball, però no al personal."</string>
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. El teu administrador de TI pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Les aplicacions de treball es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI i el teu proveïdor de VPN poden veure l\'activitat de la teva xarxa en aplicacions de treball, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. El teu administrador de TI pot veure la teva activitat a la xarxa, inclosos els correus electrònics i les dades de navegació."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Les aplicacions de treball es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI i el teu proveïdor de VPN poden veure la teva activitat a la xarxa en aplicacions de treball, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Les aplicacions personals es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu proveïdor de VPN pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Obre la configuració de la VPN"</string>
