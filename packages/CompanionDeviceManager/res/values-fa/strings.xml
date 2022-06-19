@@ -23,5 +23,5 @@
     <string name="confirmation_title" msgid="8455544820286920304">"‏مجاز کردن &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; برای مدیریت کردن &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_summary" msgid="2059360676631420073">"این برنامه برای مدیریت <xliff:g id="PROFILE_NAME">%1$s</xliff:g> شما لازم است. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
     <string name="consent_yes" msgid="8344487259618762872">"اجازه دادن"</string>
-    <string name="consent_no" msgid="2640796915611404382">"مجاز نبودن"</string>
+    <string name="consent_no" msgid="2640796915611404382">"اجازه ندادن"</string>
 </resources>

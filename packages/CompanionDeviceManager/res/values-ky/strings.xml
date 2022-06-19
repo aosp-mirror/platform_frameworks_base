@@ -22,6 +22,6 @@
     <string name="profile_name_watch" msgid="576290739483672360">"саат"</string>
     <string name="confirmation_title" msgid="8455544820286920304">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; колдонмосуна &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; түзмөгүңүздү башкарууга уруксат бериңиз"</string>
     <string name="profile_summary" msgid="2059360676631420073">"Бул колдонмо <xliff:g id="PROFILE_NAME">%1$s</xliff:g> профилиңизди башкаруу үчүн керек. <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
-    <string name="consent_yes" msgid="8344487259618762872">"Уруксат берүү"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"Ооба"</string>
     <string name="consent_no" msgid="2640796915611404382">"Уруксат берилбесин"</string>
 </resources>
