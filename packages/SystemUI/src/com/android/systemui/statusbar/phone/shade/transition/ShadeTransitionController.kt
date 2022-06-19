@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
@@ -11,6 +12,7 @@ import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.phone.panelstate.PanelState
 import com.android.systemui.statusbar.policy.ConfigurationController
+import java.io.PrintWriter
 import javax.inject.Inject
 
 /** Controls the shade expansion transition on non-lockscreen. */
@@ -20,6 +22,7 @@ class ShadeTransitionController
 constructor(
     configurationController: ConfigurationController,
     panelExpansionStateManager: PanelExpansionStateManager,
+    dumpManager: DumpManager,
     private val context: Context,
     private val splitShadeOverScrollerFactory: SplitShadeOverScroller.Factory,
     private val noOpOverScroller: NoOpOverScroller,
@@ -33,7 +36,7 @@ constructor(
     private var inSplitShade = false
 
     private val splitShadeOverScroller by lazy {
-        splitShadeOverScrollerFactory.create(qs, notificationStackScrollLayoutController)
+        splitShadeOverScrollerFactory.create({ qs }, { notificationStackScrollLayoutController })
     }
     private val shadeOverScroller: ShadeOverScroller
         get() =
@@ -53,6 +56,9 @@ constructor(
             })
         panelExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
         panelExpansionStateManager.addStateListener(this::onPanelStateChanged)
+        dumpManager.registerDumpable("ShadeTransitionController") { printWriter, _ ->
+            dump(printWriter)
+        }
     }
 
     private fun updateResources() {
@@ -72,4 +78,15 @@ constructor(
         this::qs.isInitialized &&
             this::notificationPanelViewController.isInitialized &&
             this::notificationStackScrollLayoutController.isInitialized
+
+    private fun dump(pw: PrintWriter) {
+        pw.println(
+            """
+            ShadeTransitionController:
+                inSplitShade: $inSplitShade
+                qs.isInitialized: ${this::qs.isInitialized}
+                npvc.isInitialized: ${this::notificationPanelViewController.isInitialized}
+                nssl.isInitialized: ${this::notificationStackScrollLayoutController.isInitialized}
+            """.trimIndent())
+    }
 }
