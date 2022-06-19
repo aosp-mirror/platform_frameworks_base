@@ -800,6 +800,7 @@ package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     method public boolean hasRequestForegroundServiceExemption();
+    method public boolean isOnBackInvokedCallbackEnabled();
     method public boolean isPrivilegedApp();
     method public boolean isSystemApp();
     method public void setEnableOnBackInvokedCallback(boolean);

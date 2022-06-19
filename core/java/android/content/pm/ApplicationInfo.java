@@ -2588,6 +2588,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public boolean isOnBackInvokedCallbackEnabled() {
         return ((privateFlagsExt & PRIVATE_FLAG_EXT_ENABLE_ON_BACK_INVOKED_CALLBACK)) != 0;
     }
