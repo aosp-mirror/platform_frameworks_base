@@ -110,7 +110,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"కెమెరా"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ఫోన్"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"వాయిస్ అసిస్టెంట్"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"వాలెట్"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"అన్‌లాక్ చేయి"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"పరికరం లాక్ చేయబడింది"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ముఖాన్ని స్కాన్ చేస్తోంది"</string>
@@ -510,7 +510,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"ప్రాధాన్యత"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> సంభాషణ ఫీచర్‌లను సపోర్ట్ చేయదు"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"ఈ నోటిఫికేషన్‌ల గ్రూప్‌ను ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"అన్ని <xliff:g id="APP_NAME">%1$s</xliff:g> నోటిఫికేషన్‌లు"</string>
     <string name="see_more_title" msgid="7409317011708185729">"మరిన్ని చూడండి"</string>

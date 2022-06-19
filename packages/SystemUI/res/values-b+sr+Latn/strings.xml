@@ -86,7 +86,7 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obaveštenje o sesiji snimanja ekrana je aktivno"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Želite da započnete snimanje?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Tokom snimanja Android sistem može da snimi osetljive informacije koje su vidljive na ekranu ili koje se puštaju na uređaju. To obuhvata lozinke, informacije o plaćanju, slike, poruke i zvuk."</string>
-    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvuk"</string>
+    <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimaj zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk uređaja"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk sa uređaja, na primer, muzika, pozivi i melodije zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
