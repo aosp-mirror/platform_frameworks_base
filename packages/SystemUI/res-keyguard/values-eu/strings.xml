@@ -84,7 +84,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratzaileak blokeatu egin du gailua"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Eskuz blokeatu da gailua"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ez da ezagutu"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aurpegi bidez desblokeatzeko eginbidea erabiltzeko, eman kamera atzitzeko baimena ezarpenetan"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Aurpegi bidezko desblokeoak kamera atzitzeko baimena behar du"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Idatzi SIMaren PINa. # saiakera geratzen zaizu gailua desblokeatzeko operadorearekin harremanetan jarri behar izan aurretik.}other{Idatzi SIMaren PINa. # saiakera gelditzen zaizkizu.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{Orain, SIMa desgaituta dago. Aurrera egiteko, idatzi PUK kodea. # saiakera geratzen zaizu SIMa betiko ez-erabilgarri geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.}other{Orain, SIMa desgaituta dago. Aurrera egiteko, idatzi PUK kodea. # saiakera geratzen zaizkizu SIMa betiko ez-erabilgarri geratu aurretik. Xehetasunak lortzeko, jarri operadorearekin harremanetan.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Lehenetsia"</string>
