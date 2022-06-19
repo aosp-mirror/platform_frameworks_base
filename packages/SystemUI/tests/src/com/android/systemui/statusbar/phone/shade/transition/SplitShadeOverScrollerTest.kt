@@ -43,8 +43,12 @@ class SplitShadeOverScrollerTest : SysuiTestCase() {
         whenever(nsslController.height).thenReturn(1000)
         overScroller =
             SplitShadeOverScroller(
-                configurationController, dumpManager, context, scrimController, qs, nsslController
-            )
+                configurationController,
+                dumpManager,
+                context,
+                scrimController,
+                { qs },
+                { nsslController })
     }
 
     @Test
