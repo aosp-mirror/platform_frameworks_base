@@ -60,6 +60,7 @@ import static android.service.notification.NotificationListenerService.FLAG_FILT
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ONGOING;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -5570,6 +5571,39 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
         verify(mStatusBar).showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+    }
+
+    @Test
+    public void testRateLimitedToasts_windowsRemoved() throws Exception {
+        final String testPackage = "testPackageName";
+        assertEquals(0, mService.mToastQueue.size());
+        mService.isSystemUid = false;
+        setToastRateIsWithinQuota(false); // rate limit reached
+        setIfPackageHasPermissionToAvoidToastRateLimiting(testPackage, false);
+        setAppInForegroundForToasts(mUid, false);
+
+        // package is not suspended
+        when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
+                .thenReturn(false);
+
+        Binder token = new Binder();
+        INotificationManager nmService = (INotificationManager) mService.mService;
+
+        nmService.enqueueTextToast(testPackage, token, "Text", 2000, 0, null);
+
+        // window token was added when enqueued
+        ArgumentCaptor<Binder> binderCaptor =
+                ArgumentCaptor.forClass(Binder.class);
+        verify(mWindowManagerInternal).addWindowToken(binderCaptor.capture(),
+                eq(TYPE_TOAST), anyInt(), eq(null));
+
+        // but never shown
+        verify(mStatusBar, times(0))
+                .showToast(anyInt(), any(), any(), any(), any(), anyInt(), any());
+
+        // and removed when rate limited
+        verify(mWindowManagerInternal)
+                .removeWindowToken(eq(binderCaptor.getValue()), eq(true), anyInt());
     }
 
     @Test

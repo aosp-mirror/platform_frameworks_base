@@ -78,14 +78,8 @@ public class KeyguardStateMonitor extends IKeyguardStateCallback.Stub {
         return mTrusted;
     }
 
-    public int getCurrentUser() {
-        return mCurrentUserId;
-    }
-
     @Override // Binder interface
-    public void onShowingStateChanged(boolean showing, int userId) {
-        if (userId != mCurrentUserId) return;
-
+    public void onShowingStateChanged(boolean showing) {
         mIsShowing = showing;
 
         mCallback.onShowingChanged();

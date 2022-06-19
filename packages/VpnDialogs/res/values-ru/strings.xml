@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Запрос на подключение"</string>
     <string name="warning" msgid="809658604548412033">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" пытается подключиться к сети VPN, чтобы отслеживать трафик. Этот запрос следует принимать, только если вы доверяете источнику. <br /><br />Когда подключение к сети VPN активно, в верхней части экрана появляется значок &lt;img src=vpn_icon /&gt;."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" пытается подключиться к сети VPN, чтобы отслеживать трафик. Этот запрос следует принимать, только если вы доверяете источнику. Когда подключение к сети VPN активно, на экране появляется значок &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN-подключение установлено"</string>
     <string name="session" msgid="6470628549473641030">"Сеанс:"</string>
     <string name="duration" msgid="3584782459928719435">"Продолжительность:"</string>

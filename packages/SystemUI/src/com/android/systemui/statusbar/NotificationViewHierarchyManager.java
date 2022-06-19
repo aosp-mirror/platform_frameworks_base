@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
@@ -42,6 +43,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.ForegroundServiceSectionController;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -92,6 +94,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final KeyguardBypassController mBypassController;
     private final ForegroundServiceSectionController mFgsSectionController;
     private AssistantFeedbackController mAssistantFeedbackController;
+    private final KeyguardStateController mKeyguardStateController;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final Context mContext;
 
     private NotificationPresenter mPresenter;
@@ -121,7 +125,9 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
             LowPriorityInflationHelper lowPriorityInflationHelper,
-            AssistantFeedbackController assistantFeedbackController) {
+            AssistantFeedbackController assistantFeedbackController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            KeyguardStateController keyguardStateController) {
         mContext = context;
         mHandler = mainHandler;
         mFeatureFlags = featureFlags;
@@ -140,6 +146,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mDynamicChildBindController = dynamicChildBindController;
         mLowPriorityInflationHelper = lowPriorityInflationHelper;
         mAssistantFeedbackController = assistantFeedbackController;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mKeyguardStateController = keyguardStateController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -163,6 +171,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
         beginUpdate();
 
+        boolean dynamicallyUnlocked = mDynamicPrivacyController.isDynamicallyUnlocked()
+                && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
+                && mKeyguardUpdateMonitor.getUserUnlockedWithBiometricAndIsBypassing(
+                KeyguardUpdateMonitor.getCurrentUser()))
+                && !mKeyguardStateController.isKeyguardGoingAway();
         List<NotificationEntry> activeNotifications = mEntryManager.getVisibleNotifications();
         ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
         final int N = activeNotifications.size();
@@ -181,7 +194,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             boolean devicePublic = mLockscreenUserManager.isLockscreenPublicMode(currentUserId);
             boolean userPublic = devicePublic
                     || mLockscreenUserManager.isLockscreenPublicMode(userId);
-            if (userPublic && mDynamicPrivacyController.isDynamicallyUnlocked()
+            if (userPublic && dynamicallyUnlocked
                     && (userId == currentUserId || userId == UserHandle.USER_ALL
                     || !mLockscreenUserManager.needsSeparateWorkChallenge(userId))) {
                 userPublic = false;

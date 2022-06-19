@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"សំណើ​សុំ​ការ​តភ្ជាប់"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ចង់​បង្កើត​ការ​តភ្ជាប់ VPN ដែល​អនុញ្ញាត​ឲ្យ​វា​ត្រួតពិនិត្យ​ចរាចរ​បណ្ដាញ។ ព្រម​ទទួល ប្រសិនបើ​អ្នក​ទុកចិត្ត​លើ​ប្រភព​តែប៉ុណ្ណោះ។ &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; នឹង​លេចឡើង​នៅ​ផ្នែក​ខាងលើ​នៃ​អេក្រង់​របស់​អ្នក ពេល VPN សកម្ម។"</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> ចង់រៀបចំការតភ្ជាប់ VPN ដែលអនុញ្ញាតឱ្យវាត្រួតពិនិត្យ​ចរាចរណ៍បណ្តាញ។ យល់ព្រម ប្រសិនបើអ្នកជឿទុកចិត្តលើប្រភពនេះតែប៉ុណ្ណោះ។ &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; បង្ហាញនៅលើអេក្រង់របស់អ្នក នៅពេល VPN កំពុងដំណើរការ។"</string>
     <string name="legacy_title" msgid="192936250066580964">"បា​ន​ភ្ជាប់ VPN"</string>
     <string name="session" msgid="6470628549473641030">"សម័យ៖"</string>
     <string name="duration" msgid="3584782459928719435">"ថិរវេលា៖"</string>

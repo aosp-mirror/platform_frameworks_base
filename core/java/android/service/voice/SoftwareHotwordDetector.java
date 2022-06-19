@@ -60,14 +60,15 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             PersistableBundle options,
             SharedMemory sharedMemory,
             HotwordDetector.Callback callback) {
-        super(managerService, callback);
+        super(managerService, callback, DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
 
         mManagerService = managerService;
         mAudioFormat = audioFormat;
         mCallback = callback;
         mHandler = new Handler(Looper.getMainLooper());
         updateStateLocked(options, sharedMemory,
-                new InitializationStateListener(mHandler, mCallback));
+                new InitializationStateListener(mHandler, mCallback),
+                DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
     }
 
     @RequiresPermission(RECORD_AUDIO)
