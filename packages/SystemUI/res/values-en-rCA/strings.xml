@@ -86,7 +86,7 @@
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Device must be unlocked before screenshot can be saved"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Try taking screenshot again"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Can\'t save screenshot"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Taking screenshots isn\'t allowed by the app or your organisation"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Taking screenshots isn\'t allowed by the app or your organization"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Edit screenshot"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Capture more"</string>
@@ -457,7 +457,7 @@
     <string name="keyguard_unlock_press" msgid="8488350566398524740">"Press to open"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Swipe up to try again"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Unlock to use NFC"</string>
-    <string name="do_disclosure_generic" msgid="4896482821974707167">"This device belongs to your organisation"</string>
+    <string name="do_disclosure_generic" msgid="4896482821974707167">"This device belongs to your organization"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="do_financed_disclosure_with_name" msgid="6723004643314467864">"This device is provided by <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Swipe from icon for phone"</string>
@@ -526,16 +526,16 @@
     <string name="vpn_footer" msgid="3457155078010607471">"Network may be monitored"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Network may be monitored"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"This device is managed by your parent"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Your organisation owns this device and may monitor network traffic"</string>
+    <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Your organization owns this device and may monitor network traffic"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> owns this device and may monitor network traffic"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"This device is provided by <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"This device belongs to your organisation and is connected to <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"This device belongs to your organization and is connected to <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> and is connected to <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"This device belongs to your organisation"</string>
+    <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"This device belongs to your organization"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"This device belongs to your organisation and is connected to VPNs"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"This device belongs to your organization and is connected to VPNs"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> and is connected to VPNs"</string>
-    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Your organisation may monitor network traffic in your work profile"</string>
+    <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Your organization may monitor network traffic in your work profile"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> may monitor network traffic in your work profile"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Work profile network activity is visible to your IT admin"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Network may be monitored"</string>
@@ -556,9 +556,9 @@
     <string name="monitoring_button_view_controls" msgid="8316440345340701117">"View controls"</string>
     <string name="monitoring_description_named_management" msgid="505833016545056036">"This device belongs to <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
     <string name="monitoring_financed_description_named_management" msgid="6108439201399938668">"<xliff:g id="ORGANIZATION_NAME_0">%1$s</xliff:g> may be able to access data associated with this device, manage apps and change this device\'s settings.\n\nIf you have questions, contact <xliff:g id="ORGANIZATION_NAME_1">%2$s</xliff:g>."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"This device belongs to your organisation.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
-    <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Your organisation installed a certificate authority on this device. Your secure network traffic may be monitored or modified."</string>
-    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Your organisation installed a certificate authority in your work profile. Your secure network traffic may be monitored or modified."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"This device belongs to your organization.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin."</string>
+    <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Your organization installed a certificate authority on this device. Your secure network traffic may be monitored or modified."</string>
+    <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Your organization installed a certificate authority in your work profile. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"A certificate authority is installed on this device. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Your admin has turned on network logging, which monitors traffic on your device."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Your admin has turned on network logging, which monitors traffic in your work profile but not in your personal profile."</string>
@@ -578,14 +578,14 @@
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Open trusted credentials"</string>
     <string name="monitoring_description_network_logging" msgid="577305979174002252">"Your admin has turned on network logging, which monitors traffic on your device.\n\nFor more information, contact your admin."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"You gave an app permission to set up a VPN connection.\n\nThis app can monitor your device and network activity, including emails, apps and websites."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nYour admin is capable of monitoring your network activity including emails, apps and websites.\n\nFor more information, contact your admin.\n\nYou\'re also connected to a VPN, which can monitor your network activity."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nYour admin is capable of monitoring your network activity including emails, apps, and websites.\n\nFor more information, contact your admin.\n\nYou\'re also connected to a VPN, which can monitor your network activity."</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"This device is managed by your parent. Your parent can see and manage information such as the apps that you use, your location and your screen time."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"You\'re connected to <xliff:g id="APPLICATION">%1$s</xliff:g>, which can monitor your network activity, including emails, apps and websites."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"You\'re connected to <xliff:g id="APPLICATION">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps and websites."</string>
     <string name="branded_monitoring_description_app_personal" msgid="1703511985892688885">"You\'re connected to <xliff:g id="APPLICATION">%1$s</xliff:g>, which can monitor your personal network activity, including emails, apps and websites."</string>
-    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>. The profile is connected to <xliff:g id="APPLICATION">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps and websites.\n\nFor more information, contact your admin."</string>
-    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>. The profile is connected to <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps and websites.\n\nYou\'re also connected to <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, which can monitor your personal network activity."</string>
+    <string name="monitoring_description_app_work" msgid="3713084153786663662">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>. The profile is connected to <xliff:g id="APPLICATION">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nFor more information, contact your admin."</string>
+    <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Your work profile is managed by <xliff:g id="ORGANIZATION">%1$s</xliff:g>. The profile is connected to <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, which can monitor your work network activity, including emails, apps, and websites.\n\nYou\'re also connected to <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, which can monitor your personal network activity."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Kept unlocked by trust agent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Device will stay locked until you manually unlock"</string>
     <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
@@ -988,7 +988,7 @@
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Tap for details on battery and data usage"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Turn off mobile data?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"You won\'t have access to data or the Internet through <xliff:g id="CARRIER">%s</xliff:g>. Internet will only be available via Wi-Fi."</string>
-    <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"your operator"</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"your carrier"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Because an app is obscuring a permission request, Settings can’t verify your response."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Allow <xliff:g id="APP_0">%1$s</xliff:g> to show <xliff:g id="APP_2">%2$s</xliff:g> slices?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"– It can read information from <xliff:g id="APP">%1$s</xliff:g>"</string>

@@ -136,7 +136,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Дауыс көмекшісі"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Әмиян"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Бекітпесін ашу"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Құрылғы құлыпталды."</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="5209142744692162598">"Саусақ ізі күтілуде"</string>
@@ -666,7 +666,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо режимін көрсету"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Оятқыш"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Әмиян"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Телефоныңызбен бұрынғыдан да жылдам әрі қауіпсіз сатып алу үшін параметрлерді орнатыңыз."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Барлығын көрсету"</string>
     <string name="wallet_action_button_label_unlock" msgid="8663239748726774487">"Төлеу үшін құлыпты ашу"</string>
