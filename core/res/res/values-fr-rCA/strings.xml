@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"o"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"ko"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"Mo"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"Go"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"To"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"Po"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Sans_titre&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Aucun numéro de téléphone)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Entrez la langue"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suggestions"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Langues suggérées"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Régions suggérées"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Toutes les langues"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Toutes les régions"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Rechercher"</string>
@@ -2078,8 +2075,10 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications adaptatives Android sous Android 12. Cette fonctionnalité vous présente des suggestions d\'actions et de réponses, et organise vos notifications.\n\nLes notifications améliorées peuvent accéder au contenu de toutes les notifications, y compris les renseignements personnels comme le nom des contacts et les messages. Cette fonctionnalité peut aussi fermer des notifications ou interagir avec elles, comme répondre aux appels téléphoniques et gérer le mode Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La pile pourrait s\'épuiser avant la charge habituelle"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Le mode Économiseur de pile est activé afin de prolonger l\'autonomie"</string>
+    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Économiseur de pile"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Le mode Économiseur de pile est désactivé"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Le téléphone est suffisamment chargé. Ces fonctionnalités ne sont plus restreintes."</string>

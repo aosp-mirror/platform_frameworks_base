@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"Кб"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"Мб"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"Гб"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"ТБ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Баш аты жок&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Телефон номери жок)"</string>
@@ -1689,7 +1684,7 @@
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Кызмат экрандагы нерселерди окуп, аларды башка колдонмолордун үстүнөн көрсөтөт."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Аракеттерди көрүп, аткаруу"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Кызмат колдонмодо жасаган аракеттериңизге же түзмөктүн сенсорлоруна көз салып, сиздин атыңыздан буйруктарды берет."</string>
-    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Уруксат берүү"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ооба"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Жок"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны колдонуп баштоо үчүн аны таптап коюңуз:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Атайын мүмкүнчүлүктөр баскычы менен колдонгуңуз келген функцияларды тандаңыз"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Чөлкөмдүк жөндөөлөр"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Тилди киргизиңиз"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Сунушталгандар"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Сунушталган тилдер"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Сунушталган региондор"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Бардык тилдер"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Бардык өлкөлөр"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Издөө"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Кененирээк"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 версиясында ыңгайлаштырылуучу билдирмелер жакшыртылган билдирмелерге алмаштырылды. Бул функция ыкчам аракеттерди жана жоопторду көрсөтүп, билдирмелериңизди иреттейт.\n\nЖакшыртылган билдирмелер бардык билдирмелердин мазмунун, ошондой эле байланыштардын аты-жөнү жана билдирүүлөрү сыяктуу жеке маалыматты көрө алат. Ошондой эле, бул функция билдирмелерди жаап, баскычтарын басып, телефон чалууларга жооп берип жана \"Тынчымды алба\" функциясын башкара алат."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режимдин адаттагы билдирмеси"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея кубаттоого чейин отуруп калышы мүмкүн"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батареянын отуруп калбашы үчүн Батареяны үнөмдөгүч режими иштетилди"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Батареяны үнөмдөгүч күйгүзүлдү"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Батареянын кубатынын мөөнөтүн узартуу үчүн батареянын колдонулушун азайтуу"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батареяны үнөмдөгүч"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батареяны үнөмдөө режими өчүк"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефондун кубаты жетиштүү. Функциялар мындан ары чектелбейт."</string>

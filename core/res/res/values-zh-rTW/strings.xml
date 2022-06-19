@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;未命名&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(沒有電話號碼)"</string>
@@ -636,7 +631,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"請洽詢維修供應商。"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"無法建立臉部模型，請再試一次。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"亮度過高，請嘗試使用較柔和的照明方式。"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"請試著提高亮度"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"請採用更明亮的光源"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"請將手機拿遠一點"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"請將手機拿近一點"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"請將手機舉高一點"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"請輸入語言名稱"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"建議語言"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"建議語言"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"建議地區"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"所有語言"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"所有地區"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"搜尋"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"瞭解詳情"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，加強型通知功能已取代 Android 自動調整通知。這項功能可以顯示建議的操作和回覆內容，也可以幫你整理通知訊息。\n\n加強型通知功能可存取通知內容，包括聯絡人名稱和訊息內文等個人資訊。此外，這項功能還能關閉或回覆通知，例如接聽來電及控管「零打擾」功能。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式資訊通知"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"電池電力可能會在你平常的充電時間前耗盡"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已啟用省電模式以延長電池續航力"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"已開啟省電模式"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"降低電池用量，以便延長電池續航力"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"省電模式"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"省電模式已關閉"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"手機電力充足，各項功能不再受到限制。"</string>

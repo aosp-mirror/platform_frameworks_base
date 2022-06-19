@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"តេរ៉ាបៃ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;គ្មាន​ចំណង​ជើង&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(គ្មាន​លេខ​ទូរស័ព្ទ)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ចំណូលចិត្តតំបន់"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"វាយបញ្ចូលឈ្មោះភាសា"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"បាន​ណែនាំ"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"ភាសា​ដែល​បាន​ណែ​នាំ"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"តំបន់​ដែល​បាន​ណែនាំ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ភាសាទាំងអស់"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"តំបន់ទាំងអស់"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"ស្វែងរក"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ស្វែងយល់បន្ថែម"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"ការជូនដំណឹងប្រសើរជាងមុន​បានជំនួស​ការជូនដំណឹងដែលមានភាពបត់បែន Android នៅក្នុង Android 12។ មុខងារនេះបង្ហាញការឆ្លើយតប និងសកម្មភាពដែលបានណែនាំ ព្រមទាំងរៀបចំការជូនដំណឹងរបស់អ្នក។\n\nការជូនដំណឹងប្រសើរជាងមុនអាចចូលប្រើខ្លឹមសារនៃការជូនដំណឹង រួមទាំងព័ត៌មានផ្ទាល់ខ្លួនដូចជា ឈ្មោះទំនាក់ទំនង និងសារជាដើម។ មុខងារនេះក៏អាចច្រានចោល ឬឆ្លើយតបនឹងការជូនដំណឹងដូចជា ការទទួល​ការហៅទូរសព្ទ និងគ្រប់គ្រង​មុខងារកុំរំខានផងដែរ។"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការមុខងារ​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"បានបើកមុខងារ​សន្សំ​ថ្ម"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ការកាត់បន្ថយការប្រើប្រាស់ថ្ម ដើម្បីបង្កើនកម្រិតថាមពលថ្ម"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"មុខងារ​សន្សំ​ថ្ម"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"មុខងារ​សន្សំ​ថ្ម​ត្រូវបានបិទ"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ទូរសព្ទ​មាន​កម្រិតថ្ម​គ្រប់គ្រាន់​។ មុខងារ​ផ្សេងៗ​មិន​ត្រូវបាន​រឹតបន្តឹងទៀត​ទេ។"</string>

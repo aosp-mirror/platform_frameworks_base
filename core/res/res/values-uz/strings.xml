@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Nomsiz&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Telefon raqami yo‘q)"</string>
@@ -636,7 +631,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Xizmat koʻrsatish markaziga murojaat qiling."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Yuzingiz modeli yaratilmadi. Qayta urining."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Juda yorqin. Biroz soyaroq joy tanlang."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Atrofingizni yoriting"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Atrofingizni yanada yoriting"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonni biroz uzoqroq tuting"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonni yaqinroq tuting"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonni teparoq tuting"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Hudud sozlamalari"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Til nomini kiriting"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Taklif etiladi"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Tavsiya etilgan tillar"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Tavsiya etilgan mintaqalar"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Barcha tillar"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Barcha hududlar"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Qidiruv"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Batafsil"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 tizimida moslashuvchan bildirishnomalar oʻrniga yangicha bildirishnomalar chiqadi. Bu funksiya amallar va javoblarni taklif qiladi va bildirishnomalaringizni boshqaradi.\n\nYangicha bildirishnomalar barcha bildirishnomalar kontentini, jumladan kontakt nomlari va xabarlar kabi shaxsiy bildirishnomalarni ham oʻqiy oladi. Shuningdek, bu funksiya bildirishnomalarni yopishi yoki telefon chaqiruvlariga javob berishi va Bezovta qilinmasin rejimini boshqarishi mumkin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash rejimi yoqildi"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Quvvat tejalishi yoqildi"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Batareya tejalganda batareya quvvati uzoqroq vaqtga yetadi"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Quvvat tejash"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Quvvat tejash rejimi faolsizlantirildi"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon yetarli quvvatlandi. Funksiyalar endi cheklovlarsiz ishlaydi."</string>

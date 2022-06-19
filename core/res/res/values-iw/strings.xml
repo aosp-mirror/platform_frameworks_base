@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"‏&gt;ללא כותרת&lt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(אין מספר טלפון)"</string>
@@ -1926,6 +1921,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"העדפת אזור"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"יש להקליד את שם השפה"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"הצעות"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"השפות המוצעות"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"האזורים המוצעים"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"כל השפות"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"כל האזורים"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"חיפוש"</string>
@@ -2080,8 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"מידע נוסף"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‏התכונה \'התראות משופרות\' החליפה את \'התראות מותאמות ל-Android\' ב-‏Android 12. התכונה הזו מציגה הצעות לפעולות ולתשובות ומארגנת את ההתראות שלך.\n\nל\'התראות משופרות\' יש גישה לתוכן של התראות, כולל מידע אישי כמו שמות אנשי קשר והודעות. התכונה הזו יכולה גם לסגור התראות או להגיב עליהן (למשל לענות לשיחות טלפון) ולשלוט בתכונה \'נא לא להפריע\'."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"התראת מידע לגבי מצב שגרתי"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"הסוללה עלולה להתרוקן לפני המועד הרגיל של הטעינה"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"תכונת החיסכון בסוללה הופעלה כדי להאריך את חיי הסוללה"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"התכונה \'חיסכון בסוללה\' הופעלה"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"הפחתת השימוש בסוללה תאריך את חיי הסוללה"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"חיסכון בסוללה"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"מצב \'חיסכון בסוללה\' כבוי"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"הטלפון טעון מספיק. התכונות כבר לא מוגבלות."</string>

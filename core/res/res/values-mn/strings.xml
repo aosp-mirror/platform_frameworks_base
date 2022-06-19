@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"килобайт"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TБ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Гарчиггүй&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Утасны дугаар байхгүй)"</string>
@@ -644,7 +639,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Утсаа зүүн тийш болгоно уу"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Утсаа баруун тийш болгоно уу"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Төхөөрөмж рүүгээ аль болох эгц харна уу."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Таны нүүрийг харагдахгүй байна. Утсаа нүднийхээ түвшинд барина уу."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Таны царай харагдахгүй байна. Утсаа нүднийхээ түвшинд барина уу."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Хэт их хөдөлгөөнтэй байна. Утсаа хөдөлгөөнгүй барина уу."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Нүүрээ дахин бүртгүүлнэ үү."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Царайг танихгүй байна. Дахин оролдоно уу."</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Бүс нутгийн тохиргоо"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Улсын хэлийг бичнэ үү"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Санал болгосон"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Санал болгосон хэл"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Санал болгосон бүс нутгууд"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Бүх хэл"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Бүх бүс нутаг"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Хайх"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Нэмэлт мэдээлэл авах"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Сайжруулсан мэдэгдэл нь Android 12 дахь Android-н Орчинтой тохирсон мэдэгдлийг орлосон. Энэ онцлог нь санал болгосон үйлдлүүд болон хариунуудыг харуулж, таны мэдэгдлийг цэгцэлнэ.\n\nСайжруулсан мэдэгдэл нь харилцагчийн нэр, мессеж зэрэг хувийн мэдээллийг оруулаад мэдэгдлийн контентод хандах боломжтой. Энэ онцлог мөн утасны дуудлагад хариулах болон Бүү саад бол горимыг хянах зэргээр мэдэгдлийг хаах эсвэл түүнд хариулах боломжтой."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Хэвшлийн горимын мэдээллийн мэдэгдэл"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарей ихэвчлэн цэнэглэдэг хугацаанаас өмнө дуусаж болзошгүй"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарейн ажиллах хугацааг уртасгахын тулд Батарей хэмнэгчийг идэвхжүүллээ"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Батарей хэмнэгчийг асаасан"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Батарейн ажиллах хугацааг уртасгахын тулд батарей ашиглалтыг багасгаж байна"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Батарей хэмнэгч"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Батарей хэмнэгчийг унтраалаа"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Утас хангалттай цэнэгтэй боллоо. Онцлогуудыг цаашид хязгаарлахгүй."</string>

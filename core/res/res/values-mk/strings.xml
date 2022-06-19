@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"ТБ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без наслов&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Нема телефонски број)"</string>
@@ -939,7 +934,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"Запри"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"Премотај назад"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Брзо премотај напред"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"Само повици за итни случаи"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"Само итни повици"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Мрежата е заклучена"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM картичката е заклучена со ПУК код."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Погледнете го Упатството за корисници или контактирајте со Грижа за корисници."</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Претпочитувања за регион"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Внесете име на јазик"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Предложени"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Предложени јазици"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Предложени региони"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Сите јазици"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Сите региони"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Пребарај"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Дознајте повеќе"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"„Подобрените известувања“ ги заменија „Адаптивните известувања на Android“ во Android 12. Оваа функција прикажува предложени дејства и одговори и ги организира вашите известувања. \n\n„Подобрените известувања“ може да пристапуваат до содржините од известувањата, вклучително и личните податоци, како што се имињата на контактите и пораките. Функцијава може и да ги отфрла или да одговара на известувањата, како на пример, да одговара на телефонски повици и да го контролира режимот „Не вознемирувај“."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известување за информации за режимот за рутини"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"„Штедачот на батерија“ е вклучен"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Се намалува користењето на батеријата за нејзино подолго траење"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Штедач на батерија"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Штедачот на батерија е исклучен"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефонот е доволно полн. Функциите веќе не се ограничени."</string>

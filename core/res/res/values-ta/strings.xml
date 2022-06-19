@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"பை."</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"கி.பை."</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"மெ.பை."</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ஜி.பை."</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"டெ.பை."</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"பெ.பை."</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;பெயரிடப்படாதது&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(தொலைபேசி எண் இல்லை)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"மண்டல விருப்பம்"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"மொழி பெயரை உள்ளிடுக"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"பரிந்துரைகள்"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"பரிந்துரைக்கப்படும் மொழிகள்"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"பரிந்துரைக்கப்படும் பகுதிகள்"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"எல்லா மொழிகளும்"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"எல்லா மண்டலங்களும்"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"தேடு"</string>
@@ -2078,8 +2075,10 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"மேலும் அறிக"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 பதிப்பில் \'Android சூழலுக்கேற்ற அறிவிப்புகள்\' அம்சத்திற்குப் பதிலாக \'மேம்பட்ட அறிவிப்புகள்\' மாற்றப்பட்டுள்ளது. இந்த அம்சம், பரிந்துரைக்கப்படும் செயல்களையும் பதில்களையும் காட்டுவதுடன் உங்கள் அறிவிப்புகளையும் ஒழுங்கமைக்கும்.\n\nதொடர்புகளின் பெயர்கள், மெசேஜ்கள் போன்ற தனிப்பட்ட தகவல்கள் உட்பட அனைத்து அறிவிப்பு உள்ளடக்கத்தையும் \'மேம்பட்ட அறிவிப்புகள்\' அணுக முடியும். மேலும் இந்த அம்சத்தால் அறிவிப்புகளை நிராகரிக்கவும் அவற்றுக்குப் பதிலளிக்கவும் முடியும் (அழைப்புகளுக்குப் பதிலளிப்பது, \'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தைக் கட்டுப்படுத்துவது போன்றவை)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"வழக்கமான பேட்டரி சேமிப்பானுக்கான விவர அறிவிப்பு"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"வழக்கமாகச் சார்ஜ் செய்வதற்கு முன்பே பேட்டரி தீர்ந்துபோகக்கூடும்"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"பேட்டரி ஆயுளை நீட்டிக்க பேட்டரி சேமிப்பான் இயக்கப்பட்டுள்ளது"</string>
+    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"பேட்டரி சேமிப்பு"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"பேட்டரி சேமிப்பான் ஆஃப் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"மொபைலில் போதுமான சார்ஜ் உள்ளது. அம்சங்கள் இனி தடையின்றி இயங்கும்."</string>

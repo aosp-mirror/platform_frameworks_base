@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Bez imena&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Nema broja telefona)"</string>
@@ -1925,6 +1920,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Podešavanje regiona"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Unesite naziv jezika"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Predloženi"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Predloženi jezici"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Predloženi regioni"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Svi jezici"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Svi regioni"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Pretraži"</string>
@@ -2079,8 +2076,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saznajte više"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Poboljšana obaveštenja su zamenila Android prilagodljiva obaveštenja u Android-u 12. Ova funkcija pokazuje predložene radnje i odgovore, i organizuje obaveštenja.\n\nPoboljšana obaveštenja mogu da pristupaju sadržaju obaveštenja, uključujući lične podatke poput imena kontakata i poruka. Ova funkcija može i da odbacuje obaveštenja ili da odgovara na njih, na primer, da se javlja na telefonske pozive i kontroliše režim Ne uznemiravaj."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Obaveštenje o informacijama Rutinskog režima"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija će se možda isprazniti pre uobičajenog punjenja"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Ušteda baterije je aktivirana da bi se produžilo trajanje baterije"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Ušteda baterije je uključena"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Smanjuje se potrošnja baterije da bi se produžilo njeno trajanje"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Ušteda baterije"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Ušteda baterije je isključena"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Baterija telefona je dovoljno napunjena. Funkcije više nisu ograničene."</string>

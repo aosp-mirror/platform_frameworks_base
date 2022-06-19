@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Névtelen&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Nincs telefonszám)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Régió beállítása"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Adja meg a nyelvet"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Javasolt"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Javasolt nyelvek"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Javasolt régiók"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Minden nyelv"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Minden régió"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Keresés"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"További információ"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"A bővített értesítések felváltják az androidos alkalmazkodó értesítéseket az Android 12-es verziójában. Ez a funkció javasolt műveleteket és válaszokat mutat, és rendszerezi az értesítéseket.\n\nA bővített értesítések minden értesítéstartalmat olvashatnak (így a személyes adatokat, mint például a névjegyek nevét és az üzeneteket is). Ez a funkció emellett elvetheti az értesítéseket, valamint reagálhat rájuk, például felveheti a telefonhívásokat, és vezérelheti a Ne zavarjanak módot."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Információs értesítés a rutinmódról"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Előfordulhat, hogy az akkumulátor lemerül a szokásos töltési időszak előtt"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akkumulátorkímélő mód aktiválva az akkumulátor üzemidejének növelése érdekében"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Akkumulátorkímélő mód bekapcsolva"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Akkumulátorhasználat csökkentése a hosszabb akkumulátor-élettartam érdekében"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Akkumulátorkímélő mód"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Akkumulátorkímélő mód kikapcsolva"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"A telefon töltöttsége elegendő. A funkciók használata már nincs korlátozva."</string>
