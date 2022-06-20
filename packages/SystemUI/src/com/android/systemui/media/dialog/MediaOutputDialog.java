@@ -99,7 +99,12 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
 
     @Override
     public boolean isBroadcastSupported() {
-        return mMediaOutputController.isBroadcastSupported();
+        boolean isBluetoothLeDevice = false;
+        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+            isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
+                    mMediaOutputController.getCurrentConnectedMediaDevice());
+        }
+        return mMediaOutputController.isBroadcastSupported() && isBluetoothLeDevice;
     }
 
     @Override
