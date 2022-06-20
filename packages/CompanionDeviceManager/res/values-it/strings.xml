@@ -19,7 +19,7 @@
     <string name="app_label" msgid="4470785958457506021">"Gestione dispositivi companion"</string>
     <string name="confirmation_title" msgid="3785000297483688997">"Consenti all\'app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di accedere &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"orologio"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Scegli un <xliff:g id="PROFILE_NAME">%1$s</xliff:g> che sia gestito da &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Scegli un <xliff:g id="PROFILE_NAME">%1$s</xliff:g> da gestire con &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="3002344206574997652">"Questa app è necessaria per gestire il tuo <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. L\'app <xliff:g id="APP_NAME">%2$s</xliff:g> potrà interagire con le tue notifiche e accedere alle autorizzazioni Telefono, SMS, Contatti, Calendar, Registri chiamate e Dispositivi nelle vicinanze."</string>
     <string name="permission_apps" msgid="6142133265286656158">"App"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Trasmetti in streaming le app del tuo telefono"</string>
