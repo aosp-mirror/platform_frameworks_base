@@ -305,10 +305,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"ኤስኤምኤስ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
-    <!-- no translation found for permgrouplab_storage (17339216290379241) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (5378659041354582769) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="17339216290379241">"ፋይሎች"</string>
+    <string name="permgroupdesc_storage" msgid="5378659041354582769">"በመሣሪያዎ ላይ የሚገኙ ፋይሎች መዳረሻ"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"ሙዚቃ እና ኦዲዮ"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"በመሣሪያዎ ላይ ሙዚቃን እና ኦዲዮን መድረስ"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"ፎቶዎች እና ቪዲዮዎች"</string>

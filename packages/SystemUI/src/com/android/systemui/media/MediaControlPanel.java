@@ -677,6 +677,7 @@ public class MediaControlPanel {
                         scaleTransitionDrawableLayer(transitionDrawable, 1, width, height);
                         transitionDrawable.setLayerGravity(0, Gravity.CENTER);
                         transitionDrawable.setLayerGravity(1, Gravity.CENTER);
+                        transitionDrawable.setCrossFadeEnabled(!isArtworkBound);
 
                         albumView.setImageDrawable(transitionDrawable);
                         transitionDrawable.startTransition(isArtworkBound ? 333 : 80);
@@ -1183,7 +1184,7 @@ public class MediaControlPanel {
         gutsViewHolder.getGutsText().setText(text);
 
         // Dismiss button
-        gutsViewHolder.getDismissText().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);
+        gutsViewHolder.getDismissText().setVisibility(isDismissible ? View.VISIBLE : View.GONE);
         gutsViewHolder.getDismiss().setEnabled(isDismissible);
         gutsViewHolder.getDismiss().setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
@@ -1194,11 +1195,18 @@ public class MediaControlPanel {
         });
 
         // Cancel button
+        TextView cancelText = gutsViewHolder.getCancelText();
+        if (isDismissible) {
+            cancelText.setBackground(mContext.getDrawable(R.drawable.qs_media_outline_button));
+        } else {
+            cancelText.setBackground(mContext.getDrawable(R.drawable.qs_media_solid_button));
+        }
         gutsViewHolder.getCancel().setOnClickListener(v -> {
             if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                 closeGuts();
             }
         });
+        gutsViewHolder.setDismissible(isDismissible);
 
         // Settings button
         gutsViewHolder.getSettings().setOnClickListener(v -> {
