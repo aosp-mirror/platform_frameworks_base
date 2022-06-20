@@ -18,25 +18,46 @@ package androidx.window.extensions.embedding;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_BOUNDS;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.TASK_ID;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createActivityInfoWithMinDimensions;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.createSplitRule;
+import static androidx.window.extensions.embedding.EmbeddingTestUtils.getSplitBounds;
+import static androidx.window.extensions.embedding.SplitPresenter.POSITION_END;
+import static androidx.window.extensions.embedding.SplitPresenter.POSITION_FILL;
+import static androidx.window.extensions.embedding.SplitPresenter.POSITION_START;
+import static androidx.window.extensions.embedding.SplitPresenter.getBoundsForPosition;
+import static androidx.window.extensions.embedding.SplitPresenter.getMinDimensions;
+import static androidx.window.extensions.embedding.SplitPresenter.shouldShowSideBySide;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.util.Pair;
+import android.util.Size;
 import android.window.TaskFragmentInfo;
 import android.window.WindowContainerTransaction;
 
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
@@ -56,8 +77,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class SplitPresenterTest {
-    private static final int TASK_ID = 10;
-    private static final Rect TASK_BOUNDS = new Rect(0, 0, 600, 1200);
 
     @Mock
     private Activity mActivity;
@@ -77,11 +96,7 @@ public class SplitPresenterTest {
         mPresenter = mController.mPresenter;
         spyOn(mController);
         spyOn(mPresenter);
-        final Configuration activityConfig = new Configuration();
-        activityConfig.windowConfiguration.setBounds(TASK_BOUNDS);
-        activityConfig.windowConfiguration.setMaxBounds(TASK_BOUNDS);
-        doReturn(mActivityResources).when(mActivity).getResources();
-        doReturn(activityConfig).when(mActivityResources).getConfiguration();
+        mActivity = createMockActivity();
     }
 
     @Test
@@ -128,5 +143,109 @@ public class SplitPresenterTest {
 
         verify(mTransaction, never()).setWindowingMode(any(), anyInt());
 
+    }
+
+    @Test
+    public void testGetMinDimensionsForIntent() {
+        final Intent intent = new Intent(ApplicationProvider.getApplicationContext(),
+                MinimumDimensionActivity.class);
+        assertEquals(new Size(600, 1200), getMinDimensions(intent));
+    }
+
+    @Test
+    public void testShouldShowSideBySide() {
+        Activity secondaryActivity = createMockActivity();
+        final SplitRule splitRule = createSplitRule(mActivity, secondaryActivity);
+
+        assertTrue(shouldShowSideBySide(TASK_BOUNDS, splitRule));
+
+        // Set minDimensions of primary container to larger than primary bounds.
+        final Rect primaryBounds = getSplitBounds(true /* isPrimary */);
+        Pair<Size, Size> minDimensionsPair = new Pair<>(
+                new Size(primaryBounds.width() + 1, primaryBounds.height() + 1), null);
+
+        assertFalse(shouldShowSideBySide(TASK_BOUNDS, splitRule, minDimensionsPair));
+    }
+
+    @Test
+    public void testGetBoundsForPosition() {
+        Activity secondaryActivity = createMockActivity();
+        final SplitRule splitRule = createSplitRule(mActivity, secondaryActivity);
+        final Rect primaryBounds = getSplitBounds(true /* isPrimary */);
+        final Rect secondaryBounds = getSplitBounds(false /* isPrimary */);
+
+        assertEquals("Primary bounds must be reported.",
+                primaryBounds,
+                getBoundsForPosition(POSITION_START, TASK_BOUNDS, splitRule,
+                        mActivity, null /* miniDimensionsPair */));
+
+        assertEquals("Secondary bounds must be reported.",
+                secondaryBounds,
+                getBoundsForPosition(POSITION_END, TASK_BOUNDS, splitRule,
+                        mActivity, null /* miniDimensionsPair */));
+        assertEquals("Task bounds must be reported.",
+                new Rect(),
+                getBoundsForPosition(POSITION_FILL, TASK_BOUNDS, splitRule,
+                        mActivity, null /* miniDimensionsPair */));
+
+        Pair<Size, Size> minDimensionsPair = new Pair<>(
+                new Size(primaryBounds.width() + 1, primaryBounds.height() + 1), null);
+
+        assertEquals("Fullscreen bounds must be reported because of min dimensions.",
+                new Rect(),
+                getBoundsForPosition(POSITION_START, TASK_BOUNDS,
+                        splitRule, mActivity, minDimensionsPair));
+    }
+
+    @Test
+    public void testExpandSplitContainerIfNeeded() {
+        SplitContainer splitContainer = mock(SplitContainer.class);
+        Activity secondaryActivity = createMockActivity();
+        SplitRule splitRule = createSplitRule(mActivity, secondaryActivity);
+        TaskFragmentContainer primaryTf = mController.newContainer(mActivity, TASK_ID);
+        TaskFragmentContainer secondaryTf = mController.newContainer(secondaryActivity, TASK_ID);
+        doReturn(splitRule).when(splitContainer).getSplitRule();
+        doReturn(primaryTf).when(splitContainer).getPrimaryContainer();
+        doReturn(secondaryTf).when(splitContainer).getSecondaryContainer();
+
+        assertThrows(IllegalArgumentException.class, () ->
+                mPresenter.expandSplitContainerIfNeeded(mTransaction, splitContainer, mActivity,
+                        null /* secondaryActivity */, null /* secondaryIntent */));
+
+        mPresenter.expandSplitContainerIfNeeded(mTransaction, splitContainer, mActivity,
+                secondaryActivity, null /* secondaryIntent */);
+
+        verify(mPresenter, never()).expandTaskFragment(any(), any());
+
+        doReturn(createActivityInfoWithMinDimensions()).when(secondaryActivity).getActivityInfo();
+
+        mPresenter.expandSplitContainerIfNeeded(mTransaction, splitContainer, mActivity,
+                secondaryActivity, null /* secondaryIntent */);
+
+        verify(mPresenter).expandTaskFragment(eq(mTransaction),
+                eq(primaryTf.getTaskFragmentToken()));
+        verify(mPresenter).expandTaskFragment(eq(mTransaction),
+                eq(secondaryTf.getTaskFragmentToken()));
+
+        clearInvocations(mPresenter);
+        mPresenter.expandSplitContainerIfNeeded(mTransaction, splitContainer, mActivity,
+                null /* secondaryActivity */, new Intent(ApplicationProvider
+                        .getApplicationContext(), MinimumDimensionActivity.class));
+
+        verify(mPresenter).expandTaskFragment(eq(mTransaction),
+                eq(primaryTf.getTaskFragmentToken()));
+        verify(mPresenter).expandTaskFragment(eq(mTransaction),
+                eq(secondaryTf.getTaskFragmentToken()));
+    }
+
+    private Activity createMockActivity() {
+        final Activity activity = mock(Activity.class);
+        final Configuration activityConfig = new Configuration();
+        activityConfig.windowConfiguration.setBounds(TASK_BOUNDS);
+        activityConfig.windowConfiguration.setMaxBounds(TASK_BOUNDS);
+        doReturn(mActivityResources).when(activity).getResources();
+        doReturn(activityConfig).when(mActivityResources).getConfiguration();
+        doReturn(new ActivityInfo()).when(activity).getActivityInfo();
+        return activity;
     }
 }

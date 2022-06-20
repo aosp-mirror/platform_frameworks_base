@@ -39,7 +39,7 @@
     <string name="profile_name_generic" msgid="6851028682723034988">"دستگاه"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"اجازه دادن"</string>
-    <string name="consent_no" msgid="2640796915611404382">"مجاز نبودن"</string>
+    <string name="consent_no" msgid="2640796915611404382">"اجازه ندادن"</string>
     <string name="consent_back" msgid="2560683030046918882">"برگشت"</string>
     <string name="permission_sync_confirmation_title" msgid="667074294393493186">"انتقال اجازه‌های برنامه به ساعت"</string>
     <string name="permission_sync_summary" msgid="8873391306499120778">"برای آسان‌تر کردن راه‌اندازی ساعت، برنامه‌های نصب‌شده در ساعت درحین راه‌اندازی از همان اجازه‌های تلفن استفاده خواهند کرد.\n\n ممکن است این اجازه‌ها شامل دسترسی به میکروفون و مکان ساعت باشد."</string>
