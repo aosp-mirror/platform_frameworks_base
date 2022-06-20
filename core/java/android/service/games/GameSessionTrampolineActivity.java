@@ -94,7 +94,7 @@ public final class GameSessionTrampolineActivity extends Activity {
 
         try {
             startActivityAsCaller(
-                    getIntent().getParcelableExtra(INTENT_KEY),
+                    getIntent().getParcelableExtra(INTENT_KEY, android.content.Intent.class),
                     getIntent().getBundleExtra(OPTIONS_KEY),
                     false,
                     getUserId(),
@@ -102,7 +102,7 @@ public final class GameSessionTrampolineActivity extends Activity {
         } catch (Exception e) {
             Slog.w(TAG, "Unable to launch activity from game session");
             AndroidFuture<GameSessionActivityResult> future = getIntent().getParcelableExtra(
-                    FUTURE_KEY);
+                    FUTURE_KEY, com.android.internal.infra.AndroidFuture.class);
             future.completeExceptionally(e);
             finish();
             overridePendingTransition(0, 0);
@@ -123,7 +123,7 @@ public final class GameSessionTrampolineActivity extends Activity {
         }
 
         AndroidFuture<GameSessionActivityResult> future = getIntent().getParcelableExtra(
-                FUTURE_KEY);
+                FUTURE_KEY, com.android.internal.infra.AndroidFuture.class);
         future.complete(new GameSessionActivityResult(resultCode, data));
         finish();
         overridePendingTransition(0, 0);

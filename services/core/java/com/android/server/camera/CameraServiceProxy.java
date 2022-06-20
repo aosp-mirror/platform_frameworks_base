@@ -355,7 +355,7 @@ public class CameraServiceProxy extends SystemService
                 case UsbManager.ACTION_USB_DEVICE_ATTACHED:
                 case UsbManager.ACTION_USB_DEVICE_DETACHED:
                     synchronized (mLock) {
-                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE, android.hardware.usb.UsbDevice.class);
                         if (device != null) {
                             notifyUsbDeviceHotplugLocked(device,
                                     action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED));

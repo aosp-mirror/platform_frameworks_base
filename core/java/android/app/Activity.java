@@ -6496,7 +6496,7 @@ public class Activity extends ContextThemeWrapper
         Intent intent = getIntent();
         if (intent != null) {
             try {
-                Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+                Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER, android.net.Uri.class);
                 if (referrer != null) {
                     return referrer;
                 }

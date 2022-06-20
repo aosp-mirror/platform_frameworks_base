@@ -121,7 +121,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
             public void sendResult(Bundle data) throws RemoteException {
                 final ArrayList<InstantAppResolveInfo> resolveList =
                         data.getParcelableArrayList(
-                                InstantAppResolverService.EXTRA_RESOLVE_INFO);
+                                InstantAppResolverService.EXTRA_RESOLVE_INFO, android.content.pm.InstantAppResolveInfo.class);
                 callbackHandler.post(() -> callback.onPhaseTwoResolved(resolveList, startTime));
             }
         };
@@ -343,7 +343,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
                     public void sendResult(Bundle data) throws RemoteException {
                         final ArrayList<InstantAppResolveInfo> resolveList =
                                 data.getParcelableArrayList(
-                                        InstantAppResolverService.EXTRA_RESOLVE_INFO);
+                                        InstantAppResolverService.EXTRA_RESOLVE_INFO, android.content.pm.InstantAppResolveInfo.class);
                         int sequence =
                                 data.getInt(InstantAppResolverService.EXTRA_SEQUENCE, -1);
                         onRemoteMethodResult(resolveList, sequence);

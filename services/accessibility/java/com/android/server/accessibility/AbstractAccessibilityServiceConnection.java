@@ -2300,9 +2300,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             int processId, long threadId, int callingUid, Bundle callingStack) {
         if (mTrace.isA11yTracingEnabledForTypes(loggingTypes)) {
             ArrayList<StackTraceElement> list =
-                    (ArrayList<StackTraceElement>) callingStack.getSerializable(CALL_STACK);
+                    (ArrayList<StackTraceElement>) callingStack.getSerializable(CALL_STACK, java.util.ArrayList.class);
             HashSet<String> ignoreList =
-                    (HashSet<String>) callingStack.getSerializable(IGNORE_CALL_STACK);
+                    (HashSet<String>) callingStack.getSerializable(IGNORE_CALL_STACK, java.util.HashSet.class);
             mTrace.logTrace(timestamp, where, loggingTypes, callingParams, processId, threadId,
                     callingUid, list.toArray(new StackTraceElement[list.size()]), ignoreList);
         }

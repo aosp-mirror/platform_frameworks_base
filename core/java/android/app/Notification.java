@@ -2842,7 +2842,7 @@ public class Notification implements Parcelable
                 visitor.accept(Uri.parse(extras.getString(EXTRA_BACKGROUND_IMAGE_URI)));
             }
 
-            ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
+            ArrayList<Person> people = extras.getParcelableArrayList(EXTRA_PEOPLE_LIST, android.app.Person.class);
             if (people != null && !people.isEmpty()) {
                 for (Person p : people) {
                     visitor.accept(p.getIconUri());
@@ -3882,7 +3882,7 @@ public class Notification implements Parcelable
                 }
 
                 if (mN.extras.containsKey(EXTRA_PEOPLE_LIST)) {
-                    ArrayList<Person> people = mN.extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
+                    ArrayList<Person> people = mN.extras.getParcelableArrayList(EXTRA_PEOPLE_LIST, android.app.Person.class);
                     mPersonList.addAll(people);
                 }
 
@@ -9777,7 +9777,7 @@ public class Notification implements Parcelable
             mCallType = extras.getInt(EXTRA_CALL_TYPE);
             mIsVideo = extras.getBoolean(EXTRA_CALL_IS_VIDEO);
             mPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
-            mVerificationIcon = extras.getParcelable(EXTRA_VERIFICATION_ICON);
+            mVerificationIcon = extras.getParcelable(EXTRA_VERIFICATION_ICON, android.graphics.drawable.Icon.class);
             mVerificationText = extras.getCharSequence(EXTRA_VERIFICATION_TEXT);
             mAnswerIntent = extras.getParcelable(EXTRA_ANSWER_INTENT, PendingIntent.class);
             mDeclineIntent = extras.getParcelable(EXTRA_DECLINE_INTENT, PendingIntent.class);
@@ -10895,7 +10895,7 @@ public class Notification implements Parcelable
         public WearableExtender(Notification notif) {
             Bundle wearableBundle = notif.extras.getBundle(EXTRA_WEARABLE_EXTENSIONS);
             if (wearableBundle != null) {
-                List<Action> actions = wearableBundle.getParcelableArrayList(KEY_ACTIONS);
+                List<Action> actions = wearableBundle.getParcelableArrayList(KEY_ACTIONS, android.app.Notification.Action.class);
                 if (actions != null) {
                     mActions.addAll(actions);
                 }

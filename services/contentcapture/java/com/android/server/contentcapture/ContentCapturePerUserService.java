@@ -446,8 +446,8 @@ final class ContentCapturePerUserService
             @NonNull Bundle data) {
         final int id = getSessionId(activityToken);
         final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
-        final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE);
-        final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT);
+        final AssistStructure assistStructure = data.getParcelable(ASSIST_KEY_STRUCTURE, android.app.assist.AssistStructure.class);
+        final AssistContent assistContent = data.getParcelable(ASSIST_KEY_CONTENT, android.app.assist.AssistContent.class);
         final SnapshotData snapshotData = new SnapshotData(assistData,
                 assistStructure, assistContent);
         if (id != NO_SESSION_ID) {

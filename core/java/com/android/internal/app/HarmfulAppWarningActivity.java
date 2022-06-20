@@ -54,7 +54,7 @@ public class HarmfulAppWarningActivity extends AlertActivity implements
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         final Intent intent = getIntent();
         mPackageName = intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
-        mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+        mTarget = intent.getParcelableExtra(Intent.EXTRA_INTENT, android.content.IntentSender.class);
         mHarmfulAppWarning = intent.getStringExtra(EXTRA_HARMFUL_APP_WARNING);
 
         if (mPackageName == null || mTarget == null || mHarmfulAppWarning == null) {
@@ -107,7 +107,7 @@ public class HarmfulAppWarningActivity extends AlertActivity implements
             case DialogInterface.BUTTON_NEGATIVE:
                 getPackageManager().setHarmfulAppWarning(mPackageName, null /*warning*/);
 
-                final IntentSender target = getIntent().getParcelableExtra(Intent.EXTRA_INTENT);
+                final IntentSender target = getIntent().getParcelableExtra(Intent.EXTRA_INTENT, android.content.IntentSender.class);
                 try {
                     startIntentSenderForResult(target, -1 /*requestCode*/, null /*fillInIntent*/,
                             0 /*flagsMask*/, 0 /*flagsValue*/, 0 /*extraFlags*/);

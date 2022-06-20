@@ -2062,7 +2062,7 @@ public class LauncherApps {
      * the {@link #EXTRA_PIN_ITEM_REQUEST} extra.
      */
     public PinItemRequest getPinItemRequest(Intent intent) {
-        return intent.getParcelableExtra(EXTRA_PIN_ITEM_REQUEST);
+        return intent.getParcelableExtra(EXTRA_PIN_ITEM_REQUEST, android.content.pm.LauncherApps.PinItemRequest.class);
     }
 
     /**

@@ -993,7 +993,7 @@ public class DreamService extends Service implements Window.Callback {
         if (!mWindowless) {
             mOverlayConnection.bind(
                     /* context= */ this,
-                    intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
+                    intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT, android.content.ComponentName.class),
                     new ComponentName(this, getClass()));
         }
 

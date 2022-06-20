@@ -3184,7 +3184,7 @@ public class MediaRouter {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED)) {
                 updateWifiDisplayStatus((WifiDisplayStatus) intent.getParcelableExtra(
-                        DisplayManager.EXTRA_WIFI_DISPLAY_STATUS));
+                        DisplayManager.EXTRA_WIFI_DISPLAY_STATUS, android.hardware.display.WifiDisplayStatus.class));
             }
         }
     }

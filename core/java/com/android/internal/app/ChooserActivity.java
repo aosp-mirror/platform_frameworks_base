@@ -607,9 +607,9 @@ public class ChooserActivity extends ResolverActivity implements
         mReferrerFillInIntent = new Intent().putExtra(Intent.EXTRA_REFERRER, getReferrer());
 
         mChosenComponentSender = intent.getParcelableExtra(
-                Intent.EXTRA_CHOSEN_COMPONENT_INTENT_SENDER);
+                Intent.EXTRA_CHOSEN_COMPONENT_INTENT_SENDER, android.content.IntentSender.class);
         mRefinementIntentSender = intent.getParcelableExtra(
-                Intent.EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER);
+                Intent.EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER, android.content.IntentSender.class);
         setSafeForwardingMode(true);
 
         mPinnedSharedPrefs = getPinnedSharedPrefs(this);
@@ -943,7 +943,7 @@ public class ChooserActivity extends ResolverActivity implements
             ClipData clipData = null;
             if (Intent.ACTION_SEND.equals(action)) {
                 String extraText = targetIntent.getStringExtra(Intent.EXTRA_TEXT);
-                Uri extraStream = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+                Uri extraStream = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
 
                 if (extraText != null) {
                     clipData = ClipData.newPlainText(null, extraText);
@@ -955,7 +955,7 @@ public class ChooserActivity extends ResolverActivity implements
                 }
             } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
                 final ArrayList<Uri> streams = targetIntent.getParcelableArrayListExtra(
-                        Intent.EXTRA_STREAM);
+                        Intent.EXTRA_STREAM, android.net.Uri.class);
                 clipData = ClipData.newUri(getContentResolver(), null, streams.get(0));
                 for (int i = 1; i < streams.size(); i++) {
                     clipData.addItem(getContentResolver(), new ClipData.Item(streams.get(i)));
@@ -1090,7 +1090,7 @@ public class ChooserActivity extends ResolverActivity implements
         String originalAction = originalIntent.getAction();
         if (Intent.ACTION_SEND.equals(originalAction)) {
             if (resolveIntent.getData() == null) {
-                Uri uri = resolveIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+                Uri uri = resolveIntent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
                 if (uri != null) {
                     String mimeType = getContentResolver().getType(uri);
                     resolveIntent.setDataAndType(uri, mimeType);
@@ -1335,14 +1335,14 @@ public class ChooserActivity extends ResolverActivity implements
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
-            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
             imagePreview.findViewById(R.id.content_preview_image_1_large)
                     .setTransitionName(ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME);
             mPreviewCoord.loadUriIntoView(R.id.content_preview_image_1_large, uri, 0);
         } else {
             ContentResolver resolver = getContentResolver();
 
-            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
             List<Uri> imageUris = new ArrayList<>();
             for (Uri uri : uris) {
                 if (isImageType(resolver.getType(uri))) {
@@ -1454,10 +1454,10 @@ public class ChooserActivity extends ResolverActivity implements
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
-            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
             loadFileUriIntoView(uri, contentPreviewLayout);
         } else {
-            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
             int uriCount = uris.size();
 
             if (uriCount == 0) {
@@ -1541,10 +1541,10 @@ public class ChooserActivity extends ResolverActivity implements
     private int findPreferredContentPreview(Intent targetIntent, ContentResolver resolver) {
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
-            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+            Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
             return findPreferredContentPreview(uri, resolver);
         } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
-            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
             if (uris == null || uris.isEmpty()) {
                 return CONTENT_PREVIEW_TEXT;
             }
@@ -1914,12 +1914,12 @@ public class ChooserActivity extends ResolverActivity implements
             IntentFilter intentFilter = new IntentFilter(intent.getAction(), intent.getType());
             List<Uri> contentUris = new ArrayList<>();
             if (Intent.ACTION_SEND.equals(intent.getAction())) {
-                Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
                 if (uri != null) {
                     contentUris.add(uri);
                 }
             } else {
-                List<Uri> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                List<Uri> uris = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, android.net.Uri.class);
                 if (uris != null) {
                     contentUris.addAll(uris);
                 }

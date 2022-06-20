@@ -4867,7 +4867,7 @@ public class TelephonyManager {
                                 return;
                             }
                             ParcelUuid resultUuid =
-                                    result.getParcelable(KEY_CALL_COMPOSER_PICTURE_HANDLE);
+                                    result.getParcelable(KEY_CALL_COMPOSER_PICTURE_HANDLE, android.os.ParcelUuid.class);
                             if (resultUuid == null) {
                                 Log.e(TAG, "Got null uuid without an error"
                                         + " while uploading call composer pic");
@@ -10375,7 +10375,7 @@ public class TelephonyManager {
             protected void onReceiveResult(int resultCode, Bundle ussdResponse) {
                 Rlog.d(TAG, "USSD:" + resultCode);
                 checkNotNull(ussdResponse, "ussdResponse cannot be null.");
-                UssdResponse response = ussdResponse.getParcelable(USSD_RESPONSE);
+                UssdResponse response = ussdResponse.getParcelable(USSD_RESPONSE, android.telephony.UssdResponse.class);
 
                 if (resultCode == USSD_RETURN_SUCCESS) {
                     callback.onReceiveUssdResponse(telephonyManager, response.getUssdRequest(),
@@ -16867,7 +16867,7 @@ public class TelephonyManager {
                         }
 
                         NetworkSlicingConfig slicingConfig =
-                                result.getParcelable(KEY_SLICING_CONFIG_HANDLE);
+                                result.getParcelable(KEY_SLICING_CONFIG_HANDLE, android.telephony.data.NetworkSlicingConfig.class);
                         executor.execute(() -> callback.onResult(slicingConfig));
                     }
             });

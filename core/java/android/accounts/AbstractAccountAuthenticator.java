@@ -938,7 +938,7 @@ public abstract class AbstractAccountAuthenticator {
         String authTokenType = sessionBundle.getString(KEY_AUTH_TOKEN_TYPE);
         Bundle options = sessionBundle.getBundle(KEY_OPTIONS);
         String[] requiredFeatures = sessionBundle.getStringArray(KEY_REQUIRED_FEATURES);
-        Account account = sessionBundle.getParcelable(KEY_ACCOUNT);
+        Account account = sessionBundle.getParcelable(KEY_ACCOUNT, android.accounts.Account.class);
         boolean containsKeyAccount = sessionBundle.containsKey(KEY_ACCOUNT);
 
         // Actual options passed to add account or update credentials flow.

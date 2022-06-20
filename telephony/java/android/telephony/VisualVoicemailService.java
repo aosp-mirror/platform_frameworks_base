@@ -157,14 +157,14 @@ public abstract class VisualVoicemailService extends Service {
         @Override
         public void handleMessage(final Message msg) {
             final PhoneAccountHandle handle = msg.getData()
-                    .getParcelable(DATA_PHONE_ACCOUNT_HANDLE);
+                    .getParcelable(DATA_PHONE_ACCOUNT_HANDLE, android.telecom.PhoneAccountHandle.class);
             VisualVoicemailTask task = new VisualVoicemailTask(msg.replyTo, msg.arg1);
             switch (msg.what) {
                 case MSG_ON_CELL_SERVICE_CONNECTED:
                     onCellServiceConnected(task, handle);
                     break;
                 case MSG_ON_SMS_RECEIVED:
-                    VisualVoicemailSms sms = msg.getData().getParcelable(DATA_SMS);
+                    VisualVoicemailSms sms = msg.getData().getParcelable(DATA_SMS, android.telephony.VisualVoicemailSms.class);
                     onSmsReceived(task, sms);
                     break;
                 case MSG_ON_SIM_REMOVED:

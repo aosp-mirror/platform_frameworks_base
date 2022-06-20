@@ -508,7 +508,7 @@ public class UserManagerService extends IUserManager.Stub {
             if (!ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK.equals(intent.getAction())) {
                 return;
             }
-            final IntentSender target = intent.getParcelableExtra(Intent.EXTRA_INTENT);
+            final IntentSender target = intent.getParcelableExtra(Intent.EXTRA_INTENT, android.content.IntentSender.class);
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL);
             // Call setQuietModeEnabled on bg thread to avoid ANR
             BackgroundThread.getHandler().post(() ->

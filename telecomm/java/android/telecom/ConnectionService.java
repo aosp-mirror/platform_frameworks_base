@@ -2044,7 +2044,7 @@ public abstract class ConnectionService extends Service {
         if (isHandover) {
             PhoneAccountHandle fromPhoneAccountHandle = request.getExtras() != null
                     ? (PhoneAccountHandle) request.getExtras().getParcelable(
-                    TelecomManager.EXTRA_HANDOVER_FROM_PHONE_ACCOUNT) : null;
+                    TelecomManager.EXTRA_HANDOVER_FROM_PHONE_ACCOUNT, android.telecom.PhoneAccountHandle.class) : null;
             if (!isIncoming) {
                 connection = onCreateOutgoingHandoverConnection(fromPhoneAccountHandle, request);
             } else {

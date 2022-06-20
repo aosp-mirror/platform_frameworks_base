@@ -341,8 +341,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         BroadcastReceiver portReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                ParcelableUsbPort port = intent.getParcelableExtra(UsbManager.EXTRA_PORT);
-                UsbPortStatus status = intent.getParcelableExtra(UsbManager.EXTRA_PORT_STATUS);
+                ParcelableUsbPort port = intent.getParcelableExtra(UsbManager.EXTRA_PORT, android.hardware.usb.ParcelableUsbPort.class);
+                UsbPortStatus status = intent.getParcelableExtra(UsbManager.EXTRA_PORT_STATUS, android.hardware.usb.UsbPortStatus.class);
                 mHandler.updateHostState(
                         port.getUsbPort(context.getSystemService(UsbManager.class)), status);
             }

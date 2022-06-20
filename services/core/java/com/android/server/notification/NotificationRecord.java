@@ -682,7 +682,7 @@ public final class NotificationRecord {
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
-                                    Adjustment.KEY_SNOOZE_CRITERIA);
+                                    Adjustment.KEY_SNOOZE_CRITERIA, android.service.notification.SnoozeCriterion.class);
                     setSnoozeCriteria(snoozeCriterionList);
                     EventLogTags.writeNotificationAdjusted(getKey(), Adjustment.KEY_SNOOZE_CRITERIA,
                             snoozeCriterionList.toString());
@@ -708,7 +708,7 @@ public final class NotificationRecord {
                 }
                 if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
                     setSystemGeneratedSmartActions(
-                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS));
+                            signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS, android.app.Notification.Action.class));
                     EventLogTags.writeNotificationAdjusted(getKey(),
                             Adjustment.KEY_CONTEXTUAL_ACTIONS,
                             getSystemGeneratedSmartActions().toString());

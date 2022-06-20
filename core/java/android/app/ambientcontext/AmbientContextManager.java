@@ -117,7 +117,7 @@ public final class AmbientContextManager {
      */
     @NonNull public static List<AmbientContextEvent> getEventsFromIntent(@NonNull Intent intent) {
         if (intent.hasExtra(AmbientContextManager.EXTRA_AMBIENT_CONTEXT_EVENTS)) {
-            return intent.getParcelableArrayListExtra(EXTRA_AMBIENT_CONTEXT_EVENTS);
+            return intent.getParcelableArrayListExtra(EXTRA_AMBIENT_CONTEXT_EVENTS, android.app.ambientcontext.AmbientContextEvent.class);
         } else {
             return new ArrayList<>();
         }

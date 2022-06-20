@@ -500,7 +500,7 @@ public class StatusBarNotification implements Parcelable {
                         template.hashCode());
             }
             ArrayList<Person> people = getNotification().extras.getParcelableArrayList(
-                    Notification.EXTRA_PEOPLE_LIST);
+                    Notification.EXTRA_PEOPLE_LIST, android.app.Person.class);
             if (people != null && !people.isEmpty()) {
                 logMaker.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_PEOPLE, people.size());
             }
