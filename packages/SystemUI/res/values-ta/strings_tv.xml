@@ -30,8 +30,6 @@
     <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"மைக்ரோஃபோன் ரெக்கார்டு செய்வதை நிறுத்திவிட்டது"</string>
     <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"கேமரா ரெக்கார்டு செய்வதை நிறுத்திவிட்டது"</string>
     <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"கேமராவும் மைக்ரோஃபோனும் ரெக்கார்டு செய்வதை நிறுத்திவிட்டன"</string>
-    <!-- no translation found for screen_recording_announcement (2996750593472241520) -->
-    <skip />
-    <!-- no translation found for screen_stopped_recording_announcement (979749439036681416) -->
-    <skip />
+    <string name="screen_recording_announcement" msgid="2996750593472241520">"ஸ்கிரீன் ரெக்கார்டிங் தொடங்கியது"</string>
+    <string name="screen_stopped_recording_announcement" msgid="979749439036681416">"ஸ்கிரீன் ரெக்கார்டிங் நிறுத்தப்பட்டது"</string>
 </resources>
