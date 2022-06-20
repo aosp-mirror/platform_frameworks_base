@@ -407,7 +407,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="368812367182387320">"Vaš radni profil je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može pratiti vašu aktivnost na mreži, uključujući e-poruke i web lokacije."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="8179722332380953673">"Vaš lični profil je povezan s aplikacijom <xliff:g id="VPN_APP">%1$s</xliff:g>, koja može pratiti vašu aktivnost na mreži, uključujući e-poruke, aplikacije i web lokacije."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otvorite postavke VPN mreže"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Otvorite postavke VPN-a"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"Ovim uređajem upravlja tvoj roditelj. Roditelj može vidjeti i upravljati informacijama kao što su aplikacije koje koristiš, lokacija i vrijeme korištenja uređaja."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Pouzdani agent sprečava zaključavanje"</string>

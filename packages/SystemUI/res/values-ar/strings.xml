@@ -110,7 +110,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"الكاميرا"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"الهاتف"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"المساعد الصوتي"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"المحفظة"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"محفظة"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"فتح القفل"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"الجهاز مُقفل."</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"مسح الوجه"</string>
@@ -472,7 +472,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"عرض الوضع التجريبي"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"إيثرنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"المنبّه"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"المحفظة"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"محفظة"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"يمكنك إعداد طريقة دفع لإجراء عمليات شراء بسرعة وأمان أكبر باستخدام هاتفك."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"عرض الكل"</string>
     <string name="wallet_secondary_label_no_card" msgid="530725155985223497">"إضافة بطاقة"</string>
