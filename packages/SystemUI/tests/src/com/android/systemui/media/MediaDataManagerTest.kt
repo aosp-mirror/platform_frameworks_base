@@ -603,6 +603,7 @@ class MediaDataManagerTest : SysuiTestCase() {
                 .onSmartspaceMediaDataLoaded(anyObject(), anyObject(), anyBoolean())
     }
 
+    @Ignore("b/229838140")
     @Test
     fun testMediaRecommendationDisabled_removesSmartspaceData() {
         // GIVEN a media recommendation card is present
@@ -976,6 +977,26 @@ class MediaDataManagerTest : SysuiTestCase() {
         callbackCaptor.value.invoke(KEY, state)
         verify(listener, never()).onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(),
                 anyBoolean())
+    }
+
+    @Test
+    fun testPlaybackStateChange_keyHasNullToken_doesNothing() {
+        // When we get an update that sets the data's token to null
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isFalse()
+        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(token = null))
+
+        // And then get a state update
+        val state = PlaybackState.Builder().build()
+        val callbackCaptor = argumentCaptor<(String, PlaybackState) -> Unit>()
+        verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
+
+        // Then no changes are made
+        callbackCaptor.value.invoke(KEY, state)
+        verify(listener, never()).onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(),
+            anyBoolean())
     }
 
     /**

@@ -706,7 +706,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             }
             pinnedShortcuts.addAll(pinned);
         });
-        // Then, update the pinned state if necessary.
+        // Secondly, update the pinned state if necessary.
         final List<ShortcutInfo> pinned = findAll(pinnedShortcuts);
         if (pinned != null) {
             pinned.forEach(si -> {
@@ -720,6 +720,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 si.clearFlags(ShortcutInfo.FLAG_PINNED);
             }
         });
+        // Then, schedule a background job to persist the pinned states.
+        mShortcutUser.forAllLaunchers(ShortcutPackageItem::scheduleSave);
 
         // Lastly, remove the ones that are no longer pinned, cached nor dynamic.
         removeOrphans();

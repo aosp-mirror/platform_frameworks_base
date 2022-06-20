@@ -432,6 +432,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private static final int DESTROY_TIMEOUT = 10 * 1000;
 
     final ActivityTaskManagerService mAtmService;
+    @NonNull
     final ActivityInfo info; // activity info provided by developer in AndroidManifest
     // Which user is this running for?
     final int mUserId;
@@ -670,9 +671,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * from the style of activity. Because we don't want {@link WindowContainer#getOrientation()}
      * to be affected by the temporal state of {@link ActivityClientController#convertToTranslucent}
      * when running ANIM_SCENE_TRANSITION.
-     * @see WindowContainer#fillsParent()
+     * @see WindowContainer#providesOrientation()
      */
-    private final boolean mFillsParent;
+    private final boolean mStyleFillsParent;
 
     // The input dispatching timeout for this application token in milliseconds.
     long mInputDispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -1971,10 +1972,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // This style is propagated to the main window attributes with
                     // FLAG_SHOW_WALLPAPER from PhoneWindow#generateLayout.
                     || ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
-            mFillsParent = mOccludesParent;
+            mStyleFillsParent = mOccludesParent;
             noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
         } else {
-            mFillsParent = mOccludesParent = true;
+            mStyleFillsParent = mOccludesParent = true;
             noDisplay = false;
         }
 
@@ -2880,8 +2881,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
+    boolean providesOrientation() {
+        return mStyleFillsParent;
+    }
+
+    @Override
     boolean fillsParent() {
-        return mFillsParent;
+        return occludesParent(true /* includingFinishing */);
     }
 
     /** Returns true if this activity is not finishing, is opaque and fills the entire space of
@@ -4294,9 +4300,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mTransitionController.collect(tStartingWindow);
                 tStartingWindow.reparent(this, POSITION_TOP);
 
-                // Propagate other interesting state between the tokens. If the old token is displayed,
-                // we should immediately force the new one to be displayed. If it is animating, we need
-                // to move that animation to the new one.
+                // Clear the frozen insets state when transferring the existing starting window to
+                // the next target activity.  In case the frozen state from a trampoline activity
+                // affecting the starting window frame computation to see the window being
+                // clipped if the rotation change during the transition animation.
+                tStartingWindow.clearFrozenInsetsState();
+
+                // Propagate other interesting state between the tokens. If the old token is
+                // displayed, we should immediately force the new one to be displayed. If it is
+                // animating, we need to move that animation to the new one.
                 if (fromActivity.allDrawn) {
                     allDrawn = true;
                 }
@@ -9700,6 +9712,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     boolean canBeAnimationTarget() {
         return true;
+    }
+
+    @Nullable
+    Point getMinDimensions() {
+        final ActivityInfo.WindowLayout windowLayout = info.windowLayout;
+        if (windowLayout == null) {
+            return null;
+        }
+        return new Point(windowLayout.minWidth, windowLayout.minHeight);
     }
 
     static class Builder {
