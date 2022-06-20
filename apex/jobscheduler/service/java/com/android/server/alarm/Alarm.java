@@ -88,6 +88,10 @@ class Alarm {
      * Change wasn't enable for the caller due to compat reasons.
      */
     static final int EXACT_ALLOW_REASON_COMPAT = 2;
+    /**
+     * Caller had USE_EXACT_ALARM permission.
+     */
+    static final int EXACT_ALLOW_REASON_POLICY_PERMISSION = 3;
 
     public final int type;
     /**
@@ -119,6 +123,7 @@ class Alarm {
     public AlarmManagerService.PriorityClass priorityClass;
     /** Broadcast options to use when delivering this alarm */
     public Bundle mIdleOptions;
+    public boolean mUsingReserveQuota;
 
     Alarm(int type, long when, long requestedWhenElapsed, long windowLength, long interval,
             PendingIntent op, IAlarmListener rec, String listenerTag, WorkSource ws, int flags,
@@ -147,6 +152,7 @@ class Alarm {
         mExactAllowReason = exactAllowReason;
         sourcePackage = (operation != null) ? operation.getCreatorPackage() : packageName;
         creatorUid = (operation != null) ? operation.getCreatorUid() : this.uid;
+        mUsingReserveQuota = false;
     }
 
     public static String makeTag(PendingIntent pi, String tag, int type) {
@@ -275,6 +281,8 @@ class Alarm {
                 return "compat";
             case EXACT_ALLOW_REASON_PERMISSION:
                 return "permission";
+            case EXACT_ALLOW_REASON_POLICY_PERMISSION:
+                return "policy_permission";
             case EXACT_ALLOW_REASON_NOT_APPLICABLE:
                 return "N/A";
             default:
@@ -334,6 +342,9 @@ class Alarm {
         TimeUtils.formatDuration(getWhenElapsed(), nowELAPSED, ipw);
         ipw.print(" maxWhenElapsed=");
         TimeUtils.formatDuration(mMaxWhenElapsed, nowELAPSED, ipw);
+        if (mUsingReserveQuota) {
+            ipw.print(" usingReserveQuota=true");
+        }
         ipw.println();
 
         if (alarmClock != null) {

@@ -40,6 +40,9 @@ class GutsViewHolder constructor(itemView: View) {
     val dismissText: TextView = itemView.requireViewById(R.id.dismiss_text)
     val settings: ImageButton = itemView.requireViewById(R.id.settings)
 
+    private var isDismissible: Boolean = true
+    var colorScheme: ColorScheme? = null
+
     /** Marquees the main text of the guts menu. */
     fun marquee(start: Boolean, delay: Long, tag: String) {
         val gutsTextHandler = gutsText.handler
@@ -47,19 +50,31 @@ class GutsViewHolder constructor(itemView: View) {
             Log.d(tag, "marquee while longPressText.getHandler() is null", Exception())
             return
         }
-        gutsTextHandler.postDelayed( { gutsText.isSelected = start }, delay)
+        gutsTextHandler.postDelayed({ gutsText.isSelected = start }, delay)
+    }
+
+    /** Set whether this control can be dismissed, and update appearance to match */
+    fun setDismissible(dismissible: Boolean) {
+        if (isDismissible == dismissible) return
+
+        isDismissible = dismissible
+        colorScheme?.let { setColors(it) }
     }
 
     /** Sets the right colors on all the guts views based on the given [ColorScheme]. */
-    fun setColors(colorScheme: ColorScheme) {
-        setSurfaceColor(surfaceFromScheme(colorScheme))
-        setTextPrimaryColor(textPrimaryFromScheme(colorScheme))
-        setAccentPrimaryColor(accentPrimaryFromScheme(colorScheme))
+    fun setColors(scheme: ColorScheme) {
+        colorScheme = scheme
+        setSurfaceColor(surfaceFromScheme(scheme))
+        setTextPrimaryColor(textPrimaryFromScheme(scheme))
+        setAccentPrimaryColor(accentPrimaryFromScheme(scheme))
     }
 
     /** Sets the surface color on all guts views that use it. */
     fun setSurfaceColor(surfaceColor: Int) {
         dismissText.setTextColor(surfaceColor)
+        if (!isDismissible) {
+            cancelText.setTextColor(surfaceColor)
+        }
     }
 
     /** Sets the primary accent color on all guts views that use it. */
@@ -74,7 +89,9 @@ class GutsViewHolder constructor(itemView: View) {
     fun setTextPrimaryColor(textPrimary: Int) {
         val textColorList = ColorStateList.valueOf(textPrimary)
         gutsText.setTextColor(textColorList)
-        cancelText.setTextColor(textColorList)
+        if (isDismissible) {
+            cancelText.setTextColor(textColorList)
+        }
     }
 
     companion object {

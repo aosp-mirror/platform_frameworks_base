@@ -553,10 +553,10 @@ class SurfaceAnimator {
     public static final int ANIMATION_TYPE_INSETS_CONTROL = 1 << 5;
 
     /**
-     * Animation when a fixed rotation transform is applied to a window token.
+     * Animation applied to a non-app window token, e.g. a fixed rotation transform.
      * @hide
      */
-    public static final int ANIMATION_TYPE_FIXED_TRANSFORM = 1 << 6;
+    public static final int ANIMATION_TYPE_TOKEN_TRANSFORM = 1 << 6;
 
     /**
      * Animation when a reveal starting window animation is applied to app window.
@@ -582,7 +582,7 @@ class SurfaceAnimator {
             ANIMATION_TYPE_RECENTS,
             ANIMATION_TYPE_WINDOW_ANIMATION,
             ANIMATION_TYPE_INSETS_CONTROL,
-            ANIMATION_TYPE_FIXED_TRANSFORM,
+            ANIMATION_TYPE_TOKEN_TRANSFORM,
             ANIMATION_TYPE_STARTING_REVEAL
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -600,7 +600,7 @@ class SurfaceAnimator {
             case ANIMATION_TYPE_RECENTS: return "recents_animation";
             case ANIMATION_TYPE_WINDOW_ANIMATION: return "window_animation";
             case ANIMATION_TYPE_INSETS_CONTROL: return "insets_animation";
-            case ANIMATION_TYPE_FIXED_TRANSFORM: return "fixed_rotation";
+            case ANIMATION_TYPE_TOKEN_TRANSFORM: return "token_transform";
             case ANIMATION_TYPE_STARTING_REVEAL: return "starting_reveal";
             default: return "unknown type:" + type;
         }

@@ -95,6 +95,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final String DATA_CONFIG_FILE_PATH = "system/devicestate/";
     private static final String CONFIG_FILE_NAME = "device_state_configuration.xml";
     private static final String FLAG_CANCEL_OVERRIDE_REQUESTS = "FLAG_CANCEL_OVERRIDE_REQUESTS";
+    private static final String FLAG_APP_INACCESSIBLE = "FLAG_APP_INACCESSIBLE";
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -144,6 +145,9 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                             switch (configFlagString) {
                                 case FLAG_CANCEL_OVERRIDE_REQUESTS:
                                     flags |= DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
+                                    break;
+                                case FLAG_APP_INACCESSIBLE:
+                                    flags |= DeviceState.FLAG_APP_INACCESSIBLE;
                                     break;
                                 default:
                                     Slog.w(TAG, "Parsed unknown flag with name: "
