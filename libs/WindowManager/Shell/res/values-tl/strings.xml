@@ -82,8 +82,6 @@
     <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Mag-double tap sa tabi ng isang app para iposisyon ito ulit"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"I-expand para sa higit pang impormasyon."</string>
-    <!-- no translation found for maximize_button_text (1650859196290301963) -->
-    <skip />
-    <!-- no translation found for close_button_text (2913281996024033299) -->
-    <skip />
+    <string name="maximize_button_text" msgid="1650859196290301963">"I-maximize"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Isara"</string>
 </resources>
