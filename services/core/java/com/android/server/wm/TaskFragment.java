@@ -96,6 +96,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.am.HostingRecord;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
@@ -103,7 +104,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -152,6 +152,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     final RootWindowContainer mRootWindowContainer;
     private final TaskFragmentOrganizerController mTaskFragmentOrganizerController;
 
+    // TODO(b/233177466): Move mMinWidth and mMinHeight to Task and remove usages in TaskFragment
     /**
      * Minimal width of this task fragment when it's resizeable. {@link #INVALID_MIN_SIZE} means it
      * should use the default minimal width.
@@ -533,6 +534,25 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a, int uid) {
         return isAllowedToEmbedActivityInUntrustedMode(a)
                 || isAllowedToEmbedActivityInTrustedMode(a, uid);
+    }
+
+    boolean smallerThanMinDimension(@NonNull ActivityRecord activity) {
+        final Rect taskFragBounds = getBounds();
+        final Task task = getTask();
+        // Don't need to check if the bounds match parent Task bounds because the fallback mechanism
+        // is to reparent the Activity to parent if minimum dimensions are not satisfied.
+        if (task == null || taskFragBounds.equals(task.getBounds())) {
+            return false;
+        }
+        final Point minDimensions = activity.getMinDimensions();
+        if (minDimensions == null) {
+            return false;
+        }
+        final int minWidth = minDimensions.x;
+        final int minHeight = minDimensions.y;
+        final boolean smaller = taskFragBounds.width() < minWidth
+                || taskFragBounds.height() < minHeight;
+        return smaller;
     }
 
     /**
@@ -1148,7 +1168,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // for the current activity to be paused.
                 final boolean isTop = this == taskDisplayArea.getFocusedRootTask();
                 mAtmService.startProcessAsync(next, false /* knownToBeDead */, isTop,
-                        isTop ? "pre-top-activity" : "pre-activity");
+                        isTop ? HostingRecord.HOSTING_TYPE_NEXT_TOP_ACTIVITY
+                                : HostingRecord.HOSTING_TYPE_NEXT_ACTIVITY);
             }
             if (lastResumed != null) {
                 lastResumed.setWillCloseOrEnterPip(true);
@@ -1754,11 +1775,12 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         mClearedTaskForReuse = false;
         mClearedTaskFragmentForPip = false;
 
-        boolean isAddingActivity = child.asActivityRecord() != null;
+        final ActivityRecord addingActivity = child.asActivityRecord();
+        final boolean isAddingActivity = addingActivity != null;
         final Task task = isAddingActivity ? getTask() : null;
 
         // If this task had any activity before we added this one.
-        boolean taskHadActivity = task != null && task.getActivity(Objects::nonNull) != null;
+        boolean taskHadActivity = task != null && task.getTopMostActivity() != null;
         // getActivityType() looks at the top child, so we need to read the type before adding
         // a new child in case the new child is on top and UNDEFINED.
         final int activityType = task != null ? task.getActivityType() : ACTIVITY_TYPE_UNDEFINED;
@@ -1779,7 +1801,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 mBackScreenshots.put(r.mActivityComponent.flattenToString(), backBuffer);
             }
             child.asActivityRecord().inHistory = true;
-            task.onDescendantActivityAdded(taskHadActivity, activityType, child.asActivityRecord());
+            task.onDescendantActivityAdded(taskHadActivity, activityType, addingActivity);
         }
     }
 
@@ -2062,9 +2084,15 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 final boolean inPipTransition = windowingMode == WINDOWING_MODE_PINNED
                         && !mTmpFullBounds.isEmpty() && mTmpFullBounds.equals(parentBounds);
                 if (WindowConfiguration.isFloating(windowingMode) && !inPipTransition) {
-                    // For floating tasks, calculate the smallest width from the bounds of the task
+                    // For floating tasks, calculate the smallest width from the bounds of the
+                    // task, because they should not be affected by insets.
                     inOutConfig.smallestScreenWidthDp = (int) (
                             Math.min(mTmpFullBounds.width(), mTmpFullBounds.height()) / density);
+                } else if (isEmbedded()) {
+                    // For embedded TFs, the smallest width should be updated. Otherwise, inherit
+                    // from the parent task would result in applications loaded wrong resource.
+                    inOutConfig.smallestScreenWidthDp =
+                            Math.min(inOutConfig.screenWidthDp, inOutConfig.screenHeightDp);
                 }
                 // otherwise, it will just inherit
             }
@@ -2171,7 +2199,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (applicationType != ACTIVITY_TYPE_UNDEFINED || !hasChild()) {
             return applicationType;
         }
-        final ActivityRecord activity = getTopNonFinishingActivity();
+        final ActivityRecord activity = getTopMostActivity();
         return activity != null ? activity.getActivityType() : getTopChild().getActivityType();
     }
 
@@ -2287,7 +2315,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     TaskFragmentInfo getTaskFragmentInfo() {
         List<IBinder> childActivities = new ArrayList<>();
         for (int i = 0; i < getChildCount(); i++) {
-            final WindowContainer wc = getChildAt(i);
+            final WindowContainer<?> wc = getChildAt(i);
             final ActivityRecord ar = wc.asActivityRecord();
             if (mTaskFragmentOrganizerUid != INVALID_UID && ar != null
                     && ar.info.processName.equals(mTaskFragmentOrganizerProcessName)
@@ -2307,7 +2335,31 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 childActivities,
                 positionInParent,
                 mClearedTaskForReuse,
-                mClearedTaskFragmentForPip);
+                mClearedTaskFragmentForPip,
+                calculateMinDimension());
+    }
+
+    /**
+     * Calculates the minimum dimensions that this TaskFragment can be resized.
+     * @see TaskFragmentInfo#getMinimumWidth()
+     * @see TaskFragmentInfo#getMinimumHeight()
+     */
+    Point calculateMinDimension() {
+        final int[] maxMinWidth = new int[1];
+        final int[] maxMinHeight = new int[1];
+
+        forAllActivities(a -> {
+            if (a.finishing) {
+                return;
+            }
+            final Point minDimensions = a.getMinDimensions();
+            if (minDimensions == null) {
+                return;
+            }
+            maxMinWidth[0] = Math.max(maxMinWidth[0], minDimensions.x);
+            maxMinHeight[0] = Math.max(maxMinHeight[0], minDimensions.y);
+        });
+        return new Point(maxMinWidth[0], maxMinHeight[0]);
     }
 
     @Nullable
