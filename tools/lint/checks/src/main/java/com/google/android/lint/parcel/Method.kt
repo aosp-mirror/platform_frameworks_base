@@ -35,4 +35,8 @@ data class Method(
             val prefix = if (params.isEmpty()) "" else "${params.joinToString(", ", "<", ">")} "
             return "$prefix$clazz.$name(${parameters.joinToString()})"
         }
+
+    val className: String by lazy {
+        clazz.split(".").last()
+    }
 }

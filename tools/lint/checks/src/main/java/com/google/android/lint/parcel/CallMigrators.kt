@@ -19,6 +19,7 @@ package com.google.android.lint.parcel
 import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.LintFix
 import com.android.tools.lint.detector.api.Location
+import com.intellij.psi.PsiArrayType
 import com.intellij.psi.PsiCallExpression
 import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiIntersectionType
@@ -26,8 +27,8 @@ import com.intellij.psi.PsiMethod
 import com.intellij.psi.PsiType
 import com.intellij.psi.PsiTypeParameter
 import com.intellij.psi.PsiWildcardType
-import org.jetbrains.kotlin.utils.addToStdlib.cast
 import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UVariable
 
@@ -42,11 +43,11 @@ abstract class CallMigrator(
 ) {
     open fun report(context: JavaContext, call: UCallExpression, method: PsiMethod) {
         val location = context.getLocation(call)
-        val itemType = getBoundingClass(context, call, method)
+        val itemType = filter(getBoundingClass(context, call, method))
         val fix = (itemType as? PsiClassType)?.let { type ->
             getParcelFix(location, this.method.name, getArgumentSuffix(type))
         }
-        val message = "Unsafe `Parcel.${this.method.name}()` API usage"
+        val message = "Unsafe `${this.method.className}.${this.method.name}()` API usage"
         context.report(SaferParcelChecker.ISSUE_UNSAFE_API_USAGE, call, location, message, fix)
     }
 
@@ -73,14 +74,14 @@ abstract class CallMigrator(
     }
 
     /**
-     * Tries to obtain the type expected by the "receiving" end given a certain {@link UExpression}.
+     * Tries to obtain the type expected by the "receiving" end given a certain {@link UElement}.
      *
      * This could be an assignment, an argument passed to a method call, to a constructor call, a
      * type cast, etc. If no receiving end is found, the type of the UExpression itself is returned.
      */
-    protected fun getReceivingType(expression: UExpression): PsiType? {
+    protected fun getReceivingType(expression: UElement): PsiType? {
         val parent = expression.uastParent
-        val type = when (parent) {
+        var type = when (parent) {
             is UCallExpression -> {
                 val i = parent.valueArguments.indexOf(expression)
                 val psiCall = parent.sourcePsi as? PsiCallExpression ?: return null
@@ -92,10 +93,13 @@ abstract class CallMigrator(
             is UExpression -> parent.getExpressionType()
             else -> null
         }
-        return filter(type ?: expression.getExpressionType())
+        if (type == null && expression is UExpression) {
+            type = expression.getExpressionType()
+        }
+        return type
     }
 
-    private fun filter(type: PsiType?): PsiType? {
+    protected fun filter(type: PsiType?): PsiType? {
         // It's important that PsiIntersectionType case is above the one that check the type in
         // rejects, because for intersect types, the canonicalText is one of the terms.
         if (type is PsiIntersectionType) {
@@ -169,7 +173,7 @@ class ContainerReturnMigrator(
     override fun getBoundingClass(
             context: JavaContext, call: UCallExpression, method: PsiMethod
     ): PsiType? {
-        val type = getReceivingType(call.uastParent as UExpression) ?: return null
+        val type = getReceivingType(call.uastParent!!) ?: return null
         return getItemType(type, container)
     }
 }
@@ -184,7 +188,7 @@ class ReturnMigrator(
     override fun getBoundingClass(
             context: JavaContext, call: UCallExpression, method: PsiMethod
     ): PsiType? {
-        return getReceivingType(call.uastParent as UExpression)
+        return getReceivingType(call.uastParent!!)
     }
 }
 
@@ -199,11 +203,27 @@ class ReturnMigratorWithClassLoader(
     override fun getBoundingClass(
             context: JavaContext, call: UCallExpression, method: PsiMethod
     ): PsiType? {
-        return getReceivingType(call.uastParent as UExpression)
+        return getReceivingType(call.uastParent!!)
     }
 
     override fun getArgumentSuffix(type: PsiClassType): String =
             "${type.rawType().canonicalText}.class.getClassLoader(), " +
                     "${type.rawType().canonicalText}.class"
 
+}
+
+/**
+ * This class derives the type to be appended by inferring the expected array type
+ * for the method result.
+ */
+class ArrayReturnMigrator(
+    method: Method,
+    rejects: Set<String> = emptySet(),
+) : CallMigrator(method, rejects) {
+    override fun getBoundingClass(
+           context: JavaContext, call: UCallExpression, method: PsiMethod
+    ): PsiType? {
+        val type = getReceivingType(call.uastParent!!)
+        return (type as? PsiArrayType)?.componentType
+    }
 }

@@ -27,20 +27,22 @@ class SaferParcelCheckerTest : LintDetectorTest() {
     override fun getDetector(): Detector = SaferParcelChecker()
 
     override fun getIssues(): List<Issue> = listOf(
-            SaferParcelChecker.ISSUE_UNSAFE_API_USAGE
+        SaferParcelChecker.ISSUE_UNSAFE_API_USAGE
     )
 
     override fun lint(): TestLintTask =
-            super.lint()
-                    .allowMissingSdk(true)
-                    // We don't do partial analysis in the platform
-                    .skipTestModes(TestMode.PARTIAL)
+        super.lint()
+            .allowMissingSdk(true)
+            // We don't do partial analysis in the platform
+            .skipTestModes(TestMode.PARTIAL)
 
-    fun testDetectUnsafeReadSerializable() {
+    /** Parcel Tests */
+
+    fun testParcelDetectUnsafeReadSerializable() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                         package test.pkg;
                         import android.os.Parcel;
                         import java.io.Serializable;
@@ -51,27 +53,27 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                             }
                         }
                         """
-                        ).indented(),
-                        *includes
-                )
-                .expectIdenticalTestModeOutput(false)
-                .run()
-                .expect(
-                        """
+                ).indented(),
+                *includes
+            )
+            .expectIdenticalTestModeOutput(false)
+            .run()
+            .expect(
+                """
                         src/test/pkg/TestClass.java:7: Warning: Unsafe Parcel.readSerializable() \
                         API usage [UnsafeParcelApi]
                                 Serializable ans = p.readSerializable();
                                                    ~~~~~~~~~~~~~~~~~~~~
                         0 errors, 1 warnings
                         """.addLineContinuation()
-                )
+            )
     }
 
-    fun testDoesNotDetectSafeReadSerializable() {
+    fun testParcelDoesNotDetectSafeReadSerializable() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                         package test.pkg;
                         import android.os.Parcel;
                         import java.io.Serializable;
@@ -82,18 +84,18 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                             }
                         }
                         """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect("No warnings.")
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
     }
 
-    fun testDetectUnsafeReadArrayList() {
+    fun testParcelDetectUnsafeReadArrayList() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                         package test.pkg;
                         import android.os.Parcel;
 
@@ -103,26 +105,26 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                             }
                         }
                         """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect(
-                        """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
                         src/test/pkg/TestClass.java:6: Warning: Unsafe Parcel.readArrayList() API \
                         usage [UnsafeParcelApi]
                                 ArrayList ans = p.readArrayList(null);
                                                 ~~~~~~~~~~~~~~~~~~~~~
                         0 errors, 1 warnings
                         """.addLineContinuation()
-                )
+            )
     }
 
-    fun testDoesNotDetectSafeReadArrayList() {
+    fun testParcelDoesNotDetectSafeReadArrayList() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -133,18 +135,18 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect("No warnings.")
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
     }
 
-    fun testDetectUnsafeReadList() {
+    fun testParcelDetectUnsafeReadList() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -157,26 +159,26 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect(
-                        """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
                         src/test/pkg/TestClass.java:9: Warning: Unsafe Parcel.readList() API usage \
                         [UnsafeParcelApi]
                                 p.readList(list, null);
                                 ~~~~~~~~~~~~~~~~~~~~~~
                         0 errors, 1 warnings
                         """.addLineContinuation()
-                )
+            )
     }
 
-    fun testDoesNotDetectSafeReadList() {
+    fun testDParceloesNotDetectSafeReadList() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -189,18 +191,18 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect("No warnings.")
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
     }
 
-    fun testDetectUnsafeReadParcelable() {
+    fun testParcelDetectUnsafeReadParcelable() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -211,26 +213,26 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect(
-                        """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
                         src/test/pkg/TestClass.java:7: Warning: Unsafe Parcel.readParcelable() API \
                         usage [UnsafeParcelApi]
                                 Intent ans = p.readParcelable(null);
                                              ~~~~~~~~~~~~~~~~~~~~~~
                         0 errors, 1 warnings
                         """.addLineContinuation()
-                )
+            )
     }
 
-    fun testDoesNotDetectSafeReadParcelable() {
+    fun testParcelDoesNotDetectSafeReadParcelable() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -241,18 +243,18 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect("No warnings.")
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
     }
 
-    fun testDetectUnsafeReadParcelableList() {
+    fun testParcelDetectUnsafeReadParcelableList() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -265,26 +267,26 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect(
-                        """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
                         src/test/pkg/TestClass.java:9: Warning: Unsafe Parcel.readParcelableList() \
                         API usage [UnsafeParcelApi]
                                 List<Intent> ans = p.readParcelableList(list, null);
                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         0 errors, 1 warnings
                         """.addLineContinuation()
-                )
+            )
     }
 
-    fun testDoesNotDetectSafeReadParcelableList() {
+    fun testParcelDoesNotDetectSafeReadParcelableList() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -298,18 +300,18 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect("No warnings.")
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
     }
 
-    fun testDetectUnsafeReadSparseArray() {
+    fun testParcelDetectUnsafeReadSparseArray() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -321,26 +323,26 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect(
-                        """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
                         src/test/pkg/TestClass.java:8: Warning: Unsafe Parcel.readSparseArray() API\
                          usage [UnsafeParcelApi]
                                 SparseArray<Intent> ans = p.readSparseArray(null);
                                                           ~~~~~~~~~~~~~~~~~~~~~~~
                         0 errors, 1 warnings
                         """.addLineContinuation()
-                )
+            )
     }
 
-    fun testDoesNotDetectSafeReadSparseArray() {
+    fun testParcelDoesNotDetectSafeReadSparseArray() {
         lint()
-                .files(
-                        java(
-                                """
+            .files(
+                java(
+                    """
                                 package test.pkg;
                                 import android.content.Intent;
                                 import android.os.Parcel;
@@ -353,21 +355,383 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                                     }
                                 }
                                 """
-                        ).indented(),
-                        *includes
-                )
-                .run()
-                .expect("No warnings.")
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
     }
+
+    fun testParcelDetectUnsafeReadSArray() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Parcel;
+
+                                public class TestClass {
+                                    private TestClass(Parcel p) {
+                                        Intent[] ans = p.readArray(null);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
+                        src/test/pkg/TestClass.java:7: Warning: Unsafe Parcel.readArray() API\
+                         usage [UnsafeParcelApi]
+                                Intent[] ans = p.readArray(null);
+                                               ~~~~~~~~~~~~~~~~~
+                        0 errors, 1 warnings
+                        """.addLineContinuation()
+            )
+    }
+
+    fun testParcelDoesNotDetectSafeReadArray() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Parcel;
+
+                                public class TestClass {
+                                    private TestClass(Parcel p) {
+                                        Intent[] ans = p.readArray(null, Intent.class);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
+    }
+
+    fun testParcelDetectUnsafeReadParcelableSArray() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Parcel;
+
+                                public class TestClass {
+                                    private TestClass(Parcel p) {
+                                        Intent[] ans = p.readParcelableArray(null);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
+                        src/test/pkg/TestClass.java:7: Warning: Unsafe Parcel.readParcelableArray() API\
+                         usage [UnsafeParcelApi]
+                                Intent[] ans = p.readParcelableArray(null);
+                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                        0 errors, 1 warnings
+                        """.addLineContinuation()
+            )
+    }
+
+    fun testParcelDoesNotDetectSafeReadParcelableArray() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Parcel;
+
+                                public class TestClass {
+                                    private TestClass(Parcel p) {
+                                        Intent[] ans = p.readParcelableArray(null, Intent.class);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
+    }
+
+    /** Bundle Tests */
+
+    fun testBundleDetectUnsafeGetParcelable() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Bundle;
+
+                                public class TestClass {
+                                    private TestClass(Bundle b) {
+                                        Intent ans = b.getParcelable("key");
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
+                    src/test/pkg/TestClass.java:7: Warning: Unsafe Bundle.getParcelable() API usage [UnsafeParcelApi]
+                            Intent ans = b.getParcelable("key");
+                                         ~~~~~~~~~~~~~~~~~~~~~~
+                    0 errors, 1 warnings
+                        """.addLineContinuation()
+            )
+    }
+
+    fun testBundleDoesNotDetectSafeGetParcelable() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Bundle;
+
+                                public class TestClass {
+                                    private TestClass(Bundle b) {
+                                        Intent ans = b.getParcelable("key", Intent.class);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
+    }
+
+    fun testBundleDetectUnsafeGetParcelableArrayList() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Bundle;
+
+                                public class TestClass {
+                                    private TestClass(Bundle b) {
+                                        ArrayList<Intent> ans = b.getParcelableArrayList("key");
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
+                    src/test/pkg/TestClass.java:7: Warning: Unsafe Bundle.getParcelableArrayList() API usage [UnsafeParcelApi]
+                            ArrayList<Intent> ans = b.getParcelableArrayList("key");
+                                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    0 errors, 1 warnings
+                        """.addLineContinuation()
+            )
+    }
+
+    fun testBundleDoesNotDetectSafeGetParcelableArrayList() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Bundle;
+
+                                public class TestClass {
+                                    private TestClass(Bundle b) {
+                                        ArrayList<Intent> ans = b.getParcelableArrayList("key", Intent.class);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
+    }
+
+    fun testBundleDetectUnsafeGetParcelableArray() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Bundle;
+
+                                public class TestClass {
+                                    private TestClass(Bundle b) {
+                                        Intent[] ans = b.getParcelableArray("key");
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
+                    src/test/pkg/TestClass.java:7: Warning: Unsafe Bundle.getParcelableArray() API usage [UnsafeParcelApi]
+                            Intent[] ans = b.getParcelableArray("key");
+                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    0 errors, 1 warnings
+                        """.addLineContinuation()
+            )
+    }
+
+    fun testBundleDoesNotDetectSafeGetParcelableArray() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Bundle;
+
+                                public class TestClass {
+                                    private TestClass(Bundle b) {
+                                        Intent[] ans = b.getParcelableArray("key", Intent.class);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
+    }
+
+    fun testBundleDetectUnsafeGetSparseParcelableArray() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Bundle;
+
+                                public class TestClass {
+                                    private TestClass(Bundle b) {
+                                        SparseArray<Intent> ans = b.getSparseParcelableArray("key");
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
+                    src/test/pkg/TestClass.java:7: Warning: Unsafe Bundle.getSparseParcelableArray() API usage [UnsafeParcelApi]
+                            SparseArray<Intent> ans = b.getSparseParcelableArray("key");
+                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    0 errors, 1 warnings
+                        """.addLineContinuation()
+            )
+    }
+
+    fun testBundleDoesNotDetectSafeGetSparseParcelableArray() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+                                import android.os.Bundle;
+
+                                public class TestClass {
+                                    private TestClass(Bundle b) {
+                                        SparseArray<Intent> ans = b.getSparseParcelableArray("key", Intent.class);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
+    }
+
+    /** Intent Tests */
+
+    fun testIntentDetectUnsafeGetParcelableExtra() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+
+                                public class TestClass {
+                                    private TestClass(Intent i) {
+                                        Intent ans = i.getParcelableExtra("name");
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect(
+                """
+                    src/test/pkg/TestClass.java:6: Warning: Unsafe Intent.getParcelableExtra() API usage [UnsafeParcelApi]
+                            Intent ans = i.getParcelableExtra("name");
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    0 errors, 1 warnings
+                        """.addLineContinuation()
+            )
+    }
+
+    fun testIntentDoesNotDetectSafeGetParcelableExtra() {
+        lint()
+            .files(
+                java(
+                    """
+                                package test.pkg;
+                                import android.content.Intent;
+
+                                public class TestClass {
+                                    private TestClass(Intent i) {
+                                        Intent ans = i.getParcelableExtra("name", Intent.class);
+                                    }
+                                }
+                                """
+                ).indented(),
+                *includes
+            )
+            .run()
+            .expect("No warnings.")
+    }
+
 
     /** Stubs for classes used for testing */
 
 
     private val includes =
-            arrayOf(
-                manifest().minSdk("Tiramisu"),
-                java(
-                        """
+        arrayOf(
+            manifest().minSdk("Tiramisu"),
+            java(
+                """
                         package android.os;
                         import java.util.ArrayList;
                         import java.util.List;
@@ -375,7 +739,7 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                         import java.util.HashMap;
 
                         public final class Parcel {
-                            // Deprecateds
+                            // Deprecated
                             public Object[] readArray(ClassLoader loader) { return null; }
                             public ArrayList readArrayList(ClassLoader loader) { return null; }
                             public HashMap readHashMap(ClassLoader loader) { return null; }
@@ -402,26 +766,57 @@ class SaferParcelCheckerTest : LintDetectorTest() {
                             public <T> SparseArray<T> readSparseArray(ClassLoader loader, Class<? extends T> clazz) { return null; }
                         }
                         """
-                ).indented(),
-                java(
+            ).indented(),
+            java(
+                """
+                        package android.os;
+                        import java.util.ArrayList;
+                        import java.util.List;
+                        import java.util.Map;
+                        import java.util.HashMap;
+
+                        public final class Bundle {
+                            // Deprecated
+                            public <T extends Parcelable> T getParcelable(String key) { return  null; }
+                            public <T extends Parcelable> ArrayList<T> getParcelableArrayList(String key) { return null; }
+                            public Parcelable[] getParcelableArray(String key) { return null; }
+                            public <T extends Parcelable> SparseArray<T> getSparseParcelableArray(String key) { return null; }
+
+                            // Replacements
+                            public <T> T getParcelable(String key, Class<T> clazz) { return  null; }
+                            public <T> ArrayList<T> getParcelableArrayList(String key, Class<? extends T> clazz) { return null; }
+                            public <T> T[] getParcelableArray(String key, Class<T> clazz) { return null; }
+                            public <T> SparseArray<T> getSparseParcelableArray(String key, Class<? extends T> clazz) { return null; }
+
+                        }
                         """
+            ).indented(),
+            java(
+                """
                         package android.os;
                         public interface Parcelable {}
                         """
-                ).indented(),
-                java(
-                        """
+            ).indented(),
+            java(
+                """
                         package android.content;
-                        public class Intent implements Parcelable, Cloneable {}
+                        public class Intent implements Parcelable, Cloneable {
+                            // Deprecated
+                            public <T extends Parcelable> T getParcelableExtra(String name) { return null; }
+
+                            // Replacements
+                            public <T> T getParcelableExtra(String name, Class<T> clazz) { return null; }
+
+                        }
                         """
-                ).indented(),
-                java(
-                        """
+            ).indented(),
+            java(
+                """
                         package android.util;
                         public class SparseArray<E> implements Cloneable {}
                         """
-                ).indented(),
-            )
+            ).indented(),
+        )
 
     // Substitutes "backslash + new line" with an empty string to imitate line continuation
     private fun String.addLineContinuation(): String = this.trimIndent().replace("\\\n", "")
