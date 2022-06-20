@@ -3360,9 +3360,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             assertThat(dpmi.isActiveSupervisionApp(uid)).isTrue();
             assertThat(dpm.getProfileOwnerOrDeviceOwnerSupervisionComponent(user))
                         .isEqualTo(admin1);
+            assertThat(dpm.isSupervisionComponent(admin1)).isTrue();
         } else {
             assertThat(dpmi.isActiveSupervisionApp(uid)).isFalse();
             assertThat(dpm.getProfileOwnerOrDeviceOwnerSupervisionComponent(user)).isNull();
+            assertThat(dpm.isSupervisionComponent(admin1)).isFalse();
         }
     }
 
