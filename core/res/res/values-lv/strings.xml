@@ -637,7 +637,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Sazinieties ar remonta pakalpojumu sniedzēju."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nevar izveidot sejas modeli. Mēģiniet vēlreiz."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Pārāk spilgts. Izmēģiniet maigāku apgaismojumu."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Izmēģiniet spožāku apgaismojumu."</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Izmēģiniet spožāku apgaismojumu"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Pārvietojiet tālruni tālāk."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Pārvietojiet tālruni tuvāk."</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Paceliet tālruni augstāk."</string>
@@ -650,13 +650,13 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Lūdzu, atkārtoti reģistrējiet savu seju."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Nevar atpazīt seju. Mēģiniet vēlreiz."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Nedaudz mainiet galvas pozīciju."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Skatieties tieši uz tālruni."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Skatieties tieši uz tālruni."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Skatieties tieši uz tālruni."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Skatieties tieši uz tālruni"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Skatieties tieši uz tālruni"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Skatieties tieši uz tālruni"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Noņemiet visu, kas aizsedz jūsu seju."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Notīriet ekrāna augšdaļu, tostarp melno joslu."</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Sejai ir jābūt pilnībā redzamai."</string>
-    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Sejai ir jābūt pilnībā redzamai."</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Sejai ir jābūt pilnībā redzamai"</string>
+    <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Sejai ir jābūt pilnībā redzamai"</string>
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nevar izveidot sejas modeli. Mēģiniet vēlreiz."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Konstatētas tumšas brilles. Sejai ir jābūt pilnībā redzamai."</string>
     <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Konstatēts sejas aizsegs. Sejai ir jābūt pilnībā redzamai."</string>

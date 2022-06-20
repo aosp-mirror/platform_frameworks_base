@@ -644,7 +644,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Утсаа зүүн тийш болгоно уу"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Утсаа баруун тийш болгоно уу"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Төхөөрөмж рүүгээ аль болох эгц харна уу."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Таны нүүрийг харагдахгүй байна. Утсаа нүднийхээ түвшинд барина уу."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Таны царай харагдахгүй байна. Утсаа нүднийхээ түвшинд барина уу."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Хэт их хөдөлгөөнтэй байна. Утсаа хөдөлгөөнгүй барина уу."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Нүүрээ дахин бүртгүүлнэ үү."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Царайг танихгүй байна. Дахин оролдоно уу."</string>

@@ -638,7 +638,7 @@
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Muito iluminado. Diminua a iluminação."</string>
     <string name="face_acquired_too_dark" msgid="7919016380747701228">"Use uma iluminação mais intensa"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Afaste o smartphone"</string>
-    <string name="face_acquired_too_far" msgid="2922278214231064859">"Aproxime o smartphone"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Aproxime o smartphone do seu rosto"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Mova o smartphone para cima"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Mova o smartphone para baixo"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Mova o smartphone para a esquerda"</string>
@@ -649,9 +649,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Registre seu rosto novamente."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Não foi possível reconhecer o rosto Tente de novo."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Mude a posição da cabeça ligeiramente"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Olhe mais diretamente para o smartphone"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Olhe mais diretamente para o smartphone"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Olhe mais diretamente para o smartphone"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Olhe diretamente para o smartphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Olhe diretamente para o smartphone"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Olhe diretamente para o smartphone"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Remova tudo que esteja ocultando seu rosto."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpe a parte superior da tela, inclusive a barra preta"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Seu rosto precisa estar completamente visível"</string>
