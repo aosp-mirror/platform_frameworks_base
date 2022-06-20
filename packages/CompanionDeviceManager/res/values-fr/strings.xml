@@ -19,7 +19,7 @@
     <string name="app_label" msgid="4470785958457506021">"Gestionnaire d\'appareils associés"</string>
     <string name="confirmation_title" msgid="3785000297483688997">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à accéder à votre &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"montre"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Sélectionner le/la <xliff:g id="PROFILE_NAME">%1$s</xliff:g> qui sera géré(e) par &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Sélectionnez le/la <xliff:g id="PROFILE_NAME">%1$s</xliff:g> qui sera géré(e) par &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="3002344206574997652">"Cette appli est nécessaire pour gérer votre <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> aura l\'autorisation d\'interagir avec vos notifications et d\'accéder au téléphone, aux SMS, aux contacts, à l\'agenda, aux journaux d\'appels et aux appareils à proximité."</string>
     <string name="permission_apps" msgid="6142133265286656158">"Applis"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Diffuser en streaming les applis de votre téléphone"</string>
