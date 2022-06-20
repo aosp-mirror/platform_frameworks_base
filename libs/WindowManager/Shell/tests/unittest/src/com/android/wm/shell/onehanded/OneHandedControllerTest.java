@@ -33,7 +33,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.om.IOverlayManager;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -41,12 +40,10 @@ import android.testing.AndroidTestingRunner;
 import android.util.ArrayMap;
 import android.view.Display;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -87,15 +84,9 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
     @Mock
-    InteractionJankMonitor mMockJankMonitor;
-    @Mock
-    IOverlayManager mMockOverlayManager;
-    @Mock
     TaskStackListenerImpl mMockTaskStackListener;
     @Mock
     ShellExecutor mMockShellMainExecutor;
-    @Mock
-    SurfaceControl mMockLeash;
     @Mock
     Handler mMockShellMainHandler;
 
@@ -140,9 +131,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mOneHandedAccessibilityUtil,
                 mSpiedTimeoutHandler,
                 mSpiedTransitionState,
-                mMockJankMonitor,
                 mMockUiEventLogger,
-                mMockOverlayManager,
                 mMockTaskStackListener,
                 mMockShellMainExecutor,
                 mMockShellMainHandler)
