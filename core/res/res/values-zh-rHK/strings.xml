@@ -636,7 +636,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"請諮詢維修服務供應商。"</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"無法建立面部模型，請再試一次。"</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"影像太亮。請嘗試在更暗的環境下使用。"</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"請嘗試在更明亮的環境下使用"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"請試用更充足的光線"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"請將手機移遠一點"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"請將手機移近一點"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"請將手機向上移"</string>
@@ -644,17 +644,17 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"請將手機向左移"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"請將手機向右移"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"請以更直視的角度看著裝置。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到您的臉。將手機保持與視線同高。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到面孔，請將手機放在視線水平。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"裝置不夠穩定。請拿穩手機。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊臉孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識面孔，請再試一次。"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"請稍微變更頭部的位置"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"盡可能直視手機"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"盡可能直視手機"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"請正面望向手機"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"盡可能直視手機"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"移除遮住您臉孔的任何東西。"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"請清理螢幕頂部，包括黑色列"</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"您必須展示整個面孔。"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"必須展示整個面孔"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"您必須展示整個面孔。"</string>
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"無法建立面部模型，請再試一次。"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"偵測到深色眼鏡。您必須展示整個面孔。"</string>

@@ -636,7 +636,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Vakashela umhlinzeki wokulungisa."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ayikwazi ukusungula imodeli yobuso bakho. Zama futhi."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Kukhanya kakhulu. Zama ukukhanya okuthambile."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Zama ukukhanyisa okukhanyayo"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Zama ukukhanyisa okukhudlwana"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Yisa ifoni kude"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Sondeza ifoni eduze"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Yisa ifoni phezulu"</string>
