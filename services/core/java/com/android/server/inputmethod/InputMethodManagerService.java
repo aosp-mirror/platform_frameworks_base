@@ -134,9 +134,7 @@ import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.accessibility.AccessibilityManager;
-import android.view.autofill.AutofillId;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
@@ -157,7 +155,6 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
-import com.android.internal.inputmethod.IInlineSuggestionsResponseCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
@@ -282,39 +279,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private final Set<String> mNonPreemptibleInputMethods;
 
-    private static final class CreateInlineSuggestionsRequest {
-        @NonNull final InlineSuggestionsRequestInfo mRequestInfo;
-        @NonNull final IInlineSuggestionsRequestCallback mCallback;
-        @NonNull final String mPackageName;
-
-        CreateInlineSuggestionsRequest(
-                @NonNull InlineSuggestionsRequestInfo requestInfo,
-                @NonNull IInlineSuggestionsRequestCallback callback,
-                @NonNull String packageName) {
-            mRequestInfo = requestInfo;
-            mCallback = callback;
-            mPackageName = packageName;
-        }
-    }
-
-    /**
-     * If a request to create inline autofill suggestions comes in while the IME is unbound
-     * due to {@link #mPreventImeStartupUnlessTextEditor}, this is where it is stored, so
-     * that it may be fulfilled once the IME rebinds.
-     */
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    private CreateInlineSuggestionsRequest mPendingInlineSuggestionsRequest;
-
-    /**
-     * A callback into the autofill service obtained from the latest call to
-     * {@link #onCreateInlineSuggestionsRequestLocked}, which can be used to invalidate an
-     * autofill session in case the IME process dies.
-     */
-    @GuardedBy("ImfLock.class")
-    @Nullable
-    private IInlineSuggestionsRequestCallback mInlineSuggestionsRequestCallback;
-
     @UserIdInt
     private int mLastSwitchUserId;
 
@@ -338,7 +302,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
     private final InputMethodMenuController mMenuController;
-    private final InputMethodBindingController mBindingController;
+    @NonNull private final InputMethodBindingController mBindingController;
+    @NonNull private final AutofillSuggestionsController mAutofillController;
 
     // TODO(b/219056452): Use AccessibilityManagerInternal instead.
     private final AccessibilityManager mAccessibilityManager;
@@ -717,7 +682,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * identify it in the future.
      */
     @GuardedBy("ImfLock.class")
-    private IBinder getCurTokenLocked() {
+    @Nullable
+    IBinder getCurTokenLocked() {
         return mBindingController.getCurToken();
     }
 
@@ -758,7 +724,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     @Nullable
-    private IInputMethodInvoker getCurMethodLocked() {
+    IInputMethodInvoker getCurMethodLocked() {
         return mBindingController.getCurMethod();
     }
 
@@ -1794,6 +1760,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 mSettings, context);
         mMenuController = new InputMethodMenuController(this);
         mBindingController = new InputMethodBindingController(this);
+        mAutofillController = new AutofillSuggestionsController(this);
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
         mNonPreemptibleInputMethods = Sets.newHashSet(mRes.getStringArray(
@@ -2179,148 +2146,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    private void onCreateInlineSuggestionsRequestLocked(@UserIdInt int userId,
-            InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback callback,
-            boolean touchExplorationEnabled) {
-        clearPendingInlineSuggestionsRequestLocked();
-        mInlineSuggestionsRequestCallback = callback;
-        final InputMethodInfo imi = mMethodMap.get(getSelectedMethodIdLocked());
-        try {
-            if (userId == mSettings.getCurrentUserId()
-                    && imi != null && isInlineSuggestionsEnabled(imi, touchExplorationEnabled)) {
-                mPendingInlineSuggestionsRequest = new CreateInlineSuggestionsRequest(
-                        requestInfo, callback, imi.getPackageName());
-                if (getCurMethodLocked() != null) {
-                    // In the normal case when the IME is connected, we can make the request here.
-                    performOnCreateInlineSuggestionsRequestLocked();
-                } else {
-                    // Otherwise, the next time the IME connection is established,
-                    // InputMethodBindingController.mMainConnection#onServiceConnected() will call
-                    // into #performOnCreateInlineSuggestionsRequestLocked() to make the request.
-                    if (DEBUG) {
-                        Slog.d(TAG, "IME not connected. Delaying inline suggestions request.");
-                    }
-                }
-            } else {
-                callback.onInlineSuggestionsUnsupported();
-            }
-        } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
-        }
-    }
-
-    @GuardedBy("ImfLock.class")
     void performOnCreateInlineSuggestionsRequestLocked() {
-        if (mPendingInlineSuggestionsRequest == null) {
-            return;
-        }
-        IInputMethodInvoker curMethod = getCurMethodLocked();
-        if (DEBUG) {
-            Slog.d(TAG, "Performing onCreateInlineSuggestionsRequest. mCurMethod = " + curMethod);
-        }
-        if (curMethod != null) {
-            final IInlineSuggestionsRequestCallback callback =
-                    new InlineSuggestionsRequestCallbackDecorator(
-                            mPendingInlineSuggestionsRequest.mCallback,
-                            mPendingInlineSuggestionsRequest.mPackageName,
-                            mCurTokenDisplayId, getCurTokenLocked(), this);
-            curMethod.onCreateInlineSuggestionsRequest(
-                    mPendingInlineSuggestionsRequest.mRequestInfo, callback);
-        } else {
-            Slog.w(TAG, "No IME connected! Abandoning inline suggestions creation request.");
-        }
-        clearPendingInlineSuggestionsRequestLocked();
-    }
-
-    @GuardedBy("ImfLock.class")
-    private void clearPendingInlineSuggestionsRequestLocked() {
-        mPendingInlineSuggestionsRequest = null;
-    }
-
-    private static boolean isInlineSuggestionsEnabled(InputMethodInfo imi,
-            boolean touchExplorationEnabled) {
-        return imi.isInlineSuggestionsEnabled()
-                && (!touchExplorationEnabled
-                    || imi.supportsInlineSuggestionsWithTouchExploration());
-    }
-
-    /**
-     * The decorator which validates the host package name in the
-     * {@link InlineSuggestionsRequest} argument to make sure it matches the IME package name.
-     */
-    private static final class InlineSuggestionsRequestCallbackDecorator
-            extends IInlineSuggestionsRequestCallback.Stub {
-        @NonNull
-        private final IInlineSuggestionsRequestCallback mCallback;
-        @NonNull
-        private final String mImePackageName;
-
-        private final int mImeDisplayId;
-
-        @NonNull
-        private final IBinder mImeToken;
-        @NonNull
-        private final InputMethodManagerService mImms;
-
-        InlineSuggestionsRequestCallbackDecorator(
-                @NonNull IInlineSuggestionsRequestCallback callback, @NonNull String imePackageName,
-                int displayId, @NonNull IBinder imeToken, @NonNull InputMethodManagerService imms) {
-            mCallback = callback;
-            mImePackageName = imePackageName;
-            mImeDisplayId = displayId;
-            mImeToken = imeToken;
-            mImms = imms;
-        }
-
-        @Override
-        public void onInlineSuggestionsUnsupported() throws RemoteException {
-            mCallback.onInlineSuggestionsUnsupported();
-        }
-
-        @Override
-        public void onInlineSuggestionsRequest(InlineSuggestionsRequest request,
-                IInlineSuggestionsResponseCallback callback)
-                throws RemoteException {
-            if (!mImePackageName.equals(request.getHostPackageName())) {
-                throw new SecurityException(
-                        "Host package name in the provide request=[" + request.getHostPackageName()
-                                + "] doesn't match the IME package name=[" + mImePackageName
-                                + "].");
-            }
-            request.setHostDisplayId(mImeDisplayId);
-            mImms.setCurHostInputToken(mImeToken, request.getHostInputToken());
-            mCallback.onInlineSuggestionsRequest(request, callback);
-        }
-
-        @Override
-        public void onInputMethodStartInput(AutofillId imeFieldId) throws RemoteException {
-            mCallback.onInputMethodStartInput(imeFieldId);
-        }
-
-        @Override
-        public void onInputMethodShowInputRequested(boolean requestResult) throws RemoteException {
-            mCallback.onInputMethodShowInputRequested(requestResult);
-        }
-
-        @Override
-        public void onInputMethodStartInputView() throws RemoteException {
-            mCallback.onInputMethodStartInputView();
-        }
-
-        @Override
-        public void onInputMethodFinishInputView() throws RemoteException {
-            mCallback.onInputMethodFinishInputView();
-        }
-
-        @Override
-        public void onInputMethodFinishInput() throws RemoteException {
-            mCallback.onInputMethodFinishInput();
-        }
-
-        @Override
-        public void onInlineSuggestionsSessionInvalidated() throws RemoteException {
-            mCallback.onInlineSuggestionsSessionInvalidated();
-        }
+        mAutofillController.performOnCreateInlineSuggestionsRequest();
     }
 
     /**
@@ -2794,13 +2621,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     void invalidateAutofillSessionLocked() {
-        if (mInlineSuggestionsRequestCallback != null) {
-            try {
-                mInlineSuggestionsRequestCallback.onInlineSuggestionsSessionInvalidated();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Cannot invalidate autofill session.", e);
-            }
-        }
+        mAutofillController.invalidateAutofillSession();
     }
 
     @GuardedBy("ImfLock.class")
@@ -5511,7 +5332,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             boolean touchExplorationEnabled = mAccessibilityManager.isTouchExplorationEnabled();
 
             synchronized (ImfLock.class) {
-                onCreateInlineSuggestionsRequestLocked(userId, requestInfo, cb,
+                mAutofillController.onCreateInlineSuggestionsRequest(userId, requestInfo, cb,
                         touchExplorationEnabled);
             }
         }

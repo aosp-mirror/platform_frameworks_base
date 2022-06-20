@@ -77,7 +77,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") @Nullable private Intent mCurIntent;
     @GuardedBy("ImfLock.class") @Nullable private IInputMethodInvoker mCurMethod;
     @GuardedBy("ImfLock.class") private int mCurMethodUid = Process.INVALID_UID;
-    @GuardedBy("ImfLock.class") private IBinder mCurToken;
+    @GuardedBy("ImfLock.class") @Nullable private IBinder mCurToken;
     @GuardedBy("ImfLock.class") private int mCurSeq;
     @GuardedBy("ImfLock.class") private boolean mVisibleBound;
     private boolean mSupportsStylusHw;
@@ -173,6 +173,7 @@ final class InputMethodBindingController {
      * identify it in the future.
      */
     @GuardedBy("ImfLock.class")
+    @Nullable
     IBinder getCurToken() {
         return mCurToken;
     }
