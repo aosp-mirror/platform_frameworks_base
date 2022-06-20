@@ -4475,13 +4475,11 @@ public class ComputerEngine implements Computer {
         if (p == null) {
             return false;
         }
-        final PackageStateInternal ps = getPackageStateInternal(p.getPackageName());
-        if (ps == null) {
-            return false;
-        }
         final int callingUid = Binder.getCallingUid();
         final int callingUserId = UserHandle.getUserId(callingUid);
-        if (shouldFilterApplication(ps, callingUid, callingUserId)) {
+        final PackageStateInternal ps = getPackageStateInternal(p.getPackageName());
+        if (ps == null
+                || shouldFilterApplicationIncludingUninstalled(ps, callingUid, callingUserId)) {
             return false;
         }
         switch (type) {
@@ -5571,7 +5569,7 @@ public class ComputerEngine implements Computer {
         final PackageStateInternal packageState =
                 getPackageStateInternal(component.getPackageName());
         return packageState != null && !shouldFilterApplication(packageState, callingUid,
-                component, TYPE_UNKNOWN, userId);
+                component, TYPE_UNKNOWN, userId, true /* filterUninstall */);
     }
 
     @Override
@@ -5615,9 +5613,9 @@ public class ComputerEngine implements Computer {
         boolean throwException = sourceSetting == null || targetSetting == null;
         if (!throwException) {
             final boolean filterSource =
-                    shouldFilterApplication(sourceSetting, callingUid, userId);
+                    shouldFilterApplicationIncludingUninstalled(sourceSetting, callingUid, userId);
             final boolean filterTarget =
-                    shouldFilterApplication(targetSetting, callingUid, userId);
+                    shouldFilterApplicationIncludingUninstalled(targetSetting, callingUid, userId);
             // The caller must have visibility of the both packages
             throwException = filterSource || filterTarget;
         }
