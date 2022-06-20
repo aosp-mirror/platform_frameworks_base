@@ -5412,7 +5412,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     SurfaceControl[] findRoundedCornerOverlays() {
         List<SurfaceControl> roundedCornerOverlays = new ArrayList<>();
         for (WindowToken token : mTokenMap.values()) {
-            if (token.mRoundedCornerOverlay) {
+            if (token.mRoundedCornerOverlay && token.isVisible()) {
                 roundedCornerOverlays.add(token.mSurfaceControl);
             }
         }
