@@ -301,6 +301,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     public void putAll(Bundle bundle) {
         unparcel();
         bundle.unparcel();
+        mOwnsLazyValues = false;
+        bundle.mOwnsLazyValues = false;
         mMap.putAll(bundle.mMap);
 
         // FD state is now known if and only if both bundles already knew
