@@ -3921,7 +3921,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClient.resized(mClientWindowFrames, reportDraw, mLastReportedConfiguration,
                     getCompatInsetsState(), forceRelayout, alwaysConsumeSystemBars, displayId,
                     mSyncSeqId, resizeMode);
-            if (drawPending && prevRotation != mLastReportedConfiguration
+            if (drawPending && prevRotation >= 0 && prevRotation != mLastReportedConfiguration
                     .getMergedConfiguration().windowConfiguration.getRotation()) {
                 mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
                 ProtoLog.v(WM_DEBUG_ORIENTATION,
