@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Мәтін көшірілді."</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Сурет көшірілді."</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Мазмұн көшірілді."</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Буфер редакторы"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Буфер"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Суретті алдын ала көру"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"өзгерту"</string>
     <string name="add" msgid="81036585205287996">"Қосу"</string>
     <string name="manage_users" msgid="1823875311934643849">"Пайдаланушыларды басқару"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Бұл хабарландыруды бөлінген экранға сүйреп апару мүмкін емес."</string>
