@@ -2698,9 +2698,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * will be applied.
      */
     void scheduleAnimation() {
-        if (mParent != null) {
-            mParent.scheduleAnimation();
-        }
+        mWmService.scheduleAnimationLocked();
     }
 
     /**

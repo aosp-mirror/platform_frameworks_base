@@ -1237,11 +1237,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     @Override
-    void scheduleAnimation() {
-        mWmService.scheduleAnimationLocked();
-    }
-
-    @Override
     protected void removeChild(DisplayContent dc) {
         super.removeChild(dc);
         if (mTopFocusedDisplayId == dc.getDisplayId()) {
