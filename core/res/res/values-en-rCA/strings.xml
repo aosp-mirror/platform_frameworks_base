@@ -81,8 +81,8 @@
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Emergency calling unavailable"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"No voice service"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"No voice service or emergency calling"</string>
-    <string name="RestrictedStateContent" msgid="7693575344608618926">"Temporarily turned off by your operator"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Temporarily turned off by your operator for SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="RestrictedStateContent" msgid="7693575344608618926">"Temporarily turned off by your carrier"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Temporarily turned off by your carrier for SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Can’t reach mobile network"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Try changing preferred network. Tap to change."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Emergency calling unavailable"</string>
@@ -124,10 +124,10 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"Searching for Service"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"Couldn’t set up Wi‑Fi calling"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"To make calls and send messages over Wi-Fi, first ask your operator to set up this service. Then turn on Wi-Fi calling again from Settings. (Error code: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"To make calls and send messages over Wi-Fi, first ask your carrier to set up this service. Then turn on Wi-Fi calling again from Settings. (Error code: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="4795145070505729156">"Issue registering Wi‑Fi calling with your operator: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+    <item msgid="4795145070505729156">"Issue registering Wi‑Fi calling with your carrier: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
     <!-- no translation found for wfcSpnFormat_spn (2982505428519096311) -->
     <skip />
@@ -193,7 +193,7 @@
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"Too many password attempts"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Admin relinquished device for personal use"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Device is managed"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"Your organisation manages this device and may monitor network traffic. Tap for details."</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"Your organization manages this device and may monitor network traffic. Tap for details."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps can access your location"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Contact your IT admin to find out more"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"Geofencing service"</string>
@@ -205,7 +205,7 @@
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS time update service"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Music recognition manager service"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Your device will be erased"</string>
-    <string name="factory_reset_message" msgid="2657049595153992213">"The admin app can\'t be used. Your device will now be erased.\n\nIf you have questions, contact your organisation\'s admin."</string>
+    <string name="factory_reset_message" msgid="2657049595153992213">"The admin app can\'t be used. Your device will now be erased.\n\nIf you have questions, contact your organization\'s admin."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printing disabled by <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Turn on your work profile"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Your personal apps are blocked until you turn on your work profile"</string>
@@ -703,8 +703,8 @@
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"Allows the holder to bind to the top-level interface of a condition provider service. Should never be needed for normal apps."</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"bind to a dream service"</string>
     <string name="permdesc_bindDreamService" msgid="9129615743300572973">"Allows the holder to bind to the top-level interface of a dream service. Should never be needed for normal apps."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"invoke the operator-provided configuration app"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"Allows the holder to invoke the operator-provided configuration app. Should never be needed for normal apps."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="5098810760209818140">"invoke the carrier-provided configuration app"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4790845896063237887">"Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps."</string>
     <string name="permlab_accessNetworkConditions" msgid="1270732533356286514">"listen for observations on network conditions"</string>
     <string name="permdesc_accessNetworkConditions" msgid="2959269186741956109">"Allows an application to listen for observations on network conditions. Should never be needed for normal apps."</string>
     <string name="permlab_setInputCalibration" msgid="932069700285223434">"change input device calibration"</string>
@@ -715,10 +715,10 @@
     <string name="permdesc_handoverStatus" msgid="3842269451732571070">"Allows this application to receive information about current Android Beam transfers"</string>
     <string name="permlab_removeDrmCertificates" msgid="710576248717404416">"remove DRM certificates"</string>
     <string name="permdesc_removeDrmCertificates" msgid="4068445390318355716">"Allows an application to remove DRM certficates. Should never be needed for normal apps."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"bind to an operator messaging service"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Allows the holder to bind to the top-level interface of an operator messaging service. Should never be needed for normal apps."</string>
-    <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"bind to operator services"</string>
-    <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Allows the holder to bind to operator services. Should never be needed for normal apps."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="3363450860593096967">"bind to a carrier messaging service"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Allows the holder to bind to the top-level interface of a carrier messaging service. Should never be needed for normal apps."</string>
+    <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"bind to carrier services"</string>
+    <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Allows the holder to bind to carrier services. Should never be needed for normal apps."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"access Do Not Disturb"</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Allows the app to read and write Do Not Disturb configuration."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"start view permission usage"</string>
@@ -1353,7 +1353,7 @@
     <string name="sim_added_message" msgid="6602906609509958680">"Restart your device to access the mobile network."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Restart"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Activate mobile service"</string>
-    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Download the mobile app to activate your new SIM"</string>
+    <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"Download the carrier app to activate your new SIM"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"Download the <xliff:g id="APP_NAME">%1$s</xliff:g> app to activate your new SIM"</string>
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Download app"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"New SIM inserted"</string>
@@ -1606,7 +1606,7 @@
     <string name="ssl_certificate_is_valid" msgid="7293675884598527081">"This certificate is valid."</string>
     <string name="issued_to" msgid="5975877665505297662">"Issued to:"</string>
     <string name="common_name" msgid="1486334593631798443">"Common name:"</string>
-    <string name="org_name" msgid="7526331696464255245">"Organisation:"</string>
+    <string name="org_name" msgid="7526331696464255245">"Organization:"</string>
     <string name="org_unit" msgid="995934486977223076">"Organisational unit:"</string>
     <string name="issued_by" msgid="7872459822431585684">"Issued by:"</string>
     <string name="validity_period" msgid="1717724283033175968">"Validity:"</string>
@@ -1663,7 +1663,7 @@
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Enter SIM PIN"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Enter PIN"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Enter Password"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM is now disabled. Enter PUK code to continue. Contact operator for details."</string>
+    <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM is now disabled. Enter PUK code to continue. Contact carrier for details."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Enter desired PIN code"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Confirm desired PIN code"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Unlocking SIM card…"</string>
