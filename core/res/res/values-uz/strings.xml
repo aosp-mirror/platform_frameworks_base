@@ -636,7 +636,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Xizmat koʻrsatish markaziga murojaat qiling."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Yuzingiz modeli yaratilmadi. Qayta urining."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Juda yorqin. Biroz soyaroq joy tanlang."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Atrofingizni yoriting"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"Atrofingizni yanada yoriting"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonni biroz uzoqroq tuting"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonni yaqinroq tuting"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonni teparoq tuting"</string>
