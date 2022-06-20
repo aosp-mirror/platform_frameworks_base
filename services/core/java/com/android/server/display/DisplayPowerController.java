@@ -657,12 +657,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         mIsRbcActive = mCdsi.isReduceBrightColorsActivated();
         mAutomaticBrightnessController.recalculateSplines(mIsRbcActive, adjustedNits);
-
-        // If rbc is turned on, off or there is a change in strength, we want to reset the short
-        // term model. Since the nits range at which brightness now operates has changed due to
-        // RBC/strength change, any short term model based on the previous range should be
-        // invalidated.
-        mAutomaticBrightnessController.resetShortTermModel();
     }
 
     /**

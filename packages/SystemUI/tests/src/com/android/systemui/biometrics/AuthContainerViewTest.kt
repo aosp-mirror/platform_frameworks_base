@@ -106,6 +106,23 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun testDismissesOnFocusLoss() {
+        val container = initializeContainer()
+        waitForIdleSync()
+
+        verify(callback).onDialogAnimatedIn()
+
+        container.onWindowFocusChanged(false)
+        waitForIdleSync()
+
+        verify(callback).onDismissed(
+            eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
+            eq<ByteArray?>(null) /* credentialAttestation */
+        )
+        assertThat(container.parent).isNull()
+    }
+
+    @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
         val container = initializeContainer()
         container.mBiometricCallback.onAction(
