@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.notification.NotificationUtils.logKey;
 
 import android.util.Log;
 import android.view.View;
@@ -247,7 +248,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     @Override
     @NonNull
     public String getNodeLabel() {
-        return mView.getEntry().getKey();
+        return logKey(mView.getEntry());
     }
 
     @Override

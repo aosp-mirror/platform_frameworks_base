@@ -579,11 +579,7 @@ public class ShadeListBuilder implements Dumpable {
                     if (existingSummary == null) {
                         group.setSummary(entry);
                     } else {
-                        mLogger.logDuplicateSummary(
-                                mIterationCount,
-                                group.getKey(),
-                                existingSummary.getKey(),
-                                entry.getKey());
+                        mLogger.logDuplicateSummary(mIterationCount, group, existingSummary, entry);
 
                         // Use whichever one was posted most recently
                         if (entry.getSbn().getPostTime()
@@ -1070,7 +1066,7 @@ public class ShadeListBuilder implements Dumpable {
         if (!Objects.equals(curr, prev)) {
             mLogger.logEntryAttachStateChanged(
                     mIterationCount,
-                    entry.getKey(),
+                    entry,
                     prev.getParent(),
                     curr.getParent());
 

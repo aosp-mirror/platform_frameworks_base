@@ -142,7 +142,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
     protected void setEntryPinned(
             @NonNull HeadsUpManager.HeadsUpEntry headsUpEntry, boolean isPinned) {
-        mLogger.logSetEntryPinned(headsUpEntry.mEntry.getKey(), isPinned);
+        mLogger.logSetEntryPinned(headsUpEntry.mEntry, isPinned);
         NotificationEntry entry = headsUpEntry.mEntry;
         if (entry.isRowPinned() != isPinned) {
             entry.setRowPinned(isPinned);
@@ -183,7 +183,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
-        mLogger.logNotificationActuallyRemoved(entry.getKey());
+        mLogger.logNotificationActuallyRemoved(entry);
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }
