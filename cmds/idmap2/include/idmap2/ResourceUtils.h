@@ -30,13 +30,13 @@ namespace android::idmap2 {
 #define EXTRACT_ENTRY(resid) (0x0000ffff & (resid))
 
 // use typedefs to let the compiler warn us about implicit casts
-using ResourceId = uint32_t;  // 0xpptteeee
+using ResourceId = android::ResourceId;  // 0xpptteeee
 using PackageId = uint8_t;    // pp in 0xpptteeee
 using TypeId = uint8_t;       // tt in 0xpptteeee
 using EntryId = uint16_t;     // eeee in 0xpptteeee
 
-using DataType = uint8_t;    // Res_value::dataType
-using DataValue = uint32_t;  // Res_value::data
+using DataType = android::DataType;    // Res_value::dataType
+using DataValue = android::DataValue;  // Res_value::data
 
 struct TargetValue {
   DataType data_type;

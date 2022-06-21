@@ -198,6 +198,7 @@ extern int register_android_security_Scrypt(JNIEnv *env);
 extern int register_com_android_internal_content_F2fsUtils(JNIEnv* env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
 extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv *env);
+extern int register_com_android_internal_content_om_OverlayManagerImpl(JNIEnv* env);
 extern int register_com_android_internal_expresslog_Counter(JNIEnv* env);
 extern int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv* env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
@@ -1587,6 +1588,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_SharedMemory),
         REG_JNI(register_android_os_incremental_IncrementalManager),
         REG_JNI(register_com_android_internal_content_om_OverlayConfig),
+        REG_JNI(register_com_android_internal_content_om_OverlayManagerImpl),
         REG_JNI(register_com_android_internal_expresslog_Counter),
         REG_JNI(register_com_android_internal_net_NetworkUtilsInternal),
         REG_JNI(register_com_android_internal_os_ClassLoaderFactory),

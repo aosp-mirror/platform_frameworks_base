@@ -46,14 +46,6 @@ struct TargetResourceContainer : public ResourceContainer {
   ~TargetResourceContainer() override = default;
 };
 
-struct OverlayManifestInfo {
-  std::string package_name;     // NOLINT(misc-non-private-member-variables-in-classes)
-  std::string name;             // NOLINT(misc-non-private-member-variables-in-classes)
-  std::string target_package;   // NOLINT(misc-non-private-member-variables-in-classes)
-  std::string target_name;      // NOLINT(misc-non-private-member-variables-in-classes)
-  ResourceId resource_mapping;  // NOLINT(misc-non-private-member-variables-in-classes)
-};
-
 struct OverlayData {
   struct ResourceIdValue {
     // The overlay resource id.

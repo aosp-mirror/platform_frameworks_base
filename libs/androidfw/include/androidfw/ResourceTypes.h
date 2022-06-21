@@ -1830,6 +1830,28 @@ inline ResTable_overlayable_policy_header::PolicyFlags& operator |=(
   return first;
 }
 
+using ResourceId = uint32_t;  // 0xpptteeee
+
+using DataType = uint8_t;    // Res_value::dataType
+using DataValue = uint32_t;  // Res_value::data
+
+struct OverlayManifestInfo {
+  std::string package_name;     // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string name;             // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string target_package;   // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string target_name;      // NOLINT(misc-non-private-member-variables-in-classes)
+  ResourceId resource_mapping;  // NOLINT(misc-non-private-member-variables-in-classes)
+};
+
+struct FabricatedOverlayEntryParameters {
+  std::string resource_name;
+  DataType data_type;
+  DataValue data_value;
+  std::string data_string_value;
+  std::optional<android::base::borrowed_fd> data_binary_value;
+  std::string configuration;
+};
+
 class AssetManager2;
 
 /**
