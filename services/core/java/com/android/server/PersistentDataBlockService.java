@@ -35,14 +35,17 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.DumpUtils;
 
 import libcore.io.IoUtils;
 
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -678,6 +681,20 @@ public class PersistentDataBlockService extends SystemService {
         public String getPersistentDataPackageName() {
             enforcePersistentDataBlockAccess();
             return mContext.getString(R.string.config_persistentDataPackageName);
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+
+            pw.println("mDataBlockFile: " + mDataBlockFile);
+            pw.println("mIsRunningDSU: " + mIsRunningDSU);
+            pw.println("mInitDoneSignal: " + mInitDoneSignal);
+            pw.println("mAllowedUid: " + mAllowedUid);
+            pw.println("mBlockDeviceSize: " + mBlockDeviceSize);
+            synchronized (mLock) {
+                pw.println("mIsWritable: " + mIsWritable);
+            }
         }
     };
 
