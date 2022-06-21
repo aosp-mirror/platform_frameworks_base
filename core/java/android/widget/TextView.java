@@ -9005,6 +9005,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         if (onCheckIsTextEditor() && isEnabled()) {
             mEditor.createInputMethodStateIfNeeded();
+            mEditor.mInputMethodState.mUpdateCursorAnchorInfoMode = 0;
+            mEditor.mInputMethodState.mUpdateCursorAnchorInfoFilter = 0;
+
             outAttrs.inputType = getInputType();
             if (mEditor.mInputContentType != null) {
                 outAttrs.imeOptions = mEditor.mInputContentType.imeOptions;
@@ -9058,6 +9061,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         return null;
+    }
+
+    /**
+     * Called back by the system to handle {@link InputConnection#requestCursorUpdates(int, int)}.
+     *
+     * @param cursorUpdateMode modes defined in {@link InputConnection.CursorUpdateMode}.
+     * @param cursorUpdateFilter modes defined in {@link InputConnection.CursorUpdateFilter}.
+     *
+     * @hide
+     */
+    public void onRequestCursorUpdatesInternal(
+            @InputConnection.CursorUpdateMode int cursorUpdateMode,
+            @InputConnection.CursorUpdateFilter int cursorUpdateFilter) {
+        mEditor.mInputMethodState.mUpdateCursorAnchorInfoMode = cursorUpdateMode;
+        mEditor.mInputMethodState.mUpdateCursorAnchorInfoFilter = cursorUpdateFilter;
+        if ((cursorUpdateMode & InputConnection.CURSOR_UPDATE_IMMEDIATE) == 0) {
+            return;
+        }
+        if (isInLayout()) {
+            // In this case, the view hierarchy is currently undergoing a layout pass.
+            // IMM#updateCursorAnchorInfo is supposed to be called soon after the layout
+            // pass is finished.
+        } else {
+            // This will schedule a layout pass of the view tree, and the layout event
+            // eventually triggers IMM#updateCursorAnchorInfo.
+            requestLayout();
+        }
     }
 
     /**
