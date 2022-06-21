@@ -84,7 +84,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"L\'administrador ha bloquejat el dispositiu"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"El dispositiu s\'ha bloquejat manualment"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"No s\'ha reconegut"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Per utilitzar Desbloqueig facial, activa l\'accés a la càmera a Configuració"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Desbloqueig facial necessita accés a la càmera"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{Introdueix el PIN de la SIM. Et queda # intent; si no l\'encertes, contacta amb l\'operador per desbloquejar el dispositiu.}other{Introdueix el PIN de la SIM. Et queden # intents.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queda # intent; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador per obtenir informació.}other{La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queden # intents; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador per obtenir informació.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Predeterminada"</string>

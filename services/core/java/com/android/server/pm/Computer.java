@@ -236,7 +236,8 @@ public interface Computer extends PackageDataSnapshot {
      * existence.
      * <p>
      * Package with {@link PackageManager#SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN} is not
-     * treated as an uninstalled package for the carrier apps customization.
+     * treated as an uninstalled package for the carrier apps customization. Bypassing the
+     * uninstalled package check if the caller is system, shell or root uid.
      */
     boolean shouldFilterApplicationIncludingUninstalled(@Nullable PackageStateInternal ps,
             int callingUid, int userId);

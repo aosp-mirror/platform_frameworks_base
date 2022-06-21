@@ -28,12 +28,10 @@ import static com.android.wm.shell.onehanded.OneHandedState.STATE_NONE;
 import android.annotation.BinderThread;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.om.IOverlayManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
@@ -92,7 +90,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
     private final OneHandedState mState;
     private final OneHandedTutorialHandler mTutorialHandler;
     private final TaskStackListenerImpl mTaskStackListener;
-    private final IOverlayManager mOverlayManager;
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
     private final OneHandedImpl mImpl = new OneHandedImpl();
@@ -210,11 +207,9 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
                 context, displayLayout, settingsUtil, animationController, tutorialHandler,
                 jankMonitor, mainExecutor);
         OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
-        IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
-                ServiceManager.getService(Context.OVERLAY_SERVICE));
         return new OneHandedController(context, displayController, organizer, touchHandler,
                 tutorialHandler, settingsUtil, accessibilityUtil, timeoutHandler, oneHandedState,
-                jankMonitor, oneHandedUiEventsLogger, overlayManager, taskStackListener,
+                oneHandedUiEventsLogger, taskStackListener,
                 mainExecutor, mainHandler);
     }
 
@@ -228,9 +223,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
             OneHandedAccessibilityUtil oneHandedAccessibilityUtil,
             OneHandedTimeoutHandler timeoutHandler,
             OneHandedState state,
-            InteractionJankMonitor jankMonitor,
             OneHandedUiEventLogger uiEventsLogger,
-            IOverlayManager overlayManager,
             TaskStackListenerImpl taskStackListener,
             ShellExecutor mainExecutor,
             Handler mainHandler) {
@@ -242,7 +235,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController>,
         mTouchHandler = touchHandler;
         mState = state;
         mTutorialHandler = tutorialHandler;
-        mOverlayManager = overlayManager;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
         mOneHandedUiEventLogger = uiEventsLogger;

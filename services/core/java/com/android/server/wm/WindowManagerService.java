@@ -6035,9 +6035,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Note that Locked in this case is on mLayoutToAnim */
     void scheduleAnimationLocked() {
-        if (mAnimator != null) {
-            mAnimator.scheduleAnimation();
-        }
+        mAnimator.scheduleAnimation();
     }
 
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {

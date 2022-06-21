@@ -3615,30 +3615,35 @@ class Task extends TaskFragment {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder(128);
-        if (stringName != null) {
-            sb.append(stringName);
-            sb.append(" U=");
-            sb.append(mUserId);
-            final Task rootTask = getRootTask();
-            if (rootTask != this) {
-                sb.append(" rootTaskId=");
-                sb.append(rootTask.mTaskId);
-            }
-            sb.append(" visible=");
-            sb.append(shouldBeVisible(null /* starting */));
-            sb.append(" visibleRequested=");
-            sb.append(isVisibleRequested());
-            sb.append(" mode=");
-            sb.append(windowingModeToString(getWindowingMode()));
-            sb.append(" translucent=");
-            sb.append(isTranslucent(null /* starting */));
-            sb.append(" sz=");
-            sb.append(getChildCount());
-            sb.append('}');
-            return sb.toString();
+    String toFullString() {
+        final StringBuilder sb = new StringBuilder(192);
+        sb.append(this);
+        sb.setLength(sb.length() - 1); // Remove tail '}'.
+        sb.append(" U=");
+        sb.append(mUserId);
+        final Task rootTask = getRootTask();
+        if (rootTask != this) {
+            sb.append(" rootTaskId=");
+            sb.append(rootTask.mTaskId);
         }
+        sb.append(" visible=");
+        sb.append(shouldBeVisible(null /* starting */));
+        sb.append(" visibleRequested=");
+        sb.append(isVisibleRequested());
+        sb.append(" mode=");
+        sb.append(windowingModeToString(getWindowingMode()));
+        sb.append(" translucent=");
+        sb.append(isTranslucent(null /* starting */));
+        sb.append(" sz=");
+        sb.append(getChildCount());
+        sb.append('}');
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        if (stringName != null) return stringName;
+        StringBuilder sb = new StringBuilder(128);
         sb.append("Task{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" #");
@@ -3653,11 +3658,9 @@ class Task extends TaskFragment {
         } else if (affinityIntent != null && affinityIntent.getComponent() != null) {
             sb.append(" aI=");
             sb.append(affinityIntent.getComponent().flattenToShortString());
-        } else {
-            sb.append(" ??");
         }
-        stringName = sb.toString();
-        return toString();
+        sb.append('}');
+        return stringName = sb.toString();
     }
 
     /**

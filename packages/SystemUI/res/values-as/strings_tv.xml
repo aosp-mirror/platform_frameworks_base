@@ -30,8 +30,6 @@
     <string name="mic_stopped_recording_announcement" msgid="7301537004900721242">"মাইক্ৰ’ফ’নটোৱে ৰেক’ৰ্ড কৰাটো বন্ধ কৰিছে"</string>
     <string name="camera_stopped_recording_announcement" msgid="8540496432367032801">"কেমেৰাটোৱে ৰেক’ৰ্ড কৰাটো বন্ধ কৰিছে"</string>
     <string name="mic_camera_stopped_recording_announcement" msgid="8708524579599977412">"কেমেৰা আৰু মাইক্ৰ’ফ’নটোৱে ৰেক’ৰ্ড কৰাটো বন্ধ কৰিছে"</string>
-    <!-- no translation found for screen_recording_announcement (2996750593472241520) -->
-    <skip />
-    <!-- no translation found for screen_stopped_recording_announcement (979749439036681416) -->
-    <skip />
+    <string name="screen_recording_announcement" msgid="2996750593472241520">"স্ক্ৰীন ৰেকৰ্ডিং আৰম্ভ কৰা হৈছে"</string>
+    <string name="screen_stopped_recording_announcement" msgid="979749439036681416">"স্ক্ৰীন ৰেকৰ্ডিং বন্ধ হৈছে"</string>
 </resources>
