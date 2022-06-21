@@ -24,6 +24,7 @@ import android.media.MediaRoute2Info
 import android.os.Handler
 import android.os.PowerManager
 import android.util.Log
+import android.view.Gravity
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
@@ -69,6 +70,11 @@ class MediaTttChipControllerReceiver @Inject constructor(
     powerManager,
     R.layout.media_ttt_chip_receiver
 ) {
+    override val windowLayoutParams = commonWindowLayoutParams.apply {
+        gravity = Gravity.BOTTOM.or(Gravity.CENTER_HORIZONTAL)
+        verticalMargin = 0.1f
+    }
+
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferReceiverDisplay(
             @StatusBarManager.MediaTransferReceiverState displayState: Int,
