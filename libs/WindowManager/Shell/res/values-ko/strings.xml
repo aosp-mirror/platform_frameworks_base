@@ -82,8 +82,6 @@
     <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"앱 위치를 조정하려면 앱 옆을 두 번 탭하세요."</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"확인"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"추가 정보는 펼쳐서 확인하세요."</string>
-    <!-- no translation found for maximize_button_text (1650859196290301963) -->
-    <skip />
-    <!-- no translation found for close_button_text (2913281996024033299) -->
-    <skip />
+    <string name="maximize_button_text" msgid="1650859196290301963">"최대화"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"닫기"</string>
 </resources>
