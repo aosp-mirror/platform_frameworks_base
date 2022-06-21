@@ -84,17 +84,23 @@ import android.service.chooser.ChooserTarget;
 import android.view.View;
 
 import androidx.annotation.CallSuper;
+import androidx.test.espresso.matcher.BoundedDiagnosingMatcher;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 
+import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.widget.GridLayoutManager;
+import com.android.internal.widget.RecyclerView;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -1680,6 +1686,25 @@ public class ChooserActivityTest {
                 wrapper.getAdapter().getItem(1).getDisplayLabel(), is("testTitle1"));
     }
 
+    @Test
+    public void testUpdateMaxTargetsPerRow_columnCountIsUpdated() throws InterruptedException {
+        updateMaxTargetsPerRowResource(/* targetsPerRow= */ 4);
+        givenAppTargets(/* appCount= */ 16);
+        Intent sendIntent = createSendTextIntent();
+        final ChooserActivity activity =
+                mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+
+        updateMaxTargetsPerRowResource(/* targetsPerRow= */ 6);
+        InstrumentationRegistry.getInstrumentation()
+                .runOnMainSync(() -> activity.onConfigurationChanged(
+                        InstrumentationRegistry.getInstrumentation()
+                                .getContext().getResources().getConfiguration()));
+
+        waitForIdle();
+        onView(withIdFromRuntimeResource("resolver_list"))
+                .check(matches(withGridColumnCount(6)));
+    }
+
     // This test is too long and too slow and should not be taken as an example for future tests.
     @Test @Ignore
     public void testDirectTargetLoggingWithAppTargetNotRankedPortrait()
@@ -3061,6 +3086,64 @@ public class ChooserActivityTest {
 
     private Matcher<View> withTextFromRuntimeResource(String id) {
         return withText(getRuntimeResourceId(id, "string"));
+    }
+
+    private static GridRecyclerSpanCountMatcher withGridColumnCount(int columnCount) {
+        return new GridRecyclerSpanCountMatcher(Matchers.is(columnCount));
+    }
+
+    private static class GridRecyclerSpanCountMatcher extends
+            BoundedDiagnosingMatcher<View, RecyclerView> {
+
+        private final Matcher<Integer> mIntegerMatcher;
+
+        private GridRecyclerSpanCountMatcher(Matcher<Integer> integerMatcher) {
+            super(RecyclerView.class);
+            this.mIntegerMatcher = integerMatcher;
+        }
+
+        @Override
+        protected void describeMoreTo(Description description) {
+            description.appendText("RecyclerView grid layout span count to match: ");
+            this.mIntegerMatcher.describeTo(description);
+        }
+
+        @Override
+        protected boolean matchesSafely(RecyclerView view, Description mismatchDescription) {
+            int spanCount = ((GridLayoutManager) view.getLayoutManager()).getSpanCount();
+            if (this.mIntegerMatcher.matches(spanCount)) {
+                return true;
+            } else {
+                mismatchDescription.appendText("RecyclerView grid layout span count was ")
+                        .appendValue(spanCount);
+                return false;
+            }
+        }
+    }
+
+    private void givenAppTargets(int appCount) {
+        List<ResolvedComponentInfo> resolvedComponentInfos =
+                createResolvedComponentsForTest(appCount);
+        when(
+                ChooserActivityOverrideData
+                        .getInstance()
+                        .resolverListController
+                        .getResolversForIntent(
+                                Mockito.anyBoolean(),
+                                Mockito.anyBoolean(),
+                                Mockito.isA(List.class)))
+                .thenReturn(resolvedComponentInfos);
+    }
+
+    private void updateMaxTargetsPerRowResource(int targetsPerRow) {
+        ChooserActivityOverrideData.getInstance().resources = Mockito.spy(
+                InstrumentationRegistry.getInstrumentation().getContext().getResources());
+        when(
+                ChooserActivityOverrideData
+                        .getInstance()
+                        .resources
+                        .getInteger(R.integer.config_chooser_max_targets_per_row))
+                .thenReturn(targetsPerRow);
     }
 
     // ChooserWrapperActivity inherits from the framework ChooserActivity, so if the framework

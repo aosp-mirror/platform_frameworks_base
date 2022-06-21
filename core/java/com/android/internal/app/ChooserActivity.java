@@ -1002,6 +1002,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         mShouldDisplayLandscape = shouldDisplayLandscape(newConfig.orientation);
         mMaxTargetsPerRow = getResources().getInteger(R.integer.config_chooser_max_targets_per_row);
+        mChooserMultiProfilePagerAdapter.setMaxTargetsPerRow(mMaxTargetsPerRow);
         adjustPreviewWidth(newConfig.orientation, null);
         updateStickyContentPreview();
         updateTabPadding();

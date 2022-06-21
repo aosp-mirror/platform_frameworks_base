@@ -19,7 +19,7 @@
     <string name="app_label" msgid="4470785958457506021">"सहयोगी डिवाइस मैनेजर"</string>
     <string name="confirmation_title" msgid="3785000297483688997">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ऐक्सेस करने की अनुमति दें"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"स्मार्टवॉच"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"कोई <xliff:g id="PROFILE_NAME">%1$s</xliff:g> चुनें, ताकि उसे &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; की मदद से प्रबंधित किया जा सके"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"कोई <xliff:g id="PROFILE_NAME">%1$s</xliff:g> चुनें, ताकि उसे &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; की मदद से मैनेज किया जा सके"</string>
     <string name="summary_watch" msgid="3002344206574997652">"यह ऐप्लिकेशन, <xliff:g id="DEVICE_NAME">%1$s</xliff:g> को मैनेज करने के लिए ज़रूरी है. <xliff:g id="APP_NAME">%2$s</xliff:g> आपकी सूचनाओं पर कार्रवाई कर पाएगा. साथ ही, इसे आपके फ़ोन, एसएमएस, संपर्कों, कैलेंडर, कॉल लॉग, और आस-पास मौजूद डिवाइसों को ऐक्सेस करने की अनुमति मिल पाएगी."</string>
     <string name="permission_apps" msgid="6142133265286656158">"ऐप्लिकेशन"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"अपने फ़ोन के ऐप्लिकेशन को स्ट्रीम करें"</string>

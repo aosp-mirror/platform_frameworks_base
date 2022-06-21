@@ -611,6 +611,21 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
+    void setSideStagePositionAnimated(@SplitPosition int sideStagePosition) {
+        if (mSideStagePosition == sideStagePosition) return;
+        SurfaceControl.Transaction t = mTransactionPool.acquire();
+        final StageTaskListener topLeftStage =
+                mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
+        final StageTaskListener bottomRightStage =
+                mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
+        mSplitLayout.splitSwitching(t, topLeftStage.mRootLeash, bottomRightStage.mRootLeash,
+                () -> {
+                    setSideStagePosition(SplitLayout.reversePosition(mSideStagePosition),
+                            null /* wct */);
+                    mTransactionPool.release(t);
+                });
+    }
+
     void setSideStagePosition(@SplitPosition int sideStagePosition,
             @Nullable WindowContainerTransaction wct) {
         setSideStagePosition(sideStagePosition, true /* updateBounds */, wct);
@@ -1209,7 +1224,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     @Override
     public void onDoubleTappedDivider() {
-        setSideStagePosition(SplitLayout.reversePosition(mSideStagePosition), null /* wct */);
+        setSideStagePositionAnimated(SplitLayout.reversePosition(mSideStagePosition));
         mLogger.logSwap(getMainStagePosition(), mMainStage.getTopChildTaskUid(),
                 getSideStagePosition(), mSideStage.getTopChildTaskUid(),
                 mSplitLayout.isLandscape());
