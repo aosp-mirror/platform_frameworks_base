@@ -31,6 +31,8 @@
         android:padding="@dimen/media_ttt_chip_outer_padding"
         android:background="@drawable/media_ttt_chip_background"
         android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/notification_side_paddings"
+        android:layout_marginEnd="@dimen/notification_side_paddings"
         android:clipToPadding="false"
         android:gravity="center_vertical"
         android:alpha="0.0"
@@ -46,8 +48,9 @@
 
         <TextView
             android:id="@+id/text"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:textSize="@dimen/media_ttt_text_size"
             android:textColor="?android:attr/textColorPrimary"
             android:alpha="0.0"
