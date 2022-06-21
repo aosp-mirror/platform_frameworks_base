@@ -8182,7 +8182,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         resolvedBounds.set(containingBounds);
 
         final float letterboxAspectRatioOverride =
-                mWmService.mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+                mLetterboxUiController.getFixedOrientationLetterboxAspectRatio();
         final float desiredAspectRatio =
                 letterboxAspectRatioOverride > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
                         ? letterboxAspectRatioOverride : computeAspectRatio(parentBounds);
@@ -8735,18 +8735,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Returns the min aspect ratio of this activity.
      */
     private float getMinAspectRatio() {
-        float infoAspectRatio = info.getMinAspectRatio(getRequestedOrientation());
-        // Complying with the CDD 7.1.1.2 requirement for unresizble apps:
-        // https://source.android.com/compatibility/12/android-12-cdd#7112_screen_aspect_ratio
-        return infoAspectRatio < 1f && info.resizeMode == RESIZE_MODE_UNRESIZEABLE
-                    // TODO(233582832): Consider removing fixed-orientation condition.
-                    // Some apps switching from tablet to phone layout at the certain size
-                    // threshold. This may lead to flickering on tablets in landscape orientation
-                    // if an app sets orientation to portrait dynamically because of aspect ratio
-                    // restriction applied here.
-                    && getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
-                ? mLetterboxUiController.getDefaultMinAspectRatioForUnresizableApps()
-                : infoAspectRatio;
+        return info.getMinAspectRatio(getRequestedOrientation());
     }
 
     /**
