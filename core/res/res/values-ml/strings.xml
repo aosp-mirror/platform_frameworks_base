@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;ശീർഷകമില്ലാത്ത&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(ഫോൺ നമ്പറില്ല)"</string>
@@ -636,7 +631,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"റിപ്പയർ കേന്ദ്രം സന്ദർശിക്കുക."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"മുഖ മോഡൽ സൃഷ്ടിക്കാനാകില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"വളരെയധികം തെളിച്ചം. സൗമ്യതയേറിയ പ്രകാശം ശ്രമിക്കൂ."</string>
-    <string name="face_acquired_too_dark" msgid="7919016380747701228">"തിളക്കമേറിയ ലൈറ്റിംഗ് പരീക്ഷിച്ച് നോക്കൂ"</string>
+    <string name="face_acquired_too_dark" msgid="7919016380747701228">"കൂടുതൽ വെളിച്ചമുള്ളയിടത്ത് പരീക്ഷിച്ച് നോക്കൂ"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ഫോൺ കൂടുതൽ ദൂരേയ്ക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ഫോൺ അടുത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ഫോൺ മുകളിലേക്ക് ഉയർത്തുക"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"മേഖലാ മുൻഗണന"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ഭാഷ ടൈപ്പ് ചെയ്യുക"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"നിര്‍‌ദ്ദേശിച്ചത്"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"നിർദ്ദേശിച്ച ഭാഷകൾ"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"നിർദ്ദേശിച്ച പ്രദേശങ്ങൾ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"തിരയുക"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"കൂടുതലറിയുക"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-ൽ Android അഡാപ്റ്റീവ് അറിയിപ്പുകൾക്ക് പകരം മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ ഉൾപ്പെടുത്തിയിരിക്കുന്നു. നിർദ്ദേശിക്കുന്ന പ്രവർത്തനങ്ങളും മറുപടികളും കാണിക്കുന്നതിനൊപ്പം ഈ ഫീച്ചർ നിങ്ങളുടെ അറിയിപ്പുകൾ ഓർഗനൈസ് ചെയ്യുന്നു.\n\nമെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾക്ക്, കോൺടാക്റ്റ് പേരുകളും സന്ദേശങ്ങളും പോലുള്ള വ്യക്തിപരമായ വിവരങ്ങൾ ഉൾപ്പെടെയുള്ള അറിയിപ്പ് ഉള്ളടക്കം ആക്‌സസ് ചെയ്യാനാകും. ഫോൺ കോളുകൾക്ക് മറുപടി നൽകുക, \'ശല്യപ്പെടുത്തരുത്\' നിയന്ത്രിക്കുക എന്നിവ പോലെ, അറിയിപ്പുകൾ ഡിസ്‌മിസ് ചെയ്യാനും അവയ്‌ക്ക് മറുപടി നൽകാനും ഈ ഫീച്ചറിന് കഴിയും."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ബാറ്ററി സേവർ ഓണാക്കി"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ബാറ്ററി ലൈഫ് വർദ്ധിപ്പിക്കാൻ ബാറ്ററി ഉപയോഗം കുറയ്ക്കുന്നു"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ബാറ്ററി ലാഭിക്കൽ"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കിയിരിക്കുന്നു"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ഫോണിൽ വേണ്ടത്ര ചാർജ് ഉണ്ട്. ഫീച്ചറുകൾക്ക് ഇനി നിയന്ത്രണമില്ല."</string>

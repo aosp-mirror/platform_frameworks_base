@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"بایت"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"کیلوبایت"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"مگابایت"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"گیگابایت"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"ترابایت"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"پتابایت"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> ‏<xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"‏&lt;بدون عنوان&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(بدون شماره تلفن)"</string>
@@ -644,7 +639,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"تلفن را به‌سمت چپ ببرید"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"تلفن را به‌سمت راست ببرید"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"لطفاً مستقیم به دستگاه نگه کنید."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"چهره‌تان دیده نمی‌شود. تلفن را هم‌سطح چشمانتان نگه دارید."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"چهره دیده نمی‌شود. تلفن را هم‌سطح چشمانتان نگه دارید."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حرکت خیلی زیاد است. تلفن را ثابت نگه‌دارید."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"لطفاً چهره‌تان را مجدداً ثبت کنید."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"چهره شناسایی نشد. دوباره امتحان کنید."</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"اولویت‌های منطقه"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"نام زبان را تایپ کنید"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"پیشنهادی"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"زبان‌های پیشنهادی"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"مناطق پیشنهادی"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"همه زبان‌ها"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"همه منطقه‌ها"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"جستجو"</string>
@@ -2044,7 +2041,7 @@
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"برنامه مضر شناسایی شد"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"به <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> اجازه می‌دهید به همه گزارش‌های دستگاه دسترسی داشته باشد؟"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"مجاز کردن دسترسی یک‌باره"</string>
-    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"مجاز نیست"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"اجازه ندادن"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"گزارش‌های دستگاه آنچه را در دستگاهتان رخ می‌دهد ثبت می‌کند. برنامه‌ها می‌توانند از این گزارش‌ها برای پیدا کردن مشکلات و رفع آن‌ها استفاده کنند.\n\nبرخی‌از گزارش‌ها ممکن است حاوی اطلاعات حساس باشند، بنابراین فقط به برنامه‌های مورداعتمادتان اجازه دسترسی به همه گزارش‌های دستگاه را بدهید. \n\nاگر به این برنامه اجازه ندهید به همه گزارش‌های دستگاه دسترسی داشته باشد، همچنان می‌تواند به گزارش‌های خودش دسترسی داشته باشد. سازنده دستگاه نیز ممکن است همچنان بتواند به برخی‌از گزارش‌ها یا اطلاعات دستگاهتان دسترسی داشته باشد. بیشتر بدانید"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"دوباره نشان داده نشود"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> می‌خواهد تکه‌های <xliff:g id="APP_2">%2$s</xliff:g> را نشان دهد"</string>
@@ -2078,8 +2075,10 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"بیشتر بدانید"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‏در Android نسخه ۱۲، اعلان‌های بهبودیافته جایگزین «اعلان‌های تطبیقی» شده است. این ویژگی پاسخ‌ها و کنش‌های پیشنهادی را نمایش می‌دهد و اعلان‌هایتان را سازمان‌دهی می‌کند.\n\nاعلان‌های بهبودیافته می‌توانند به محتوای اعلان، ازجمله اطلاعات شخصی مثل نام‌ها و پیام‌های مخاطبین دسترسی داشته باشند. این ویژگی همچنین می‌تواند اعلان‌ها را رد کند یا به آن‌ها پاسخ دهد؛ مثلاً پاسخ به تماس‌های تلفنی و کنترل کردن «مزاحم نشوید»."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"اعلان اطلاعات حالت روال معمول"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ممکن است شارژ باتری قبل از شارژ معمول تمام شود"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"جهت افزایش عمر باتری، «بهینه‌سازی باتری» فعال شد"</string>
+    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"بهینه‌سازی باتری"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"«بهینه‌سازی باتری» خاموش شد"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"تلفن به‌اندازه کافی شارژ دارد. ویژگی‌ها دیگر محدود نمی‌شوند."</string>

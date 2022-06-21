@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Bez nazwy&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Brak numeru telefonu)"</string>
@@ -1926,6 +1921,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Ustawienie regionu"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Wpisz nazwę języka"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Sugerowane"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Sugerowane języki"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Sugerowane regiony"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Wszystkie języki"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Wszystkie kraje"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Szukaj"</string>
@@ -2080,8 +2077,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Więcej informacji"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"W Androidzie 12 ulepszone powiadomienia zastąpiły dotychczasowe powiadomienia adaptacyjne. Ta funkcja pokazuje sugerowane działania i odpowiedzi oraz porządkuje powiadomienia.\n\nUlepszone powiadomienia mogą czytać całą zawartość powiadomień, w tym informacje osobiste takie jak nazwy kontaktów i treść wiadomości. Funkcja może też zamykać powiadomienia oraz reagować na nie, np. odbierać połączenia telefoniczne i sterować trybem Nie przeszkadzać."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Powiadomienie z informacją o trybie rutynowym"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria może się wyczerpać przed zwykłą porą ładowania"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Włączono Oszczędzanie baterii, by wydłużyć czas pracy na baterii"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Oszczędzanie baterii jest włączone"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Ograniczam wykorzystanie baterii, aby przedłużyć jej żywotność"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Oszczędzanie baterii"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Oszczędzanie baterii zostało wyłączone"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Telefon jest wystarczająco naładowany. Funkcje nie są już ograniczone."</string>

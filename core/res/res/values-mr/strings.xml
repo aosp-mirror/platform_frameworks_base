@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;अशीर्षकांकित&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(कोणताही फोन नंबर नाही)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"भाषा नाव टाइप करा"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"सुचवलेल्या भाषा"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"सुचवलेल्या भाषा"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"सुचवलेले प्रदेश"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"सर्व भाषा"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"सर्व प्रदेश"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"शोध"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"अधिक जाणून घ्या"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 मधील Android ॲडॅप्टिव्ह सूचना हे वैशिष्ट्य बदलून आता वर्धित सूचना झाले आहे. हे वैशिष्ट्य सुचवलेल्या कृती आणि उत्तरे दाखवते व तुमच्या सूचना व्यवस्थापित करते. \n\nवर्धित सूचना हे वैशिष्ट्य संपर्कांची नावे आणि मेसेज यांसारख्या वैयक्तिक माहितीसह सर्व सूचनांचा आशय ॲक्सेस करू शकते. हे वैशिष्ट्य फोन कॉलना उत्तर देणे आणि व्यत्यय आणू नका नियंत्रित करणे यांसारख्या कृती करून सूचना डिसमिस करू शकते किंवा त्यांना प्रतिसाद देऊ शकते."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"बॅटरी सेव्हर सुरू केला आहे"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी वापर कमी करा"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"बॅटरी सेव्‍हर"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"बॅटरी सेव्हर बंद केलेला आहे"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"फोन पुरेसा चार्ज केलेला आहे. वैशिष्ट्ये मर्यादित नाहीत."</string>

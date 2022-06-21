@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;නම් යොදා නැත&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(දුරකථන අංකයක් නොමැත)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ප්‍රදේශ මනාපය"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"භාෂා නම ටයිප් කරන්න"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"යෝජිත"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"යෝජිත භාෂා"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"යෝජිත කලාප"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"සියලු භාෂා"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"සියලු ප්‍රදේශ"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"සෙවීම"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"තව දැන ගන්න"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"වැඩිදියුණු කළ දැනුම්දීම් Android 12 හි Android අනුවර්තී දැනුම්දීම් ප්‍රතිස්ථාපනය කරයි. මෙම විශේෂාංගය යෝජිත ක්‍රියා සහ පිළිතුරු පෙන්වන අතර, ඔබගේ දැනුම්දීම් සංවිධානය කරයි.\n\nවැඩිදියුණු කළ දැනුම්දීම්වලට සම්බන්ධතා නම් සහ පණිවිඩ වැනි පුද්ගලික තොරතුරු ඇතුළුව, සියලු දැනුම්දීම් අන්තර්ගතය වෙත ප්‍රවේශ විය හැකිය. මෙම විශේෂාංගයට දැනුම්දීම් ඉවත දැමීමට හෝ දුරකථන ඇමතුම්වලට පිළිතුරු දීම සහ බාධා නොකිරීම පාලනය කිරීම වැනි, දැනුම්දීම්වලට ප්‍රතිචාර දැක්වීමටද හැකිය."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"දිනචරියා ප්‍රකාර තතු දැනුම්දීම"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"බැටරිය සුපුරුදු ආරෝපණයට පෙර ඉවර විය හැක"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"බැටරි සුරැකුම බැටරි ආයු කාලය දීර්ඝ කිරීමට සක්‍රිය කෙරිණි"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"බැටරි සුරැකුම ක්‍රියාත්මකයි"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"බැටරි ආයු කාලය දිගු කිරීම සඳහා බැටරි භාවිතය අඩු කිරීම"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"බැටරි සුරැකුම"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"බැටරි සුරැකුම ක්‍රියාවිරහිත කර ඇත"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"දුරකථනයට ප්‍රමාණවත් ආරෝපණයක් තිබේ. විශේෂාංග තවදුරටත් සීමා කර නැත."</string>

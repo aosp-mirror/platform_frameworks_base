@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TБ"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Без названия&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Нет номера телефона)"</string>
@@ -1926,6 +1921,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Региональные настройки"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Введите название языка"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Рекомендуемые"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Рекомендуемые языки"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Предлагаемые регионы"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Все языки"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Все регионы"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Поиск"</string>
@@ -2080,8 +2077,10 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Подробнее"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 доступны улучшенные уведомления. Эта функция упорядочивает все ваши уведомления и подсказывает ответы и действия.\n\nЕй доступно содержимое всех уведомлений, в том числе имена контактов, сообщения и другие личные данные. Также эта функция может закрывать уведомления и нажимать кнопки в них, например отвечать на звонки и управлять режимом \"Не беспокоить\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Уведомление о батарее"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея может разрядиться"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>
+    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Режим энергосбережения"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Режим энергосбережения отключен"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Телефон заряжен достаточно. Функции больше не ограничены."</string>
