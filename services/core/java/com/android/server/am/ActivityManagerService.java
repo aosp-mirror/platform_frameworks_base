@@ -15283,6 +15283,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             app.processName, app.toShortString(), cpuLimit, app)) {
                     mHandler.post(() -> {
                         synchronized (ActivityManagerService.this) {
+                            if (app.getThread() == null
+                               || app.mState.getSetProcState() < ActivityManager.PROCESS_STATE_HOME) {
+                                   return;
+                            }
                             app.killLocked("excessive cpu " + cpuTimeUsed + " during "
                                     + uptimeSince + " dur=" + checkDur + " limit=" + cpuLimit,
                                     ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
@@ -15308,6 +15312,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             app.processName, r.toString(), cpuLimit, app)) {
                     mHandler.post(() -> {
                         synchronized (ActivityManagerService.this) {
+                            if (app.getThread() == null
+                               || app.mState.getSetProcState() < ActivityManager.PROCESS_STATE_HOME) {
+                                   return;
+                            }
                             mPhantomProcessList.killPhantomProcessGroupLocked(app, r,
                                     ApplicationExitInfo.REASON_EXCESSIVE_RESOURCE_USAGE,
                                     ApplicationExitInfo.SUBREASON_EXCESSIVE_CPU,
