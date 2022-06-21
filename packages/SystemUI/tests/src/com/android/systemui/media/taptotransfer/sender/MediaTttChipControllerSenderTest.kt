@@ -27,6 +27,7 @@ import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.test.filters.SmallTest
@@ -67,6 +68,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Mock
     private lateinit var logger: MediaTttLogger
     @Mock
+    private lateinit var accessibilityManager: AccessibilityManager
+    @Mock
     private lateinit var powerManager: PowerManager
     @Mock
     private lateinit var windowManager: WindowManager
@@ -95,8 +98,11 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
+
         uiEventLoggerFake = UiEventLoggerFake()
         senderUiEventLogger = MediaTttSenderUiEventLogger(uiEventLoggerFake)
+
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenReturn(TIMEOUT)
 
         controllerSender = MediaTttChipControllerSender(
             commandQueue,
@@ -105,6 +111,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
             windowManager,
             viewUtil,
             fakeExecutor,
+            accessibilityManager,
             TapGestureDetector(context),
             powerManager,
             senderUiEventLogger
@@ -592,7 +599,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeClock.advanceTime(1000L)
         controllerSender.removeChip("fakeRemovalReason")
 
-        fakeClock.advanceTime(state.state.timeout + 1)
+        fakeClock.advanceTime(TIMEOUT + 1L)
 
         verify(windowManager).removeView(any())
     }
@@ -615,7 +622,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         fakeClock.advanceTime(1000L)
         controllerSender.removeChip("fakeRemovalReason")
 
-        fakeClock.advanceTime(state.state.timeout + 1)
+        fakeClock.advanceTime(TIMEOUT + 1L)
 
         verify(windowManager).removeView(any())
     }
@@ -674,6 +681,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 private const val APP_NAME = "Fake app name"
 private const val OTHER_DEVICE_NAME = "My Tablet"
 private const val PACKAGE_NAME = "com.android.systemui"
+private const val TIMEOUT = 10000
 
 private val routeInfo = MediaRoute2Info.Builder("id", OTHER_DEVICE_NAME)
     .addFeature("feature")

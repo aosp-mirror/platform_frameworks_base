@@ -31,6 +31,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
+import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS
+import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS
+import android.view.accessibility.AccessibilityManager.FLAG_CONTENT_TEXT
 import android.widget.LinearLayout
 import com.android.internal.widget.CachingIconView
 import com.android.settingslib.Utils
@@ -56,6 +60,7 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
     private val windowManager: WindowManager,
     private val viewUtil: ViewUtil,
     @Main private val mainExecutor: DelayableExecutor,
+    private val accessibilityManager: AccessibilityManager,
     private val tapGestureDetector: TapGestureDetector,
     private val powerManager: PowerManager,
     @LayoutRes private val chipLayoutRes: Int
@@ -110,10 +115,16 @@ abstract class MediaTttChipControllerCommon<T : ChipInfoCommon>(
         }
 
         // Cancel and re-set the chip timeout each time we get a new state.
+        val timeout = accessibilityManager.getRecommendedTimeoutMillis(
+            chipInfo.getTimeoutMs().toInt(),
+            // Not all chips have controls so FLAG_CONTENT_CONTROLS might be superfluous, but
+            // include it just to be safe.
+            FLAG_CONTENT_ICONS or FLAG_CONTENT_TEXT or FLAG_CONTENT_CONTROLS
+       )
         cancelChipViewTimeout?.run()
         cancelChipViewTimeout = mainExecutor.executeDelayed(
             { removeChip(MediaTttRemovalReason.REASON_TIMEOUT) },
-            chipInfo.getTimeoutMs()
+            timeout.toLong()
         )
     }
 
