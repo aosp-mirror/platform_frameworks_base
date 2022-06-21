@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.charging
+package com.android.systemui.charging
 
 import android.content.Context
 import android.content.res.Configuration
@@ -32,6 +32,7 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.ripple.RippleView
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.BatteryController
@@ -84,7 +85,7 @@ class WiredChargingRippleController @Inject constructor(
     private var debounceLevel = 0
 
     @VisibleForTesting
-    var rippleView: ChargingRippleView = ChargingRippleView(context, attrs = null)
+    var rippleView: RippleView = RippleView(context, attrs = null)
 
     init {
         pluggedIn = batteryController.isPluggedIn
