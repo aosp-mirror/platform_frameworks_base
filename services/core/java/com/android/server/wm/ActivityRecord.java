@@ -2467,8 +2467,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!newTask && taskSwitch && processRunning && !activityCreated && task.intent != null
                 && mActivityComponent.equals(task.intent.getComponent())) {
             final ActivityRecord topAttached = task.getActivity(ActivityRecord::attachedToProcess);
-            if (topAttached != null && topAttached.isSnapshotCompatible(snapshot)) {
-                return STARTING_WINDOW_TYPE_SNAPSHOT;
+            if (topAttached != null) {
+                if (topAttached.isSnapshotCompatible(snapshot)
+                        // This trampoline must be the same rotation.
+                        && mDisplayContent.getDisplayRotation().rotationForOrientation(mOrientation,
+                                mDisplayContent.getRotation()) == snapshot.getRotation()) {
+                    return STARTING_WINDOW_TYPE_SNAPSHOT;
+                }
+                // No usable snapshot. And a splash screen may also be weird because an existing
+                // activity may be shown right after the trampoline is finished.
+                return STARTING_WINDOW_TYPE_NONE;
             }
         }
         final boolean isActivityHome = isActivityTypeHome();
