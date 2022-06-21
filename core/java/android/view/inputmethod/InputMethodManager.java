@@ -1131,9 +1131,7 @@ public final class InputMethodManager {
                                 || mServedInputConnection == null) {
                             return;
                         }
-                        final boolean isMonitoring = (mRequestUpdateCursorAnchorInfoMonitorMode
-                                & InputConnection.CURSOR_UPDATE_MONITOR) != 0;
-                        if (!isMonitoring) {
+                        if (!mServedInputConnection.isCursorAnchorInfoMonitoring()) {
                             return;
                         }
                         // Since the host VirtualDisplay is moved, we need to issue
