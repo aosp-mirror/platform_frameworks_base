@@ -158,14 +158,13 @@ public class StartingSurfaceController {
                         + topFullscreenActivity);
                 return null;
             }
-            if (topFullscreenActivity.getWindowConfiguration().getRotation()
-                    != taskSnapshot.getRotation()) {
+            if (activity.mDisplayContent.getRotation() != taskSnapshot.getRotation()) {
                 // The snapshot should have been checked by ActivityRecord#isSnapshotCompatible
                 // that the activity will be updated to the same rotation as the snapshot. Since
                 // the transition is not started yet, fixed rotation transform needs to be applied
                 // earlier to make the snapshot show in a rotated container.
                 activity.mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(
-                        topFullscreenActivity, false /* checkOpening */);
+                        activity, false /* checkOpening */);
             }
                 mService.mAtmService.mTaskOrganizerController.addStartingWindow(task,
                         activity, 0 /* launchTheme */, taskSnapshot);
