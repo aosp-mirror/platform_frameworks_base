@@ -27,4 +27,4 @@ interface ChipInfoCommon {
     fun getTimeoutMs(): Long
 }
 
-const val DEFAULT_TIMEOUT_MILLIS = 3000L
+const val DEFAULT_TIMEOUT_MILLIS = 4000L

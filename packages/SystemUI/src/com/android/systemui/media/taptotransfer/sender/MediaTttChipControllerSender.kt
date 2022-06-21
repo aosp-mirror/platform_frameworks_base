@@ -24,6 +24,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
 import android.widget.TextView
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
@@ -53,6 +54,7 @@ class MediaTttChipControllerSender @Inject constructor(
     windowManager: WindowManager,
     viewUtil: ViewUtil,
     @Main mainExecutor: DelayableExecutor,
+    accessibilityManager: AccessibilityManager,
     tapGestureDetector: TapGestureDetector,
     powerManager: PowerManager,
     private val uiEventLogger: MediaTttSenderUiEventLogger
@@ -62,6 +64,7 @@ class MediaTttChipControllerSender @Inject constructor(
     windowManager,
     viewUtil,
     mainExecutor,
+    accessibilityManager,
     tapGestureDetector,
     powerManager,
     R.layout.media_ttt_chip
