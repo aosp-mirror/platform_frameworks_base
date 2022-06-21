@@ -2394,8 +2394,8 @@ public class LocationManager {
      * @return true if the listener was successfully added
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      *
-     * @deprecated use {@link #registerGnssStatusCallback(GnssStatus.Callback)} instead. No longer
-     * supported in apps targeting S and above.
+     * @deprecated Use {@link #registerGnssStatusCallback(GnssStatus.Callback, Handler)} or {@link
+     * #registerGnssStatusCallback(Executor, GnssStatus.Callback)} instead.
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
@@ -2505,7 +2505,8 @@ public class LocationManager {
     /**
      * No-op method to keep backward-compatibility.
      *
-     * @deprecated Use {@link #addNmeaListener} instead.
+     * @deprecated Use {@link #addNmeaListener(OnNmeaMessageListener, Handler)} or {@link
+     * #addNmeaListener(Executor, OnNmeaMessageListener)} instead.
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
