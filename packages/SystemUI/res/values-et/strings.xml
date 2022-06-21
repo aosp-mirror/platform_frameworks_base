@@ -373,7 +373,7 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Teie organisatsioon on selle seadme omanik ja võib jälgida võrguliiklust"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> on selle seadme omanik ja võib jälgida võrguliiklust"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Selle seadme on andnud <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"See seade kuulub teie organisatsioonile ja on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"See seade kuulub teie organisatsioonile ja on ühendatud internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"See seade kuulub organisatsioonile <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ja on internetiga rakenduse <xliff:g id="VPN_APP">%2$s</xliff:g> kaudu ühendatud"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"See seade kuulub teie organisatsioonile"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Selle seadme omanik on <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
@@ -383,8 +383,8 @@
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> võib jälgida võrguliiklust teie tööprofiilil"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Tööprofiili võrgutegevused on teie IT-administraatorile nähtavad"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Võrku võidakse jälgida"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"See seade on internetiga VPN-ide kaudu ühendatud"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Teie töörakendused on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud"</string>
+    <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"See seade on ühendatud internetiga VPN-ide kaudu"</string>
+    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"Teie töörakendused on ühendatud internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="451254750289172191">"Teie isiklikud rakendused on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud"</string>
     <string name="quick_settings_disclosure_named_vpn" msgid="6191822916936028208">"See seade on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud"</string>
     <string name="monitoring_title_financed_device" msgid="3659962357973919387">"Selle seadme on andnud <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -403,8 +403,8 @@
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Teie administraator lülitas sisse võrgu logimise funktsiooni, mis jälgib teie seadmes liiklust."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Teie administraator on sisse lülitanud võrgu logimise funktsiooni, mis jälgib liiklust teie võrguprofiilil, kuid mitte teie isiklikul profiilil."</string>
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"See seade on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud. Teie võrgutegevus, sealhulgas meilid ja sirvimisandmed, on nähtav teie IT-administraatorile."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"See seade on internetiga rakenduse <xliff:g id="VPN_APP_0">%1$s</xliff:g> ja <xliff:g id="VPN_APP_1">%2$s</xliff:g> kaudu ühendatud. Teie võrgutegevus, sealhulgas meilid ja sirvimisandmed, on nähtav teie IT-administraatorile."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Teie töörakendused on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud. Teie töörakenduste võrgutegevus, sealhulgas meilid ja sirvimisandmed, on nähtav teie IT-administraatorile ning VPN-i teenusepakkujale."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"See seade on ühendatud internetiga rakenduste <xliff:g id="VPN_APP_0">%1$s</xliff:g> ja <xliff:g id="VPN_APP_1">%2$s</xliff:g> kaudu. Teie võrgutegevused (sealhulgas meilid ja sirvimisandmed) on nähtavad teie IT-administraatorile."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Teie töörakendused on ühendatud internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu. Teie töörakenduste võrgutegevused (sealhulgas meilid ja sirvimisandmed) on nähtavad teie IT-administraatorile ning VPN-i teenusepakkujale."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Teie isiklikud rakendused on internetiga rakenduse <xliff:g id="VPN_APP">%1$s</xliff:g> kaudu ühendatud. Teie võrgutegevus, sealhulgas meilid ja sirvimisandmed, on nähtav teie VPN-i teenusepakkujale."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN-i seadete avamine"</string>

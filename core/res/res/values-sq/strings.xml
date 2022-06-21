@@ -649,9 +649,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Regjistroje përsëri fytyrën tënde."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Fytyra nuk mund të njihet. Provo sërish."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Ndrysho pak pozicionin e kokës"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Shiko më shumë drejtpërdrejt telefonit"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Shiko më shumë drejtpërdrejt telefonit"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Shiko më shumë drejtpërdrejt telefonit"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Shiko më drejtpërdrejt telefonin"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Shiko më drejtpërdrejt telefonin"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Shiko më drejtpërdrejt telefonin"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Hiq gjithçka që fsheh fytyrën tënde."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Pastro kreun e ekranit, duke përfshirë shiritin e zi"</string>
     <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Fytyra jote duhet të jetë plotësisht e dukshme"</string>

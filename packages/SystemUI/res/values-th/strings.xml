@@ -373,7 +373,7 @@
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้และอาจตรวจสอบการจราจรของข้อมูลในเครือข่าย"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"อุปกรณ์นี้ให้บริการโดย <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"อุปกรณ์นี้เป็นขององค์กรและเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"อุปกรณ์นี้เป็นขององค์กรและเชื่อมต่ออินเทอร์เน็ตผ่าน <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"อุปกรณ์นี้เป็นของ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> และเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> เป็นเจ้าของอุปกรณ์นี้"</string>
@@ -403,8 +403,8 @@
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในอุปกรณ์ของคุณ"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในโปรไฟล์งานแต่ไม่ตรวจสอบในโปรไฟล์ส่วนตัวของคุณ"</string>
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่ายรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP_0">%1$s</xliff:g> และ<xliff:g id="VPN_APP_1">%2$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่ายรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"แอปงานเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีและผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายในแอปงานได้ ซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บ"</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน <xliff:g id="VPN_APP_0">%1$s</xliff:g> และ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่าย ซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"แอปงานเชื่อมต่ออินเทอร์เน็ตผ่าน <xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีและผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายในแอปงานได้ ซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บ"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"แอปส่วนตัวเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"เปิดการตั้งค่า VPN"</string>
