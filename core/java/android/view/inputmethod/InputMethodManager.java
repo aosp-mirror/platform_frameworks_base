@@ -1421,12 +1421,21 @@ public final class InputMethodManager {
     }
 
     /**
-     * Returns {@code true} if currently selected IME supports Stylus handwriting.
+     * Returns {@code true} if currently selected IME supports Stylus handwriting & is enabled.
      * If the method returns {@code false}, {@link #startStylusHandwriting(View)} shouldn't be
      * called and Stylus touch should continue as normal touch input.
      * @see #startStylusHandwriting(View)
      */
     public boolean isStylusHandwritingAvailable() {
+        final Context fallbackContext = ActivityThread.currentApplication();
+        if (fallbackContext == null) {
+            return false;
+        }
+        if (Settings.Global.getInt(fallbackContext.getContentResolver(),
+                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
+            Log.d(TAG, "Stylus handwriting is not enabled in settings.");
+            return false;
+        }
         try {
             return mService.isStylusHandwritingAvailable();
         } catch (RemoteException e) {
