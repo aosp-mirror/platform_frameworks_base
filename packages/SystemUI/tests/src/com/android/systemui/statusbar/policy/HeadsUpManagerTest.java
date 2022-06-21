@@ -106,7 +106,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     public void testHunRemovedLogging() {
         mAlertEntry.mEntry = mEntry;
         mHeadsUpManager.onAlertEntryRemoved(mAlertEntry);
-        verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(mEntry.getKey()));
+        verify(mLogger, times(1)).logNotificationActuallyRemoved(eq(mEntry));
     }
 
     @Test

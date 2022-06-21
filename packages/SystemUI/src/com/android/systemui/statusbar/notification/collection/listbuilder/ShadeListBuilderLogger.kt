@@ -23,8 +23,10 @@ import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class ShadeListBuilderLogger @Inject constructor(
@@ -110,12 +112,17 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logDuplicateSummary(buildId: Int, groupKey: String, existingKey: String, newKey: String) {
+    fun logDuplicateSummary(
+        buildId: Int,
+        group: GroupEntry,
+        existingSummary: NotificationEntry,
+        newSummary: NotificationEntry
+    ) {
         buffer.log(TAG, WARNING, {
             long1 = buildId.toLong()
-            str1 = groupKey
-            str2 = existingKey
-            str3 = newKey
+            str1 = group.logKey
+            str2 = existingSummary.logKey
+            str3 = newSummary.logKey
         }, {
             """(Build $long1) Duplicate summary for group "$str1": "$str2" vs. "$str3""""
         })
@@ -124,7 +131,7 @@ class ShadeListBuilderLogger @Inject constructor(
     fun logDuplicateTopLevelKey(buildId: Int, topLevelKey: String) {
         buffer.log(TAG, WARNING, {
             long1 = buildId.toLong()
-            str1 = topLevelKey
+            str1 = logKey(topLevelKey)
         }, {
             "(Build $long1) Duplicate top-level key: $str1"
         })
@@ -132,15 +139,15 @@ class ShadeListBuilderLogger @Inject constructor(
 
     fun logEntryAttachStateChanged(
         buildId: Int,
-        key: String,
+        entry: ListEntry,
         prevParent: GroupEntry?,
         newParent: GroupEntry?
     ) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
-            str1 = key
-            str2 = prevParent?.key
-            str3 = newParent?.key
+            str1 = entry.logKey
+            str2 = prevParent?.logKey
+            str3 = newParent?.logKey
         }, {
 
             val action = if (str2 == null && str3 != null) {
@@ -160,8 +167,8 @@ class ShadeListBuilderLogger @Inject constructor(
     fun logParentChanged(buildId: Int, prevParent: GroupEntry?, newParent: GroupEntry?) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
-            str1 = prevParent?.key
-            str2 = newParent?.key
+            str1 = prevParent?.logKey
+            str2 = newParent?.logKey
         }, {
             if (str1 == null && str2 != null) {
                 "(Build $long1)     Parent is {$str2}"
@@ -180,8 +187,8 @@ class ShadeListBuilderLogger @Inject constructor(
     ) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
-            str1 = suppressedParent?.key
-            str2 = keepingParent?.key
+            str1 = suppressedParent?.logKey
+            str2 = keepingParent?.logKey
         }, {
             "(Build $long1)     Change of parent to '$str1' suppressed; keeping parent '$str2'"
         })
@@ -193,7 +200,7 @@ class ShadeListBuilderLogger @Inject constructor(
     ) {
         buffer.log(TAG, INFO, {
             long1 = buildId.toLong()
-            str1 = keepingParent?.key
+            str1 = keepingParent?.logKey
         }, {
             "(Build $long1)     Group pruning suppressed; keeping parent '$str1'"
         })
@@ -281,7 +288,7 @@ class ShadeListBuilderLogger @Inject constructor(
             val entry = entries[i]
             buffer.log(TAG, DEBUG, {
                 int1 = i
-                str1 = entry.key
+                str1 = entry.logKey
             }, {
                 "[$int1] $str1"
             })
@@ -289,7 +296,7 @@ class ShadeListBuilderLogger @Inject constructor(
             if (entry is GroupEntry) {
                 entry.summary?.let {
                     buffer.log(TAG, DEBUG, {
-                        str1 = it.key
+                        str1 = it.logKey
                     }, {
                         "  [*] $str1 (summary)"
                     })
@@ -298,7 +305,7 @@ class ShadeListBuilderLogger @Inject constructor(
                     val child = entry.children[j]
                     buffer.log(TAG, DEBUG, {
                         int1 = j
-                        str1 = child.key
+                        str1 = child.logKey
                     }, {
                         "  [$int1] $str1"
                     })
@@ -308,7 +315,7 @@ class ShadeListBuilderLogger @Inject constructor(
     }
 
     fun logPipelineRunSuppressed() =
-            buffer.log(TAG, INFO, {}) { "Suppressing pipeline run during animation." }
+        buffer.log(TAG, INFO, {}) { "Suppressing pipeline run during animation." }
 }
 
 private const val TAG = "ShadeListBuilder"
