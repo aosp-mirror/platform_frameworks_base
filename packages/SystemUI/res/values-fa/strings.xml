@@ -78,7 +78,7 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"دوباره نماگرفت بگیرید"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"نماگرفت ذخیره نمی‌شود"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"برنامه یا سازمان شما اجازه نمی‌دهند نماگرفت بگیرید."</string>
-    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"سرپرست سیستم گرفتن نماگرفت را مسدود کرده است"</string>
+    <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"سرپرست فناوری اطلاعات گرفتن نماگرفت را مسدود کرده است"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ویرایش"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ویرایش نماگرفت"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"هم‌رسانی نماگرفت"</string>
@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"دوربین"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"تلفن"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"دستیار صوتی"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"کیف پول"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"کدخوان پاسخ‌سریع"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"باز کردن قفل"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"دستگاه قفل است"</string>
@@ -353,10 +353,10 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"کاربر حذف شود؟"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"همه برنامه‌ها و داده‌های این کاربر حذف می‌شود."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"حذف"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> به همه اطلاعاتی که روی صفحه‌نمایش قابل‌مشاهد است و هنگام ضبط کردن یا ارسال محتوا از دستگاهتان پخش می‌شود دسترسی خواهد داشت. این شامل اطلاعاتی مانند گذرواژه‌ها، جزئیات پرداخت، عکس‌ها، پیام‌ها، و صداهایی که پخش می‌کنید می‌شود."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"سرویس ارائه‌دهنده این عملکرد به همه اطلاعاتی که روی صفحه‌نمایش قابل‌مشاهد است و هنگام ضبط کردن یا ارسال محتوا از دستگاهتان پخش می‌شود دسترسی خواهد داشت. این شامل اطلاعاتی مانند گذرواژه‌ها، جزئیات پرداخت، عکس‌ها، پیام‌ها، و صداهایی که پخش می‌کنید می‌شود."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ضبط یا ارسال محتوا شروع شود؟"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"ضبط یا ارسال محتوا با <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> شروع شود؟"</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> به همه اطلاعاتی که روی صفحه‌نمایش قابل‌مشاهد است و هنگام ضبط کردن یا پخش محتوا از دستگاهتان پخش می‌شود دسترسی خواهد داشت. این شامل اطلاعاتی مانند گذرواژه‌ها، جزئیات پرداخت، عکس‌ها، پیام‌ها، و صداهایی که پخش می‌کنید می‌شود."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"سرویس ارائه‌دهنده این عملکرد به همه اطلاعاتی که روی صفحه‌نمایش قابل‌مشاهد است و هنگام ضبط کردن یا پخش محتوا از دستگاهتان پخش می‌شود دسترسی خواهد داشت. این شامل اطلاعاتی مانند گذرواژه‌ها، جزئیات پرداخت، عکس‌ها، پیام‌ها، و صداهایی که پخش می‌کنید می‌شود."</string>
+    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ضبط یا پخش محتوا شروع شود؟"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"ضبط یا پخش محتوا با <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> شروع شود؟"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"پاک کردن همه موارد"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"مدیریت"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"سابقه"</string>
@@ -380,7 +380,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"‏این دستگاه متعلق به <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> است و ازطریق چند VPN به اینترنت متصل شده است"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ممکن است سازمان شما ترافیک شبکه را در نمایه کاری‌تان پایش کند"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ممکن است ترافیک شبکه را در نمایه کاری شما پایش کند"</string>
-    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"سرپرست سیستم می‌تواند فعالیت شبکه نمایه کاری را ببیند"</string>
+    <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"سرپرست فناوری اطلاعات می‌تواند فعالیت شبکه نمایه کاری را ببیند"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ممکن است شبکه پایش شود"</string>
     <string name="quick_settings_disclosure_vpns" msgid="3586175303518266301">"‏این دستگاه ازطریق چند VPN به اینترنت متصل شده است"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="153393105176944100">"برنامه‌های کاری‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است"</string>
@@ -401,9 +401,9 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"مرجع گواهینامه‌ای در این دستگاه نصب شده است. ممکن است ترافیک امن شبکه شما پایش یا تغییر داده شود."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"سرپرست سیستم شما گزارش‌گیری از شبکه را (که ترافیک دستگاه شما را پایش می‌کند) روشن کرده است."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"سرپرست شما گزارش‌گیری شبکه را که بر ترافیک نمایه کاری‌تان نظارت می‌کند، اما بر ترافیک نمایه شخصی‌تان نظارت نمی‌کند روشن کرده است."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"این دستگاه ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. سرپرست سیستم شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"این دستگاه ازطریق <xliff:g id="VPN_APP_0">%1$s</xliff:g> و <xliff:g id="VPN_APP_1">%2$s</xliff:g> به اینترنت متصل شده است. سرپرست سیستم شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏برنامه‌های کاری‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. ارائه‌دهنده VPN و سرپرست سیستم شما می‌توانند فعالیت شبکه شما در برنامه‌های کاری را (ازجمله ایمیل‌ها و داده‌های مرور) ببینند."</string>
+    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"این دستگاه ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. سرپرست فناوری اطلاعات شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"این دستگاه ازطریق <xliff:g id="VPN_APP_0">%1$s</xliff:g> و <xliff:g id="VPN_APP_1">%2$s</xliff:g> به اینترنت متصل شده است. سرپرست فناوری اطلاعات شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏برنامه‌های کاری‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. ارائه‌دهنده VPN و سرپرست فناوری اطلاعات شما می‌توانند فعالیت شبکه شما در برنامه‌های کاری را (ازجمله ایمیل‌ها و داده‌های مرور) ببینند."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏برنامه‌های شخصی‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. ارائه‌دهنده VPN شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏باز کردن تنظیمات VPN"</string>
@@ -462,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"نمایش حالت نمایشی"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"اترنت"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"زنگ"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"کیف‌پول"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"کیف پول"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"برای خرید سریع‌تر و امن‌تر با تلفن، راه‌اندازی کنید"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"نمایش همه"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"برای باز کردن ضربه بزنید"</string>
@@ -553,7 +553,7 @@
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"راست"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"مرکز"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
-    <string name="keyboard_key_space" msgid="6980847564173394012">"فاصله"</string>
+    <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"ورود"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"پس‌بر"</string>
     <string name="keyboard_key_media_play_pause" msgid="8389984232732277478">"پخش/مکث"</string>
@@ -843,7 +843,7 @@
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"مرتبط کردن دستگاه جدید"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"برای ارسال محتوای این جلسه، لطفاً برنامه را باز کنید."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"برنامه ناشناس"</string>
-    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"توقف ارسال محتوا"</string>
+    <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"توقف پخش محتوا"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"دستگاه‌های دردسترس برای خروجی صدا."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"میزان صدا"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"همه‌فرتستی چطور کار می‌کند"</string>
@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"نوشتار کپی شد"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"تصویر کپی شد"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"محتوا کپی شد"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"ویرایشگر بریده‌دان"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"بریده‌دان"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"پیش‌نمای تصویر"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"ویرایش کردن"</string>
     <string name="add" msgid="81036585205287996">"افزودن"</string>
     <string name="manage_users" msgid="1823875311934643849">"مدیریت کاربران"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"این اعلان از تنظیم کشیدن برای دو نیمه کردن صفحه پشتیبانی نمی‌کند."</string>

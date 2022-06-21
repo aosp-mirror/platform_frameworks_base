@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"Szöveg másolva"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"Kép másolva"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"Tartalom másolva"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"Vágólapszerkesztő"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"Vágólap"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"Kép előnézete"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"szerkesztés"</string>
     <string name="add" msgid="81036585205287996">"Hozzáadás"</string>
     <string name="manage_users" msgid="1823875311934643849">"Felhasználók kezelése"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"Az értesítés nem támogatja a megosztott képernyőre való áthúzást."</string>

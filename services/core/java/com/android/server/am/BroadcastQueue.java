@@ -24,6 +24,11 @@ import static android.text.TextUtils.formatSimple;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__BOOT_COMPLETED;
 import static com.android.internal.util.FrameworkStatsLog.BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED__EVENT__LOCKED_BOOT_COMPLETED;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_DEFERRAL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
@@ -316,7 +321,7 @@ public final class BroadcastQueue {
     }
 
     private final void processCurBroadcastLocked(BroadcastRecord r,
-            ProcessRecord app) throws RemoteException {
+            ProcessRecord app, int receiverType, int processTemperature) throws RemoteException {
         if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                 "Process cur broadcast " + r + " for app " + app);
         final IApplicationThread thread = app.getThread();
@@ -362,6 +367,10 @@ public final class BroadcastQueue {
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
+            FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, app.uid,
+                    r.callingUid == -1 ? Process.SYSTEM_UID : r.callingUid,
+                    ActivityManagerService.getShortAction(r.intent.getAction()),
+                    receiverType, processTemperature);
         } finally {
             if (!started) {
                 if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
@@ -398,7 +407,9 @@ public final class BroadcastQueue {
             }
             try {
                 mPendingBroadcast = null;
-                processCurBroadcastLocked(br, app);
+                processCurBroadcastLocked(br, app,
+                        BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST,
+                        BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD);
                 didSomething = true;
             } catch (Exception e) {
                 Slog.w(TAG, "Exception in new application when starting receiver "
@@ -628,8 +639,8 @@ public final class BroadcastQueue {
 
     void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
-            boolean ordered, boolean sticky, int sendingUser)
-            throws RemoteException {
+            boolean ordered, boolean sticky, int sendingUser,
+            int receiverUid, int callingUid) throws RemoteException {
         // Send the intent to the receiver asynchronously using one-way binder calls.
         if (app != null) {
             final IApplicationThread thread = app.getThread();
@@ -663,6 +674,12 @@ public final class BroadcastQueue {
             receiver.performReceive(intent, resultCode, data, extras, ordered,
                     sticky, sendingUser);
         }
+        FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED,
+                receiverUid == -1 ? Process.SYSTEM_UID : receiverUid,
+                callingUid == -1 ? Process.SYSTEM_UID : callingUid,
+                ActivityManagerService.getShortAction(intent.getAction()),
+                BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME,
+                BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
     }
 
     private void deliverToRegisteredReceiverLocked(BroadcastRecord r,
@@ -965,7 +982,8 @@ public final class BroadcastQueue {
                 maybeReportBroadcastDispatchedEventLocked(r, filter.owningUid);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         new Intent(r.intent), r.resultCode, r.resultData,
-                        r.resultExtras, r.ordered, r.initialSticky, r.userId);
+                        r.resultExtras, r.ordered, r.initialSticky, r.userId,
+                        filter.receiverList.uid, r.callingUid);
                 // parallel broadcasts are fire-and-forget, not bookended by a call to
                 // finishReceiverLocked(), so we manage their activity-start token here
                 if (filter.receiverList.app != null
@@ -1317,7 +1335,8 @@ public final class BroadcastQueue {
                             }
                             performReceiveLocked(r.callerApp, r.resultTo,
                                     new Intent(r.intent), r.resultCode,
-                                    r.resultData, r.resultExtras, false, false, r.userId);
+                                    r.resultData, r.resultExtras, false, false, r.userId,
+                                    r.callingUid, r.callingUid);
                             logBootCompletedBroadcastCompletionLatencyIfPossible(r);
                             // Set this to null so that the reference
                             // (local and remote) isn't kept in the mBroadcastHistory.
@@ -1837,7 +1856,9 @@ public final class BroadcastQueue {
                 app.addPackage(info.activityInfo.packageName,
                         info.activityInfo.applicationInfo.longVersionCode, mService.mProcessStats);
                 maybeAddAllowBackgroundActivityStartsToken(app, r);
-                processCurBroadcastLocked(r, app);
+                processCurBroadcastLocked(r, app,
+                        BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST,
+                        BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM);
                 return;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception when sending broadcast to "

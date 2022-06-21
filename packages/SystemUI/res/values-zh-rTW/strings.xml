@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"相機"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"電話"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"語音小幫手"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"電子錢包"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"錢包"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR 圖碼掃描器"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"解除鎖定"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"裝置已鎖定"</string>
@@ -462,7 +462,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"顯示示範模式"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"乙太網路"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"鬧鐘"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"電子錢包"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"錢包"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"完成相關設定之後，就能以更快速安全的方式透過手機消費"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"顯示全部"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"輕觸即可開啟"</string>
@@ -552,7 +552,7 @@
     <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"向左鍵"</string>
     <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"向右鍵"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"中央鍵"</string>
-    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab 鍵"</string>
+    <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"空格鍵"</string>
     <string name="keyboard_key_enter" msgid="8633362970109751646">"Enter 鍵"</string>
     <string name="keyboard_key_backspace" msgid="4095278312039628074">"Backspace 鍵"</string>
@@ -945,14 +945,10 @@
     <string name="clipboard_text_copied" msgid="5100836834278976679">"已複製文字"</string>
     <string name="clipboard_image_copied" msgid="3793365360174328722">"已複製圖片"</string>
     <string name="clipboard_content_copied" msgid="144452398567828145">"已複製內容"</string>
-    <!-- no translation found for clipboard_editor (2971197550401892843) -->
-    <skip />
-    <!-- no translation found for clipboard_overlay_window_name (6450043652167357664) -->
-    <skip />
-    <!-- no translation found for clipboard_image_preview (2156475174343538128) -->
-    <skip />
-    <!-- no translation found for clipboard_edit (4500155216174011640) -->
-    <skip />
+    <string name="clipboard_editor" msgid="2971197550401892843">"剪貼簿編輯器"</string>
+    <string name="clipboard_overlay_window_name" msgid="6450043652167357664">"剪貼簿"</string>
+    <string name="clipboard_image_preview" msgid="2156475174343538128">"圖片預覽"</string>
+    <string name="clipboard_edit" msgid="4500155216174011640">"編輯"</string>
     <string name="add" msgid="81036585205287996">"新增"</string>
     <string name="manage_users" msgid="1823875311934643849">"管理使用者"</string>
     <string name="drag_split_not_supported" msgid="4326847447699729722">"這項通知無法拖曳到分割畫面中。"</string>
