@@ -291,7 +291,8 @@ class BackPanelController private constructor(
 
     override fun onMotionEvent(event: MotionEvent) {
         backAnimation?.onBackMotion(
-            event,
+            event.x,
+            event.y,
             event.actionMasked,
             if (mView.isLeftPanel) BackEvent.EDGE_LEFT else BackEvent.EDGE_RIGHT
         )
