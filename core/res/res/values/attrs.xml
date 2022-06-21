@@ -3075,6 +3075,20 @@
             <enum name="noHideDescendants" value="4" />
         </attr>
 
+        <!-- Describes whether this view should allow interactions from AccessibilityServices only
+             if the service sets the isAccessibilityTool property. -->
+        <attr name="accessibilityDataPrivate" format="integer">
+            <!-- The system determines whether the view's accessibility data is private
+                 - default (recommended). -->
+            <enum name="auto" value="0" />
+            <!-- Allow interactions from AccessibilityServices only if the service sets the
+                 isAccessibilityTool property. -->
+            <enum name="yes" value="1" />
+            <!-- Allow interactions from all AccessibilityServices, regardless of their
+                 isAccessibilityTool property. -->
+            <enum name="no" value="2" />
+        </attr>
+
         <!-- Indicates to accessibility services whether the user should be notified when
              this view changes. -->
         <attr name="accessibilityLiveRegion" format="integer">

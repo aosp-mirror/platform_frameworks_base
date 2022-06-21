@@ -551,6 +551,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_ENHANCED_WEB_ACCESSIBILITY
                 | AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS);
+        info.setAccessibilityTool(true);
         try {
             // Calling out with a lock held is fine since if the system
             // process is gone the client calling in will be killed.
