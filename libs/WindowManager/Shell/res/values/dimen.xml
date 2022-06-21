@@ -81,6 +81,9 @@
     <!-- The width and height of the background for custom action in PiP menu. -->
     <dimen name="pip_custom_close_bg_size">32dp</dimen>
 
+    <!-- Extra padding between picture-in-picture windows and any registered keep clear areas. -->
+    <dimen name="pip_keep_clear_areas_padding">16dp</dimen>
+
     <dimen name="dismiss_target_x_size">24dp</dimen>
     <dimen name="floating_dismiss_bottom_margin">50dp</dimen>
 

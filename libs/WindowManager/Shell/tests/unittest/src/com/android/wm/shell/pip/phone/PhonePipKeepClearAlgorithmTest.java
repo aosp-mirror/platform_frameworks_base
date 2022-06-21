@@ -34,61 +34,61 @@ import org.junit.runner.RunWith;
 import java.util.Set;
 
 /**
- * Unit tests against {@link PipKeepClearAlgorithm}.
+ * Unit tests against {@link PhonePipKeepClearAlgorithm}.
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-public class PipKeepClearAlgorithmTest extends ShellTestCase {
+public class PhonePipKeepClearAlgorithmTest extends ShellTestCase {
 
-    private PipKeepClearAlgorithm mPipKeepClearAlgorithm;
+    private PhonePipKeepClearAlgorithm mPipKeepClearAlgorithm;
     private static final Rect DISPLAY_BOUNDS = new Rect(0, 0, 1000, 1000);
 
     @Before
     public void setUp() throws Exception {
-        mPipKeepClearAlgorithm = new PipKeepClearAlgorithm();
+        mPipKeepClearAlgorithm = new PhonePipKeepClearAlgorithm(mContext);
     }
 
     @Test
-    public void adjust_withCollidingRestrictedKeepClearAreas_movesBounds() {
+    public void findUnoccludedPosition_withCollidingRestrictedKeepClearArea_movesBounds() {
         final Rect inBounds = new Rect(0, 0, 100, 100);
         final Rect keepClearRect = new Rect(50, 50, 150, 150);
 
-        final Rect outBounds = mPipKeepClearAlgorithm.adjust(inBounds, Set.of(keepClearRect),
-                Set.of(), DISPLAY_BOUNDS);
+        final Rect outBounds = mPipKeepClearAlgorithm.findUnoccludedPosition(inBounds,
+                Set.of(keepClearRect), Set.of(), DISPLAY_BOUNDS);
 
         assertFalse(outBounds.contains(keepClearRect));
     }
 
     @Test
-    public void adjust_withNonCollidingRestrictedKeepClearAreas_boundsDoNotChange() {
+    public void findUnoccludedPosition_withNonCollidingRestrictedKeepClearArea_boundsUnchanged() {
         final Rect inBounds = new Rect(0, 0, 100, 100);
         final Rect keepClearRect = new Rect(100, 100, 150, 150);
 
-        final Rect outBounds = mPipKeepClearAlgorithm.adjust(inBounds, Set.of(keepClearRect),
-                Set.of(), DISPLAY_BOUNDS);
+        final Rect outBounds = mPipKeepClearAlgorithm.findUnoccludedPosition(inBounds,
+                Set.of(keepClearRect), Set.of(), DISPLAY_BOUNDS);
 
         assertEquals(inBounds, outBounds);
     }
 
     @Test
-    public void adjust_withCollidingUnrestrictedKeepClearAreas_boundsDoNotChange() {
+    public void findUnoccludedPosition_withCollidingUnrestrictedKeepClearArea_moveBounds() {
         // TODO(b/183746978): update this test to accommodate for the updated algorithm
         final Rect inBounds = new Rect(0, 0, 100, 100);
         final Rect keepClearRect = new Rect(50, 50, 150, 150);
 
-        final Rect outBounds = mPipKeepClearAlgorithm.adjust(inBounds, Set.of(),
+        final Rect outBounds = mPipKeepClearAlgorithm.findUnoccludedPosition(inBounds, Set.of(),
                 Set.of(keepClearRect), DISPLAY_BOUNDS);
 
-        assertEquals(inBounds, outBounds);
+        assertFalse(outBounds.contains(keepClearRect));
     }
 
     @Test
-    public void adjust_withNonCollidingUnrestrictedKeepClearAreas_boundsDoNotChange() {
+    public void findUnoccludedPosition_withNonCollidingUnrestrictedKeepClearArea_boundsUnchanged() {
         final Rect inBounds = new Rect(0, 0, 100, 100);
         final Rect keepClearRect = new Rect(100, 100, 150, 150);
 
-        final Rect outBounds = mPipKeepClearAlgorithm.adjust(inBounds, Set.of(),
+        final Rect outBounds = mPipKeepClearAlgorithm.findUnoccludedPosition(inBounds, Set.of(),
                 Set.of(keepClearRect), DISPLAY_BOUNDS);
 
         assertEquals(inBounds, outBounds);
