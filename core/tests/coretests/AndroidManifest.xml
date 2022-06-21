@@ -1680,6 +1680,17 @@
                   android:resizeableActivity="true"
                   android:exported="true">
         </activity>
+
+        <service android:name="android.view.stylus.HandwritingImeService"
+                 android:label="Handwriting IME"
+                 android:permission="android.permission.BIND_INPUT_METHOD"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="android.view.InputMethod"/>
+            </intent-filter>
+            <meta-data android:name="android.view.im"
+                       android:resource="@xml/ime_meta_handwriting"/>
+        </service>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
