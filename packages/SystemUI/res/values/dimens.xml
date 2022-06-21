@@ -1060,6 +1060,7 @@
     <!-- Since the generic icon isn't circular, we need to scale it down so it still fits within
          the circular chip. -->
     <dimen name="media_ttt_generic_icon_size_receiver">70dp</dimen>
+    <dimen name="media_ttt_receiver_vert_translation">20dp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>

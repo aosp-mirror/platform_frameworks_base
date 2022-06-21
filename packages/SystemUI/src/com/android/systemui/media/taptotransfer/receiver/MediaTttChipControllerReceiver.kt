@@ -25,6 +25,7 @@ import android.os.Handler
 import android.os.PowerManager
 import android.util.Log
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
@@ -37,6 +38,7 @@ import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCom
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.gesture.TapGestureDetector
+import com.android.systemui.util.animation.AnimationUtil.Companion.frames
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.view.ViewUtil
 import javax.inject.Inject
@@ -71,8 +73,8 @@ class MediaTttChipControllerReceiver @Inject constructor(
     R.layout.media_ttt_chip_receiver
 ) {
     override val windowLayoutParams = commonWindowLayoutParams.apply {
+        height = getWindowHeight()
         gravity = Gravity.BOTTOM.or(Gravity.CENTER_HORIZONTAL)
-        verticalMargin = 0.1f
     }
 
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
@@ -137,6 +139,19 @@ class MediaTttChipControllerReceiver @Inject constructor(
         )
     }
 
+    override fun animateChipIn(chipView: ViewGroup) {
+        val appIconView = chipView.requireViewById<View>(R.id.app_icon)
+        appIconView.animate()
+                .translationYBy(-1 * getTranslationAmount().toFloat())
+                .setDuration(30.frames)
+                .start()
+        appIconView.animate()
+                .alpha(1f)
+                .setDuration(5.frames)
+                .start()
+
+    }
+
     override fun getIconSize(isAppIcon: Boolean): Int? =
         context.resources.getDimensionPixelSize(
             if (isAppIcon) {
@@ -145,6 +160,17 @@ class MediaTttChipControllerReceiver @Inject constructor(
                 R.dimen.media_ttt_generic_icon_size_receiver
             }
         )
+
+    private fun getWindowHeight(): Int {
+        return context.resources.getDimensionPixelSize(R.dimen.media_ttt_icon_size_receiver) +
+                // Make the window large enough to accommodate the animation amount
+                getTranslationAmount()
+    }
+
+    /** Returns the amount that the chip will be translated by in its intro animation. */
+    private fun getTranslationAmount(): Int {
+        return context.resources.getDimensionPixelSize(R.dimen.media_ttt_receiver_vert_translation)
+    }
 }
 
 data class ChipReceiverInfo(

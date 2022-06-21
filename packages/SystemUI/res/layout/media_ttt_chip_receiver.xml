@@ -19,14 +19,14 @@
     android:id="@+id/media_ttt_receiver_chip"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/media_ttt_chip_background_receiver"
     >
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/app_icon"
         android:layout_width="@dimen/media_ttt_icon_size_receiver"
         android:layout_height="@dimen/media_ttt_icon_size_receiver"
-        android:layout_gravity="center"
+        android:layout_gravity="center|bottom"
+        android:alpha="0.0"
         />
 
 </FrameLayout>
