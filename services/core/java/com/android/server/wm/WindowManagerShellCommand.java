@@ -1370,9 +1370,10 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        be ignored and framework implementation will determine aspect ratio.");
         pw.println("      --minAspectRatioForUnresizable aspectRatio");
         pw.println("        Default min aspect ratio for unresizable apps which is used when an");
-        pw.println("        app doesn't specify android:minAspectRatio. An exception will be");
-        pw.println("        thrown if aspectRatio < "
-                + LetterboxConfiguration.MIN_UNRESIZABLE_ASPECT_RATIO);
+        pw.println("        app is eligible for the size compat mode.  If aspectRatio <= "
+                + LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO);
+        pw.println("        both it and R.dimen.config_fixedOrientationLetterboxAspectRatio will");
+        pw.println("        be ignored and framework implementation will determine aspect ratio.");
         pw.println("      --cornerRadius radius");
         pw.println("        Corners radius for activities in the letterbox mode. If radius < 0,");
         pw.println("        both it and R.integer.config_letterboxActivityCornersRadius will be");

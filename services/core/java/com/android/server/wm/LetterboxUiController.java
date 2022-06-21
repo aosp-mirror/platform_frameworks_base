@@ -28,6 +28,7 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTypeToString;
 
 import android.annotation.Nullable;
@@ -211,10 +212,19 @@ final class LetterboxUiController {
                 : mLetterboxConfiguration.getLetterboxVerticalPositionMultiplier();
     }
 
-    float getDefaultMinAspectRatioForUnresizableApps() {
+    float getFixedOrientationLetterboxAspectRatio() {
+        return mActivityRecord.shouldCreateCompatDisplayInsets()
+                ? getDefaultMinAspectRatioForUnresizableApps()
+                : mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
+    }
+
+    private float getDefaultMinAspectRatioForUnresizableApps() {
         if (!mLetterboxConfiguration.getIsSplitScreenAspectRatioForUnresizableAppsEnabled()
                 || mActivityRecord.getDisplayContent() == null) {
-            return mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps();
+            return mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps()
+                    > MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO
+                            ? mLetterboxConfiguration.getDefaultMinAspectRatioForUnresizableApps()
+                            : mLetterboxConfiguration.getFixedOrientationLetterboxAspectRatio();
         }
 
         int dividerWindowWidth =
@@ -226,10 +236,10 @@ final class LetterboxUiController {
         // Getting the same aspect ratio that apps get in split screen.
         Rect bounds = new Rect(mActivityRecord.getDisplayContent().getBounds());
         if (bounds.width() >= bounds.height()) {
-            bounds.inset(/* dx */ dividerSize, /* dy */ 0);
+            bounds.inset(/* dx */ dividerSize / 2, /* dy */ 0);
             bounds.right = bounds.centerX();
         } else {
-            bounds.inset(/* dx */ 0, /* dy */ dividerSize);
+            bounds.inset(/* dx */ 0, /* dy */ dividerSize / 2);
             bounds.bottom = bounds.centerY();
         }
         return computeAspectRatio(bounds);
