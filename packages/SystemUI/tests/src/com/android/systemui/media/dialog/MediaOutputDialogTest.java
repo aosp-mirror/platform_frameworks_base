@@ -138,13 +138,28 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         mFeatures.add(MediaRoute2Info.FEATURE_REMOTE_GROUP_PLAYBACK);
 
         assertThat(mMediaOutputDialog.getStopButtonVisibility()).isEqualTo(View.VISIBLE);
+    }
 
-        mFeatures.clear();
+    @Test
+    public void getStopButtonVisibility_remoteBLEDevice_returnVisible() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
         when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_PLAYING);
+        when(mMediaDevice.isBLEDevice()).thenReturn(true);
+
         assertThat(mMediaOutputDialog.getStopButtonVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void getStopButtonVisibility_remoteNonBLEDevice_returnGone() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_PLAYING);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.getStopButtonVisibility()).isEqualTo(View.GONE);
     }
 
     @Test

@@ -651,7 +651,7 @@
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Prepoznavanje lica nije uspjelo. Pokušajte ponovo."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Malo pomaknite glavu"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Gledajte izravnije prema telefonu"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Gledajte izravnije prema telefonu"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Gledajte ravno u telefon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Gledajte izravnije prema telefonu"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Uklonite sve što vam zakriva lice."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Očistite vrh zaslona, uključujući crnu traku"</string>

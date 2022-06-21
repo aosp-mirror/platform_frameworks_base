@@ -1937,7 +1937,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                 continue;
             }
             final Task rootTask = child.asTask();
-            pw.println(doublePrefix + "* " + rootTask);
+            pw.println(doublePrefix + "* " + rootTask.toFullString());
             rootTask.dump(pw, triplePrefix, dumpAll);
         }
     }

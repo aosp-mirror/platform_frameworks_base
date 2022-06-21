@@ -186,6 +186,8 @@ public class RemoteTransitionCompat implements Parcelable {
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error merging transition.", e);
                 }
+                // commit taskAppeared after merge transition finished.
+                mRecentsSession.commitTasksAppearedIfNeeded(recents);
             }
         };
         mTransition = new RemoteTransition(remote, appThread);
@@ -226,6 +228,7 @@ public class RemoteTransitionCompat implements Parcelable {
         private PictureInPictureSurfaceTransaction mPipTransaction = null;
         private IBinder mTransition = null;
         private boolean mKeyguardLocked = false;
+        private RemoteAnimationTargetCompat[] mAppearedTargets;
 
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
                 IRemoteTransitionFinishedCallback finishCB,
@@ -251,6 +254,7 @@ public class RemoteTransitionCompat implements Parcelable {
         boolean merge(TransitionInfo info, SurfaceControl.Transaction t,
                 RecentsAnimationListener recents) {
             SparseArray<TransitionInfo.Change> openingTasks = null;
+            mAppearedTargets = null;
             boolean cancelRecents = false;
             boolean homeGoingAway = false;
             boolean hasChangingApp = false;
@@ -331,8 +335,15 @@ public class RemoteTransitionCompat implements Parcelable {
                 targets[i] = target;
             }
             t.apply();
-            recents.onTasksAppeared(targets);
+            mAppearedTargets = targets;
             return true;
+        }
+
+        private void commitTasksAppearedIfNeeded(RecentsAnimationListener recents) {
+            if (mAppearedTargets != null) {
+                recents.onTasksAppeared(mAppearedTargets);
+                mAppearedTargets = null;
+            }
         }
 
         @Override public ThumbnailData screenshotTask(int taskId) {

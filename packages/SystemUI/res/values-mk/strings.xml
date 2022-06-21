@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Камера"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Телефон"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Гласовна помош"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Паричник"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Скенер на QR-кодови"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Отклучување"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Уредот е заклучен"</string>
@@ -403,7 +403,7 @@
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Вашиот администратор вклучил евиденција на мрежата, што подразбира следење на сообраќајот на вашиот уред."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Вашиот администратор вклучил мрежна евиденција, што подразбира следење на сообраќајот во работниот, но не и во личниот профил."</string>
     <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Уредов е поврзан на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, вклучително е-пораките и податоците од прелистување, е видлива за вашиот IT-администратор."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Уредот е поврзан на интернет преку <xliff:g id="VPN_APP_0">%1$s</xliff:g> и <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Вашата мрежна активност во работните апликации, вклучително е-пораките и податоците од прелистување, е видлива за вашиот IT-администратор."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Уредот е поврзан на интернет преку <xliff:g id="VPN_APP_0">%1$s</xliff:g> и <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Вашата мрежна активност, вклучително е-пораките и податоците од прелистување, е видлива за IT-администраторот."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Вашите работни апликации се поврзани на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, вклучително е-пораките и податоците од прелистување, е видлива за вашиот IT-администратор и давател на услуги за VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Вашите лични апликации се поврзани на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, вклучително е-пораките и податоците од прелистување, е видлива за вашиот давател на услуги за VPN."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
@@ -463,7 +463,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Прикажи демо-режим"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Етернет"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Аларм"</string>
-    <string name="wallet_title" msgid="5369767670735827105">"Паричник"</string>
+    <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Поставете за да купувате побрзо и побезбедно преку вашиот телефон"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Прикажи ги сите"</string>
     <string name="wallet_secondary_label_no_card" msgid="8488069304491125713">"Допрете за да отворите"</string>
