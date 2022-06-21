@@ -198,6 +198,22 @@ class TaskFragmentContainer {
         return mPendingAppearedIntent;
     }
 
+    void setPendingAppearedIntent(@Nullable Intent intent) {
+        mPendingAppearedIntent = intent;
+    }
+
+    /**
+     * Clears the pending appeared Intent if it is the same as given Intent. Otherwise, the
+     * pending appeared Intent is cleared when TaskFragmentInfo is set and is not empty (has
+     * running activities).
+     */
+    void clearPendingAppearedIntentIfNeeded(@NonNull Intent intent) {
+        if (mPendingAppearedIntent == null || mPendingAppearedIntent != intent) {
+            return;
+        }
+        mPendingAppearedIntent = null;
+    }
+
     boolean hasActivity(@NonNull IBinder token) {
         if (mInfo != null && mInfo.getActivities().contains(token)) {
             return true;
@@ -230,13 +246,18 @@ class TaskFragmentContainer {
 
     void setInfo(@NonNull TaskFragmentInfo info) {
         if (!mIsFinished && mInfo == null && info.isEmpty()) {
-            // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if it is
-            // still empty after timeout.
+            // onTaskFragmentAppeared with empty info. We will remove the TaskFragment if no
+            // pending appeared intent/activities. Otherwise, wait and removing the TaskFragment if
+            // it is still empty after timeout.
             mAppearEmptyTimeout = () -> {
                 mAppearEmptyTimeout = null;
                 mController.onTaskFragmentAppearEmptyTimeout(this);
             };
-            mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
+            if (mPendingAppearedIntent != null || !mPendingAppearedActivities.isEmpty()) {
+                mController.getHandler().postDelayed(mAppearEmptyTimeout, APPEAR_EMPTY_TIMEOUT_MS);
+            } else {
+                mAppearEmptyTimeout.run();
+            }
         } else if (mAppearEmptyTimeout != null && !info.isEmpty()) {
             mController.getHandler().removeCallbacks(mAppearEmptyTimeout);
             mAppearEmptyTimeout = null;
