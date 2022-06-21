@@ -1114,7 +1114,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         // If a task is launching from a created-by-organizer task, it should be launched into the
         // same created-by-organizer task as well. Unless, the candidate task is already positioned
         // in the another adjacent task.
-        if (sourceTask != null) {
+        if (sourceTask != null && (candidateTask == null
+                // A pinned task relaunching should be handled by its task organizer. Skip fallback
+                // launch target of a pinned task from source task.
+                || candidateTask.getWindowingMode() != WINDOWING_MODE_PINNED)) {
             Task launchTarget = sourceTask.getCreatedByOrganizerTask();
             if (launchTarget != null && launchTarget.getAdjacentTaskFragment() != null) {
                 if (candidateTask != null) {
