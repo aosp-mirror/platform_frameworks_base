@@ -34,9 +34,10 @@ class OverlayWindow(private val context: Context) {
 
     fun addDecorProvider(
         decorProvider: DecorProvider,
-        @Surface.Rotation rotation: Int
+        @Surface.Rotation rotation: Int,
+        tintColor: Int
     ) {
-        val view = decorProvider.inflateView(context, rootView, rotation)
+        val view = decorProvider.inflateView(context, rootView, rotation, tintColor)
         viewProviderMap[decorProvider.viewId] = Pair(view, decorProvider)
     }
 
@@ -69,7 +70,7 @@ class OverlayWindow(private val context: Context) {
      */
     fun hasSameProviders(newProviders: List<DecorProvider>): Boolean {
         return (newProviders.size == viewProviderMap.size) &&
-                newProviders.all { getView(it.viewId) != null }
+            newProviders.all { getView(it.viewId) != null }
     }
 
     /**
@@ -82,23 +83,28 @@ class OverlayWindow(private val context: Context) {
         filterIds: Array<Int>? = null,
         reloadToken: Int,
         @Surface.Rotation rotation: Int,
+        tintColor: Int,
         displayUniqueId: String? = null
     ) {
         filterIds?.forEach { id ->
             viewProviderMap[id]?.let {
                 it.second.onReloadResAndMeasure(
-                        view = it.first,
-                        reloadToken = reloadToken,
-                        displayUniqueId = displayUniqueId,
-                        rotation = rotation)
+                    view = it.first,
+                    reloadToken = reloadToken,
+                    rotation = rotation,
+                    tintColor = tintColor,
+                    displayUniqueId = displayUniqueId
+                )
             }
         } ?: run {
             viewProviderMap.values.forEach {
                 it.second.onReloadResAndMeasure(
-                        view = it.first,
-                        reloadToken = reloadToken,
-                        displayUniqueId = displayUniqueId,
-                        rotation = rotation)
+                    view = it.first,
+                    reloadToken = reloadToken,
+                    rotation = rotation,
+                    tintColor = tintColor,
+                    displayUniqueId = displayUniqueId
+                )
             }
         }
     }

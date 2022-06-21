@@ -1382,7 +1382,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         mScreenDecorations.mDisplayListener.onDisplayChanged(1);
 
-        verify(hwcLayer, times(1)).onDisplayChanged(1);
+        verify(hwcLayer, times(1)).onDisplayChanged(any());
     }
 
     @Test
@@ -1406,7 +1406,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
 
         mScreenDecorations.mDisplayListener.onDisplayChanged(1);
 
-        verify(cutoutView, times(1)).onDisplayChanged(1);
+        verify(cutoutView, times(1)).onDisplayChanged(any());
     }
 
     @Test

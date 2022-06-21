@@ -109,19 +109,25 @@ class FaceScanningOverlayProviderImpl(
     override fun onReloadResAndMeasure(
         view: View,
         reloadToken: Int,
-        rotation: Int,
+        @Surface.Rotation rotation: Int,
+        tintColor: Int,
         displayUniqueId: String?
     ) {
         (view.layoutParams as FrameLayout.LayoutParams).let {
             updateLayoutParams(it, rotation)
             view.layoutParams = it
+            (view as? FaceScanningOverlay)?.let { overlay ->
+                overlay.setColor(tintColor)
+                overlay.onDisplayChanged(displayUniqueId)
+            }
         }
     }
 
     override fun inflateView(
         context: Context,
         parent: ViewGroup,
-        @Surface.Rotation rotation: Int
+        @Surface.Rotation rotation: Int,
+        tintColor: Int
     ): View {
         val view = FaceScanningOverlay(
                 context,
@@ -129,6 +135,7 @@ class FaceScanningOverlayProviderImpl(
                 statusBarStateController,
                 keyguardUpdateMonitor)
         view.id = viewId
+        view.setColor(tintColor)
         FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT).let {
             updateLayoutParams(it, rotation)

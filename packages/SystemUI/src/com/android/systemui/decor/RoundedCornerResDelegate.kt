@@ -18,9 +18,7 @@ package com.android.systemui.decor
 
 import android.annotation.ArrayRes
 import android.annotation.DrawableRes
-import android.content.res.ColorStateList
 import android.content.res.Resources
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.DisplayUtils
 import android.util.Size
@@ -56,8 +54,6 @@ class RoundedCornerResDelegate(
 
     var bottomRoundedSize = Size(0, 0)
         private set
-
-    var colorTintList = ColorStateList.valueOf(Color.BLACK)
 
     var tuningSizeFactor: Int? = null
         set(value) {
@@ -107,19 +103,19 @@ class RoundedCornerResDelegate(
 
         val hasDefaultRadius = RoundedCorners.getRoundedCornerRadius(res, displayUniqueId) > 0
         hasTop = hasDefaultRadius ||
-                (RoundedCorners.getRoundedCornerTopRadius(res, displayUniqueId) > 0)
+            (RoundedCorners.getRoundedCornerTopRadius(res, displayUniqueId) > 0)
         hasBottom = hasDefaultRadius ||
-                (RoundedCorners.getRoundedCornerBottomRadius(res, displayUniqueId) > 0)
+            (RoundedCorners.getRoundedCornerBottomRadius(res, displayUniqueId) > 0)
 
         topRoundedDrawable = getDrawable(
-                displayConfigIndex = configIdx,
-                arrayResId = R.array.config_roundedCornerTopDrawableArray,
-                backupDrawableId = R.drawable.rounded_corner_top
+            displayConfigIndex = configIdx,
+            arrayResId = R.array.config_roundedCornerTopDrawableArray,
+            backupDrawableId = R.drawable.rounded_corner_top
         )
         bottomRoundedDrawable = getDrawable(
-                displayConfigIndex = configIdx,
-                arrayResId = R.array.config_roundedCornerBottomDrawableArray,
-                backupDrawableId = R.drawable.rounded_corner_bottom
+            displayConfigIndex = configIdx,
+            arrayResId = R.array.config_roundedCornerBottomDrawableArray,
+            backupDrawableId = R.drawable.rounded_corner_bottom
         )
     }
 
@@ -147,13 +143,15 @@ class RoundedCornerResDelegate(
         if (physicalPixelDisplaySizeRatio != 1f) {
             if (topRoundedSize.width != 0) {
                 topRoundedSize = Size(
-                        (physicalPixelDisplaySizeRatio * topRoundedSize.width + 0.5f).toInt(),
-                        (physicalPixelDisplaySizeRatio * topRoundedSize.height + 0.5f).toInt())
+                    (physicalPixelDisplaySizeRatio * topRoundedSize.width + 0.5f).toInt(),
+                    (physicalPixelDisplaySizeRatio * topRoundedSize.height + 0.5f).toInt()
+                )
             }
             if (bottomRoundedSize.width != 0) {
                 bottomRoundedSize = Size(
-                        (physicalPixelDisplaySizeRatio * bottomRoundedSize.width + 0.5f).toInt(),
-                        (physicalPixelDisplaySizeRatio * bottomRoundedSize.height + 0.5f).toInt())
+                    (physicalPixelDisplaySizeRatio * bottomRoundedSize.width + 0.5f).toInt(),
+                    (physicalPixelDisplaySizeRatio * bottomRoundedSize.height + 0.5f).toInt()
+                )
             }
         }
     }
@@ -180,8 +178,9 @@ class RoundedCornerResDelegate(
         pw.println("  hasTop=$hasTop")
         pw.println("  hasBottom=$hasBottom")
         pw.println("  topRoundedSize(w,h)=(${topRoundedSize.width},${topRoundedSize.height})")
-        pw.println("  bottomRoundedSize(w,h)=(${bottomRoundedSize.width}," +
-                "${bottomRoundedSize.height})")
+        pw.println(
+            "  bottomRoundedSize(w,h)=(${bottomRoundedSize.width},${bottomRoundedSize.height})"
+        )
         pw.println("  physicalPixelDisplaySizeRatio=$physicalPixelDisplaySizeRatio")
     }
 }
