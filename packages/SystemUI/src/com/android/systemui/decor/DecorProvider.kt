@@ -33,7 +33,7 @@ abstract class DecorProvider {
 
     /** The number of total aligned bounds */
     val numOfAlignedEdge: Int
-    get() = alignedBounds.size
+        get() = alignedBounds.size
 
     /** The aligned bounds for the view which is created through inflateView() */
     abstract val alignedBounds: List<Int>
@@ -46,14 +46,16 @@ abstract class DecorProvider {
         view: View,
         reloadToken: Int,
         @Surface.Rotation rotation: Int,
-        displayUniqueId: String? = null
+        tintColor: Int,
+        displayUniqueId: String?
     )
 
     /** Inflate view into parent as current rotation */
     abstract fun inflateView(
         context: Context,
         parent: ViewGroup,
-        @Surface.Rotation rotation: Int
+        @Surface.Rotation rotation: Int,
+        tintColor: Int
     ): View
 }
 
