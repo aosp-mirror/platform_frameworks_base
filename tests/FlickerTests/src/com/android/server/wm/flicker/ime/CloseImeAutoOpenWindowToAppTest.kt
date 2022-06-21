@@ -69,12 +69,12 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup {
-                test {
+                eachRun {
                     testApp.launchViaIntent(wmHelper)
                 }
             }
             teardown {
-                test {
+                eachRun {
                     testApp.exit(wmHelper)
                 }
             }

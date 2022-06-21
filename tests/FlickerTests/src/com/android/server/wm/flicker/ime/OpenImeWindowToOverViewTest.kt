@@ -104,11 +104,10 @@ class OpenImeWindowToOverViewTest(private val testSpec: FlickerTestParameter) {
      */
     private fun waitNavStatusBarVisibility(stateSync: WindowManagerStateHelper.StateSyncBuilder) {
         when {
-            testSpec.isLandscapeOrSeascapeAtStart && !testSpec.isGesturalNavigation ->
-                stateSync.add(statusBarInvisible)
             testSpec.isLandscapeOrSeascapeAtStart ->
                 stateSync.add(statusBarInvisible)
-                    .add(navBarInvisible)
+            else ->
+                stateSync.withNavBarStatusBarVisible()
         }
     }
 
