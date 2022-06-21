@@ -50,7 +50,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.privacy.PrivacyModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
-import com.android.systemui.settings.dagger.SettingsModule;
+import com.android.systemui.settings.dagger.MultiUserUtilsModule;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -127,7 +127,7 @@ import dagger.Provides;
             QsFrameTranslateModule.class,
             ScreenshotModule.class,
             SensorModule.class,
-            SettingsModule.class,
+            MultiUserUtilsModule.class,
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
             SmartspaceModule.class,
