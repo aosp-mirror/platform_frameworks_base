@@ -49,7 +49,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -464,7 +463,7 @@ final class HdmiCecController {
         }
 
         int iterationStrategy = pickStrategy & Constants.POLL_ITERATION_STRATEGY_MASK;
-        LinkedList<Integer> pollingCandidates = new LinkedList<>();
+        ArrayList<Integer> pollingCandidates = new ArrayList<>();
         switch (iterationStrategy) {
             case Constants.POLL_ITERATION_IN_ORDER:
                 for (int i = Constants.ADDR_TV; i <= Constants.ADDR_SPECIFIC_USE; ++i) {
