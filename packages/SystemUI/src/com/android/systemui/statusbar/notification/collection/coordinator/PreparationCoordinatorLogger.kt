@@ -19,48 +19,51 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.collection.GroupEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class PreparationCoordinatorLogger @Inject constructor(
     @NotificationLog private val buffer: LogBuffer
 ) {
-    fun logNotifInflated(key: String) {
+    fun logNotifInflated(entry: NotificationEntry) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = key
+            str1 = entry.logKey
         }, {
             "NOTIF INFLATED $str1"
         })
     }
 
-    fun logInflationAborted(key: String, reason: String) {
+    fun logInflationAborted(entry: NotificationEntry, reason: String) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = key
+            str1 = entry.logKey
             str2 = reason
         }, {
             "NOTIF INFLATION ABORTED $str1 reason=$str2"
         })
     }
 
-    fun logDoneWaitingForGroupInflation(groupKey: String) {
+    fun logDoneWaitingForGroupInflation(group: GroupEntry) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = groupKey
+            str1 = group.logKey
         }, {
             "Finished inflating all members of group $str1, releasing group"
         })
     }
 
-    fun logGroupInflationTookTooLong(groupKey: String) {
+    fun logGroupInflationTookTooLong(group: GroupEntry) {
         buffer.log(TAG, LogLevel.WARNING, {
-            str1 = groupKey
+            str1 = group.logKey
         }, {
             "Group inflation took too long for $str1, releasing children early"
         })
     }
 
-    fun logDelayingGroupRelease(groupKey: String, childKey: String) {
+    fun logDelayingGroupRelease(group: GroupEntry, child: NotificationEntry) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = groupKey
-            str2 = childKey
+            str1 = group.logKey
+            str2 = child.logKey
         }, {
             "Delaying release of group $str1 because child $str2 is still inflating"
         })

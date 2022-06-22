@@ -267,13 +267,14 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             requireNonNull(stats);
             NotificationEntry storedEntry = mNotificationSet.get(entry.getKey());
             if (storedEntry == null) {
-                mLogger.logNonExistentNotifDismissed(entry.getKey());
+                mLogger.logNonExistentNotifDismissed(entry);
                 continue;
             }
             if (entry != storedEntry) {
                 throw mEulogizer.record(
                         new IllegalStateException("Invalid entry: "
-                                + "different stored and dismissed entries for " + entry.getKey()));
+                                + "different stored and dismissed entries for " + logKey(entry)
+                                + " stored=@" + Integer.toHexString(storedEntry.hashCode())));
             }
 
             if (entry.getDismissState() == DISMISSED) {
@@ -282,7 +283,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
 
             updateDismissInterceptors(entry);
             if (isDismissIntercepted(entry)) {
-                mLogger.logNotifDismissedIntercepted(entry.getKey());
+                mLogger.logNotifDismissedIntercepted(entry);
                 continue;
             }
 
@@ -299,7 +300,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                             stats.notificationVisibility);
                 } catch (RemoteException e) {
                     // system process is dead if we're here.
-                    mLogger.logRemoteExceptionOnNotificationClear(entry.getKey(), e);
+                    mLogger.logRemoteExceptionOnNotificationClear(entry, e);
                 }
             }
         }
@@ -342,7 +343,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                 // interceptors the chance to filter the notification
                 updateDismissInterceptors(entry);
                 if (isDismissIntercepted(entry)) {
-                    mLogger.logNotifClearAllDismissalIntercepted(entry.getKey());
+                    mLogger.logNotifClearAllDismissalIntercepted(entry);
                 }
                 entries.remove(i);
             }
@@ -363,7 +364,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             NotificationEntry entry = entries.get(i);
 
             entry.setDismissState(DISMISSED);
-            mLogger.logNotifDismissed(entry.getKey());
+            mLogger.logNotifDismissed(entry);
 
             if (isCanceled(entry)) {
                 canceledEntries.add(entry);
@@ -416,12 +417,12 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             int reason) {
         Assert.isMainThread();
 
-        mLogger.logNotifRemoved(sbn.getKey(), reason);
+        mLogger.logNotifRemoved(sbn, reason);
 
         final NotificationEntry entry = mNotificationSet.get(sbn.getKey());
         if (entry == null) {
             // TODO (b/160008901): Throw an exception here
-            mLogger.logNoNotificationToRemoveWithKey(sbn.getKey(), reason);
+            mLogger.logNoNotificationToRemoveWithKey(sbn, reason);
             return;
         }
 
@@ -464,7 +465,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             mEventQueue.add(new BindEntryEvent(entry, sbn));
             mNotificationSet.put(sbn.getKey(), entry);
 
-            mLogger.logNotifPosted(sbn.getKey());
+            mLogger.logNotifPosted(entry);
             mEventQueue.add(new EntryAddedEvent(entry));
 
         } else {
@@ -483,7 +484,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             entry.setSbn(sbn);
             mEventQueue.add(new BindEntryEvent(entry, sbn));
 
-            mLogger.logNotifUpdated(sbn.getKey());
+            mLogger.logNotifUpdated(entry);
             mEventQueue.add(new EntryUpdatedEvent(entry, true /* fromSystem */));
         }
     }
@@ -498,12 +499,12 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         if (mNotificationSet.get(entry.getKey()) != entry) {
             throw mEulogizer.record(
                     new IllegalStateException("No notification to remove with key "
-                            + entry.getKey()));
+                            + logKey(entry)));
         }
 
         if (!isCanceled(entry)) {
             throw mEulogizer.record(
-                    new IllegalStateException("Cannot remove notification " + entry.getKey()
+                    new IllegalStateException("Cannot remove notification " + logKey(entry)
                             + ": has not been marked for removal"));
         }
 
@@ -514,7 +515,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         }
 
         if (!isLifetimeExtended(entry)) {
-            mLogger.logNotifReleased(entry.getKey());
+            mLogger.logNotifReleased(entry);
             mNotificationSet.remove(entry.getKey());
             cancelDismissInterception(entry);
             mEventQueue.add(new EntryRemovedEvent(entry, entry.mCancellationReason));
@@ -580,7 +581,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                         }
                     }
                 } else {
-                    mLogger.logRankingMissing(entry.getKey(), rankingMap);
+                    mLogger.logRankingMissing(entry, rankingMap);
                 }
             }
         }
@@ -627,10 +628,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                             extender.getName(), logKey, collectionEntryIs)));
         }
 
-        mLogger.logLifetimeExtensionEnded(
-                entry.getKey(),
-                extender,
-                entry.mLifetimeExtenders.size());
+        mLogger.logLifetimeExtensionEnded(entry, extender, entry.mLifetimeExtenders.size());
 
         if (!isLifetimeExtended(entry)) {
             if (tryRemoveNotification(entry)) {
@@ -657,7 +655,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         mAmDispatchingToOtherCode = true;
         for (NotifLifetimeExtender extender : mLifetimeExtenders) {
             if (extender.maybeExtendLifetime(entry, entry.mCancellationReason)) {
-                mLogger.logLifetimeExtended(entry.getKey(), extender);
+                mLogger.logLifetimeExtended(entry, extender);
                 entry.mLifetimeExtenders.add(extender);
             }
         }
@@ -924,17 +922,17 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         // Make sure we have the notification to update
         NotificationEntry entry = mNotificationSet.get(sbn.getKey());
         if (entry == null) {
-            mLogger.logNotifInternalUpdateFailed(sbn.getKey(), name, reason);
+            mLogger.logNotifInternalUpdateFailed(sbn, name, reason);
             return;
         }
-        mLogger.logNotifInternalUpdate(sbn.getKey(), name, reason);
+        mLogger.logNotifInternalUpdate(entry, name, reason);
 
         // First do the pieces of postNotification which are not about assuming the notification
         // was sent by the app
         entry.setSbn(sbn);
         mEventQueue.add(new BindEntryEvent(entry, sbn));
 
-        mLogger.logNotifUpdated(sbn.getKey());
+        mLogger.logNotifUpdated(entry);
         mEventQueue.add(new EntryUpdatedEvent(entry, false /* fromSystem */));
 
         // Skip the applyRanking step and go straight to dispatching the events

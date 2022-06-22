@@ -360,13 +360,13 @@ public class PreparationCoordinator implements Coordinator {
     }
 
     private void abortInflation(NotificationEntry entry, String reason) {
-        mLogger.logInflationAborted(entry.getKey(), reason);
+        mLogger.logInflationAborted(entry, reason);
         mNotifInflater.abortInflation(entry);
         mInflatingNotifs.remove(entry);
     }
 
     private void onInflationFinished(NotificationEntry entry, NotifViewController controller) {
-        mLogger.logNotifInflated(entry.getKey());
+        mLogger.logNotifInflated(entry);
         mInflatingNotifs.remove(entry);
         mViewBarn.registerViewForEntry(entry, controller);
         mInflationStates.put(entry, STATE_INFLATED);
@@ -398,20 +398,20 @@ public class PreparationCoordinator implements Coordinator {
             return false;
         }
         if (isBeyondGroupInitializationWindow(group, now)) {
-            mLogger.logGroupInflationTookTooLong(group.getKey());
+            mLogger.logGroupInflationTookTooLong(group);
             return false;
         }
         if (mInflatingNotifs.contains(group.getSummary())) {
-            mLogger.logDelayingGroupRelease(group.getKey(), group.getSummary().getKey());
+            mLogger.logDelayingGroupRelease(group, group.getSummary());
             return true;
         }
         for (NotificationEntry child : group.getChildren()) {
             if (mInflatingNotifs.contains(child) && !child.wasAttachedInPreviousPass()) {
-                mLogger.logDelayingGroupRelease(group.getKey(), child.getKey());
+                mLogger.logDelayingGroupRelease(group, child);
                 return true;
             }
         }
-        mLogger.logDoneWaitingForGroupInflation(group.getKey());
+        mLogger.logDoneWaitingForGroupInflation(group);
         return false;
     }
 
