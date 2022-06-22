@@ -17621,7 +17621,7 @@ public final class Settings {
         public @interface SyncDisabledMode {}
 
         /**
-         * Sync is not not disabled.
+         * Sync is not disabled.
          *
          * @hide
          */
