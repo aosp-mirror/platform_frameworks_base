@@ -160,7 +160,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 200;
+    static final int VERSION = 201;
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -927,6 +927,28 @@ public class BatteryStatsImpl extends BatteryStats {
             screenDozeTimer.reset(false, elapsedRealtimeUs);
             for (int i = 0; i < NUM_SCREEN_BRIGHTNESS_BINS; i++) {
                 screenBrightnessTimers[i].reset(false, elapsedRealtimeUs);
+            }
+        }
+
+        /**
+         * Write data to summary parcel
+         */
+        public void writeSummaryToParcel(Parcel out, long elapsedRealtimeUs) {
+            screenOnTimer.writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
+            screenDozeTimer.writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
+            for (int i = 0; i < NUM_SCREEN_BRIGHTNESS_BINS; i++) {
+                screenBrightnessTimers[i].writeSummaryFromParcelLocked(out, elapsedRealtimeUs);
+            }
+        }
+
+        /**
+         * Read data from summary parcel
+         */
+        public void readSummaryFromParcel(Parcel in) {
+            screenOnTimer.readSummaryFromParcelLocked(in);
+            screenDozeTimer.readSummaryFromParcelLocked(in);
+            for (int i = 0; i < NUM_SCREEN_BRIGHTNESS_BINS; i++) {
+                screenBrightnessTimers[i].readSummaryFromParcelLocked(in);
             }
         }
     }
@@ -15636,6 +15658,10 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].readSummaryFromParcelLocked(in);
         }
+        final int numDisplays = in.readInt();
+        for (int i = 0; i < numDisplays; i++) {
+            mPerDisplayBatteryStats[i].readSummaryFromParcel(in);
+        }
         mInteractive = false;
         mInteractiveTimer.readSummaryFromParcelLocked(in);
         mPhoneOn = false;
@@ -16134,6 +16160,11 @@ public class BatteryStatsImpl extends BatteryStats {
         mScreenDozeTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
             mScreenBrightnessTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        }
+        final int numDisplays = mPerDisplayBatteryStats.length;
+        out.writeInt(numDisplays);
+        for (int i = 0; i < numDisplays; i++) {
+            mPerDisplayBatteryStats[i].writeSummaryToParcel(out, NOWREAL_SYS);
         }
         mInteractiveTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mPowerSaveModeEnabledTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
