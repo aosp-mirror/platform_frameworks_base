@@ -16,11 +16,14 @@
 
 package com.android.server.display.color;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -1128,6 +1131,15 @@ public class ColorDisplayServiceTest {
         startService();
         verify(mDisplayTransformManager).setColorMode(
                 eq(ColorDisplayManager.COLOR_MODE_BOOSTED), any(), eq(Display.COLOR_MODE_INVALID));
+    }
+
+    @Test
+    public void getColorMode_noAvailableModes_returnsNotSet() {
+        when(mResourcesSpy.getIntArray(R.array.config_availableColorModes))
+                .thenReturn(new int[] {});
+        startService();
+        verify(mDisplayTransformManager, never()).setColorMode(anyInt(), any(), anyInt());
+        assertThat(mBinderService.getColorMode()).isEqualTo(-1);
     }
 
     /**
