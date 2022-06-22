@@ -147,10 +147,9 @@ public class DeviceSelectActionFromPlaybackTest {
 
         // The addresses depend on local device's LA.
         // This help the tests to pass with every local device LA.
-        synchronized (mHdmiCecLocalDevicePlayback.mLock) {
-            mPlaybackLogicalAddress1 =
-                    mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
-        }
+        mPlaybackLogicalAddress1 =
+                mHdmiCecLocalDevicePlayback.getDeviceInfo().getLogicalAddress();
+
         mPlaybackLogicalAddress2 = mPlaybackLogicalAddress1 == ADDR_PLAYBACK_2
                 ? ADDR_PLAYBACK_1 : ADDR_PLAYBACK_2;
         mPlaybackLogicalAddress3 = mPlaybackLogicalAddress1 == ADDR_PLAYBACK_3

@@ -112,9 +112,7 @@ public class SetAudioVolumeLevelDiscoveryActionTest {
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mTestLooper.dispatchAll();
 
-        synchronized (mPlaybackDevice.mLock) {
-            mPlaybackLogicalAddress = mPlaybackDevice.getDeviceInfo().getLogicalAddress();
-        }
+        mPlaybackLogicalAddress = mPlaybackDevice.getDeviceInfo().getLogicalAddress();
 
         // Setup specific to these tests
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(

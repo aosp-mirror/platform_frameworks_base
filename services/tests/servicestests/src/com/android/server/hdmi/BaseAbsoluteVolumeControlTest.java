@@ -212,9 +212,7 @@ public abstract class BaseAbsoluteVolumeControlTest {
     }
 
     protected int getLogicalAddress() {
-        synchronized (mHdmiCecLocalDevice.mLock) {
-            return mHdmiCecLocalDevice.getDeviceInfo().getLogicalAddress();
-        }
+        return mHdmiCecLocalDevice.getDeviceInfo().getLogicalAddress();
     }
 
     /**
