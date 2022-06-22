@@ -17,30 +17,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
            xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
 
-    <!-- HybridNotification themes and styles -->
-
-    <style name="HybridNotification">
-        <item name="hybridNotificationStyle">@style/hybrid_notification</item>
-        <item name="hybridNotificationTitleStyle">@style/hybrid_notification_title</item>
-        <item name="hybridNotificationTextStyle">@style/hybrid_notification_text</item>
-    </style>
-
-    <style name="hybrid_notification">
-        <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
-        <item name="android:paddingEnd">12dp</item>
-    </style>
-
-    <style name="hybrid_notification_title">
-        <item name="android:paddingEnd">4dp</item>
-        <item name="android:textAppearance">@*android:style/TextAppearance.DeviceDefault.Notification.Title</item>
-    </style>
-
-    <style name="hybrid_notification_text"
-           parent="@*android:style/Widget.DeviceDefault.Notification.Text">
-        <item name="android:paddingEnd">4dp</item>
-    </style>
-
-
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">@dimen/status_bar_clock_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
