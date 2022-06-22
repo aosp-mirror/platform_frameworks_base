@@ -26,6 +26,7 @@ import android.os.PowerManager
 import android.util.Log
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -52,6 +53,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     windowManager: WindowManager,
     viewUtil: ViewUtil,
     mainExecutor: DelayableExecutor,
+    accessibilityManager: AccessibilityManager,
     tapGestureDetector: TapGestureDetector,
     powerManager: PowerManager,
     @Main private val mainHandler: Handler,
@@ -62,6 +64,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     windowManager,
     viewUtil,
     mainExecutor,
+    accessibilityManager,
     tapGestureDetector,
     powerManager,
     R.layout.media_ttt_chip_receiver

@@ -54,6 +54,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1044,7 +1045,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         @Override
         public boolean showBeforeProvisioning() {
-            return false;
+            return Build.isDebuggable() && mGlobalSettings.getInt(
+                    Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0;
         }
     }
 
