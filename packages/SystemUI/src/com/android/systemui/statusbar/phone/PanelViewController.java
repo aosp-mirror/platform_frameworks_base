@@ -1163,8 +1163,6 @@ public abstract class PanelViewController {
                 mTouchDisabled ? "T" : "f"));
     }
 
-    public abstract void resetViews(boolean animate);
-
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
     }
