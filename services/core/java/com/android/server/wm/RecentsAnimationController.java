@@ -71,9 +71,7 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
@@ -99,11 +97,6 @@ import java.util.stream.Collectors;
 public class RecentsAnimationController implements DeathRecipient {
     private static final String TAG = RecentsAnimationController.class.getSimpleName();
     private static final long FAILSAFE_DELAY = 1000;
-    /**
-     * If the recents animation is canceled before the delay since the window drawn, do not log the
-     * action because the duration is too small that may be just a mistouch.
-     */
-    private static final long LATENCY_TRACKER_LOG_DELAY_MS = 300;
 
     // Constant for a yet-to-be-calculated {@link RemoteAnimationTarget#Mode} state
     private static final int MODE_UNKNOWN = -1;
@@ -144,7 +137,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mPendingStart = true;
 
     // Set when the animation has been canceled
-    private volatile boolean mCanceled;
+    private boolean mCanceled;
 
     // Whether or not the input consumer is enabled. The input consumer must be both registered and
     // enabled for it to start intercepting touch events.
@@ -783,15 +776,6 @@ public class RecentsAnimationController implements DeathRecipient {
                         "collectTaskRemoteAnimations, target: %s", target);
             }
         }, false /* traverseTopToBottom */);
-    }
-
-    void logRecentsAnimationStartTime(int durationMs) {
-        BackgroundThread.getHandler().postDelayed(() -> {
-            if (!mCanceled) {
-                mService.mLatencyTracker.logAction(LatencyTracker.ACTION_START_RECENTS_ANIMATION,
-                        durationMs);
-            }
-        }, LATENCY_TRACKER_LOG_DELAY_MS);
     }
 
     private boolean removeTaskInternal(int taskId) {

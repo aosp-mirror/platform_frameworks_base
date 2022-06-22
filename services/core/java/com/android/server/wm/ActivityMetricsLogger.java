@@ -145,6 +145,12 @@ class ActivityMetricsLogger {
     private static final long UNKNOWN_VISIBILITY_CHECK_DELAY_MS = 3000;
 
     /**
+     * If the recents animation is finished before the delay since the window drawn, do not log the
+     * action because the duration is too small that may be just an accidentally touch.
+     */
+    private static final long LATENCY_TRACKER_RECENTS_DELAY_MS = 300;
+
+    /**
      * The flag for {@link #notifyActivityLaunching} to skip associating a new launch with an active
      * transition, in the case the launch is standalone (e.g. from recents).
      */
@@ -734,10 +740,6 @@ class ActivityMetricsLogger {
         if (info.mLoggedTransitionStarting) {
             done(false /* abort */, info, "notifyWindowsDrawn", timestampNs);
         }
-        if (r.mWmService.isRecentsAnimationTarget(r)) {
-            r.mWmService.getRecentsAnimationController().logRecentsAnimationStartTime(
-                    info.mSourceEventDelayMs + info.mWindowsDrawnDelayMs);
-        }
         return infoSnapshot;
     }
 
@@ -782,12 +784,6 @@ class ActivityMetricsLogger {
             info.mReason = activityToReason.valueAt(index);
             info.mLoggedTransitionStarting = true;
             if (info.mIsDrawn) {
-                if (info.mReason == APP_TRANSITION_RECENTS_ANIM) {
-                    final LatencyTracker latencyTracker = r.mWmService.mLatencyTracker;
-                    final int duration = info.mSourceEventDelayMs + info.mCurrentTransitionDelayMs;
-                    mLoggerHandler.post(() -> latencyTracker.logAction(
-                            LatencyTracker.ACTION_START_RECENTS_ANIMATION, duration));
-                }
                 done(false /* abort */, info, "notifyTransitionStarting drawn", timestampNs);
             }
         }
@@ -955,6 +951,9 @@ class ActivityMetricsLogger {
                 launchObserverNotifyActivityLaunchFinished(info, timestampNs);
             }
             logAppTransitionFinished(info, isHibernating != null ? isHibernating : false);
+            if (info.mReason == APP_TRANSITION_RECENTS_ANIM) {
+                logRecentsAnimationLatency(info);
+            }
         }
         mTransitionInfoList.remove(info);
     }
@@ -1108,6 +1107,22 @@ class ActivityMetricsLogger {
         sb.append(": ");
         TimeUtils.formatDuration(info.windowsDrawnDelayMs, sb);
         Log.i(TAG, sb.toString());
+    }
+
+    private void logRecentsAnimationLatency(TransitionInfo info) {
+        final int duration = info.mSourceEventDelayMs + info.mWindowsDrawnDelayMs;
+        final ActivityRecord r = info.mLastLaunchedActivity;
+        final long lastTopLossTime = r.topResumedStateLossTime;
+        final WindowManagerService wm = mSupervisor.mService.mWindowManager;
+        final Object controller = wm.getRecentsAnimationController();
+        mLoggerHandler.postDelayed(() -> {
+            if (lastTopLossTime != r.topResumedStateLossTime
+                    || controller != wm.getRecentsAnimationController()) {
+                // Skip if the animation was finished in a short time.
+                return;
+            }
+            wm.mLatencyTracker.logAction(LatencyTracker.ACTION_START_RECENTS_ANIMATION, duration);
+        }, LATENCY_TRACKER_RECENTS_DELAY_MS);
     }
 
     private static int getAppStartTransitionType(int tronType, boolean relaunched) {
