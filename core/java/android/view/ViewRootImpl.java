@@ -84,6 +84,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
@@ -600,6 +601,14 @@ public final class ViewRootImpl implements ViewParent,
      * VRI will not try to sync a buffer in BBQ, but still report when a draw occurred.
      */
     private boolean mSyncBuffer = false;
+
+    /**
+     * Flag to determine whether the client needs to check with WMS if it can draw. WMS will notify
+     * the client that it can't draw if we're still in the middle of a sync set that includes this
+     * window. Once the sync is complete, the window can resume drawing. This is to ensure we don't
+     * deadlock the client by trying to request draws when there may not be any buffers available.
+     */
+    private boolean mCheckIfCanDraw = false;
 
     int mSyncSeqId = 0;
     int mLastSyncSeqId = 0;
@@ -2703,6 +2712,9 @@ public final class ViewRootImpl implements ViewParent,
 
         mIsInTraversal = true;
         mWillDrawSoon = true;
+        boolean cancelDraw = false;
+        boolean isSyncRequest = false;
+
         boolean windowSizeMayChange = false;
         WindowManager.LayoutParams lp = mWindowAttributes;
 
@@ -2972,6 +2984,8 @@ public final class ViewRootImpl implements ViewParent,
                     mViewFrameInfo.flags |= FrameInfo.FLAG_WINDOW_VISIBILITY_CHANGED;
                 }
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
+                cancelDraw = (relayoutResult & RELAYOUT_RES_CANCEL_AND_REDRAW)
+                        == RELAYOUT_RES_CANCEL_AND_REDRAW;
                 final boolean dragResizing = mPendingDragResizing;
                 if (mSyncSeqId > mLastSyncSeqId) {
                     mLastSyncSeqId = mSyncSeqId;
@@ -2980,6 +2994,7 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     reportNextDraw();
                     mSyncBuffer = true;
+                    isSyncRequest = true;
                 }
 
                 final boolean surfaceControlChanged =
@@ -3268,6 +3283,19 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         } else {
+            // If a relayout isn't going to happen, we still need to check if this window can draw
+            // when mCheckIfCanDraw is set. This is because it means we had a sync in the past, but
+            // have not been told by WMS that the sync is complete and that we can continue to draw
+            if (mCheckIfCanDraw) {
+                try {
+                    cancelDraw = mWindowSession.cancelDraw(mWindow);
+                    if (DEBUG_BLAST) {
+                        Log.d(mTag, "cancelDraw returned " + cancelDraw);
+                    }
+                } catch (RemoteException e) {
+                }
+            }
+
             // Not the first pass and no window/insets/visibility change but the window
             // may have moved and we need check that and if so to update the left and right
             // in the attach info. We translate only the window frame since on window move
@@ -3486,7 +3514,9 @@ public final class ViewRootImpl implements ViewParent,
             reportNextDraw();
         }
 
-        boolean cancelAndRedraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw();
+        mCheckIfCanDraw = isSyncRequest || cancelDraw;
+
+        boolean cancelAndRedraw = mAttachInfo.mTreeObserver.dispatchOnPreDraw() || cancelDraw;
         if (!cancelAndRedraw) {
             createSyncIfNeeded();
         }
