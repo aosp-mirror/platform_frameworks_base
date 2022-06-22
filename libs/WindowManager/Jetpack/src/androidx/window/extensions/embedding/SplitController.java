@@ -43,6 +43,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
@@ -70,6 +71,8 @@ import java.util.function.Consumer;
 public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
         ActivityEmbeddingComponent {
     static final String TAG = "SplitController";
+    static final boolean ENABLE_SHELL_TRANSITIONS =
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
 
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -332,6 +335,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * bounds is large enough for at least one split rule.
      */
     private void updateAnimationOverride(@NonNull TaskContainer taskContainer) {
+        if (ENABLE_SHELL_TRANSITIONS) {
+            // TODO(b/207070762): cleanup with legacy app transition
+            // Animation will be handled by WM Shell with Shell transition enabled.
+            return;
+        }
         if (!taskContainer.isTaskBoundsInitialized()
                 || !taskContainer.isWindowingModeInitialized()) {
             // We don't know about the Task bounds/windowingMode yet.

@@ -2816,6 +2816,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *                     snapshot from {@link #getFreezeSnapshotTarget()}.
      */
     void initializeChangeTransition(Rect startBounds, @Nullable SurfaceControl freezeTarget) {
+        if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
+            // TODO(b/207070762): request shell transition for activityEmbedding change.
+            return;
+        }
         mDisplayContent.prepareAppTransition(TRANSIT_CHANGE);
         mDisplayContent.mChangingContainers.add(this);
         // Calculate the relative position in parent container.
