@@ -370,8 +370,6 @@ public class SystemServicesTestRule implements TestRule {
         // This makes sure the posted messages without delay are processed, e.g.
         // DisplayPolicy#release, WindowManagerService#setAnimationScale.
         waitUntilWindowManagerHandlersIdle();
-        // Clear all posted messages with delay, so they don't be executed at unexpected times.
-        cleanupWindowManagerHandlers();
         // Needs to explicitly dispose current static threads because there could be messages
         // scheduled at a later time, and all mocks are invalid when it's executed.
         DisplayThread.dispose();
@@ -458,18 +456,6 @@ public class SystemServicesTestRule implements TestRule {
             atmService.mProcessMap.put(pid, proc);
         }
         return proc;
-    }
-
-    void cleanupWindowManagerHandlers() {
-        final WindowManagerService wm = getWindowManagerService();
-        if (wm == null) {
-            return;
-        }
-        wm.mH.removeCallbacksAndMessages(null);
-        wm.mAnimationHandler.removeCallbacksAndMessages(null);
-        // This is a different handler object than the wm.mAnimationHandler above.
-        AnimationThread.getHandler().removeCallbacksAndMessages(null);
-        SurfaceAnimationThread.getHandler().removeCallbacksAndMessages(null);
     }
 
     void waitUntilWindowManagerHandlersIdle() {

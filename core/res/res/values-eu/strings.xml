@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Izengabea&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Ez dago telefono-zenbakirik)"</string>
@@ -307,7 +302,7 @@
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"bidali eta ikusi SMS mezuak"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Fitxategiak"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"gailuko fitxategiak atzitu"</string>
-    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"musika eta audioa"</string>
+    <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Musika eta audioa"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"atzitu gailuko musika eta audioak"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Argazkiak eta bideoak"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"atzitu gailuko argazkiak eta bideoak"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Lurralde-hobespena"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Adierazi hizkuntza"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Iradokitakoak"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Iradokitako hizkuntzak"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Iradokitako lurraldeak"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Hizkuntza guztiak"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Lurralde guztiak"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Bilaketa"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lortu informazio gehiago"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-n, jakinarazpen hobetuek ordeztu dituzte Android-eko jakinarazpen egokituak. Eginbide horrek, iradokitako ekintzak eta erantzunak erakusten, eta zure jakinarazpenak antolatzen ditu.\n\nJakinarazpen hobetuek jakinarazpenen eduki osoa atzi dezakete, informazio pertsonala barne (esaterako, kontaktuen izenak eta mezuak). Halaber, eginbideak jakinarazpenak baztertu, edo haiei erantzun diezaieke; adibidez, telefono-deiei erantzun diezaieke, eta ez molestatzeko modua kontrolatu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohitura moduaren informazio-jakinarazpena"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baliteke bateria ohi baino lehenago agortzea"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Bateria-aurrezlea aktibatuta dago bateriaren iraupena luzatzeko"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Bateria-aurrezlea aktibatu da"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Bateria-erabilera murrizten hasi da haren iraupena luzatzeko"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Bateria-aurrezlea"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Desaktibatu egin da bateria-aurrezlea"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Behar adina bateria dauka telefonoak. Jada ez dago eginbiderik murriztuta."</string>

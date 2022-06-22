@@ -39,9 +39,9 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -977,7 +977,7 @@ public class Environment {
     }
 
     private static boolean hasInterestingFiles(File dir) {
-        final LinkedList<File> explore = new LinkedList<>();
+        final ArrayDeque<File> explore = new ArrayDeque<>();
         explore.add(dir);
         while (!explore.isEmpty()) {
             dir = explore.pop();

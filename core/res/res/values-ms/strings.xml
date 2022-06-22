@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Tidak bertajuk&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Tiada nombor telefon)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Pilihan wilayah"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Taipkan nama bahasa"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Dicadangkan"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Bahasa yang dicadangkan"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Rantau yang disyorkan"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Semua bahasa"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Semua rantau"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Cari"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Ketahui lebih lanjut"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pemberitahuan yang dipertingkatkan menggantikan Pemberitahuan Boleh Suai Android dalam Android 12. Ciri ini menunjukkan cadangan tindakan dan balasan, serta mengatur pemberitahuan anda.\n\nPemberitahuan yang dipertingkatkan dapat mengakses kandungan pemberitahuan, termasuk maklumat peribadi seperti nama kenalan dan mesej. Ciri ini juga dapat mengetepikan atau membalas pemberitahuan, seperti menjawab panggilan telefon dan mengawal Jangan Ganggu."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Pemberitahuan maklumat Mod Rutin"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateri mungkin habis sebelum pengecasan biasa"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Penjimat Bateri diaktifkan untuk memanjangkan hayat bateri"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Penjimat Bateri dihidupkan"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Mengurangkan penggunaan bateri untuk melanjutkan hayat bateri"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Penjimat Bateri"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Penjimat Bateri dimatikan"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Cas telefon mencukupi. Ciri tidak lagi dihadkan."</string>

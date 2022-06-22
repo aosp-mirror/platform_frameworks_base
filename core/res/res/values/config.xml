@@ -5144,11 +5144,11 @@
     <!-- Whether displaying letterbox education is enabled for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsEducationEnabled">false</bool>
 
-    <!-- Default min aspect ratio for unresizable apps which is used when an app doesn't specify
-         android:minAspectRatio in accordance with CDD 7.1.1.2 requirement:
-         https://source.android.com/compatibility/12/android-12-cdd#7112_screen_aspect_ratio.
-         An exception will be thrown if the given aspect ratio < 4:3.  -->
-    <item name="config_letterboxDefaultMinAspectRatioForUnresizableApps" format="float" type="dimen">1.5</item>
+    <!-- Default min aspect ratio for unresizable apps which are eligible for size compat mode.
+         Values <= 1.0 will be ignored. Activity min/max aspect ratio restrictions will still be
+         espected so this override can control the maximum screen area that can be occupied by
+         the app in the letterbox mode. -->
+    <item name="config_letterboxDefaultMinAspectRatioForUnresizableApps" format="float" type="dimen">0.0</item>
 
     <!-- Whether using split screen aspect ratio as a default aspect ratio for unresizable apps. -->
     <bool name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled">false</bool>

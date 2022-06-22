@@ -2987,11 +2987,6 @@ public class InputMethodService extends AbstractInputMethodService {
      * the text.  This is called whether or not the input method has requested
      * extracted text updates, although if so it will not receive this call
      * if the extracted text has changed as well.
-     *
-     * <p>Be careful about changing the text in reaction to this call with
-     * methods such as setComposingText, commitText or
-     * deleteSurroundingText. If the cursor moves as a result, this method
-     * will be called again, which may result in an infinite loop.
      * 
      * <p>The default implementation takes care of updating the cursor in
      * the extract text, if it is being shown.

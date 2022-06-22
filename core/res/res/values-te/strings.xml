@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;శీర్షిక లేనిది&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(ఫోన్ నంబర్ లేదు)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"భాష పేరును టైప్ చేయండి"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"సూచించినవి"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"సూచించిన భాషలు"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"సూచించిన ప్రాంతాలు"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"అన్ని భాషలు"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"అన్ని ప్రాంతాలు"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"సెర్చ్"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"మరింత తెలుసుకోండి"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12లో Android అనుకూల నోటిఫికేషన్‌లను, మెరుగైన నోటిఫికేషన్‌లు రీప్లేస్‌ చేశాయి. ఈ ఫీచర్, సూచించిన చర్యలను, రిప్లయిలను చూపించి, మీ నోటిఫికేషన్‌లను ఆర్గనైజ్ చేస్తుంది.\n\nకాంటాక్ట్ పేర్లు, మెసేజ్‌లు లాంటి వ్యక్తిగత సమాచారంతో పాటు నోటిఫికేషన్ కంటెంట్‌ను మెరుగైన నోటిఫికేషన్‌లు యాక్సెస్ చేస్తాయి. ఫోన్ కాల్స్‌కు సమాధానమివ్వడం, \'అంతరాయం కలిగించవద్దు\' ఆప్షన్‌ను కంట్రోల్ చేయడం వంటి నోటిఫికేషన్‌లను విస్మరించడం లేదా వాటికి ప్రతిస్పందించడం కూడా ఈ ఫీచర్ చేయగలదు."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"బ్యాటరీ సేవర్ ఆన్ చేయబడింది"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"బ్యాటరీ జీవితకాలాన్ని పొడిగించడానికి బ్యాటరీ వినియోగాన్ని తగ్గించడం"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"బ్యాటరీ సేవర్"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"బ్యాటరీ సేవర్ ఆఫ్ చేయబడింది"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ఫోన్‌కు తగినంత ఛార్జింగ్ ఉంది. ఫీచర్‌లు ఇప్పటి నుండి పరిమితం చేయబడవు."</string>

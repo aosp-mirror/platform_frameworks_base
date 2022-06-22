@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;ခေါင်းစဉ်မဲ့&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(ဖုန်းနံပါတ်မရှိပါ)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ဘာသာစကားအမည် ထည့်ပါ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"အကြံပြုထားသည်"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"အကြံပြုထားသည့် ဘာသာစကားများ"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"အကြံပြုထားသည့် ဒေသများ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ဘာသာစကားအားလုံး"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ဒေသအားလုံး"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"ရှာဖွေရန်"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ပိုမိုလေ့လာရန်"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 တွင် ‘Android အလိုက်သင့် အကြောင်းကြားချက်များ’ ကို အဆင့်မြင့် အကြောင်းကြားချက်များဖြင့် အစားထိုးထားသည်။ ဤဝန်ဆောင်မှုက အကြံပြုထားသော လုပ်ဆောင်ချက်နှင့် ပြန်စာများကို ပြပေးပြီး သင်၏အကြောင်းကြားချက်များကို စီစဉ်ပေးသည်။\n\nအဆင့်မြင့် အကြောင်းကြားချက်များက အဆက်အသွယ်အမည်နှင့် မက်ဆေ့ဂျ်များကဲ့သို့ ကိုယ်ရေးကိုယ်တာအချက်လက်များ အပါအဝင် အကြောင်းကြားချက် အကြောင်းအရာကို သုံးနိုင်သည်။ ဤဝန်ဆောင်မှုက ဖုန်းခေါ်ဆိုမှုများ ဖြေခြင်းနှင့် ‘မနှောင့်ယှက်ရ’ ကို ထိန်းချုပ်ခြင်းကဲ့သို့ အကြောင်းကြားချက်များကို ပယ်နိုင်သည် (သို့) တုံ့ပြန်နိုင်သည်။"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"ဘက်ထရီ အားထိန်း ဖွင့်ထားသည်"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"ဘက်ထရီသက်တမ်း ပိုရှည်စေရန် ဘက်ထရီ အသုံးပြုမှု လျှော့ချခြင်း"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"ဘက်ထရီ အားထိန်း"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"ဘက်ထရီ အားထိန်းကို ပိတ်ထားသည်"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ဖုန်းတွင် ဘက်ထရီအား အလုံအလောက် ရှိသည်။ လုပ်ဆောင်ချက်များကို ကန့်သတ်မထားတော့ပါ။"</string>

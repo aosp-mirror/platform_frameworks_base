@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Không có tiêu đề&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Không có số điện thoại nào)"</string>
@@ -644,7 +639,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Đưa điện thoại sang bên trái"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Đưa điện thoại sang bên phải"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Vui lòng nhìn thẳng vào thiết bị."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không thấy khuôn mặt bạn. Cầm điện thoại ngang tầm mắt"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Không phát hiện thấy khuôn mặt của bạn. Hãy cầm điện thoại ngang tầm mắt"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Thiết bị di chuyển quá nhiều. Giữ yên thiết bị."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Vui lòng đăng ký lại khuôn mặt của bạn."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Không thể nhận dạng khuôn mặt. Hãy thử lại."</string>
@@ -654,7 +649,7 @@
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Nhìn thẳng vào điện thoại"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Hãy loại bỏ mọi thứ che khuất khuôn mặt bạn."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Vệ sinh phần đầu màn hình, bao gồm cả thanh màu đen"</string>
-    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Toàn bộ khuôn mặt của bạn phải được hiển thị"</string>
+    <string name="face_acquired_dark_glasses_detected" msgid="7263638432128692048">"Bạn cần cho thấy toàn bộ khuôn mặt của mình"</string>
     <string name="face_acquired_mouth_covering_detected" msgid="615991670821926847">"Toàn bộ khuôn mặt của bạn phải được hiển thị"</string>
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Không thể tạo mẫu khuôn mặt của bạn. Hãy thử lại."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Đã phát hiện đeo kính đen. Toàn bộ khuôn mặt của bạn phải được hiển thị."</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Tùy chọn khu vực"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Nhập tên ngôn ngữ"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Đề xuất"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Ngôn ngữ đề xuất"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Khu vực đề xuất"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Tất cả ngôn ngữ"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Tất cả khu vực"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Tìm kiếm"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Tìm hiểu thêm"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Thông báo nâng cao đã thay thế Thông báo thích ứng trên Android trong Android 12. Tính năng này hiển thị những thao tác và câu trả lời đề xuất, đồng thời sắp xếp các thông báo của bạn.\n\nThông báo nâng cao có thể đọc mọi nội dung thông báo, bao gồm cả thông tin cá nhân như tên liên hệ và tin nhắn. Tính năng này cũng có thể đóng hoặc phản hồi các thông báo, chẳng hạn như trả lời cuộc gọi điện thoại, đồng thời có thể kiểm soát chế độ Không làm phiền."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Đã bật Trình tiết kiệm pin"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Giảm mức sử dụng pin để kéo dài tuổi thọ pin"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Trình tiết kiệm pin"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Trình tiết kiệm pin đã tắt"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Điện thoại còn đủ pin. Các tính năng không bị hạn chế nữa."</string>

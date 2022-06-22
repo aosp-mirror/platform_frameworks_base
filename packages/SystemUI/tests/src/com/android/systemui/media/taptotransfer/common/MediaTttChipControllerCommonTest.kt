@@ -25,6 +25,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -65,6 +66,8 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Mock
     private lateinit var logger: MediaTttLogger
     @Mock
+    private lateinit var accessibilityManager: AccessibilityManager
+    @Mock
     private lateinit var windowManager: WindowManager
     @Mock
     private lateinit var viewUtil: ViewUtil
@@ -88,11 +91,21 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         )).thenReturn(applicationInfo)
         context.setMockPackageManager(packageManager)
 
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any()))
+            .thenReturn(TIMEOUT_MS.toInt())
+
         fakeClock = FakeSystemClock()
         fakeExecutor = FakeExecutor(fakeClock)
 
         controllerCommon = TestControllerCommon(
-            context, logger, windowManager, viewUtil, fakeExecutor, tapGestureDetector, powerManager
+            context,
+            logger,
+            windowManager,
+            viewUtil,
+            fakeExecutor,
+            accessibilityManager,
+            tapGestureDetector,
+            powerManager
         )
     }
 
@@ -344,6 +357,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         windowManager: WindowManager,
         viewUtil: ViewUtil,
         @Main mainExecutor: DelayableExecutor,
+        accessibilityManager: AccessibilityManager,
         tapGestureDetector: TapGestureDetector,
         powerManager: PowerManager
     ) : MediaTttChipControllerCommon<ChipInfo>(
@@ -352,6 +366,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         windowManager,
         viewUtil,
         mainExecutor,
+        accessibilityManager,
         tapGestureDetector,
         powerManager,
         R.layout.media_ttt_chip
@@ -364,7 +379,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     }
 
     inner class ChipInfo : ChipInfoCommon {
-        override fun getTimeoutMs() = TIMEOUT_MS
+        override fun getTimeoutMs() = 1L
     }
 }
 

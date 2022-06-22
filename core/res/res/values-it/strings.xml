@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Senza nome&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Nessun numero di telefono)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Area geografica preferita"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Digita nome lingua"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Suggerite"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Lingue suggerite"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Aree geografiche consigliate"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Tutte le lingue"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Tutte le aree geografiche"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Cerca"</string>
@@ -2078,8 +2075,8 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Scopri di più"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Le notifiche adattive Android sono state sostituite dalle notifiche avanzate in Android 12. Questa funzionalità mostra risposte e azioni suggerite e organizza le tue notifiche.\n\nLe notifiche avanzate possono accedere ai contenuti di una notifica, incluse le informazioni personali, come i nomi dei contatti e i messaggi. Questa funzionalità può anche ignorare le notifiche o rispondervi, ad esempio accettando le telefonate, e controllare la modalità Non disturbare."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifica di informazioni sulla modalità Routine"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Risparmio energetico attivo per far durare di più la batteria"</string>
+    <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"Risparmio energetico attivato"</string>
+    <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"Riduzione dell\'utilizzo di batteria per estenderne la durata"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Risparmio energetico"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Risparmio energetico disattivato"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Il telefono ha carica sufficiente. Funzionalità non più limitate."</string>

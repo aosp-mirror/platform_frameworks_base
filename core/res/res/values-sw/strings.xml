@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"B"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"TB"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"PB"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="UNIT">%2$s</xliff:g> <xliff:g id="NUMBER">%1$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Haina jina&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Hakuna nambari ya simu)"</string>
@@ -644,7 +639,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Sogeza simu upande wako wa kushoto"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Sogeza simu upande wako wa kulia"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Tafadhali angalia kifaa chako moja kwa moja."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Imeshindwa kuona uso wako. Shikilia simu yako katika usawa wa macho."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Imeshindwa kuona uso wako. Shikilia simu yako ikilingana na macho."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Inatikisika sana. Ishike simu iwe thabiti."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Tafadhali sajili uso wako tena."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Imeshindwa kutambua uso. Jaribu tena."</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Mapendeleo ya eneo"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Weka jina la lugha"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Zinazopendekezwa"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Lugha zinazopendekezwa"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Maeneo yanayopendekezwa"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Lugha zote"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Maeneo yote"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Tafuta"</string>
@@ -2078,8 +2075,10 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Pata maelezo zaidi"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Kipengele cha Arifa Zilizoboreshwa kilichukua nafasi ya Arifa Zinazojirekebisha za Android katika Android 12. Kipengele hiki kinaonyesha majibu na vitendo vinavyopendekezwa na kupanga arifa zako.\n\nKipengele cha Arifa zilizoboreshwa kinaweza kufikia maudhui ya arifa, ikiwa ni pamoja na taarifa binafsi kama vile majina ya anwani na ujumbe. Kipengele hiki kinaweza pia kuondoa au kujibu arifa, kama vile kujibu simu na kudhibiti kipengele cha Usinisumbue."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Arifa ya maelezo ya Hali ya Kawaida"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Huenda betri itakwisha chaji mapema"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Imewasha Kiokoa Betri ili kurefusha muda wa matumizi ya betri"</string>
+    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Kiokoa betri"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Kiokoa Betri kimezimwa"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Simu ina chaji ya kutosha. Vipengele havizuiliwi tena."</string>

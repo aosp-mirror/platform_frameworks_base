@@ -21,11 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"t"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"kt"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"Mt"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"Gt"</string>
-    <string name="terabyteShort" msgid="1822367128583886496">"Tt"</string>
-    <string name="petabyteShort" msgid="5651571254228534832">"Pt"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="3381766946944136678">"&lt;Nimetön&gt;"</string>
     <string name="emptyPhoneNumber" msgid="5812172618020360048">"(Ei puhelinnumeroa)"</string>
@@ -1924,6 +1919,8 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Alueasetus"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Anna kielen nimi"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Ehdotukset"</string>
+    <string name="language_picker_section_suggested_bilingual" msgid="5932198319583556613">"Kieliehdotukset"</string>
+    <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"Alue-ehdotukset"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Kaikki kielet"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Kaikki alueet"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Haku"</string>
@@ -2078,8 +2075,10 @@
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lue lisää"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Parannetut ilmoitukset korvasivat Androidin mukautuvat ilmoitukset Android 12:ssa. Tämä ominaisuus näyttää toiminto- ja vastausehdotuksia ja järjestää ilmoituksesi.\n\nParannetuilla ilmoituksilla on pääsy kaikkeen ilmoitussisältöön, myös henkilökohtaisiin tietoihin (esim. kontaktien nimet ja viestit). Ominaisuus voi myös ohittaa ilmoituksia tai vastata niihin, esim. vastata puheluihin ja ohjata Älä häiritse ‑tilaa."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohjelmatilan tietoilmoitus"</string>
-    <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akku saattaa loppua ennen normaalia latausaikaa"</string>
-    <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Virransäästö otettu käyttöön akunkeston pidentämiseksi"</string>
+    <!-- no translation found for dynamic_mode_notification_title (1388718452788985481) -->
+    <skip />
+    <!-- no translation found for dynamic_mode_notification_summary (1639031262484979689) -->
+    <skip />
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"Virransäästö"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"Virransäästö laitettiin pois päältä"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Puhelimessa on tarpeeksi virtaa. Ominaisuuksia ei enää rajoiteta."</string>
