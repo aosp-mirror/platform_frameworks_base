@@ -177,6 +177,8 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
     private final AtomicBoolean mHasPendingInvalidation = new AtomicBoolean();
 
     private final AtomicBoolean mIsCursorAnchorInfoMonitoring = new AtomicBoolean(false);
+    private final AtomicBoolean mHasPendingImmediateCursorAnchorInfoUpdate =
+            new AtomicBoolean(false);
 
     public RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
@@ -222,6 +224,23 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
 
     public View getServedView() {
         return mServedView.get();
+    }
+
+    /**
+     * Gets and resets {@link #mHasPendingImmediateCursorAnchorInfoUpdate}.
+     *
+     * <p>Calling this method resets {@link #mHasPendingImmediateCursorAnchorInfoUpdate}. This
+     * means that the second call of this method returns {@code false} unless the IME requests
+     * {@link android.view.inputmethod.CursorAnchorInfo} again with
+     * {@link InputConnection#CURSOR_UPDATE_IMMEDIATE} flag.</p>
+     *
+     * @return {@code true} if there is any pending request for
+     *         {@link android.view.inputmethod.CursorAnchorInfo} with
+     *         {@link InputConnection#CURSOR_UPDATE_IMMEDIATE} flag.
+     */
+    @AnyThread
+    public boolean resetHasPendingImmediateCursorAnchorInfoUpdate() {
+        return mHasPendingImmediateCursorAnchorInfoUpdate.getAndSet(false);
     }
 
     /**
@@ -1010,6 +1029,8 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
             // requestCursorUpdates() is not currently supported across displays.
             return false;
         }
+        final boolean hasImmediate =
+                (cursorUpdateMode & InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0;
         final boolean hasMonitoring =
                 (cursorUpdateMode & InputConnection.CURSOR_UPDATE_MONITOR) != 0;
         boolean result = false;
@@ -1020,6 +1041,7 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
             // TODO(b/199934664): See if we can remove this by providing a default impl.
             return false;
         } finally {
+            mHasPendingImmediateCursorAnchorInfoUpdate.set(result && hasImmediate);
             mIsCursorAnchorInfoMonitoring.set(result && hasMonitoring);
         }
     }
