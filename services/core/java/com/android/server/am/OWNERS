@@ -1,4 +1,3 @@
-
 # Applications & Processes
 yamasani@google.com
 jsharkey@google.com
@@ -18,8 +17,6 @@ jji@google.com
 ogunwale@google.com
 
 # Permissions & Packages
-svetoslavganov@google.com
-toddke@google.com
 patb@google.com
 
 # Battery Stats
@@ -35,8 +32,8 @@ narayan@google.com
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
 per-file *Voice* = file:/core/java/android/service/voice/OWNERS
 
-per-file SettingsToPropertiesMapper.java = omakoto@google.com, svetoslavganov@google.com, yamasani@google.com
+per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com
 
-per-file CarUserSwitchingDialog.java = keunyoung@google.com, felipeal@google.com, gurunagarajan@google.com
+per-file CarUserSwitchingDialog.java = file:platform/packages/services/Car:/OWNERS
 
 per-file ContentProviderHelper.java = varunshah@google.com, omakoto@google.com, jsharkey@google.com, yamasani@google.com
