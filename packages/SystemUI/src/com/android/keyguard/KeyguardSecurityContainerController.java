@@ -116,12 +116,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 // If we're in one handed mode, the user can tap on the opposite side of the screen
                 // to move the bouncer across. In that case, inhibit the falsing (otherwise the taps
                 // to move the bouncer to each screen side can end up closing it instead).
-                if (mView.getMode() == KeyguardSecurityContainer.MODE_ONE_HANDED) {
-                    boolean isLeftAligned = mView.isOneHandedModeLeftAligned();
-                    if ((isLeftAligned && ev.getX() > mView.getWidth() / 2f)
-                            || (!isLeftAligned && ev.getX() <= mView.getWidth() / 2f)) {
-                        mFalsingCollector.avoidGesture();
-                    }
+                if (mView.isTouchOnTheOtherSideOfSecurity(ev)) {
+                    mFalsingCollector.avoidGesture();
                 }
 
                 if (mTouchDown != null) {
@@ -169,8 +165,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
             int bouncerSide = SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__DEFAULT;
-            if (mView.getMode() == KeyguardSecurityContainer.MODE_ONE_HANDED) {
-                bouncerSide = mView.isOneHandedModeLeftAligned()
+            if (mView.isSidedSecurityMode()) {
+                bouncerSide = mView.isSecurityLeftAligned()
                         ? SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__LEFT
                         : SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__RIGHT;
             }
@@ -367,8 +363,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     public void onResume(int reason) {
         if (mCurrentSecurityMode != SecurityMode.None) {
             int state = SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN;
-            if (mView.getMode() == KeyguardSecurityContainer.MODE_ONE_HANDED) {
-                state = mView.isOneHandedModeLeftAligned()
+            if (mView.isSidedSecurityMode()) {
+                state = mView.isSecurityLeftAligned()
                         ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN_LEFT
                         : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SHOWN_RIGHT;
             }

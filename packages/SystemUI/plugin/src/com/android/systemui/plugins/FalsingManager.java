@@ -29,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Interface that decides whether a touch on the phone was accidental. i.e. Pocket Dialing.
  *
- * {@see com.android.systemui.classifier.FalsingManagerImpl}
+ * {@see com.android.systemui.classifier.BrightLineFalsingManager}
  */
 @ProvidesInterface(version = FalsingManager.VERSION)
 public interface FalsingManager {
