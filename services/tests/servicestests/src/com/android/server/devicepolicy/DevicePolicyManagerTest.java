@@ -7846,7 +7846,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setDeviceOwner();
         dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
         when(getServices().ipackageManager.getBlockUninstallForUser(
-                eq(packageName), eq(UserHandle.USER_SYSTEM)))
+                eq(packageName), eq(UserHandle.getCallingUserId())))
                 .thenReturn(true);
 
         assertThat(dpm.isUninstallBlocked(admin1, packageName)).isTrue();
