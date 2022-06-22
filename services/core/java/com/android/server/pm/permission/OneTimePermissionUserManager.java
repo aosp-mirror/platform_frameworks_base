@@ -33,6 +33,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.PermissionThread;
 
 /**
  * Class that handles one-time permissions for a user
@@ -79,7 +80,8 @@ public class OneTimePermissionUserManager {
         mContext = context;
         mActivityManager = context.getSystemService(ActivityManager.class);
         mAlarmManager = context.getSystemService(AlarmManager.class);
-        mPermissionControllerManager = context.getSystemService(PermissionControllerManager.class);
+        mPermissionControllerManager = new PermissionControllerManager(
+                mContext, PermissionThread.getHandler());
         mHandler = context.getMainThreadHandler();
     }
 
