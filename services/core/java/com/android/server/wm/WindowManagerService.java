@@ -1201,7 +1201,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_hasPermanentDpad);
         mInTouchMode = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_defaultInTouchMode);
-        inputManager.setInTouchMode(mInTouchMode, MY_PID, MY_UID, true /* hasPermission */);
+        inputManager.setInTouchMode(mInTouchMode, MY_PID, MY_UID, /* hasPermission= */ true,
+                DEFAULT_DISPLAY);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
         mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
@@ -3824,7 +3825,9 @@ public class WindowManagerService extends IWindowManager.Stub
                                                       /* printlog= */ false);
             final long token = Binder.clearCallingIdentity();
             try {
-                if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission)) {
+                // TODO(b/198499018): Add displayId parameter indicating the target display.
+                // For now, will just pass DEFAULT_DISPLAY for displayId.
+                if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission, DEFAULT_DISPLAY)) {
                     mInTouchMode = mode;
                 }
             } finally {

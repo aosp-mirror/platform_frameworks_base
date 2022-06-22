@@ -301,7 +301,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.setInTouchMode(!currentTouchMode);
 
         verify(mWm.mInputManager).setInTouchMode(
-                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true);
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true,
+                DEFAULT_DISPLAY);
     }
 
     @Test
@@ -316,7 +317,8 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         mWm.setInTouchMode(!currentTouchMode);
 
         verify(mWm.mInputManager).setInTouchMode(
-                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false);
+                !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false,
+                DEFAULT_DISPLAY);
     }
 
     @Test

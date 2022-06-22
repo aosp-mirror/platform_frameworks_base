@@ -16,7 +16,6 @@
 
 package com.android.server.input;
 
-import android.content.Context;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.lights.Light;
@@ -64,7 +63,19 @@ public interface NativeInputManagerService {
 
     void setInputFilterEnabled(boolean enable);
 
-    boolean setInTouchMode(boolean inTouchMode, int pid, int uid, boolean hasPermission);
+    /**
+     * Set the touch mode state for the display passed as argument.
+     *
+     * @param inTouchMode   true if the device is in touch mode
+     * @param pid           the pid of the process that requested to switch touch mode state
+     * @param uid           the uid of the process that requested to switch touch mode state
+     * @param hasPermission if set to {@code true} then no further authorization will be performed
+     * @param displayId     the target display (ignored if device is configured with per display
+     *                      touch mode enabled)
+     * @return {@code true} if the touch mode was successfully changed, {@code false} otherwise
+     */
+    boolean setInTouchMode(boolean inTouchMode, int pid, int uid, boolean hasPermission,
+            int displayId);
 
     void setMaximumObscuringOpacityForTouch(float opacity);
 
@@ -194,12 +205,11 @@ public interface NativeInputManagerService {
         @SuppressWarnings({"unused", "FieldCanBeLocal"})
         private final long mPtr;
 
-        NativeImpl(InputManagerService service, Context context, MessageQueue messageQueue) {
-            mPtr = init(service, context, messageQueue);
+        NativeImpl(InputManagerService service, MessageQueue messageQueue) {
+            mPtr = init(service, messageQueue);
         }
 
-        private native long init(InputManagerService service, Context context,
-                MessageQueue messageQueue);
+        private native long init(InputManagerService service, MessageQueue messageQueue);
 
         @Override
         public native void start();
@@ -240,7 +250,7 @@ public interface NativeInputManagerService {
 
         @Override
         public native boolean setInTouchMode(boolean inTouchMode, int pid, int uid,
-                boolean hasPermission);
+                boolean hasPermission, int displayId);
 
         @Override
         public native void setMaximumObscuringOpacityForTouch(float opacity);
