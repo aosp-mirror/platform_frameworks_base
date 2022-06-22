@@ -63,6 +63,7 @@ final class ContentRecordingController {
      */
     void setContentRecordingSessionLocked(@Nullable ContentRecordingSession incomingSession,
             @NonNull WindowManagerService wmService) {
+        // TODO(b/219761722) handle a null session arriving due to task setup failing
         if (incomingSession != null && (!ContentRecordingSession.isValid(incomingSession)
                 || ContentRecordingSession.isSameDisplay(mSession, incomingSession))) {
             // Ignore an invalid session, or a session for the same display as currently recording.

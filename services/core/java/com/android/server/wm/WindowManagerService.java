@@ -48,6 +48,7 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR;
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
+import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
@@ -289,6 +290,7 @@ import android.view.displayhash.VerifiedDisplayHash;
 import android.window.ClientWindowFrames;
 import android.window.ITaskFpsCallback;
 import android.window.TaskSnapshot;
+import android.window.WindowContainerToken;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -8287,6 +8289,26 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void setContentRecordingSession(@Nullable ContentRecordingSession incomingSession) {
             synchronized (mGlobalLock) {
+                // Allow the controller to handle teardown or a non-task session.
+                if (incomingSession == null
+                        || incomingSession.getContentToRecord() != RECORD_CONTENT_TASK) {
+                    mContentRecordingController.setContentRecordingSessionLocked(incomingSession,
+                            WindowManagerService.this);
+                    return;
+                }
+                // For a task session, find the activity identified by the launch cookie.
+                final WindowContainerToken wct = getTaskWindowContainerTokenForLaunchCookie(
+                        incomingSession.getTokenToRecord());
+                if (wct == null) {
+                    Slog.w(TAG, "Handling a new recording session; unable to find the "
+                            + "WindowContainerToken");
+                    mContentRecordingController.setContentRecordingSessionLocked(null,
+                            WindowManagerService.this);
+                    return;
+                }
+                // Replace the launch cookie in the session details with the task's
+                // WindowContainerToken.
+                incomingSession.setTokenToRecord(wct.asBinder());
                 mContentRecordingController.setContentRecordingSessionLocked(incomingSession,
                         WindowManagerService.this);
             }
@@ -8542,6 +8564,38 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mAtmService.setFocusedTask(task.mTaskId, touchedActivity);
+    }
+
+    /**
+     * Retrieve the {@link WindowContainerToken} of the task that contains the activity started
+     * with the given launch cookie.
+     *
+     * @param launchCookie the launch cookie set on the {@link ActivityOptions} when starting an
+     *                     activity
+     * @return a token representing the task containing the activity started with the given launch
+     * cookie, or {@code null} if the token couldn't be found.
+     */
+    @VisibleForTesting
+    @Nullable
+    WindowContainerToken getTaskWindowContainerTokenForLaunchCookie(@NonNull IBinder launchCookie) {
+        // Find the activity identified by the launch cookie.
+        final ActivityRecord targetActivity = mRoot.getActivity(
+                activity -> activity.mLaunchCookie == launchCookie);
+        if (targetActivity == null) {
+            Slog.w(TAG, "Unable to find the activity for this launch cookie");
+            return null;
+        }
+        if (targetActivity.getTask() == null) {
+            Slog.w(TAG, "Unable to find the task for this launch cookie");
+            return null;
+        }
+        WindowContainerToken taskWindowContainerToken =
+                targetActivity.getTask().mRemoteToken.toWindowContainerToken();
+        if (taskWindowContainerToken == null) {
+            Slog.w(TAG, "Unable to find the WindowContainerToken for " + targetActivity.getName());
+            return null;
+        }
+        return taskWindowContainerToken;
     }
 
     /**
