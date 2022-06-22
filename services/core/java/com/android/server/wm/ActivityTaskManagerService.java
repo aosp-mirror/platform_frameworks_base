@@ -1231,6 +1231,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             @Nullable String callingFeatureId, Intent intent, String resolvedType,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, Bundle bOptions, int userId, boolean validateIncomingUser) {
+
+        final SafeActivityOptions opts = SafeActivityOptions.fromBundle(bOptions);
+        // A quick path (skip general intent/task resolving) to start recents animation if the
+        // recents (or home) activity is available in background.
+        if (opts != null && opts.getOriginalOptions().getTransientLaunch()
+                && isCallerRecents(Binder.getCallingUid())) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mGlobalLock) {
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "startExistingRecents");
+                    if (mActivityStartController.startExistingRecentsIfPossible(
+                            intent, opts.getOriginalOptions())) {
+                        return ActivityManager.START_TASK_TO_FRONT;
+                    }
+                    // Else follow the standard launch procedure.
+                }
+            } finally {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
         if (Process.isSdkSandboxUid(Binder.getCallingUid())) {
@@ -1257,7 +1279,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
                 .setProfilerInfo(profilerInfo)
-                .setActivityOptions(bOptions)
+                .setActivityOptions(opts)
                 .setUserId(userId)
                 .execute();
 

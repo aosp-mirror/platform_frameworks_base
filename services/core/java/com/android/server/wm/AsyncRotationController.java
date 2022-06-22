@@ -120,7 +120,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
             } else {
                 mTransitionOp = OP_CHANGE;
             }
-        } else if (transitionType != WindowManager.TRANSIT_NONE) {
+        } else if (displayContent.mTransitionController.isShellTransitionsEnabled()) {
             mTransitionOp = OP_APP_SWITCH;
         } else {
             mTransitionOp = OP_LEGACY;
