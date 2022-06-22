@@ -227,7 +227,6 @@ status_t CursorWindow::writeToParcel(Parcel* parcel) {
         if (!dest) goto fail;
         memcpy(static_cast<uint8_t*>(dest),
                 static_cast<uint8_t*>(mData), mAllocOffset);
-        memset(static_cast<uint8_t*>(dest) + mAllocOffset, 0, 4);
         memcpy(static_cast<uint8_t*>(dest) + compactedSize - slotsSize,
                 static_cast<uint8_t*>(mData) + mSlotsOffset, slotsSize);
     }
