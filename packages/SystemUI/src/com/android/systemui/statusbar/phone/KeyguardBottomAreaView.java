@@ -28,17 +28,13 @@ import static com.android.systemui.tuner.LockscreenFragment.LOCKSCREEN_RIGHT_UNL
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE;
 import static com.android.systemui.wallet.controller.QuickAccessWalletController.WalletChangeEvent.WALLET_PREFERENCE_CHANGE;
 
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
@@ -46,13 +42,8 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.MediaStore;
-import android.service.media.CameraPrewarmService;
 import android.service.quickaccesswallet.GetWalletCardsError;
 import android.service.quickaccesswallet.GetWalletCardsResponse;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -172,20 +163,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceHelper mAffordanceHelper;
     private FalsingManager mFalsingManager;
     private boolean mUserSetupComplete;
-    private boolean mPrewarmBound;
-    private Messenger mPrewarmMessenger;
-    private final ServiceConnection mPrewarmConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mPrewarmMessenger = new Messenger(service);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mPrewarmMessenger = null;
-        }
-    };
 
     private boolean mLeftIsVoiceAssist;
     private Drawable mLeftAssistIcon;
@@ -602,46 +579,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     }
 
-    public void bindCameraPrewarmService() {
-        Intent intent = getCameraIntent();
-        ActivityInfo targetInfo = mActivityIntentHelper.getTargetActivityInfo(intent,
-                KeyguardUpdateMonitor.getCurrentUser(), true /* onlyDirectBootAware */);
-        if (targetInfo != null && targetInfo.metaData != null) {
-            String clazz = targetInfo.metaData.getString(
-                    MediaStore.META_DATA_STILL_IMAGE_CAMERA_PREWARM_SERVICE);
-            if (clazz != null) {
-                Intent serviceIntent = new Intent();
-                serviceIntent.setClassName(targetInfo.packageName, clazz);
-                serviceIntent.setAction(CameraPrewarmService.ACTION_PREWARM);
-                try {
-                    if (getContext().bindServiceAsUser(serviceIntent, mPrewarmConnection,
-                            Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                            new UserHandle(UserHandle.USER_CURRENT))) {
-                        mPrewarmBound = true;
-                    }
-                } catch (SecurityException e) {
-                    Log.w(TAG, "Unable to bind to prewarm service package=" + targetInfo.packageName
-                            + " class=" + clazz, e);
-                }
-            }
-        }
-    }
-
-    public void unbindCameraPrewarmService(boolean launched) {
-        if (mPrewarmBound) {
-            if (mPrewarmMessenger != null && launched) {
-                try {
-                    mPrewarmMessenger.send(Message.obtain(null /* handler */,
-                            CameraPrewarmService.MSG_CAMERA_FIRED));
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Error sending camera fired message", e);
-                }
-            }
-            mContext.unbindService(mPrewarmConnection);
-            mPrewarmBound = false;
-        }
-    }
-
     public void launchCamera(String source) {
         final Intent intent = getCameraIntent();
         intent.putExtra(EXTRA_CAMERA_LAUNCH_SOURCE, source);
@@ -651,8 +588,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
-                    int result = ActivityManager.START_CANCELED;
-
                     // Normally an activity will set it's requested rotation
                     // animation on its window. However when launching an activity
                     // causes the orientation to change this is too late. In these cases
@@ -666,7 +601,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     o.setRotationAnimationHint(
                             WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
                     try {
-                        result = ActivityTaskManager.getService().startActivityAsUser(
+                        ActivityTaskManager.getService().startActivityAsUser(
                                 null, getContext().getBasePackageName(),
                                 getContext().getAttributionTag(), intent,
                                 intent.resolveTypeIfNeeded(getContext().getContentResolver()),
@@ -675,25 +610,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     } catch (RemoteException e) {
                         Log.w(TAG, "Unable to start camera activity", e);
                     }
-                    final boolean launched = isSuccessfulLaunch(result);
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            unbindCameraPrewarmService(launched);
-                        }
-                    });
                 }
             });
         } else {
             // We need to delay starting the activity because ResolverActivity finishes itself if
             // launched behind lockscreen.
-            mActivityStarter.startActivity(intent, false /* dismissShade */,
-                    new ActivityStarter.Callback() {
-                        @Override
-                        public void onActivityStarted(int resultCode) {
-                            unbindCameraPrewarmService(isSuccessfulLaunch(resultCode));
-                        }
-                    });
+            mActivityStarter.startActivity(intent, false /* dismissShade */);
         }
     }
 
@@ -703,12 +625,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         mDarkAmount = darkAmount;
         dozeTimeTick();
-    }
-
-    private static boolean isSuccessfulLaunch(int result) {
-        return result == ActivityManager.START_SUCCESS
-                || result == ActivityManager.START_DELIVERED_TO_TOP
-                || result == ActivityManager.START_TASK_TO_FRONT;
     }
 
     public void launchLeftAffordance() {
