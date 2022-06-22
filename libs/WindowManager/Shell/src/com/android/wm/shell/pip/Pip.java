@@ -86,12 +86,12 @@ public interface Pip {
     }
 
     /**
-     * Registers the pinned stack animation listener.
+     * Set the callback when {@link PipTaskOrganizer#isInPip()} state is changed.
      *
-     * @param callback The callback of pinned stack animation.
+     * @param callback The callback accepts the result of {@link PipTaskOrganizer#isInPip()}
+     *                 when it's changed.
      */
-    default void setPinnedStackAnimationListener(Consumer<Boolean> callback) {
-    }
+    default void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {}
 
     /**
      * Set the pinned stack with {@link PipAnimationController.AnimationType}
