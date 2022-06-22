@@ -58,8 +58,7 @@
       "name": "FrameworksServicesTests",
       "options": [
         { "include-filter": "com.android.server.am.BatteryStatsServiceTest" },
-        { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
-        { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
+        { "include-filter": "com.android.server.power.stats.BatteryStatsTests" }
       ]
     }
   ],
