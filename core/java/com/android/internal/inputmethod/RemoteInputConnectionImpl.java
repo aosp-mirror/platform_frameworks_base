@@ -176,6 +176,8 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
     private final AtomicInteger mCurrentSessionId = new AtomicInteger(0);
     private final AtomicBoolean mHasPendingInvalidation = new AtomicBoolean();
 
+    private final AtomicBoolean mIsCursorAnchorInfoMonitoring = new AtomicBoolean(false);
+
     public RemoteInputConnectionImpl(@NonNull Looper looper,
             @NonNull InputConnection inputConnection,
             @NonNull InputMethodManager inputMethodManager, @Nullable View servedView) {
@@ -220,6 +222,16 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
 
     public View getServedView() {
         return mServedView.get();
+    }
+
+    /**
+     * @return {@code true} if there is any active request for
+     *         {@link android.view.inputmethod.CursorAnchorInfo} with
+     *         {@link InputConnection#CURSOR_UPDATE_MONITOR} flag.
+     */
+    @AnyThread
+    public boolean isCursorAnchorInfoMonitoring() {
+        return mIsCursorAnchorInfoMonitoring.get();
     }
 
     /**
@@ -998,11 +1010,17 @@ public final class RemoteInputConnectionImpl extends IRemoteInputConnection.Stub
             // requestCursorUpdates() is not currently supported across displays.
             return false;
         }
+        final boolean hasMonitoring =
+                (cursorUpdateMode & InputConnection.CURSOR_UPDATE_MONITOR) != 0;
+        boolean result = false;
         try {
-            return ic.requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
+            result = ic.requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
+            return result;
         } catch (AbstractMethodError ignored) {
             // TODO(b/199934664): See if we can remove this by providing a default impl.
             return false;
+        } finally {
+            mIsCursorAnchorInfoMonitoring.set(result && hasMonitoring);
         }
     }
 
