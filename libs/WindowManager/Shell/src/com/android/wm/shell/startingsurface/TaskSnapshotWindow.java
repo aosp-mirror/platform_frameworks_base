@@ -20,10 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.graphics.Color.alpha;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.ViewRootImpl.LOCAL_LAYOUT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
-import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 import static android.view.WindowManager.LayoutParams.FLAG_IGNORE_CHEEK_PRESSES;
@@ -53,7 +51,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityThread;
-import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -80,7 +77,6 @@ import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.view.WindowLayout;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.window.ClientWindowFrames;
@@ -212,8 +208,6 @@ public class TaskSnapshotWindow {
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
         final SurfaceControl surfaceControl = new SurfaceControl();
         final ClientWindowFrames tmpFrames = new ClientWindowFrames();
-        final WindowLayout windowLayout = new WindowLayout();
-        final Rect displayCutoutSafe = new Rect();
 
         final InsetsSourceControl[] tmpControls = new InsetsSourceControl[0];
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
@@ -251,25 +245,9 @@ public class TaskSnapshotWindow {
         window.setOuter(snapshotSurface);
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
-            if (LOCAL_LAYOUT) {
-                if (!surfaceControl.isValid()) {
-                    session.updateVisibility(window, layoutParams, View.VISIBLE,
-                            tmpMergedConfiguration, surfaceControl, tmpInsetsState, tmpControls);
-                }
-                tmpInsetsState.getDisplayCutoutSafe(displayCutoutSafe);
-                final WindowConfiguration winConfig =
-                        tmpMergedConfiguration.getMergedConfiguration().windowConfiguration;
-                windowLayout.computeFrames(layoutParams, tmpInsetsState, displayCutoutSafe,
-                        winConfig.getBounds(), winConfig.getWindowingMode(), UNSPECIFIED_LENGTH,
-                        UNSPECIFIED_LENGTH, info.requestedVisibilities, 1f /* compatScale */,
-                        tmpFrames);
-                session.updateLayout(window, layoutParams, 0 /* flags */, tmpFrames,
-                        UNSPECIFIED_LENGTH, UNSPECIFIED_LENGTH);
-            } else {
-                session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0,
-                        tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
-                        tmpControls, new Bundle());
-            }
+            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0,
+                    tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
+                    tmpControls, new Bundle());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
