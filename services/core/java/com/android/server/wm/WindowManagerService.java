@@ -8783,6 +8783,41 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Toggle active transaction tracing.
+     * Setting to true increases the buffer size for active debugging.
+     * Setting to false resets the buffer size and dumps the trace to file.
+     */
+    public void setActiveTransactionTracing(boolean active) {
+        if (!checkCallingPermission(
+                android.Manifest.permission.DUMP, "setActiveTransactionTracing()")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Parcel data = null;
+            try {
+                IBinder sf = ServiceManager.getService("SurfaceFlinger");
+                if (sf != null) {
+                    data = Parcel.obtain();
+                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    data.writeInt(active ? 1 : 0);
+                    sf.transact(/* TRANSACTION_TRACE_CONTROL_CODE */ 1041, data,
+                            null, 0 /* flags */);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set transaction tracing");
+            } finally {
+                if (data != null) {
+                    data.recycle();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     @Override
     public boolean mirrorDisplay(int displayId, SurfaceControl outSurfaceControl) {
         if (!checkCallingPermission(READ_FRAME_BUFFER, "mirrorDisplay()")) {
