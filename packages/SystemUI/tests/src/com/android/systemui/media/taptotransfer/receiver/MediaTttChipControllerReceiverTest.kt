@@ -28,6 +28,7 @@ import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -65,6 +66,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var logger: MediaTttLogger
     @Mock
+    private lateinit var accessibilityManager: AccessibilityManager
+    @Mock
     private lateinit var powerManager: PowerManager
     @Mock
     private lateinit var windowManager: WindowManager
@@ -99,6 +102,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             windowManager,
             viewUtil,
             FakeExecutor(FakeSystemClock()),
+            accessibilityManager,
             TapGestureDetector(context),
             powerManager,
             Handler.getMain(),

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.taptotransfer.common
+package android.window;
 
 /**
- * A superclass chip state that will be subclassed by the sender chip and receiver chip.
+ * Marker interface for {@link OnBackInvokedCallback} used for backward compatibility between the
+ * new system back and the old back event dispatching. Callbacks implementing this interface are
+ * allowed to be registered even if <code>enableOnbackInvoked</code> is set to false in the
+ * application manifest.
+ * @hide
  */
-interface ChipInfoCommon {
-    /**
-     * Returns the amount of time the given chip state should display on the screen before it times
-     * out and disappears.
-     */
-    fun getTimeoutMs(): Long
-}
+public interface CompatOnBackInvokedCallback extends OnBackInvokedCallback{
 
-const val DEFAULT_TIMEOUT_MILLIS = 4000L
+    @Override
+    void onBackInvoked();
+}

@@ -196,6 +196,7 @@ import android.view.contentcapture.MainContentCaptureSession;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.window.ClientWindowFrames;
+import android.window.CompatOnBackInvokedCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import android.window.SurfaceSyncer;
@@ -339,13 +340,12 @@ public final class ViewRootImpl implements ViewParent,
     /**
      * The top level {@link OnBackInvokedDispatcher}.
      */
-    private final WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher =
-            new WindowOnBackInvokedDispatcher();
+    private final WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
     /**
      * Compatibility {@link OnBackInvokedCallback} that dispatches KEYCODE_BACK events
      * to view root for apps using legacy back behavior.
      */
-    private OnBackInvokedCallback mCompatOnBackInvokedCallback;
+    private CompatOnBackInvokedCallback mCompatOnBackInvokedCallback;
 
     /**
      * Callback for notifying about global configuration changes.
@@ -962,6 +962,8 @@ public final class ViewRootImpl implements ViewParent,
         mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
+        mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(
+                context.getApplicationInfo().isOnBackInvokedCallbackEnabled());
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -10852,13 +10854,6 @@ public final class ViewRootImpl implements ViewParent,
         };
         mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatOnBackInvokedCallback);
-    }
-
-    private void unregisterCompatOnBackInvokedCallback() {
-        if (mCompatOnBackInvokedCallback != null) {
-            mOnBackInvokedDispatcher.unregisterOnBackInvokedCallback(mCompatOnBackInvokedCallback);
-            mCompatOnBackInvokedCallback = null;
-        }
     }
 
     @Override
