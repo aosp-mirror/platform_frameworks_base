@@ -1331,13 +1331,11 @@ public class HdmiControlService extends SystemService {
      */
     private boolean sourceAddressIsLocal(HdmiCecMessage message) {
         for (HdmiCecLocalDevice device : getAllLocalDevices()) {
-            synchronized (device.mLock) {
-                if (message.getSource() == device.getDeviceInfo().getLogicalAddress()
-                        && message.getSource() != Constants.ADDR_UNREGISTERED) {
-                    HdmiLogger.warning(
-                            "Unexpected source: message sent from device itself, " + message);
-                    return true;
-                }
+            if (message.getSource() == device.getDeviceInfo().getLogicalAddress()
+                    && message.getSource() != Constants.ADDR_UNREGISTERED) {
+                HdmiLogger.warning(
+                        "Unexpected source: message sent from device itself, " + message);
+                return true;
             }
         }
         return false;
@@ -1560,9 +1558,7 @@ public class HdmiControlService extends SystemService {
             if (deviceInfo.getDisplayName().equals(newDisplayName)) {
                 continue;
             }
-            synchronized (device.mLock) {
-                device.setDeviceInfo(deviceInfo.toBuilder().setDisplayName(newDisplayName).build());
-            }
+            device.setDeviceInfo(deviceInfo.toBuilder().setDisplayName(newDisplayName).build());
             sendCecCommand(
                     HdmiCecMessageBuilder.buildSetOsdNameCommand(
                             deviceInfo.getLogicalAddress(), Constants.ADDR_TV, newDisplayName));
@@ -4096,10 +4092,7 @@ public class HdmiControlService extends SystemService {
         public void onAudioDeviceVolumeChanged(
                 @NonNull AudioDeviceAttributes audioDevice,
                 @NonNull VolumeInfo volumeInfo) {
-            int localDeviceAddress;
-            synchronized (mLocalDevice.mLock) {
-                localDeviceAddress = mLocalDevice.getDeviceInfo().getLogicalAddress();
-            }
+            int localDeviceAddress = mLocalDevice.getDeviceInfo().getLogicalAddress();
             sendCecCommand(SetAudioVolumeLevelMessage.build(
                             localDeviceAddress,
                             mSystemAudioDevice.getLogicalAddress(),
