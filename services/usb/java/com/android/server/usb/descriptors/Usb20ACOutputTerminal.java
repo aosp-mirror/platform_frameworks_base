@@ -71,6 +71,7 @@ public final class Usb20ACOutputTerminal extends UsbACTerminal {
         super.report(canvas);
 
         canvas.openList();
+        canvas.writeListItem("Source ID:" + getSourceID());
         canvas.writeListItem("Clock Source ID: " + getClkSourceID());
         canvas.writeListItem("Controls: " + ReportCanvas.getHexString(getControls()));
         canvas.writeListItem("Terminal Name ID: " + getTerminalID());
