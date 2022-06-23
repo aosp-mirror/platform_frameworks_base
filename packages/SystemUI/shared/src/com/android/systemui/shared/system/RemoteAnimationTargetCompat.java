@@ -203,8 +203,7 @@ public class RemoteAnimationTargetCompat {
         // TODO: once we can properly sync transactions across process, then get rid of this leash.
         leash = createLeash(info, change, order, t);
 
-        isTranslucent = (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0
-                || (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0;
+        isTranslucent = (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0;
         clipRect = null;
         position = null;
         localBounds = new Rect(change.getEndAbsBounds());
