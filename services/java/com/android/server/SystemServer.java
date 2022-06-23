@@ -326,8 +326,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.systemcaptions.SystemCaptionsManagerService";
     private static final String TEXT_TO_SPEECH_MANAGER_SERVICE_CLASS =
             "com.android.server.texttospeech.TextToSpeechManagerService";
-    private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
-            "com.android.server.timezone.RulesManagerService$Lifecycle";
     private static final String IOT_SERVICE_CLASS =
             "com.android.things.server.IoTSystemService";
     private static final String SLICE_MANAGER_SERVICE_CLASS =
@@ -2182,19 +2180,6 @@ public final class SystemServer implements Dumpable {
                 reportWtf("starting RuntimeService", e);
             }
             t.traceEnd();
-
-            // timezone.RulesManagerService will prevent a device starting up if the chain of trust
-            // required for safe time zone updates might be broken. RuleManagerService cannot do
-            // this check when mOnlyCore == true, so we don't enable the service in this case.
-            // This service requires that JobSchedulerService is already started when it starts.
-            final boolean startRulesManagerService =
-                    !mOnlyCore && context.getResources().getBoolean(
-                            R.bool.config_enableUpdateableTimeZoneRules);
-            if (startRulesManagerService) {
-                t.traceBegin("StartTimeZoneRulesManagerService");
-                mSystemServiceManager.startService(TIME_ZONE_RULES_MANAGER_SERVICE_CLASS);
-                t.traceEnd();
-            }
 
             if (!isWatch && !disableNetworkTime) {
                 t.traceBegin("StartNetworkTimeUpdateService");
