@@ -42,6 +42,7 @@ import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP_TO_SP
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 import static com.android.wm.shell.transition.Transitions.isOpeningType;
 
+import android.animation.Animator;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -248,6 +249,13 @@ public class PipTransition extends PipTransitionController {
         return false;
     }
 
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        end();
+    }
+
     /** Helper to identify whether this handler is currently the one playing an animation */
     private boolean isAnimatingLocally() {
         return mFinishTransaction != null;
@@ -280,6 +288,13 @@ public class PipTransition extends PipTransitionController {
             final Rect destinationBounds = mPipBoundsAlgorithm.getEntryDestinationBounds();
             outWCT.setBounds(request.getTriggerTask().token, destinationBounds);
         }
+    }
+
+    @Override
+    public void end() {
+        Animator animator = mPipAnimationController.getCurrentAnimator();
+        if (animator == null) return;
+        animator.end();
     }
 
     @Override

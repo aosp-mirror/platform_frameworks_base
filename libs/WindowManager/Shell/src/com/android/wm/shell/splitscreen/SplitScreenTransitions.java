@@ -225,9 +225,25 @@ class SplitScreenTransitions {
 
     void mergeAnimation(IBinder transition, TransitionInfo info, SurfaceControl.Transaction t,
             IBinder mergeTarget, Transitions.TransitionFinishCallback finishCallback) {
-        if (mergeTarget == mAnimatingTransition && mActiveRemoteHandler != null) {
+        if (mergeTarget != mAnimatingTransition) return;
+        if (mActiveRemoteHandler != null) {
             mActiveRemoteHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+        } else {
+            for (int i = mAnimations.size() - 1; i >= 0; --i) {
+                final Animator anim = mAnimations.get(i);
+                mTransitions.getAnimExecutor().execute(anim::end);
+            }
         }
+    }
+
+    boolean end() {
+        // If its remote, there's nothing we can do right now.
+        if (mActiveRemoteHandler != null) return false;
+        for (int i = mAnimations.size() - 1; i >= 0; --i) {
+            final Animator anim = mAnimations.get(i);
+            mTransitions.getAnimExecutor().execute(anim::end);
+        }
+        return true;
     }
 
     void onTransitionMerged(@NonNull IBinder transition) {
