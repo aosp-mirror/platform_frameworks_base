@@ -55,6 +55,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.view.IRemoteAnimationFinishedCallback;
@@ -191,6 +192,9 @@ public class KeyguardService extends Service {
 
     private static IRemoteTransition wrap(IRemoteAnimationRunner runner) {
         return new IRemoteTransition.Stub() {
+            final ArrayMap<IBinder, IRemoteTransitionFinishedCallback> mFinishCallbacks =
+                    new ArrayMap<>();
+
             @Override
             public void startAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
@@ -205,11 +209,17 @@ public class KeyguardService extends Service {
                     t.setAlpha(change.getLeash(), 1.0f);
                 }
                 t.apply();
+                synchronized (mFinishCallbacks) {
+                    mFinishCallbacks.put(transition, finishCallback);
+                }
                 runner.onAnimationStart(getTransitionOldType(info.getType(), info.getFlags(), apps),
                         apps, wallpapers, nonApps,
                         new IRemoteAnimationFinishedCallback.Stub() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
+                                synchronized (mFinishCallbacks) {
+                                    if (mFinishCallbacks.remove(transition) == null) return;
+                                }
                                 Slog.d(TAG, "Finish IRemoteAnimationRunner.");
                                 finishCallback.onTransitionFinished(null /* wct */, null /* t */);
                             }
@@ -220,7 +230,20 @@ public class KeyguardService extends Service {
             public void mergeAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) {
-
+                try {
+                    final IRemoteTransitionFinishedCallback origFinishCB;
+                    synchronized (mFinishCallbacks) {
+                        origFinishCB = mFinishCallbacks.remove(transition);
+                    }
+                    if (origFinishCB == null) {
+                        // already finished (or not started yet), so do nothing.
+                        return;
+                    }
+                    runner.onAnimationCancelled();
+                    origFinishCB.onTransitionFinished(null /* wct */, null /* t */);
+                } catch (RemoteException e) {
+                    // nothing, we'll just let it finish on its own I guess.
+                }
             }
         };
     }
