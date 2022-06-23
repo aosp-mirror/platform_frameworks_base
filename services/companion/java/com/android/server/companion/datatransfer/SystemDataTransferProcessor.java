@@ -24,8 +24,6 @@ import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.Utils.prepareForIpc;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
@@ -41,23 +39,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
+import android.permission.PermissionControllerManager;
 import android.util.Slog;
-import android.util.Xml;
 
 import com.android.server.companion.AssociationStore;
 import com.android.server.companion.CompanionDeviceManagerService;
 import com.android.server.companion.PermissionsUtils;
-import com.android.server.companion.datatransfer.permbackup.BackupHelper;
 import com.android.server.companion.proto.CompanionMessage;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This processor builds user consent intent for a given SystemDataTransferRequest and processes the
@@ -83,6 +75,8 @@ public class SystemDataTransferProcessor {
     private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private final CompanionMessageProcessor mCompanionMessageProcessor;
+    private final PermissionControllerManager mPermissionControllerManager;
+    private final ExecutorService mExecutor;
 
     public SystemDataTransferProcessor(CompanionDeviceManagerService service,
             AssociationStore associationStore,
@@ -93,6 +87,8 @@ public class SystemDataTransferProcessor {
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
         mCompanionMessageProcessor = companionMessageProcessor;
         mCompanionMessageProcessor.setListener(this::onCompleteMessageReceived);
+        mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
+        mExecutor = Executors.newSingleThreadExecutor();
     }
 
     /**
@@ -180,23 +176,13 @@ public class SystemDataTransferProcessor {
 
         // TODO: Establish a secure channel
 
-        final long callingIdentityToken = Binder.clearCallingIdentity();
-
         // Start permission sync
+        final long callingIdentityToken = Binder.clearCallingIdentity();
         try {
-            BackupHelper backupHelper = new BackupHelper(mContext, UserHandle.of(userId));
-            XmlSerializer serializer = Xml.newSerializer();
-            ByteArrayOutputStream backup = new ByteArrayOutputStream();
-            serializer.setOutput(backup, UTF_8.name());
-
-            backupHelper.writeState(serializer);
-
-            serializer.flush();
-
-            mCompanionMessageProcessor.paginateAndDispatchMessagesToApp(backup.toByteArray(),
-                    CompanionMessage.PERMISSION_SYNC, packageName, userId, associationId);
-        } catch (IOException ioe) {
-            Slog.e(LOG_TAG, "Error while writing permission state.");
+            mPermissionControllerManager.getRuntimePermissionBackup(UserHandle.of(userId),
+                    mExecutor,
+                    backup -> mCompanionMessageProcessor.paginateAndDispatchMessagesToApp(backup,
+                        CompanionMessage.PERMISSION_SYNC, packageName, userId, associationId));
         } finally {
             Binder.restoreCallingIdentity(callingIdentityToken);
         }
@@ -219,21 +205,11 @@ public class SystemDataTransferProcessor {
     private void processPermissionSyncMessage(CompanionMessageInfo messageInfo) {
         Slog.i(LOG_TAG, "Applying permissions.");
         // Start applying permissions
+        UserHandle user = mContext.getUser();
         final long callingIdentityToken = Binder.clearCallingIdentity();
         try {
-            BackupHelper backupHelper = new BackupHelper(mContext, mContext.getUser());
-            XmlPullParser parser = Xml.newPullParser();
-            ByteArrayInputStream stream = new ByteArrayInputStream(
-                    messageInfo.getData());
-            parser.setInput(stream, UTF_8.name());
-
-            backupHelper.restoreState(parser);
-        } catch (IOException e) {
-            Slog.e(LOG_TAG, "IOException reading message: "
-                    + new String(messageInfo.getData()));
-        } catch (XmlPullParserException e) {
-            Slog.e(LOG_TAG, "Error parsing message: "
-                    + new String(messageInfo.getData()));
+            mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(
+                    messageInfo.getData(), user);
         } finally {
             Slog.i(LOG_TAG, "Permissions applied.");
             Binder.restoreCallingIdentity(callingIdentityToken);
