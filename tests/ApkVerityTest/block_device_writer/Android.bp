@@ -24,12 +24,7 @@ package {
 }
 
 cc_test {
-    // Depending on how the test runs, the executable may be uploaded to different location.
-    // Before the bug in the file pusher is fixed, workaround by making the name unique.
-    // See b/124718249#comment12.
-    name: "block_device_writer_module",
-    stem: "block_device_writer",
-
+    name: "block_device_writer",
     srcs: ["block_device_writer.cpp"],
     cflags: [
         "-D_FILE_OFFSET_BITS=64",
@@ -42,20 +37,13 @@ cc_test {
         "libbase",
         "libutils",
     ],
-    // For some reasons, cuttlefish (x86) uses x86_64 test suites for testing. Unfortunately, when
-    // the uploader does not pick up the executable from correct output location. The following
-    // workaround allows the test to:
-    //  * upload the 32-bit exectuable for both 32 and 64 bits devices to use
-    //  * refer to the same executable name in Java
-    //  * no need to force the Java test to be archiecture specific.
-    //
-    // See b/145573317 for details.
+    compile_multilib: "both",
     multilib: {
         lib32: {
-            suffix: "",
+            suffix: "32",
         },
         lib64: {
-            suffix: "64", // not really used
+            suffix: "64",
         },
     },
 
