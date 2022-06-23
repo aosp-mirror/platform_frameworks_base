@@ -190,12 +190,8 @@ genrule {
 
 // This produces the same annotations.zip as framework-doc-stubs, but by using
 // outputs from individual modules instead of all the source code.
-genrule {
-    name: "sdk-annotations.zip",
-    srcs: [
-        ":android-non-updatable-doc-stubs{.annotations.zip}",
-        ":all-modules-public-annotations",
-    ],
+genrule_defaults {
+    name: "sdk-annotations-defaults",
     out: ["annotations.zip"],
     tools: [
         "merge_annotation_zips",
@@ -203,6 +199,24 @@ genrule {
     ],
     cmd: "$(location merge_annotation_zips) $(genDir)/out $(in) && " +
         "$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out",
+}
+
+genrule {
+    name: "sdk-annotations.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs{.annotations.zip}",
+        ":all-modules-public-annotations",
+    ],
+}
+
+genrule {
+    name: "sdk-annotations-system.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-system{.annotations.zip}",
+        ":all-modules-system-annotations",
+    ],
 }
 
 genrule {
