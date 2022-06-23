@@ -68,15 +68,15 @@ import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
-import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
+import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
 import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
 import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
 import com.android.wm.shell.unfold.animation.UnfoldTaskAnimator;
-import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
 import com.android.wm.shell.unfold.qualifier.UnfoldShellTransition;
+import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
 import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -218,6 +218,7 @@ public abstract class WMShellModule {
             PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
             PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
+            PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
@@ -227,7 +228,7 @@ public abstract class WMShellModule {
         return Optional.ofNullable(PipController.create(context, displayController,
                 pipAppOpsListener, pipBoundsAlgorithm, pipKeepClearAlgorithm, pipBoundsState,
                 pipMotionHelper,
-                pipMediaController, phonePipMenuController, pipTaskOrganizer,
+                pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
                 pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
                 taskStackListener, pipParamsChangedForwarder, oneHandedController, mainExecutor));
     }
