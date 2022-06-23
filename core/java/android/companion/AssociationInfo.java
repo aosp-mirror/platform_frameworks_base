@@ -55,6 +55,14 @@ public final class AssociationInfo implements Parcelable {
 
     private final boolean mSelfManaged;
     private final boolean mNotifyOnDeviceNearby;
+
+    /**
+     * Indicates that the association has been revoked (removed), but we keep the association
+     * record for final clean up (e.g. removing the app from the list of the role holders).
+     *
+     * @see CompanionDeviceManager#disassociate(int)
+     */
+    private final boolean mRevoked;
     private final long mTimeApprovedMs;
     /**
      * A long value indicates the last time connected reported by selfManaged devices
@@ -71,7 +79,7 @@ public final class AssociationInfo implements Parcelable {
     public AssociationInfo(int id, @UserIdInt int userId, @NonNull String packageName,
             @Nullable MacAddress macAddress, @Nullable CharSequence displayName,
             @Nullable String deviceProfile, boolean selfManaged, boolean notifyOnDeviceNearby,
-            long timeApprovedMs, long lastTimeConnectedMs) {
+            boolean revoked, long timeApprovedMs, long lastTimeConnectedMs) {
         if (id <= 0) {
             throw new IllegalArgumentException("Association ID should be greater than 0");
         }
@@ -91,6 +99,7 @@ public final class AssociationInfo implements Parcelable {
 
         mSelfManaged = selfManaged;
         mNotifyOnDeviceNearby = notifyOnDeviceNearby;
+        mRevoked = revoked;
         mTimeApprovedMs = timeApprovedMs;
         mLastTimeConnectedMs = lastTimeConnectedMs;
     }
@@ -176,6 +185,14 @@ public final class AssociationInfo implements Parcelable {
     }
 
     /**
+     * @return if the association has been revoked (removed).
+     * @hide
+     */
+    public boolean isRevoked() {
+        return mRevoked;
+    }
+
+    /**
      * @return the last time self reported disconnected for selfManaged only.
      * @hide
      */
@@ -244,6 +261,7 @@ public final class AssociationInfo implements Parcelable {
                 + ", mDeviceProfile='" + mDeviceProfile + '\''
                 + ", mSelfManaged=" + mSelfManaged
                 + ", mNotifyOnDeviceNearby=" + mNotifyOnDeviceNearby
+                + ", mRevoked=" + mRevoked
                 + ", mTimeApprovedMs=" + new Date(mTimeApprovedMs)
                 + ", mLastTimeConnectedMs=" + (
                     mLastTimeConnectedMs == Long.MAX_VALUE
@@ -260,6 +278,7 @@ public final class AssociationInfo implements Parcelable {
                 && mUserId == that.mUserId
                 && mSelfManaged == that.mSelfManaged
                 && mNotifyOnDeviceNearby == that.mNotifyOnDeviceNearby
+                && mRevoked == that.mRevoked
                 && mTimeApprovedMs == that.mTimeApprovedMs
                 && mLastTimeConnectedMs == that.mLastTimeConnectedMs
                 && Objects.equals(mPackageName, that.mPackageName)
@@ -271,7 +290,7 @@ public final class AssociationInfo implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mId, mUserId, mPackageName, mDeviceMacAddress, mDisplayName,
-                mDeviceProfile, mSelfManaged, mNotifyOnDeviceNearby, mTimeApprovedMs,
+                mDeviceProfile, mSelfManaged, mNotifyOnDeviceNearby, mRevoked, mTimeApprovedMs,
                 mLastTimeConnectedMs);
     }
 
@@ -293,6 +312,7 @@ public final class AssociationInfo implements Parcelable {
 
         dest.writeBoolean(mSelfManaged);
         dest.writeBoolean(mNotifyOnDeviceNearby);
+        dest.writeBoolean(mRevoked);
         dest.writeLong(mTimeApprovedMs);
         dest.writeLong(mLastTimeConnectedMs);
     }
@@ -309,6 +329,7 @@ public final class AssociationInfo implements Parcelable {
 
         mSelfManaged = in.readBoolean();
         mNotifyOnDeviceNearby = in.readBoolean();
+        mRevoked = in.readBoolean();
         mTimeApprovedMs = in.readLong();
         mLastTimeConnectedMs = in.readLong();
     }
@@ -352,11 +373,13 @@ public final class AssociationInfo implements Parcelable {
         @NonNull
         private final AssociationInfo mOriginalInfo;
         private boolean mNotifyOnDeviceNearby;
+        private boolean mRevoked;
         private long mLastTimeConnectedMs;
 
         private Builder(@NonNull AssociationInfo info) {
             mOriginalInfo = info;
             mNotifyOnDeviceNearby = info.mNotifyOnDeviceNearby;
+            mRevoked = info.mRevoked;
             mLastTimeConnectedMs = info.mLastTimeConnectedMs;
         }
 
@@ -388,6 +411,17 @@ public final class AssociationInfo implements Parcelable {
         }
 
         /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @Override
+        @NonNull
+        public Builder setRevoked(boolean revoked) {
+            mRevoked = revoked;
+            return this;
+        }
+
+        /**
          * @hide
          */
         @NonNull
@@ -401,6 +435,7 @@ public final class AssociationInfo implements Parcelable {
                     mOriginalInfo.mDeviceProfile,
                     mOriginalInfo.mSelfManaged,
                     mNotifyOnDeviceNearby,
+                    mRevoked,
                     mOriginalInfo.mTimeApprovedMs,
                     mLastTimeConnectedMs
             );
@@ -433,5 +468,12 @@ public final class AssociationInfo implements Parcelable {
          */
         @NonNull
         Builder setLastTimeConnected(long lastTimeConnectedMs);
+
+        /**
+         * Should only be used by the CompanionDeviceManagerService.
+         * @hide
+         */
+        @NonNull
+        Builder setRevoked(boolean revoked);
     }
 }
