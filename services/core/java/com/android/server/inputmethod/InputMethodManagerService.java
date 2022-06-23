@@ -5754,10 +5754,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onImeParentChanged() {
             synchronized (ImfLock.class) {
-                // Hide the IME method menu when the IME surface parent will change in
-                // case seeing the dialog dismiss flickering during the next focused window
-                // starting the input connection.
-                mMenuController.hideInputMethodMenu();
+                // Hide the IME method menu only when the IME surface parent is changed by the
+                // input target changed, in case seeing the dialog dismiss flickering during
+                // the next focused window starting the input connection.
+                if (mLastImeTargetWindow != mCurFocusedWindow) {
+                    mMenuController.hideInputMethodMenu();
+                }
             }
         }
 
