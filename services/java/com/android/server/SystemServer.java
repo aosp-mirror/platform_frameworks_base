@@ -409,7 +409,7 @@ public final class SystemServer implements Dumpable {
             "/apex/com.android.uwb/javalib/service-uwb.jar";
     private static final String UWB_SERVICE_CLASS = "com.android.server.uwb.UwbService";
     private static final String BLUETOOTH_APEX_SERVICE_JAR_PATH =
-            "/apex/com.android.bluetooth/javalib/service-bluetooth.jar";
+            "/apex/com.android.btservices/javalib/service-bluetooth.jar";
     private static final String BLUETOOTH_SERVICE_CLASS =
             "com.android.server.bluetooth.BluetoothService";
     private static final String SAFETY_CENTER_SERVICE_CLASS =
