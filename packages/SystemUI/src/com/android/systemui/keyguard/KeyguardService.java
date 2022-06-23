@@ -158,7 +158,7 @@ public class KeyguardService extends Service {
             Rect localBounds = new Rect(change.getEndAbsBounds());
             localBounds.offsetTo(change.getEndRelOffset().x, change.getEndRelOffset().y);
 
-            out.add(new RemoteAnimationTarget(
+            final RemoteAnimationTarget target = new RemoteAnimationTarget(
                     taskId,
                     newModeToLegacyMode(change.getMode()),
                     change.getLeash(),
@@ -169,7 +169,15 @@ public class KeyguardService extends Service {
                     info.getChanges().size() - i,
                     new Point(), localBounds, new Rect(change.getEndAbsBounds()),
                     windowConfiguration, isNotInRecents, null /* startLeash */,
-                    change.getStartAbsBounds(), taskInfo, false /* allowEnterPip */));
+                    change.getStartAbsBounds(), taskInfo, false /* allowEnterPip */);
+            // Use hasAnimatingParent to mark the anything below root task
+            if (taskId != -1 && change.getParent() != null) {
+                final TransitionInfo.Change parentChange = info.getChange(change.getParent());
+                if (parentChange != null && parentChange.getTaskInfo() != null) {
+                    target.hasAnimatingParent = true;
+                }
+            }
+            out.add(target);
         }
         return out.toArray(new RemoteAnimationTarget[out.size()]);
     }
@@ -190,6 +198,7 @@ public class KeyguardService extends Service {
         }
     }
 
+    // Wrap Keyguard going away animation
     private static IRemoteTransition wrap(IRemoteAnimationRunner runner) {
         return new IRemoteTransition.Stub() {
             final ArrayMap<IBinder, IRemoteTransitionFinishedCallback> mFinishCallbacks =
@@ -204,9 +213,24 @@ public class KeyguardService extends Service {
                 final RemoteAnimationTarget[] wallpapers = wrap(info, true /* wallpapers */);
                 final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
 
-                // TODO: Remove this, and update alpha value in the IAnimationRunner.
-                for (TransitionInfo.Change change : info.getChanges()) {
-                    t.setAlpha(change.getLeash(), 1.0f);
+                // Sets the alpha to 0 for the opening root task for fade in animation. And since
+                // the fade in animation can only apply on the first opening app, so set alpha to 1
+                // for anything else.
+                boolean foundOpening = false;
+                for (RemoteAnimationTarget target : apps) {
+                    if (target.taskId != -1
+                            && target.mode == RemoteAnimationTarget.MODE_OPENING
+                            && !target.hasAnimatingParent) {
+                        if (foundOpening) {
+                            Log.w(TAG, "More than one opening target");
+                            t.setAlpha(target.leash, 1.0f);
+                            continue;
+                        }
+                        t.setAlpha(target.leash, 0.0f);
+                        foundOpening = true;
+                    } else {
+                        t.setAlpha(target.leash, 1.0f);
+                    }
                 }
                 t.apply();
                 synchronized (mFinishCallbacks) {
