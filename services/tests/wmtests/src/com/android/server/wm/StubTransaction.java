@@ -30,6 +30,7 @@ import android.view.InputWindowHandle;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import java.util.HashSet;
 import java.util.concurrent.Executor;
 
 /**
@@ -37,8 +38,14 @@ import java.util.concurrent.Executor;
  * testing to avoid calls to native code.
  */
 public class StubTransaction extends SurfaceControl.Transaction {
+
+    private HashSet<Runnable> mWindowInfosReportedListeners = new HashSet<>();
+
     @Override
     public void apply() {
+        for (Runnable listener : mWindowInfosReportedListeners) {
+            listener.run();
+        }
     }
 
     @Override
@@ -47,6 +54,7 @@ public class StubTransaction extends SurfaceControl.Transaction {
 
     @Override
     public void apply(boolean sync) {
+        apply();
     }
 
     @Override
@@ -235,11 +243,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction syncInputWindows() {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction setColorSpaceAgnostic(SurfaceControl sc, boolean agnostic) {
         return this;
     }
@@ -297,6 +300,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
     @Override
     public SurfaceControl.Transaction setTrustedOverlay(SurfaceControl sc,
             boolean isTrustedOverlay) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction addWindowInfosReportedListener(@NonNull Runnable listener) {
+        mWindowInfosReportedListeners.add(listener);
         return this;
     }
 }
