@@ -796,10 +796,10 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public void startInput(InputConnection ic, EditorInfo attribute) {
-            if (DEBUG) Log.v(TAG, "startInput(): editor=" + attribute);
+        public void startInput(InputConnection ic, EditorInfo editorInfo) {
+            if (DEBUG) Log.v(TAG, "startInput(): editor=" + editorInfo);
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.startInput");
-            doStartInput(ic, attribute, false);
+            doStartInput(ic, editorInfo, false);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
@@ -808,10 +808,10 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public void restartInput(InputConnection ic, EditorInfo attribute) {
-            if (DEBUG) Log.v(TAG, "restartInput(): editor=" + attribute);
+        public void restartInput(InputConnection ic, EditorInfo editorInfo) {
+            if (DEBUG) Log.v(TAG, "restartInput(): editor=" + editorInfo);
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.restartInput");
-            doStartInput(ic, attribute, true);
+            doStartInput(ic, editorInfo, true);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
@@ -2315,11 +2315,11 @@ public class InputMethodService extends AbstractInputMethodService {
      * setup here.  You are guaranteed that {@link #onCreateInputView()} will
      * have been called some time before this function is called.
      * 
-     * @param info Description of the type of text being edited.
+     * @param editorInfo Description of the type of text being edited.
      * @param restarting Set to true if we are restarting input on the
      * same text field as before.
      */
-    public void onStartInputView(EditorInfo info, boolean restarting) {
+    public void onStartInputView(EditorInfo editorInfo, boolean restarting) {
         // Intentionally empty
     }
     
@@ -2360,11 +2360,11 @@ public class InputMethodService extends AbstractInputMethodService {
      * editor is hidden but wants to show its candidates UI as text is
      * entered through some other mechanism.
      * 
-     * @param info Description of the type of text being edited.
+     * @param editorInfo Description of the type of text being edited.
      * @param restarting Set to true if we are restarting input on the
      * same text field as before.
      */
-    public void onStartCandidatesView(EditorInfo info, boolean restarting) {
+    public void onStartCandidatesView(EditorInfo editorInfo, boolean restarting) {
         // Intentionally empty
     }
     
@@ -2902,7 +2902,7 @@ public class InputMethodService extends AbstractInputMethodService {
         unregisterCompatOnBackInvokedCallback();
     }
 
-    void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
+    void doStartInput(InputConnection ic, EditorInfo editorInfo, boolean restarting) {
         if (!restarting && mInputStarted) {
             doFinishInput();
         }
@@ -2910,13 +2910,13 @@ public class InputMethodService extends AbstractInputMethodService {
                 null /* icProto */);
         mInputStarted = true;
         mStartedInputConnection = ic;
-        mInputEditorInfo = attribute;
+        mInputEditorInfo = editorInfo;
         initialize();
         mInlineSuggestionSessionController.notifyOnStartInput(
-                attribute == null ? null : attribute.packageName,
-                attribute == null ? null : attribute.autofillId);
+                editorInfo == null ? null : editorInfo.packageName,
+                editorInfo == null ? null : editorInfo.autofillId);
         if (DEBUG) Log.v(TAG, "CALL: onStartInput");
-        onStartInput(attribute, restarting);
+        onStartInput(editorInfo, restarting);
         if (mDecorViewVisible) {
             if (mShowInputRequested) {
                 if (DEBUG) Log.v(TAG, "CALL: onStartInputView");

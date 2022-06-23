@@ -49,14 +49,14 @@ interface IInputMethodManager {
     boolean hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver, int reason);
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
-    // has gained focus, and if 'attribute' is non-null then also does startInput.
+    // has gained focus, and if 'editorInfo' is non-null then also does startInput.
     // @NonNull
     InputBindResult startInputOrWindowGainedFocus(
             /* @StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken,
             /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
-            int windowFlags, in EditorInfo attribute, in IRemoteInputConnection inputConnection,
+            int windowFlags, in EditorInfo editorInfo, in IRemoteInputConnection inputConnection,
             in IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, in ImeOnBackInvokedDispatcher imeDispatcher);
 
