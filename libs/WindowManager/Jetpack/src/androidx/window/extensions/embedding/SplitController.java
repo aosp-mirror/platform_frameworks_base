@@ -642,6 +642,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     private void onActivityConfigurationChanged(@NonNull Activity activity) {
+        if (activity.isFinishing()) {
+            // Do nothing if the activity is currently finishing.
+            return;
+        }
+
         if (isInPictureInPicture(activity)) {
             // We don't embed activity when it is in PIP.
             return;
@@ -1119,6 +1124,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     boolean launchPlaceholderIfNecessary(@NonNull Activity activity, boolean isOnCreated) {
+        if (activity.isFinishing()) {
+            return false;
+        }
+
         final TaskFragmentContainer container = getContainerWithActivity(activity);
         // Don't launch placeholder if the container is occluded.
         if (container != null && container != getTopActiveContainer(container.getTaskId())) {
