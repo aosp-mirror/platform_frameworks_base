@@ -210,7 +210,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 BOUNDS_POSITION_TOP,
                 mAuthController,
                 mStatusBarStateController,
-                mKeyguardUpdateMonitor));
+                mKeyguardUpdateMonitor,
+                mExecutor));
 
         mScreenDecorations = spy(new ScreenDecorations(mContext, mExecutor, mSecureSettings,
                 mBroadcastDispatcher, mTunerService, mUserTracker, mDotViewController,

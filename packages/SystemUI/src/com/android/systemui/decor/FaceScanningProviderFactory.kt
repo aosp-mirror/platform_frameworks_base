@@ -32,10 +32,12 @@ import android.widget.FrameLayout
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.FaceScanningOverlay
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 @SysUISingleton
@@ -44,6 +46,7 @@ class FaceScanningProviderFactory @Inject constructor(
     private val context: Context,
     private val statusBarStateController: StatusBarStateController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    @Main private val mainExecutor: Executor,
     private val featureFlags: FeatureFlags
 ) : DecorProviderFactory() {
     private val display = context.display
@@ -82,7 +85,9 @@ class FaceScanningProviderFactory @Inject constructor(
                                         bound.baseOnRotation0(displayInfo.rotation),
                                         authController,
                                         statusBarStateController,
-                                        keyguardUpdateMonitor)
+                                        keyguardUpdateMonitor,
+                                        mainExecutor
+                                )
                         )
                     }
                 }
@@ -102,7 +107,8 @@ class FaceScanningOverlayProviderImpl(
     override val alignedBound: Int,
     private val authController: AuthController,
     private val statusBarStateController: StatusBarStateController,
-    private val keyguardUpdateMonitor: KeyguardUpdateMonitor
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val mainExecutor: Executor
 ) : BoundDecorProvider() {
     override val viewId: Int = com.android.systemui.R.id.face_scanning_anim
 
@@ -127,7 +133,9 @@ class FaceScanningOverlayProviderImpl(
                 context,
                 alignedBound,
                 statusBarStateController,
-                keyguardUpdateMonitor)
+                keyguardUpdateMonitor,
+                mainExecutor
+        )
         view.id = viewId
         FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT).let {
