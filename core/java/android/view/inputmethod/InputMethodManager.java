@@ -1131,9 +1131,7 @@ public final class InputMethodManager {
                                 || mServedInputConnection == null) {
                             return;
                         }
-                        final boolean isMonitoring = (mRequestUpdateCursorAnchorInfoMonitorMode
-                                & InputConnection.CURSOR_UPDATE_MONITOR) != 0;
-                        if (!isMonitoring) {
+                        if (!mServedInputConnection.isCursorAnchorInfoMonitoring()) {
                             return;
                         }
                         // Since the host VirtualDisplay is moved, we need to issue
@@ -2829,8 +2827,8 @@ public final class InputMethodManager {
             }
             // If immediate bit is set, we will call updateCursorAnchorInfo() even when the data has
             // not been changed from the previous call.
-            final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
-                    CURSOR_UPDATE_IMMEDIATE) != 0;
+            final boolean isImmediate = mServedInputConnection != null
+                    && mServedInputConnection.resetHasPendingImmediateCursorAnchorInfoUpdate();
             if (!isImmediate && Objects.equals(mCursorAnchorInfo, cursorAnchorInfo)) {
                 // TODO: Consider always emitting this message once we have addressed redundant
                 // calls of this method from android.widget.Editor.
@@ -2849,8 +2847,6 @@ public final class InputMethodManager {
                 mCurrentInputMethodSession.updateCursorAnchorInfo(cursorAnchorInfo);
             }
             mCursorAnchorInfo = cursorAnchorInfo;
-            // Clear immediate bit (if any).
-            mRequestUpdateCursorAnchorInfoMonitorMode &= ~CURSOR_UPDATE_IMMEDIATE;
         }
     }
 

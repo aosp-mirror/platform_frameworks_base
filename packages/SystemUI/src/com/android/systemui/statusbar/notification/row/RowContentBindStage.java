@@ -57,7 +57,7 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
             @NonNull StageCallback callback) {
         RowContentBindParams params = getStageParams(entry);
 
-        mLogger.logStageParams(entry.getKey(), params.toString());
+        mLogger.logStageParams(entry, params);
 
         // Resolve content to bind/unbind.
         @InflationFlag int inflationFlags = params.getContentViews();

@@ -71,7 +71,7 @@ abstract class HdmiCecLocalDevice {
     protected final int mDeviceType;
     protected int mPreferredAddress;
     @GuardedBy("mLock")
-    protected HdmiDeviceInfo mDeviceInfo;
+    private HdmiDeviceInfo mDeviceInfo;
     protected int mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
     protected int mLastKeyRepeatCount = 0;
 
@@ -666,11 +666,9 @@ abstract class HdmiCecLocalDevice {
      * Computes the set of supported device features, and updates local state to match.
      */
     private void updateDeviceFeatures() {
-        synchronized (mLock) {
-            setDeviceInfo(getDeviceInfo().toBuilder()
-                    .setDeviceFeatures(computeDeviceFeatures())
-                    .build());
-        }
+        setDeviceInfo(getDeviceInfo().toBuilder()
+                .setDeviceFeatures(computeDeviceFeatures())
+                .build());
     }
 
     /**
@@ -678,9 +676,7 @@ abstract class HdmiCecLocalDevice {
      */
     protected final DeviceFeatures getDeviceFeatures() {
         updateDeviceFeatures();
-        synchronized (mLock) {
-            return getDeviceInfo().getDeviceFeatures();
-        }
+        return getDeviceInfo().getDeviceFeatures();
     }
 
     @Constants.HandleMessageResult
@@ -982,14 +978,12 @@ abstract class HdmiCecLocalDevice {
         return mDeviceType;
     }
 
-    @GuardedBy("mLock")
     HdmiDeviceInfo getDeviceInfo() {
         synchronized (mLock) {
             return mDeviceInfo;
         }
     }
 
-    @GuardedBy("mLock")
     void setDeviceInfo(HdmiDeviceInfo info) {
         synchronized (mLock) {
             mDeviceInfo = info;
@@ -1042,10 +1036,8 @@ abstract class HdmiCecLocalDevice {
 
         // Send <Give Features> if using CEC 2.0 or above.
         if (mService.getCecVersion() >= HdmiControlManager.HDMI_CEC_VERSION_2_0) {
-            synchronized (mLock) {
-                mService.sendCecCommand(HdmiCecMessageBuilder.buildGiveFeatures(
-                        getDeviceInfo().getLogicalAddress(), targetAddress));
-            }
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildGiveFeatures(
+                    getDeviceInfo().getLogicalAddress(), targetAddress));
         }
 
         // If we don't already have a {@link SetAudioVolumeLevelDiscoveryAction} for the target

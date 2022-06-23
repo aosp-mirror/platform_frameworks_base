@@ -132,9 +132,7 @@ public class RequestSadActionTest {
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x0000);
         mTestLooper.dispatchAll();
-        synchronized (mHdmiCecLocalDeviceTv.mLock) {
-            mTvLogicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();
-        }
+        mTvLogicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();
         mNativeWrapper.clearResultMessages();
     }
 

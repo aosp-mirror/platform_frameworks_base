@@ -367,10 +367,15 @@ class DragState {
             mDragWindowHandle.ownerUid = MY_UID;
             mDragWindowHandle.scaleFactor = 1.0f;
 
-            // Keep the default behavior of this window to be focusable, which allows the system
-            // to consume keys when dragging is active. This can also be used to modify the drag
-            // state on key press. For example, cancel drag on escape key.
-            mDragWindowHandle.inputConfig = InputConfig.PREVENT_SPLITTING;
+            // InputConfig.PREVENT_SPLITTING: To keep the default behavior of this window to be
+            // focusable, which allows the system to consume keys when dragging is active. This can
+            // also be used to modify the drag state on key press. For example, cancel drag on
+            // escape key.
+            // InputConfig.TRUSTED_OVERLAY: To not block any touches while D&D ongoing and allowing
+            // touches to pass through to windows underneath. This allows user to interact with the
+            // UI to navigate while dragging.
+            mDragWindowHandle.inputConfig =
+                    InputConfig.PREVENT_SPLITTING | InputConfig.TRUSTED_OVERLAY;
 
             // The drag window cannot receive new touches.
             mDragWindowHandle.touchableRegion.setEmpty();

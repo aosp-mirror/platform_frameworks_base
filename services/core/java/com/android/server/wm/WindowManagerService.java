@@ -89,6 +89,7 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_MULTIPLIER;
@@ -2205,6 +2206,20 @@ public class WindowManagerService extends IWindowManager.Stub
                         == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Returns whether this window can proceed with drawing or needs to retry later.
+     */
+    public boolean cancelDraw(Session session, IWindow client) {
+        synchronized (mGlobalLock) {
+            final WindowState win = windowForClientLocked(session, client, false);
+            if (win == null) {
+                return false;
+            }
+
+            return win.cancelAndRedraw();
+        }
+    }
+
     public int relayoutWindow(Session session, IWindow client, LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
@@ -2221,6 +2236,11 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win == null) {
                 return 0;
             }
+
+            if (win.cancelAndRedraw()) {
+                result |= RELAYOUT_RES_CANCEL_AND_REDRAW;
+            }
+
             final DisplayContent displayContent = win.getDisplayContent();
             final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
 
@@ -2523,6 +2543,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 win.mLastSeqIdSentToRelayout = win.mSyncSeqId;
                 outSyncIdBundle.putInt("seqid", win.mSyncSeqId);
+                win.mAlreadyRequestedSync = true;
             } else {
                 outSyncIdBundle.putInt("seqid", -1);
             }

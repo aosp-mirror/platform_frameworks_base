@@ -122,6 +122,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.PermissionThread;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
@@ -2004,7 +2005,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         Preconditions.checkArgumentNonNegative(userId, "userId");
         CompletableFuture<byte[]> backup = new CompletableFuture<>();
         mPermissionControllerManager.getRuntimePermissionBackup(UserHandle.of(userId),
-                mContext.getMainExecutor(), backup::complete);
+                PermissionThread.getExecutor(), backup::complete);
 
         try {
             return backup.get(BACKUP_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
@@ -2055,7 +2056,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             }
         }
         mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName,
-                UserHandle.of(userId), mContext.getMainExecutor(), (hasMoreBackup) -> {
+                UserHandle.of(userId), PermissionThread.getExecutor(), (hasMoreBackup) -> {
                     if (hasMoreBackup) {
                         return;
                     }
@@ -4443,9 +4444,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             }
         }
 
-        mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
-        mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
-    }
+        mPermissionControllerManager = new PermissionControllerManager(
+                mContext, PermissionThread.getHandler());
+        mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);    }
 
     private static String getVolumeUuidForPackage(AndroidPackage pkg) {
         if (pkg == null) {

@@ -92,6 +92,7 @@ import com.android.internal.util.IntPair;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.PermissionThread;
 import com.android.server.SystemService;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
@@ -335,7 +336,7 @@ public final class PermissionPolicyService extends SystemService {
                 PermissionControllerManager manager = mPermControllerManagers.get(user);
                 if (manager == null) {
                     manager = new PermissionControllerManager(
-                            getUserContext(getContext(), user), FgThread.getHandler());
+                            getUserContext(getContext(), user), PermissionThread.getHandler());
                     mPermControllerManagers.put(user, manager);
                 }
                 manager.updateUserSensitiveForApp(uid);
@@ -343,8 +344,9 @@ public final class PermissionPolicyService extends SystemService {
         }, UserHandle.ALL, intentFilter, null, null);
 
         PermissionControllerManager manager = new PermissionControllerManager(
-                getUserContext(getContext(), Process.myUserHandle()), FgThread.getHandler());
-        FgThread.getHandler().postDelayed(manager::updateUserSensitive,
+                getUserContext(getContext(), Process.myUserHandle()),
+                PermissionThread.getHandler());
+        PermissionThread.getHandler().postDelayed(manager::updateUserSensitive,
                 USER_SENSITIVE_UPDATE_DELAY_MS);
     }
 
@@ -371,6 +373,11 @@ public final class PermissionPolicyService extends SystemService {
         if (isStarted(changedUserId)) {
             synchronized (mLock) {
                 if (mIsPackageSyncsScheduled.add(new Pair<>(packageName, changedUserId))) {
+                    // TODO(b/165030092): migrate this to PermissionThread.getHandler().
+                    // synchronizePackagePermissionsAndAppOpsForUser is a heavy operation.
+                    // Dispatched on a PermissionThread, it interferes with user switch.
+                    // FgThread is busy and schedules it after most of the switch is done.
+                    // A possible solution is to delay the callback.
                     FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             PermissionPolicyService
                                     ::synchronizePackagePermissionsAndAppOpsForUser,
@@ -584,9 +591,9 @@ public final class PermissionPolicyService extends SystemService {
             final PermissionControllerManager permissionControllerManager =
                     new PermissionControllerManager(
                             getUserContext(getContext(), UserHandle.of(userId)),
-                            FgThread.getHandler());
+                            PermissionThread.getHandler());
             permissionControllerManager.grantOrUpgradeDefaultRuntimePermissions(
-                    FgThread.getExecutor(), successful -> {
+                    PermissionThread.getExecutor(), successful -> {
                         if (successful) {
                             future.complete(null);
                         } else {
@@ -690,7 +697,7 @@ public final class PermissionPolicyService extends SystemService {
             synchronized (mLock) {
                 if (!mIsUidSyncScheduled.get(uid)) {
                     mIsUidSyncScheduled.put(uid, true);
-                    FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
+                    PermissionThread.getHandler().sendMessage(PooledLambda.obtainMessage(
                             PermissionPolicyService::resetAppOpPermissionsIfNotRequestedForUid,
                             this, uid));
                 }

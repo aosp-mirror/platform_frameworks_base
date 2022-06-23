@@ -384,4 +384,9 @@ interface IWindowSession {
      * Clears a touchable region set by {@link #setInsets}.
      */
     void clearTouchableRegion(IWindow window);
+
+    /**
+     * Returns whether this window needs to cancel draw and retry later.
+     */
+    boolean cancelDraw(IWindow window);
 }

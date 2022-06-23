@@ -132,9 +132,7 @@ public class HdmiCecControllerTest {
         mHdmiControlServiceSpy.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         mTestLooper.dispatchAll();
 
-        synchronized (playbackDevice.mLock) {
-            mPlaybackLogicalAddress = playbackDevice.getDeviceInfo().getLogicalAddress();
-        }
+        mPlaybackLogicalAddress = playbackDevice.getDeviceInfo().getLogicalAddress();
         mTestLooper.dispatchAll();
     }
 

@@ -20,7 +20,7 @@ package com.android.server.usb.descriptors;
  * An audio class-specific Mixer Unit interface.
  * see Audio20.pdf section 4.7.2.6 Mixer Unit Descriptor
  */
-public final class Usb20ACMixerUnit extends UsbACMixerUnit {
+public final class Usb20ACMixerUnit extends UsbACMixerUnit implements UsbAudioChannelCluster {
     private static final String TAG = "Usb20ACMixerUnit";
 
     private int mChanConfig;    // 6+p:4 Describes the spatial location of the
@@ -35,6 +35,21 @@ public final class Usb20ACMixerUnit extends UsbACMixerUnit {
 
     public Usb20ACMixerUnit(int length, byte type, byte subtype, int subClass) {
         super(length, type, subtype, subClass);
+    }
+
+    @Override
+    public byte getChannelCount() {
+        return mNumOutputs;
+    }
+
+    @Override
+    public int getChannelConfig() {
+        return mChanConfig;
+    }
+
+    @Override
+    public byte getChannelNames() {
+        return mChanNames;
     }
 
     @Override

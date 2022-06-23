@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.service.notification.StatusBarNotification;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,10 +56,8 @@ public class HybridGroupManager {
         mOverflowNumberPadding = res.getDimensionPixelSize(R.dimen.group_overflow_number_padding);
     }
 
-    private HybridNotificationView inflateHybridViewWithStyle(int style,
-            View contentView, ViewGroup parent) {
-        LayoutInflater inflater = new ContextThemeWrapper(mContext, style)
-                .getSystemService(LayoutInflater.class);
+    private HybridNotificationView inflateHybridView(View contentView, ViewGroup parent) {
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         int layout = contentView instanceof ConversationLayout
                 ? R.layout.hybrid_conversation_notification
                 : R.layout.hybrid_notification;
@@ -93,16 +90,8 @@ public class HybridGroupManager {
     public HybridNotificationView bindFromNotification(HybridNotificationView reusableView,
             View contentView, StatusBarNotification notification,
             ViewGroup parent) {
-        return bindFromNotificationWithStyle(reusableView, contentView, notification,
-                R.style.HybridNotification, parent);
-    }
-
-    private HybridNotificationView bindFromNotificationWithStyle(
-            HybridNotificationView reusableView, View contentView,
-            StatusBarNotification notification,
-            int style, ViewGroup parent) {
         if (reusableView == null) {
-            reusableView = inflateHybridViewWithStyle(style, contentView, parent);
+            reusableView = inflateHybridView(contentView, parent);
         }
         CharSequence titleText = resolveTitle(notification.getNotification());
         CharSequence contentText = resolveText(notification.getNotification());

@@ -138,9 +138,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                         // does not poll local devices, we should put device info of local device
                         // manually here.
                         for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
-                            synchronized (device.mLock) {
-                                mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
-                            }
+                            mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
                         }
 
                         List<HotplugDetectionAction> hotplugActions =
@@ -179,11 +177,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     void deviceSelect(int id, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
-        synchronized (mLock) {
-            if (id == getDeviceInfo().getId()) {
-                mService.oneTouchPlay(callback);
-                return;
-            }
+        if (id == getDeviceInfo().getId()) {
+            mService.oneTouchPlay(callback);
+            return;
         }
         HdmiDeviceInfo targetDevice = mService.getHdmiCecNetwork().getDeviceInfo(id);
         if (targetDevice == null) {

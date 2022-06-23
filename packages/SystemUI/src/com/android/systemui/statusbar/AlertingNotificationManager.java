@@ -65,7 +65,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      * @param entry entry to show
      */
     public void showNotification(@NonNull NotificationEntry entry) {
-        mLogger.logShowNotification(entry.getKey());
+        mLogger.logShowNotification(entry);
         addAlertEntry(entry);
         updateNotification(entry.getKey(), true /* alert */);
         entry.setInterruption();
@@ -319,7 +319,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
          * @param updatePostTime whether or not to refresh the post time
          */
         public void updateEntry(boolean updatePostTime) {
-            mLogger.logUpdateEntry(mEntry.getKey(), updatePostTime);
+            mLogger.logUpdateEntry(mEntry, updatePostTime);
 
             long currentTime = mClock.currentTimeMillis();
             mEarliestRemovaltime = currentTime + mMinimumDisplayTime;

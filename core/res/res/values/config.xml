@@ -2905,7 +2905,7 @@
 
     <!-- System bluetooth stack package name -->
     <string name="config_systemBluetoothStack" translatable="false">
-        com.android.bluetooth.services
+        com.android.bluetooth
     </string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
@@ -5657,7 +5657,7 @@
     <bool name="config_enableSafetyCenter">true</bool>
 
     <!-- Config for whether Safety Protection is enabled. -->
-    <bool name="config_safetyProtectionEnabled">false</bool>
+    <bool name="config_safetyProtectionEnabled">true</bool>
 
     <!-- Flag indicating if help links for Settings app should be enabled. -->
     <bool name="config_settingsHelpLinksEnabled">false</bool>
