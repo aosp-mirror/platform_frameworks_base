@@ -661,13 +661,7 @@
     <!-- When large clock is showing, offset the smartspace by this amount -->
     <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
     <!-- With the large clock, move up slightly from the center -->
-    <dimen name="keyguard_large_clock_top_margin">-60dp</dimen>
-
-    <!-- TODO: Remove during migration -->
-    <!-- Default line spacing multiplier between hours and minutes of the keyguard clock -->
-    <item name="keyguard_clock_line_spacing_scale" type="dimen" format="float">.7</item>
-    <!-- Burmese line spacing multiplier between hours and minutes of the keyguard clock -->
-    <item name="keyguard_clock_line_spacing_scale_burmese" type="dimen" format="float">1</item>
+    <dimen name="keyguard_large_clock_top_padding">100dp</dimen>
 
     <dimen name="notification_scrim_corner_radius">32dp</dimen>
 
@@ -889,11 +883,6 @@
     <!-- The maximum offset in either direction that elements are moved vertically to prevent
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_y_clock">42dp</dimen>
-
-    <!-- Clock maximum font size (dp is intentional, to prevent any further scaling) -->
-     <!-- TODO: Remove when clock migration complete -->
-    <dimen name="large_clock_text_size">150dp</dimen>
-    <dimen name="clock_text_size">86dp</dimen>
 
     <!-- The maximum offset in either direction that icons move to prevent burn-in on AOD. -->
     <dimen name="default_burn_in_prevention_offset">15dp</dimen>

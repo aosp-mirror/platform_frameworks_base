@@ -474,7 +474,13 @@ class TextInterpolator(layout: Layout) {
         val out = mutableListOf<List<PositionedGlyphs>>()
         for (lineNo in 0 until layout.lineCount) { // Shape all lines.
             val lineStart = layout.getLineStart(lineNo)
-            val count = layout.getLineEnd(lineNo) - lineStart
+            var count = layout.getLineEnd(lineNo) - lineStart
+            // Do not render the last character in the line if it's a newline and unprintable
+            val last = lineStart + count - 1
+            if (last > lineStart && last < layout.text.length && layout.text[last] == '\n') {
+                count--
+            }
+
             val runs = mutableListOf<PositionedGlyphs>()
             TextShaper.shapeText(
                 layout.text,
