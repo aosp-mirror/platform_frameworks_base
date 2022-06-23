@@ -748,19 +748,20 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    private void logHunSkippedForUnexpectedState(String key, boolean expected, boolean actual) {
+    private void logHunSkippedForUnexpectedState(ExpandableNotificationRow enr,
+            boolean expected, boolean actual) {
         if (mLogger == null) return;
-        mLogger.hunSkippedForUnexpectedState(key, expected, actual);
+        mLogger.hunSkippedForUnexpectedState(enr.getEntry(), expected, actual);
     }
 
-    private void logHunAnimationSkipped(String key, String reason) {
+    private void logHunAnimationSkipped(ExpandableNotificationRow enr, String reason) {
         if (mLogger == null) return;
-        mLogger.hunAnimationSkipped(key, reason);
+        mLogger.hunAnimationSkipped(enr.getEntry(), reason);
     }
 
-    private void logHunAnimationEventAdded(String key, int type) {
+    private void logHunAnimationEventAdded(ExpandableNotificationRow enr, int type) {
         if (mLogger == null) return;
-        mLogger.hunAnimationEventAdded(key, type);
+        mLogger.hunAnimationEventAdded(enr.getEntry(), type);
     }
 
     private void onDrawDebug(Canvas canvas) {
@@ -3174,7 +3175,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             if (isHeadsUp != row.isHeadsUp()) {
                 // For cases where we have a heads up showing and appearing again we shouldn't
                 // do the animations at all.
-                logHunSkippedForUnexpectedState(key, isHeadsUp, row.isHeadsUp());
+                logHunSkippedForUnexpectedState(row, isHeadsUp, row.isHeadsUp());
                 continue;
             }
             int type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_OTHER;
@@ -3192,7 +3193,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (row.isChildInGroup()) {
                     // We can otherwise get stuck in there if it was just isolated
                     row.setHeadsUpAnimatingAway(false);
-                    logHunAnimationSkipped(key, "row is child in group");
+                    logHunAnimationSkipped(row, "row is child in group");
                     continue;
                 }
             } else {
@@ -3200,7 +3201,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (viewState == null) {
                     // A view state was never generated for this view, so we don't need to animate
                     // this. This may happen with notification children.
-                    logHunAnimationSkipped(key, "row has no viewState");
+                    logHunAnimationSkipped(row, "row has no viewState");
                     continue;
                 }
                 if (isHeadsUp && (mAddedHeadsUpChildren.contains(row) || pinnedAndClosed)) {
@@ -3224,7 +3225,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                         + " onBottom=" + onBottom
                         + " row=" + row.getEntry().getKey());
             }
-            logHunAnimationEventAdded(key, type);
+            logHunAnimationEventAdded(row, type);
         }
         mHeadsUpChangeAnimations.clear();
         mAddedHeadsUpChildren.clear();
@@ -4360,8 +4361,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     /**
      * Update colors of "dismiss" and "empty shade" views.
-     *
-     * @param lightTheme True if light theme should be used.
      */
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
     void updateDecorViews() {
@@ -4777,8 +4776,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (SPEW) {
                     Log.v(TAG, "generateHeadsUpAnimation: previous hun appear animation cancelled");
                 }
-                logHunAnimationSkipped(row.getEntry().getKey(),
-                        "previous hun appear animation cancelled");
+                logHunAnimationSkipped(row, "previous hun appear animation cancelled");
                 return;
             }
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));

@@ -84,6 +84,7 @@ import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip.PipTransitionState;
 import com.android.wm.shell.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
@@ -128,10 +129,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     protected PhonePipMenuController mMenuController;
     protected PipTaskOrganizer mPipTaskOrganizer;
+    private PipTransitionState mPipTransitionState;
     protected PinnedStackListenerForwarder.PinnedTaskListener mPinnedTaskListener =
             new PipControllerPinnedTaskListener();
 
     private boolean mIsKeyguardShowingOrAnimating;
+
+    private Consumer<Boolean> mOnIsInPipStateChangedListener;
 
     private interface PipAnimationListener {
         /**
@@ -291,6 +295,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipKeepClearAlgorithm pipKeepClearAlgorithm, PipBoundsState pipBoundsState,
             PipMotionHelper pipMotionHelper, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
+            PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
@@ -305,7 +310,8 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
                 pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
-                phonePipMenuController, pipTaskOrganizer, pipTouchHandler, pipTransitionController,
+                phonePipMenuController, pipTaskOrganizer, pipTransitionState,
+                pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
                 oneHandedController, mainExecutor)
                 .mImpl;
@@ -321,6 +327,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
             PipTaskOrganizer pipTaskOrganizer,
+            PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler,
             PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -344,6 +351,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         mPipBoundsState = pipBoundsState;
         mPipMotionHelper = pipMotionHelper;
         mPipTaskOrganizer = pipTaskOrganizer;
+        mPipTransitionState = pipTransitionState;
         mMainExecutor = mainExecutor;
         mMediaController = pipMediaController;
         mMenuController = phonePipMenuController;
@@ -369,6 +377,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             mPipBoundsState.setDisplayId(displayId);
             onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
                     false /* saveRestoreSnapFraction */);
+        });
+        mPipTransitionState.addOnPipTransitionStateChangedListener((oldState, newState) -> {
+            if (mOnIsInPipStateChangedListener != null) {
+                final boolean wasInPip = PipTransitionState.isInPip(oldState);
+                final boolean nowInPip = PipTransitionState.isInPip(newState);
+                if (nowInPip != wasInPip) {
+                    mOnIsInPipStateChangedListener.accept(nowInPip);
+                }
+            }
         });
         mPipBoundsState.setOnMinimalSizeChangeCallback(
                 () -> {
@@ -664,6 +681,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
     }
 
+    private void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
+        mOnIsInPipStateChangedListener = callback;
+        if (mOnIsInPipStateChangedListener != null) {
+            callback.accept(mPipTransitionState.isInPip());
+        }
+    }
+
     private void setShelfHeightLocked(boolean visible, int height) {
         final int shelfHeight = visible ? height : 0;
         mPipBoundsState.setShelfVisibility(visible, shelfHeight);
@@ -937,6 +961,13 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         public void setShelfHeight(boolean visible, int height) {
             mMainExecutor.execute(() -> {
                 PipController.this.setShelfHeight(visible, height);
+            });
+        }
+
+        @Override
+        public void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
+            mMainExecutor.execute(() -> {
+                PipController.this.setOnIsInPipStateChangedListener(callback);
             });
         }
 

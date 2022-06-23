@@ -375,10 +375,23 @@ public class KeyguardSecurityContainer extends FrameLayout {
         mViewMode.updatePositionByTouchX(x);
     }
 
-    /** Returns whether the inner SecurityViewFlipper is left-aligned when in one-handed mode. */
-    public boolean isOneHandedModeLeftAligned() {
-        return mCurrentMode == MODE_ONE_HANDED
-                && ((OneHandedViewMode) mViewMode).isLeftAligned();
+    public boolean isSidedSecurityMode() {
+        return mViewMode instanceof SidedSecurityMode;
+    }
+
+    /** Returns whether the inner SecurityViewFlipper is left-aligned when in sided mode. */
+    public boolean isSecurityLeftAligned() {
+        return mViewMode instanceof SidedSecurityMode
+                && ((SidedSecurityMode) mViewMode).isLeftAligned();
+    }
+
+    /**
+     * Returns whether the touch happened on the other side of security (like bouncer) when in
+     * sided mode.
+     */
+    public boolean isTouchOnTheOtherSideOfSecurity(MotionEvent ev) {
+        return mViewMode instanceof SidedSecurityMode
+                && ((SidedSecurityMode) mViewMode).isTouchOnTheOtherSideOfSecurity(ev);
     }
 
     public void onPause() {
@@ -437,11 +450,14 @@ public class KeyguardSecurityContainer extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
-        mDoubleTapDetector.onTouchEvent(event);
 
         boolean result =  mMotionEventListeners.stream()
                 .anyMatch(listener -> listener.onTouchEvent(event))
                 || super.onTouchEvent(event);
+
+        // double tap detector should be called after listeners handle touches as listeners are
+        // helping with ignoring falsing. Otherwise falsing will be activated for some double taps
+        mDoubleTapDetector.onTouchEvent(event);
 
         switch (action) {
             case MotionEvent.ACTION_MOVE:
@@ -487,11 +503,16 @@ public class KeyguardSecurityContainer extends FrameLayout {
     private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            if (!mIsDragging) {
-                mViewMode.handleDoubleTap(e);
-            }
+            return handleDoubleTap(e);
+        }
+    }
+
+    @VisibleForTesting boolean handleDoubleTap(MotionEvent e) {
+        if (!mIsDragging) {
+            mViewMode.handleDoubleTap(e);
             return true;
         }
+        return false;
     }
 
     void addMotionEventListener(Gefingerpoken listener) {
@@ -771,6 +792,70 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     /**
+     * Base class for modes which support having on left/right side of the screen, used for large
+     * screen devices
+     */
+    abstract static class SidedSecurityMode implements ViewMode {
+        private ViewGroup mView;
+        private GlobalSettings mGlobalSettings;
+        private int mDefaultSideSetting;
+
+        public void init(ViewGroup v, GlobalSettings globalSettings, boolean leftAlignedByDefault) {
+            mView = v;
+            mGlobalSettings = globalSettings;
+            mDefaultSideSetting =
+                    leftAlignedByDefault ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
+                            : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT;
+        }
+
+        /**
+         * Determine if a double tap on this view is on the other side. If so, will animate
+         * positions and record the preference to always show on this side.
+         */
+        @Override
+        public void handleDoubleTap(MotionEvent event) {
+            boolean currentlyLeftAligned = isLeftAligned();
+            // Did the tap hit the "other" side of the bouncer?
+            if (isTouchOnTheOtherSideOfSecurity(event, currentlyLeftAligned)) {
+                boolean willBeLeftAligned = !currentlyLeftAligned;
+                updateSideSetting(willBeLeftAligned);
+
+                int keyguardState = willBeLeftAligned
+                        ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_LEFT
+                        : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_RIGHT;
+                SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, keyguardState);
+
+                updateSecurityViewLocation(willBeLeftAligned, /* animate= */ true);
+            }
+        }
+
+        private boolean isTouchOnTheOtherSideOfSecurity(MotionEvent ev, boolean leftAligned) {
+            float x = ev.getX();
+            return (leftAligned && (x > mView.getWidth() / 2f))
+                    || (!leftAligned && (x < mView.getWidth() / 2f));
+        }
+
+        public boolean isTouchOnTheOtherSideOfSecurity(MotionEvent ev) {
+            return isTouchOnTheOtherSideOfSecurity(ev, isLeftAligned());
+        }
+
+        protected abstract void updateSecurityViewLocation(boolean leftAlign, boolean animate);
+
+        boolean isLeftAligned() {
+            return mGlobalSettings.getInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
+                    mDefaultSideSetting)
+                    == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
+        }
+
+        protected void updateSideSetting(boolean leftAligned) {
+            mGlobalSettings.putInt(
+                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
+                    leftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
+                            : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
+        }
+    }
+
+    /**
      * Default bouncer is centered within the space
      */
     static class DefaultViewMode implements ViewMode {
@@ -802,7 +887,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * User switcher mode will display both the current user icon as well as
      * a user switcher, in both portrait and landscape modes.
      */
-    static class UserSwitcherViewMode implements ViewMode {
+    static class UserSwitcherViewMode extends SidedSecurityMode {
         private ViewGroup mView;
         private ViewGroup mUserSwitcherViewGroup;
         private KeyguardSecurityViewFlipper mViewFlipper;
@@ -819,6 +904,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
                 @NonNull UserSwitcherController userSwitcherController) {
+            init(v, globalSettings, /* leftAlignedByDefault= */false);
             mView = v;
             mViewFlipper = viewFlipper;
             mFalsingManager = falsingManager;
@@ -1030,6 +1116,10 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
         @Override
         public void updateSecurityViewLocation() {
+            updateSecurityViewLocation(isLeftAligned(), /* animate= */false);
+        }
+
+        public void updateSecurityViewLocation(boolean leftAlign, boolean animate) {
             int yTrans = mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_y_trans);
 
             if (mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -1039,8 +1129,12 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mUserSwitcherViewGroup.setTranslationY(yTrans);
                 mViewFlipper.setTranslationY(-yTrans);
             } else {
-                updateViewGravity(mViewFlipper, Gravity.RIGHT | Gravity.BOTTOM);
-                updateViewGravity(mUserSwitcherViewGroup, Gravity.LEFT | Gravity.CENTER_VERTICAL);
+                int securityHorizontalGravity = leftAlign ? Gravity.LEFT : Gravity.RIGHT;
+                int userSwitcherHorizontalGravity =
+                        securityHorizontalGravity == Gravity.LEFT ? Gravity.RIGHT : Gravity.LEFT;
+                updateViewGravity(mViewFlipper, securityHorizontalGravity | Gravity.BOTTOM);
+                updateViewGravity(mUserSwitcherViewGroup,
+                        userSwitcherHorizontalGravity | Gravity.CENTER_VERTICAL);
 
                 // Attempt to reposition a bit higher to make up for this frame being a bit lower
                 // on the device
@@ -1060,20 +1154,19 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * Logic to enabled one-handed bouncer mode. Supports animating the bouncer
      * between alternate sides of the display.
      */
-    static class OneHandedViewMode implements ViewMode {
+    static class OneHandedViewMode extends SidedSecurityMode {
         @Nullable private ValueAnimator mRunningOneHandedAnimator;
         private ViewGroup mView;
         private KeyguardSecurityViewFlipper mViewFlipper;
-        private GlobalSettings mGlobalSettings;
 
         @Override
         public void init(@NonNull ViewGroup v, @NonNull GlobalSettings globalSettings,
                 @NonNull KeyguardSecurityViewFlipper viewFlipper,
                 @NonNull FalsingManager falsingManager,
                 @NonNull UserSwitcherController userSwitcherController) {
+            init(v, globalSettings, /* leftAlignedByDefault= */true);
             mView = v;
             mViewFlipper = viewFlipper;
-            mGlobalSettings = globalSettings;
 
             updateSecurityViewGravity();
             updateSecurityViewLocation(isLeftAligned(), /* animate= */false);
@@ -1107,43 +1200,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
             updateSecurityViewLocation(isTouchOnLeft, /* animate= */false);
         }
 
-        boolean isLeftAligned() {
-            return mGlobalSettings.getInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
-                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT)
-                == Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
-        }
-
-        private void updateSideSetting(boolean leftAligned) {
-            mGlobalSettings.putInt(
-                    Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
-                    leftAligned ? Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT
-                    : Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
-        }
-
-        /**
-         * Determine if a double tap on this view is on the other side. If so, will animate
-         * positions and record the preference to always show on this side.
-         */
-        @Override
-        public void handleDoubleTap(MotionEvent event) {
-            float x = event.getX();
-            boolean currentlyLeftAligned = isLeftAligned();
-            // Did the tap hit the "other" side of the bouncer?
-            if ((currentlyLeftAligned && (x > mView.getWidth() / 2f))
-                    || (!currentlyLeftAligned && (x < mView.getWidth() / 2f))) {
-
-                boolean willBeLeftAligned = !currentlyLeftAligned;
-                updateSideSetting(willBeLeftAligned);
-
-                int keyguardState = willBeLeftAligned
-                        ? SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_LEFT
-                        : SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED__STATE__SWITCH_RIGHT;
-                SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, keyguardState);
-
-                updateSecurityViewLocation(willBeLeftAligned, true /* animate */);
-            }
-        }
-
         @Override
         public void updateSecurityViewLocation() {
             updateSecurityViewLocation(isLeftAligned(), /* animate= */false);
@@ -1151,10 +1207,10 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
         /**
          * Moves the inner security view to the correct location (in one handed mode) with
-         * animation. This is triggered when the user taps on the side of the screen that is not
-         * currently occupied by the security view.
+         * animation. This is triggered when the user double taps on the side of the screen that is
+         * not currently occupied by the security view.
          */
-        private void updateSecurityViewLocation(boolean leftAlign, boolean animate) {
+        protected void updateSecurityViewLocation(boolean leftAlign, boolean animate) {
             if (mRunningOneHandedAnimator != null) {
                 mRunningOneHandedAnimator.cancel();
                 mRunningOneHandedAnimator = null;

@@ -53,6 +53,7 @@ import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip.PipTransitionState;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -80,6 +81,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private PipSnapAlgorithm mMockPipSnapAlgorithm;
     @Mock private PipMediaController mMockPipMediaController;
     @Mock private PipTaskOrganizer mMockPipTaskOrganizer;
+    @Mock private PipTransitionState mMockPipTransitionState;
     @Mock private PipTransitionController mMockPipTransitionController;
     @Mock private PipTouchHandler mMockPipTouchHandler;
     @Mock private PipMotionHelper mMockPipMotionHelper;
@@ -104,8 +106,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm,
                 mMockPipKeepClearAlgorithm,
                 mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
-                mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTouchHandler,
-                mMockPipTransitionController, mMockWindowManagerShellWrapper,
+                mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTransitionState,
+                mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mPipParamsChangedForwarder,
                 mMockOneHandedController, mMockExecutor);
         when(mMockPipBoundsAlgorithm.getSnapAlgorithm()).thenReturn(mMockPipSnapAlgorithm);
@@ -138,8 +140,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm,
                 mMockPipKeepClearAlgorithm,
                 mMockPipBoundsState, mMockPipMotionHelper, mMockPipMediaController,
-                mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTouchHandler,
-                mMockPipTransitionController, mMockWindowManagerShellWrapper,
+                mMockPhonePipMenuController, mMockPipTaskOrganizer, mMockPipTransitionState,
+                mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mPipParamsChangedForwarder,
                 mMockOneHandedController, mMockExecutor));
     }
