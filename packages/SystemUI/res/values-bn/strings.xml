@@ -118,7 +118,7 @@
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ক্যামেরা"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ফোন"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"ভয়েস সহায়তা"</string>
-    <string name="accessibility_wallet_button" msgid="1458258783460555507">"ওয়ালেট"</string>
+    <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR কোড স্ক্যানার"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"আনলক করুন"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ডিভাইস লক করা আছে"</string>
