@@ -76,7 +76,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     protected int mLevel;
     protected boolean mPluggedIn;
-    private boolean mPluggedInWireless;
+    private int mPluggedChargingSource;
     protected boolean mCharging;
     private boolean mStateUnknown = false;
     private boolean mCharged;
@@ -195,10 +195,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
             mLevel = (int)(100f
                     * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                     / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
-            mPluggedIn = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
-            mPluggedInWireless = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0)
-                    == BatteryManager.BATTERY_PLUGGED_WIRELESS;
-
+            mPluggedChargingSource = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+            mPluggedIn = mPluggedChargingSource != 0;
             final int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
                     BatteryManager.BATTERY_STATUS_UNKNOWN);
             mCharged = status == BatteryManager.BATTERY_STATUS_FULL;
@@ -284,7 +282,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @Override
     public boolean isPluggedInWireless() {
-        return mPluggedInWireless;
+        return mPluggedChargingSource == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
 
     @Override
@@ -440,5 +438,10 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     public void onDemoModeFinished() {
         registerReceiver();
         updatePowerSave();
+    }
+
+    @Override
+    public boolean isChargingSourceDock() {
+        return mPluggedChargingSource == BatteryManager.BATTERY_PLUGGED_DOCK;
     }
 }
