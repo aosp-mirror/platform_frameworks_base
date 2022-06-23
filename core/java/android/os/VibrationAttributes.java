@@ -133,6 +133,9 @@ public final class VibrationAttributes implements Parcelable {
 
     /**
      * Flag requesting vibration effect to be played even under limited interruptions.
+     *
+     * <p>Only privileged apps can ignore user settings that limit interruptions, and this
+     * flag will be ignored otherwise.
      */
     public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 0x1;
 
