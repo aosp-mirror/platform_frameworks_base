@@ -376,11 +376,11 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> upravlja ovim uređajem i može nadzirati mrežni saobraćaj"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"Ovaj uređaj pruža <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"Ovaj uređaj pripada vašoj organizaciji i povezan je s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je na internet putem aplikacije <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je s internetom putem aplikacije <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Ovaj uređaj pripada vašoj organizaciji"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Ovaj uređaj pripada vašoj organizaciji i povezan je na internet putem VPN-ova"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je na internet putem VPN-ova"</string>
+    <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"Ovaj uređaj pripada vašoj organizaciji i povezan je s internetom putem VPN-ova"</string>
+    <string name="quick_settings_disclosure_named_management_vpns" msgid="3312645578322079185">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> i povezan je s internetom putem VPN-ova"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Vaša organizacija može pratiti mrežni saobraćaj na vašem profilu."</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> može pratiti mrežni saobraćaj na vašem radnom profilu"</string>
     <string name="quick_settings_disclosure_managed_profile_network_activity" msgid="2636594621387832827">"Mrežna aktivnost radnog profila je vidljiva vašem IT administratoru"</string>
