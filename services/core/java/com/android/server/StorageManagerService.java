@@ -2829,6 +2829,14 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
+            int latestWrite = mVold.getWriteAmount();
+            if (latestWrite == -1) {
+                Slog.w(TAG, "Failed to get storage write record");
+                return;
+            }
+
+            updateStorageWriteRecords(latestWrite);
+
             // Block based checkpoint process runs fstrim. So, if checkpoint is in progress
             // (first boot after OTA), We skip the smart idle maintenance
             if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
@@ -2836,13 +2844,6 @@ class StorageManagerService extends IStorageManager.Stub
                     return;
                 }
 
-                int latestWrite = mVold.getWriteAmount();
-                if (latestWrite == -1) {
-                    Slog.w(TAG, "Failed to get storage write record");
-                    return;
-                }
-
-                updateStorageWriteRecords(latestWrite);
                 int avgWriteAmount = getAverageWriteAmount();
 
                 Slog.i(TAG, "Set smart idle maintenance: " + "latest write amount: " +
