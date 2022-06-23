@@ -42,7 +42,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.notification.SectionClassifier;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
@@ -57,6 +56,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotifViewBarn;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
 
@@ -98,7 +98,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private BindEventManagerImpl mBindEventManagerImpl;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Spy private FakeNotifInflater mNotifInflater = new FakeNotifInflater();
-    private final SectionClassifier mSectionClassifier = new SectionClassifier();
+    private final SectionStyleProvider mSectionStyleProvider = new SectionStyleProvider();
 
     private NotifUiAdjustmentProvider mAdjustmentProvider;
 
@@ -111,7 +111,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mAdjustmentProvider =
-            new NotifUiAdjustmentProvider(mLockscreenUserManager, mSectionClassifier);
+            new NotifUiAdjustmentProvider(mLockscreenUserManager, mSectionStyleProvider);
         mEntry = getNotificationEntryBuilder().setParent(ROOT_ENTRY).build();
         mInflationError = new Exception(TEST_MESSAGE);
         mErrorManager = new NotifInflationErrorManager();
@@ -495,7 +495,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     private static final int TEST_MAX_GROUP_DELAY = 100;
 
     private void setSectionIsLowPriority(boolean minimized) {
-        mSectionClassifier.setMinimizedSections(minimized
+        mSectionStyleProvider.setMinimizedSections(minimized
                 ? Collections.singleton(mNotifSection.getSectioner())
                 : Collections.emptyList());
     }
