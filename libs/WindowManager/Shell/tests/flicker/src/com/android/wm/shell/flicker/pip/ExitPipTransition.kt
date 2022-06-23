@@ -19,10 +19,10 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.traces.common.FlickerComponentName.Companion.LAUNCHER
 import org.junit.Test
 
 /**
@@ -78,7 +78,7 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
     }
 
     /**
-     * Checks that [pipApp] and [LAUNCHER_COMPONENT] layers are visible at the start
+     * Checks that [pipApp] and [LAUNCHER] layers are visible at the start
      * of the transition. Then [pipApp] layer becomes invisible, and remains invisible
      * until the end of the transition
      */
@@ -87,10 +87,10 @@ abstract class ExitPipTransition(testSpec: FlickerTestParameter) : PipTransition
     open fun pipLayerBecomesInvisible() {
         testSpec.assertLayers {
             this.isVisible(pipApp.component)
-                .isVisible(LAUNCHER_COMPONENT)
+                .isVisible(LAUNCHER)
                 .then()
                 .isInvisible(pipApp.component)
-                .isVisible(LAUNCHER_COMPONENT)
+                .isVisible(LAUNCHER)
         }
     }
 }

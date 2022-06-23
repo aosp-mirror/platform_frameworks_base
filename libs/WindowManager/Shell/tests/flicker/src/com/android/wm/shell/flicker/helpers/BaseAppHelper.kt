@@ -40,7 +40,7 @@ abstract class BaseAppHelper(
     component,
     LauncherStrategyFactory.getInstance(instrumentation).launcherStrategy
 ) {
-    private val appSelector = By.pkg(component.packageName).depth(0)
+    private val appSelector = By.pkg(`package`).depth(0)
 
     protected val isTelevision: Boolean
         get() = context.packageManager.run {

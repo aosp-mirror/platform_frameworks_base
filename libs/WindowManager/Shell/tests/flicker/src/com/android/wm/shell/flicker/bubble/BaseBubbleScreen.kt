@@ -48,7 +48,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
             ServiceManager.getService(Context.NOTIFICATION_SERVICE))
 
     protected val uid = context.packageManager.getApplicationInfo(
-            testApp.component.packageName, 0).uid
+            testApp.`package`, 0).uid
 
     protected abstract val transition: FlickerBuilder.() -> Unit
 
@@ -59,7 +59,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
         return {
             setup {
                 test {
-                    notifyManager.setBubblesAllowed(testApp.component.packageName,
+                    notifyManager.setBubblesAllowed(testApp.`package`,
                             uid, NotificationManager.BUBBLE_PREFERENCE_ALL)
                     testApp.launchViaIntent(wmHelper)
                     waitAndGetAddBubbleBtn()
@@ -69,7 +69,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
 
             teardown {
                 test {
-                    notifyManager.setBubblesAllowed(testApp.component.packageName,
+                    notifyManager.setBubblesAllowed(testApp.`package`,
                         uid, NotificationManager.BUBBLE_PREFERENCE_NONE)
                     testApp.exit()
                 }

@@ -16,16 +16,16 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.common.FlickerComponentName.Companion.LAUNCHER
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -157,15 +157,15 @@ open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec
     }
 
     /**
-     * Checks [LAUNCHER_COMPONENT] layer remains visible throughout the animation
+     * Checks [LAUNCHER] layer remains visible throughout the animation
      */
     @Presubmit
     @Test
     fun launcherLayerBecomesVisible() {
         testSpec.assertLayers {
-            isInvisible(LAUNCHER_COMPONENT)
+            isInvisible(LAUNCHER)
                 .then()
-                .isVisible(LAUNCHER_COMPONENT)
+                .isVisible(LAUNCHER)
         }
     }
 

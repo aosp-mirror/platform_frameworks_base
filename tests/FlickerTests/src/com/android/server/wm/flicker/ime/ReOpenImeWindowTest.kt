@@ -77,11 +77,11 @@ open class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                     testApp.openIME(wmHelper)
                 }
                 eachRun {
+                    this.setRotation(testSpec.startRotation)
                     device.pressRecentApps()
                     wmHelper.StateSyncBuilder()
                         .withRecentsActivityVisible()
                         .waitForAndVerify()
-                    this.setRotation(testSpec.startRotation)
                 }
             }
             transitions {
