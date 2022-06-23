@@ -49,6 +49,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -281,7 +282,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
                 UserHandle.USER_SYSTEM, new InsetsVisibilities(), null, new InsetsState(),
-                new InsetsSourceControl[0]);
+                new InsetsSourceControl[0], new Rect());
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());
