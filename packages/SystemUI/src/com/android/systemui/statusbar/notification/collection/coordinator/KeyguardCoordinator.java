@@ -19,13 +19,13 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider;
 
 import javax.inject.Inject;
 
