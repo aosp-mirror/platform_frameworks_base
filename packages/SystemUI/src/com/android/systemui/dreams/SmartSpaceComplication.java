@@ -82,6 +82,7 @@ public class SmartSpaceComplication implements Complication {
                         mSmartSpaceController.addListener(mSmartspaceListener);
                     } else {
                         mSmartSpaceController.removeListener(mSmartspaceListener);
+                        mDreamOverlayStateController.removeComplication(mComplication);
                     }
                 }
             });
