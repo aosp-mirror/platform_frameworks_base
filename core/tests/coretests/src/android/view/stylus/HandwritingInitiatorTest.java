@@ -16,6 +16,7 @@
 
 package android.view.stylus;
 
+import static android.provider.Settings.Global.STYLUS_HANDWRITING_ENABLED;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
@@ -32,6 +33,7 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings;
 import android.view.HandwritingInitiator;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -67,6 +69,8 @@ public class HandwritingInitiatorTest {
     private static final int HW_BOUNDS_OFFSETS_TOP_PX = 20;
     private static final int HW_BOUNDS_OFFSETS_RIGHT_PX = 30;
     private static final int HW_BOUNDS_OFFSETS_BOTTOM_PX = 40;
+    private static final int SETTING_VALUE_ON = 1;
+    private static final int SETTING_VALUE_OFF = 0;
     private int mHandwritingSlop = 4;
 
     private static final Rect sHwArea = new Rect(100, 200, 500, 500);
@@ -74,12 +78,21 @@ public class HandwritingInitiatorTest {
     private HandwritingInitiator mHandwritingInitiator;
     private View mTestView;
     private Context mContext;
+    private int mHwInitialState;
+    private boolean mShouldRestoreInitialHwState;
 
     @Before
     public void setup() throws Exception {
         final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         mContext = instrumentation.getTargetContext();
 
+        mHwInitialState = Settings.Global.getInt(mContext.getContentResolver(),
+                STYLUS_HANDWRITING_ENABLED, SETTING_VALUE_OFF);
+        if (mHwInitialState != SETTING_VALUE_ON) {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    STYLUS_HANDWRITING_ENABLED, SETTING_VALUE_ON);
+            mShouldRestoreInitialHwState = true;
+        }
         String imeId = HandwritingImeService.getImeId();
         instrumentation.getUiAutomation().executeShellCommand("ime enable " + imeId);
         instrumentation.getUiAutomation().executeShellCommand("ime set " + imeId);
@@ -105,6 +118,11 @@ public class HandwritingInitiatorTest {
 
     @After
     public void tearDown() throws Exception {
+        if (mShouldRestoreInitialHwState) {
+            mShouldRestoreInitialHwState = false;
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    STYLUS_HANDWRITING_ENABLED, mHwInitialState);
+        }
         InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .executeShellCommand("ime reset");
     }
