@@ -713,14 +713,15 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             case IGNORED_ERROR_APP_OPS:
                 Slog.w(TAG, "Would be an error: vibrate from uid " + uid);
                 break;
-            case IGNORED_FOR_ALARM:
-                if (DEBUG) {
-                    Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
-                }
-                break;
             case IGNORED_FOR_EXTERNAL:
                 if (DEBUG) {
                     Slog.d(TAG, "Ignoring incoming vibration for current external vibration");
+                }
+                break;
+            case IGNORED_FOR_HIGHER_IMPORTANCE:
+                if (DEBUG) {
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of ongoing vibration"
+                            + " with higher importance");
                 }
                 break;
             case IGNORED_FOR_ONGOING:
@@ -734,12 +735,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             + attrs);
                 }
                 break;
-            case IGNORED_FOR_RINGTONE:
-                if (DEBUG) {
-                    Slog.d(TAG, "Ignoring incoming vibration in favor of ringtone vibration");
-                }
-                break;
-
             default:
                 if (DEBUG) {
                     Slog.d(TAG, "Vibration for uid=" + uid + " and with attrs=" + attrs
@@ -812,18 +807,41 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             return null;
         }
 
-        if (currentVibration.attrs.getUsage() == VibrationAttributes.USAGE_ALARM) {
-            return Vibration.Status.IGNORED_FOR_ALARM;
-        }
-
-        if (currentVibration.attrs.getUsage() == VibrationAttributes.USAGE_RINGTONE) {
-            return Vibration.Status.IGNORED_FOR_RINGTONE;
+        int currentUsage = currentVibration.attrs.getUsage();
+        int newUsage = vib.attrs.getUsage();
+        if (getVibrationImportance(currentUsage) > getVibrationImportance(newUsage)) {
+            // Current vibration has higher importance than this one and should not be cancelled.
+            return Vibration.Status.IGNORED_FOR_HIGHER_IMPORTANCE;
         }
 
         if (currentVibration.isRepeating()) {
+            // Current vibration is repeating, assume it's more important.
             return Vibration.Status.IGNORED_FOR_ONGOING;
         }
+
         return null;
+    }
+
+    private static int getVibrationImportance(@VibrationAttributes.Usage int usage) {
+        switch (usage) {
+            case VibrationAttributes.USAGE_RINGTONE:
+                return 5;
+            case VibrationAttributes.USAGE_ALARM:
+                return 4;
+            case VibrationAttributes.USAGE_NOTIFICATION:
+                return 3;
+            case VibrationAttributes.USAGE_COMMUNICATION_REQUEST:
+            case VibrationAttributes.USAGE_ACCESSIBILITY:
+                return 2;
+            case VibrationAttributes.USAGE_HARDWARE_FEEDBACK:
+            case VibrationAttributes.USAGE_PHYSICAL_EMULATION:
+                return 1;
+            case VibrationAttributes.USAGE_MEDIA:
+            case VibrationAttributes.USAGE_TOUCH:
+            case VibrationAttributes.USAGE_UNKNOWN:
+            default:
+                return 0;
+        }
     }
 
     /**

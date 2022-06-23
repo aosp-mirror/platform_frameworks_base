@@ -16,6 +16,9 @@
 
 package com.android.keyguard;
 
+import static android.provider.Settings.Global.ONE_HANDED_KEYGUARD_SIDE;
+import static android.provider.Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT;
+import static android.provider.Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.systemBars;
@@ -25,7 +28,9 @@ import static com.android.keyguard.KeyguardSecurityContainer.MODE_ONE_HANDED;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -34,10 +39,10 @@ import static org.mockito.Mockito.when;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Insets;
-import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -70,6 +75,9 @@ import java.util.ArrayList;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityContainerTest extends SysuiTestCase {
+
+    private static final int VIEW_WIDTH = 1600;
+
     private int mScreenWidth;
     private int mFakeMeasureSpec;
 
@@ -212,14 +220,12 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mKeyguardSecurityContainer.updatePositionByTouchX(
                 mKeyguardSecurityContainer.getWidth() - 1f);
 
-        verify(mGlobalSettings).putInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
-                Settings.Global.ONE_HANDED_KEYGUARD_SIDE_RIGHT);
+        verify(mGlobalSettings).putInt(ONE_HANDED_KEYGUARD_SIDE, ONE_HANDED_KEYGUARD_SIDE_RIGHT);
         verify(mSecurityViewFlipper).setTranslationX(
                 mKeyguardSecurityContainer.getWidth() - mSecurityViewFlipper.getWidth());
 
         mKeyguardSecurityContainer.updatePositionByTouchX(1f);
-        verify(mGlobalSettings).putInt(Settings.Global.ONE_HANDED_KEYGUARD_SIDE,
-                Settings.Global.ONE_HANDED_KEYGUARD_SIDE_LEFT);
+        verify(mGlobalSettings).putInt(ONE_HANDED_KEYGUARD_SIDE, ONE_HANDED_KEYGUARD_SIDE_LEFT);
 
         verify(mSecurityViewFlipper).setTranslationX(0.0f);
     }
@@ -253,10 +259,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         // THEN views are oriented side by side
         verify(mSecurityViewFlipper).setLayoutParams(mLayoutCaptor.capture());
         assertThat(mLayoutCaptor.getValue().gravity).isEqualTo(Gravity.RIGHT | Gravity.BOTTOM);
-        ViewGroup userSwitcher = mKeyguardSecurityContainer.findViewById(
-                R.id.keyguard_bouncer_user_switcher);
-        assertThat(((FrameLayout.LayoutParams) userSwitcher.getLayoutParams()).gravity)
-                .isEqualTo(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        assertUserSwitcherGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
     }
 
     @Test
@@ -276,10 +279,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         // THEN views are both centered horizontally
         verify(mSecurityViewFlipper).setLayoutParams(mLayoutCaptor.capture());
         assertThat(mLayoutCaptor.getValue().gravity).isEqualTo(Gravity.CENTER_HORIZONTAL);
-        ViewGroup userSwitcher = mKeyguardSecurityContainer.findViewById(
-                R.id.keyguard_bouncer_user_switcher);
-        assertThat(((FrameLayout.LayoutParams) userSwitcher.getLayoutParams()).gravity)
-                .isEqualTo(Gravity.CENTER_HORIZONTAL);
+        assertUserSwitcherGravity(Gravity.CENTER_HORIZONTAL);
     }
 
     @Test
@@ -310,7 +310,85 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         assertThat(anchor.isClickable()).isTrue();
     }
 
+    @Test
+    public void testTouchesAreRecognizedAsBeingOnTheOtherSideOfSecurity() {
+        setupUserSwitcher();
+        setViewWidth(VIEW_WIDTH);
+
+        assertThat(mKeyguardSecurityContainer.isTouchOnTheOtherSideOfSecurity(
+                touchEventLeftSide())).isTrue();
+        assertThat(mKeyguardSecurityContainer.isTouchOnTheOtherSideOfSecurity(
+                touchEventRightSide())).isFalse();
+
+        mKeyguardSecurityContainer.handleDoubleTap(touchEventLeftSide());
+        // settings should be updated, we need to keep the mock updated as well
+        when(mGlobalSettings.getInt(any(), anyInt())).thenReturn(ONE_HANDED_KEYGUARD_SIDE_LEFT);
+        assertThat(mKeyguardSecurityContainer.isTouchOnTheOtherSideOfSecurity(
+                touchEventLeftSide())).isFalse();
+        assertThat(mKeyguardSecurityContainer.isTouchOnTheOtherSideOfSecurity(
+                touchEventRightSide())).isTrue();
+    }
+
+    @Test
+    public void testSecuritySwitchesSidesInLandscapeUserSwitcherMode() {
+        Configuration config = new Configuration();
+        config.orientation = Configuration.ORIENTATION_LANDSCAPE;
+        when(getContext().getResources().getConfiguration()).thenReturn(config);
+        setupUserSwitcher();
+        // check default position
+        assertSecurityGravity(Gravity.RIGHT | Gravity.BOTTOM);
+        assertUserSwitcherGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+
+        reset(mSecurityViewFlipper);
+        when(mSecurityViewFlipper.getLayoutParams()).thenReturn(mSecurityViewFlipperLayoutParams);
+        // change setting so configuration change triggers position change
+        when(mGlobalSettings.getInt(any(), anyInt())).thenReturn(ONE_HANDED_KEYGUARD_SIDE_LEFT);
+        mKeyguardSecurityContainer.onConfigurationChanged(new Configuration());
+
+        // check position after switching
+        assertSecurityGravity(Gravity.LEFT | Gravity.BOTTOM);
+        assertUserSwitcherGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+    }
+
+    private void assertUserSwitcherGravity(@Gravity.GravityFlags int gravity) {
+        ViewGroup userSwitcher = mKeyguardSecurityContainer.findViewById(
+                R.id.keyguard_bouncer_user_switcher);
+        assertThat(((FrameLayout.LayoutParams) userSwitcher.getLayoutParams()).gravity)
+                .isEqualTo(gravity);
+    }
+
+    private void assertSecurityGravity(@Gravity.GravityFlags int gravity) {
+        verify(mSecurityViewFlipper, atLeastOnce()).setLayoutParams(mLayoutCaptor.capture());
+        assertThat(mLayoutCaptor.getValue().gravity).isEqualTo(gravity);
+    }
+
+    private void setViewWidth(int width) {
+        mKeyguardSecurityContainer.setRight(width);
+        mKeyguardSecurityContainer.setLeft(0);
+    }
+
+    private MotionEvent touchEventLeftSide() {
+        return MotionEvent.obtain(
+                /* downTime= */0,
+                /* eventTime= */0,
+                MotionEvent.ACTION_DOWN,
+                /* x= */VIEW_WIDTH / 3f,
+                /* y= */0,
+                /* metaState= */0);
+    }
+
+    private MotionEvent touchEventRightSide() {
+        return MotionEvent.obtain(
+                /* downTime= */0,
+                /* eventTime= */0,
+                MotionEvent.ACTION_DOWN,
+                /* x= */(VIEW_WIDTH / 3f) * 2,
+                /* y= */0,
+                /* metaState= */0);
+    }
+
     private void setupUserSwitcher() {
+        when(mGlobalSettings.getInt(any(), anyInt())).thenReturn(ONE_HANDED_KEYGUARD_SIDE_RIGHT);
         mKeyguardSecurityContainer.initMode(KeyguardSecurityContainer.MODE_USER_SWITCHER,
                 mGlobalSettings, mFalsingManager, mUserSwitcherController);
     }
