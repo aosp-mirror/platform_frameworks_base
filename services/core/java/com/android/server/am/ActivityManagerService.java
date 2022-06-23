@@ -8790,8 +8790,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         // otherwise the watchdog may be prevented from resetting the system.
 
         // Bail early if not published yet
-        if (ServiceManager.getService(Context.DROPBOX_SERVICE) == null) return;
-        final DropBoxManager dbox = mContext.getSystemService(DropBoxManager.class);
+        final DropBoxManager dbox;
+        try {
+            dbox = mContext.getSystemService(DropBoxManager.class);
+        } catch (Exception e) {
+            return;
+        }
 
         // Exit early if the dropbox isn't configured to accept this report type.
         final String dropboxTag = processClass(process) + "_" + eventType;
