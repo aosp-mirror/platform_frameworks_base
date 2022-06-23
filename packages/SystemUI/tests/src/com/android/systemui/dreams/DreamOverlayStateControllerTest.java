@@ -207,4 +207,15 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
             assertThat(complications.contains(weatherComplication)).isFalse();
         }
     }
+
+    @Test
+    public void testComplicationWithNoTypeNotFiltered() {
+        final Complication complication = Mockito.mock(Complication.class);
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor);
+        stateController.addComplication(complication);
+        mExecutor.runAllReady();
+        assertThat(stateController.getComplications(true).contains(complication))
+                .isTrue();
+    }
 }
