@@ -3999,13 +3999,12 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Called when a touch screen event was not handled by any of the views
-     * under it.  This is most useful to process touch events that happen
+     * inside of the activity.  This is most useful to process touch events that happen
      * outside of your window bounds, where there is no view to receive it.
      *
      * @param event The touch screen event being processed.
      *
      * @return Return true if you have consumed the event, false if you haven't.
-     * The default implementation always returns false.
      */
     public boolean onTouchEvent(MotionEvent event) {
         if (mWindow.shouldCloseOnTouch(this, event)) {
@@ -4038,12 +4037,12 @@ public class Activity extends ContextThemeWrapper
      * Called when a generic motion event was not handled by any of the
      * views inside of the activity.
      * <p>
-     * Generic motion events describe joystick movements, mouse hovers, track pad
-     * touches, scroll wheel movements and other input events.  The
-     * {@link MotionEvent#getSource() source} of the motion event specifies
+     * Generic motion events describe joystick movements, hover events from mouse or stylus
+     * devices, trackpad touches, scroll wheel movements and other motion events not handled
+     * by {@link #onTouchEvent(MotionEvent)} or {@link #onTrackballEvent(MotionEvent)}.
+     * The {@link MotionEvent#getSource() source} of the motion event specifies
      * the class of input that was received.  Implementations of this method
      * must examine the bits in the source before processing the event.
-     * The following code example shows how this is done.
      * </p><p>
      * Generic motion events with source class
      * {@link android.view.InputDevice#SOURCE_CLASS_POINTER}
@@ -4254,6 +4253,8 @@ public class Activity extends ContextThemeWrapper
      * @param ev The touch screen event.
      *
      * @return boolean Return true if this event was consumed.
+     *
+     * @see #onTouchEvent(MotionEvent)
      */
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
@@ -4274,6 +4275,8 @@ public class Activity extends ContextThemeWrapper
      * @param ev The trackball event.
      *
      * @return boolean Return true if this event was consumed.
+     *
+     * @see #onTrackballEvent(MotionEvent)
      */
     public boolean dispatchTrackballEvent(MotionEvent ev) {
         onUserInteraction();
@@ -4292,6 +4295,8 @@ public class Activity extends ContextThemeWrapper
      * @param ev The generic motion event.
      *
      * @return boolean Return true if this event was consumed.
+     *
+     * @see #onGenericMotionEvent(MotionEvent)
      */
     public boolean dispatchGenericMotionEvent(MotionEvent ev) {
         onUserInteraction();
