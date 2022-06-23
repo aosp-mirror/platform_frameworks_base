@@ -1521,6 +1521,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitTransitions.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
     }
 
+    /** Jump the current transition animation to the end. */
+    public boolean end() {
+        return mSplitTransitions.end();
+    }
+
     @Override
     public void onTransitionMerged(@NonNull IBinder transition) {
         mSplitTransitions.onTransitionMerged(transition);

@@ -53,10 +53,18 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
     private static class MixedTransition {
         static final int TYPE_ENTER_PIP_FROM_SPLIT = 1;
 
+        /** The default animation for this mixed transition. */
+        static final int ANIM_TYPE_DEFAULT = 0;
+
+        /** For ENTER_PIP_FROM_SPLIT, indicates that this is a to-home animation. */
+        static final int ANIM_TYPE_GOING_HOME = 1;
+
         final int mType;
+        int mAnimType = 0;
         final IBinder mTransition;
 
         Transitions.TransitionFinishCallback mFinishCallback = null;
+        Transitions.TransitionHandler mLeftoversHandler = null;
 
         /**
          * Mixed transitions are made up of multiple "parts". This keeps track of how many
@@ -128,7 +136,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         MixedTransition mixed = null;
         for (int i = mActiveTransitions.size() - 1; i >= 0; --i) {
             if (mActiveTransitions.get(i).mTransition != transition) continue;
-            mixed = mActiveTransitions.remove(i);
+            mixed = mActiveTransitions.get(i);
             break;
         }
         if (mixed == null) return false;
@@ -137,6 +145,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
             return animateEnterPipFromSplit(mixed, info, startTransaction, finishTransaction,
                     finishCallback);
         } else {
+            mActiveTransitions.remove(mixed);
             throw new IllegalStateException("Starting mixed animation without a known mixed type? "
                     + mixed.mType);
         }
@@ -178,6 +187,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
             --mixed.mInFlightSubAnimations;
             if (mixed.mInFlightSubAnimations > 0) return;
+            mActiveTransitions.remove(mixed);
             if (isGoingHome) {
                 mSplitHandler.onTransitionAnimationComplete();
             }
@@ -216,8 +226,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                     finishCB);
             // Dispatch the rest of the transition normally. This will most-likely be taken by
             // recents or default handler.
-            mPlayer.dispatchTransition(mixed.mTransition, everythingElse, otherStartT,
-                    finishTransaction, finishCB, this);
+            mixed.mLeftoversHandler = mPlayer.dispatchTransition(mixed.mTransition, everythingElse,
+                    otherStartT, finishTransaction, finishCB, this);
         } else {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  Not leaving split, so just "
                     + "forward animation to Pip-Handler.");
@@ -235,6 +245,32 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        for (int i = 0; i < mActiveTransitions.size(); ++i) {
+            if (mActiveTransitions.get(i) != mergeTarget) continue;
+            MixedTransition mixed = mActiveTransitions.get(i);
+            if (mixed.mInFlightSubAnimations <= 0) {
+                // Already done, so no need to end it.
+                return;
+            }
+            if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
+                if (mixed.mAnimType == MixedTransition.ANIM_TYPE_GOING_HOME) {
+                    boolean ended = mSplitHandler.end();
+                    // If split couldn't end (because it is remote), then don't end everything else
+                    // since we have to play out the animation anyways.
+                    if (!ended) return;
+                    mPipHandler.end();
+                    if (mixed.mLeftoversHandler != null) {
+                        mixed.mLeftoversHandler.mergeAnimation(transition, info, t, mergeTarget,
+                                finishCallback);
+                    }
+                } else {
+                    mPipHandler.end();
+                }
+            } else {
+                throw new IllegalStateException("Playing a mixed transition with unknown type? "
+                        + mixed.mType);
+            }
+        }
     }
 
     @Override
