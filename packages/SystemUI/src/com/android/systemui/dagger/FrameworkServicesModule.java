@@ -60,6 +60,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
+import android.os.PowerExemptionManager;
 import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.UserManager;
@@ -373,6 +374,13 @@ public class FrameworkServicesModule {
     @Singleton
     static PowerManager providePowerManager(Context context) {
         return context.getSystemService(PowerManager.class);
+    }
+
+    /** */
+    @Provides
+    @Singleton
+    static PowerExemptionManager providePowerExemptionManager(Context context) {
+        return context.getSystemService(PowerExemptionManager.class);
     }
 
     /** */
