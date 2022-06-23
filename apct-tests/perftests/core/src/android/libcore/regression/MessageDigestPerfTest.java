@@ -51,7 +51,7 @@ public class MessageDigestPerfTest {
     @Parameterized.Parameter(0)
     public Algorithm mAlgorithm;
 
-    public String mProvider = "AndroidSSL";
+    public String mProvider = "AndroidOpenSSL";
 
     private static final int DATA_SIZE = 8192;
     private static final byte[] DATA = new byte[DATA_SIZE];
