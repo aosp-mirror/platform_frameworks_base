@@ -23,6 +23,7 @@ import android.annotation.IntDef
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Rect
+import android.util.Log
 import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
@@ -47,6 +48,8 @@ import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.traceSection
 import javax.inject.Inject
+
+private val TAG: String = MediaHierarchyManager::class.java.simpleName
 
 /**
  * Similarly to isShown but also excludes views that have 0 alpha
@@ -964,6 +967,14 @@ class MediaHierarchyManager @Inject constructor(
                         top,
                         left + currentBounds.width(),
                         top + currentBounds.height())
+
+                if (mediaFrame.childCount > 0) {
+                    val child = mediaFrame.getChildAt(0)
+                    if (mediaFrame.height < child.height) {
+                        Log.wtf(TAG, "mediaFrame height is too small for child: " +
+                            "${mediaFrame.height} vs ${child.height}")
+                    }
+                }
             }
             if (isCrossFadeAnimatorRunning) {
                 // When cross-fading with an animation, we only notify the media carousel of the
