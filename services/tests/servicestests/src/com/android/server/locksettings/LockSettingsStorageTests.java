@@ -232,12 +232,22 @@ public class LockSettingsStorageTests {
 
     @Test
     public void testPrefetch() {
-        mStorage.writeKeyValue("key", "toBeFetched", 0);
+        mStorage.writeKeyValue("key1", "value1", 0);
+        mStorage.writeKeyValue("key2", "value2", 0);
 
         mStorage.clearCache();
+
+        assertFalse(mStorage.isUserPrefetched(0));
+        assertFalse(mStorage.isKeyValueCached("key1", 0));
+        assertFalse(mStorage.isKeyValueCached("key2", 0));
+
         mStorage.prefetchUser(0);
 
-        assertEquals("toBeFetched", mStorage.readKeyValue("key", "default", 0));
+        assertTrue(mStorage.isUserPrefetched(0));
+        assertTrue(mStorage.isKeyValueCached("key1", 0));
+        assertTrue(mStorage.isKeyValueCached("key2", 0));
+        assertEquals("value1", mStorage.readKeyValue("key1", "default", 0));
+        assertEquals("value2", mStorage.readKeyValue("key2", "default", 0));
     }
 
     @Test
