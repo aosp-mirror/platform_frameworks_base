@@ -429,6 +429,7 @@ class BackPanelController private constructor(
                 stretchEntryBackIndicator(preThresholdStretchProgress(xTranslation))
             GestureState.INACTIVE ->
                 mView.resetStretch()
+            else -> {}
         }
 
         // set y translation
