@@ -654,7 +654,6 @@ public final class InputMethodManager {
         public boolean startInput(@StartInputReason int startInputReason, View focusedView,
                 @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
                 int windowFlags) {
-            final View servedView;
             ImeTracing.getInstance().triggerClientDump(
                     "InputMethodManager.DelegateImpl#startInput", InputMethodManager.this,
                     null /* icProto */);
@@ -662,7 +661,6 @@ public final class InputMethodManager {
                 mCurrentTextBoxAttribute = null;
                 mCompletions = null;
                 mServedConnecting = true;
-                servedView = getServedViewLocked();
             }
             return startInputInner(startInputReason,
                     focusedView != null ? focusedView.getWindowToken() : null, startInputFlags,
