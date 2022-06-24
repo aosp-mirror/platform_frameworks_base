@@ -16,14 +16,16 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
-import android.platform.test.annotations.FlakyTest
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.navBarLayerPositionEnd
+import com.android.server.wm.flicker.statusBarLayerPositionEnd
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,8 +45,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
 @Postsubmit
-open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter)
-    : OpenAppFromNotificationCold(testSpec) {
+open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter) :
+    OpenAppFromNotificationCold(testSpec) {
 
     override val openingNotificationsFromLockScreen = true
 
@@ -85,6 +87,62 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter)
     @Test
     override fun appWindowBecomesTopWindow() = super.appWindowBecomesTopWindow()
 
+    /**
+     * Checks the position of the navigation bar at the start and end of the transition
+     *
+     * Differently from the normal usage of this assertion, check only the final state of the
+     * transition because the display is off at the start and the NavBar is never visible
+     */
+    @Postsubmit
+    @Test
+    override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerPositionEnd()
+
+    /**
+     * Checks the position of the status bar at the start and end of the transition
+     *
+     * Differently from the normal usage of this assertion, check only the final state of the
+     * transition because the display is off at the start and the NavBar is never visible
+     */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerPositionEnd()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
     companion object {
         /**
          * Creates the test configurations.
@@ -95,7 +153,7 @@ open class OpenAppFromLockNotificationCold(testSpec: FlickerTestParameter)
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return com.android.server.wm.flicker.FlickerTestParameterFactory.getInstance()
+            return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(repetitions = 3)
         }
     }
