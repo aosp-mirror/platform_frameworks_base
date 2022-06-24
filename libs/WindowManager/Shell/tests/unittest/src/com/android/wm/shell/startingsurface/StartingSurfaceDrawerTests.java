@@ -249,7 +249,8 @@ public class StartingSurfaceDrawerTests {
                 any() /* window */, any() /* attrs */,
                 anyInt() /* viewVisibility */, anyInt() /* displayId */,
                 any() /* requestedVisibility */, any() /* outInputChannel */,
-                any() /* outInsetsState */, any() /* outActiveControls */);
+                any() /* outInsetsState */, any() /* outActiveControls */,
+                any() /* outAttachedFrame */);
         TaskSnapshotWindow mockSnapshotWindow = TaskSnapshotWindow.create(windowInfo,
                 mBinder,
                 snapshot, mTestExecutor, () -> {

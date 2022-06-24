@@ -59,6 +59,7 @@ public class KeyguardPasswordViewController
     private final boolean mShowImeAtScreenOn;
     private EditText mPasswordEntry;
     private ImageView mSwitchImeButton;
+    private boolean mPaused;
 
     private final OnEditorActionListener mOnEditorActionListener = (v, actionId, event) -> {
         // Check if this was the result of hitting the enter key
@@ -202,6 +203,7 @@ public class KeyguardPasswordViewController
     @Override
     public void onResume(int reason) {
         super.onResume(reason);
+        mPaused = false;
         if (reason != KeyguardSecurityView.SCREEN_ON || mShowImeAtScreenOn) {
             showInput();
         }
@@ -223,6 +225,11 @@ public class KeyguardPasswordViewController
 
     @Override
     public void onPause() {
+        if (mPaused) {
+            return;
+        }
+        mPaused = true;
+
         if (!mPasswordEntry.isVisibleToUser()) {
             // Reset all states directly and then hide IME when the screen turned off.
             super.onPause();

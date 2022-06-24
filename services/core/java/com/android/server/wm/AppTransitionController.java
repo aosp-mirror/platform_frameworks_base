@@ -116,7 +116,6 @@ public class AppTransitionController {
     private final DisplayContent mDisplayContent;
     private final WallpaperController mWallpaperControllerLocked;
     private RemoteAnimationDefinition mRemoteAnimationDefinition = null;
-    private static final int KEYGUARD_GOING_AWAY_ANIMATION_DURATION = 400;
 
     private static final int TYPE_NONE = 0;
     private static final int TYPE_ACTIVITY = 1;
@@ -727,14 +726,17 @@ public class AppTransitionController {
      */
     private void overrideWithRemoteAnimationIfSet(@Nullable ActivityRecord animLpActivity,
             @TransitionOldType int transit, ArraySet<Integer> activityTypes) {
+        RemoteAnimationAdapter adapter = null;
         if (transit == TRANSIT_OLD_CRASHING_ACTIVITY_CLOSE) {
             // The crash transition has higher priority than any involved remote animations.
-            return;
+        } else if (AppTransition.isKeyguardGoingAwayTransitOld(transit)) {
+            adapter = mRemoteAnimationDefinition != null
+                    ? mRemoteAnimationDefinition.getAdapter(transit, activityTypes)
+                    : null;
+        } else if (mDisplayContent.mAppTransition.getRemoteAnimationController() == null) {
+            adapter = getRemoteAnimationOverride(animLpActivity, transit, activityTypes);
         }
-        final RemoteAnimationAdapter adapter =
-                getRemoteAnimationOverride(animLpActivity, transit, activityTypes);
-        if (adapter != null
-                && mDisplayContent.mAppTransition.getRemoteAnimationController() == null) {
+        if (adapter != null) {
             mDisplayContent.mAppTransition.overridePendingAppTransitionRemote(adapter);
         }
     }

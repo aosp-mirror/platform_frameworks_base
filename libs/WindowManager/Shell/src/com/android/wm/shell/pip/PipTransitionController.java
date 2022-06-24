@@ -237,6 +237,10 @@ public abstract class PipTransitionController implements Transitions.TransitionH
             @NonNull final Transitions.TransitionFinishCallback finishCallback) {
     }
 
+    /** End the currently-playing PiP animation. */
+    public void end() {
+    }
+
     /**
      * Callback interface for PiP transitions (both from and to PiP mode)
      */

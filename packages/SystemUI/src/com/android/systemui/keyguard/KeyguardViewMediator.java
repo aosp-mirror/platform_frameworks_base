@@ -2503,10 +2503,18 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf("DismissPanel"));
 
+                // Apply the opening animation on root task if exists
+                RemoteAnimationTarget aniTarget = apps[0];
+                for (RemoteAnimationTarget tmpTarget : apps) {
+                    if (tmpTarget.taskId != -1 && !tmpTarget.hasAnimatingParent) {
+                        aniTarget = tmpTarget;
+                        break;
+                    }
+                }
                 // Pass the surface and metadata to the unlock animation controller.
                 mKeyguardUnlockAnimationControllerLazy.get()
                         .notifyStartSurfaceBehindRemoteAnimation(
-                                apps[0], startTime, mSurfaceBehindRemoteAnimationRequested);
+                                aniTarget, startTime, mSurfaceBehindRemoteAnimationRequested);
             } else {
                 mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf("RemoteAnimationDisabled"));

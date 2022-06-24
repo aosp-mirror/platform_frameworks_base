@@ -145,9 +145,6 @@ class DreamSmartspaceController @Inject constructor(
             if (view !is View) {
                 return null
             }
-
-            view.setIsDreaming(true)
-
             return view
         } else {
             null

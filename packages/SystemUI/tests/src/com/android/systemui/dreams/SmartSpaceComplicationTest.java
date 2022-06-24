@@ -72,19 +72,67 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
     }
 
     /**
-     * Ensures {@link SmartSpaceComplication} is only registered when it is available.
+     * Ensures {@link SmartSpaceComplication} isn't registered right away on start.
      */
     @Test
-    public void testAvailability() {
+    public void testRegistrantStart_doesNotAddComplication() {
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
+        verify(mDreamOverlayStateController, never()).addComplication(eq(mComplication));
+    }
 
-        final SmartSpaceComplication.Registrant registrant = new SmartSpaceComplication.Registrant(
+    private SmartSpaceComplication.Registrant getRegistrant() {
+        return new SmartSpaceComplication.Registrant(
                 mContext,
                 mDreamOverlayStateController,
                 mComplication,
                 mSmartspaceController);
-        registrant.start();
-        verify(mDreamOverlayStateController, never()).addComplication(eq(mComplication));
+    }
 
+    @Test
+    public void testOverlayActive_addsTargetListener() {
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
+
+        final ArgumentCaptor<DreamOverlayStateController.Callback> dreamCallbackCaptor =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        verify(mDreamOverlayStateController).addCallback(dreamCallbackCaptor.capture());
+
+        when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
+        dreamCallbackCaptor.getValue().onStateChanged();
+
+        // Test
+        final ArgumentCaptor<BcSmartspaceDataPlugin.SmartspaceTargetListener> listenerCaptor =
+                ArgumentCaptor.forClass(BcSmartspaceDataPlugin.SmartspaceTargetListener.class);
+        verify(mSmartspaceController).addListener(listenerCaptor.capture());
+    }
+
+    @Test
+    public void testOverlayActive_targetsNonEmpty_addsComplication() {
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
+
+        final ArgumentCaptor<DreamOverlayStateController.Callback> dreamCallbackCaptor =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        verify(mDreamOverlayStateController).addCallback(dreamCallbackCaptor.capture());
+
+        when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
+        dreamCallbackCaptor.getValue().onStateChanged();
+
+        final ArgumentCaptor<BcSmartspaceDataPlugin.SmartspaceTargetListener> listenerCaptor =
+                ArgumentCaptor.forClass(BcSmartspaceDataPlugin.SmartspaceTargetListener.class);
+        verify(mSmartspaceController).addListener(listenerCaptor.capture());
+
+        // Test
+        final SmartspaceTarget target = Mockito.mock(SmartspaceTarget.class);
+        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList(target));
+        verify(mDreamOverlayStateController).addComplication(eq(mComplication));
+    }
+
+    @Test
+    public void testOverlayActive_targetsEmpty_removesComplication() {
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
 
         final ArgumentCaptor<DreamOverlayStateController.Callback> dreamCallbackCaptor =
                 ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
@@ -100,10 +148,41 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
         final SmartspaceTarget target = Mockito.mock(SmartspaceTarget.class);
         listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList(target));
         verify(mDreamOverlayStateController).addComplication(eq(mComplication));
+
+        // Test
+        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList());
+        verify(mDreamOverlayStateController).removeComplication(eq(mComplication));
     }
 
     @Test
-    public void testGetViewReusesSameView() {
+    public void testOverlayInActive_removesTargetListener_removesComplication() {
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
+
+        final ArgumentCaptor<DreamOverlayStateController.Callback> dreamCallbackCaptor =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        verify(mDreamOverlayStateController).addCallback(dreamCallbackCaptor.capture());
+
+        when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
+        dreamCallbackCaptor.getValue().onStateChanged();
+
+        final ArgumentCaptor<BcSmartspaceDataPlugin.SmartspaceTargetListener> listenerCaptor =
+                ArgumentCaptor.forClass(BcSmartspaceDataPlugin.SmartspaceTargetListener.class);
+        verify(mSmartspaceController).addListener(listenerCaptor.capture());
+
+        final SmartspaceTarget target = Mockito.mock(SmartspaceTarget.class);
+        listenerCaptor.getValue().onSmartspaceTargetsUpdated(Arrays.asList(target));
+        verify(mDreamOverlayStateController).addComplication(eq(mComplication));
+
+        // Test
+        when(mDreamOverlayStateController.isOverlayActive()).thenReturn(false);
+        dreamCallbackCaptor.getValue().onStateChanged();
+        verify(mSmartspaceController).removeListener(listenerCaptor.getValue());
+        verify(mDreamOverlayStateController).removeComplication(eq(mComplication));
+    }
+
+    @Test
+    public void testGetView_reusesSameView() {
         final SmartSpaceComplication complication = new SmartSpaceComplication(getContext(),
                 mSmartspaceController);
         final Complication.ViewHolder viewHolder = complication.createView(mComplicationViewModel);

@@ -1139,7 +1139,7 @@ public abstract class WallpaperService extends Service {
 
                         if (mSession.addToDisplay(mWindow, mLayout, View.VISIBLE,
                                 mDisplay.getDisplayId(), mRequestedVisibilities, inputChannel,
-                                mInsetsState, mTempControls) < 0) {
+                                mInsetsState, mTempControls, new Rect()) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }
@@ -1171,8 +1171,7 @@ public abstract class WallpaperService extends Service {
                         mInsetsState.getDisplayCutoutSafe(displayCutoutSafe);
                         mWindowLayout.computeFrames(mLayout, mInsetsState, displayCutoutSafe,
                                 winConfig.getBounds(), winConfig.getWindowingMode(), mWidth,
-                                mHeight, mRequestedVisibilities, null /* attachedWindowFrame */,
-                                1f /* compatScale */, mWinFrames);
+                                mHeight, mRequestedVisibilities, 1f /* compatScale */, mWinFrames);
 
                         mSession.updateLayout(mWindow, mLayout, 0 /* flags */, mWinFrames, mWidth,
                                 mHeight);

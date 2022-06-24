@@ -195,27 +195,28 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
                 UserHandle.getUserId(mUid), requestedVisibilities, outInputChannel, outInsetsState,
-                outActiveControls);
+                outActiveControls, outAttachedFrame);
     }
 
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
-                requestedVisibilities, outInputChannel, outInsetsState, outActiveControls);
+                requestedVisibilities, outInputChannel, outInsetsState, outActiveControls,
+                outAttachedFrame);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, InsetsState outInsetsState) {
+            int viewVisibility, int displayId, InsetsState outInsetsState, Rect outAttachedFrame) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
                 UserHandle.getUserId(mUid), mDummyRequestedVisibilities, null /* outInputChannel */,
-                outInsetsState, mDummyControls);
+                outInsetsState, mDummyControls, outAttachedFrame);
     }
 
     @Override

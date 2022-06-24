@@ -19,10 +19,10 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.content.Context
 import android.view.View
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
-import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.provider.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.util.traceSection
 import dagger.assisted.Assisted

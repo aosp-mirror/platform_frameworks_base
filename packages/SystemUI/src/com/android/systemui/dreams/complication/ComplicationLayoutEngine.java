@@ -54,7 +54,7 @@ import javax.inject.Named;
  */
 @DreamOverlayComponent.DreamOverlayScope
 public class ComplicationLayoutEngine implements Complication.VisibilityController {
-    public static final String TAG = "ComplicationLayoutEngine";
+    public static final String TAG = "ComplicationLayoutEng";
 
     /**
      * {@link ViewEntry} is an internal container, capturing information necessary for working with
@@ -529,7 +529,7 @@ public class ComplicationLayoutEngine implements Complication.VisibilityControll
      */
     public void addComplication(ComplicationId id, View view,
             ComplicationLayoutParams lp, @Complication.Category int category) {
-        Log.d(TAG, "engine: " + this + " addComplication");
+        Log.d(TAG, "@" + Integer.toHexString(this.hashCode()) + " addComplication: " + id);
 
         // If the complication is present, remove.
         if (mEntries.containsKey(id)) {

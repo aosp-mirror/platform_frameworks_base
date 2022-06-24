@@ -238,7 +238,8 @@ public class TaskSnapshotWindow {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#addToDisplay");
             final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
-                    info.requestedVisibilities, tmpInputChannel, tmpInsetsState, tmpControls);
+                    info.requestedVisibilities, tmpInputChannel, tmpInsetsState, tmpControls,
+                    new Rect());
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
@@ -260,8 +261,8 @@ public class TaskSnapshotWindow {
                         tmpMergedConfiguration.getMergedConfiguration().windowConfiguration;
                 windowLayout.computeFrames(layoutParams, tmpInsetsState, displayCutoutSafe,
                         winConfig.getBounds(), winConfig.getWindowingMode(), UNSPECIFIED_LENGTH,
-                        UNSPECIFIED_LENGTH, info.requestedVisibilities,
-                        null /* attachedWindowFrame */, 1f /* compatScale */, tmpFrames);
+                        UNSPECIFIED_LENGTH, info.requestedVisibilities, 1f /* compatScale */,
+                        tmpFrames);
                 session.updateLayout(window, layoutParams, 0 /* flags */, tmpFrames,
                         UNSPECIFIED_LENGTH, UNSPECIFIED_LENGTH);
             } else {
