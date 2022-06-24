@@ -930,26 +930,6 @@ public class SyntheticPasswordManager {
     private ArrayMap<Integer, ArrayMap<Long, TokenData>> tokenMap = new ArrayMap<>();
 
     /**
-     * Create a token based Synthetic password for the given user.
-     * @return the handle of the token
-     */
-    public long createStrongTokenBasedSyntheticPassword(byte[] token, int userId,
-            @Nullable EscrowTokenStateChangeCallback changeCallback) {
-        return createTokenBasedSyntheticPassword(token, TOKEN_TYPE_STRONG, userId,
-                changeCallback);
-    }
-
-    /**
-     * Create a weak token based Synthetic password for the given user.
-     * @return the handle of the weak token
-     */
-    public long createWeakTokenBasedSyntheticPassword(byte[] token, int userId,
-            @Nullable EscrowTokenStateChangeCallback changeCallback) {
-        return createTokenBasedSyntheticPassword(token, TOKEN_TYPE_WEAK, userId,
-                changeCallback);
-    }
-
-    /**
      * Create a token based Synthetic password of the given type for the given user.
      * @return the handle of the token
      */
