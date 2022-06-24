@@ -188,6 +188,23 @@ genrule {
         "$(location :frameworks-base-api-module-lib-current.txt)",
 }
 
+// This produces the same annotations.zip as framework-doc-stubs, but by using
+// outputs from individual modules instead of all the source code.
+genrule {
+    name: "sdk-annotations.zip",
+    srcs: [
+        ":android-non-updatable-doc-stubs{.annotations.zip}",
+        ":all-modules-public-annotations",
+    ],
+    out: ["annotations.zip"],
+    tools: [
+        "merge_annotation_zips",
+        "soong_zip",
+    ],
+    cmd: "$(location merge_annotation_zips) $(genDir)/out $(in) && " +
+        "$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out",
+}
+
 genrule {
     name: "combined-removed-dex",
     visibility: [
