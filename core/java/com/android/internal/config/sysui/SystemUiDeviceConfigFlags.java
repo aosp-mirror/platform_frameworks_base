@@ -548,6 +548,12 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
 
+    /**
+     * (boolean) Whether the task manager should show a stop button if the app is allowlisted
+     * by the user.
+     */
+    public static final String TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS =
+            "show_stop_button_for_user_allowlisted_apps";
 
     /**
      * (boolean) Whether the clipboard overlay is enabled.
