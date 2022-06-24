@@ -45,6 +45,7 @@ import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.camera2.CameraManager;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.ColorDisplayManager;
@@ -544,5 +545,11 @@ public class FrameworkServicesModule {
     @Singleton
     static SafetyCenterManager provideSafetyCenterManager(Context context) {
         return context.getSystemService(SafetyCenterManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static CameraManager provideCameraManager(Context context) {
+        return context.getSystemService(CameraManager.class);
     }
 }
