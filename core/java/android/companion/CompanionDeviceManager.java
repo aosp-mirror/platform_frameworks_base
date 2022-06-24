@@ -38,15 +38,22 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.MacAddress;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.util.ExceptionUtils;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.CollectionUtils;
 
+import libcore.io.IoUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -272,6 +279,9 @@ public final class CompanionDeviceManager {
 
     @GuardedBy("mListeners")
     private final ArrayList<OnAssociationsChangedListenerProxy> mListeners = new ArrayList<>();
+
+    @GuardedBy("mTransports")
+    private final SparseArray<Transport> mTransports = new SparseArray<>();
 
     /** @hide */
     public CompanionDeviceManager(
@@ -800,6 +810,36 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /** {@hide} */
+    public final void attachSystemDataTransport(int associationId, @NonNull InputStream in,
+            @NonNull OutputStream out) throws DeviceNotAssociatedException {
+        synchronized (mTransports) {
+            if (mTransports.contains(associationId)) {
+                detachSystemDataTransport(associationId);
+            }
+
+            try {
+                final Transport transport = new Transport(associationId, in, out);
+                mTransports.put(associationId, transport);
+                transport.start();
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to attach transport", e);
+            }
+        }
+    }
+
+    /** {@hide} */
+    public final void detachSystemDataTransport(int associationId)
+            throws DeviceNotAssociatedException {
+        synchronized (mTransports) {
+            final Transport transport = mTransports.get(associationId);
+            if (transport != null) {
+                mTransports.delete(associationId);
+                transport.stop();
+            }
+        }
+    }
+
     /**
      * Associates given device with given app for the given user directly, without UI prompt.
      *
@@ -1002,6 +1042,95 @@ public final class CompanionDeviceManager {
         @Override
         public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
             mExecutor.execute(() -> mListener.onAssociationsChanged(associations));
+        }
+    }
+
+    /**
+     * Representation of an active system data transport.
+     * <p>
+     * Internally uses two threads to shuttle bidirectional data between a
+     * remote device and a {@code socketpair} that the system is listening to.
+     * This design ensures that data payloads are transported efficiently
+     * without adding Binder traffic contention.
+     */
+    private class Transport {
+        private final int mAssociationId;
+        private final InputStream mRemoteIn;
+        private final OutputStream mRemoteOut;
+
+        private InputStream mLocalIn;
+        private OutputStream mLocalOut;
+
+        private volatile boolean mStopped;
+
+        public Transport(int associationId, InputStream remoteIn, OutputStream remoteOut) {
+            mAssociationId = associationId;
+            mRemoteIn = remoteIn;
+            mRemoteOut = remoteOut;
+        }
+
+        public void start() throws IOException {
+            final ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair();
+            mLocalIn = new ParcelFileDescriptor.AutoCloseInputStream(pair[0]);
+            mLocalOut = new ParcelFileDescriptor.AutoCloseOutputStream(pair[0]);
+
+            try {
+                mService.attachSystemDataTransport(mContext.getPackageName(),
+                        mContext.getUserId(), mAssociationId, pair[1]);
+            } catch (RemoteException e) {
+                throw new IOException("Failed to configure transport", e);
+            }
+
+            new Thread(() -> {
+                try {
+                    copyWithFlushing(mLocalIn, mRemoteOut);
+                } catch (IOException e) {
+                    if (!mStopped) {
+                        Log.w(LOG_TAG, "Trouble during outgoing transport", e);
+                        stop();
+                    }
+                }
+            }).start();
+            new Thread(() -> {
+                try {
+                    copyWithFlushing(mRemoteIn, mLocalOut);
+                } catch (IOException e) {
+                    if (!mStopped) {
+                        Log.w(LOG_TAG, "Trouble during incoming transport", e);
+                        stop();
+                    }
+                }
+            }).start();
+        }
+
+        public void stop() {
+            mStopped = true;
+
+            IoUtils.closeQuietly(mRemoteIn);
+            IoUtils.closeQuietly(mRemoteOut);
+            IoUtils.closeQuietly(mLocalIn);
+            IoUtils.closeQuietly(mLocalOut);
+
+            try {
+                mService.detachSystemDataTransport(mContext.getPackageName(),
+                        mContext.getUserId(), mAssociationId);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, "Failed to detach transport", e);
+            }
+        }
+
+        /**
+         * Copy all data from the first stream to the second stream, flushing
+         * after every write to ensure that we quickly deliver all pending data.
+         */
+        private void copyWithFlushing(@NonNull InputStream in, @NonNull OutputStream out)
+                throws IOException {
+            byte[] buffer = new byte[8192];
+            int c;
+            while ((c = in.read(buffer)) != -1) {
+                out.write(buffer, 0, c);
+                out.flush();
+            }
         }
     }
 }

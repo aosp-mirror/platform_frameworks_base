@@ -76,6 +76,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerWhitelistManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -723,6 +724,19 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void startSystemDataTransfer(String packageName, int userId, int associationId) {
             mSystemDataTransferProcessor.startSystemDataTransfer(packageName, userId,
+                    associationId);
+        }
+
+        @Override
+        public void attachSystemDataTransport(String packageName, int userId, int associationId,
+                ParcelFileDescriptor fd) {
+            mSystemDataTransferProcessor.attachSystemDataTransport(packageName, userId,
+                    associationId, fd);
+        }
+
+        @Override
+        public void detachSystemDataTransport(String packageName, int userId, int associationId) {
+            mSystemDataTransferProcessor.detachSystemDataTransport(packageName, userId,
                     associationId);
         }
 
