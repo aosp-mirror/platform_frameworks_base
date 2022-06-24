@@ -74,18 +74,27 @@ open class ClockRegistry(
 
     open var currentClockId: ClockId
         get() {
-            val json = Settings.Secure.getString(
-                context.contentResolver,
-                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE
-            )
-            return gson.fromJson(json, ClockSetting::class.java)?.clockId ?: DEFAULT_CLOCK_ID
+            return try {
+                val json = Settings.Secure.getString(
+                    context.contentResolver,
+                    Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE
+                )
+                gson.fromJson(json, ClockSetting::class.java)?.clockId ?: DEFAULT_CLOCK_ID
+            } catch (ex: Exception) {
+                Log.e(TAG, "Failed to parse clock setting", ex)
+                DEFAULT_CLOCK_ID
+            }
         }
         set(value) {
-            val json = gson.toJson(ClockSetting(value, System.currentTimeMillis()))
-            Settings.Secure.putString(
-                context.contentResolver,
-                Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE, json
-            )
+            try {
+                val json = gson.toJson(ClockSetting(value, System.currentTimeMillis()))
+                Settings.Secure.putString(
+                    context.contentResolver,
+                    Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE, json
+                )
+            } catch (ex: Exception) {
+                Log.e(TAG, "Failed to set clock setting", ex)
+            }
         }
 
     init {
@@ -183,6 +192,6 @@ open class ClockRegistry(
 
     private data class ClockSetting(
         val clockId: ClockId,
-        val _applied_timestamp: Long
+        val _applied_timestamp: Long?
     )
 }
