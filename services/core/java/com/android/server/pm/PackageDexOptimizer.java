@@ -936,12 +936,15 @@ public class PackageDexOptimizer {
             String classLoaderContext, int profileAnalysisResult, boolean downgrade,
             int dexoptFlags, String oatDir) {
         final boolean shouldBePublic = (dexoptFlags & DEXOPT_PUBLIC) != 0;
-        // If the artifacts should be public while the current artifacts are not, we should
-        // re-compile anyway.
-        if (shouldBePublic && isOdexPrivate(packageName, path, isa, oatDir)) {
-            // Ensure compilation by pretending a compiler filter change on the apk/odex location
-            // (the reason for the '-'. A positive value means the 'oat' location).
-            return adjustDexoptNeeded(-DexFile.DEX2OAT_FOR_FILTER);
+        final boolean isProfileGuidedFilter = (dexoptFlags & DEXOPT_PROFILE_GUIDED) != 0;
+        boolean newProfile = profileAnalysisResult == PROFILE_ANALYSIS_OPTIMIZE;
+
+        if (!newProfile && isProfileGuidedFilter && shouldBePublic
+                && isOdexPrivate(packageName, path, isa, oatDir)) {
+            // The profile that will be used is a cloud profile, while the profile used previously
+            // is a user profile. Typically, this happens after an app starts being used by other
+            // apps.
+            newProfile = true;
         }
 
         int dexoptNeeded;
@@ -959,7 +962,6 @@ public class PackageDexOptimizer {
                     && profileAnalysisResult == PROFILE_ANALYSIS_DONT_OPTIMIZE_EMPTY_PROFILES) {
                 actualCompilerFilter = "verify";
             }
-            boolean newProfile = profileAnalysisResult == PROFILE_ANALYSIS_OPTIMIZE;
             dexoptNeeded = DexFile.getDexOptNeeded(path, isa, actualCompilerFilter,
                     classLoaderContext, newProfile, downgrade);
         } catch (IOException ioe) {
