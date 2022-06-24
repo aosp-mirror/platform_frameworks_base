@@ -196,16 +196,32 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
-    fun logRankingMissing(entry: NotificationEntry, rankingMap: RankingMap) {
+    fun logMissingRankings(
+        newlyInconsistentEntries: List<NotificationEntry>,
+        totalInconsistent: Int,
+        rankingMap: RankingMap
+    ) {
         buffer.log(TAG, WARNING, {
-            str1 = entry.logKey
+            int1 = totalInconsistent
+            int2 = newlyInconsistentEntries.size
+            str1 = newlyInconsistentEntries.joinToString { it.logKey ?: "null" }
         }, {
-            "Ranking update is missing ranking for $str1"
+            "Ranking update is missing ranking for $int1 entries ($int2 new): $str1"
         })
-        buffer.log(TAG, DEBUG, {}, { "Ranking map contents:" })
-        for (entry in rankingMap.orderedKeys) {
-            buffer.log(TAG, DEBUG, { str1 = logKey(entry) }, { "  $str1" })
-        }
+        buffer.log(TAG, DEBUG, {
+            str1 = rankingMap.orderedKeys.map { logKey(it) ?: "null" }.toString()
+        }, {
+            "Ranking map contents: $str1"
+        })
+    }
+
+    fun logRecoveredRankings(newlyConsistentKeys: List<String>) {
+        buffer.log(TAG, INFO, {
+            int1 = newlyConsistentKeys.size
+            str1 = newlyConsistentKeys.joinToString { logKey(it) ?: "null" }
+        }, {
+            "Ranking update now contains rankings for $int1 previously inconsistent entries: $str1"
+        })
     }
 
     fun logRemoteExceptionOnNotificationClear(entry: NotificationEntry, e: RemoteException) {
@@ -343,6 +359,31 @@ class NotifCollectionLogger @Inject constructor(
         }, {
             "Mismatch: current $str2 is $str3 for: $str1"
         })
+    }
+}
+
+fun maybeLogInconsistentRankings(
+    logger: NotifCollectionLogger,
+    oldKeysWithoutRankings: Set<String>,
+    newEntriesWithoutRankings: Map<String, NotificationEntry>?,
+    rankingMap: RankingMap
+) {
+    if (oldKeysWithoutRankings.isEmpty() && newEntriesWithoutRankings == null) return
+    val newlyConsistent: List<String> = oldKeysWithoutRankings
+        .mapNotNull { key ->
+            key.takeIf { key !in (newEntriesWithoutRankings ?: emptyMap()) }
+                .takeIf { key in rankingMap.orderedKeys }
+        }.sorted()
+    if (newlyConsistent.isNotEmpty()) {
+        logger.logRecoveredRankings(newlyConsistent)
+    }
+    val newlyInconsistent: List<NotificationEntry> = newEntriesWithoutRankings
+        ?.mapNotNull { (key, entry) ->
+            entry.takeIf { key !in oldKeysWithoutRankings }
+        }?.sortedBy { it.key } ?: emptyList()
+    if (newlyInconsistent.isNotEmpty()) {
+        val totalInconsistent: Int = newEntriesWithoutRankings?.size ?: 0
+        logger.logMissingRankings(newlyInconsistent, totalInconsistent, rankingMap)
     }
 }
 
