@@ -356,6 +356,8 @@ class StorageManagerService extends IStorageManager.Stub
     private static final boolean DEFAULT_CHARGING_REQUIRED = true;
     // Minimum GC interval sleep time in ms
     private static final int DEFAULT_MIN_GC_SLEEPTIME = 10000;
+    // Target dirty segment ratio to aim to
+    private static final int DEFAULT_TARGET_DIRTY_RATIO = 80;
 
     private volatile int mLifetimePercentThreshold;
     private volatile int mMinSegmentsThreshold;
@@ -364,6 +366,7 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile float mLowBatteryLevel;
     private volatile boolean mChargingRequired;
     private volatile int mMinGCSleepTime;
+    private volatile int mTargetDirtyRatio;
     private volatile boolean mNeedGC;
 
     private volatile boolean mPassedLifetimeThresh;
@@ -2616,6 +2619,8 @@ class StorageManagerService extends IStorageManager.Stub
                 "charging_required", DEFAULT_CHARGING_REQUIRED);
             mMinGCSleepTime = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
                 "min_gc_sleeptime", DEFAULT_MIN_GC_SLEEPTIME);
+            mTargetDirtyRatio = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "target_dirty_ratio", DEFAULT_TARGET_DIRTY_RATIO);
 
             // If we use the smart idle maintenance, we need to turn off GC in the traditional idle
             // maintenance to avoid the conflict
@@ -2756,10 +2761,11 @@ class StorageManagerService extends IStorageManager.Stub
                             ", dirty reclaim rate: " + mDirtyReclaimRate +
                             ", segment reclaim weight: " + mSegmentReclaimWeight +
                             ", period(min): " + sSmartIdleMaintPeriod +
-                            ", min gc sleep time(ms): " + mMinGCSleepTime);
+                            ", min gc sleep time(ms): " + mMinGCSleepTime +
+                            ", target dirty ratio: " + mTargetDirtyRatio);
                 mVold.setGCUrgentPace(avgWriteAmount, mMinSegmentsThreshold, mDirtyReclaimRate,
                                       mSegmentReclaimWeight, sSmartIdleMaintPeriod,
-                                      mMinGCSleepTime);
+                                      mMinGCSleepTime, mTargetDirtyRatio);
             } else {
                 Slog.i(TAG, "Skipping smart idle maintenance - block based checkpoint in progress");
             }
