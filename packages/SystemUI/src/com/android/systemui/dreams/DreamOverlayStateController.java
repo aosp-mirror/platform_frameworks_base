@@ -101,6 +101,9 @@ public class DreamOverlayStateController implements
     public void addComplication(Complication complication) {
         mExecutor.execute(() -> {
             if (mComplications.add(complication)) {
+                if (DEBUG) {
+                    Log.d(TAG, "addComplication: added " + complication);
+                }
                 mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
             }
         });
@@ -112,6 +115,9 @@ public class DreamOverlayStateController implements
     public void removeComplication(Complication complication) {
         mExecutor.execute(() -> {
             if (mComplications.remove(complication)) {
+                if (DEBUG) {
+                    Log.d(TAG, "removeComplication: removed " + complication);
+                }
                 mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
             }
         });

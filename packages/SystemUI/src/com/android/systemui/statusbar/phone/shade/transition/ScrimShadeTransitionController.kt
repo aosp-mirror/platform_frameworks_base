@@ -2,10 +2,13 @@ package com.android.systemui.statusbar.phone.shade.transition
 
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.util.MathUtils.constrain
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -21,7 +24,8 @@ constructor(
     configurationController: ConfigurationController,
     dumpManager: DumpManager,
     private val scrimController: ScrimController,
-    @Main private val resources: Resources
+    @Main private val resources: Resources,
+    private val statusBarStateController: SysuiStatusBarStateController,
 ) {
 
     private var inSplitShade = false
@@ -55,12 +59,15 @@ constructor(
     }
 
     private fun calculateScrimExpansionFraction(expansionEvent: PanelExpansionChangeEvent): Float {
-        return if (inSplitShade) {
-            expansionEvent.dragDownPxAmount / splitShadeScrimTransitionDistance
+        return if (inSplitShade && isScreenUnlocked()) {
+            constrain(expansionEvent.dragDownPxAmount / splitShadeScrimTransitionDistance, 0f, 1f)
         } else {
             expansionEvent.fraction
         }
     }
+
+    private fun isScreenUnlocked() =
+        statusBarStateController.currentOrUpcomingState == StatusBarState.SHADE
 
     private fun dump(printWriter: PrintWriter, args: Array<String>) {
         printWriter.println(
@@ -68,6 +75,7 @@ constructor(
                 ScrimShadeTransitionController:
                   Resources:
                     inSplitShade: $inSplitShade
+                    isScreenUnlocked: ${isScreenUnlocked()}
                     splitShadeScrimTransitionDistance: $splitShadeScrimTransitionDistance
                   State:
                     lastExpansionFraction: $lastExpansionFraction

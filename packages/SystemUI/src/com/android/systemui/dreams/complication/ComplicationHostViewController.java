@@ -21,6 +21,7 @@ import static com.android.systemui.dreams.complication.dagger.ComplicationModule
 
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Debug;
 import android.util.Log;
 import android.view.View;
 
@@ -44,7 +45,8 @@ import javax.inject.Named;
  * a {@link ComplicationLayoutEngine}.
  */
 public class ComplicationHostViewController extends ViewController<ConstraintLayout> {
-    public static final String TAG = "ComplicationHostVwCtrl";
+    private static final String TAG = "ComplicationHostVwCtrl";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final ComplicationLayoutEngine mLayoutEngine;
     private final LifecycleOwner mLifecycleOwner;
@@ -90,6 +92,11 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
     }
 
     private void updateComplications(Collection<ComplicationViewModel> complications) {
+        if (DEBUG) {
+            Log.d(TAG, "updateComplications called. Callers = " + Debug.getCallers(25));
+            Log.d(TAG, "    mComplications = " + mComplications.toString());
+            Log.d(TAG, "    complications = " + complications.toString());
+        }
         final Collection<ComplicationId> ids = complications.stream()
                 .map(complicationViewModel -> complicationViewModel.getId())
                 .collect(Collectors.toSet());

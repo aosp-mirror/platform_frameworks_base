@@ -523,6 +523,18 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return true;
     }
 
+    @Override
+    public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        ArrayList<Animator> anims = mAnimations.get(mergeTarget);
+        if (anims == null) return;
+        for (int i = anims.size() - 1; i >= 0; --i) {
+            final Animator anim = anims.get(i);
+            mAnimExecutor.execute(anim::end);
+        }
+    }
+
     private void edgeExtendWindow(TransitionInfo.Change change,
             Animation a, SurfaceControl.Transaction startTransaction,
             SurfaceControl.Transaction finishTransaction) {

@@ -420,7 +420,10 @@ public class CompatibilityInfo implements Parcelable {
          * Translate a Rect in screen coordinates into the app window's coordinates.
          */
         @UnsupportedAppUsage
-        public void translateRectInScreenToAppWindow(Rect rect) {
+        public void translateRectInScreenToAppWindow(@Nullable Rect rect) {
+            if (rect == null) {
+                return;
+            }
             rect.scale(applicationInvertedScale);
         }
 
