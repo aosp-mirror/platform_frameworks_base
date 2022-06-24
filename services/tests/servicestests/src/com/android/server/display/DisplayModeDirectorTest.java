@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.DisplayManager.DeviceConfig.KEY_BRIGHTNESS_THROTTLING_DATA;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_HIGH_AMBIENT_BRIGHTNESS_THRESHOLDS;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_HIGH_DISPLAY_BRIGHTNESS_THRESHOLDS;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_LOW_AMBIENT_BRIGHTNESS_THRESHOLDS;
@@ -1900,6 +1901,11 @@ public class DisplayModeDirectorTest {
         void setRefreshRateInHbmHdr(int fps) {
             putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                     KEY_REFRESH_RATE_IN_HBM_HDR, String.valueOf(fps));
+        }
+
+        void setBrightnessThrottlingData(String brightnessThrottlingData) {
+            putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                    KEY_BRIGHTNESS_THROTTLING_DATA, brightnessThrottlingData);
         }
 
         void setLowDisplayBrightnessThresholds(int[] brightnessThresholds) {
