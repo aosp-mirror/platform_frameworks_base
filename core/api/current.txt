@@ -18170,10 +18170,15 @@ package android.hardware.camera2.params {
   }
 
   public final class DeviceStateSensorOrientationMap {
-    ctor public DeviceStateSensorOrientationMap(@NonNull long[]);
     method public int getSensorOrientation(long);
     field public static final long FOLDED = 4L; // 0x4L
     field public static final long NORMAL = 0L; // 0x0L
+  }
+
+  public static final class DeviceStateSensorOrientationMap.Builder {
+    ctor public DeviceStateSensorOrientationMap.Builder();
+    method @NonNull public android.hardware.camera2.params.DeviceStateSensorOrientationMap.Builder addOrientationForState(long, long);
+    method @NonNull public android.hardware.camera2.params.DeviceStateSensorOrientationMap build();
   }
 
   public final class DynamicRangeProfiles {
