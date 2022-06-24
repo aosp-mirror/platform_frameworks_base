@@ -541,7 +541,9 @@ public final class InputMethodManager {
 
     /**
      * The monitor mode for {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}.
+     * @deprecated This is kept for {@link UnsupportedAppUsage}.  Must not be used.
      */
+    @Deprecated
     private int mRequestUpdateCursorAnchorInfoMonitorMode = REQUEST_UPDATE_CURSOR_ANCHOR_INFO_NONE;
 
     /**
@@ -2737,8 +2739,10 @@ public final class InputMethodManager {
      * Return true if the current input method wants to be notified when cursor/anchor location
      * is changed.
      *
+     * @deprecated This method is kept for {@link UnsupportedAppUsage}.  Must not be used.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isCursorAnchorInfoEnabled() {
         synchronized (mH) {
@@ -2753,23 +2757,14 @@ public final class InputMethodManager {
     /**
      * Set the requested mode for {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}.
      *
+     * @deprecated This method is kept for {@link UnsupportedAppUsage}.  Must not be used.
      * @hide
      */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setUpdateCursorAnchorInfoMode(int flags) {
         synchronized (mH) {
             mRequestUpdateCursorAnchorInfoMonitorMode = flags;
-        }
-    }
-
-    /**
-     * Get the requested mode for {@link #updateCursorAnchorInfo(View, CursorAnchorInfo)}.
-     *
-     * @hide
-     */
-    public int getUpdateCursorAnchorInfoMode() {
-        synchronized (mH) {
-            return mRequestUpdateCursorAnchorInfoMonitorMode;
         }
     }
 

@@ -18,7 +18,6 @@
 -->
 <com.android.systemui.shared.clocks.AnimatableClockView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/animatable_clock_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="start"
@@ -26,6 +25,7 @@
     android:textSize="@dimen/small_clock_text_size"
     android:fontFamily="@*android:string/config_clockFontFamily"
     android:elegantTextHeight="false"
+    android:ellipsize="none"
     android:singleLine="true"
     android:fontFeatureSettings="pnum"
     chargeAnimationDelay="350"

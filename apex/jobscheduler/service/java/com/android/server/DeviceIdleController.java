@@ -73,6 +73,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
@@ -2329,8 +2330,8 @@ public class DeviceIdleController extends SystemService
             // a battery update the next time the level drops.
             mCharging = true;
             mActiveReason = ACTIVE_REASON_UNKNOWN;
-            mState = STATE_ACTIVE;
-            mLightState = LIGHT_STATE_ACTIVE;
+            moveToStateLocked(STATE_ACTIVE, "boot");
+            moveToLightStateLocked(LIGHT_STATE_ACTIVE, "boot");
             mInactiveTimeout = mConstants.INACTIVE_TIMEOUT;
             mPreIdleFactor = 1.0f;
             mLastPreIdleFactor = 1.0f;
@@ -3173,8 +3174,7 @@ public class DeviceIdleController extends SystemService
                     + ", changeLightIdle=" + changeLightIdle);
         }
         if (mState != STATE_ACTIVE || mLightState != STATE_ACTIVE) {
-            EventLogTags.writeDeviceIdle(STATE_ACTIVE, activeReason);
-            mState = STATE_ACTIVE;
+            moveToStateLocked(STATE_ACTIVE, activeReason);
             mInactiveTimeout = newInactiveTimeout;
             resetIdleManagementLocked();
             // Don't reset maintenance window start time if we're in a light idle maintenance window
@@ -3184,8 +3184,7 @@ public class DeviceIdleController extends SystemService
             }
 
             if (changeLightIdle) {
-                EventLogTags.writeDeviceIdleLight(LIGHT_STATE_ACTIVE, activeReason);
-                mLightState = LIGHT_STATE_ACTIVE;
+                moveToLightStateLocked(LIGHT_STATE_ACTIVE, activeReason);
                 resetLightIdleManagementLocked();
                 // Only report active if light is also ACTIVE.
                 scheduleReportActiveLocked(activeReason, activeUid);
@@ -3258,11 +3257,7 @@ public class DeviceIdleController extends SystemService
                     // values, so returning here is safe.
                     return;
                 }
-                if (DEBUG) {
-                    Slog.d(TAG, "Moved from "
-                            + stateToString(mState) + " to STATE_QUICK_DOZE_DELAY");
-                }
-                mState = STATE_QUICK_DOZE_DELAY;
+                moveToStateLocked(STATE_QUICK_DOZE_DELAY, "no activity");
                 // Make sure any motion sensing or locating is stopped.
                 resetIdleManagementLocked();
                 if (isUpcomingAlarmClock()) {
@@ -3277,10 +3272,8 @@ public class DeviceIdleController extends SystemService
                     // recently closed app) needs to finish running.
                     scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
                 }
-                EventLogTags.writeDeviceIdle(mState, "no activity");
             } else if (mState == STATE_ACTIVE) {
-                mState = STATE_INACTIVE;
-                if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE");
+                moveToStateLocked(STATE_INACTIVE, "no activity");
                 resetIdleManagementLocked();
                 long delay = mInactiveTimeout;
                 if (shouldUseIdleTimeoutFactorLocked()) {
@@ -3296,12 +3289,10 @@ public class DeviceIdleController extends SystemService
                 } else {
                     scheduleAlarmLocked(delay, false);
                 }
-                EventLogTags.writeDeviceIdle(mState, "no activity");
             }
         }
         if (mLightState == LIGHT_STATE_ACTIVE && mLightEnabled) {
-            mLightState = LIGHT_STATE_INACTIVE;
-            if (DEBUG) Slog.d(TAG, "Moved from LIGHT_STATE_ACTIVE to LIGHT_STATE_INACTIVE");
+            moveToLightStateLocked(LIGHT_STATE_INACTIVE, "no activity");
             resetLightIdleManagementLocked();
             scheduleLightAlarmLocked(mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT,
                     mConstants.FLEX_TIME_SHORT);
@@ -3309,7 +3300,6 @@ public class DeviceIdleController extends SystemService
             // timeout and a single light idle period.
             scheduleLightMaintenanceAlarmLocked(
                     mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT + mConstants.LIGHT_IDLE_TIMEOUT);
-            EventLogTags.writeDeviceIdleLight(mLightState, "no activity");
         }
     }
 
@@ -3429,12 +3419,7 @@ public class DeviceIdleController extends SystemService
                 // time from now.
                 scheduleLightAlarmLocked(mCurLightIdleBudget, mConstants.FLEX_TIME_SHORT);
                 scheduleLightMaintenanceAlarmLocked(mCurLightIdleBudget + mNextLightIdleDelay);
-                if (DEBUG) {
-                    Slog.d(TAG, "Moved from " + lightStateToString(mLightState)
-                            + " to LIGHT_STATE_IDLE_MAINTENANCE");
-                }
-                mLightState = LIGHT_STATE_IDLE_MAINTENANCE;
-                EventLogTags.writeDeviceIdleLight(mLightState, reason);
+                moveToLightStateLocked(LIGHT_STATE_IDLE_MAINTENANCE, reason);
                 addEvent(EVENT_LIGHT_MAINTENANCE, null);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
             } else {
@@ -3443,9 +3428,7 @@ public class DeviceIdleController extends SystemService
                 // We'll only wait for another full idle period, however, and then give up.
                 scheduleLightMaintenanceAlarmLocked(mNextLightIdleDelay);
                 cancelLightAlarmLocked();
-                if (DEBUG) Slog.d(TAG, "Moved to LIGHT_WAITING_FOR_NETWORK.");
-                mLightState = LIGHT_STATE_WAITING_FOR_NETWORK;
-                EventLogTags.writeDeviceIdleLight(mLightState, reason);
+                moveToLightStateLocked(LIGHT_STATE_WAITING_FOR_NETWORK, reason);
             }
         } else {
             if (mMaintenanceStartTime != 0) {
@@ -3469,9 +3452,7 @@ public class DeviceIdleController extends SystemService
             // maintenance window, so reschedule the alarm starting from now.
             scheduleLightMaintenanceAlarmLocked(mNextLightIdleDelay);
             cancelLightAlarmLocked();
-            if (DEBUG) Slog.d(TAG, "Moved to LIGHT_STATE_IDLE.");
-            mLightState = LIGHT_STATE_IDLE;
-            EventLogTags.writeDeviceIdleLight(mLightState, reason);
+            moveToLightStateLocked(LIGHT_STATE_IDLE, reason);
             addEvent(EVENT_LIGHT_IDLE, null);
             mGoingIdleWakeLock.acquire();
             mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON_LIGHT);
@@ -3535,12 +3516,11 @@ public class DeviceIdleController extends SystemService
                 moveToStateLocked(STATE_IDLE_PENDING, reason);
                 break;
             case STATE_IDLE_PENDING:
-                moveToStateLocked(STATE_SENSING, reason);
                 cancelLocatingLocked();
                 mLocated = false;
                 mLastGenericLocation = null;
                 mLastGpsLocation = null;
-                updateActiveConstraintsLocked();
+                moveToStateLocked(STATE_SENSING, reason);
 
                 // Wait for open constraints and an accelerometer reading before moving on.
                 if (mUseMotionSensor && mAnyMotionDetector.hasSensor()) {
@@ -3609,7 +3589,7 @@ public class DeviceIdleController extends SystemService
                 }
                 moveToStateLocked(STATE_IDLE, reason);
                 if (mLightState != LIGHT_STATE_OVERRIDE) {
-                    mLightState = LIGHT_STATE_OVERRIDE;
+                    moveToLightStateLocked(LIGHT_STATE_OVERRIDE, "deep");
                     cancelAllLightAlarmsLocked();
                 }
                 addEvent(EVENT_DEEP_IDLE, null);
@@ -3637,14 +3617,27 @@ public class DeviceIdleController extends SystemService
     }
 
     @GuardedBy("this")
+    private void moveToLightStateLocked(int state, String reason) {
+        if (DEBUG) {
+            Slog.d(TAG, String.format("Moved from LIGHT_STATE_%s to LIGHT_STATE_%s.",
+                    lightStateToString(mLightState), lightStateToString(state)));
+        }
+        mLightState = state;
+        EventLogTags.writeDeviceIdleLight(mLightState, reason);
+        // This is currently how to set the current state in a trace.
+        Trace.traceCounter(Trace.TRACE_TAG_SYSTEM_SERVER, "DozeLightState", state);
+    }
+
+    @GuardedBy("this")
     private void moveToStateLocked(int state, String reason) {
-        final int oldState = mState;
-        mState = state;
         if (DEBUG) {
             Slog.d(TAG, String.format("Moved from STATE_%s to STATE_%s.",
-                    stateToString(oldState), stateToString(mState)));
+                    stateToString(mState), stateToString(state)));
         }
+        mState = state;
         EventLogTags.writeDeviceIdle(mState, reason);
+        // This is currently how to set the current state in a trace.
+        Trace.traceCounter(Trace.TRACE_TAG_SYSTEM_SERVER, "DozeDeepState", state);
         updateActiveConstraintsLocked();
     }
 

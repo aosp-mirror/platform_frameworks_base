@@ -26,6 +26,7 @@ import android.os.Handler
 import android.os.RemoteException
 import android.util.Log
 import android.view.RemoteAnimationTarget
+import android.view.SurfaceControl
 import android.view.SyncRtSurfaceTransactionApplier
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -292,6 +293,8 @@ class KeyguardUnlockAnimationController @Inject constructor(
     private var willUnlockWithSmartspaceTransition: Boolean = false
 
     private val handler = Handler()
+
+    private val tmpFloat = FloatArray(9)
 
     init {
         with(surfaceBehindAlphaAnimator) {
@@ -723,13 +726,27 @@ class KeyguardUnlockAnimationController @Inject constructor(
             if (keyguardStateController.isSnappingKeyguardBackAfterSwipe) amount
             else surfaceBehindAlpha
 
-        applyParamsToSurface(
-            SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
-                surfaceBehindRemoteAnimationTarget!!.leash)
-                .withMatrix(surfaceBehindMatrix)
-                .withCornerRadius(roundedCornerRadius)
-                .withAlpha(animationAlpha)
-                .build())
+        // SyncRtSurfaceTransactionApplier cannot apply transaction when the target view is unable
+        // to draw
+        val sc: SurfaceControl? = surfaceBehindRemoteAnimationTarget?.leash
+        if (keyguardViewController.viewRootImpl.view?.visibility != View.VISIBLE &&
+            sc?.isValid == true) {
+            with(SurfaceControl.Transaction()) {
+                setMatrix(sc, surfaceBehindMatrix, tmpFloat)
+                setCornerRadius(sc, roundedCornerRadius)
+                setAlpha(sc, animationAlpha)
+                apply()
+            }
+        } else {
+            applyParamsToSurface(
+                SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(
+                    surfaceBehindRemoteAnimationTarget!!.leash)
+                    .withMatrix(surfaceBehindMatrix)
+                    .withCornerRadius(roundedCornerRadius)
+                    .withAlpha(animationAlpha)
+                    .build()
+            )
+        }
     }
 
     /**
@@ -744,8 +761,11 @@ class KeyguardUnlockAnimationController @Inject constructor(
         handler.removeCallbacksAndMessages(null)
 
         // Make sure we made the surface behind fully visible, just in case. It should already be
-        // fully visible. If the launcher is doing its own animation, let it continue without
-        // forcing it to 1f.
+        // fully visible. The exit animation is finished, and we should not hold the leash anymore,
+        // so forcing it to 1f.
+        surfaceBehindAlphaAnimator.cancel()
+        surfaceBehindEntryAnimator.cancel()
+        surfaceBehindAlpha = 1f
         setSurfaceBehindAppearAmount(1f)
         launcherUnlockController?.setUnlockAmount(1f, false /* forceIfAnimating */)
 

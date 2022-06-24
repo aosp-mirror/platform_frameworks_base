@@ -215,13 +215,15 @@ public final class EditableInputConnection extends BaseInputConnection
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         if (DEBUG) Log.v(TAG, "requestUpdateCursorAnchorInfo " + cursorUpdateMode);
 
-        // It is possible that any other bit is used as a valid flag in a future release.
-        // We should reject the entire request in such a case.
-        final int knownFlagMask = InputConnection.CURSOR_UPDATE_IMMEDIATE
-                | InputConnection.CURSOR_UPDATE_MONITOR
-                | InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS
+        final int knownModeFlags = InputConnection.CURSOR_UPDATE_IMMEDIATE
+                | InputConnection.CURSOR_UPDATE_MONITOR;
+        final int knownFilterFlags = InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS
                 | InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER
                 | InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS;
+
+        // It is possible that any other bit is used as a valid flag in a future release.
+        // We should reject the entire request in such a case.
+        final int knownFlagMask = knownModeFlags | knownFilterFlags;
         final int unknownFlags = cursorUpdateMode & ~knownFlagMask;
         if (unknownFlags != 0) {
             if (DEBUG) {
@@ -237,21 +239,10 @@ public final class EditableInputConnection extends BaseInputConnection
             // CursorAnchorInfo is temporarily unavailable.
             return false;
         }
-        mIMM.setUpdateCursorAnchorInfoMode(cursorUpdateMode);
-        if ((cursorUpdateMode & InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0) {
-            if (mTextView == null) {
-                // In this case, FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is silently ignored.
-                // TODO: Return some notification code for the input method that indicates
-                // FLAG_CURSOR_ANCHOR_INFO_IMMEDIATE is ignored.
-            } else if (mTextView.isInLayout()) {
-                // In this case, the view hierarchy is currently undergoing a layout pass.
-                // IMM#updateCursorAnchorInfo is supposed to be called soon after the layout
-                // pass is finished.
-            } else {
-                // This will schedule a layout pass of the view tree, and the layout event
-                // eventually triggers IMM#updateCursorAnchorInfo.
-                mTextView.requestLayout();
-            }
+        mIMM.setUpdateCursorAnchorInfoMode(cursorUpdateMode);  // for UnsupportedAppUsage
+        if (mTextView != null) {
+            mTextView.onRequestCursorUpdatesInternal(cursorUpdateMode & knownModeFlags,
+                    cursorUpdateMode & knownFilterFlags);
         }
         return true;
     }

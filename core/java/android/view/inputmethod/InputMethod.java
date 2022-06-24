@@ -233,7 +233,7 @@ public interface InputMethod {
      *                        long as your implementation of {@link InputMethod} relies on such
      *                        IPCs
      * @param navButtonFlags {@link InputMethodNavButtonFlags} in the initial state of this session.
-     * @param imeDispatcher The {@link ImeOnBackInvokedDispatcher }} to be set on the
+     * @param imeDispatcher The {@link ImeOnBackInvokedDispatcher} to be set on the
      *                      IME's {@link android.window.WindowOnBackInvokedDispatcher}, so that IME
      *                      {@link android.window.OnBackInvokedCallback}s can be forwarded to
      *                      the client requesting to start input.

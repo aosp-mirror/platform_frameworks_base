@@ -30,10 +30,10 @@ public class WindowlessWindowLayout extends WindowLayout {
     public void computeFrames(WindowManager.LayoutParams attrs, InsetsState state,
             Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
             int requestedWidth, int requestedHeight, InsetsVisibilities requestedVisibilities,
-            Rect attachedWindowFrame, float compatScale, ClientWindowFrames outFrames) {
-        outFrames.frame.set(0, 0, attrs.width, attrs.height);
-        outFrames.displayFrame.set(outFrames.frame);
-        outFrames.parentFrame.set(outFrames.frame);
+            float compatScale, ClientWindowFrames frames) {
+        frames.frame.set(0, 0, attrs.width, attrs.height);
+        frames.displayFrame.set(frames.frame);
+        frames.parentFrame.set(frames.frame);
     }
 }
 

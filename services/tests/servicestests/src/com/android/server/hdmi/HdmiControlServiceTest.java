@@ -669,6 +669,52 @@ public class HdmiControlServiceTest {
     }
 
     @Test
+    public void initCec_statusListener_CecEnabled_CecAvailable_TvTransientToOn() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON);
+        mNativeWrapper.onCecMessage(reportPowerStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
+    }
+
+    @Test
+    public void initCec_statusListener_CecEnabled_CecAvailable_TvTransientToStandby() {
+        HdmiControlStatusCallback hdmiControlStatusCallback = new HdmiControlStatusCallback();
+        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_DISABLED);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlServiceSpy.addHdmiControlStatusChangeListener(hdmiControlStatusCallback);
+        mHdmiControlServiceSpy.setControlEnabled(HdmiControlManager.HDMI_CEC_CONTROL_ENABLED);
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportPowerStatus =
+                HdmiCecMessageBuilder.buildReportPowerStatus(
+                        Constants.ADDR_TV,
+                        mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress(),
+                        HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+        mNativeWrapper.onCecMessage(reportPowerStatus);
+        mTestLooper.dispatchAll();
+
+        assertThat(hdmiControlStatusCallback.mCecEnabled).isTrue();
+        assertThat(hdmiControlStatusCallback.mCecAvailable).isTrue();
+    }
+
+    @Test
     public void handleCecCommand_errorParameter_returnsAbortInvalidOperand() {
         // Validity ERROR_PARAMETER. Taken from HdmiCecMessageValidatorTest#isValid_menuStatus
         HdmiCecMessage message = HdmiUtils.buildMessage("80:8D:03");

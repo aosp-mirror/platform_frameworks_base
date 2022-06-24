@@ -129,13 +129,16 @@ class ClockRegistryTest : SysuiTestCase() {
         pluginListener.onPluginConnected(plugin1, mockContext)
         pluginListener.onPluginConnected(plugin2, mockContext)
         val list = registry.getClocks()
-        assertEquals(list, listOf(
-            ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
-            ClockMetadata("clock_1", "clock 1"),
-            ClockMetadata("clock_2", "clock 2"),
-            ClockMetadata("clock_3", "clock 3"),
-            ClockMetadata("clock_4", "clock 4")
-        ))
+        assertEquals(
+            list,
+            listOf(
+                ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
+                ClockMetadata("clock_1", "clock 1"),
+                ClockMetadata("clock_2", "clock 2"),
+                ClockMetadata("clock_3", "clock 3"),
+                ClockMetadata("clock_4", "clock 4")
+            )
+        )
     }
 
     @Test
@@ -157,11 +160,14 @@ class ClockRegistryTest : SysuiTestCase() {
         pluginListener.onPluginConnected(plugin1, mockContext)
         pluginListener.onPluginConnected(plugin2, mockContext)
         val list = registry.getClocks()
-        assertEquals(list, listOf(
-            ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
-            ClockMetadata("clock_1", "clock 1"),
-            ClockMetadata("clock_2", "clock 2")
-        ))
+        assertEquals(
+            list,
+            listOf(
+                ClockMetadata(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME),
+                ClockMetadata("clock_1", "clock 1"),
+                ClockMetadata("clock_2", "clock 2")
+            )
+        )
 
         assertEquals(registry.createExampleClock("clock_1"), mockClock)
         assertEquals(registry.createExampleClock("clock_2"), mockClock)
@@ -221,7 +227,7 @@ class ClockRegistryTest : SysuiTestCase() {
         pluginListener.onPluginConnected(plugin2, mockContext)
 
         var changeCallCount = 0
-        registry.registerClockChangeListener({ changeCallCount++ })
+        registry.registerClockChangeListener { changeCallCount++ }
 
         pluginListener.onPluginDisconnected(plugin1)
         assertEquals(0, changeCallCount)

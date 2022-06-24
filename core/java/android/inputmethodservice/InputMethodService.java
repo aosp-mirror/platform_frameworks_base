@@ -366,7 +366,7 @@ public class InputMethodService extends AbstractInputMethodService {
      **/
     private RingBuffer<MotionEvent> mPendingEvents;
     private ImeOnBackInvokedDispatcher mImeDispatcher;
-    private Boolean mBackCallbackRegistered = false;
+    private boolean mBackCallbackRegistered = false;
     private final CompatOnBackInvokedCallback mCompatBackCallback = this::compatHandleBack;
     private Runnable mImeSurfaceRemoverRunnable;
     private Runnable mFinishHwRunnable;

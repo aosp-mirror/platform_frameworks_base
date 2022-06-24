@@ -4599,20 +4599,22 @@ public class Editor {
                 return;
             }
             // Skip if the IME has not requested the cursor/anchor position.
-            if (!imm.isCursorAnchorInfoEnabled()) {
+            final int knownCursorAnchorInfoModes =
+                    InputConnection.CURSOR_UPDATE_IMMEDIATE | InputConnection.CURSOR_UPDATE_MONITOR;
+            if ((mInputMethodState.mUpdateCursorAnchorInfoMode & knownCursorAnchorInfoModes) == 0) {
                 return;
             }
             Layout layout = mTextView.getLayout();
             if (layout == null) {
                 return;
             }
-            int mode = imm.getUpdateCursorAnchorInfoMode();
+            final int filter = mInputMethodState.mUpdateCursorAnchorInfoFilter;
             boolean includeEditorBounds =
-                    (mode & InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS) != 0;
+                    (filter & InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS) != 0;
             boolean includeCharacterBounds =
-                    (mode & InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS) != 0;
+                    (filter & InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS) != 0;
             boolean includeInsertionMarker =
-                    (mode & InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER) != 0;
+                    (filter & InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER) != 0;
             boolean includeAll =
                     (!includeEditorBounds && !includeCharacterBounds && !includeInsertionMarker);
 
@@ -4713,6 +4715,10 @@ public class Editor {
             }
 
             imm.updateCursorAnchorInfo(mTextView, builder.build());
+
+            // Drop the immediate flag if any.
+            mInputMethodState.mUpdateCursorAnchorInfoMode &=
+                    ~InputConnection.CURSOR_UPDATE_IMMEDIATE;
         }
     }
 
@@ -7203,6 +7209,10 @@ public class Editor {
         boolean mSelectionModeChanged;
         boolean mContentChanged;
         int mChangedStart, mChangedEnd, mChangedDelta;
+        @InputConnection.CursorUpdateMode
+        int mUpdateCursorAnchorInfoMode;
+        @InputConnection.CursorUpdateFilter
+        int mUpdateCursorAnchorInfoFilter;
     }
 
     /**

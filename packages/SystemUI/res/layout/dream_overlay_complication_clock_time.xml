@@ -19,7 +19,7 @@
     android:id="@+id/time_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:fontFamily="@font/clock"
+    android:fontFamily="@*android:string/config_clockFontFamily"
     android:includeFontPadding="false"
     android:textColor="@android:color/white"
     android:format12Hour="h:mm"

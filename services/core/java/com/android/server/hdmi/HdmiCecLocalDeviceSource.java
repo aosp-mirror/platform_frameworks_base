@@ -82,7 +82,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
                 callback);
         if (action == null) {
             Slog.w(TAG, "Cannot initiate queryDisplayStatus");
-            invokeCallback(callback, HdmiControlManager.RESULT_EXCEPTION);
+            invokeCallback(callback, HdmiControlManager.POWER_STATUS_UNKNOWN);
             return;
         }
         addAndStartAction(action);

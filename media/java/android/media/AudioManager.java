@@ -4004,7 +4004,7 @@ public class AudioManager {
      * Timeout duration in ms when waiting on an external focus policy for the result for a
      * focus request
      */
-    private static final int EXT_FOCUS_POLICY_TIMEOUT_MS = 200;
+    private static final int EXT_FOCUS_POLICY_TIMEOUT_MS = 250;
 
     private static final String FOCUS_CLIENT_ID_STRING = "android_audio_focus_client_id";
 
@@ -4284,8 +4284,17 @@ public class AudioManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        if (status != AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY) {
+            // default path with no external focus policy
+            return status;
+        }
 
-        return handleExternalAudioPolicyWaitIfNeeded(clientFakeId, status);
+        BlockingFocusResultReceiver focusReceiver;
+        synchronized (mFocusRequestsLock) {
+            focusReceiver = addClientIdToFocusReceiverLocked(clientFakeId);
+        }
+
+        return handleExternalAudioPolicyWaitIfNeeded(clientFakeId, focusReceiver);
     }
 
     /**
@@ -4368,7 +4377,9 @@ public class AudioManager {
         }
 
         final String clientId = getIdForAudioFocusListener(afr.getOnAudioFocusChangeListener());
+        BlockingFocusResultReceiver focusReceiver;
         synchronized (mFocusRequestsLock) {
+
             try {
                 // TODO status contains result and generation counter for ext policy
                 status = service.requestAudioFocus(afr.getAudioAttributes(),
@@ -4383,29 +4394,30 @@ public class AudioManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+            if (status != AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY) {
+                // default path with no external focus policy
+                return status;
+            }
+            focusReceiver = addClientIdToFocusReceiverLocked(clientId);
         }
 
-        return handleExternalAudioPolicyWaitIfNeeded(clientId, status);
+        return handleExternalAudioPolicyWaitIfNeeded(clientId, focusReceiver);
+    }
+
+    @GuardedBy("mFocusRequestsLock")
+    private BlockingFocusResultReceiver addClientIdToFocusReceiverLocked(String clientId) {
+        BlockingFocusResultReceiver focusReceiver;
+        if (mFocusRequestsAwaitingResult == null) {
+            mFocusRequestsAwaitingResult =
+                    new HashMap<String, BlockingFocusResultReceiver>(1);
+        }
+        focusReceiver = new BlockingFocusResultReceiver(clientId);
+        mFocusRequestsAwaitingResult.put(clientId, focusReceiver);
+        return focusReceiver;
     }
 
     private @FocusRequestResult int handleExternalAudioPolicyWaitIfNeeded(String clientId,
-            @FocusRequestResult int results) {
-        if (results != AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY) {
-            // default path with no external focus policy
-            return results;
-        }
-
-        BlockingFocusResultReceiver focusReceiver;
-
-        synchronized (mFocusRequestsLock) {
-            if (mFocusRequestsAwaitingResult == null) {
-                mFocusRequestsAwaitingResult =
-                        new HashMap<String, BlockingFocusResultReceiver>(1);
-            }
-            focusReceiver = new BlockingFocusResultReceiver(clientId);
-            mFocusRequestsAwaitingResult.put(clientId, focusReceiver);
-        }
-
+            BlockingFocusResultReceiver focusReceiver) {
         focusReceiver.waitForResult(EXT_FOCUS_POLICY_TIMEOUT_MS);
         if (DEBUG && !focusReceiver.receivedResult()) {
             Log.e(TAG, "handleExternalAudioPolicyWaitIfNeeded"

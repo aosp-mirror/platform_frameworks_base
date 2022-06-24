@@ -1439,7 +1439,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
             int displayId, int requestUserId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame) {
         Arrays.fill(outActiveControls, null);
         int[] appOp = new int[1];
         final boolean isRoundedCornerOverlay = (attrs.privateFlags
@@ -1854,6 +1854,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
             outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
             getInsetsSourceControls(win, outActiveControls);
+
+            if (win.mLayoutAttached) {
+                outAttachedFrame.set(win.getParentWindow().getCompatFrame());
+            } else {
+                // Make this invalid which indicates a null attached frame.
+                outAttachedFrame.set(0, 0, -1, -1);
+            }
         }
 
         Binder.restoreCallingIdentity(origId);
@@ -8773,6 +8780,41 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to set layer tracing flags");
+            } finally {
+                if (data != null) {
+                    data.recycle();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Toggle active transaction tracing.
+     * Setting to true increases the buffer size for active debugging.
+     * Setting to false resets the buffer size and dumps the trace to file.
+     */
+    public void setActiveTransactionTracing(boolean active) {
+        if (!checkCallingPermission(
+                android.Manifest.permission.DUMP, "setActiveTransactionTracing()")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            Parcel data = null;
+            try {
+                IBinder sf = ServiceManager.getService("SurfaceFlinger");
+                if (sf != null) {
+                    data = Parcel.obtain();
+                    data.writeInterfaceToken("android.ui.ISurfaceComposer");
+                    data.writeInt(active ? 1 : 0);
+                    sf.transact(/* TRANSACTION_TRACE_CONTROL_CODE */ 1041, data,
+                            null, 0 /* flags */);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set transaction tracing");
             } finally {
                 if (data != null) {
                     data.recycle();

@@ -749,6 +749,11 @@ interface IWindowManager
     void setLayerTracingFlags(int flags);
 
     /**
+     * Toggle active SurfaceFlinger transaction tracing.
+     */
+    void setActiveTransactionTracing(boolean active);
+
+    /**
      * Forwards a scroll capture request to the appropriate window, if available.
      *
      * @param displayId the id of the display to target

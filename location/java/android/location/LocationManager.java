@@ -2394,8 +2394,8 @@ public class LocationManager {
      * @return true if the listener was successfully added
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      *
-     * @deprecated use {@link #registerGnssStatusCallback(GnssStatus.Callback)} instead. No longer
-     * supported in apps targeting S and above.
+     * @deprecated Use {@link #registerGnssStatusCallback(GnssStatus.Callback, Handler)} or {@link
+     * #registerGnssStatusCallback(Executor, GnssStatus.Callback)} instead.
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
@@ -2505,7 +2505,8 @@ public class LocationManager {
     /**
      * No-op method to keep backward-compatibility.
      *
-     * @deprecated Use {@link #addNmeaListener} instead.
+     * @deprecated Use {@link #addNmeaListener(OnNmeaMessageListener, Handler)} or {@link
+     * #addNmeaListener(Executor, OnNmeaMessageListener)} instead.
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
@@ -2666,6 +2667,13 @@ public class LocationManager {
      * while the {@link #GPS_PROVIDER} is enabled, and while the client app is in the foreground.
      *
      * <p>Not all GNSS chipsets support measurements updates, see {@link #getGnssCapabilities()}.
+     *
+     * <p class="caution">On Android R devices that have not yet upgraded to Android R QPR1, using
+     * this API will cause unavoidable crashes in the client application when GNSS measurements
+     * are received. If a client needs to receive GNSS measurements on Android R devices that have
+     * not been upgraded to QPR1, clients are instead encouraged to use
+     * <a href="https://developer.android.com/reference/androidx/core/location/LocationManagerCompat#registerGnssMeasurementsCallback(android.location.LocationManager,java.util.concurrent.Executor,android.location.GnssMeasurementsEvent.Callback)">LocationManagerCompat.registerGnssMeasurementsCallback()</a>
+     * from the compat libraries instead to avoid this crash.
      *
      * @param executor the executor that the callback runs on
      * @param callback the callback to register
