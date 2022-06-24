@@ -843,6 +843,7 @@ class LockSettingsStorage extends WatchableImpl {
 
         private synchronized void remove(int type, String key, int userId) {
             mCache.remove(mCacheKey.set(type, key, userId));
+            mVersion++;
         }
 
         private synchronized void put(int type, String key, Object value, int userId) {
