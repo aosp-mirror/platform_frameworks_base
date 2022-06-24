@@ -3126,8 +3126,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (callback == null) {
             return;
         }
-        final boolean mayWatchPackageName =
-                packageName != null && !filterAppAccessUnlocked(packageName);
+        final boolean mayWatchPackageName = packageName != null
+                && !filterAppAccessUnlocked(packageName, UserHandle.getUserId(callingUid));
         synchronized (this) {
             int switchOp = (op != AppOpsManager.OP_NONE) ? AppOpsManager.opToSwitch(op) : op;
 
@@ -3331,7 +3331,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             // When the caller is the system, it's possible that the packageName is the special
             // one (e.g., "root") which isn't actually existed.
             if (resolveUid(packageName) == uid
-                    || (isPackageExisted(packageName) && !filterAppAccessUnlocked(packageName))) {
+                    || (isPackageExisted(packageName)
+                            && !filterAppAccessUnlocked(packageName, UserHandle.getUserId(uid)))) {
                 return AppOpsManager.MODE_ALLOWED;
             }
             return AppOpsManager.MODE_ERRORED;
@@ -3350,10 +3351,10 @@ public class AppOpsService extends IAppOpsService.Stub {
      *
      * NOTE: This must not be called while synchronized on {@code this} to avoid dead locks
      */
-    private boolean filterAppAccessUnlocked(String packageName) {
+    private boolean filterAppAccessUnlocked(String packageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         return LocalServices.getService(PackageManagerInternal.class)
-                .filterAppAccess(packageName, callingUid, UserHandle.getUserId(callingUid));
+                .filterAppAccess(packageName, callingUid, userId);
     }
 
     @Override
