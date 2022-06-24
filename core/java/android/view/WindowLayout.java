@@ -66,14 +66,15 @@ public class WindowLayout {
     public void computeFrames(WindowManager.LayoutParams attrs, InsetsState state,
             Rect displayCutoutSafe, Rect windowBounds, @WindowingMode int windowingMode,
             int requestedWidth, int requestedHeight, InsetsVisibilities requestedVisibilities,
-            Rect attachedWindowFrame, float compatScale, ClientWindowFrames outFrames) {
+            float compatScale, ClientWindowFrames frames) {
         final int type = attrs.type;
         final int fl = attrs.flags;
         final int pfl = attrs.privateFlags;
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) == FLAG_LAYOUT_IN_SCREEN;
-        final Rect outDisplayFrame = outFrames.displayFrame;
-        final Rect outParentFrame = outFrames.parentFrame;
-        final Rect outFrame = outFrames.frame;
+        final Rect attachedWindowFrame = frames.attachedFrame;
+        final Rect outDisplayFrame = frames.displayFrame;
+        final Rect outParentFrame = frames.parentFrame;
+        final Rect outFrame = frames.frame;
 
         // Compute bounds restricted by insets
         final Insets insets = state.calculateInsets(windowBounds, attrs.getFitInsetsTypes(),
@@ -104,7 +105,7 @@ public class WindowLayout {
         final DisplayCutout cutout = state.getDisplayCutout();
         final Rect displayCutoutSafeExceptMaybeBars = mTempDisplayCutoutSafeExceptMaybeBarsRect;
         displayCutoutSafeExceptMaybeBars.set(displayCutoutSafe);
-        outFrames.isParentFrameClippedByDisplayCutout = false;
+        frames.isParentFrameClippedByDisplayCutout = false;
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS && !cutout.isEmpty()) {
             // Ensure that windows with a non-ALWAYS display cutout mode are laid out in
             // the cutout safe zone.
@@ -167,7 +168,7 @@ public class WindowLayout {
             if (!attachedInParent && !floatingInScreenWindow) {
                 mTempRect.set(outParentFrame);
                 outParentFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
-                outFrames.isParentFrameClippedByDisplayCutout = !mTempRect.equals(outParentFrame);
+                frames.isParentFrameClippedByDisplayCutout = !mTempRect.equals(outParentFrame);
             }
             outDisplayFrame.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
         }
@@ -287,12 +288,9 @@ public class WindowLayout {
             }
         }
 
-        if (DEBUG) Log.d(TAG, "computeWindowFrames " + attrs.getTitle()
-                + " outFrames=" + outFrames
+        if (DEBUG) Log.d(TAG, "computeFrames " + attrs.getTitle()
+                + " frames=" + frames
                 + " windowBounds=" + windowBounds.toShortString()
-                + " attachedWindowFrame=" + (attachedWindowFrame != null
-                        ? attachedWindowFrame.toShortString()
-                        : "null")
                 + " requestedWidth=" + requestedWidth
                 + " requestedHeight=" + requestedHeight
                 + " compatScale=" + compatScale

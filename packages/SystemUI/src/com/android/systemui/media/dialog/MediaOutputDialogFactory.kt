@@ -19,6 +19,7 @@ package com.android.systemui.media.dialog
 import android.content.Context
 import android.media.AudioManager
 import android.media.session.MediaSessionManager
+import android.os.PowerExemptionManager
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
@@ -45,7 +46,8 @@ class MediaOutputDialogFactory @Inject constructor(
     private val uiEventLogger: UiEventLogger,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
-    private val audioManager: AudioManager
+    private val audioManager: AudioManager,
+    private val powerExemptionManager: PowerExemptionManager
 ) {
     companion object {
         private const val INTERACTION_JANK_TAG = "media_output"
@@ -60,8 +62,8 @@ class MediaOutputDialogFactory @Inject constructor(
         val controller = MediaOutputController(
             context, packageName,
             mediaSessionManager, lbm, starter, notifCollection,
-            dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager
-        )
+            dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager,
+            powerExemptionManager)
         val dialog =
             MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller, uiEventLogger)
         mediaOutputDialog = dialog

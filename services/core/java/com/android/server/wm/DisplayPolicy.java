@@ -1523,13 +1523,14 @@ public class DisplayPolicy {
      */
     void simulateLayoutDisplay(DisplayFrames displayFrames) {
         final InsetsStateController controller = mDisplayContent.getInsetsStateController();
+        sTmpClientFrames.attachedFrame = null;
         for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
             final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
             mWindowLayout.computeFrames(win.mAttrs.forRotation(displayFrames.mRotation),
                     displayFrames.mInsetsState, displayFrames.mDisplayCutoutSafe,
                     displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
-                    UNSPECIFIED_LENGTH, win.getRequestedVisibilities(),
-                    null /* attachedWindowFrame */, win.mGlobalScale, sTmpClientFrames);
+                    UNSPECIFIED_LENGTH, win.getRequestedVisibilities(), win.mGlobalScale,
+                    sTmpClientFrames);
             final SparseArray<InsetsSource> sources = win.getProvidedInsetsSources();
             final InsetsState state = displayFrames.mInsetsState;
             for (int index = sources.size() - 1; index >= 0; index--) {
@@ -1541,13 +1542,14 @@ public class DisplayPolicy {
     }
 
     void updateInsetsSourceFramesExceptIme(DisplayFrames displayFrames) {
+        sTmpClientFrames.attachedFrame = null;
         for (int i = mInsetsSourceWindowsExceptIme.size() - 1; i >= 0; i--) {
             final WindowState win = mInsetsSourceWindowsExceptIme.valueAt(i);
             mWindowLayout.computeFrames(win.mAttrs.forRotation(displayFrames.mRotation),
                     displayFrames.mInsetsState, displayFrames.mDisplayCutoutSafe,
                     displayFrames.mUnrestricted, win.getWindowingMode(), UNSPECIFIED_LENGTH,
-                    UNSPECIFIED_LENGTH, win.getRequestedVisibilities(),
-                    null /* attachedWindowFrame */, win.mGlobalScale, sTmpClientFrames);
+                    UNSPECIFIED_LENGTH, win.getRequestedVisibilities(), win.mGlobalScale,
+                    sTmpClientFrames);
             win.updateSourceFrame(sTmpClientFrames.frame);
         }
     }
@@ -1577,7 +1579,7 @@ public class DisplayPolicy {
         displayFrames = win.getDisplayFrames(displayFrames);
 
         final WindowManager.LayoutParams attrs = win.mAttrs.forRotation(displayFrames.mRotation);
-        final Rect attachedWindowFrame = attached != null ? attached.getFrame() : null;
+        sTmpClientFrames.attachedFrame = attached != null ? attached.getFrame() : null;
 
         // If this window has different LayoutParams for rotations, we cannot trust its requested
         // size. Because it might have not sent its requested size for the new rotation.
@@ -1587,8 +1589,7 @@ public class DisplayPolicy {
 
         mWindowLayout.computeFrames(attrs, win.getInsetsState(), displayFrames.mDisplayCutoutSafe,
                 win.getBounds(), win.getWindowingMode(), requestedWidth, requestedHeight,
-                win.getRequestedVisibilities(), attachedWindowFrame, win.mGlobalScale,
-                sTmpClientFrames);
+                win.getRequestedVisibilities(), win.mGlobalScale, sTmpClientFrames);
 
         win.setFrames(sTmpClientFrames, win.mRequestedWidth, win.mRequestedHeight);
     }

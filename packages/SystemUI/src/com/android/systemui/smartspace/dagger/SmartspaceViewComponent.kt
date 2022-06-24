@@ -56,6 +56,8 @@ interface SmartspaceViewComponent {
         ):
                 BcSmartspaceDataPlugin.SmartspaceView {
             val ssView = plugin.getView(parent)
+            // Currently, this is only used to provide SmartspaceView on Dream surface.
+            ssView.setIsDreaming(true)
             ssView.registerDataProvider(plugin)
 
             ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {

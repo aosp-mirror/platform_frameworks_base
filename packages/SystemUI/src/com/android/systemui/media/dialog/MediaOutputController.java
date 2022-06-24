@@ -44,6 +44,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.IBinder;
+import android.os.PowerExemptionManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -101,6 +102,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String PAGE_CONNECTED_DEVICES_KEY =
             "top_level_connected_devices";
+    private static final long ALLOWLIST_DURATION_MS = 20000;
+    private static final String ALLOWLIST_REASON = "mediaoutput:remote_transfer";
+
     private final String mPackageName;
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
@@ -114,6 +118,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
     final List<MediaDevice> mCachedMediaDevices = new CopyOnWriteArrayList<>();
     private final AudioManager mAudioManager;
+    private final PowerExemptionManager mPowerExemptionManager;
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager;
     private final Map<String, Integer> mNearbyDeviceInfoMap = new ConcurrentHashMap<>();
 
@@ -147,7 +152,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             CommonNotifCollection notifCollection,
             DialogLaunchAnimator dialogLaunchAnimator,
             Optional<NearbyMediaDevicesManager> nearbyMediaDevicesManagerOptional,
-            AudioManager audioManager) {
+            AudioManager audioManager,
+            PowerExemptionManager powerExemptionManager) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -155,6 +161,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mActivityStarter = starter;
         mNotifCollection = notifCollection;
         mAudioManager = audioManager;
+        mPowerExemptionManager = powerExemptionManager;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
@@ -776,7 +783,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
                 mNotifCollection, mDialogLaunchAnimator, Optional.of(mNearbyMediaDevicesManager),
-                mAudioManager);
+                mAudioManager, mPowerExemptionManager);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
         mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
@@ -820,6 +827,17 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             return;
         }
         broadcast.setBroadcastCode(broadcastCode.getBytes(StandardCharsets.UTF_8));
+    }
+
+    void setTemporaryAllowListExceptionIfNeeded(MediaDevice targetDevice) {
+        if (mPowerExemptionManager == null || mPackageName == null) {
+            Log.w(TAG, "powerExemptionManager or package name is null");
+            return;
+        }
+        mPowerExemptionManager.addToTemporaryAllowList(mPackageName,
+                PowerExemptionManager.REASON_MEDIA_NOTIFICATION_TRANSFER,
+                ALLOWLIST_REASON,
+                ALLOWLIST_DURATION_MS);
     }
 
     String getBroadcastMetadata() {
