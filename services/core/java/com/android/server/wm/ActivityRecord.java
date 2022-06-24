@@ -7788,11 +7788,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 newParentConfiguration.windowConfiguration.getWindowingMode();
         final boolean isFixedOrientationLetterboxAllowed =
                 parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
-                        || parentWindowingMode == WINDOWING_MODE_FULLSCREEN;
+                        || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
+                        // Switching from PiP to fullscreen.
+                        || (parentWindowingMode == WINDOWING_MODE_PINNED
+                                && resolvedConfig.windowConfiguration.getWindowingMode()
+                                        == WINDOWING_MODE_FULLSCREEN);
         // TODO(b/181207944): Consider removing the if condition and always run
         // resolveFixedOrientationConfiguration() since this should be applied for all cases.
         if (isFixedOrientationLetterboxAllowed) {
-            resolveFixedOrientationConfiguration(newParentConfiguration, parentWindowingMode);
+            resolveFixedOrientationConfiguration(newParentConfiguration);
         }
 
         if (mCompatDisplayInsets != null) {
@@ -8084,8 +8088,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * <p>If letterboxed due to fixed orientation then aspect ratio restrictions are also applied
      * in this method.
      */
-    private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig,
-            int windowingMode) {
+    private void resolveFixedOrientationConfiguration(@NonNull Configuration newParentConfig) {
         mLetterboxBoundsForFixedOrientationAndAspectRatio = null;
         mIsEligibleForFixedOrientationLetterbox = false;
         final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
@@ -8103,11 +8106,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Ignore orientation request for activity in ActivityEmbedding split.
         final TaskFragment organizedTf = getOrganizedTaskFragment();
         if (organizedTf != null && !organizedTf.fillsParent()) {
-            return;
-        }
-        if (windowingMode == WINDOWING_MODE_PINNED) {
-            // PiP bounds have higher priority than the requested orientation. Otherwise the
-            // activity may be squeezed into a small piece.
             return;
         }
 
