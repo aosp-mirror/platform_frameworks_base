@@ -109,41 +109,6 @@ interface IWindowSession {
             out InsetsState insetsState, out InsetsSourceControl[] activeControls,
             out Bundle bundle);
 
-    /**
-     * Changes the view visibility and the attributes of a window. This should only be called when
-     * the visibility of the root view is changed. This returns a valid surface if the root view is
-     * visible. This also returns the latest information for the caller to compute its window frame.
-     *
-     * @param window The window being updated.
-     * @param attrs If non-null, new attributes to apply to the window.
-     * @param viewVisibility Window root view's visibility.
-     * @param outMergedConfiguration New config container that holds global, override and merged
-     * config for window, if it is now becoming visible and the merged configuration has changed
-     * since it was last displayed.
-     * @param outSurfaceControl Object in which is placed the new display surface.
-     * @param outInsetsState The current insets state in the system.
-     * @param outActiveControls The insets source controls for the caller to override the insets
-     * state in the system.
-     *
-     * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
-     */
-    int updateVisibility(IWindow window, in WindowManager.LayoutParams attrs, int viewVisibility,
-            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState outInsetsState, out InsetsSourceControl[] outActiveControls);
-
-    /**
-     * Reports the layout results and the attributes of a window to the server.
-     *
-     * @param window The window being reported.
-     * @param attrs If non-null, new attributes to apply to the window.
-     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
-     * @param clientFrames the window frames computed by the client.
-     * @param requestedWidth The width the window wants to be.
-     * @param requestedHeight The height the window wants to be.
-     */
-    oneway void updateLayout(IWindow window, in WindowManager.LayoutParams attrs, int flags,
-            in ClientWindowFrames clientFrames, int requestedWidth, int requestedHeight);
-
     /*
      * Notify the window manager that an application is relaunching and
      * windows should be prepared for replacement.
