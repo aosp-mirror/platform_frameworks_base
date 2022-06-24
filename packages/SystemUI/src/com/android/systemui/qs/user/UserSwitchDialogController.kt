@@ -95,9 +95,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
                         getButton(BUTTON_NEUTRAL)
                     )
 
-                    if (controller == null) {
-                        dismiss()
-                    }
+                    dismiss()
 
                     activityStarter.postStartActivityDismissingKeyguard(
                         USER_SETTINGS_INTENT, 0, controller
