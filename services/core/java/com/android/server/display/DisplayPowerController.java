@@ -461,6 +461,18 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private boolean mIsRbcActive;
 
+    // Whether there's a callback to tell listeners the display has changed scheduled to run. When
+    // true it implies a wakelock is being held to guarantee the update happens before we collapse
+    // into suspend and so needs to be cleaned up if the thread is exiting.
+    // Should only be accessed on the Handler thread.
+    private boolean mOnStateChangedPending;
+
+    // Count of proximity messages currently on this DPC's Handler. Used to keep track of how many
+    // suspend blocker acquisitions are pending when shutting down this DPC.
+    // Should only be accessed on the Handler thread.
+    private int mOnProximityPositiveMessages;
+    private int mOnProximityNegativeMessages;
+
     // Animators.
     private ObjectAnimator mColorFadeOnAnimator;
     private ObjectAnimator mColorFadeOffAnimator;
@@ -1091,10 +1103,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mHbmController.stop();
         mBrightnessThrottler.stop();
         mHandler.removeCallbacksAndMessages(null);
+
+        // Release any outstanding wakelocks we're still holding because of pending messages.
         if (mUnfinishedBusiness) {
             mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdUnfinishedBusiness);
             mUnfinishedBusiness = false;
         }
+        if (mOnStateChangedPending) {
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdOnStateChanged);
+            mOnStateChangedPending = false;
+        }
+        for (int i = 0; i < mOnProximityPositiveMessages; i++) {
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxPositive);
+        }
+        mOnProximityPositiveMessages = 0;
+        for (int i = 0; i < mOnProximityNegativeMessages; i++) {
+            mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxNegative);
+        }
+        mOnProximityNegativeMessages = 0;
 
         final float brightness = mPowerState != null
             ? mPowerState.getScreenBrightness()
@@ -2248,8 +2274,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void sendOnStateChangedWithWakelock() {
-        mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdOnStateChanged);
-        mHandler.post(mOnStateChangedRunnable);
+        if (!mOnStateChangedPending) {
+            mOnStateChangedPending = true;
+            mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdOnStateChanged);
+            mHandler.post(mOnStateChangedRunnable);
+        }
     }
 
     private void logDisplayPolicyChanged(int newPolicy) {
@@ -2408,6 +2437,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final Runnable mOnStateChangedRunnable = new Runnable() {
         @Override
         public void run() {
+            mOnStateChangedPending = false;
             mCallbacks.onStateChanged();
             mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdOnStateChanged);
         }
@@ -2416,17 +2446,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void sendOnProximityPositiveWithWakelock() {
         mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxPositive);
         mHandler.post(mOnProximityPositiveRunnable);
+        mOnProximityPositiveMessages++;
     }
 
     private final Runnable mOnProximityPositiveRunnable = new Runnable() {
         @Override
         public void run() {
+            mOnProximityPositiveMessages--;
             mCallbacks.onProximityPositive();
             mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxPositive);
         }
     };
 
     private void sendOnProximityNegativeWithWakelock() {
+        mOnProximityNegativeMessages++;
         mCallbacks.acquireSuspendBlocker(mSuspendBlockerIdProxNegative);
         mHandler.post(mOnProximityNegativeRunnable);
     }
@@ -2434,6 +2467,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final Runnable mOnProximityNegativeRunnable = new Runnable() {
         @Override
         public void run() {
+            mOnProximityNegativeMessages--;
             mCallbacks.onProximityNegative();
             mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxNegative);
         }
@@ -2533,6 +2567,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mReportedToPolicy="
                 + reportedToPolicyToString(mReportedScreenStateToPolicy));
         pw.println("  mIsRbcActive=" + mIsRbcActive);
+        pw.println("  mOnStateChangePending=" + mOnStateChangedPending);
+        pw.println("  mOnProximityPositiveMessages=" + mOnProximityPositiveMessages);
+        pw.println("  mOnProximityNegativeMessages=" + mOnProximityNegativeMessages);
 
         if (mScreenBrightnessRampAnimator != null) {
             pw.println("  mScreenBrightnessRampAnimator.isAnimating()="
