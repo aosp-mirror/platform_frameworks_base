@@ -7563,10 +7563,15 @@ public class AppOpsManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
     public @NonNull List<AppOpsManager.PackageOps> getPackagesForOps(@Nullable String[] ops) {
-        final int opCount = ops.length;
-        final int[] opCodes = new int[opCount];
-        for (int i = 0; i < opCount; i++) {
-            opCodes[i] = sOpStrToOp.get(ops[i]);
+        final int[] opCodes;
+        if (ops != null) {
+            final int opCount = ops.length;
+            opCodes = new int[opCount];
+            for (int i = 0; i < opCount; i++) {
+                opCodes[i] = sOpStrToOp.get(ops[i]);
+            }
+        } else {
+            opCodes = null;
         }
         final List<AppOpsManager.PackageOps> result = getPackagesForOps(opCodes);
         return (result != null) ? result : Collections.emptyList();
