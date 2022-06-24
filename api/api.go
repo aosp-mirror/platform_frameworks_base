@@ -155,6 +155,13 @@ func createMergedPublicAnnotationsFilegroup(ctx android.LoadHookContext, modules
 	ctx.CreateModule(android.FileGroupFactory, &props)
 }
 
+func createMergedSystemAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
+	props := fgProps{}
+	props.Name = proptools.StringPtr("all-modules-system-annotations")
+	props.Srcs = createSrcs(modules, "{.system.annotations.zip}")
+	ctx.CreateModule(android.FileGroupFactory, &props)
+}
+
 func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	// For the filtered api versions, we prune all APIs except art module's APIs. because
 	// 1) ART apis are available by default to all modules, while other module-to-module deps are
@@ -294,6 +301,7 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedFrameworkImpl(ctx, bootclasspath)
 
 	createMergedPublicAnnotationsFilegroup(ctx, bootclasspath)
+	createMergedSystemAnnotationsFilegroup(ctx, bootclasspath)
 
 	createFilteredApiVersions(ctx, bootclasspath)
 
