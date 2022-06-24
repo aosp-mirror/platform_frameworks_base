@@ -7007,10 +7007,6 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
-        <service android:name="com.android.server.timezone.TimeZoneUpdateIdler"
-                 android:permission="android.permission.BIND_JOB_SERVICE" >
-        </service>
-
         <service android:name="com.android.server.usage.UsageStatsIdleService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
