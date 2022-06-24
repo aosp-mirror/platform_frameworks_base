@@ -46,7 +46,7 @@ oneway interface IInputMethod {
     void unbindInput();
 
     void startInput(in IBinder startInputToken, in IRemoteInputConnection inputConnection,
-            in EditorInfo attribute, boolean restarting, int navigationBarFlags,
+            in EditorInfo editorInfo, boolean restarting, int navigationBarFlags,
             in ImeOnBackInvokedDispatcher imeDispatcher);
 
     void onNavButtonFlagsChanged(int navButtonFlags);

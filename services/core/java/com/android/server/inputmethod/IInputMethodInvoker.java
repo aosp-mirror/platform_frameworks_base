@@ -149,10 +149,11 @@ final class IInputMethodInvoker {
 
     @AnyThread
     void startInput(IBinder startInputToken, IRemoteInputConnection inputConnection,
-            EditorInfo attribute, boolean restarting, @InputMethodNavButtonFlags int navButtonFlags,
+            EditorInfo editorInfo, boolean restarting,
+            @InputMethodNavButtonFlags int navButtonFlags,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         try {
-            mTarget.startInput(startInputToken, inputConnection, attribute, restarting,
+            mTarget.startInput(startInputToken, inputConnection, editorInfo, restarting,
                     navButtonFlags, imeDispatcher);
         } catch (RemoteException e) {
             logRemoteException(e);

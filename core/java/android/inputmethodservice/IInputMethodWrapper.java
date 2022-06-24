@@ -351,7 +351,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void startInput(IBinder startInputToken, IRemoteInputConnection inputConnection,
-            EditorInfo attribute, boolean restarting,
+            EditorInfo editorInfo, boolean restarting,
             @InputMethodNavButtonFlags int navButtonFlags,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
         if (mCancellationGroup == null) {
@@ -361,7 +361,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = startInputToken;
         args.arg2 = inputConnection;
-        args.arg3 = attribute;
+        args.arg3 = editorInfo;
         args.argi1 = restarting ? 1 : 0;
         args.argi2 = navButtonFlags;
         args.arg4 = imeDispatcher;
