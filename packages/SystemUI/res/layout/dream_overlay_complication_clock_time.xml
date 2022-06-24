@@ -22,8 +22,8 @@
     android:fontFamily="@font/clock"
     android:includeFontPadding="false"
     android:textColor="@android:color/white"
-    android:format12Hour="h:mm"
-    android:format24Hour="kk:mm"
+    android:format12Hour="@string/dream_time_complication_12_hr_time_format"
+    android:format24Hour="@string/dream_time_complication_24_hr_time_format"
     android:shadowColor="@color/keyguard_shadow_color"
     android:shadowRadius="?attr/shadowRadius"
     android:textSize="@dimen/dream_overlay_complication_clock_time_text_size"/>

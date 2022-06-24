@@ -2581,4 +2581,12 @@
     <!-- [CHAR LIMIT=NONE] Le audio broadcast dialog, media app is unknown -->
     <string name="bt_le_audio_broadcast_dialog_unknown_name">Unknown</string>
 
+    <!-- Date format for the Dream Date Complication [CHAR LIMIT=NONE] -->
+    <string name="dream_date_complication_date_format">EEE, MMM d</string>
+
+    <!-- Time format for the Dream Time Complication for 12-hour time format [CHAR LIMIT=NONE] -->
+    <string name="dream_time_complication_12_hr_time_format">h:mm</string>
+
+    <!-- Time format for the Dream Time Complication for 24-hour time format [CHAR LIMIT=NONE] -->
+    <string name="dream_time_complication_24_hr_time_format">kk:mm</string>
 </resources>
