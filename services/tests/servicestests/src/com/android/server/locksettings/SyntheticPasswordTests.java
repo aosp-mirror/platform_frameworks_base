@@ -567,6 +567,13 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         }
     }
 
+    @Test
+    public void testHexEncodingIsUppercase() {
+        final byte[] raw = new byte[] { (byte)0xAB, (byte)0xCD, (byte)0xEF };
+        final byte[] expected = new byte[] { 'A', 'B', 'C', 'D', 'E', 'F' };
+        assertArrayEquals(expected, SyntheticPasswordManager.bytesToHex(raw));
+    }
+
     // b/62213311
     //TODO: add non-migration work profile case, and unify/un-unify transition.
     //TODO: test token after user resets password

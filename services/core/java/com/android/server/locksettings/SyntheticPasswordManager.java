@@ -272,9 +272,8 @@ public class SyntheticPasswordManager {
          * AuthenticationToken.mSyntheticPassword for details on what each block means.
          */
         private void recreate(byte[] escrowSplit0, byte[] escrowSplit1) {
-            mSyntheticPassword = String.valueOf(HexEncoding.encode(
-                    SyntheticPasswordCrypto.personalisedHash(
-                            PERSONALIZATION_SP_SPLIT, escrowSplit0, escrowSplit1))).getBytes();
+            mSyntheticPassword = bytesToHex(SyntheticPasswordCrypto.personalisedHash(
+                    PERSONALIZATION_SP_SPLIT, escrowSplit0, escrowSplit1));
         }
 
         /**
@@ -1415,18 +1414,9 @@ public class SyntheticPasswordManager {
         return result;
     }
 
-    protected static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
-    private static byte[] bytesToHex(byte[] bytes) {
-        if (bytes == null) {
-            return "null".getBytes();
-        }
-        byte[] hexBytes = new byte[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexBytes[j * 2] = HEX_ARRAY[v >>> 4];
-            hexBytes[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return hexBytes;
+    @VisibleForTesting
+    static byte[] bytesToHex(byte[] bytes) {
+        return HexEncoding.encodeToString(bytes).getBytes();
     }
 
     /**
