@@ -1482,8 +1482,6 @@ public class Dialog implements DialogInterface, Window.Callback,
     /**
      * Returns the {@link OnBackInvokedDispatcher} instance associated with the window that this
      * dialog is attached to.
-     *
-     * Returns null if the dialog is not attached to a window with a decor.
      */
     @NonNull
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {

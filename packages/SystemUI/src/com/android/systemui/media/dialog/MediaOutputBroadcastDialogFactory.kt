@@ -19,6 +19,7 @@ package com.android.systemui.media.dialog
 import android.content.Context
 import android.media.AudioManager
 import android.media.session.MediaSessionManager
+import android.os.PowerExemptionManager
 import android.view.View
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothManager
@@ -43,7 +44,8 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
     private val uiEventLogger: UiEventLogger,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
-    private val audioManager: AudioManager
+    private val audioManager: AudioManager,
+    private val powerExemptionManager: PowerExemptionManager
 ) {
     var mediaOutputBroadcastDialog: MediaOutputBroadcastDialog? = null
 
@@ -54,7 +56,8 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
 
         val controller = MediaOutputController(context, packageName,
                 mediaSessionManager, lbm, starter, notifCollection,
-                dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager)
+                dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager,
+                powerExemptionManager)
         val dialog =
                 MediaOutputBroadcastDialog(context, aboveStatusBar, broadcastSender, controller)
         mediaOutputBroadcastDialog = dialog
