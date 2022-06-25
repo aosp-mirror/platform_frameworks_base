@@ -20,5 +20,5 @@
     style="@style/clock_subtitle"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:format12Hour="EEE, MMM d"
-    android:format24Hour="EEE, MMM d"/>
+    android:format12Hour="@string/dream_date_complication_date_format"
+    android:format24Hour="@string/dream_date_complication_date_format"/>
