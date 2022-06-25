@@ -46,7 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.EventLogTags;
-import com.android.server.display.DisplayPowerController.BrightnessEvent;
+import com.android.server.display.brightness.BrightnessEvent;
 
 import java.io.PrintWriter;
 
@@ -337,14 +337,15 @@ class AutomaticBrightnessController {
 
     float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
         if (brightnessEvent != null) {
-            brightnessEvent.lux =
-                    mAmbientLuxValid ? mAmbientLux : PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            brightnessEvent.preThresholdLux = mPreThresholdLux;
-            brightnessEvent.preThresholdBrightness = mPreThresholdBrightness;
-            brightnessEvent.recommendedBrightness = mScreenAutoBrightness;
-            brightnessEvent.flags |= (!mAmbientLuxValid ? BrightnessEvent.FLAG_INVALID_LUX : 0)
+            brightnessEvent.setLux(
+                    mAmbientLuxValid ? mAmbientLux : PowerManager.BRIGHTNESS_INVALID_FLOAT);
+            brightnessEvent.setPreThresholdLux(mPreThresholdLux);
+            brightnessEvent.setPreThresholdBrightness(mPreThresholdBrightness);
+            brightnessEvent.setRecommendedBrightness(mScreenAutoBrightness);
+            brightnessEvent.setFlags(brightnessEvent.getFlags()
+                    | (!mAmbientLuxValid ? BrightnessEvent.FLAG_INVALID_LUX : 0)
                     | (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE
-                        ? BrightnessEvent.FLAG_DOZE_SCALE : 0);
+                        ? BrightnessEvent.FLAG_DOZE_SCALE : 0));
         }
 
         if (!mAmbientLuxValid) {
