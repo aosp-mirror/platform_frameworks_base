@@ -1212,7 +1212,8 @@ public class DisplayPolicy {
                 break;
             default:
                 if (attrs.providedInsets != null) {
-                    for (InsetsFrameProvider provider : attrs.providedInsets) {
+                    for (int i = attrs.providedInsets.length - 1; i >= 0; i--) {
+                        final InsetsFrameProvider provider = attrs.providedInsets[i];
                         switch (provider.type) {
                             case ITYPE_STATUS_BAR:
                                 mStatusBarAlt = win;
@@ -1231,21 +1232,29 @@ public class DisplayPolicy {
                                 mExtraNavBarAltPosition = getAltBarPosition(attrs);
                                 break;
                         }
+                        // The index of the provider and corresponding insets types cannot change at
+                        // runtime as ensured in WMS. Make use of the index in the provider directly
+                        // to access the latest provided size at runtime.
+                        final int index = i;
                         final TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider =
                                 provider.insetsSize != null
                                         ? (displayFrames, windowContainer, inOutFrame) -> {
                                             inOutFrame.inset(win.mGivenContentInsets);
+                                            final InsetsFrameProvider ifp =
+                                                    win.mAttrs.forRotation(displayFrames.mRotation)
+                                                            .providedInsets[index];
                                             calculateInsetsFrame(displayFrames, windowContainer,
-                                                    inOutFrame, provider.source,
-                                                    provider.insetsSize);
+                                                    inOutFrame, ifp.source, ifp.insetsSize);
                                         } : null;
                         final TriConsumer<DisplayFrames, WindowContainer, Rect> imeFrameProvider =
                                 provider.imeInsetsSize != null
                                         ? (displayFrames, windowContainer, inOutFrame) -> {
                                             inOutFrame.inset(win.mGivenContentInsets);
+                                            final InsetsFrameProvider ifp =
+                                                    win.mAttrs.forRotation(displayFrames.mRotation)
+                                                            .providedInsets[index];
                                             calculateInsetsFrame(displayFrames, windowContainer,
-                                                    inOutFrame, provider.source,
-                                                    provider.imeInsetsSize);
+                                                    inOutFrame, ifp.source, ifp.imeInsetsSize);
                                         } : null;
                         mDisplayContent.setInsetProvider(provider.type, win, frameProvider,
                                 imeFrameProvider);
@@ -1256,14 +1265,14 @@ public class DisplayPolicy {
         }
     }
 
-    private void calculateInsetsFrame(DisplayFrames df, WindowContainer coutainer, Rect inOutFrame,
+    private void calculateInsetsFrame(DisplayFrames df, WindowContainer container, Rect inOutFrame,
             int source, Insets insetsSize) {
         if (source == InsetsFrameProvider.SOURCE_DISPLAY) {
             inOutFrame.set(df.mUnrestricted);
         } else if (source == InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS) {
-            inOutFrame.set(coutainer.getBounds());
+            inOutFrame.set(container.getBounds());
         }
-        if (insetsSize == null || insetsSize.equals(Insets.NONE)) {
+        if (insetsSize == null) {
             return;
         }
         // Only one side of the provider shall be applied. Check in the order of left - top -
@@ -1276,6 +1285,8 @@ public class DisplayPolicy {
             inOutFrame.left = inOutFrame.right - insetsSize.right;
         } else if (insetsSize.bottom != 0) {
             inOutFrame.top = inOutFrame.bottom - insetsSize.bottom;
+        } else {
+            inOutFrame.setEmpty();
         }
     }
 

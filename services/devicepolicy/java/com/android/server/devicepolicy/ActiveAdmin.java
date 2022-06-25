@@ -315,8 +315,6 @@ class ActiveAdmin {
     public String mOrganizationId;
     public String mEnrollmentSpecificId;
     public boolean mAdminCanGrantSensorsPermissions;
-    public boolean mPreferentialNetworkServiceEnabled =
-            DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
     public List<PreferentialNetworkServiceConfig> mPreferentialNetworkServiceConfigs =
             List.of(PreferentialNetworkServiceConfig.DEFAULT);
 
@@ -848,15 +846,15 @@ class ActiveAdmin {
             } else if (TAG_ALWAYS_ON_VPN_LOCKDOWN.equals(tag)) {
                 mAlwaysOnVpnLockdown = parser.getAttributeBoolean(null, ATTR_VALUE, false);
             } else if (TAG_PREFERENTIAL_NETWORK_SERVICE_ENABLED.equals(tag)) {
-                mPreferentialNetworkServiceEnabled = parser.getAttributeBoolean(null, ATTR_VALUE,
+                boolean preferentialNetworkServiceEnabled = parser.getAttributeBoolean(null,
+                        ATTR_VALUE,
                         DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT);
-                if (mPreferentialNetworkServiceEnabled) {
+                if (preferentialNetworkServiceEnabled) {
                     PreferentialNetworkServiceConfig.Builder configBuilder =
                             new PreferentialNetworkServiceConfig.Builder();
-                    configBuilder.setEnabled(mPreferentialNetworkServiceEnabled);
+                    configBuilder.setEnabled(preferentialNetworkServiceEnabled);
                     configBuilder.setNetworkId(NET_ENTERPRISE_ID_1);
                     mPreferentialNetworkServiceConfigs = List.of(configBuilder.build());
-                    mPreferentialNetworkServiceEnabled = false;
                 }
             } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
                 mCommonCriteriaMode = parser.getAttributeBoolean(null, ATTR_VALUE, false);
@@ -1273,9 +1271,6 @@ class ActiveAdmin {
 
         pw.print("mAlwaysOnVpnLockdown=");
         pw.println(mAlwaysOnVpnLockdown);
-
-        pw.print("mPreferentialNetworkServiceEnabled=");
-        pw.println(mPreferentialNetworkServiceEnabled);
 
         pw.print("mCommonCriteriaMode=");
         pw.println(mCommonCriteriaMode);

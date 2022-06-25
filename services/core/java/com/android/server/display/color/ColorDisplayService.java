@@ -956,6 +956,8 @@ public final class ColorDisplayService extends SystemService {
                         R.array.config_availableColorModes);
                 if (availableColorModes.length > 0) {
                     colorMode = availableColorModes[0];
+                } else {
+                    colorMode = NOT_SET;
                 }
             }
         }

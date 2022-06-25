@@ -64,7 +64,6 @@ public class KeyguardServiceDelegate {
             reset();
         }
         boolean showing;
-        boolean showingAndNotOccluded;
         boolean inputRestricted;
         volatile boolean occluded;
         boolean secure;
@@ -83,7 +82,7 @@ public class KeyguardServiceDelegate {
             // the event something checks before the service is actually started.
             // KeyguardService itself should default to this state until the real state is known.
             showing = true;
-            showingAndNotOccluded = true;
+            occluded = false;
             secure = true;
             deviceHasKeyguard = true;
             enabled = true;
@@ -148,7 +147,6 @@ public class KeyguardServiceDelegate {
                 Context.BIND_AUTO_CREATE, mHandler, UserHandle.SYSTEM)) {
             Log.v(TAG, "*** Keyguard: can't bind to " + keyguardComponent);
             mKeyguardState.showing = false;
-            mKeyguardState.showingAndNotOccluded = false;
             mKeyguardState.secure = false;
             synchronized (mKeyguardState) {
                 // TODO: Fix synchronisation model in this class. The other state in this class
@@ -440,7 +438,6 @@ public class KeyguardServiceDelegate {
         pw.println(prefix + TAG);
         prefix += "  ";
         pw.println(prefix + "showing=" + mKeyguardState.showing);
-        pw.println(prefix + "showingAndNotOccluded=" + mKeyguardState.showingAndNotOccluded);
         pw.println(prefix + "inputRestricted=" + mKeyguardState.inputRestricted);
         pw.println(prefix + "occluded=" + mKeyguardState.occluded);
         pw.println(prefix + "secure=" + mKeyguardState.secure);

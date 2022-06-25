@@ -16,21 +16,31 @@
 
 package com.android.server.display;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.display.BrightnessInfo;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Temperature;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.util.Slog;
 
-import com.android.server.display.DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.DisplayDeviceConfig.BrightnessThrottlingData;
+import com.android.server.display.DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * This class monitors various conditions, such as skin temperature throttling status, and limits
@@ -44,28 +54,54 @@ class BrightnessThrottler {
 
     private final Injector mInjector;
     private final Handler mHandler;
-    private BrightnessThrottlingData mThrottlingData;
+    // We need a separate handler for unit testing. These two handlers are the same throughout the
+    // non-test code.
+    private final Handler mDeviceConfigHandler;
     private final Runnable mThrottlingChangeCallback;
     private final SkinThermalStatusObserver mSkinThermalStatusObserver;
+    private final DeviceConfigListener mDeviceConfigListener;
+    private final DeviceConfigInterface mDeviceConfig;
+
     private int mThrottlingStatus;
+    private BrightnessThrottlingData mThrottlingData;
+    private BrightnessThrottlingData mDdcThrottlingData;
     private float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
     private @BrightnessInfo.BrightnessMaxReason int mBrightnessMaxReason =
         BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
+    private String mUniqueDisplayId;
+
+    // The most recent string that has been set from DeviceConfig
+    private String mBrightnessThrottlingDataString;
+
+    // This is a collection of brightness throttling data that has been written as overrides from
+    // the DeviceConfig. This will always take priority over the display device config data.
+    private HashMap<String, BrightnessThrottlingData> mBrightnessThrottlingDataOverride =
+            new HashMap<>(1);
 
     BrightnessThrottler(Handler handler, BrightnessThrottlingData throttlingData,
-            Runnable throttlingChangeCallback) {
-        this(new Injector(), handler, throttlingData, throttlingChangeCallback);
+            Runnable throttlingChangeCallback, String uniqueDisplayId) {
+        this(new Injector(), handler, handler, throttlingData, throttlingChangeCallback,
+                uniqueDisplayId);
     }
 
-    BrightnessThrottler(Injector injector, Handler handler, BrightnessThrottlingData throttlingData,
-            Runnable throttlingChangeCallback) {
+    @VisibleForTesting
+    BrightnessThrottler(Injector injector, Handler handler, Handler deviceConfigHandler,
+            BrightnessThrottlingData throttlingData, Runnable throttlingChangeCallback,
+            String uniqueDisplayId) {
         mInjector = injector;
+
         mHandler = handler;
+        mDeviceConfigHandler = deviceConfigHandler;
         mThrottlingData = throttlingData;
+        mDdcThrottlingData = throttlingData;
         mThrottlingChangeCallback = throttlingChangeCallback;
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(mInjector, mHandler);
 
-        resetThrottlingData(mThrottlingData);
+        mUniqueDisplayId = uniqueDisplayId;
+        mDeviceConfig = injector.getDeviceConfig();
+        mDeviceConfigListener = new DeviceConfigListener();
+
+        resetThrottlingData(mThrottlingData, mUniqueDisplayId);
     }
 
     boolean deviceSupportsThrottling() {
@@ -86,7 +122,7 @@ class BrightnessThrottler {
 
     void stop() {
         mSkinThermalStatusObserver.stopObserving();
-
+        mDeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigListener);
         // We're asked to stop throttling, so reset brightness restrictions.
         mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
         mBrightnessMaxReason = BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
@@ -97,9 +133,19 @@ class BrightnessThrottler {
         mThrottlingStatus = THROTTLING_INVALID;
     }
 
-    void resetThrottlingData(BrightnessThrottlingData throttlingData) {
+    private void resetThrottlingData() {
+        resetThrottlingData(mDdcThrottlingData, mUniqueDisplayId);
+    }
+
+    void resetThrottlingData(BrightnessThrottlingData throttlingData, String displayId) {
         stop();
-        mThrottlingData = throttlingData;
+
+        mUniqueDisplayId = displayId;
+        mDdcThrottlingData = throttlingData;
+        mDeviceConfigListener.startListening();
+        reloadBrightnessThrottlingDataOverride();
+        mThrottlingData = mBrightnessThrottlingDataOverride.getOrDefault(mUniqueDisplayId,
+                throttlingData);
 
         if (deviceSupportsThrottling()) {
             mSkinThermalStatusObserver.startObserving();
@@ -173,12 +219,146 @@ class BrightnessThrottler {
     private void dumpLocal(PrintWriter pw) {
         pw.println("BrightnessThrottler:");
         pw.println("  mThrottlingData=" + mThrottlingData);
+        pw.println("  mDdcThrottlingData=" + mDdcThrottlingData);
+        pw.println("  mUniqueDisplayId=" + mUniqueDisplayId);
         pw.println("  mThrottlingStatus=" + mThrottlingStatus);
         pw.println("  mBrightnessCap=" + mBrightnessCap);
         pw.println("  mBrightnessMaxReason=" +
             BrightnessInfo.briMaxReasonToString(mBrightnessMaxReason));
+        pw.println("  mBrightnessThrottlingDataOverride=" + mBrightnessThrottlingDataOverride);
+        pw.println("  mBrightnessThrottlingDataString=" + mBrightnessThrottlingDataString);
 
         mSkinThermalStatusObserver.dump(pw);
+    }
+
+    private String getBrightnessThrottlingDataString() {
+        return mDeviceConfig.getString(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                DisplayManager.DeviceConfig.KEY_BRIGHTNESS_THROTTLING_DATA,
+                /* defaultValue= */ null);
+    }
+
+    private boolean parseAndSaveData(@NonNull String strArray,
+            @NonNull HashMap<String, BrightnessThrottlingData> tempBrightnessThrottlingData) {
+        boolean validConfig = true;
+        String[] items = strArray.split(",");
+        int i = 0;
+
+        try {
+            String uniqueDisplayId = items[i++];
+
+            // number of throttling points
+            int noOfThrottlingPoints = Integer.parseInt(items[i++]);
+            List<ThrottlingLevel> throttlingLevels = new ArrayList<>(noOfThrottlingPoints);
+
+            // throttling level and point
+            for (int j = 0; j < noOfThrottlingPoints; j++) {
+                String severity = items[i++];
+                int status = parseThermalStatus(severity);
+
+                float brightnessPoint = parseBrightness(items[i++]);
+
+                throttlingLevels.add(new ThrottlingLevel(status, brightnessPoint));
+            }
+            BrightnessThrottlingData toSave =
+                    DisplayDeviceConfig.BrightnessThrottlingData.create(throttlingLevels);
+            tempBrightnessThrottlingData.put(uniqueDisplayId, toSave);
+        } catch (NumberFormatException | IndexOutOfBoundsException
+                | UnknownThermalStatusException e) {
+            validConfig = false;
+            Slog.e(TAG, "Throttling data is invalid array: '" + strArray + "'", e);
+        }
+
+        if (i != items.length) {
+            validConfig = false;
+        }
+
+        return validConfig;
+    }
+
+    public void reloadBrightnessThrottlingDataOverride() {
+        HashMap<String, BrightnessThrottlingData> tempBrightnessThrottlingData =
+                new HashMap<>(1);
+        mBrightnessThrottlingDataString = getBrightnessThrottlingDataString();
+        boolean validConfig = true;
+        mBrightnessThrottlingDataOverride.clear();
+        if (mBrightnessThrottlingDataString != null) {
+            String[] throttlingDataSplits = mBrightnessThrottlingDataString.split(";");
+            for (String s : throttlingDataSplits) {
+                if (!parseAndSaveData(s, tempBrightnessThrottlingData)) {
+                    validConfig = false;
+                    break;
+                }
+            }
+
+            if (validConfig) {
+                mBrightnessThrottlingDataOverride.putAll(tempBrightnessThrottlingData);
+                tempBrightnessThrottlingData.clear();
+            }
+
+        } else {
+            Slog.w(TAG, "DeviceConfig BrightnessThrottlingData is null");
+        }
+    }
+
+    /**
+     * Listens to config data change and updates the brightness throttling data using
+     * DisplayManager#KEY_BRIGHTNESS_THROTTLING_DATA.
+     * The format should be a string similar to: "local:4619827677550801152,2,moderate,0.5,severe,
+     * 0.379518072;local:4619827677550801151,1,moderate,0.75"
+     * In this order:
+     * <displayId>,<no of throttling levels>,[<severity as string>,<brightness cap>]
+     * Where the latter part is repeated for each throttling level, and the entirety is repeated
+     * for each display, separated by a semicolon.
+     */
+    public class DeviceConfigListener implements DeviceConfig.OnPropertiesChangedListener {
+        public Executor mExecutor = new HandlerExecutor(mDeviceConfigHandler);
+
+        public void startListening() {
+            mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                    mExecutor, this);
+        }
+
+        @Override
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            reloadBrightnessThrottlingDataOverride();
+            resetThrottlingData();
+        }
+    }
+
+    private float parseBrightness(String intVal) throws NumberFormatException {
+        float value = Float.parseFloat(intVal);
+        if (value < PowerManager.BRIGHTNESS_MIN || value > PowerManager.BRIGHTNESS_MAX) {
+            throw new NumberFormatException("Brightness constraint value out of bounds.");
+        }
+        return value;
+    }
+
+    @PowerManager.ThermalStatus private int parseThermalStatus(@NonNull String value)
+            throws UnknownThermalStatusException {
+        switch (value) {
+            case "none":
+                return PowerManager.THERMAL_STATUS_NONE;
+            case "light":
+                return PowerManager.THERMAL_STATUS_LIGHT;
+            case "moderate":
+                return PowerManager.THERMAL_STATUS_MODERATE;
+            case "severe":
+                return PowerManager.THERMAL_STATUS_SEVERE;
+            case "critical":
+                return PowerManager.THERMAL_STATUS_CRITICAL;
+            case "emergency":
+                return PowerManager.THERMAL_STATUS_EMERGENCY;
+            case "shutdown":
+                return PowerManager.THERMAL_STATUS_SHUTDOWN;
+            default:
+                throw new UnknownThermalStatusException("Invalid Thermal Status: " + value);
+        }
+    }
+
+    private static class UnknownThermalStatusException extends Exception {
+        UnknownThermalStatusException(String message) {
+            super(message);
+        }
     }
 
     private final class SkinThermalStatusObserver extends IThermalEventListener.Stub {
@@ -257,6 +437,11 @@ class BrightnessThrottler {
         public IThermalService getThermalService() {
             return IThermalService.Stub.asInterface(
                     ServiceManager.getService(Context.THERMAL_SERVICE));
+        }
+
+        @NonNull
+        public DeviceConfigInterface getDeviceConfig() {
+            return DeviceConfigInterface.REAL;
         }
     }
 }

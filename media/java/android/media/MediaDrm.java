@@ -2867,7 +2867,7 @@ public final class MediaDrm implements AutoCloseable {
             = "drm.mediadrm.get_device_unique_id.error.list";
 
         /**
-         * Key to extraact the count of {@link KeyStatus#STATUS_EXPIRED} events
+         * Key to extract the count of {@link KeyStatus#STATUS_EXPIRED} events
          * that occured. The count is extracted from the
          * {@link PersistableBundle} returned from a {@link #getMetrics} call.
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).

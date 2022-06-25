@@ -182,13 +182,13 @@ public interface InputMethod {
      * @param inputConnection Optional specific input connection for
      * communicating with the text box; if null, you should use the generic
      * bound input connection.
-     * @param info Information about the text box (typically, an EditText)
+     * @param editorInfo Information about the text box (typically, an EditText)
      *        that requests input.
      * 
      * @see EditorInfo
      */
     @MainThread
-    public void startInput(InputConnection inputConnection, EditorInfo info);
+    public void startInput(InputConnection inputConnection, EditorInfo editorInfo);
 
     /**
      * This method is called when the state of this input method needs to be
@@ -201,13 +201,13 @@ public interface InputMethod {
      * @param inputConnection Optional specific input connection for
      * communicating with the text box; if null, you should use the generic
      * bound input connection.
-     * @param attribute The attribute of the text box (typically, a EditText)
+     * @param editorInfo The attribute of the text box (typically, a EditText)
      *        that requests input.
      * 
      * @see EditorInfo
      */
     @MainThread
-    public void restartInput(InputConnection inputConnection, EditorInfo attribute);
+    public void restartInput(InputConnection inputConnection, EditorInfo editorInfo);
 
     /**
      * This method is called when {@code {@link #startInput(InputConnection, EditorInfo)} or

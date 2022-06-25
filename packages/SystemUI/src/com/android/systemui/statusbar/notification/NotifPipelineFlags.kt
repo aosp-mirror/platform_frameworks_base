@@ -56,4 +56,7 @@ class NotifPipelineFlags @Inject constructor(
     fun isSmartspaceDedupingEnabled(): Boolean =
             featureFlags.isEnabled(Flags.SMARTSPACE) &&
                     featureFlags.isEnabled(Flags.SMARTSPACE_DEDUPING)
+
+    fun removeUnrankedNotifs(): Boolean =
+        featureFlags.isEnabled(Flags.REMOVE_UNRANKED_NOTIFICATIONS)
 }
