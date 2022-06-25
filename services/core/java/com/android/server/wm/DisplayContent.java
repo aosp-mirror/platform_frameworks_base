@@ -2941,9 +2941,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // Set some sort of reasonable bounds on the size of the display that we will try
             // to emulate.
             final int minSize = 200;
-            final int maxScale = 2;
-            width = Math.min(Math.max(width, minSize), mInitialDisplayWidth * maxScale);
-            height = Math.min(Math.max(height, minSize), mInitialDisplayHeight * maxScale);
+            final int maxScale = 3;
+            final int maxSize = Math.max(mInitialDisplayWidth, mInitialDisplayHeight) * maxScale;
+            width = Math.min(Math.max(width, minSize), maxSize);
+            height = Math.min(Math.max(height, minSize), maxSize);
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
