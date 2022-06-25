@@ -69,6 +69,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
@@ -1365,7 +1366,8 @@ class UserController implements Handler.Callback {
         List<UserInfo> profilesToStart = new ArrayList<>(profiles.size());
         for (UserInfo user : profiles) {
             if ((user.flags & UserInfo.FLAG_INITIALIZED) == UserInfo.FLAG_INITIALIZED
-                    && user.id != currentUserId && !user.isQuietModeEnabled()) {
+                    && user.id != currentUserId
+                    && shouldStartWithParent(user)) {
                 profilesToStart.add(user);
             }
         }
@@ -1378,6 +1380,13 @@ class UserController implements Handler.Callback {
         if (i < profilesToStartSize) {
             Slogf.w(TAG, "More profiles than MAX_RUNNING_USERS");
         }
+    }
+
+    private boolean shouldStartWithParent(UserInfo user) {
+        final UserProperties properties = mInjector.getUserManagerInternal()
+                .getUserProperties(user.id);
+        return (properties != null && properties.getStartWithParent())
+                && !user.isQuietModeEnabled();
     }
 
     // TODO(b/239982558): might need to infer the display id based on parent user

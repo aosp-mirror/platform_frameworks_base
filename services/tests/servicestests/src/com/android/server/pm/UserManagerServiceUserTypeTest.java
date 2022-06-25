@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 import static org.testng.Assert.assertThrows;
 
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
@@ -81,6 +82,8 @@ public class UserManagerServiceUserTypeTest {
                 DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
                 /* flags= */0,
                 /* letsPersonalDataIntoProfile= */false).build());
+        final UserProperties.Builder userProps = new UserProperties.Builder()
+                .setShowInLauncher(17);
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
                 .setEnabled(1)
@@ -98,6 +101,7 @@ public class UserManagerServiceUserTypeTest {
                 .setDefaultSystemSettings(systemSettings)
                 .setDefaultSecureSettings(secureSettings)
                 .setDefaultCrossProfileIntentFilters(filters)
+                .setDefaultUserProperties(userProps)
                 .createUserTypeDetails();
 
         assertEquals("a.name", type.getName());
@@ -134,6 +138,8 @@ public class UserManagerServiceUserTypeTest {
         for (int i = 0; i < filters.size(); i++) {
             assertEquals(filters.get(i), type.getDefaultCrossProfileIntentFilters().get(i));
         }
+
+        assertEquals(17, type.getDefaultUserPropertiesReference().getShowInLauncher());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -172,6 +178,11 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(type.getDefaultSystemSettings().isEmpty());
         assertTrue(type.getDefaultSecureSettings().isEmpty());
         assertTrue(type.getDefaultCrossProfileIntentFilters().isEmpty());
+
+        final UserProperties props = type.getDefaultUserPropertiesReference();
+        assertNotNull(props);
+        assertFalse(props.getStartWithParent());
+        assertEquals(UserProperties.SHOW_IN_LAUNCHER_WITH_PARENT, props.getShowInLauncher());
 
         assertFalse(type.hasBadge());
     }
@@ -250,19 +261,24 @@ public class UserManagerServiceUserTypeTest {
 
         // Mock some "AOSP defaults".
         final Bundle restrictions = makeRestrictionsBundle("no_config_vpn", "no_config_tethering");
+        final UserProperties.Builder props = new UserProperties.Builder()
+                .setShowInLauncher(19)
+                .setStartWithParent(true);
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
                 .setName(userTypeAosp1)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(31)
-                .setDefaultRestrictions(restrictions));
+                .setDefaultRestrictions(restrictions)
+                .setDefaultUserProperties(props));
         builders.put(userTypeAosp2, new UserTypeDetails.Builder()
                 .setName(userTypeAosp1)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(32)
                 .setIconBadge(401)
                 .setBadgeColors(402, 403, 404)
-                .setDefaultRestrictions(restrictions));
+                .setDefaultRestrictions(restrictions)
+                .setDefaultUserProperties(props));
 
         final XmlResourceParser parser = mResources.getXml(R.xml.usertypes_test_profile);
         UserTypeFactory.customizeBuilders(builders, parser);
@@ -272,6 +288,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(31, aospType.getMaxAllowedPerParent());
         assertEquals(Resources.ID_NULL, aospType.getIconBadge());
         assertTrue(UserRestrictionsUtils.areEqual(restrictions, aospType.getDefaultRestrictions()));
+        assertEquals(19, aospType.getDefaultUserPropertiesReference().getShowInLauncher());
+        assertEquals(true, aospType.getDefaultUserPropertiesReference().getStartWithParent());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -300,6 +318,8 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(UserRestrictionsUtils.areEqual(
                 makeRestrictionsBundle("no_remove_user", "no_bluetooth"),
                 aospType.getDefaultRestrictions()));
+        assertEquals(2020, aospType.getDefaultUserPropertiesReference().getShowInLauncher());
+        assertEquals(false, aospType.getDefaultUserPropertiesReference().getStartWithParent());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);

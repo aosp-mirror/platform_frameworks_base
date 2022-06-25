@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.UserManager;
@@ -305,6 +306,12 @@ public abstract class UserManagerInternal {
      * for users that already existed on-disk from an older version of Android.
      */
     public abstract boolean shouldIgnorePrepareStorageErrors(int userId);
+
+    /**
+     * Returns the {@link UserProperties} of the given user, or {@code null} if it is not found.
+     * NB: The actual object is returned. So do NOT modify it!
+     */
+    public abstract @Nullable UserProperties getUserProperties(@UserIdInt int userId);
 
     /** TODO(b/239982558): add javadoc / mention invalid_id is used to unassing */
     public abstract void assignUserToDisplay(@UserIdInt int userId, int displayId);

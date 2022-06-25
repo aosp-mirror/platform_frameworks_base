@@ -52,6 +52,7 @@ import android.content.pm.PackagePartitions;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
+import android.content.pm.UserProperties;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -182,7 +183,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_NAME = "name";
     private static final String TAG_ACCOUNT = "account";
     private static final String ATTR_FLAGS = "flags";
-    private static final String ATTR_TYPE = "type";
+    private static final String ATTR_TYPE = "type"; // userType
     private static final String ATTR_ICON_PATH = "icon";
     private static final String ATTR_ID = "id";
     private static final String ATTR_CREATION_TIME = "created";
@@ -217,6 +218,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TAG_ENTRY = "entry";
     private static final String TAG_VALUE = "value";
     private static final String TAG_SEED_ACCOUNT_OPTIONS = "seedAccountOptions";
+    private static final String TAG_USER_PROPERTIES = "userProperties";
     private static final String TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL =
             "lastRequestQuietModeEnabledCall";
     private static final String TAG_IGNORE_PREPARE_STORAGE_ERRORS =
@@ -261,7 +263,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     static final int MAX_RECENTLY_REMOVED_IDS_SIZE = 100;
 
-    private static final int USER_VERSION = 9;
+    private static final int USER_VERSION = 10;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -326,6 +328,9 @@ public class UserManagerService extends IUserManager.Stub {
         PersistableBundle seedAccountOptions;
         // Whether to perist the seed account information to be available after a boot
         boolean persistSeedData;
+
+        /** Properties of the user whose default values originate from its user type. */
+        UserProperties userProperties;
 
         /** Elapsed realtime since boot when the user started. */
         long startRealtime;
@@ -1492,6 +1497,36 @@ public class UserManagerService extends IUserManager.Stub {
     boolean isUserTypeSubtypeOfSystem(String userType) {
         UserTypeDetails userTypeDetails = mUserTypes.get(userType);
         return userTypeDetails != null && userTypeDetails.isSystem();
+    }
+
+    /**
+     * Returns a *copy* of the given user's UserProperties, stripping out any information for which
+     * the caller lacks permission.
+     */
+    @Override
+    public @NonNull UserProperties getUserPropertiesCopy(@UserIdInt int userId) {
+        checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserProperties");
+        final UserProperties origProperties = getUserPropertiesInternal(userId);
+        if (origProperties != null) {
+            int callingUid = Binder.getCallingUid();
+            boolean exposeAllFields = callingUid == Process.SYSTEM_UID;
+            boolean hasManage = hasPermissionGranted(Manifest.permission.MANAGE_USERS, callingUid);
+            boolean hasQuery = hasPermissionGranted(Manifest.permission.QUERY_USERS, callingUid);
+            return new UserProperties(origProperties, exposeAllFields, hasManage, hasQuery);
+        }
+        // A non-existent or partial user will reach here.
+        throw new IllegalArgumentException("Cannot access properties for user " + userId);
+    }
+
+    /** Returns the user's actual, canonical UserProperties object. Do not edit it externally. */
+    private @Nullable UserProperties getUserPropertiesInternal(@UserIdInt int userId) {
+        synchronized (mUsersLock) {
+            final UserData userData = getUserDataLU(userId);
+            if (userData != null) {
+                return userData.userProperties;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -3282,6 +3317,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions, int userVersion,
             int userTypeVersion) {
+        Slog.i(LOG_TAG, "Upgrading users from userVersion " + userVersion + " to " + USER_VERSION);
         Set<Integer> userIdsToWrite = new ArraySet<>();
         final int originalVersion = mUserVersion;
         final int originalUserTypeVersion = mUserTypeVersion;
@@ -3417,6 +3453,27 @@ public class UserManagerService extends IUserManager.Stub {
             userVersion = 9;
         }
 
+        if (userVersion < 10) {
+            // Add UserProperties.
+            synchronized (mUsersLock) {
+                for (int i = 0; i < mUsers.size(); i++) {
+                    final UserData userData = mUsers.valueAt(i);
+                    final UserTypeDetails userTypeDetails = mUserTypes.get(userData.info.userType);
+                    if (userTypeDetails == null) {
+                        throw new IllegalStateException(
+                                "Cannot upgrade user because " + userData.info.userType
+                                        + " isn't defined on this device!");
+                    }
+                    userData.userProperties = new UserProperties(
+                            userTypeDetails.getDefaultUserPropertiesReference());
+                    userIdsToWrite.add(userData.info.id);
+                }
+            }
+            userVersion = 10;
+        }
+
+        // Reminder: If you add another upgrade, make sure to increment USER_VERSION too.
+
         // Done with userVersion changes, moving on to deal with userTypeVersion upgrades
         // Upgrade from previous user type to a new user type
         final int newUserTypeVersion = UserTypeFactory.getUserTypeVersion();
@@ -3431,6 +3488,11 @@ public class UserManagerService extends IUserManager.Stub {
             Slog.w(LOG_TAG, "User version " + mUserVersion + " didn't upgrade as expected to "
                     + USER_VERSION);
         } else {
+            if (userVersion > USER_VERSION) {
+                Slog.wtf(LOG_TAG, "Upgraded user version " + mUserVersion + " is higher the SDK's "
+                        + "one of " + USER_VERSION + ". Someone forgot to update USER_VERSION?");
+            }
+
             mUserVersion = userVersion;
             mUserTypeVersion = newUserTypeVersion;
 
@@ -3550,6 +3612,8 @@ public class UserManagerService extends IUserManager.Stub {
         flags |= mUserTypes.get(systemUserType).getDefaultUserInfoFlags();
         UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags, systemUserType);
         UserData userData = putUserInfo(system);
+        userData.userProperties = new UserProperties(
+                mUserTypes.get(userData.info.userType).getDefaultUserPropertiesReference());
         mNextSerialNumber = MIN_USER_ID;
         mUserVersion = USER_VERSION;
         mUserTypeVersion = UserTypeFactory.getUserTypeVersion();
@@ -3724,6 +3788,12 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.endTag(null, TAG_SEED_ACCOUNT_OPTIONS);
         }
 
+        if (userData.userProperties != null) {
+            serializer.startTag(null, TAG_USER_PROPERTIES);
+            userData.userProperties.writeToXml(serializer);
+            serializer.endTag(null, TAG_USER_PROPERTIES);
+        }
+
         if (userData.getLastRequestQuietModeEnabledMillis() != 0L) {
             serializer.startTag(/* namespace */ null, TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL);
             serializer.text(String.valueOf(userData.getLastRequestQuietModeEnabledMillis()));
@@ -3843,6 +3913,7 @@ public class UserManagerService extends IUserManager.Stub {
         String seedAccountName = null;
         String seedAccountType = null;
         PersistableBundle seedAccountOptions = null;
+        UserProperties userProperties = null;
         Bundle baseRestrictions = null;
         Bundle legacyLocalRestrictions = null;
         RestrictionsSet localRestrictions = null;
@@ -3921,6 +3992,17 @@ public class UserManagerService extends IUserManager.Stub {
                 } else if (TAG_SEED_ACCOUNT_OPTIONS.equals(tag)) {
                     seedAccountOptions = PersistableBundle.restoreFromXml(parser);
                     persistSeedData = true;
+                } else if (TAG_USER_PROPERTIES.equals(tag)) {
+                    // We already got the userType above (if it exists), so we can use it.
+                    // And it must exist, since ATTR_TYPE historically predates PROPERTIES.
+                    final UserTypeDetails userTypeDetails = mUserTypes.get(userType);
+                    if (userTypeDetails == null) {
+                        Slog.e(LOG_TAG, "User has properties but no user type!");
+                        return null;
+                    }
+                    final UserProperties defaultProps
+                            = userTypeDetails.getDefaultUserPropertiesReference();
+                    userProperties = new UserProperties(parser, defaultProps);
                 } else if (TAG_LAST_REQUEST_QUIET_MODE_ENABLED_CALL.equals(tag)) {
                     type = parser.next();
                     if (type == XmlPullParser.TEXT) {
@@ -3957,6 +4039,7 @@ public class UserManagerService extends IUserManager.Stub {
         userData.seedAccountType = seedAccountType;
         userData.persistSeedData = persistSeedData;
         userData.seedAccountOptions = seedAccountOptions;
+        userData.userProperties = userProperties;
         userData.setLastRequestQuietModeEnabledMillis(lastRequestQuietModeEnabledTimestamp);
         if (ignorePrepareStorageErrors) {
             userData.setIgnorePrepareStorageErrors();
@@ -4292,6 +4375,8 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                     userData = new UserData();
                     userData.info = userInfo;
+                    userData.userProperties = new UserProperties(
+                            userTypeDetails.getDefaultUserPropertiesReference());
                     mUsers.put(userId, userData);
                 }
                 writeUserLP(userData);
@@ -5618,6 +5703,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
         // If we got here, we probably recycled user ids, so invalidate any caches.
         UserManager.invalidateStaticUserProperties();
+        UserManager.invalidateUserPropertiesCache();
         if (nextId < 0) {
             throw new IllegalStateException("No user id available!");
         }
@@ -6320,6 +6406,10 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
+        if (userData.userProperties != null) {
+            userData.userProperties.println(pw, "    ");
+        }
+
         pw.println("    Ignore errors preparing storage: "
                 + userData.getIgnorePrepareStorageErrors());
 
@@ -6710,6 +6800,15 @@ public class UserManagerService extends IUserManager.Stub {
                 UserData userData = mUsers.get(userId);
                 return userData != null && userData.getIgnorePrepareStorageErrors();
             }
+        }
+
+        @Override
+        public @Nullable UserProperties getUserProperties(@UserIdInt int userId) {
+            final UserProperties props = getUserPropertiesInternal(userId);
+            if (props == null) {
+                Slog.w(LOG_TAG, "A null UserProperties was returned for user " + userId);
+            }
+            return props;
         }
 
         @Override
