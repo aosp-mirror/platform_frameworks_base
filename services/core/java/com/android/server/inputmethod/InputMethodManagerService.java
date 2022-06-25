@@ -1787,7 +1787,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (selectedMethodId != null && !mMethodMap.get(selectedMethodId).isSystem()) {
             return;
         }
-        final List<InputMethodInfo> suitableImes = InputMethodUtils.getDefaultEnabledImes(
+        final List<InputMethodInfo> suitableImes = InputMethodInfoUtils.getDefaultEnabledImes(
                 context, mSettings.getEnabledInputMethodListLocked());
         if (suitableImes.isEmpty()) {
             Slog.i(TAG, "No default found");
@@ -4049,7 +4049,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (subtype != null) {
                 setInputMethodWithSubtypeIdLocked(token, id,
-                        InputMethodUtils.getSubtypeIdFromHashCode(mMethodMap.get(id),
+                        SubtypeUtils.getSubtypeIdFromHashCode(mMethodMap.get(id),
                                 subtype.hashCode()));
             } else {
                 setInputMethod(token, id);
@@ -4093,7 +4093,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // defined, there is no need to switch to the last IME.
                 if (!imiIdIsSame || lastSubtypeHash != currentSubtypeHash) {
                     targetLastImiId = lastIme.first;
-                    subtypeId = InputMethodUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
+                    subtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
                 }
             }
 
@@ -4112,13 +4112,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         final InputMethodInfo imi = enabled.get(i);
                         if (imi.getSubtypeCount() > 0 && imi.isSystem()) {
                             InputMethodSubtype keyboardSubtype =
-                                    InputMethodUtils.findLastResortApplicableSubtypeLocked(mRes,
-                                            InputMethodUtils.getSubtypes(imi),
-                                            InputMethodUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
+                                    SubtypeUtils.findLastResortApplicableSubtypeLocked(mRes,
+                                            SubtypeUtils.getSubtypes(imi),
+                                            SubtypeUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
                             if (keyboardSubtype != null) {
                                 targetLastImiId = imi.getId();
-                                subtypeId = InputMethodUtils.getSubtypeIdFromHashCode(
-                                        imi, keyboardSubtype.hashCode());
+                                subtypeId = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                                        keyboardSubtype.hashCode());
                                 if(keyboardSubtype.getLocale().equals(locale)) {
                                     break;
                                 }
@@ -4188,8 +4188,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (lastImi == null) return null;
             try {
                 final int lastSubtypeHash = Integer.parseInt(lastIme.second);
-                final int lastSubtypeId =
-                        InputMethodUtils.getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
+                final int lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(lastImi,
+                        lastSubtypeHash);
                 if (lastSubtypeId < 0 || lastSubtypeId >= lastImi.getSubtypeCount()) {
                     return null;
                 }
@@ -4868,7 +4868,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("ImfLock.class")
     private boolean chooseNewDefaultIMELocked() {
-        final InputMethodInfo imi = InputMethodUtils.getMostApplicableDefaultIME(
+        final InputMethodInfo imi = InputMethodInfoUtils.getMostApplicableDefaultIME(
                 mSettings.getEnabledInputMethodListLocked());
         if (imi != null) {
             if (DEBUG) {
@@ -5011,7 +5011,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (resetDefaultEnabledIme || reenableMinimumNonAuxSystemImes) {
             final ArrayList<InputMethodInfo> defaultEnabledIme =
-                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList,
+                    InputMethodInfoUtils.getDefaultEnabledImes(mContext, mMethodList,
                             reenableMinimumNonAuxSystemImes);
             final int N = defaultEnabledIme.size();
             for (int i = 0; i < N; ++i) {
@@ -5067,7 +5067,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final String systemSpeechRecognizer =
                 mContext.getString(com.android.internal.R.string.config_systemSpeechRecognizer);
         final String currentDefaultVoiceImeId = mSettings.getDefaultVoiceInputMethod();
-        final InputMethodInfo newSystemVoiceIme = InputMethodUtils.chooseSystemVoiceIme(
+        final InputMethodInfo newSystemVoiceIme = InputMethodInfoUtils.chooseSystemVoiceIme(
                 mMethodMap, systemSpeechRecognizer, currentDefaultVoiceImeId);
         if (newSystemVoiceIme == null) {
             if (DEBUG) {
@@ -5193,8 +5193,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             String subtypeHashCode = mSettings.getLastSubtypeForInputMethodLocked(newDefaultIme);
             if (subtypeHashCode != null) {
                 try {
-                    lastSubtypeId = InputMethodUtils.getSubtypeIdFromHashCode(
-                            imi, Integer.parseInt(subtypeHashCode));
+                    lastSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(imi,
+                            Integer.parseInt(subtypeHashCode));
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "HashCode for subtype looks broken: " + subtypeHashCode, e);
                 }
@@ -5229,7 +5229,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             return null;
         }
         if (!subtypeIsSelected || mCurrentSubtype == null
-                || !InputMethodUtils.isValidSubtypeId(imi, mCurrentSubtype.hashCode())) {
+                || !SubtypeUtils.isValidSubtypeId(imi, mCurrentSubtype.hashCode())) {
             int subtypeId = mSettings.getSelectedInputMethodSubtypeId(selectedMethodId);
             if (subtypeId == NOT_A_SUBTYPE_ID) {
                 // If there are no selected subtypes, the framework will try to find
@@ -5242,17 +5242,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
                     mCurrentSubtype = explicitlyOrImplicitlyEnabledSubtypes.get(0);
                 } else if (explicitlyOrImplicitlyEnabledSubtypes.size() > 1) {
-                    mCurrentSubtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
+                    mCurrentSubtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
                             mRes, explicitlyOrImplicitlyEnabledSubtypes,
-                            InputMethodUtils.SUBTYPE_MODE_KEYBOARD, null, true);
+                            SubtypeUtils.SUBTYPE_MODE_KEYBOARD, null, true);
                     if (mCurrentSubtype == null) {
-                        mCurrentSubtype = InputMethodUtils.findLastResortApplicableSubtypeLocked(
-                                mRes, explicitlyOrImplicitlyEnabledSubtypes, null, null,
-                                true);
+                        mCurrentSubtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
+                                mRes, explicitlyOrImplicitlyEnabledSubtypes, null, null, true);
                     }
                 }
             } else {
-                mCurrentSubtype = InputMethodUtils.getSubtypes(imi).get(subtypeId);
+                mCurrentSubtype = SubtypeUtils.getSubtypes(imi).get(subtypeId);
             }
         }
         return mCurrentSubtype;
@@ -6169,8 +6168,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         setInputMethodEnabledLocked(inputMethodInfo.getId(), false);
                     }
                     // Re-enable with default enabled IMEs.
-                    for (InputMethodInfo imi :
-                            InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList)) {
+                    for (InputMethodInfo imi : InputMethodInfoUtils.getDefaultEnabledImes(
+                            mContext, mMethodList)) {
                         setInputMethodEnabledLocked(imi.getId(), true);
                     }
                     updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
@@ -6191,8 +6190,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             mContext.getResources(), mContext.getContentResolver(), methodMap,
                             userId, false);
 
-                    nextEnabledImes = InputMethodUtils.getDefaultEnabledImes(mContext, methodList);
-                    nextIme = InputMethodUtils.getMostApplicableDefaultIME(nextEnabledImes).getId();
+                    nextEnabledImes = InputMethodInfoUtils.getDefaultEnabledImes(mContext,
+                            methodList);
+                    nextIme = InputMethodInfoUtils.getMostApplicableDefaultIME(
+                            nextEnabledImes).getId();
 
                     // Reset enabled IMEs.
                     settings.putEnabledInputMethodsStr("");
