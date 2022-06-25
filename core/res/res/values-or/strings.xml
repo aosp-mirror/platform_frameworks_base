@@ -638,7 +638,7 @@
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ଅତ୍ୟଧିକ ଉଜ୍ଵଳ। କମ୍ ଉଜ୍ବଳକରଣରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ଅତ୍ୟଧିକ ଅନ୍ଧକାର। ଉଜ୍ବଳ ଲାଇଟ୍ ବ୍ୟବହାର କରନ୍ତୁ।"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"ଫୋନ୍‌କୁ ଟିକେ ଦୂରକୁ ନିଅନ୍ତୁ।"</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"ଫୋନ୍‌କୁ ପାଖକୁ ଆଣନ୍ତୁ।"</string>
+    <string name="face_acquired_too_far" msgid="5098567726427173896">"ଫୋନକୁ ପାଖକୁ ଆଣନ୍ତୁ।"</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"ଫୋନ୍‌କୁ ଉପରକୁ ଉଠାନ୍ତୁ।"</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"ଫୋନ୍‌କୁ ତଳକୁ ନିଅନ୍ତୁ।"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ବାମ ପଟକୁ ଫୋନ୍ ଘୁଞ୍ଚାନ୍ତୁ।"</string>

@@ -298,7 +298,7 @@ public class BackAnimationControllerTest {
 
     private void doMotionEvent(int actionDown, int coordinate) {
         mController.onMotionEvent(
-                MotionEvent.obtain(0, mEventTime, actionDown, coordinate, coordinate, 0),
+                coordinate, coordinate,
                 actionDown,
                 BackEvent.EDGE_LEFT);
         mEventTime += 10;
