@@ -213,7 +213,7 @@ public class VirtualDeviceManagerServiceTest {
                 mContext.getSystemService(WindowManager.class), threadVerifier);
 
         mAssociationInfo = new AssociationInfo(1, 0, null,
-                MacAddress.BROADCAST_ADDRESS, "", null, true, false, 0, 0);
+                MacAddress.BROADCAST_ADDRESS, "", null, true, false, false, 0, 0);
 
         VirtualDeviceParams params = new VirtualDeviceParams
                 .Builder()
