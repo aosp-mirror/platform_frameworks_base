@@ -2940,7 +2940,7 @@
 
     <!-- System bluetooth stack package name -->
     <string name="config_systemBluetoothStack" translatable="false">
-        com.android.bluetooth.services
+        com.android.bluetooth
     </string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
