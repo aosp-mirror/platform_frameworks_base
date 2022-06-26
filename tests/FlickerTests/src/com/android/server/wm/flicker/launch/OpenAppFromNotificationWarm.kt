@@ -16,11 +16,11 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.WindowInsets
 import android.view.WindowManager
-import android.platform.test.annotations.FlakyTest
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.launcher3.tapl.LauncherInstrumentation
@@ -53,8 +53,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
 @Postsubmit
-open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter)
-    : OpenAppTransition(testSpec) {
+open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter) :
+    OpenAppTransition(testSpec) {
     protected val taplInstrumentation = LauncherInstrumentation()
 
     override val testApp: NotificationAppHelper = NotificationAppHelper(instrumentation)
@@ -179,6 +179,32 @@ open class OpenAppFromNotificationWarm(testSpec: FlickerTestParameter)
         Assume.assumeTrue(isShellTransitionsEnabled)
         super.appWindowBecomesTopWindow()
     }
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+
+    /** {@inheritDoc} */
+    @Postsubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**
