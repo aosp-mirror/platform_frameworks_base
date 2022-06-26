@@ -17069,4 +17069,35 @@ public class TelephonyManager {
         }
         return false;
     }
+
+    /**
+     * Fetches the EFPSISMSC value from the SIM that contains the Public Service Identity
+     * of the SM-SC (either a SIP URI or tel URI), the value is common for both appType
+     * {@link #APPTYPE_ISIM} and {@link #APPTYPE_SIM}.
+     * The EFPSISMSC value is used by the ME to submit SMS over IP as defined in 24.341 [55].
+     *
+     * @param appType ICC Application type {@link #APPTYPE_ISIM} or {@link #APPTYPE_USIM}
+     * @return SIP URI or tel URI of the Public Service Identity of the SM-SC
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    public String getSmscIdentity(int appType) {
+        try {
+            IPhoneSubInfo info = getSubscriberInfoService();
+            if (info == null) {
+                Rlog.e(TAG, "getSmscIdentity(): IPhoneSubInfo instance is NULL");
+                return null;
+            }
+            /** Fetches the SIM PSISMSC params based on subId and appType */
+            return info.getSmscIdentity(getSubId(), appType);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getSmscIdentity(): RemoteException: " + ex.getMessage());
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getSmscIdentity(): NullPointerException: " + ex.getMessage());
+        }
+        return null;
+    }
 }
