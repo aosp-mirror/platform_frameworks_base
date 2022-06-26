@@ -391,6 +391,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(expected.getSound(), actual.getSound());
         assertEquals(expected.canBypassDnd(), actual.canBypassDnd());
         assertTrue(Arrays.equals(expected.getVibrationPattern(), actual.getVibrationPattern()));
+        assertEquals(expected.getVibrationEffect(), actual.getVibrationEffect());
         assertEquals(expected.getGroup(), actual.getGroup());
         assertEquals(expected.getAudioAttributes(), actual.getAudioAttributes());
         assertEquals(expected.getLightColor(), actual.getLightColor());
@@ -410,6 +411,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(parent.getSound(), actual.getSound());
         assertEquals(parent.canBypassDnd(), actual.canBypassDnd());
         assertTrue(Arrays.equals(parent.getVibrationPattern(), actual.getVibrationPattern()));
+        assertEquals(parent.getVibrationEffect(), actual.getVibrationEffect());
         assertEquals(parent.getGroup(), actual.getGroup());
         assertEquals(parent.getAudioAttributes(), actual.getAudioAttributes());
         assertEquals(parent.getLightColor(), actual.getLightColor());
