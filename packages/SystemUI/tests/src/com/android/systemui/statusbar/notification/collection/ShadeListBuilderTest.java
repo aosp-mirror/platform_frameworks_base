@@ -570,7 +570,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertTrue(entry.hasFinishedInitialization());
 
         // WHEN the pipeline is kicked off
-        mReadyForBuildListener.onBuildList(singletonList(entry));
+        mReadyForBuildListener.onBuildList(singletonList(entry), "test");
         mPipelineChoreographer.runIfScheduled();
 
         // THEN the entry's initialization time is reset
@@ -2092,7 +2092,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
             mPendingSet.clear();
         }
 
-        mReadyForBuildListener.onBuildList(mEntrySet);
+        mReadyForBuildListener.onBuildList(mEntrySet, "test");
         mPipelineChoreographer.runIfScheduled();
     }
 
