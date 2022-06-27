@@ -542,14 +542,17 @@ public class ApkLiteParseUtils {
 
                 int minVer = DEFAULT_MIN_SDK_VERSION;
                 String minCode = null;
+                boolean minAssigned = false;
                 int targetVer = DEFAULT_TARGET_SDK_VERSION;
                 String targetCode = null;
 
                 if (!TextUtils.isEmpty(minSdkVersionString)) {
                     try {
                         minVer = Integer.parseInt(minSdkVersionString);
+                        minAssigned = true;
                     } catch (NumberFormatException ignored) {
                         minCode = minSdkVersionString;
+                        minAssigned = !TextUtils.isEmpty(minCode);
                     }
                 }
 
@@ -558,7 +561,7 @@ public class ApkLiteParseUtils {
                         targetVer = Integer.parseInt(targetSdkVersionString);
                     } catch (NumberFormatException ignored) {
                         targetCode = targetSdkVersionString;
-                        if (minCode == null) {
+                        if (!minAssigned) {
                             minCode = targetCode;
                         }
                     }
