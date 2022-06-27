@@ -1472,6 +1472,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     "%s: Abort animation, invalid leash", TAG);
             return null;
         }
+        if (isInPipDirection(direction)
+                && !isSourceRectHintValidForEnterPip(sourceHintRect, destinationBounds)) {
+            // The given source rect hint is too small for enter PiP animation, reset it to null.
+            sourceHintRect = null;
+        }
         final int rotationDelta = mWaitForFixedRotation
                 ? deltaRotation(mCurrentRotation, mNextRotation)
                 : Surface.ROTATION_0;
@@ -1543,6 +1548,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     rotatedDestinationBounds);
         }
         return sourceHintRect;
+    }
+
+    /**
+     * This is a situation in which the source rect hint on at least one axis is smaller
+     * than the destination bounds, which represents a problem because we would have to scale
+     * up that axis to fit the bounds. So instead, just fallback to the non-source hint
+     * animation in this case.
+     *
+     * @return {@code false} if the given source is too small to use for the entering animation.
+     */
+    private boolean isSourceRectHintValidForEnterPip(Rect sourceRectHint, Rect destinationBounds) {
+        return sourceRectHint != null
+                && sourceRectHint.width() > destinationBounds.width()
+                && sourceRectHint.height() > destinationBounds.height();
     }
 
     /**
