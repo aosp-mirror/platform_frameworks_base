@@ -19,6 +19,7 @@ package com.android.server.timedetector;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,12 +42,15 @@ import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
+import android.app.timedetector.TimePoint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.ParcelableException;
 import android.os.TimestampedValue;
 import android.util.IndentingPrintWriter;
+import android.util.NtpTrustedTime;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -77,6 +81,7 @@ public class TimeDetectorServiceTest {
     private TestHandler mTestHandler;
     private TestCallerIdentityInjector mTestCallerIdentityInjector;
     private FakeServiceConfigAccessor mFakeServiceConfigAccessor;
+    private NtpTrustedTime mMockNtpTrustedTime;
     private StubbedTimeDetectorStrategy mStubbedTimeDetectorStrategy;
 
 
@@ -94,10 +99,11 @@ public class TimeDetectorServiceTest {
 
         mStubbedTimeDetectorStrategy = new StubbedTimeDetectorStrategy();
         mFakeServiceConfigAccessor = new FakeServiceConfigAccessor();
+        mMockNtpTrustedTime = mock(NtpTrustedTime.class);
 
         mTimeDetectorService = new TimeDetectorService(
                 mMockContext, mTestHandler, mFakeServiceConfigAccessor,
-                mStubbedTimeDetectorStrategy, mTestCallerIdentityInjector);
+                mStubbedTimeDetectorStrategy, mTestCallerIdentityInjector, mMockNtpTrustedTime);
     }
 
     @After
@@ -397,6 +403,23 @@ public class TimeDetectorServiceTest {
 
         mTestHandler.waitForMessagesToBeProcessed();
         mStubbedTimeDetectorStrategy.verifySuggestExternalTimeCalled(externalTimeSuggestion);
+    }
+
+    @Test
+    public void testLatestNetworkTime() {
+        NtpTrustedTime.TimeResult latestNetworkTime =
+                new NtpTrustedTime.TimeResult(1234L, 54321L, 999L);
+        when(mMockNtpTrustedTime.getCachedTimeResult())
+                .thenReturn(latestNetworkTime);
+        TimePoint expected = new TimePoint(latestNetworkTime.getTimeMillis(),
+                latestNetworkTime.getElapsedRealtimeMillis());
+        assertEquals(expected, mTimeDetectorService.latestNetworkTime());
+    }
+
+    @Test
+    public void testLatestNetworkTime_noTimeAvailable() {
+        when(mMockNtpTrustedTime.getCachedTimeResult()).thenReturn(null);
+        assertThrows(ParcelableException.class, () -> mTimeDetectorService.latestNetworkTime());
     }
 
     @Test

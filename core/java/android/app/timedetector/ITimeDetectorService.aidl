@@ -24,6 +24,7 @@ import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
+import android.app.timedetector.TimePoint;
 
 /**
  * System private API to communicate with time detector service.
@@ -45,9 +46,11 @@ interface ITimeDetectorService {
 
   boolean updateConfiguration(in TimeConfiguration timeConfiguration);
 
-  void suggestExternalTime( in ExternalTimeSuggestion timeSuggestion);
+  void suggestExternalTime(in ExternalTimeSuggestion timeSuggestion);
   void suggestGnssTime(in GnssTimeSuggestion timeSuggestion);
   boolean suggestManualTime(in ManualTimeSuggestion timeSuggestion);
   void suggestNetworkTime(in NetworkTimeSuggestion timeSuggestion);
   void suggestTelephonyTime(in TelephonyTimeSuggestion timeSuggestion);
+
+  TimePoint latestNetworkTime();
 }
