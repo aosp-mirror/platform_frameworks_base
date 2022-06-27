@@ -986,7 +986,7 @@ public class ShadeListBuilder implements Dumpable {
         // Check for suppressed order changes
         if (!getStabilityManager().isEveryChangeAllowed()) {
             mForceReorderable = true;
-            boolean isSorted = isSorted(mNotifList, mTopLevelComparator);
+            boolean isSorted = isShadeSorted();
             mForceReorderable = false;
             if (!isSorted) {
                 getStabilityManager().onEntryReorderSuppressed();
@@ -995,9 +995,23 @@ public class ShadeListBuilder implements Dumpable {
         Trace.endSection();
     }
 
+    private boolean isShadeSorted() {
+        if (!isSorted(mNotifList, mTopLevelComparator)) {
+            return false;
+        }
+        for (ListEntry entry : mNotifList) {
+            if (entry instanceof GroupEntry) {
+                if (!isSorted(((GroupEntry) entry).getChildren(), mGroupChildrenComparator)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     /** Determine whether the items in the list are sorted according to the comparator */
     @VisibleForTesting
-    public static <T> boolean isSorted(List<T> items, Comparator<T> comparator) {
+    public static <T> boolean isSorted(List<T> items, Comparator<? super T> comparator) {
         if (items.size() <= 1) {
             return true;
         }
@@ -1205,7 +1219,7 @@ public class ShadeListBuilder implements Dumpable {
     };
 
 
-    private final Comparator<ListEntry> mGroupChildrenComparator = (o1, o2) -> {
+    private final Comparator<NotificationEntry> mGroupChildrenComparator = (o1, o2) -> {
         int index1 = canReorder(o1) ? -1 : o1.getPreviousAttachState().getStableIndex();
         int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
         int cmp = Integer.compare(index1, index2);

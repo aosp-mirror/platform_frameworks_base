@@ -53,6 +53,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.NotificationInteractionTracker;
+import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder.OnRenderListListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection;
@@ -1797,6 +1798,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     @Test
     public void testStableMultipleSectionOrdering() {
+        // WHEN the list is originally built with reordering disabled
         mListBuilder.setSectioners(asList(
                 new PackageSectioner(PACKAGE_1), new PackageSectioner(PACKAGE_2)));
         mStabilityManager.setAllowEntryReordering(false);
@@ -1807,12 +1809,94 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         addNotif(3, PACKAGE_1).setRank(3);
         dispatchBuild();
 
+        // VERIFY the order and that entry reordering has not been suppressed
         verifyBuiltList(
                 notif(0),
                 notif(1),
                 notif(3),
                 notif(2)
         );
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+
+        // WHEN the ranks change
+        setNewRank(notif(0).entry, 4);
+        dispatchBuild();
+
+        // VERIFY the order does not change that entry reordering has been suppressed
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(3),
+                notif(2)
+        );
+        verify(mStabilityManager).onEntryReorderSuppressed();
+
+        // WHEN reordering is now allowed again
+        mStabilityManager.setAllowEntryReordering(true);
+        dispatchBuild();
+
+        // VERIFY that list order changes
+        verifyBuiltList(
+                notif(1),
+                notif(3),
+                notif(0),
+                notif(2)
+        );
+    }
+
+    @Test
+    public void testStableChildOrdering() {
+        // WHEN the list is originally built with reordering disabled
+        mStabilityManager.setAllowEntryReordering(false);
+        addGroupSummary(0, PACKAGE_1, GROUP_1).setRank(0);
+        addGroupChild(1, PACKAGE_1, GROUP_1).setRank(1);
+        addGroupChild(2, PACKAGE_1, GROUP_1).setRank(2);
+        addGroupChild(3, PACKAGE_1, GROUP_1).setRank(3);
+        dispatchBuild();
+
+        // VERIFY the order and that entry reordering has not been suppressed
+        verifyBuiltList(
+                group(
+                        summary(0),
+                        child(1),
+                        child(2),
+                        child(3)
+                )
+        );
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+
+        // WHEN the ranks change
+        setNewRank(notif(2).entry, 5);
+        dispatchBuild();
+
+        // VERIFY the order does not change that entry reordering has been suppressed
+        verifyBuiltList(
+                group(
+                        summary(0),
+                        child(1),
+                        child(2),
+                        child(3)
+                )
+        );
+        verify(mStabilityManager).onEntryReorderSuppressed();
+
+        // WHEN reordering is now allowed again
+        mStabilityManager.setAllowEntryReordering(true);
+        dispatchBuild();
+
+        // VERIFY that list order changes
+        verifyBuiltList(
+                group(
+                        summary(0),
+                        child(1),
+                        child(3),
+                        child(2)
+                )
+        );
+    }
+
+    private static void setNewRank(NotificationEntry entry, int rank) {
+        entry.setRanking(new RankingBuilder(entry.getRanking()).setRank(rank).build());
     }
 
     @Test
