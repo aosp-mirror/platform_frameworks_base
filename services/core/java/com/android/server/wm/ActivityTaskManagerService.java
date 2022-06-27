@@ -3668,7 +3668,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution) {
+    public TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution,
+            boolean takeSnapshotIfNeeded) {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "getTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -3682,8 +3683,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
             }
             // Don't call this while holding the lock as this operation might hit the disk.
-            return mWindowManager.mTaskSnapshotController.getSnapshot(taskId, task.mUserId,
-                    true /* restoreFromDisk */, isLowResolution);
+            TaskSnapshot taskSnapshot = mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
+                    task.mUserId, true /* restoreFromDisk */, isLowResolution);
+            if (taskSnapshot == null && takeSnapshotIfNeeded) {
+                taskSnapshot = takeTaskSnapshot(taskId);
+            }
+            return taskSnapshot;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -6656,7 +6661,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public TaskSnapshot getTaskSnapshotBlocking(
                 int taskId, boolean isLowResolution) {
-            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution);
+            return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution,
+                    false /* takeSnapshotIfNeeded */);
         }
 
         @Override
