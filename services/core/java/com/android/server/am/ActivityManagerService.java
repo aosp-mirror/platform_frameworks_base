@@ -8755,7 +8755,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static String processClass(ProcessRecord process) {
         if (process == null || process.getPid() == MY_PID) {
             return "system_server";
-        } else if ((process.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+        } else if (process.info.isSystemApp() || process.info.isSystemExt()) {
             return "system_app";
         } else {
             return "data_app";
