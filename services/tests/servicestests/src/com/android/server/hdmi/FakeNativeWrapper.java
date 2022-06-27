@@ -118,7 +118,13 @@ final class FakeNativeWrapper implements NativeWrapper {
     }
 
     @Override
-    public void nativeSetOption(int flag, boolean enabled) {}
+    public void enableWakeupByOtp(boolean enabled) {}
+
+    @Override
+    public void enableCec(boolean enabled) {}
+
+    @Override
+    public void enableSystemCecControl(boolean enabled) {}
 
     @Override
     public void nativeSetLanguage(String language) {}
