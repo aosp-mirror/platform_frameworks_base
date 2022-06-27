@@ -97,6 +97,11 @@ static bool validateFile(const char* filename) {
         case FileType::KEY_LAYOUT: {
             base::Result<std::shared_ptr<KeyLayoutMap>> ret = KeyLayoutMap::load(filename);
             if (!ret.ok()) {
+                if (ret.error().message() == "Missing kernel config") {
+                    // It means the layout is valid, but won't be loaded on this device because
+                    // this layout requires a certain kernel config.
+                    return true;
+                }
                 error("Error %s parsing key layout file.\n\n", ret.error().message().c_str());
                 return false;
             }
