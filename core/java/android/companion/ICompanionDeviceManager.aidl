@@ -63,8 +63,6 @@ interface ICompanionDeviceManager {
     void createAssociation(in String packageName, in String macAddress, int userId,
         in byte[] certificate);
 
-    void dispatchMessage(int messageId, int associationId, in byte[] message);
-
     void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);
 
     void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener, int userId);

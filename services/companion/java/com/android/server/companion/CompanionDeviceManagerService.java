@@ -106,11 +106,10 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.companion.datatransfer.CompanionMessageProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
-import com.android.server.companion.securechannel.CompanionSecureCommunicationsManager;
+import com.android.server.companion.transport.CompanionTransportManager;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -151,10 +150,9 @@ public class CompanionDeviceManagerService extends SystemService {
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private AssociationRequestsProcessor mAssociationRequestsProcessor;
     private SystemDataTransferProcessor mSystemDataTransferProcessor;
-    private CompanionMessageProcessor mCompanionMessageProcessor;
     private CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private CompanionApplicationController mCompanionAppController;
-    private CompanionSecureCommunicationsManager mSecureCommsManager;
+    private CompanionTransportManager mTransportManager;
 
     private final ActivityTaskManagerInternal mAtmInternal;
     private final ActivityManagerInternal mAmInternal;
@@ -238,11 +236,9 @@ public class CompanionDeviceManagerService extends SystemService {
                 /* cdmService */this, mAssociationStore);
         mCompanionAppController = new CompanionApplicationController(
                 context, mApplicationControllerCallback);
-        mSecureCommsManager = new CompanionSecureCommunicationsManager(
-                mAssociationStore, mCompanionAppController);
-        mCompanionMessageProcessor = new CompanionMessageProcessor(mSecureCommsManager);
+        mTransportManager = new CompanionTransportManager(context);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
-                mSystemDataTransferRequestStore, mCompanionMessageProcessor);
+                mSystemDataTransferRequestStore, mTransportManager);
 
         // Publish "binder" service.
         final CompanionDeviceManagerImpl impl = new CompanionDeviceManagerImpl();
@@ -319,18 +315,32 @@ public class CompanionDeviceManagerService extends SystemService {
                 MINUTES.toMillis(10));
     }
 
-    @Nullable
+    @NonNull
     AssociationInfo getAssociationWithCallerChecks(
             @UserIdInt int userId, @NonNull String packageName, @NonNull String macAddress) {
-        final AssociationInfo association = mAssociationStore.getAssociationsForPackageWithAddress(
+        AssociationInfo association = mAssociationStore.getAssociationsForPackageWithAddress(
                 userId, packageName, macAddress);
-        return sanitizeWithCallerChecks(getContext(), association);
+        association = sanitizeWithCallerChecks(getContext(), association);
+        if (association != null) {
+            return association;
+        } else {
+            throw new IllegalArgumentException("Association does not exist "
+                    + "or the caller does not have permissions to manage it "
+                    + "(ie. it belongs to a different package or a different user).");
+        }
     }
 
-    @Nullable
+    @NonNull
     AssociationInfo getAssociationWithCallerChecks(int associationId) {
-        final AssociationInfo association = mAssociationStore.getAssociationById(associationId);
-        return sanitizeWithCallerChecks(getContext(), association);
+        AssociationInfo association = mAssociationStore.getAssociationById(associationId);
+        association = sanitizeWithCallerChecks(getContext(), association);
+        if (association != null) {
+            return association;
+        } else {
+            throw new IllegalArgumentException("Association does not exist "
+                    + "or the caller does not have permissions to manage it "
+                    + "(ie. it belongs to a different package or a different user).");
+        }
     }
 
     private void onDeviceAppearedInternal(int associationId) {
@@ -609,12 +619,6 @@ public class CompanionDeviceManagerService extends SystemService {
 
             final AssociationInfo association =
                     getAssociationWithCallerChecks(userId, packageName, deviceMacAddress);
-            if (association == null) {
-                throw new IllegalArgumentException("Association does not exist "
-                        + "or the caller does not have permissions to manage it "
-                        + "(ie. it belongs to a different package or a different user).");
-            }
-
             disassociateInternal(association.getId());
         }
 
@@ -622,15 +626,9 @@ public class CompanionDeviceManagerService extends SystemService {
         public void disassociate(int associationId) {
             if (DEBUG) Log.i(TAG, "disassociate() associationId=" + associationId);
 
-            final AssociationInfo association = getAssociationWithCallerChecks(associationId);
-            if (association == null) {
-                throw new IllegalArgumentException("Association with ID " + associationId + " "
-                        + "does not exist "
-                        + "or belongs to a different package "
-                        + "or belongs to a different user");
-            }
-
-            disassociateInternal(associationId);
+            final AssociationInfo association =
+                    getAssociationWithCallerChecks(associationId);
+            disassociateInternal(association.getId());
         }
 
         @Override
@@ -698,27 +696,6 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void dispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
-            if (DEBUG) {
-                Log.i(TAG, "dispatchMessage() associationId=" + associationId + "\n"
-                        + " message(Base64)=" + Base64.encodeToString(message, 0));
-            }
-
-            getContext().enforceCallingOrSelfPermission(DELIVER_COMPANION_MESSAGES,
-                    "dispatchMessage");
-
-            AssociationInfo association = getAssociationWithCallerChecks(associationId);
-            if (association == null) {
-                throw new IllegalArgumentException("Association with ID " + associationId + " "
-                        + "does not exist "
-                        + "or belongs to a different package "
-                        + "or belongs to a different user");
-            }
-
-            mSecureCommsManager.receiveSecureMessage(messageId, associationId, message);
-        }
-
-        @Override
         public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
                 int userId, int associationId) {
             return mSystemDataTransferProcessor.buildPermissionTransferUserConsentIntent(
@@ -735,14 +712,14 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void attachSystemDataTransport(String packageName, int userId, int associationId,
                 ParcelFileDescriptor fd) {
-            mSystemDataTransferProcessor.attachSystemDataTransport(packageName, userId,
-                    associationId, fd);
+            getAssociationWithCallerChecks(associationId);
+            mTransportManager.attachSystemDataTransport(packageName, userId, associationId, fd);
         }
 
         @Override
         public void detachSystemDataTransport(String packageName, int userId, int associationId) {
-            mSystemDataTransferProcessor.detachSystemDataTransport(packageName, userId,
-                    associationId);
+            getAssociationWithCallerChecks(associationId);
+            mTransportManager.detachSystemDataTransport(packageName, userId, associationId);
         }
 
         @Override
@@ -750,13 +727,6 @@ public class CompanionDeviceManagerService extends SystemService {
             if (DEBUG) Log.i(TAG, "notifyDevice_Appeared() id=" + associationId);
 
             AssociationInfo association = getAssociationWithCallerChecks(associationId);
-            if (association == null) {
-                throw new IllegalArgumentException("Association with ID " + associationId + " "
-                        + "does not exist "
-                        + "or belongs to a different package "
-                        + "or belongs to a different user");
-            }
-
             if (!association.isSelfManaged()) {
                 throw new IllegalArgumentException("Association with ID " + associationId
                         + " is not self-managed. notifyDeviceAppeared(int) can only be called for"
@@ -777,13 +747,6 @@ public class CompanionDeviceManagerService extends SystemService {
             if (DEBUG) Log.i(TAG, "notifyDevice_Disappeared() id=" + associationId);
 
             final AssociationInfo association = getAssociationWithCallerChecks(associationId);
-            if (association == null) {
-                throw new IllegalArgumentException("Association with ID " + associationId + " "
-                        + "does not exist "
-                        + "or belongs to a different package "
-                        + "or belongs to a different user");
-            }
-
             if (!association.isSelfManaged()) {
                 throw new IllegalArgumentException("Association with ID " + associationId
                         + " is not self-managed. notifyDeviceAppeared(int) can only be called for"
@@ -892,7 +855,6 @@ public class CompanionDeviceManagerService extends SystemService {
             final CompanionDeviceShellCommand cmd = new CompanionDeviceShellCommand(
                     CompanionDeviceManagerService.this,
                     mAssociationStore,
-                    mSecureCommsManager,
                     mDevicePresenceMonitor);
             cmd.exec(this, in, out, err, args, callback, resultReceiver);
         }

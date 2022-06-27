@@ -16,11 +16,14 @@
 
 package android.companion;
 
+import android.content.Context;
 import android.os.SystemClock;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
 import com.android.internal.util.HexDump;
+
+import libcore.util.EmptyArray;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,69 +34,81 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Random;
 
 public class SystemDataTransportTest extends InstrumentationTestCase {
     private static final String TAG = "SystemDataTransportTest";
 
-    private static final int COMMAND_INVALID = 0xF00DCAFE;
-    private static final int COMMAND_PING_V0 = 0x50490000;
-    private static final int COMMAND_PONG_V0 = 0x504F0000;
+    private static final int MESSAGE_INVALID = 0xF00DCAFE;
 
+    private static final int MESSAGE_REQUEST_INVALID = 0x63636363; // ????
+    private static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
+
+    private static final int MESSAGE_RESPONSE_INVALID = 0x33333333; // !!!!
+    private static final int MESSAGE_RESPONSE_SUCCESS = 0x33838567; // !SUC
+    private static final int MESSAGE_RESPONSE_FAILURE = 0x33706573; // !FAI
+
+    private Context mContext;
     private CompanionDeviceManager mCdm;
+    private int mAssociationId;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        mCdm = getInstrumentation().getTargetContext()
-                .getSystemService(CompanionDeviceManager.class);
+        mContext = getInstrumentation().getTargetContext();
+        mCdm = mContext.getSystemService(CompanionDeviceManager.class);
+        mAssociationId = createAssociation();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+
+        mCdm.disassociate(mAssociationId);
     }
 
     public void testPingHandRolled() {
         // NOTE: These packets are explicitly hand-rolled to verify wire format;
         // the remainder of the tests are fine using generated packets
 
-        // PING v0 with payload "HELLO WORLD!"
+        // MESSAGE_REQUEST_PING with payload "HELLO WORLD!"
         final byte[] input = new byte[] {
-                0x50, 0x49, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x0C,
+                0x63, (byte) 0x80, 0x73, 0x78, // message: MESSAGE_REQUEST_PING
+                0x00, 0x00, 0x00, 0x2A, // sequence: 42
+                0x00, 0x00, 0x00, 0x0C, // length: 12
                 0x48, 0x45, 0x4C, 0x4C, 0x4F, 0x20, 0x57, 0x4F, 0x52, 0x4C, 0x44, 0x21,
         };
-        // PONG v0 with payload "HELLO WORLD!"
+        // MESSAGE_RESPONSE_SUCCESS with payload "HELLO WORLD!"
         final byte[] expected = new byte[] {
-                0x50, 0x4F, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x0C,
+                0x33, (byte) 0x83, (byte) 0x85, 0x67, // message: MESSAGE_RESPONSE_SUCCESS
+                0x00, 0x00, 0x00, 0x2A, // sequence: 42
+                0x00, 0x00, 0x00, 0x0C, // length: 12
                 0x48, 0x45, 0x4C, 0x4C, 0x4F, 0x20, 0x57, 0x4F, 0x52, 0x4C, 0x44, 0x21,
         };
-
-        final ByteArrayInputStream in = new ByteArrayInputStream(input);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        mCdm.attachSystemDataTransport(42, in, out);
-
-        final byte[] actual = waitForByteArray(out, expected.length);
-        assertEquals(HexDump.toHexString(expected), HexDump.toHexString(actual));
+        assertTransportBehavior(input, expected);
     }
 
     public void testPingTrickle() {
-        final byte[] input = generatePacket(COMMAND_PING_V0, TAG);
-        final byte[] expected = generatePacket(COMMAND_PONG_V0, TAG);
+        final byte[] input = generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 1, TAG);
+        final byte[] expected = generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 1, TAG);
 
         final ByteArrayInputStream in = new ByteArrayInputStream(input);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        mCdm.attachSystemDataTransport(42, new TrickleInputStream(in), out);
+        mCdm.attachSystemDataTransport(mAssociationId, new TrickleInputStream(in), out);
 
         final byte[] actual = waitForByteArray(out, expected.length);
         assertEquals(HexDump.toHexString(expected), HexDump.toHexString(actual));
     }
 
     public void testPingDelay() {
-        final byte[] input = generatePacket(COMMAND_PING_V0, TAG);
-        final byte[] expected = generatePacket(COMMAND_PONG_V0, TAG);
+        final byte[] input = generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 1, TAG);
+        final byte[] expected = generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 1, TAG);
 
         final ByteArrayInputStream in = new ByteArrayInputStream(input);
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        mCdm.attachSystemDataTransport(42, new DelayingInputStream(in, 1000),
+        mCdm.attachSystemDataTransport(mAssociationId, new DelayingInputStream(in, 1000),
                 new DelayingOutputStream(out, 1000));
 
         final byte[] actual = waitForByteArray(out, expected.length);
@@ -104,49 +119,54 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         final byte[] blob = new byte[500_000];
         new Random().nextBytes(blob);
 
-        final byte[] input = generatePacket(COMMAND_PING_V0, blob);
-        final byte[] expected = generatePacket(COMMAND_PONG_V0, blob);
-
-        final ByteArrayInputStream in = new ByteArrayInputStream(input);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        mCdm.attachSystemDataTransport(42, in, out);
-
-        final byte[] actual = waitForByteArray(out, expected.length);
-        assertEquals(HexDump.toHexString(expected), HexDump.toHexString(actual));
+        final byte[] input = generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 1, blob);
+        final byte[] expected = generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 1, blob);
+        assertTransportBehavior(input, expected);
     }
 
     public void testMutiplePingPing() {
-        final byte[] input = concat(generatePacket(COMMAND_PING_V0, "red"),
-                generatePacket(COMMAND_PING_V0, "green"));
-        final byte[] expected = concat(generatePacket(COMMAND_PONG_V0, "red"),
-                generatePacket(COMMAND_PONG_V0, "green"));
-
-        final ByteArrayInputStream in = new ByteArrayInputStream(input);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        mCdm.attachSystemDataTransport(42, in, out);
-
-        final byte[] actual = waitForByteArray(out, expected.length);
-        assertEquals(HexDump.toHexString(expected), HexDump.toHexString(actual));
+        final byte[] input = concat(
+                generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 1, "red"),
+                generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 2, "green"));
+        final byte[] expected = concat(
+                generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 1, "red"),
+                generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 2, "green"));
+        assertTransportBehavior(input, expected);
     }
 
     public void testMultipleInvalidPing() {
-        final byte[] input = concat(generatePacket(COMMAND_INVALID, "red"),
-                generatePacket(COMMAND_PING_V0, "green"));
-        final byte[] expected = generatePacket(COMMAND_PONG_V0, "green");
+        final byte[] input = concat(
+                generatePacket(MESSAGE_INVALID, /* sequence */ 1, "red"),
+                generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 2, "green"));
+        final byte[] expected =
+                generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 2, "green");
+        assertTransportBehavior(input, expected);
+    }
 
-        final ByteArrayInputStream in = new ByteArrayInputStream(input);
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        mCdm.attachSystemDataTransport(42, in, out);
+    public void testMultipleInvalidRequestPing() {
+        final byte[] input = concat(
+                generatePacket(MESSAGE_REQUEST_INVALID, /* sequence */ 1, "red"),
+                generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 2, "green"));
+        final byte[] expected = concat(
+                generatePacket(MESSAGE_RESPONSE_FAILURE, /* sequence */ 1),
+                generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 2, "green"));
+        assertTransportBehavior(input, expected);
+    }
 
-        final byte[] actual = waitForByteArray(out, expected.length);
-        assertEquals(HexDump.toHexString(expected), HexDump.toHexString(actual));
+    public void testMultipleInvalidResponsePing() {
+        final byte[] input = concat(
+                generatePacket(MESSAGE_RESPONSE_INVALID, /* sequence */ 1, "red"),
+                generatePacket(MESSAGE_REQUEST_PING, /* sequence */ 2, "green"));
+        final byte[] expected =
+                generatePacket(MESSAGE_RESPONSE_SUCCESS, /* sequence */ 2, "green");
+        assertTransportBehavior(input, expected);
     }
 
     public void testDoubleAttach() {
         // Connect an empty connection that is stalled out
         final InputStream in = new EmptyInputStream();
         final OutputStream out = new ByteArrayOutputStream();
-        mCdm.attachSystemDataTransport(42, in, out);
+        mCdm.attachSystemDataTransport(mAssociationId, in, out);
         SystemClock.sleep(1000);
 
         // Attach a second transport that has some packets; it should disconnect
@@ -154,17 +174,57 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         testPingHandRolled();
     }
 
-    public static byte[] concat(byte[] a, byte[] b) {
-        return ByteBuffer.allocate(a.length + b.length).put(a).put(b).array();
+    public static byte[] concat(byte[]... blobs) {
+        int length = 0;
+        for (byte[] blob : blobs) {
+            length += blob.length;
+        }
+        final ByteBuffer buf = ByteBuffer.allocate(length);
+        for (byte[] blob : blobs) {
+            buf.put(blob);
+        }
+        return buf.array();
     }
 
-    public static byte[] generatePacket(int command, String data) {
-        return generatePacket(command, data.getBytes(StandardCharsets.UTF_8));
+    public static byte[] generatePacket(int message, int sequence) {
+        return generatePacket(message, sequence, EmptyArray.BYTE);
     }
 
-    public static byte[] generatePacket(int command, byte[] data) {
-        return ByteBuffer.allocate(data.length + 8)
-                .putInt(command).putInt(data.length).put(data).array();
+    public static byte[] generatePacket(int message, int sequence, String data) {
+        return generatePacket(message, sequence, data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static byte[] generatePacket(int message, int sequence, byte[] data) {
+        return ByteBuffer.allocate(data.length + 12)
+                .putInt(message)
+                .putInt(sequence)
+                .putInt(data.length)
+                .put(data)
+                .array();
+    }
+
+    private int createAssociation() {
+        getInstrumentation().getUiAutomation().executeShellCommand("cmd companiondevice associate "
+                + mContext.getUserId() + " " + mContext.getPackageName() + " AA:BB:CC:DD:EE:FF");
+        List<AssociationInfo> infos;
+        for (int i = 0; i < 100; i++) {
+            infos = mCdm.getMyAssociations();
+            if (!infos.isEmpty()) {
+                return infos.get(0).getId();
+            } else {
+                SystemClock.sleep(100);
+            }
+        }
+        throw new AssertionError();
+    }
+
+    private void assertTransportBehavior(byte[] input, byte[] expected) {
+        final ByteArrayInputStream in = new ByteArrayInputStream(input);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        mCdm.attachSystemDataTransport(mAssociationId, in, out);
+
+        final byte[] actual = waitForByteArray(out, expected.length);
+        assertEquals(HexDump.toHexString(expected), HexDump.toHexString(actual));
     }
 
     private static byte[] waitForByteArray(ByteArrayOutputStream out, int size) {
