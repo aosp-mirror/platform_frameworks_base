@@ -1613,7 +1613,9 @@ public final class TvInteractiveAppManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSession.getInputSession().requestBroadcastInfo(request);
+                    if (mSession.getInputSession() != null) {
+                        mSession.getInputSession().requestBroadcastInfo(request);
+                    }
                 }
             });
         }
@@ -1622,7 +1624,9 @@ public final class TvInteractiveAppManager {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSession.getInputSession().removeBroadcastInfo(requestId);
+                    if (mSession.getInputSession() != null) {
+                        mSession.getInputSession().removeBroadcastInfo(requestId);
+                    }
                 }
             });
         }
