@@ -62,6 +62,7 @@ import android.companion.DeviceNotAssociatedException;
 import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceManager;
 import android.companion.IOnAssociationsChangedListener;
+import android.companion.ISystemDataTransferCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -722,9 +723,10 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void startSystemDataTransfer(String packageName, int userId, int associationId) {
+        public void startSystemDataTransfer(String packageName, int userId, int associationId,
+                ISystemDataTransferCallback callback) {
             mSystemDataTransferProcessor.startSystemDataTransfer(packageName, userId,
-                    associationId);
+                    associationId, callback);
         }
 
         @Override

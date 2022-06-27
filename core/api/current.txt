@@ -9008,7 +9008,8 @@ package android.companion {
     method @Deprecated public boolean hasNotificationAccess(android.content.ComponentName);
     method public void requestNotificationAccess(android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void startObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
-    method public void startSystemDataTransfer(int) throws android.companion.DeviceNotAssociatedException;
+    method @Deprecated public void startSystemDataTransfer(int) throws android.companion.DeviceNotAssociatedException;
+    method public void startSystemDataTransfer(int, @NonNull java.util.concurrent.Executor, @NonNull android.os.OutcomeReceiver<java.lang.Void,android.companion.CompanionException>) throws android.companion.DeviceNotAssociatedException;
     method @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE) public void stopObservingDevicePresence(@NonNull String) throws android.companion.DeviceNotAssociatedException;
     field public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
     field @Deprecated public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
@@ -9032,6 +9033,9 @@ package android.companion {
     method @MainThread public void onDeviceDisappeared(@NonNull android.companion.AssociationInfo);
     method public void onMessageDispatchedFromSystem(int, int, @NonNull byte[]);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
+  }
+
+  public class CompanionException extends java.lang.RuntimeException {
   }
 
   public interface DeviceFilter<D extends android.os.Parcelable> extends android.os.Parcelable {
