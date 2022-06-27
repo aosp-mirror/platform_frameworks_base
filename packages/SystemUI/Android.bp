@@ -93,6 +93,7 @@ android_library {
         "SystemUISharedLib",
         "SystemUI-statsd",
         "SettingsLib",
+        "androidx.core_core-ktx",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
