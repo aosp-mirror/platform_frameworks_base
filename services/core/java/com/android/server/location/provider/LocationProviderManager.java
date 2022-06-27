@@ -2523,10 +2523,16 @@ public class LocationProviderManager extends
             filtered = locationResult;
         }
 
-        Location last = getLastLocationUnsafe(USER_CURRENT, PERMISSION_FINE, true, Long.MAX_VALUE);
-        if (last != null && locationResult.get(0).getElapsedRealtimeNanos()
-                < last.getElapsedRealtimeNanos()) {
-            Log.e(TAG, "non-monotonic location received from " + mName + " provider");
+        // check for non-monotonic locations if we're not the passive manager. the passive manager
+        // is much more likely to see non-monotonic locations since it gets locations from all
+        // providers, so this error log is not very useful there.
+        if (mPassiveManager != null) {
+            Location last = getLastLocationUnsafe(USER_CURRENT, PERMISSION_FINE, true,
+                    Long.MAX_VALUE);
+            if (last != null && locationResult.get(0).getElapsedRealtimeNanos()
+                    < last.getElapsedRealtimeNanos()) {
+                Log.e(TAG, "non-monotonic location received from " + mName + " provider");
+            }
         }
 
         // update last location
