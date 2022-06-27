@@ -88,7 +88,7 @@ public class FabricatedOverlay {
         }
 
         /**
-         * Sets the value of
+         * Sets the value of the fabricated overlay
          *
          * @param resourceName name of the target resource to overlay (in the form
          *                     [package]:type/entry)
@@ -102,6 +102,25 @@ public class FabricatedOverlay {
             entry.resourceName = resourceName;
             entry.dataType = dataType;
             entry.data = value;
+            mEntries.add(entry);
+            return this;
+        }
+
+        /**
+         * Sets the value of the fabricated overlay
+         *
+         * @param resourceName name of the target resource to overlay (in the form
+         *                     [package]:type/entry)
+         * @param dataType the data type of the new value
+         * @param value the string representing the new value
+         *
+         * @see android.util.TypedValue#type
+         */
+        public Builder setResourceValue(@NonNull String resourceName, int dataType, String value) {
+            final FabricatedOverlayInternalEntry entry = new FabricatedOverlayInternalEntry();
+            entry.resourceName = resourceName;
+            entry.dataType = dataType;
+            entry.stringData = value;
             mEntries.add(entry);
             return this;
         }

@@ -234,7 +234,11 @@ Status Idmap2Service::createFabricatedOverlay(
   }
 
   for (const auto& res : overlay.entries) {
-    builder.SetResourceValue(res.resourceName, res.dataType, res.data);
+    if (res.dataType == Res_value::TYPE_STRING) {
+      builder.SetResourceValue(res.resourceName, res.dataType, res.stringData.value());
+    } else {
+      builder.SetResourceValue(res.resourceName, res.dataType, res.data);
+    }
   }
 
   // Generate the file path of the fabricated overlay and ensure it does not collide with an
