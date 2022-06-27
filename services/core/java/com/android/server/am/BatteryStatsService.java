@@ -56,7 +56,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Parcel;
-import android.os.ParcelFileDescriptor;
 import android.os.ParcelFormatException;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
@@ -726,56 +725,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         return mBatteryUsageStatsProvider.getBatteryUsageStats(queries);
-    }
-
-    @Override
-    @EnforcePermission(BATTERY_STATS)
-    public byte[] getStatistics() {
-        //Slog.i("foo", "SENDING BATTERY INFO:");
-        //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
-        Parcel out = Parcel.obtain();
-        // Drain the handler queue to make sure we've handled all pending works, so we'll get
-        // an accurate stats.
-        awaitCompletion();
-        syncStats("get-stats", BatteryExternalStatsWorker.UPDATE_ALL);
-        synchronized (mStats) {
-            mStats.writeToParcel(out, 0);
-        }
-        byte[] data = out.marshall();
-        out.recycle();
-        return data;
-    }
-
-    /**
-     * Returns parceled BatteryStats as a MemoryFile.
-     *
-     * @param forceUpdate If true, runs a sync to get fresh battery stats. Otherwise,
-     *                  returns the current values.
-     */
-    @Override
-    @EnforcePermission(BATTERY_STATS)
-    public ParcelFileDescriptor getStatisticsStream(boolean forceUpdate) {
-        //Slog.i("foo", "SENDING BATTERY INFO:");
-        //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
-        Parcel out = Parcel.obtain();
-        if (forceUpdate) {
-            // Drain the handler queue to make sure we've handled all pending works, so we'll get
-            // an accurate stats.
-            awaitCompletion();
-            syncStats("get-stats", BatteryExternalStatsWorker.UPDATE_ALL);
-        }
-        synchronized (mStats) {
-            mStats.writeToParcel(out, 0);
-        }
-        byte[] data = out.marshall();
-        if (DBG) Slog.d(TAG, "getStatisticsStream parcel size is:" + data.length);
-        out.recycle();
-        try {
-            return ParcelFileDescriptor.fromData(data, "battery-stats");
-        } catch (IOException e) {
-            Slog.w(TAG, "Unable to create shared memory", e);
-            return null;
-        }
     }
 
     /** Register callbacks for statsd pulled atoms. */
