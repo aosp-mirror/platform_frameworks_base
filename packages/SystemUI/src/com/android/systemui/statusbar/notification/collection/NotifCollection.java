@@ -601,6 +601,12 @@ public class NotifCollection implements Dumpable {
         );
         mNotificationsWithoutRankings = currentEntriesWithoutRankings == null
                 ? Collections.emptySet() : currentEntriesWithoutRankings.keySet();
+        if (currentEntriesWithoutRankings != null && mNotifPipelineFlags.removeUnrankedNotifs()) {
+            for (NotificationEntry entry : currentEntriesWithoutRankings.values()) {
+                entry.mCancellationReason = REASON_UNKNOWN;
+                tryRemoveNotification(entry);
+            }
+        }
         mEventQueue.add(new RankingAppliedEvent());
     }
 
