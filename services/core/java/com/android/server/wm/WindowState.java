@@ -3461,10 +3461,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mClient.asBinder().isBinderAlive();
     }
 
-    boolean isClosing() {
-        return mAnimatingExit || (mActivityRecord != null && mActivityRecord.isClosingOrEnteringPip());
-    }
-
     void sendAppVisibilityToClients() {
         super.sendAppVisibilityToClients();
 
