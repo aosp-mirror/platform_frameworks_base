@@ -1645,6 +1645,7 @@ public final class InputMethodManager {
         mCurId = null;
         mCurMethod = null; // for @UnsupportedAppUsage
         mCurrentInputMethodSession = null;
+        mIsInputMethodSuppressingSpellChecker = false;
     }
 
     /**
@@ -1707,7 +1708,6 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     void finishInputLocked() {
         mVirtualDisplayToScreenMatrix = null;
-        mIsInputMethodSuppressingSpellChecker = false;
         setNextServedViewLocked(null);
         if (getServedViewLocked() != null) {
             if (DEBUG) {
