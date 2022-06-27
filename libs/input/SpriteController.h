@@ -265,7 +265,7 @@ private:
     void doDisposeSurfaces();
 
     void ensureSurfaceComposerClient();
-    sp<SurfaceControl> obtainSurface(int32_t width, int32_t height);
+    sp<SurfaceControl> obtainSurface(int32_t width, int32_t height, int32_t displayId);
 };
 
 } // namespace android
