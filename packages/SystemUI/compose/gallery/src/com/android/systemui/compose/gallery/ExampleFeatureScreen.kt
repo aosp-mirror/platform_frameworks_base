@@ -18,10 +18,11 @@ package com.android.systemui.compose.gallery
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.android.systemui.ExampleFeature
 
 /** The screen that shows ExampleFeature. */
 @Composable
-fun ExampleFeatureScreen() {
-    Column { ExampleFeature("This is an example feature!") }
+fun ExampleFeatureScreen(modifier: Modifier = Modifier) {
+    Column(modifier) { ExampleFeature("This is an example feature!") }
 }

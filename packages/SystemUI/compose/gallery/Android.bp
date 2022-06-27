@@ -52,6 +52,7 @@ android_library {
 android_app {
     name: "SystemUIComposeGallery",
     defaults: ["platform_app_defaults"],
+    manifest: "app/AndroidManifest.xml",
 
     static_libs: [
         "SystemUIComposeGalleryLib",
