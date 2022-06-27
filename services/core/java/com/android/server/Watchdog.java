@@ -306,11 +306,13 @@ public class Watchdog implements Dumpable {
         }
 
         String describeBlockedStateLocked() {
+            Thread thread = getThread();
+            String threadIdentifier = thread.getName() + ", tid=" + thread.getId();
             if (mCurrentMonitor == null) {
-                return "Blocked in handler on " + mName + " (" + getThread().getName() + ")";
+                return "Blocked in handler on " + mName + " (" + threadIdentifier + ")";
             } else {
                 return "Blocked in monitor " + mCurrentMonitor.getClass().getName()
-                        + " on " + mName + " (" + getThread().getName() + ")";
+                        + " on " + mName + " (" + threadIdentifier + ")";
             }
         }
 
