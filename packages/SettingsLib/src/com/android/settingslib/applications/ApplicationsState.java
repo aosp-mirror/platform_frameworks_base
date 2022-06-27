@@ -48,7 +48,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.Formatter;
-import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -116,7 +115,6 @@ public class ApplicationsState {
 
     final Context mContext;
     final PackageManager mPm;
-    final IconDrawableFactory mDrawableFactory;
     final IPackageManager mIpm;
     final UserManager mUm;
     final StorageStatsManager mStats;
@@ -194,7 +192,6 @@ public class ApplicationsState {
     private ApplicationsState(Application app, IPackageManager iPackageManager) {
         mContext = app;
         mPm = mContext.getPackageManager();
-        mDrawableFactory = IconDrawableFactory.newInstance(mContext);
         mIpm = iPackageManager;
         mUm = mContext.getSystemService(UserManager.class);
         mStats = mContext.getSystemService(StorageStatsManager.class);
