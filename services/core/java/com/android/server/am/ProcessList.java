@@ -5129,6 +5129,7 @@ public final class ProcessList {
         private static final String EXTRA_REQUESTER = "requester";
 
         private static final String DROPBOX_TAG_IMPERCEPTIBLE_KILL = "imperceptible_app_kill";
+        private static final boolean LOG_TO_DROPBOX = false;
 
         // uid -> killing information mapping
         private SparseArray<List<Bundle>> mWorkItems = new SparseArray<List<Bundle>>();
@@ -5234,7 +5235,7 @@ public final class ProcessList {
 
         private void handleDeviceIdle() {
             final DropBoxManager dbox = mService.mContext.getSystemService(DropBoxManager.class);
-            final boolean logToDropbox = dbox != null
+            final boolean logToDropbox = LOG_TO_DROPBOX && dbox != null
                     && dbox.isTagEnabled(DROPBOX_TAG_IMPERCEPTIBLE_KILL);
 
             synchronized (mService) {
