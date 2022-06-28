@@ -475,5 +475,13 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
         assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
+
+        tf0.setResumedActivity(activity0, "test");
+        tf1.setResumedActivity(activity1, "test");
+        mDisplayContent.mFocusedApp = activity1;
+
+        // Making the activity0 be the focused activity and ensure the focused app is updated.
+        activity0.moveFocusableActivityToTop("test");
+        assertEquals(activity0, mDisplayContent.mFocusedApp);
     }
 }
