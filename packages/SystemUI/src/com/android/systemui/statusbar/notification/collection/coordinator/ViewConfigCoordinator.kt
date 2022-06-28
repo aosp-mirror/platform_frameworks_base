@@ -70,11 +70,9 @@ class ViewConfigCoordinator @Inject internal constructor(
 
     override fun attach(pipeline: NotifPipeline) {
         mPipeline = pipeline
-        if (pipeline.isNewPipelineEnabled) {
-            mLockscreenUserManager.addUserChangedListener(mUserChangedListener)
-            mConfigurationController.addCallback(this)
-            mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback)
-        }
+        mLockscreenUserManager.addUserChangedListener(mUserChangedListener)
+        mConfigurationController.addCallback(this)
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateCallback)
     }
 
     override fun onDensityOrFontScaleChanged() {

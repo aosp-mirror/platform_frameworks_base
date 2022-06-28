@@ -152,8 +152,6 @@ public class NotifCollectionTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         allowTestableLooperAsMainThread();
 
-        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
-
         when(mEulogizer.record(any(Exception.class))).thenAnswer(i -> i.getArguments()[0]);
 
         mListenerInOrder = inOrder(mCollectionListener);
