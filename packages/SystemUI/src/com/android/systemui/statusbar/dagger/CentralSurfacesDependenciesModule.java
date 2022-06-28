@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
+import com.android.systemui.statusbar.phone.StatusBarIconList;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
@@ -251,6 +252,16 @@ public interface CentralSurfacesDependenciesModule {
     @Binds
     StatusBarIconController provideStatusBarIconController(
             StatusBarIconControllerImpl controllerImpl);
+
+    /**
+     */
+    @Provides
+    @SysUISingleton
+    static StatusBarIconList provideStatusBarIconList(Context context) {
+        return new StatusBarIconList(
+                context.getResources().getStringArray(
+                        com.android.internal.R.array.config_statusBarIcons));
+    }
 
     /**
      */
