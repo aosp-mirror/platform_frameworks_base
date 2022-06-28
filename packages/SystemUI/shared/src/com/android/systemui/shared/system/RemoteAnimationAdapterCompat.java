@@ -220,9 +220,9 @@ public class RemoteAnimationAdapterCompat {
                         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                             info.getChanges().get(i).getLeash().release();
                         }
-                        for (int i = leashMap.size() - 1; i >= 0; --i) {
-                            leashMap.valueAt(i).release();
-                        }
+                        // Don't release here since launcher might still be using them. Instead
+                        // let launcher release them (eg. via RemoteAnimationTargets)
+                        leashMap.clear();
                         try {
                             finishCallback.onTransitionFinished(null /* wct */, finishTransaction);
                         } catch (RemoteException e) {
