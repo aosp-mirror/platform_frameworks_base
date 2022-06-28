@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
@@ -195,5 +196,27 @@ public class BatteryControllerTest extends SysuiTestCase {
                 });
         TestableLooper.get(this).processAllMessages();
         // Should not throw an exception
+    }
+
+    @Test
+    public void batteryStateChanged_withChargingSourceDock_isChargingSourceDockTrue() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_DOCK);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertTrue(mBatteryController.isChargingSourceDock());
+    }
+
+    @Test
+    public void batteryStateChanged_withChargingSourceNotDock_isChargingSourceDockFalse() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_DISCHARGING);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_WIRELESS);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertFalse(mBatteryController.isChargingSourceDock());
     }
 }
