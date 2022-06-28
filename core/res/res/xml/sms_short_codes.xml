@@ -61,7 +61,7 @@
     <shortcode country="bg" pattern="\\d{4,5}" premium="18(?:16|423)|19(?:1[56]|35)" free="116\\d{3}|1988|1490" />
 
     <!-- Bahrain: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="bh" pattern="\\d{1,5}" free="81181" />
+    <shortcode country="bh" pattern="\\d{1,5}" free="81181|85999" />
 
     <!-- Brazil: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="br" pattern="\\d{1,5}" free="6000[012]\\d|876|5500|9963|4141|8000" />
