@@ -19,6 +19,13 @@
           package="com.android.appenumeration.shareduid"
           android:sharedUserId="com.android.appenumeration.shareduid">
     <application>
+        <activity android:name="com.android.appenumeration.testapp.DummyActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.INFO"/>
+            </intent-filter>
+        </activity>
         <uses-library android:name="android.test.runner" />
     </application>
 </manifest>

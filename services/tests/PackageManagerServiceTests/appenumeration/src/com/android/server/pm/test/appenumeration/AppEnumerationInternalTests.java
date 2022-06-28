@@ -21,14 +21,19 @@ import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.AppGlobals;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.IntentSender;
 import android.content.pm.IPackageManager;
 import android.content.pm.ProviderInfo;
 import android.os.Process;
 import android.os.UserHandle;
 
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +59,7 @@ public class AppEnumerationInternalTests {
     private static final String TARGET_HAS_APPOP_PERMISSION =
             "com.android.appenumeration.hasappoppermission";
     private static final String TARGET_SHARED_USER = "com.android.appenumeration.shareduid";
+    private static final String TARGET_NON_EXISTENT = "com.android.appenumeration.nonexistent.pkg";
 
     private static final String SYNC_PROVIDER_AUTHORITY = TARGET_SYNC_PROVIDER;
     private static final String PERMISSION_REQUEST_INSTALL_PACKAGES =
@@ -132,6 +138,26 @@ public class AppEnumerationInternalTests {
 
         final int uid = mIPackageManager.getUidForSharedUser(SHARED_USER_NAME);
         assertThat(uid).isEqualTo(Process.INVALID_UID);
+    }
+
+    @Test
+    public void getLaunchIntentSenderForPackage_intentSender_cannotDetectPackage()
+            throws Exception {
+        installPackage(SHARED_USER_APK_PATH, false /* forceQueryable */);
+
+        final Context context = InstrumentationRegistry.getInstrumentation().getContext();
+        final IntentSender sender = context.getPackageManager()
+                .getLaunchIntentSenderForPackage(TARGET_SHARED_USER);
+        assertThat(new PendingIntent(sender.getTarget()).isTargetedToPackage()).isTrue();
+        sender.sendIntent(context, 0 /* code */, null /* intent */,
+                null /* onFinished */, null /* handler */);
+
+        final IntentSender failedSender = InstrumentationRegistry.getInstrumentation().getContext()
+                .getPackageManager().getLaunchIntentSenderForPackage(TARGET_NON_EXISTENT);
+        assertThat(new PendingIntent(failedSender.getTarget()).isTargetedToPackage()).isTrue();
+        Assert.assertThrows(IntentSender.SendIntentException.class,
+                () -> failedSender.sendIntent(context, 0 /* code */, null /* intent */,
+                        null /* onFinished */, null /* handler */));
     }
 
     private static void installPackage(String apkPath, boolean forceQueryable) {
