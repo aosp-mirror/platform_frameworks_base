@@ -161,6 +161,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
@@ -6508,12 +6509,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         /**
          * Notifies the remote insets controller that the top focused window has changed.
          *
-         * @param packageName The name of the package that is open in the top focused window.
+         * @param component The application component that is open in the top focussed window.
          * @param requestedVisibilities The insets visibilities requested by the focussed window.
          */
-        void topFocusedWindowChanged(String packageName, InsetsVisibilities requestedVisibilities) {
+        void topFocusedWindowChanged(ComponentName component,
+                InsetsVisibilities requestedVisibilities) {
             try {
-                mRemoteInsetsController.topFocusedWindowChanged(packageName, requestedVisibilities);
+                mRemoteInsetsController.topFocusedWindowChanged(component, requestedVisibilities);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver package in top focused window change", e);
             }
