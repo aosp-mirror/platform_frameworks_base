@@ -37,6 +37,7 @@ import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.BroadcastOptions;
 import android.app.GameManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -2245,6 +2246,27 @@ public abstract class Context {
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Version of {@link #sendBroadcastMultiplePermissions(Intent, String[])} that allows you to
+     * specify the {@link android.app.BroadcastOptions}.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermissions Array of names of permissions that a receiver must hold
+     *                            in order to receive your broadcast.
+     *                            If empty, no permissions are required.
+     * @param options Additional sending options, generated from a
+     *                {@link android.app.BroadcastOptions}.
+     * @see #sendBroadcastMultiplePermissions(Intent, String[])
+     * @see android.app.BroadcastOptions
+     * @hide
+     */
+    @SystemApi
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable BroadcastOptions options) {
+        sendBroadcastMultiplePermissions(intent, receiverPermissions, options.toBundle());
     }
 
     /**
