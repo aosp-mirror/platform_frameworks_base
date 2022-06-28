@@ -230,6 +230,7 @@ package android {
     field public static final String READ_WALLPAPER_INTERNAL = "android.permission.READ_WALLPAPER_INTERNAL";
     field public static final String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
     field public static final String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
+    field public static final String RECEIVE_BLUETOOTH_MAP = "android.permission.RECEIVE_BLUETOOTH_MAP";
     field public static final String RECEIVE_DATA_ACTIVITY_CHANGE = "android.permission.RECEIVE_DATA_ACTIVITY_CHANGE";
     field public static final String RECEIVE_DEVICE_CUSTOMIZATION_READY = "android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY";
     field public static final String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
@@ -311,6 +312,7 @@ package android {
     field public static final String WRITE_EMBEDDED_SUBSCRIPTIONS = "android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS";
     field @Deprecated public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
+    field public static final String WRITE_SMS = "android.permission.WRITE_SMS";
   }
 
   public static final class Manifest.permission_group {
@@ -1978,6 +1980,7 @@ package android.content {
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.content.Intent registerReceiverForAllUsers(@Nullable android.content.BroadcastReceiver, @NonNull android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler, int);
     method public abstract void sendBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendBroadcastMultiplePermissions(@NonNull android.content.Intent, @NonNull String[], @Nullable android.app.BroadcastOptions);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
     field public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
@@ -2077,6 +2080,7 @@ package android.content {
     field public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
     field public static final String ACTION_USER_ADDED = "android.intent.action.USER_ADDED";
     field public static final String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
+    field public static final String ACTION_USER_SWITCHED = "android.intent.action.USER_SWITCHED";
     field public static final String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
     field public static final String CATEGORY_LEANBACK_SETTINGS = "android.intent.category.LEANBACK_SETTINGS";
     field public static final String EXTRA_CALLING_PACKAGE = "android.intent.extra.CALLING_PACKAGE";
@@ -2097,7 +2101,9 @@ package android.content {
     field public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
     field public static final String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
+    field public static final String EXTRA_USER_HANDLE = "android.intent.extra.user_handle";
     field public static final String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
+    field public static final int FLAG_RECEIVER_INCLUDE_BACKGROUND = 16777216; // 0x1000000
     field public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 67108864; // 0x4000000
     field public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
   }

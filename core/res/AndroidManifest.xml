@@ -1536,7 +1536,7 @@
         android:protectionLevel="normal"
         android:permissionFlags="removed"/>
 
-    <!-- @hide We need to keep this around for backwards compatibility -->
+    <!-- @SystemApi @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_SMS"
         android:protectionLevel="normal"
         android:permissionFlags="removed"/>
@@ -1614,7 +1614,7 @@
     <permission android:name="android.permission.RECEIVE_EMERGENCY_BROADCAST"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to monitor incoming Bluetooth MAP messages, to record
+    <!-- @SystemApi Allows an application to monitor incoming Bluetooth MAP messages, to record
          or perform processing on them. -->
     <!-- @hide -->
     <permission android:name="android.permission.RECEIVE_BLUETOOTH_MAP"
