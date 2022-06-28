@@ -183,6 +183,9 @@ public final class PowerManager {
     /**
      * Wake lock flag: Turn the screen on when the wake lock is acquired.
      * <p>
+     * This flag requires {@link android.Manifest.permission#TURN_SCREEN_ON} for apps targeting
+     * Android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and higher.
+     * </p><p>
      * Normally wake locks don't actually wake the device, they just cause the screen to remain on
      * once it's already on. This flag will cause the device to wake up when the wake lock is
      * acquired.
@@ -195,10 +198,10 @@ public final class PowerManager {
      *
      * @deprecated Most applications should use {@link android.R.attr#turnScreenOn} or
      * {@link android.app.Activity#setTurnScreenOn(boolean)} instead, as this prevents the previous
-     * foreground app from being resumed first when the screen turns on. Note that this flag may
-     * require a permission in the future.
+     * foreground app from being resumed first when the screen turns on.
      */
     @Deprecated
+    @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
     public static final int ACQUIRE_CAUSES_WAKEUP = 0x10000000;
 
     /**

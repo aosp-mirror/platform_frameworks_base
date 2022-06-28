@@ -48,4 +48,19 @@ interface SystemPropertiesWrapper {
      * SELinux. libc will log the underlying reason.
      */
     void set(@NonNull String key, @Nullable String val);
+
+    /**
+     * Get the value for the given {@code key}, returned as a boolean.
+     * Values 'n', 'no', '0', 'false' or 'off' are considered false.
+     * Values 'y', 'yes', '1', 'true' or 'on' are considered true.
+     * (case sensitive).
+     * If the key does not exist, or has any other value, then the default
+     * result is returned.
+     *
+     * @param key the key to lookup
+     * @param def a default value to return
+     * @return the key parsed as a boolean, or def if the key isn't found or is
+     *         not able to be parsed as a boolean.
+     */
+    boolean getBoolean(@NonNull String key, boolean def);
 }

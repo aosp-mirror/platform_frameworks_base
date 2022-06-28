@@ -1702,7 +1702,7 @@
         android:description="@string/permdesc_useBiometric"
         android:protectionLevel="normal" />
 
-   <!-- ======================================================================= -->
+    <!-- ====================================================================== -->
     <!-- Permissions for posting notifications                                  -->
     <!-- ====================================================================== -->
     <eat-comment />
@@ -2467,6 +2467,15 @@
         android:label="@string/permlab_transmitIr"
         android:description="@string/permdesc_transmitIr"
         android:protectionLevel="normal" />
+
+    <!-- Allows an app to turn on the screen on, e.g. with
+         {@link android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP}.
+         <p>Intended to only be used by home automation apps.
+    -->
+    <permission android:name="android.permission.TURN_SCREEN_ON"
+        android:label="@string/permlab_turnScreenOn"
+        android:description="@string/permdesc_turnScreenOn"
+        android:protectionLevel="normal|appop" />
 
     <!-- ==================================================== -->
     <!-- Permissions related to changing audio settings   -->

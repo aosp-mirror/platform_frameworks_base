@@ -1906,6 +1906,7 @@ public class AppOpsManager {
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OP_SCHEDULE_EXACT_ALARM,
             OP_MANAGE_MEDIA,
+            OP_TURN_SCREEN_ON,
     };
 
     /**
@@ -2362,7 +2363,7 @@ public class AppOpsManager {
             null,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            null, // no permission for turning the screen on
+            Manifest.permission.TURN_SCREEN_ON,
             Manifest.permission.GET_ACCOUNTS,
             null, // no permission for running in background
             null, // no permission for changing accessibility volume
@@ -2491,7 +2492,7 @@ public class AppOpsManager {
             null, // MOCK_LOCATION
             null, // READ_EXTERNAL_STORAGE
             null, // WRITE_EXTERNAL_STORAGE
-            null, // TURN_ON_SCREEN
+            null, // TURN_SCREEN_ON
             null, // GET_ACCOUNTS
             null, // RUN_IN_BACKGROUND
             UserManager.DISALLOW_ADJUST_VOLUME, //AUDIO_ACCESSIBILITY_VOLUME
@@ -2619,7 +2620,7 @@ public class AppOpsManager {
             null, // MOCK_LOCATION
             null, // READ_EXTERNAL_STORAGE
             null, // WRITE_EXTERNAL_STORAGE
-            null, // TURN_ON_SCREEN
+            null, // TURN_SCREEN_ON
             null, // GET_ACCOUNTS
             null, // RUN_IN_BACKGROUND
             null, // AUDIO_ACCESSIBILITY_VOLUME
@@ -2746,7 +2747,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED, // MOCK_LOCATION
             AppOpsManager.MODE_ALLOWED, // READ_EXTERNAL_STORAGE
             AppOpsManager.MODE_ALLOWED, // WRITE_EXTERNAL_STORAGE
-            AppOpsManager.MODE_ALLOWED, // TURN_SCREEN_ON
+            AppOpsManager.MODE_ERRORED, // TURN_SCREEN_ON
             AppOpsManager.MODE_ALLOWED, // GET_ACCOUNTS
             AppOpsManager.MODE_ALLOWED, // RUN_IN_BACKGROUND
             AppOpsManager.MODE_ALLOWED, // AUDIO_ACCESSIBILITY_VOLUME
