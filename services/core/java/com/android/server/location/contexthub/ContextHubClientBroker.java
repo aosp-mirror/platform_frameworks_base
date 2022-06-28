@@ -44,11 +44,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.location.ClientBrokerProto;
 
 import java.util.Collections;
@@ -127,6 +131,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
     private static final long CHANGE_ID_AUTH_STATE_DENIED = 181350407L;
+    private static final long WAKELOCK_TIMEOUT_MILLIS = 5 * 1000;
 
     /*
      * The context of the service.
@@ -169,6 +174,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * creator of this broker. This is used when attributing the permissions usage of the broker.
      */
     private @Nullable String mAttributionTag;
+
+    /** Wakelock held while nanoapp message are in flight to the client */
+    @GuardedBy("mWakeLock")
+    private final WakeLock mWakeLock;
+
+    /** True if {@link #mWakeLock} is open for acquisition. */
+    @GuardedBy("mWakeLock")
+    private boolean mIsWakeLockActive = true;
 
     /*
      * Internal interface used to invoke client callbacks.
@@ -344,27 +357,60 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         mUid = Binder.getCallingUid();
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
+        PowerManager powerManager = context.getSystemService(PowerManager.class);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock.setWorkSource(new WorkSource(mUid, mPackage));
+        mWakeLock.setReferenceCounted(true);
+
         startMonitoringOpChanges();
         sendHostEndpointConnectedEvent();
     }
 
     /* package */ ContextHubClientBroker(
-            Context context, IContextHubWrapper contextHubProxy,
-            ContextHubClientManager clientManager, ContextHubInfo contextHubInfo,
-            short hostEndPointId, IContextHubClientCallback callback, String attributionTag,
-            ContextHubTransactionManager transactionManager, String packageName) {
-        this(context, contextHubProxy, clientManager, contextHubInfo, hostEndPointId, callback,
-                attributionTag, transactionManager, null /* pendingIntent */, 0 /* nanoAppId */,
+            Context context,
+            IContextHubWrapper contextHubProxy,
+            ContextHubClientManager clientManager,
+            ContextHubInfo contextHubInfo,
+            short hostEndPointId,
+            IContextHubClientCallback callback,
+            String attributionTag,
+            ContextHubTransactionManager transactionManager,
+            String packageName) {
+        this(
+                context,
+                contextHubProxy,
+                clientManager,
+                contextHubInfo,
+                hostEndPointId,
+                callback,
+                attributionTag,
+                transactionManager,
+                /* pendingIntent= */ null,
+                /* nanoAppId= */ 0,
                 packageName);
     }
 
     /* package */ ContextHubClientBroker(
-            Context context, IContextHubWrapper contextHubProxy,
-            ContextHubClientManager clientManager, ContextHubInfo contextHubInfo,
-            short hostEndPointId, PendingIntent pendingIntent, long nanoAppId,
-            String attributionTag, ContextHubTransactionManager transactionManager) {
-        this(context, contextHubProxy, clientManager, contextHubInfo, hostEndPointId,
-                null /* callback */, attributionTag, transactionManager, pendingIntent, nanoAppId,
+            Context context,
+            IContextHubWrapper contextHubProxy,
+            ContextHubClientManager clientManager,
+            ContextHubInfo contextHubInfo,
+            short hostEndPointId,
+            PendingIntent pendingIntent,
+            long nanoAppId,
+            String attributionTag,
+            ContextHubTransactionManager transactionManager) {
+        this(
+                context,
+                contextHubProxy,
+                clientManager,
+                contextHubInfo,
+                hostEndPointId,
+                /* callback= */ null,
+                attributionTag,
+                transactionManager,
+                pendingIntent,
+                nanoAppId,
                 pendingIntent.getCreatorPackage());
     }
 
@@ -787,6 +833,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private synchronized void invokeCallback(CallbackConsumer consumer) {
         if (mCallbackInterface != null) {
             try {
+                Binder.withCleanCallingIdentity(this::acquireWakeLock);
                 consumer.accept(mCallbackInterface);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while invoking client callback (host endpoint ID = "
@@ -850,19 +897,29 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * Sends a PendingIntent with extra Intent data
      *
      * @param pendingIntent the PendingIntent
-     * @param intent        the extra Intent data
+     * @param intent the extra Intent data
      */
     private void doSendPendingIntent(PendingIntent pendingIntent, Intent intent) {
         try {
             String requiredPermission = Manifest.permission.ACCESS_CONTEXT_HUB;
+            Binder.withCleanCallingIdentity(this::acquireWakeLock);
             pendingIntent.send(
-                    mContext, 0 /* code */, intent, null /* onFinished */, null /* Handler */,
-                    requiredPermission, null /* options */);
+                    mContext,
+                    /* code= */ 0,
+                    intent,
+                    /* onFinished= */ this,
+                    /* handler= */ null,
+                    requiredPermission,
+                    /* options= */ null);
         } catch (PendingIntent.CanceledException e) {
             mIsPendingIntentCancelled.set(true);
             // The PendingIntent is no longer valid
-            Log.w(TAG, "PendingIntent has been canceled, unregistering from client"
-                    + " (host endpoint ID " + mHostEndPointId + ")");
+            Log.w(
+                    TAG,
+                    "PendingIntent has been canceled, unregistering from client"
+                            + " (host endpoint ID "
+                            + mHostEndPointId
+                            + ")");
             close();
         }
     }
@@ -885,9 +942,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         if (!mPendingIntentRequest.hasPendingIntent() && mRegistered) {
             mClientManager.unregisterClient(mHostEndPointId);
             mRegistered = false;
+            Binder.withCleanCallingIdentity(this::releaseWakeLockOnExit);
         }
         mAppOpsManager.stopWatchingMode(this);
-
         mContextHubProxy.onHostEndpointDisconnected(mHostEndPointId);
     }
 
@@ -965,15 +1022,17 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             }
             out += ")";
         }
+        synchronized (mWakeLock) {
+            out += "wakelock: " + mWakeLock;
+        }
         out += "]";
-
         return out;
     }
 
     /** Callback that arrives when direct-call message callback delivery completed */
     @Override
     public void callbackFinished() {
-        // TODO(b/202447392): pending implementation.
+        Binder.withCleanCallingIdentity(this::releaseWakeLock);
     }
 
     @Override
@@ -983,6 +1042,50 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             int resultCode,
             String resultData,
             Bundle resultExtras) {
-        // TODO(b/202447392): pending implementation.
+        Binder.withCleanCallingIdentity(this::releaseWakeLock);
+    }
+
+    private void acquireWakeLock() {
+        synchronized (mWakeLock) {
+            if (mIsWakeLockActive) {
+                mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
+            }
+        }
+    }
+
+    /**
+     * Releases the wakelock.
+     *
+     * <p>The check-and-release operation should be atomic to avoid overly release.
+     */
+    private void releaseWakeLock() {
+        synchronized (mWakeLock) {
+            if (mWakeLock.isHeld()) {
+                try {
+                    mWakeLock.release();
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Releasing the wakelock fails - ", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Releases the wakelock for all the acquisitions during cleanup.
+     *
+     * <p>The check-and-release operation should be atomic to avoid overly release.
+     */
+    private void releaseWakeLockOnExit() {
+        synchronized (mWakeLock) {
+            mIsWakeLockActive = false;
+            while (mWakeLock.isHeld()) {
+                try {
+                    mWakeLock.release();
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Releasing the wakelock for all acquisitions fails - ", e);
+                    break;
+                }
+            }
+        }
     }
 }
