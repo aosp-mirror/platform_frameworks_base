@@ -332,10 +332,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     // Their staging dirs will be removed too
                     PackageInstallerSession root = !session.hasParentSessionId()
                             ? session : mSessions.get(session.getParentSessionId());
-                    if (root == null) {
-                        Slog.e(TAG, "freeStageDirs: found an orphaned session: "
-                                + session.sessionId + " parent=" + session.getParentSessionId());
-                    } else if (!root.isDestroyed() && 
+                    if (!root.isDestroyed() && 
                             (!root.isStaged() || (root.isStaged() && root.isStagedSessionReady()))) 
                     {
                         root.abandon();
