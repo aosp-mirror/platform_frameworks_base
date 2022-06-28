@@ -805,6 +805,7 @@ public final class ViewRootImpl implements ViewParent,
     private final ViewRootRectTracker mUnrestrictedKeepClearRectsTracker =
             new ViewRootRectTracker(v -> v.collectUnrestrictedPreferKeepClearRects());
     private boolean mHasPendingKeepClearAreaChange;
+    private Rect mKeepClearAccessibilityFocusRect;
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
@@ -4865,13 +4866,27 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendEmptyMessage(MSG_KEEP_CLEAR_RECTS_CHANGED);
     }
 
-    void keepClearRectsChanged() {
+    private void updateKeepClearForAccessibilityFocusRect() {
+        if (mViewConfiguration.isPreferKeepClearForFocusEnabled()) {
+            if (mKeepClearAccessibilityFocusRect == null) {
+                mKeepClearAccessibilityFocusRect = new Rect();
+            }
+            boolean hasAccessibilityFocus =
+                    getAccessibilityFocusedRect(mKeepClearAccessibilityFocusRect);
+            if (!hasAccessibilityFocus) {
+                mKeepClearAccessibilityFocusRect.setEmpty();
+            }
+            mHandler.obtainMessage(MSG_KEEP_CLEAR_RECTS_CHANGED, 1, 0).sendToTarget();
+        }
+    }
+
+    void keepClearRectsChanged(boolean accessibilityFocusRectChanged) {
         boolean restrictedKeepClearRectsChanged = mKeepClearRectsTracker.computeChanges();
         boolean unrestrictedKeepClearRectsChanged =
                 mUnrestrictedKeepClearRectsTracker.computeChanges();
 
-        if ((restrictedKeepClearRectsChanged || unrestrictedKeepClearRectsChanged)
-                && mView != null) {
+        if ((restrictedKeepClearRectsChanged || unrestrictedKeepClearRectsChanged
+                || accessibilityFocusRectChanged) && mView != null) {
             mHasPendingKeepClearAreaChange = true;
             // Only report keep clear areas immediately if they have not been reported recently
             if (!mHandler.hasMessages(MSG_REPORT_KEEP_CLEAR_RECTS)) {
@@ -4888,9 +4903,15 @@ public final class ViewRootImpl implements ViewParent,
         }
         mHasPendingKeepClearAreaChange = false;
 
-        final List<Rect> restrictedKeepClearRects = mKeepClearRectsTracker.getLastComputedRects();
+        List<Rect> restrictedKeepClearRects = mKeepClearRectsTracker.getLastComputedRects();
         final List<Rect> unrestrictedKeepClearRects =
                 mUnrestrictedKeepClearRectsTracker.getLastComputedRects();
+
+        if (mKeepClearAccessibilityFocusRect != null
+                && !mKeepClearAccessibilityFocusRect.isEmpty()) {
+            restrictedKeepClearRects = new ArrayList<>(restrictedKeepClearRects);
+            restrictedKeepClearRects.add(mKeepClearAccessibilityFocusRect);
+        }
 
         try {
             mWindowSession.reportKeepClearAreasChanged(mWindow, restrictedKeepClearRects,
@@ -5091,6 +5112,7 @@ public final class ViewRootImpl implements ViewParent,
         // Set the new focus host and node.
         mAccessibilityFocusedHost = view;
         mAccessibilityFocusedVirtualView = node;
+        updateKeepClearForAccessibilityFocusRect();
 
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.invalidateRoot();
@@ -5679,7 +5701,7 @@ public final class ViewRootImpl implements ViewParent,
                     systemGestureExclusionChanged();
                 }   break;
                 case MSG_KEEP_CLEAR_RECTS_CHANGED: {
-                    keepClearRectsChanged();
+                    keepClearRectsChanged(/* accessibilityFocusRectChanged= */ msg.arg1 == 1);
                 }   break;
                 case MSG_REPORT_KEEP_CLEAR_RECTS: {
                     reportKeepClearAreasChanged();

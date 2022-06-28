@@ -266,9 +266,14 @@ public class NotificationConversationInfo extends LinearLayout implements
         snooze.setOnClickListener(mOnSnoozeClick);
         */
 
-        if (mAppBubble == BUBBLE_PREFERENCE_ALL) {
-            ((TextView) findViewById(R.id.default_summary)).setText(getResources().getString(
+        TextView defaultSummaryTextView = findViewById(R.id.default_summary);
+        if (mAppBubble == BUBBLE_PREFERENCE_ALL
+                && BubblesManager.areBubblesEnabled(mContext, mSbn.getUser())) {
+            defaultSummaryTextView.setText(getResources().getString(
                     R.string.notification_channel_summary_default_with_bubbles, mAppName));
+        } else {
+            defaultSummaryTextView.setText(getResources().getString(
+                    R.string.notification_channel_summary_default));
         }
 
         findViewById(R.id.priority).setOnClickListener(mOnFavoriteClick);

@@ -1,3 +1,16 @@
 per-file *Notification* = set noparent
 per-file *Notification* = file:../notification/OWNERS
+
 per-file NotificationIcon* = ccassidy@google.com, evanlaird@google.com, pixel@google.com
+
+per-file NotificationsQuickSettingsContainer.java = kozynski@google.com, asc@google.com
+per-file NotificationsQSContainerController.kt = kozynski@google.com, asc@google.com
+
+per-file NotificationShadeWindowControllerImpl.java = dupin@google.com, cinek@google.com, beverlyt@google.com, pixel@google.com, juliacr@google.com
+per-file NotificationShadeWindowViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com
+per-file NotificationShadeWindowView.java = pixel@google.com, cinek@google.com, juliacr@google.com
+
+per-file NotificationPanelUnfoldAnimationController.kt = alexflo@google.com, jeffdq@google.com, juliacr@google.com
+
+per-file NotificationPanelView.java = pixel@google.com, cinek@google.com, juliacr@google.com
+per-file NotificationPanelViewController.java = pixel@google.com, cinek@google.com, juliacr@google.com

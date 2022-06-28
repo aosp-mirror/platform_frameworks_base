@@ -6760,6 +6760,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     long deleteOatArtifactsOfPackage(@NonNull Computer snapshot, String packageName) {
+        PackageManagerServiceUtils.enforceSystemOrRootOrShell(
+                "Only the system or shell can delete oat artifacts");
+
         PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
         if (packageState == null || packageState.getPkg() == null) {
             return -1; // error code of deleteOptimizedFiles

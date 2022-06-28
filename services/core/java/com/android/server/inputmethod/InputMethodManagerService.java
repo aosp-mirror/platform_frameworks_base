@@ -2476,7 +2476,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // We don't start input when session for a11y is created. We start input when
         // input method start input, a11y manager service is always on.
         if (startInputReason != StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY) {
-            final Binder startInputToken = new Binder();
             setEnabledSessionForAccessibilityLocked(mCurClient.mAccessibilitySessions);
             AccessibilityManagerInternal.get().startInput(mCurRemoteAccessibilityInputConnection,
                     mCurEditorInfo, !initial /* restarting */);

@@ -192,7 +192,11 @@ public class SyntheticPasswordManager {
             mVersion = version;
         }
 
-        private byte[] derivePassword(byte[] personalization) {
+        /**
+         * Derives a subkey from the synthetic password. For v3 and later synthetic passwords the
+         * subkeys are 256-bit; for v1 and v2 they are 512-bit.
+         */
+        private byte[] deriveSubkey(byte[] personalization) {
             if (mVersion == SYNTHETIC_PASSWORD_VERSION_V3) {
                 return (new SP800Derive(mSyntheticPassword))
                     .withContext(personalization, PERSONALISATION_CONTEXT);
@@ -203,28 +207,28 @@ public class SyntheticPasswordManager {
         }
 
         public byte[] deriveKeyStorePassword() {
-            return bytesToHex(derivePassword(PERSONALIZATION_KEY_STORE_PASSWORD));
+            return bytesToHex(deriveSubkey(PERSONALIZATION_KEY_STORE_PASSWORD));
         }
 
         public byte[] deriveGkPassword() {
-            return derivePassword(PERSONALIZATION_SP_GK_AUTH);
+            return deriveSubkey(PERSONALIZATION_SP_GK_AUTH);
         }
 
         public byte[] deriveDiskEncryptionKey() {
-            return derivePassword(PERSONALIZATION_FBE_KEY);
+            return deriveSubkey(PERSONALIZATION_FBE_KEY);
         }
 
         public byte[] deriveVendorAuthSecret() {
-            return derivePassword(PERSONALIZATION_AUTHSECRET_KEY);
+            return deriveSubkey(PERSONALIZATION_AUTHSECRET_KEY);
         }
 
         public byte[] derivePasswordHashFactor() {
-            return derivePassword(PERSONALIZATION_PASSWORD_HASH);
+            return deriveSubkey(PERSONALIZATION_PASSWORD_HASH);
         }
 
         /** Derives key used to encrypt password metrics */
         public byte[] deriveMetricsKey() {
-            return derivePassword(PERSONALIZATION_PASSWORD_METRICS);
+            return deriveSubkey(PERSONALIZATION_PASSWORD_METRICS);
         }
 
         /**
@@ -928,26 +932,6 @@ public class SyntheticPasswordManager {
     }
 
     private ArrayMap<Integer, ArrayMap<Long, TokenData>> tokenMap = new ArrayMap<>();
-
-    /**
-     * Create a token based Synthetic password for the given user.
-     * @return the handle of the token
-     */
-    public long createStrongTokenBasedSyntheticPassword(byte[] token, int userId,
-            @Nullable EscrowTokenStateChangeCallback changeCallback) {
-        return createTokenBasedSyntheticPassword(token, TOKEN_TYPE_STRONG, userId,
-                changeCallback);
-    }
-
-    /**
-     * Create a weak token based Synthetic password for the given user.
-     * @return the handle of the weak token
-     */
-    public long createWeakTokenBasedSyntheticPassword(byte[] token, int userId,
-            @Nullable EscrowTokenStateChangeCallback changeCallback) {
-        return createTokenBasedSyntheticPassword(token, TOKEN_TYPE_WEAK, userId,
-                changeCallback);
-    }
 
     /**
      * Create a token based Synthetic password of the given type for the given user.

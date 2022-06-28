@@ -62,7 +62,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
     private final Context mContext;
     private final IOverlayManager mInterface;
     private static final Map<String, Integer> TYPE_MAP = Map.of(
-            "color", TypedValue.TYPE_FIRST_COLOR_INT);
+            "color", TypedValue.TYPE_FIRST_COLOR_INT,
+            "string", TypedValue.TYPE_STRING);
 
     OverlayManagerShellCommand(@NonNull final Context ctx, @NonNull final IOverlayManager iom) {
         mContext = ctx;
@@ -390,13 +391,17 @@ final class OverlayManagerShellCommand extends ShellCommand {
                 type = Integer.parseUnsignedInt(typeString);
             }
         }
-        final int intData;
-        if (valueString.startsWith("0x")) {
-            intData = Integer.parseUnsignedInt(valueString.substring(2), 16);
+        if (type == TypedValue.TYPE_STRING) {
+            overlayBuilder.setResourceValue(resourceName, type, valueString);
         } else {
-            intData = Integer.parseUnsignedInt(valueString);
+            final int intData;
+            if (valueString.startsWith("0x")) {
+                intData = Integer.parseUnsignedInt(valueString.substring(2), 16);
+            } else {
+                intData = Integer.parseUnsignedInt(valueString);
+            }
+            overlayBuilder.setResourceValue(resourceName, type, intData);
         }
-        overlayBuilder.setResourceValue(resourceName, type, intData);
     }
 
     private int runEnableExclusive() throws RemoteException {

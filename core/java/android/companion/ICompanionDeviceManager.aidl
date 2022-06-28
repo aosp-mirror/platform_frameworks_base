@@ -76,4 +76,8 @@ interface ICompanionDeviceManager {
         int associationId);
 
     void startSystemDataTransfer(String packageName, int userId, int associationId);
+
+    void attachSystemDataTransport(String packageName, int userId, int associationId, in ParcelFileDescriptor fd);
+
+    void detachSystemDataTransport(String packageName, int userId, int associationId);
 }

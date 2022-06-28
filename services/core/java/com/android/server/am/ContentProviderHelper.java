@@ -29,6 +29,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerService.TAG_MU;
 import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_PROVIDER;
 
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -48,7 +49,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
@@ -958,20 +958,22 @@ public class ContentProviderHelper {
     String getProviderMimeType(Uri uri, int userId) {
         mService.enforceNotIsolatedCaller("getProviderMimeType");
         final String name = uri.getAuthority();
-        int callingUid = Binder.getCallingUid();
-        int callingPid = Binder.getCallingPid();
-        long ident = 0;
-        boolean clearedIdentity = false;
-        userId = mService.mUserController.unsafeConvertIncomingUser(userId);
-        if (canClearIdentity(callingPid, callingUid, userId)) {
-            clearedIdentity = true;
-            ident = Binder.clearCallingIdentity();
-        }
-        ContentProviderHolder holder = null;
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final int safeUserId = mService.mUserController.unsafeConvertIncomingUser(userId);
+        final long ident = canClearIdentity(callingPid, callingUid, safeUserId)
+                ? Binder.clearCallingIdentity() : 0;
+        final ContentProviderHolder holder;
         try {
             holder = getContentProviderExternalUnchecked(name, null, callingUid,
-                    "*getmimetype*", userId);
-            if (holder != null) {
+                    "*getmimetype*", safeUserId);
+        } finally {
+            if (ident != 0) {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+        try {
+            if (isHolderVisibleToCaller(holder, callingUid, safeUserId)) {
                 final IBinder providerConnection = holder.connection;
                 final ComponentName providerName = holder.info.getComponentName();
                 // Note: creating a new Runnable instead of using a lambda here since lambdas in
@@ -1000,15 +1002,13 @@ public class ContentProviderHelper {
             return null;
         } finally {
             // We need to clear the identity to call removeContentProviderExternalUnchecked
-            if (!clearedIdentity) {
-                ident = Binder.clearCallingIdentity();
-            }
+            final long token = Binder.clearCallingIdentity();
             try {
                 if (holder != null) {
-                    removeContentProviderExternalUnchecked(name, null, userId);
+                    removeContentProviderExternalUnchecked(name, null /* token */, safeUserId);
                 }
             } finally {
-                Binder.restoreCallingIdentity(ident);
+                Binder.restoreCallingIdentity(token);
             }
         }
 
@@ -1027,12 +1027,20 @@ public class ContentProviderHelper {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         final int safeUserId = mService.mUserController.unsafeConvertIncomingUser(userId);
-        final long ident = canClearIdentity(callingPid, callingUid, userId)
+        final long ident = canClearIdentity(callingPid, callingUid, safeUserId)
                 ? Binder.clearCallingIdentity() : 0;
+        final ContentProviderHolder holder;
         try {
-            final ContentProviderHolder holder = getContentProviderExternalUnchecked(name, null,
+            holder = getContentProviderExternalUnchecked(name, null /* token */,
                     callingUid, "*getmimetype*", safeUserId);
-            if (holder != null) {
+        } finally {
+            if (ident != 0) {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        try {
+            if (isHolderVisibleToCaller(holder, callingUid, safeUserId)) {
                 holder.provider.getTypeAsync(uri, new RemoteCallback(result -> {
                     final long identity = Binder.clearCallingIdentity();
                     try {
@@ -1048,8 +1056,6 @@ public class ContentProviderHelper {
         } catch (RemoteException e) {
             Log.w(TAG, "Content provider dead retrieving " + uri, e);
             resultCallback.sendResult(Bundle.EMPTY);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -1063,6 +1069,16 @@ public class ContentProviderHelper {
                 || ActivityManagerService.checkComponentPermission(
                         android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingPid,
                         callingUid, -1, true) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isHolderVisibleToCaller(@Nullable ContentProviderHolder holder, int callingUid,
+            @UserIdInt int userId) {
+        if (holder == null || holder.info == null) {
+            return false;
+        }
+
+        return !mService.getPackageManagerInternal()
+                .filterAppAccess(holder.info.packageName, callingUid, userId);
     }
 
     /**
@@ -1133,9 +1149,7 @@ public class ContentProviderHelper {
                     "*checkContentProviderUriPermission*", userId);
             if (holder != null) {
 
-                final PackageManagerInternal packageManagerInt = LocalServices.getService(
-                        PackageManagerInternal.class);
-                final AndroidPackage androidPackage = packageManagerInt
+                final AndroidPackage androidPackage = mService.getPackageManagerInternal()
                         .getPackage(Binder.getCallingUid());
                 if (androidPackage == null) {
                     return PackageManager.PERMISSION_DENIED;

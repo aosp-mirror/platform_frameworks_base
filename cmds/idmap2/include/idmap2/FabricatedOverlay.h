@@ -41,6 +41,9 @@ struct FabricatedOverlay {
     Builder& SetResourceValue(const std::string& resource_name, uint8_t data_type,
                               uint32_t data_value);
 
+    Builder& SetResourceValue(const std::string& resource_name, uint8_t data_type,
+                              const std::string& data_string_value);
+
     WARN_UNUSED Result<FabricatedOverlay> Build();
 
    private:
@@ -48,6 +51,7 @@ struct FabricatedOverlay {
       std::string resource_name;
       DataType data_type;
       DataValue data_value;
+      std::string data_string_value;
     };
 
     std::string package_name_;

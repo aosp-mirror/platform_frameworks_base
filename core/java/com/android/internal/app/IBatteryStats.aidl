@@ -68,13 +68,6 @@ interface IBatteryStats {
     @EnforcePermission("BATTERY_STATS")
     List<BatteryUsageStats> getBatteryUsageStats(in List<BatteryUsageStatsQuery> queries);
 
-    @UnsupportedAppUsage
-    @EnforcePermission("BATTERY_STATS")
-    byte[] getStatistics();
-
-    @EnforcePermission("BATTERY_STATS")
-    ParcelFileDescriptor getStatisticsStream(boolean updateAll);
-
     // Return true if we see the battery as currently charging.
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     @RequiresNoPermission

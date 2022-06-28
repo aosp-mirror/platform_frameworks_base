@@ -136,6 +136,7 @@ final class HotwordDetectionConnection {
     // The error codes are used for onError callback
     private static final int HOTWORD_DETECTION_SERVICE_DIED = -1;
     private static final int CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION = -2;
+    private static final int CALLBACK_DETECT_TIMEOUT = -3;
 
     // Hotword metrics
     private static final int METRICS_INIT_UNKNOWN_TIMEOUT =
@@ -545,66 +546,7 @@ final class HotwordDetectionConnection {
         if (DEBUG) {
             Slog.d(TAG, "triggerHardwareRecognitionEventForTestLocked");
         }
-        detectFromDspSourceForTest(event, callback);
-    }
-
-    private void detectFromDspSourceForTest(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
-            IHotwordRecognitionStatusCallback externalCallback) {
-        Slog.v(TAG, "detectFromDspSourceForTest");
-        IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
-            @Override
-            public void onDetected(HotwordDetectedResult result) throws RemoteException {
-                Slog.v(TAG, "onDetected");
-                synchronized (mLock) {
-                    if (!mValidatingDspTrigger) {
-                        Slog.i(TAG, "Ignored hotword detected since trigger has been handled");
-                        return;
-                    }
-                    mValidatingDspTrigger = false;
-                    try {
-                        enforcePermissionsForDataDelivery();
-                        enforceExtraKeyphraseIdNotLeaked(result, recognitionEvent);
-                    } catch (SecurityException e) {
-                        externalCallback.onError(CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION);
-                        return;
-                    }
-                    externalCallback.onKeyphraseDetected(recognitionEvent, result);
-                    if (result != null) {
-                        Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(result)
-                                + " bits from hotword trusted process");
-                        if (mDebugHotwordLogging) {
-                            Slog.i(TAG, "Egressed detected result: " + result);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onRejected(HotwordRejectedResult result) throws RemoteException {
-                Slog.v(TAG, "onRejected");
-                synchronized (mLock) {
-                    if (mValidatingDspTrigger) {
-                        mValidatingDspTrigger = false;
-                        externalCallback.onRejected(result);
-                        if (mDebugHotwordLogging && result != null) {
-                            Slog.i(TAG, "Egressed rejected result: " + result);
-                        }
-                    } else {
-                        Slog.i(TAG, "Ignored hotword rejected since trigger has been handled");
-                    }
-                }
-            }
-        };
-
-        synchronized (mLock) {
-            mValidatingDspTrigger = true;
-            mRemoteHotwordDetectionService.run(
-                    service -> service.detectFromDspSource(
-                            recognitionEvent,
-                            recognitionEvent.getCaptureFormat(),
-                            VALIDATION_TIMEOUT_MILLIS,
-                            internalCallback));
-        }
+        detectFromDspSource(event, callback);
     }
 
     private void detectFromDspSource(SoundTrigger.KeyphraseRecognitionEvent recognitionEvent,
@@ -613,6 +555,7 @@ final class HotwordDetectionConnection {
             Slog.d(TAG, "detectFromDspSource");
         }
 
+        AtomicBoolean timeoutDetected = new AtomicBoolean(false);
         // TODO: consider making this a non-anonymous class.
         IDspHotwordDetectionCallback internalCallback = new IDspHotwordDetectionCallback.Stub() {
             @Override
@@ -621,11 +564,11 @@ final class HotwordDetectionConnection {
                     Slog.d(TAG, "onDetected");
                 }
                 synchronized (mLock) {
-                    // TODO: If the dsp trigger comes in after the timeout, we will log both events.
-                    // Because we don't enforce the timeout yet. We should add some synchronizations
-                    // within the runnable to prevent the race condition to log both events.
                     if (mCancellationKeyPhraseDetectionFuture != null) {
                         mCancellationKeyPhraseDetectionFuture.cancel(true);
+                    }
+                    if (timeoutDetected.get()) {
+                        return;
                     }
                     HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                             mDetectorType,
@@ -668,6 +611,9 @@ final class HotwordDetectionConnection {
                     if (mCancellationKeyPhraseDetectionFuture != null) {
                         mCancellationKeyPhraseDetectionFuture.cancel(true);
                     }
+                    if (timeoutDetected.get()) {
+                        return;
+                    }
                     HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                             mDetectorType,
                             HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED);
@@ -689,21 +635,29 @@ final class HotwordDetectionConnection {
 
         synchronized (mLock) {
             mValidatingDspTrigger = true;
-            mRemoteHotwordDetectionService.run(
-                    service -> {
-                        // TODO: avoid allocate every time
-                        mCancellationKeyPhraseDetectionFuture = mScheduledExecutorService.schedule(
-                                () -> HotwordMetricsLogger
-                                        .writeKeyphraseTriggerEvent(mDetectorType,
-                                        HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT),
-                                VALIDATION_TIMEOUT_MILLIS,
-                                TimeUnit.MILLISECONDS);
-                        service.detectFromDspSource(
-                                recognitionEvent,
-                                recognitionEvent.getCaptureFormat(),
-                                VALIDATION_TIMEOUT_MILLIS,
-                                internalCallback);
-                    });
+            mRemoteHotwordDetectionService.run(service -> {
+                mCancellationKeyPhraseDetectionFuture = mScheduledExecutorService.schedule(
+                        () -> {
+                            // TODO: avoid allocate every time
+                            timeoutDetected.set(true);
+                            Slog.w(TAG, "Timed out on #detectFromDspSource");
+                            HotwordMetricsLogger.writeKeyphraseTriggerEvent(
+                                    mDetectorType,
+                                    HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_TIMEOUT);
+                            try {
+                                externalCallback.onError(CALLBACK_DETECT_TIMEOUT);
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to report onError status: ", e);
+                            }
+                        },
+                        VALIDATION_TIMEOUT_MILLIS,
+                        TimeUnit.MILLISECONDS);
+                service.detectFromDspSource(
+                        recognitionEvent,
+                        recognitionEvent.getCaptureFormat(),
+                        VALIDATION_TIMEOUT_MILLIS,
+                        internalCallback);
+            });
         }
     }
 
