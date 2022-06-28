@@ -2088,7 +2088,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             + mParentSessionId +  " and may not be abandoned directly.");
         }
         synchronized (mLock) {
-            assertCallerIsOwnerOrRootOrSystemLocked();
+            assertCallerIsOwnerOrRootLocked();
+
             if (isStagedAndInTerminalState()) {
                 // We keep the session in the database if it's in a finalized state. It will be
                 // removed by PackageInstallerService when the last update time is old enough.
@@ -2114,20 +2115,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         dispatchSessionFinished(INSTALL_FAILED_ABORTED, "Session was abandoned", null);
     }
-
-    /**
-     * Check if the caller is the owner of this session. Otherwise throw a
-     * {@link SecurityException}.
-     */
-    @GuardedBy("mLock")
-    private void assertCallerIsOwnerOrRootOrSystemLocked() {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.ROOT_UID && callingUid != mInstallerUid
-                && callingUid != Process.SYSTEM_UID) {
-            throw new SecurityException("Session does not belong to uid " + callingUid);
-        }
-    }
-
 
     @Override
     public boolean isMultiPackage() {
