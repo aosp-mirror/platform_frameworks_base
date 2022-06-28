@@ -2605,6 +2605,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
+    "385237117": {
+      "message": "moveFocusableActivityToTop: already on top and focused, activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "385595355": {
       "message": "Starting animation on %s: type=%d, anim=%s",
       "level": "VERBOSE",
@@ -3409,6 +3415,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1239439010": {
+      "message": "moveFocusableActivityToTop: set focused, activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "1252594551": {
       "message": "Window types in WindowContext and LayoutParams.type should match! Type from LayoutParams is %d, but type from WindowContext is %d",
       "level": "WARN",
@@ -3989,12 +4001,6 @@
       "message": "Notify removed startingWindow %s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1856211951": {
-      "message": "moveFocusableActivityToTop: already on top, activity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1856783490": {
