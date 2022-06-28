@@ -307,7 +307,8 @@ public class ZenModeHelper {
             int newRuleInstanceCount = getCurrentInstanceCount(automaticZenRule.getOwner())
                     + getCurrentInstanceCount(automaticZenRule.getConfigurationActivity())
                     + 1;
-            if (newRuleInstanceCount > RULE_LIMIT_PER_PACKAGE
+            int newPackageRuleCount = getPackageRuleCount(pkg) + 1;
+            if (newPackageRuleCount > RULE_LIMIT_PER_PACKAGE
                     || (ruleInstanceLimit > 0 && ruleInstanceLimit < newRuleInstanceCount)) {
                 throw new IllegalArgumentException("Rule instance limit exceeded");
             }
@@ -466,6 +467,23 @@ public class ZenModeHelper {
         synchronized (mConfig) {
             for (ZenRule rule : mConfig.automaticRules.values()) {
                 if (cn.equals(rule.component) || cn.equals(rule.configurationActivity)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    // Equivalent method to getCurrentInstanceCount, but for all rules associated with a specific
+    // package rather than a condition provider service or activity.
+    private int getPackageRuleCount(String pkg) {
+        if (pkg == null) {
+            return 0;
+        }
+        int count = 0;
+        synchronized (mConfig) {
+            for (ZenRule rule : mConfig.automaticRules.values()) {
+                if (pkg.equals(rule.pkg)) {
                     count++;
                 }
             }
