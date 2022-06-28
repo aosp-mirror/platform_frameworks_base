@@ -26,6 +26,11 @@ android_test {
     srcs: ["**/*.java"],
     sdk_version: "current",
     test_suites: ["device-tests"],
+    static_libs: [
+        "androidx.test.ext.junit",
+        "wm-flicker-common-app-helpers",
+        "wm-flicker-window-extensions",
+    ],
 }
 
 java_library {
