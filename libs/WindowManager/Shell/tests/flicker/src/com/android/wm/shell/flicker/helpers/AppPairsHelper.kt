@@ -17,44 +17,10 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import com.android.server.wm.flicker.Flicker
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.common.region.Region
 
 class AppPairsHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
     component: FlickerComponentName
-) : BaseAppHelper(instrumentation, activityLabel, component) {
-    fun getPrimaryBounds(dividerBounds: Region): Region {
-        val primaryAppBounds = Region.from(0, 0, dividerBounds.bounds.right,
-                dividerBounds.bounds.bottom + WindowUtils.dockedStackDividerInset)
-        return primaryAppBounds
-    }
-
-    fun getSecondaryBounds(dividerBounds: Region): Region {
-        val displayBounds = WindowUtils.displayBounds
-        val secondaryAppBounds = Region.from(0,
-                dividerBounds.bounds.bottom - WindowUtils.dockedStackDividerInset,
-                displayBounds.right, displayBounds.bottom - WindowUtils.navigationBarFrameHeight)
-        return secondaryAppBounds
-    }
-
-    companion object {
-        const val TEST_REPETITIONS = 1
-        const val TIMEOUT_MS = 3_000L
-
-        fun Flicker.waitAppsShown(app1: SplitScreenHelper?, app2: SplitScreenHelper?) {
-            wmHelper.waitFor("primaryAndSecondaryAppsVisible") { dump ->
-                val primaryAppVisible = app1?.let {
-                    dump.wmState.isWindowSurfaceShown(app1.defaultWindowName)
-                } ?: false
-                val secondaryAppVisible = app2?.let {
-                    dump.wmState.isWindowSurfaceShown(app2.defaultWindowName)
-                } ?: false
-                primaryAppVisible && secondaryAppVisible
-            }
-        }
-    }
-}
+) : BaseAppHelper(instrumentation, activityLabel, component)

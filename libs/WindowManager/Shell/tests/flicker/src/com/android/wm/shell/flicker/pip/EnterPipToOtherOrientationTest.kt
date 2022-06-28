@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -33,8 +33,8 @@ import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
-import com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_ENTER_PIP
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
+import com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_ENTER_PIP
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -98,10 +98,12 @@ class EnterPipToOtherOrientationTest(
                 // Enter PiP, and assert that the PiP is within bounds now that the device is back
                 // in portrait
                 broadcastActionTrigger.doAction(ACTION_ENTER_PIP)
-                wmHelper.waitPipShown()
-                wmHelper.waitForAppTransitionIdle()
                 // during rotation the status bar becomes invisible and reappears at the end
-                wmHelper.waitForNavBarStatusBarVisible()
+                wmHelper.StateSyncBuilder()
+                    .withPipShown()
+                    .withAppTransitionIdle()
+                    .withNavBarStatusBarVisible()
+                    .waitForAndVerify()
             }
         }
 

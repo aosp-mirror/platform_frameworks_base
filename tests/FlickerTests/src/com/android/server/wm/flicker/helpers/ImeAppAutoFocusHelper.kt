@@ -16,19 +16,16 @@
 
 package com.android.server.wm.flicker.helpers
 
+import android.app.Instrumentation
 import android.view.WindowInsets.Type.ime
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
-
-import android.app.Instrumentation
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-
 import java.util.regex.Pattern
 
 class ImeAppAutoFocusHelper @JvmOverloads constructor(
@@ -39,12 +36,9 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
     component: FlickerComponentName =
         ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
 ) : ImeAppHelper(instr, launcherName, component) {
-    override fun openIME(
-        device: UiDevice,
-        wmHelper: WindowManagerStateHelper?
-    ) {
+    override fun openIME(wmHelper: WindowManagerStateHelper) {
         // do nothing (the app is focused automatically)
-        waitIMEShown(device, wmHelper)
+        waitIMEShown(wmHelper)
     }
 
     override fun launchViaIntent(
@@ -54,7 +48,7 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         stringExtras: Map<String, String>
     ) {
         super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras)
-        waitIMEShown(uiDevice, wmHelper)
+        waitIMEShown(wmHelper)
     }
 
     override fun open() {
@@ -70,15 +64,15 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         val button = uiDevice.wait(Until.findObject(By.res(getPackage(),
                 "start_dialog_themed_activity_btn")), FIND_TIMEOUT)
 
-        require(button != null) {
+        requireNotNull(button) {
             "Button not found, this usually happens when the device " +
                     "was left in an unknown state (e.g. Screen turned off)"
         }
         button.click()
-        wmHelper.waitForAppTransitionIdle()
-        wmHelper.waitForFullScreenApp(
+        wmHelper.StateSyncBuilder()
+            .withFullScreenApp(
                 ActivityOptions.DIALOG_THEMED_ACTIVITY_COMPONENT_NAME.toFlickerComponent())
-        mInstrumentation.waitForIdleSync()
+            .waitForAndVerify()
     }
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {
         val dialog = uiDevice.wait(
@@ -87,14 +81,16 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         // Pressing back key to dismiss the dialog
         if (dialog != null) {
             uiDevice.pressBack()
-            wmHelper.waitForAppTransitionIdle()
+            wmHelper.StateSyncBuilder()
+                .withAppTransitionIdle()
+                .waitForAndVerify()
         }
     }
     fun getInsetsVisibleFromDialog(type: Int): Boolean {
-        var insetsVisibilityTextView = uiDevice.wait(
+        val insetsVisibilityTextView = uiDevice.wait(
                 Until.findObject(By.res("android:id/text1")), FIND_TIMEOUT)
         if (insetsVisibilityTextView != null) {
-            var visibility = insetsVisibilityTextView.text.toString()
+            val visibility = insetsVisibilityTextView.text.toString()
             val matcher = when (type) {
                 ime() -> {
                     Pattern.compile("IME\\: (VISIBLE|INVISIBLE)").matcher(visibility)

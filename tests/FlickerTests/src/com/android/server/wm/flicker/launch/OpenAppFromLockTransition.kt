@@ -16,19 +16,21 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
+import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.navBarLayerPositionEnd
+import com.android.server.wm.flicker.statusBarLayerPositionEnd
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.Test
 
 /**
  * Base class for app launch tests from lock screen
  */
-abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter)
-    : OpenAppTransition(testSpec) {
+abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter) :
+    OpenAppTransition(testSpec) {
 
     /**
      * Defines the transition used to run the test
@@ -39,9 +41,9 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter)
             setup {
                 eachRun {
                     device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
+                    wmHelper.StateSyncBuilder()
+                        .withoutTopVisibleAppWindows()
+                        .waitForAndVerify()
                 }
             }
             teardown {
@@ -51,7 +53,6 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter)
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.waitForFullScreenApp(testApp.component)
             }
         }
 
@@ -110,6 +111,16 @@ abstract class OpenAppFromLockTransition(testSpec: FlickerTestParameter)
     @Presubmit
     @Test
     override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerPositionEnd()
+
+    /**
+     * Checks the position of the status bar at the start and end of the transition
+     *
+     * Differently from the normal usage of this assertion, check only the final state of the
+     * transition because the display is off at the start and the NavBar is never visible
+     */
+    @Postsubmit
+    @Test
+    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerPositionEnd()
 
     /**
      * Checks that the status bar layer is visible at the end of the trace

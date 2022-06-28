@@ -19,13 +19,13 @@ package com.android.wm.shell.flicker.helpers
 import android.app.Instrumentation
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
-import android.os.SystemClock
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
 import com.android.server.wm.flicker.helpers.SYSTEMUI_PACKAGE
 import com.android.server.wm.traces.common.Rect
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.pip.tv.closeTvPipWindow
@@ -43,11 +43,11 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
 
     private val mediaController: MediaController?
         get() = mediaSessionManager.getActiveSessions(null).firstOrNull {
-            it.packageName == component.packageName
+            it.packageName == `package`
         }
 
     fun clickObject(resId: String) {
-        val selector = By.res(component.packageName, resId)
+        val selector = By.res(`package`, resId)
         val obj = uiDevice.findObject(selector) ?: error("Could not find `$resId` object")
 
         if (!isTelevision) {
@@ -71,8 +71,12 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     ) {
         launchViaIntentAndWaitShown(
             wmHelper, expectedWindowName, action, stringExtras,
-            waitConditions = arrayOf(WindowManagerStateHelper.pipShownCondition)
+            waitConditions = arrayOf(WindowManagerConditionsFactory.hasPipWindow())
         )
+
+        wmHelper.StateSyncBuilder()
+            .withPipShown()
+            .waitForAndVerify()
     }
 
     /**
@@ -95,12 +99,13 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         return false
     }
 
-    @JvmOverloads
-    fun clickEnterPipButton(wmHelper: WindowManagerStateHelper? = null) {
+    fun clickEnterPipButton(wmHelper: WindowManagerStateHelper) {
         clickObject(ENTER_PIP_BUTTON_ID)
 
         // Wait on WMHelper or simply wait for 3 seconds
-        wmHelper?.waitPipShown() ?: SystemClock.sleep(3_000)
+        wmHelper.StateSyncBuilder()
+            .withPipShown()
+            .waitForAndVerify()
         // when entering pip, the dismiss button is visible at the start. to ensure the pip
         // animation is complete, wait until the pip dismiss button is no longer visible.
         // b/176822698: dismiss-only state will be removed in the future
@@ -116,7 +121,7 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
     }
 
     fun checkWithCustomActionsCheckbox() = uiDevice
-        .findObject(By.res(component.packageName, WITH_CUSTOM_ACTIONS_BUTTON_ID))
+        .findObject(By.res(`package`, WITH_CUSTOM_ACTIONS_BUTTON_ID))
         ?.takeIf { it.isCheckable }
         ?.apply { if (!isChecked) clickObject(WITH_CUSTOM_ACTIONS_BUTTON_ID) }
         ?: error("'With custom actions' checkbox not found")
@@ -166,8 +171,10 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         }
 
         // Wait for animation to complete.
-        wmHelper.waitPipGone()
-        wmHelper.waitForHomeActivityVisible()
+        wmHelper.StateSyncBuilder()
+            .withPipGone()
+            .withHomeActivityVisible()
+            .waitForAndVerify()
     }
 
     /**
@@ -183,8 +190,10 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
             ?: error("PIP window expand button not found")
         val expandButtonBounds = expandPipObject.visibleBounds
         uiDevice.click(expandButtonBounds.centerX(), expandButtonBounds.centerY())
-        wmHelper.waitPipGone()
-        wmHelper.waitForAppTransitionIdle()
+        wmHelper.StateSyncBuilder()
+            .withPipGone()
+            .withFullScreenApp(component)
+            .waitForAndVerify()
     }
 
     /**
@@ -194,7 +203,9 @@ class PipAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
         val windowRect = getWindowRect(wmHelper)
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
-        wmHelper.waitForAppTransitionIdle()
+        wmHelper.StateSyncBuilder()
+            .withAppTransitionIdle()
+            .waitForAndVerify()
     }
 
     companion object {

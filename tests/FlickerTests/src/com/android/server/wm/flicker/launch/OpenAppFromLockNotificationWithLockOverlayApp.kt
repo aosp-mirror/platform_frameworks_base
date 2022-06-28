@@ -66,12 +66,14 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
 
                     // Launch an activity that is shown when the device is locked
                     showWhenLockedApp.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(showWhenLockedApp.component)
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(showWhenLockedApp.component)
+                        .waitForAndVerify()
 
                     device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
+                    wmHelper.StateSyncBuilder()
+                        .withoutTopVisibleAppWindows()
+                        .waitForAndVerify()
                 }
             }
 

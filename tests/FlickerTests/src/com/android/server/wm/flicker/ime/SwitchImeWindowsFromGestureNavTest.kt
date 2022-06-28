@@ -18,17 +18,16 @@ package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
-import android.view.Display
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
+import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
@@ -37,11 +36,8 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.common.WindowManagerConditionsFactory
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.Before
-
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,32 +71,26 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                 eachRun {
                     this.setRotation(testSpec.startRotation)
                     testApp.launchViaIntent(wmHelper)
-                    val testAppVisible = wmHelper.waitFor(
-                        WindowManagerStateHelper.isAppFullScreen(testApp.component),
-                        WindowManagerConditionsFactory.isAppTransitionIdle(
-                            Display.DEFAULT_DISPLAY))
-                    require(testAppVisible) {
-                        "Expected ${testApp.component.toWindowName()} to be visible"
-                    }
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(testApp.component)
+                        .waitForAndVerify()
 
                     imeTestApp.launchViaIntent(wmHelper)
-                    val imeAppVisible = wmHelper.waitFor(
-                        WindowManagerStateHelper.isAppFullScreen(imeTestApp.component),
-                        WindowManagerConditionsFactory.isAppTransitionIdle(
-                            Display.DEFAULT_DISPLAY))
-                    require(imeAppVisible) {
-                        "Expected ${imeTestApp.component.toWindowName()} to be visible"
-                    }
+                    wmHelper.StateSyncBuilder()
+                        .withFullScreenApp(imeTestApp.component)
+                        .waitForAndVerify()
 
-                    imeTestApp.openIME(device, wmHelper)
+                    imeTestApp.openIME(wmHelper)
                 }
             }
             teardown {
                 eachRun {
                     device.pressHome()
-                    wmHelper.waitForHomeActivityVisible()
-                    testApp.exit()
-                    imeTestApp.exit()
+                    wmHelper.StateSyncBuilder()
+                        .withHomeActivityVisible()
+                        .waitForAndVerify()
+                    testApp.exit(wmHelper)
+                    imeTestApp.exit(wmHelper)
                 }
             }
             transitions {
@@ -110,8 +100,9 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                 device.swipe(0, displayBounds.bounds.height,
                         displayBounds.bounds.width, displayBounds.bounds.height, 50)
 
-                wmHelper.waitForFullScreenApp(testApp.component)
-                wmHelper.waitForAppTransitionIdle()
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(testApp.component)
+                    .waitForAndVerify()
                 createTag(TAG_IME_INVISIBLE)
             }
             transitions {
@@ -119,7 +110,9 @@ open class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestP
                 val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
                 device.swipe(displayBounds.bounds.width, displayBounds.bounds.height,
                         0, displayBounds.bounds.height, 50)
-                wmHelper.waitForFullScreenApp(imeTestApp.component)
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(imeTestApp.component)
+                    .waitForAndVerify()
             }
         }
     }

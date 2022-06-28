@@ -56,7 +56,7 @@ class TvPipNotificationTests : TvPipTestBase() {
     @Test
     fun pipNotification_postedAndDismissed() {
         testApp.launchViaIntent()
-        testApp.clickEnterPipButton()
+        testApp.clickEnterPipButton(wmHelper)
 
         assertNotNull("Pip notification should have been posted",
                 waitForNotificationToAppear { it.isPipNotificationWithTitle(testApp.appName) })
@@ -70,7 +70,7 @@ class TvPipNotificationTests : TvPipTestBase() {
     @Test
     fun pipNotification_closeIntent() {
         testApp.launchViaIntent()
-        testApp.clickEnterPipButton()
+        testApp.clickEnterPipButton(wmHelper)
 
         val notification: StatusBarNotification = waitForNotificationToAppear {
             it.isPipNotificationWithTitle(testApp.appName)
@@ -87,8 +87,8 @@ class TvPipNotificationTests : TvPipTestBase() {
 
     @Test
     fun pipNotification_menuIntent() {
-        testApp.launchViaIntent()
-        testApp.clickEnterPipButton()
+        testApp.launchViaIntent(wmHelper)
+        testApp.clickEnterPipButton(wmHelper)
 
         val notification: StatusBarNotification = waitForNotificationToAppear {
             it.isPipNotificationWithTitle(testApp.appName)
@@ -106,10 +106,10 @@ class TvPipNotificationTests : TvPipTestBase() {
 
     @Test
     fun pipNotification_mediaSessionTitle_isDisplayed() {
-        testApp.launchViaIntent()
+        testApp.launchViaIntent(wmHelper)
         // Start media session and to PiP
         testApp.clickStartMediaSessionButton()
-        testApp.clickEnterPipButton()
+        testApp.clickEnterPipButton(wmHelper)
 
         // Wait for the correct notification to show up...
         waitForNotificationToAppear {

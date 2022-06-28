@@ -43,7 +43,7 @@ class TvPipBasicTest(
 
         // Set up ratio and enter Pip
         testApp.clickObject(radioButtonId)
-        testApp.clickEnterPipButton()
+        testApp.clickEnterPipButton(wmHelper)
 
         val actualRatio: Float = testApp.ui?.visibleBounds?.ratio
                 ?: fail("Application UI not found")

@@ -17,6 +17,7 @@
 package com.android.server.wm.flicker.quickswitch
 
 import android.app.Instrumentation
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -27,12 +28,10 @@ import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
@@ -40,6 +39,7 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.Rect
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -66,12 +66,10 @@ import org.junit.runners.Parameterized
 @Group1
 open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val taplInstrumentation = LauncherInstrumentation()
+    private val tapl = LauncherInstrumentation()
 
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
-
-    private val startDisplayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
 
     @Before
     open fun before() {
@@ -83,28 +81,26 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
         return FlickerBuilder(instrumentation).apply {
             setup {
                 test {
-                    taplInstrumentation.setExpectedRotation(testSpec.startRotation)
+                    tapl.setExpectedRotation(testSpec.startRotation)
                 }
-
                 eachRun {
                     testApp1.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp1.component)
-
                     testApp2.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(testApp2.component)
+                    startDisplayBounds = wmHelper.currentState.layerState
+                        .physicalDisplayBounds ?: error("Display not found")
                 }
             }
             transitions {
-                taplInstrumentation.launchedAppState.quickSwitchToPreviousApp()
-                wmHelper.waitForFullScreenApp(testApp1.component)
-                wmHelper.waitForAppTransitionIdle()
-                wmHelper.waitForNavBarStatusBarVisible()
+                tapl.launchedAppState.quickSwitchToPreviousApp()
+                wmHelper.StateSyncBuilder()
+                    .withNavBarStatusBarVisible()
+                    .waitForAndVerify()
             }
 
             teardown {
                 test {
-                    testApp1.exit()
-                    testApp2.exit()
+                    testApp1.exit(wmHelper)
+                    testApp2.exit(wmHelper)
                 }
             }
         }
@@ -251,7 +247,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
             this.isAppWindowVisible(testApp2.component)
                     .then()
                     // TODO: Do we actually want to test this? Seems too implementation specific...
-                    .isAppWindowVisible(LAUNCHER_COMPONENT, isOptional = true)
+                    .isAppWindowVisible(FlickerComponentName.LAUNCHER, isOptional = true)
                     .then()
                     .isAppWindowVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
@@ -270,7 +266,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
         testSpec.assertLayers {
             this.isVisible(testApp2.component)
                     .then()
-                    .isVisible(LAUNCHER_COMPONENT, isOptional = true)
+                    .isVisible(FlickerComponentName.LAUNCHER, isOptional = true)
                     .then()
                     .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
                     .then()
@@ -297,7 +293,7 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
      *
      * NOTE: This doesn't check that the navbar is visible or not.
      */
-    @Presubmit
+    @FlakyTest
     @Test
     fun navbarIsAlwaysInRightPosition() = testSpec.navBarLayerRotatesAndScales()
 
@@ -316,6 +312,8 @@ open class QuickSwitchBetweenTwoAppsBackTest(private val testSpec: FlickerTestPa
     fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsVisible()
 
     companion object {
+        private var startDisplayBounds = Rect.EMPTY
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {

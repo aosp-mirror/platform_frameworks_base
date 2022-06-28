@@ -16,10 +16,10 @@
 
 package com.android.wm.shell.flicker.bubble
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.WindowInsets
 import android.view.WindowManager
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -29,8 +29,8 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
-import org.junit.runner.RunWith
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 /**
@@ -54,20 +54,21 @@ class LaunchBubbleFromLockScreen(testSpec: FlickerTestParameter) : BaseBubbleScr
                     val addBubbleBtn = waitAndGetAddBubbleBtn()
                     addBubbleBtn?.click() ?: error("Bubble widget not found")
                     device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
+                    wmHelper.StateSyncBuilder()
+                        .withoutTopVisibleAppWindows()
+                        .waitForAndVerify()
                     device.wakeUp()
                 }
             }
             transitions {
                 // Swipe & wait for the notification shade to expand so all can be seen
                 val wm = context.getSystemService(WindowManager::class.java)
-                val metricInsets = wm.getCurrentWindowMetrics().windowInsets
+                    ?: error("Unable to obtain WM service")
+                val metricInsets = wm.currentWindowMetrics.windowInsets
                 val insets = metricInsets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.statusBars()
                         or WindowInsets.Type.displayCutout())
-                device.swipe(100, insets.top + 100, 100, device.getDisplayHeight() / 2, 4)
+                device.swipe(100, insets.top + 100, 100, device.displayHeight / 2, 4)
                 device.waitForIdle(2000)
                 instrumentation.uiAutomation.syncInputTransactions()
 

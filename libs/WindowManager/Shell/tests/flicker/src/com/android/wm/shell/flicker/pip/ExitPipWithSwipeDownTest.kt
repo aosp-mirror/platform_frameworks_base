@@ -16,9 +16,9 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -64,9 +64,12 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
                 val pipCenterY = pipRegion.centerY()
                 val displayCenterX = device.displayWidth / 2
                 device.swipe(pipCenterX, pipCenterY, displayCenterX, device.displayHeight, 10)
-                wmHelper.waitPipGone()
-                wmHelper.waitForWindowSurfaceDisappeared(pipApp.component)
-                wmHelper.waitForAppTransitionIdle()
+                // Wait until the other app is no longer visible
+                wmHelper.StateSyncBuilder()
+                    .withPipGone()
+                    .withWindowSurfaceDisappeared(pipApp.component)
+                    .withAppTransitionIdle()
+                    .waitForAndVerify()
             }
         }
 

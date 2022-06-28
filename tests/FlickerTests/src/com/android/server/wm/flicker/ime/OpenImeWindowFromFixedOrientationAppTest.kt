@@ -17,12 +17,12 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import android.platform.test.annotations.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -70,7 +70,9 @@ class OpenImeWindowFromFixedOrientationAppTest(private val testSpec: FlickerTest
                 eachRun {
                     // Swiping out the IME activity to home.
                     taplInstrumentation.goHome()
-                    wmHelper.waitForHomeActivityVisible()
+                    wmHelper.StateSyncBuilder()
+                        .withHomeActivityVisible()
+                        .waitForAndVerify()
                 }
             }
             transitions {

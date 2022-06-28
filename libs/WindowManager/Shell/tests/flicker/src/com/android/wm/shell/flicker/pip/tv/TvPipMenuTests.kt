@@ -244,7 +244,7 @@ class TvPipMenuTests : TvPipTestBase() {
     }
 
     private fun enterPip_openMenu_assertShown(): UiObject2 {
-        testApp.clickEnterPipButton()
+        testApp.clickEnterPipButton(wmHelper)
         // Pressing the Window key should bring up Pip menu
         uiDevice.pressWindowKey()
         return uiDevice.waitForTvPipMenu() ?: fail("Pip menu should have been shown")
