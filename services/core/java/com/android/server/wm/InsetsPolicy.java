@@ -289,7 +289,7 @@ class InsetsPolicy {
         // contains all insets types.
         final InsetsState originalState = mDisplayContent.getInsetsPolicy()
                 .enforceInsetsPolicyForTarget(type, WINDOWING_MODE_FULLSCREEN, alwaysOnTop,
-                        mStateController.getRawInsetsState());
+                        attrs.type, mStateController.getRawInsetsState());
         InsetsState state = adjustVisibilityForTransientTypes(originalState);
         return adjustInsetsForRoundedCorners(token, state, state == originalState);
     }
@@ -351,12 +351,13 @@ class InsetsPolicy {
      * @param type the inset type provided by the target
      * @param windowingMode the windowing mode of the target
      * @param isAlwaysOnTop is the target always on top
+     * @param windowType the type of the target
      * @param state the input inset state containing all the sources
      * @return The state stripped of the necessary information.
      */
     InsetsState enforceInsetsPolicyForTarget(@InternalInsetsType int type,
             @WindowConfiguration.WindowingMode int windowingMode, boolean isAlwaysOnTop,
-            InsetsState state) {
+            int windowType, InsetsState state) {
         boolean stateCopied = false;
 
         if (type != ITYPE_INVALID) {
@@ -377,21 +378,20 @@ class InsetsPolicy {
             if (type == ITYPE_STATUS_BAR || type == ITYPE_CLIMATE_BAR) {
                 state.removeSource(ITYPE_CAPTION_BAR);
             }
-
-            // IME needs different frames for certain cases (e.g. navigation bar in gesture nav).
-            if (type == ITYPE_IME) {
-                ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
-                        .getSourceProviders();
-                for (int i = providers.size() - 1; i >= 0; i--) {
-                    WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
-                    if (otherProvider.overridesImeFrame()) {
-                        InsetsSource override =
-                                new InsetsSource(
-                                        state.getSource(otherProvider.getSource().getType()));
-                        override.setFrame(otherProvider.getImeOverrideFrame());
-                        state.addSource(override);
-                    }
+        }
+        ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
+                .getSourceProviders();
+        for (int i = providers.size() - 1; i >= 0; i--) {
+            WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
+            if (otherProvider.overridesFrame(windowType)) {
+                if (!stateCopied) {
+                    state = new InsetsState(state);
+                    stateCopied = true;
                 }
+                InsetsSource override =
+                        new InsetsSource(state.getSource(otherProvider.getSource().getType()));
+                override.setFrame(otherProvider.getOverriddenFrame(windowType));
+                state.addSource(override);
             }
         }
 

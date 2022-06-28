@@ -16,10 +16,14 @@
 
 package android.view;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
+
 import android.graphics.Insets;
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -52,7 +56,9 @@ public class InsetsFrameProvider implements Parcelable {
     public static final int SOURCE_FRAME = 2;
 
     private static final int HAS_INSETS_SIZE = 1;
-    private static final int HAS_IME_INSETS_SIZE = 2;
+    private static final int HAS_INSETS_SIZE_OVERRIDE = 2;
+
+    private static Rect sTmpRect = new Rect();
 
     /**
      * The type of insets to provide.
@@ -77,29 +83,25 @@ public class InsetsFrameProvider implements Parcelable {
     public Insets insetsSize = null;
 
     /**
-     * The provided frame based on the source frame. The result will be used as the insets
-     * size to IME window. Only one side should be set.
+     * If null, the size set in insetsSize will be applied to all window types. If it contains
+     * element of some types, the insets reported to the window with that types will be overridden.
      */
-    public Insets imeInsetsSize = null;
+    public InsetsSizeOverride[] insetsSizeOverrides = null;
 
     public InsetsFrameProvider(int type) {
         this(type, SOURCE_FRAME, null, null);
     }
 
     public InsetsFrameProvider(int type, Insets insetsSize) {
-        this(type, SOURCE_FRAME, insetsSize, insetsSize);
-    }
-
-    public InsetsFrameProvider(int type, Insets insetsSize, Insets imeInsetsSize) {
-        this(type, SOURCE_FRAME, insetsSize, imeInsetsSize);
+        this(type, SOURCE_FRAME, insetsSize, null);
     }
 
     public InsetsFrameProvider(int type, int source, Insets insetsSize,
-            Insets imeInsetsSize) {
+            InsetsSizeOverride[] insetsSizeOverride) {
         this.type = type;
         this.source = source;
         this.insetsSize = insetsSize;
-        this.imeInsetsSize = imeInsetsSize;
+        this.insetsSizeOverrides = insetsSizeOverride;
     }
 
     @Override
@@ -127,8 +129,8 @@ public class InsetsFrameProvider implements Parcelable {
         if (insetsSize != null) {
             sb.append(", insetsSize=").append(insetsSize);
         }
-        if (imeInsetsSize != null) {
-            sb.append(", imeInsetsSize=").append(imeInsetsSize);
+        if (insetsSizeOverrides != null) {
+            sb.append(", insetsSizeOverrides=").append(Arrays.toString(insetsSizeOverrides));
         }
         sb.append("}");
         return sb.toString();
@@ -141,8 +143,8 @@ public class InsetsFrameProvider implements Parcelable {
         if ((insetsSizeModified & HAS_INSETS_SIZE) != 0) {
             insetsSize = Insets.CREATOR.createFromParcel(in);
         }
-        if ((insetsSizeModified & HAS_IME_INSETS_SIZE) != 0) {
-            imeInsetsSize = Insets.CREATOR.createFromParcel(in);
+        if ((insetsSizeModified & HAS_INSETS_SIZE_OVERRIDE) != 0) {
+            insetsSizeOverrides = in.createTypedArray(InsetsSizeOverride.CREATOR);
         }
     }
 
@@ -152,8 +154,8 @@ public class InsetsFrameProvider implements Parcelable {
         if (insetsSize != null) {
             insetsSizeModified |= HAS_INSETS_SIZE;
         }
-        if (imeInsetsSize != null) {
-            insetsSizeModified |= HAS_IME_INSETS_SIZE;
+        if (insetsSizeOverrides != null) {
+            insetsSizeModified |= HAS_INSETS_SIZE_OVERRIDE;
         }
         out.writeInt(insetsSizeModified);
         out.writeInt(type);
@@ -161,8 +163,8 @@ public class InsetsFrameProvider implements Parcelable {
         if (insetsSize != null) {
             insetsSize.writeToParcel(out, flags);
         }
-        if (imeInsetsSize != null) {
-            imeInsetsSize.writeToParcel(out, flags);
+        if (insetsSizeOverrides != null) {
+            out.writeTypedArray(insetsSizeOverrides, flags);
         }
     }
 
@@ -177,16 +179,12 @@ public class InsetsFrameProvider implements Parcelable {
         InsetsFrameProvider other = (InsetsFrameProvider) o;
         return type == other.type && source == other.source
                 && Objects.equals(insetsSize, other.insetsSize)
-                && Objects.equals(imeInsetsSize, other.imeInsetsSize);
+                && Arrays.equals(insetsSizeOverrides, other.insetsSizeOverrides);
     }
 
     @Override
     public int hashCode() {
-        int result = type;
-        result = 31 * result + source;
-        result = 31 * result + (insetsSize != null ? insetsSize.hashCode() : 0);
-        result = 31 * result + (imeInsetsSize != null ? imeInsetsSize.hashCode() : 0);
-        return result;
+        return Objects.hash(type, source, insetsSize, Arrays.hashCode(insetsSizeOverrides));
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<InsetsFrameProvider>
@@ -201,5 +199,96 @@ public class InsetsFrameProvider implements Parcelable {
                     return new InsetsFrameProvider[size];
                 }
             };
+
+    public static void calculateInsetsFrame(Rect displayFrame, Rect containerBounds,
+            Rect displayCutoutSafe, Rect inOutFrame, int source, Insets insetsSize,
+            @WindowManager.LayoutParams.PrivateFlags int privateFlags) {
+        boolean extendByCutout = false;
+        if (source == InsetsFrameProvider.SOURCE_DISPLAY) {
+            inOutFrame.set(displayFrame);
+        } else if (source == InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS) {
+            inOutFrame.set(containerBounds);
+        } else {
+            extendByCutout = (privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0;
+        }
+        if (insetsSize == null) {
+            return;
+        }
+        // Only one side of the provider shall be applied. Check in the order of left - top -
+        // right - bottom, only the first non-zero value will be applied.
+        if (insetsSize.left != 0) {
+            inOutFrame.right = inOutFrame.left + insetsSize.left;
+        } else if (insetsSize.top != 0) {
+            inOutFrame.bottom = inOutFrame.top + insetsSize.top;
+        } else if (insetsSize.right != 0) {
+            inOutFrame.left = inOutFrame.right - insetsSize.right;
+        } else if (insetsSize.bottom != 0) {
+            inOutFrame.top = inOutFrame.bottom - insetsSize.bottom;
+        } else {
+            inOutFrame.setEmpty();
+        }
+
+        if (extendByCutout) {
+            WindowLayout.extendFrameByCutout(displayCutoutSafe, displayFrame, inOutFrame, sTmpRect);
+        }
+    }
+
+    /**
+     * Class to describe the insets size to be provided to window with specific window type. If not
+     * used, same insets size will be sent as instructed in the insetsSize and source.
+     */
+    public static class InsetsSizeOverride implements Parcelable {
+        public final int windowType;
+        public Insets insetsSize;
+
+        protected InsetsSizeOverride(Parcel in) {
+            windowType = in.readInt();
+            insetsSize = in.readParcelable(null, android.graphics.Insets.class);
+        }
+
+        public InsetsSizeOverride(int type, Insets size) {
+            windowType = type;
+            insetsSize = size;
+        }
+
+        public static final Creator<InsetsSizeOverride> CREATOR =
+                new Creator<InsetsSizeOverride>() {
+            @Override
+            public InsetsSizeOverride createFromParcel(Parcel in) {
+                return new InsetsSizeOverride(in);
+            }
+
+            @Override
+            public InsetsSizeOverride[] newArray(int size) {
+                return new InsetsSizeOverride[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(windowType);
+            out.writeParcelable(insetsSize, flags);
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append("TypedInsetsSize: {");
+            sb.append("windowType=").append(windowType);
+            sb.append(", insetsSize=").append(insetsSize);
+            sb.append("}");
+            return sb.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(windowType, insetsSize);
+        }
+    }
 }
 

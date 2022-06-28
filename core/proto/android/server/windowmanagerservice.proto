@@ -578,7 +578,7 @@ message InsetsSourceProviderProto {
     optional WindowStateProto pending_control_target = 6;
     optional WindowStateProto fake_control_target = 7;
     optional .android.view.SurfaceControlProto captured_leash = 8;
-    optional .android.graphics.RectProto ime_overridden_frame = 9;
+    optional .android.graphics.RectProto ime_overridden_frame = 9 [deprecated=true];
     optional bool is_leash_ready_for_dispatching = 10;
     optional bool client_visible = 11;
     optional bool server_visible = 12;

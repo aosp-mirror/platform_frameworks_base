@@ -1703,7 +1703,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mFrozenInsetsState != null ? mFrozenInsetsState : getMergedInsetsState();
         final InsetsState insetsStateForWindow = insetsPolicy
                 .enforceInsetsPolicyForTarget(insetTypeProvidedByWindow,
-                        getWindowingMode(), isAlwaysOnTop(), rawInsetsState);
+                        getWindowingMode(), isAlwaysOnTop(), mAttrs.type, rawInsetsState);
         return insetsPolicy.adjustInsetsForWindow(this, insetsStateForWindow,
                 includeTransient);
     }
