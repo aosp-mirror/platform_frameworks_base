@@ -1161,6 +1161,10 @@ public class Tuner implements AutoCloseable  {
     public int tune(@NonNull FrontendSettings settings) {
         mFrontendLock.lock();
         try {
+            if (mFeOwnerTuner != null) {
+                Log.d(TAG, "Operation cannot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
             final int type = settings.getType();
             if (mFrontendHandle != null && type != mFrontendType) {
                 Log.e(TAG, "Frontend was opened with type " + mFrontendType
@@ -1204,6 +1208,10 @@ public class Tuner implements AutoCloseable  {
     public int cancelTuning() {
         mFrontendLock.lock();
         try {
+            if (mFeOwnerTuner != null) {
+                Log.d(TAG, "Operation cannot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
             return nativeStopTune();
         } finally {
             mFrontendLock.unlock();
@@ -1237,6 +1245,10 @@ public class Tuner implements AutoCloseable  {
 
         mFrontendLock.lock();
         try {
+            if (mFeOwnerTuner != null) {
+                Log.d(TAG, "Operation cannot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
             synchronized (mScanCallbackLock) {
                 // Scan can be called again for blink scan if scanCallback and executor are same as
                 //before.
@@ -1287,6 +1299,10 @@ public class Tuner implements AutoCloseable  {
     public int cancelScanning() {
         mFrontendLock.lock();
         try {
+            if (mFeOwnerTuner != null) {
+                Log.d(TAG, "Operation cannot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
             synchronized (mScanCallbackLock) {
                 FrameworkStatsLog.write(FrameworkStatsLog.TV_TUNER_STATE_CHANGED, mUserId,
                         FrameworkStatsLog.TV_TUNER_STATE_CHANGED__STATE__SCAN_STOPPED);
@@ -1376,6 +1392,9 @@ public class Tuner implements AutoCloseable  {
         try {
             if (mFrontend == null) {
                 throw new IllegalStateException("frontend is not initialized");
+            }
+            if (mFeOwnerTuner != null) {
+                throw new IllegalStateException("Operation cannot be done by sharee of tuner");
             }
             return nativeGetFrontendStatus(statusTypes);
         } finally {
@@ -1480,6 +1499,10 @@ public class Tuner implements AutoCloseable  {
         mFrontendCiCamLock.lock();
         mFrontendLock.lock();
         try {
+            if (mFeOwnerTuner != null) {
+                Log.d(TAG, "Operation cannot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
             if (TunerVersionChecker.checkHigherOrEqualVersionTo(
                     TunerVersionChecker.TUNER_VERSION_1_1,
                     "linkFrontendToCiCam")) {
@@ -1543,6 +1566,10 @@ public class Tuner implements AutoCloseable  {
     public int disconnectFrontendToCiCam(int ciCamId) {
         acquireTRMSLock("disconnectFrontendToCiCam()");
         try {
+            if (mFeOwnerTuner != null) {
+                Log.d(TAG, "Operation cannot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
             if (TunerVersionChecker.checkHigherOrEqualVersionTo(
                     TunerVersionChecker.TUNER_VERSION_1_1,
                     "unlinkFrontendToCiCam")) {
@@ -1591,6 +1618,10 @@ public class Tuner implements AutoCloseable  {
             if (mFrontend == null) {
                 throw new IllegalStateException("frontend is not initialized");
             }
+            if (mFeOwnerTuner != null) {
+                Log.d(TAG, "Operation cannot be done by sharee of tuner");
+                return RESULT_INVALID_STATE;
+            }
             return nativeRemoveOutputPid(pid);
         } finally {
             mFrontendLock.unlock();
@@ -1620,6 +1651,9 @@ public class Tuner implements AutoCloseable  {
             }
             if (mFrontend == null) {
                 throw new IllegalStateException("frontend is not initialized");
+            }
+            if (mFeOwnerTuner != null) {
+                throw new IllegalStateException("Operation cannot be done by sharee of tuner");
             }
             FrontendStatusReadiness[] readiness = nativeGetFrontendStatusReadiness(statusTypes);
             if (readiness == null) {
@@ -1697,6 +1731,9 @@ public class Tuner implements AutoCloseable  {
             if (mFrontend == null) {
                 throw new IllegalStateException("frontend is not initialized");
             }
+            if (mFeOwnerTuner != null) {
+                throw new IllegalStateException("Operation cannot be done by sharee of tuner");
+            }
             return nativeGetFrontendHardwareInfo();
         } finally {
             mFrontendLock.unlock();
@@ -1725,6 +1762,10 @@ public class Tuner implements AutoCloseable  {
         }
         if (maxNumber < 0) {
             return RESULT_INVALID_ARGUMENT;
+        }
+        if (mFeOwnerTuner != null) {
+            Log.d(TAG, "Operation cannot be done by sharee of tuner");
+            return RESULT_INVALID_STATE;
         }
         int res = nativeSetMaxNumberOfFrontends(frontendType, maxNumber);
         if (res == RESULT_SUCCESS) {
