@@ -32,7 +32,6 @@ import android.app.time.ExternalTimeSuggestion;
 import android.app.time.TimeConfiguration;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.ShellCommand;
 import android.os.UserHandle;

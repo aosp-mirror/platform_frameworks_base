@@ -64,18 +64,6 @@ public final class TimeDetectorImpl implements TimeDetector {
     }
 
     @Override
-    public void suggestNetworkTime(NetworkTimeSuggestion timeSuggestion) {
-        if (DEBUG) {
-            Log.d(TAG, "suggestNetworkTime called: " + timeSuggestion);
-        }
-        try {
-            mITimeDetectorService.suggestNetworkTime(timeSuggestion);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    @Override
     public void suggestGnssTime(GnssTimeSuggestion timeSuggestion) {
         if (DEBUG) {
             Log.d(TAG, "suggestGnssTime called: " + timeSuggestion);

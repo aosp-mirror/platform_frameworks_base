@@ -57,13 +57,13 @@ public class NtpTrustedTime implements TrustedTime {
     public static class TimeResult {
         private final long mUnixEpochTimeMillis;
         private final long mElapsedRealtimeMillis;
-        private final long mCertaintyMillis;
+        private final int mUncertaintyMillis;
 
         public TimeResult(
-                long unixEpochTimeMillis, long elapsedRealtimeMillis, long certaintyMillis) {
+                long unixEpochTimeMillis, long elapsedRealtimeMillis, int uncertaintyMillis) {
             mUnixEpochTimeMillis = unixEpochTimeMillis;
             mElapsedRealtimeMillis = elapsedRealtimeMillis;
-            mCertaintyMillis = certaintyMillis;
+            mUncertaintyMillis = uncertaintyMillis;
         }
 
         public long getTimeMillis() {
@@ -74,8 +74,8 @@ public class NtpTrustedTime implements TrustedTime {
             return mElapsedRealtimeMillis;
         }
 
-        public long getCertaintyMillis() {
-            return mCertaintyMillis;
+        public int getUncertaintyMillis() {
+            return mUncertaintyMillis;
         }
 
         /**
@@ -102,9 +102,9 @@ public class NtpTrustedTime implements TrustedTime {
         @Override
         public String toString() {
             return "TimeResult{"
-                    + "mUnixEpochTimeMillis=" + Instant.ofEpochMilli(mUnixEpochTimeMillis)
-                    + ", mElapsedRealtimeMillis=" + Duration.ofMillis(mElapsedRealtimeMillis)
-                    + ", mCertaintyMillis=" + mCertaintyMillis
+                    + "unixEpochTime=" + Instant.ofEpochMilli(mUnixEpochTimeMillis)
+                    + ", elapsedRealtime=" + Duration.ofMillis(mElapsedRealtimeMillis)
+                    + ", mUncertaintyMillis=" + mUncertaintyMillis
                     + '}';
         }
     }
@@ -217,14 +217,27 @@ public class NtpTrustedTime implements TrustedTime {
             final int port = connectionInfo.getPort();
             final int timeoutMillis = connectionInfo.getTimeoutMillis();
             if (client.requestTime(serverName, port, timeoutMillis, network)) {
-                long ntpCertainty = client.getRoundTripTime() / 2;
+                int ntpUncertaintyMillis = saturatedCast(client.getRoundTripTime() / 2);
                 mTimeResult = new TimeResult(
-                        client.getNtpTime(), client.getNtpTimeReference(), ntpCertainty);
+                        client.getNtpTime(), client.getNtpTimeReference(), ntpUncertaintyMillis);
                 return true;
             } else {
                 return false;
             }
         }
+    }
+
+    /**
+     * Casts a {@code long} to an {@code int}, clamping the value within the int range.
+     */
+    private static int saturatedCast(long longValue) {
+        if (longValue > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        if (longValue < Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return (int) longValue;
     }
 
     /**

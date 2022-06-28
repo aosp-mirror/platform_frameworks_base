@@ -189,6 +189,10 @@ public final class GeolocationTimeZoneSuggestion {
             }
         }
 
+        if (zoneIdsString == null) {
+            throw new IllegalArgumentException("Missing --zone_ids");
+        }
+
         long elapsedRealtimeMillis = SystemClock.elapsedRealtime();
         List<String> zoneIds = parseZoneIdsArg(zoneIdsString);
         GeolocationTimeZoneSuggestion suggestion =

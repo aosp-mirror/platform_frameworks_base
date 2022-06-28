@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package android.app.timedetector;
+package com.android.server.timedetector;
 
-import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
-import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
-import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
+import static com.android.server.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -32,22 +30,32 @@ public class NetworkTimeSuggestionTest {
 
     private static final TimestampedValue<Long> ARBITRARY_TIME =
             new TimestampedValue<>(1111L, 2222L);
+    private static final int ARBITRARY_UNCERTAINTY_MILLIS = 3333;
 
     @Test
     public void testEquals() {
-        NetworkTimeSuggestion one = new NetworkTimeSuggestion(ARBITRARY_TIME);
+        NetworkTimeSuggestion one = new NetworkTimeSuggestion(
+                ARBITRARY_TIME, ARBITRARY_UNCERTAINTY_MILLIS);
         assertEquals(one, one);
 
-        NetworkTimeSuggestion two = new NetworkTimeSuggestion(ARBITRARY_TIME);
+        NetworkTimeSuggestion two =
+                new NetworkTimeSuggestion(ARBITRARY_TIME, ARBITRARY_UNCERTAINTY_MILLIS);
         assertEquals(one, two);
         assertEquals(two, one);
 
         TimestampedValue<Long> differentTime = new TimestampedValue<>(
                 ARBITRARY_TIME.getReferenceTimeMillis() + 1,
                 ARBITRARY_TIME.getValue());
-        NetworkTimeSuggestion three = new NetworkTimeSuggestion(differentTime);
+        NetworkTimeSuggestion three = new NetworkTimeSuggestion(
+                differentTime, ARBITRARY_UNCERTAINTY_MILLIS);
         assertNotEquals(one, three);
         assertNotEquals(three, one);
+
+        int differentUncertainty = ARBITRARY_UNCERTAINTY_MILLIS + 1;
+        NetworkTimeSuggestion four = new NetworkTimeSuggestion(
+                ARBITRARY_TIME, differentUncertainty);
+        assertNotEquals(one, four);
+        assertNotEquals(four, one);
 
         // DebugInfo must not be considered in equals().
         one.addDebugInfo("Debug info 1");
@@ -55,37 +63,33 @@ public class NetworkTimeSuggestionTest {
         assertEquals(one, two);
     }
 
-    @Test
-    public void testParcelable() {
-        NetworkTimeSuggestion suggestion = new NetworkTimeSuggestion(ARBITRARY_TIME);
-        assertRoundTripParcelable(suggestion);
-
-        // DebugInfo should also be stored (but is not checked by equals()
-        suggestion.addDebugInfo("This is debug info");
-        NetworkTimeSuggestion rtSuggestion = roundTripParcelable(suggestion);
-        assertEquals(suggestion.getDebugInfo(), rtSuggestion.getDebugInfo());
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_noReferenceTime() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--unix_epoch_time 12345");
+                "--unix_epoch_time 12345 --uncertainty_millis 111");
         NetworkTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testParseCommandLineArg_noUnixEpochTime() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321");
+                "--reference_time 54321 --uncertainty_millis 111");
+        NetworkTimeSuggestion.parseCommandLineArg(testShellCommand);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_noUncertaintyMillis() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--reference_time 54321 --unix_epoch_time 12345");
         NetworkTimeSuggestion.parseCommandLineArg(testShellCommand);
     }
 
     @Test
     public void testParseCommandLineArg_validSuggestion() {
         ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
-                "--reference_time 54321 --unix_epoch_time 12345");
+                "--reference_time 54321 --unix_epoch_time 12345 --uncertainty_millis 111");
         TimestampedValue<Long> timeSignal = new TimestampedValue<>(54321L, 12345L);
-        NetworkTimeSuggestion expectedSuggestion = new NetworkTimeSuggestion(timeSignal);
+        NetworkTimeSuggestion expectedSuggestion = new NetworkTimeSuggestion(timeSignal, 111);
         NetworkTimeSuggestion actualSuggestion =
                 NetworkTimeSuggestion.parseCommandLineArg(testShellCommand);
         assertEquals(expectedSuggestion, actualSuggestion);

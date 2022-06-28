@@ -201,7 +201,8 @@ public final class TimeSuggestionHelper {
     public static void handlePrintCommandLineOpts(
             @NonNull PrintWriter pw, @NonNull String typeName, @NonNull Class<?> clazz) {
         pw.printf("%s suggestion options:\n", typeName);
-        pw.println("  --reference_time <elapsed realtime millis>");
+        pw.println("  --reference_time <elapsed realtime millis> - the elapsed realtime millis when"
+                + " unix epoch time was read");
         pw.println("  --unix_epoch_time <Unix epoch time millis>");
         pw.println();
         pw.println("See " + clazz.getName() + " for more information");
