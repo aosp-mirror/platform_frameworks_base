@@ -259,9 +259,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         mCurrentClockSize = clockSize;
 
+        Clock clock = getClock();
         boolean appeared = mView.switchToClock(clockSize, animate);
-        if (animate && appeared && clockSize == LARGE) {
-            getClock().getAnimations().enter();
+        if (clock != null && animate && appeared && clockSize == LARGE) {
+            clock.getAnimations().enter();
         }
     }
 
