@@ -50,8 +50,6 @@ import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.StatusBarManager;
 import android.content.ContentResolver;
-import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Canvas;
@@ -145,7 +143,6 @@ import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
-import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -252,9 +249,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private final OnOverscrollTopChangedListener
             mOnOverscrollTopChangedListener =
             new OnOverscrollTopChangedListener();
-    private final KeyguardAffordanceHelperCallback
-            mKeyguardAffordanceHelperCallback =
-            new KeyguardAffordanceHelperCallback();
     private final OnEmptySpaceClickListener
             mOnEmptySpaceClickListener =
             new OnEmptySpaceClickListener();
@@ -338,8 +332,6 @@ public class NotificationPanelViewController extends PanelViewController {
     // Current max allowed keyguard notifications determined by measuring the panel
     private int mMaxAllowedKeyguardNotifications;
 
-    private ViewGroup mPreviewContainer;
-    private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardQsUserSwitchController mKeyguardQsUserSwitchController;
     private KeyguardUserSwitcherController mKeyguardUserSwitcherController;
     private KeyguardStatusBarView mKeyguardStatusBar;
@@ -437,8 +429,6 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private boolean mQsAnimatorExpand;
     private boolean mIsLaunchTransitionFinished;
-    private boolean mIsLaunchTransitionRunning;
-    private Runnable mLaunchAnimationEndRunnable;
     private boolean mOnlyAffordanceInThisMotion;
     private ValueAnimator mQsSizeChangeAnimator;
 
@@ -455,10 +445,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
     private boolean mLaunchingAffordance;
-    private boolean mAffordanceHasPreview;
     private final FalsingManager mFalsingManager;
     private final FalsingCollector mFalsingCollector;
-    private String mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
 
     private Runnable mHeadsUpExistenceChangedRunnable = () -> {
         setHeadsUpAnimatingAway(false);
@@ -491,7 +479,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mLinearDarkAmount;
 
     private boolean mPulsing;
-    private boolean mUserSetupComplete;
     private boolean mHideIconsDuringLaunchAnimation = true;
     private int mStackScrollerMeasuringPass;
     /**
@@ -1008,8 +995,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 mOnEmptySpaceClickListener);
         addTrackingHeadsUpListener(mNotificationStackScrollLayoutController::setTrackingHeadsUp);
         mKeyguardBottomArea = mView.findViewById(R.id.keyguard_bottom_area);
-        mPreviewContainer = mView.findViewById(R.id.preview_container);
-        mKeyguardBottomArea.setPreviewContainer(mPreviewContainer);
 
         initBottomArea();
 
@@ -1033,7 +1018,6 @@ public class NotificationPanelViewController extends PanelViewController {
 
         mView.setRtlChangeListener(layoutDirection -> {
             if (layoutDirection != mOldLayoutDirection) {
-                mAffordanceHelper.onRtlPropertiesChanged();
                 mOldLayoutDirection = layoutDirection;
             }
         });
@@ -1267,7 +1251,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardBottomArea = (KeyguardBottomAreaView) mLayoutInflater.inflate(
                 R.layout.keyguard_bottom_area, mView, false);
         mKeyguardBottomArea.initFrom(oldBottomArea);
-        mKeyguardBottomArea.setPreviewContainer(mPreviewContainer);
         mView.addView(mKeyguardBottomArea, index);
         initBottomArea();
         mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
@@ -1304,11 +1287,7 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     private void initBottomArea() {
-        mAffordanceHelper = new KeyguardAffordanceHelper(
-                mKeyguardAffordanceHelperCallback, mView.getContext(), mFalsingManager);
-        mKeyguardBottomArea.setAffordanceHelper(mAffordanceHelper);
         mKeyguardBottomArea.setCentralSurfaces(mCentralSurfaces);
-        mKeyguardBottomArea.setUserSetupComplete(mUserSetupComplete);
         mKeyguardBottomArea.setFalsingManager(mFalsingManager);
         mKeyguardBottomArea.initWallet(mQuickAccessWalletController);
         mKeyguardBottomArea.initControls(mControlsComponent);
@@ -1673,10 +1652,6 @@ public class NotificationPanelViewController extends PanelViewController {
     public void resetViews(boolean animate) {
         mIsLaunchTransitionFinished = false;
         mBlockTouches = false;
-        if (!mLaunchingAffordance) {
-            mAffordanceHelper.reset(false);
-            mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
-        }
         mCentralSurfaces.getGutsManager().closeAndSaveGuts(true /* leavebehind */, true /* force */,
                 true /* controls */, -1 /* x */, -1 /* y */, true /* resetMenu */);
         if (animate && !isFullyCollapsed()) {
@@ -2217,11 +2192,6 @@ public class NotificationPanelViewController extends PanelViewController {
             return false;
         }
         return isFullyCollapsed() || mBarState != StatusBarState.SHADE;
-    }
-
-    @Override
-    protected boolean shouldGestureIgnoreXTouchSlop(float x, float y) {
-        return !mAffordanceHelper.isOnAffordanceIcon(x, y);
     }
 
     private void onQsTouch(MotionEvent event) {
@@ -3388,9 +3358,6 @@ public class NotificationPanelViewController extends PanelViewController {
             mQsExpandImmediate = true;
             setShowShelfOnly(true);
         }
-        if (mBarState == KEYGUARD || mBarState == StatusBarState.SHADE_LOCKED) {
-            mAffordanceHelper.animateHideLeftRightIcon();
-        }
         mNotificationStackScrollLayoutController.onPanelTrackingStarted();
         cancelPendingPanelCollapse();
     }
@@ -3404,12 +3371,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     true /* animate */);
         }
         mNotificationStackScrollLayoutController.onPanelTrackingStopped();
-        if (expand && (mBarState == KEYGUARD
-                || mBarState == StatusBarState.SHADE_LOCKED)) {
-            if (!mHintAnimationRunning) {
-                mAffordanceHelper.reset(true);
-            }
-        }
 
         // If we unlocked from a swipe, the user's finger might still be down after the
         // unlock animation ends. We need to wait until ACTION_UP to enable blurs again.
@@ -3482,10 +3443,6 @@ public class NotificationPanelViewController extends PanelViewController {
         return mIsLaunchTransitionFinished;
     }
 
-    public boolean isLaunchTransitionRunning() {
-        return mIsLaunchTransitionRunning;
-    }
-
     @Override
     public void setIsLaunchAnimationRunning(boolean running) {
         boolean wasRunning = mIsLaunchAnimationRunning;
@@ -3502,10 +3459,6 @@ public class NotificationPanelViewController extends PanelViewController {
         if (wasClosing != isClosing) {
             mPanelEventsEmitter.notifyPanelCollapsingChanged(isClosing);
         }
-    }
-
-    public void setLaunchTransitionEndRunnable(Runnable r) {
-        mLaunchAnimationEndRunnable = r;
     }
 
     private void updateDozingVisibilities(boolean animate) {
@@ -3686,30 +3639,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 && mBarState == StatusBarState.SHADE;
     }
 
-    public void launchCamera(boolean animate, int source) {
-        if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP) {
-            mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP;
-        } else if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE) {
-            mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_WIGGLE;
-        } else if (source == StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER) {
-            mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER;
-        } else {
-
-            // Default.
-            mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
-        }
-
-        // If we are launching it when we are occluded already we don't want it to animate,
-        // nor setting these flags, since the occluded state doesn't change anymore, hence it's
-        // never reset.
-        if (!isFullyCollapsed()) {
-            setLaunchingAffordance(true);
-        } else {
-            animate = false;
-        }
-        mAffordanceHasPreview = mKeyguardBottomArea.getRightPreview() != null;
-        mAffordanceHelper.launchAffordance(
-                animate, mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
+    /** Launches the camera. */
+    public void launchCamera(int source) {
     }
 
     public void onAffordanceLaunchEnded() {
@@ -3722,9 +3653,6 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private void setLaunchingAffordance(boolean launchingAffordance) {
         mLaunchingAffordance = launchingAffordance;
-        mKeyguardAffordanceHelperCallback.getLeftIcon().setLaunchingAffordance(launchingAffordance);
-        mKeyguardAffordanceHelperCallback.getRightIcon().setLaunchingAffordance(
-                launchingAffordance);
         mKeyguardBypassController.setLaunchingAffordance(launchingAffordance);
     }
 
@@ -3732,24 +3660,14 @@ public class NotificationPanelViewController extends PanelViewController {
      * Return true when a bottom affordance is launching an occluded activity with a splash screen.
      */
     public boolean isLaunchingAffordanceWithPreview() {
-        return mLaunchingAffordance && mAffordanceHasPreview;
+        return mLaunchingAffordance;
     }
 
     /**
      * Whether the camera application can be launched for the camera launch gesture.
      */
     public boolean canCameraGestureBeLaunched() {
-        if (!mCentralSurfaces.isCameraAllowedByAdmin()) {
-            return false;
-        }
-
-        ResolveInfo resolveInfo = mKeyguardBottomArea.resolveCameraIntent();
-        String
-                packageToLaunch =
-                (resolveInfo == null || resolveInfo.activityInfo == null) ? null
-                        : resolveInfo.activityInfo.packageName;
-        return packageToLaunch != null && (mBarState != StatusBarState.SHADE || !isForegroundApp(
-                packageToLaunch)) && !mAffordanceHelper.isSwipingInProgress();
+        return false;
     }
 
     /**
@@ -3838,9 +3756,6 @@ public class NotificationPanelViewController extends PanelViewController {
     @Override
     public void setTouchAndAnimationDisabled(boolean disabled) {
         super.setTouchAndAnimationDisabled(disabled);
-        if (disabled && mAffordanceHelper.isSwipingInProgress() && !mIsLaunchTransitionRunning) {
-            mAffordanceHelper.reset(false /* animate */);
-        }
         mNotificationStackScrollLayoutController.setAnimationsEnabled(!disabled);
     }
 
@@ -3921,11 +3836,6 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     public KeyguardBottomAreaView getKeyguardBottomAreaView() {
         return mKeyguardBottomArea;
-    }
-
-    public void setUserSetupComplete(boolean userSetupComplete) {
-        mUserSetupComplete = userSetupComplete;
-        mKeyguardBottomArea.setUserSetupComplete(userSetupComplete);
     }
 
     public void applyLaunchAnimationProgress(float linearProgress) {
@@ -4281,10 +4191,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     mMetricsLogger.count(COUNTER_PANEL_OPEN_PEEK, 1);
                 }
                 boolean handled = false;
-                if ((!mIsExpanding || mHintAnimationRunning) && !mQsExpanded
-                        && mBarState != StatusBarState.SHADE && !mDozing) {
-                    handled |= mAffordanceHelper.onTouchEvent(event);
-                }
                 if (mOnlyAffordanceInThisMotion) {
                     return true;
                 }
@@ -4524,139 +4430,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 return;
             }
             mAnimateNextPositionUpdate = true;
-        }
-    }
-
-    private class KeyguardAffordanceHelperCallback implements KeyguardAffordanceHelper.Callback {
-        @Override
-        public void onAnimationToSideStarted(boolean rightPage, float translation, float vel) {
-            boolean
-                    start =
-                    mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? rightPage
-                            : !rightPage;
-            mIsLaunchTransitionRunning = true;
-            mLaunchAnimationEndRunnable = null;
-            float displayDensity = mCentralSurfaces.getDisplayDensity();
-            int lengthDp = Math.abs((int) (translation / displayDensity));
-            int velocityDp = Math.abs((int) (vel / displayDensity));
-            if (start) {
-                mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_DIALER, lengthDp, velocityDp);
-                mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_DIALER);
-                mFalsingCollector.onLeftAffordanceOn();
-                if (mFalsingCollector.shouldEnforceBouncer()) {
-                    mCentralSurfaces.executeRunnableDismissingKeyguard(
-                            () -> mKeyguardBottomArea.launchLeftAffordance(), null,
-                            true /* dismissShade */, false /* afterKeyguardGone */,
-                            true /* deferred */);
-                } else {
-                    mKeyguardBottomArea.launchLeftAffordance();
-                }
-            } else {
-                if (KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE.equals(
-                        mLastCameraLaunchSource)) {
-                    mLockscreenGestureLogger.write(
-                            MetricsEvent.ACTION_LS_CAMERA, lengthDp, velocityDp);
-                    mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_CAMERA);
-                }
-                mFalsingCollector.onCameraOn();
-                if (mFalsingCollector.shouldEnforceBouncer()) {
-                    mCentralSurfaces.executeRunnableDismissingKeyguard(
-                            () -> mKeyguardBottomArea.launchCamera(mLastCameraLaunchSource), null,
-                            true /* dismissShade */, false /* afterKeyguardGone */,
-                            true /* deferred */);
-                } else {
-                    mKeyguardBottomArea.launchCamera(mLastCameraLaunchSource);
-                }
-            }
-            mCentralSurfaces.startLaunchTransitionTimeout();
-            mBlockTouches = true;
-        }
-
-        @Override
-        public void onAnimationToSideEnded() {
-            mIsLaunchTransitionRunning = false;
-            mIsLaunchTransitionFinished = true;
-            if (mLaunchAnimationEndRunnable != null) {
-                mLaunchAnimationEndRunnable.run();
-                mLaunchAnimationEndRunnable = null;
-            }
-            mCentralSurfaces.readyForKeyguardDone();
-        }
-
-        @Override
-        public float getMaxTranslationDistance() {
-            return (float) Math.hypot(mView.getWidth(), getHeight());
-        }
-
-        @Override
-        public void onSwipingStarted(boolean rightIcon) {
-            mFalsingCollector.onAffordanceSwipingStarted(rightIcon);
-            mView.requestDisallowInterceptTouchEvent(true);
-            mOnlyAffordanceInThisMotion = true;
-            mQsTracking = false;
-        }
-
-        @Override
-        public void onSwipingAborted() {
-            mFalsingCollector.onAffordanceSwipingAborted();
-        }
-
-        @Override
-        public void onIconClicked(boolean rightIcon) {
-            if (mHintAnimationRunning) {
-                return;
-            }
-            mHintAnimationRunning = true;
-            mAffordanceHelper.startHintAnimation(rightIcon, () -> {
-                mHintAnimationRunning = false;
-                mCentralSurfaces.onHintFinished();
-            });
-            rightIcon =
-                    mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL ? !rightIcon
-                            : rightIcon;
-            if (rightIcon) {
-                mCentralSurfaces.onCameraHintStarted();
-            } else {
-                if (mKeyguardBottomArea.isLeftVoiceAssist()) {
-                    mCentralSurfaces.onVoiceAssistHintStarted();
-                } else {
-                    mCentralSurfaces.onPhoneHintStarted();
-                }
-            }
-        }
-
-        @Override
-        public KeyguardAffordanceView getLeftIcon() {
-            return mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
-                    ? mKeyguardBottomArea.getRightView() : mKeyguardBottomArea.getLeftView();
-        }
-
-        @Override
-        public KeyguardAffordanceView getRightIcon() {
-            return mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
-                    ? mKeyguardBottomArea.getLeftView() : mKeyguardBottomArea.getRightView();
-        }
-
-        @Override
-        public View getLeftPreview() {
-            return mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
-                    ? mKeyguardBottomArea.getRightPreview() : mKeyguardBottomArea.getLeftPreview();
-        }
-
-        @Override
-        public View getRightPreview() {
-            return mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL
-                    ? mKeyguardBottomArea.getLeftPreview() : mKeyguardBottomArea.getRightPreview();
-        }
-
-        @Override
-        public float getAffordanceFalsingFactor() {
-            return mCentralSurfaces.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
-        }
-
-        @Override
-        public boolean needsAntiFalsing() {
-            return mBarState == KEYGUARD;
         }
     }
 
@@ -5115,15 +4888,6 @@ public class NotificationPanelViewController extends PanelViewController {
         @Override
         public int getOpacity() {
             return 0;
-        }
-    }
-
-    private class OnConfigurationChangedListener extends
-            PanelViewController.OnConfigurationChangedListener {
-        @Override
-        public void onConfigurationChanged(Configuration newConfig) {
-            super.onConfigurationChanged(newConfig);
-            mAffordanceHelper.onConfigurationChanged();
         }
     }
 

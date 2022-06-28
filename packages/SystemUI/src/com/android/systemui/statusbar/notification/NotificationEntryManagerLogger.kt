@@ -17,18 +17,32 @@
 package com.android.systemui.statusbar.notification
 
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
+import com.android.systemui.log.LogMessage
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 /** Logger for [NotificationEntryManager]. */
 class NotificationEntryManagerLogger @Inject constructor(
+    notifPipelineFlags: NotifPipelineFlags,
     @NotificationLog private val buffer: LogBuffer
 ) {
+    private val devLoggingEnabled by lazy { notifPipelineFlags.isDevLoggingEnabled() }
+
+    private inline fun devLog(
+        level: LogLevel,
+        initializer: LogMessage.() -> Unit,
+        noinline printer: LogMessage.() -> String
+    ) {
+        if (Compile.IS_DEBUG && devLoggingEnabled) buffer.log(TAG, level, initializer, printer)
+    }
+
     fun logNotifAdded(key: String) {
-        buffer.log(TAG, INFO, {
+        devLog(INFO, {
             str1 = key
         }, {
             "NOTIF ADDED $str1"
@@ -36,7 +50,7 @@ class NotificationEntryManagerLogger @Inject constructor(
     }
 
     fun logNotifUpdated(key: String) {
-        buffer.log(TAG, INFO, {
+        devLog(INFO, {
             str1 = key
         }, {
             "NOTIF UPDATED $str1"
@@ -44,7 +58,7 @@ class NotificationEntryManagerLogger @Inject constructor(
     }
 
     fun logInflationAborted(key: String, status: String, reason: String) {
-        buffer.log(TAG, DEBUG, {
+        devLog(DEBUG, {
             str1 = key
             str2 = status
             str3 = reason
@@ -54,7 +68,7 @@ class NotificationEntryManagerLogger @Inject constructor(
     }
 
     fun logNotifInflated(key: String, isNew: Boolean) {
-        buffer.log(TAG, DEBUG, {
+        devLog(DEBUG, {
             str1 = key
             bool1 = isNew
         }, {
@@ -63,7 +77,7 @@ class NotificationEntryManagerLogger @Inject constructor(
     }
 
     fun logRemovalIntercepted(key: String) {
-        buffer.log(TAG, INFO, {
+        devLog(INFO, {
             str1 = key
         }, {
             "NOTIF REMOVE INTERCEPTED for $str1"
@@ -71,7 +85,7 @@ class NotificationEntryManagerLogger @Inject constructor(
     }
 
     fun logLifetimeExtended(key: String, extenderName: String, status: String) {
-        buffer.log(TAG, INFO, {
+        devLog(INFO, {
             str1 = key
             str2 = extenderName
             str3 = status
@@ -81,7 +95,7 @@ class NotificationEntryManagerLogger @Inject constructor(
     }
 
     fun logNotifRemoved(key: String, removedByUser: Boolean) {
-        buffer.log(TAG, INFO, {
+        devLog(INFO, {
             str1 = key
             bool1 = removedByUser
         }, {
@@ -90,7 +104,7 @@ class NotificationEntryManagerLogger @Inject constructor(
     }
 
     fun logFilterAndSort(reason: String) {
-        buffer.log(TAG, INFO, {
+        devLog(INFO, {
             str1 = reason
         }, {
             "FILTER AND SORT reason=$str1"
