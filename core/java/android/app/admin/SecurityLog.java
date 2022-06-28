@@ -518,7 +518,7 @@ public class SecurityLog {
 
     /**
      * Indicates that an event occurred as the device attempted to connect to
-     * a WiFi network. The log entry contains the following information about the
+     * a managed WiFi network. The log entry contains the following information about the
      * event, encapsulated in an {@link Object} array and accessible via
      * {@link SecurityEvent#getData()}:
      * <li> [0] Last 2 octets of the network BSSID ({@code String}, in the form "xx:xx:xx:xx:AA:BB")
@@ -530,7 +530,7 @@ public class SecurityLog {
     public static final int TAG_WIFI_CONNECTION = SecurityLogTags.SECURITY_WIFI_CONNECTION;
 
     /**
-     * Indicates that the device disconnects from a connected WiFi network.
+     * Indicates that the device disconnects from a managed WiFi network.
      * The log entry contains the following information about the
      * event, encapsulated in an {@link Object} array and accessible via
      * {@link SecurityEvent#getData()}:
