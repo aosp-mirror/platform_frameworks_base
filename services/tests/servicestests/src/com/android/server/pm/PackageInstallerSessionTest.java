@@ -168,7 +168,6 @@ public class PackageInstallerSessionTest {
                 /* stageCid */ null,
                 /* prepared */ true,
                 /* committed */ true,
-                /* destroyed */ staged ? true : false,
                 /* sealed */ false,  // Setting to true would trigger some PM logic.
                 /* childSessionIds */ childSessionIds != null ? childSessionIds : new int[0],
                 /* parentSessionId */ parentSessionId,
