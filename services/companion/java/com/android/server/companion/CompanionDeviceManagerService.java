@@ -111,6 +111,7 @@ import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 import com.android.server.companion.securechannel.CompanionSecureCommunicationsManager;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -154,6 +155,7 @@ public class CompanionDeviceManagerService extends SystemService {
     private CompanionApplicationController mCompanionAppController;
     private CompanionSecureCommunicationsManager mSecureCommsManager;
 
+    private final ActivityTaskManagerInternal mAtmInternal;
     private final ActivityManagerInternal mAmInternal;
     private final IAppOpsService mAppOpsManager;
     private final PowerWhitelistManager mPowerWhitelistManager;
@@ -206,6 +208,7 @@ public class CompanionDeviceManagerService extends SystemService {
         mPowerWhitelistManager = context.getSystemService(PowerWhitelistManager.class);
         mAppOpsManager = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
+        mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mUserManager = context.getSystemService(UserManager.class);
@@ -1259,6 +1262,9 @@ public class CompanionDeviceManagerService extends SystemService {
             if (uid >= 0) {
                 companionAppUids.add(uid);
             }
+        }
+        if (mAtmInternal != null) {
+            mAtmInternal.setCompanionAppUids(userId, companionAppUids);
         }
         if (mAmInternal != null) {
             // Make a copy of the set and send it to ActivityManager.
