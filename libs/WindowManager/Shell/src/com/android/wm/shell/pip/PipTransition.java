@@ -715,7 +715,7 @@ public class PipTransition extends PipTransitionController {
         mSurfaceTransactionHelper
                 .crop(finishTransaction, leash, destinationBounds)
                 .round(finishTransaction, leash, true /* applyCornerRadius */);
-        mPipMenuController.attach(leash);
+        mTransitions.getMainExecutor().executeDelayed(() -> mPipMenuController.attach(leash), 0);
 
         if (taskInfo.pictureInPictureParams != null
                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()

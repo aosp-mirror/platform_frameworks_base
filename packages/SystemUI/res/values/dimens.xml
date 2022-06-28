@@ -676,9 +676,6 @@
     <!-- The minimum background radius when swiping to a side for the camera / phone affordances. -->
     <dimen name="keyguard_affordance_min_background_radius">30dp</dimen>
 
-    <!-- The size of the touch targets on the keyguard for the affordances. -->
-    <dimen name="keyguard_affordance_touch_target_size">120dp</dimen>
-
     <!-- The grow amount for the camera and phone circles when hinting -->
     <dimen name="hint_grow_amount_sideways">60dp</dimen>
 

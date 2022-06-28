@@ -942,7 +942,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         // Re-set the PIP bounds to none.
         mPipBoundsState.setBounds(new Rect());
         mPipUiEventLoggerLogger.setTaskInfo(null);
-        mPipMenuController.detach();
+        mMainExecutor.executeDelayed(() -> mPipMenuController.detach(), 0);
 
         if (info.displayId != Display.DEFAULT_DISPLAY && mOnDisplayIdChangeCallback != null) {
             mOnDisplayIdChangeCallback.accept(Display.DEFAULT_DISPLAY);
