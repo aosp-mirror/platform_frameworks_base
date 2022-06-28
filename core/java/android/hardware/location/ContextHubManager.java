@@ -726,45 +726,75 @@ public final class ContextHubManager {
         return new IContextHubClientCallback.Stub() {
             @Override
             public void onMessageFromNanoApp(NanoAppMessage message) {
-                executor.execute(() -> callback.onMessageFromNanoApp(client, message));
+                executor.execute(
+                        () -> {
+                            callback.onMessageFromNanoApp(client, message);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onHubReset() {
-                executor.execute(() -> callback.onHubReset(client));
+                executor.execute(
+                        () -> {
+                            callback.onHubReset(client);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppAborted(long nanoAppId, int abortCode) {
-                executor.execute(() -> callback.onNanoAppAborted(client, nanoAppId, abortCode));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppAborted(client, nanoAppId, abortCode);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppLoaded(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppLoaded(client, nanoAppId));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppLoaded(client, nanoAppId);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppUnloaded(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppUnloaded(client, nanoAppId));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppUnloaded(client, nanoAppId);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppEnabled(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppEnabled(client, nanoAppId));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppEnabled(client, nanoAppId);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onNanoAppDisabled(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppDisabled(client, nanoAppId));
+                executor.execute(
+                        () -> {
+                            callback.onNanoAppDisabled(client, nanoAppId);
+                            client.callbackFinished();
+                        });
             }
 
             @Override
             public void onClientAuthorizationChanged(
                     long nanoAppId, @ContextHubManager.AuthorizationState int authorization) {
                 executor.execute(
-                        () -> callback.onClientAuthorizationChanged(
-                                client, nanoAppId, authorization));
+                        () -> {
+                            callback.onClientAuthorizationChanged(client, nanoAppId, authorization);
+                            client.callbackFinished();
+                        });
             }
         };
     }
