@@ -1427,17 +1427,32 @@ public final class InputMethodManager {
      * @see #startStylusHandwriting(View)
      */
     public boolean isStylusHandwritingAvailable() {
+        return isStylusHandwritingAvailableAsUser(UserHandle.myUserId());
+    }
+
+    /**
+     * Returns {@code true} if currently selected IME supports Stylus handwriting & is enabled for
+     * the given userId.
+     * If the method returns {@code false}, {@link #startStylusHandwriting(View)} shouldn't be
+     * called and Stylus touch should continue as normal touch input.
+     * @see #startStylusHandwriting(View)
+     * @param userId user ID to query.
+     * @hide
+     */
+    public boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
         final Context fallbackContext = ActivityThread.currentApplication();
         if (fallbackContext == null) {
             return false;
         }
         if (Settings.Global.getInt(fallbackContext.getContentResolver(),
                 Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
-            Log.d(TAG, "Stylus handwriting is not enabled in settings.");
+            if (DEBUG) {
+                Log.d(TAG, "Stylus handwriting is not enabled in settings.");
+            }
             return false;
         }
         try {
-            return mService.isStylusHandwritingAvailable();
+            return mService.isStylusHandwritingAvailableAsUser(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
