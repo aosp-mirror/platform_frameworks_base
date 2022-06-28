@@ -122,7 +122,6 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
-import static com.android.server.wm.WindowContainer.SYNC_STATE_NONE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
@@ -2245,7 +2244,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return 0;
             }
 
-            if (win.cancelAndRedraw()) {
+            if (win.cancelAndRedraw() && win.mPrepareSyncSeqId <= win.mLastSeqIdSentToRelayout) {
                 result |= RELAYOUT_RES_CANCEL_AND_REDRAW;
             }
 
@@ -2551,11 +2550,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 win.mLastSeqIdSentToRelayout = win.mSyncSeqId;
                 outSyncIdBundle.putInt("seqid", win.mSyncSeqId);
-                // Only mark mAlreadyRequestedSync if there's an explicit sync request, and not if
-                // we're syncing due to mDrawHandlers
-                if (win.mSyncState != SYNC_STATE_NONE) {
-                    win.mAlreadyRequestedSync = true;
-                }
             } else {
                 outSyncIdBundle.putInt("seqid", -1);
             }

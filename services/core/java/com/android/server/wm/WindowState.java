@@ -115,6 +115,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RESIZE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
@@ -391,7 +392,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     int mSyncSeqId = 0;
     int mLastSeqIdSentToRelayout = 0;
-    boolean mAlreadyRequestedSync;
+
+    /** The last syncId associated with a prepareSync or 0 when no sync is active. */
+    int mPrepareSyncSeqId = 0;
 
     /**
      * {@code true} when the client was still drawing for sync when the sync-set was finished or
@@ -4421,7 +4424,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
 
-        pw.println(prefix + "mAlreadyRequestedSync=" + mAlreadyRequestedSync);
+        pw.println(prefix + "mPrepareSyncSeqId=" + mPrepareSyncSeqId);
     }
 
     @Override
@@ -5913,6 +5916,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWinAnimator.getSurfaceControl();
     }
 
+    /** Drops a buffer for this window's view-root from a transaction */
+    private void dropBufferFrom(Transaction t) {
+        SurfaceControl viewSurface = getClientViewRootSurface();
+        if (viewSurface == null) return;
+        t.setBuffer(viewSurface, (android.hardware.HardwareBuffer) null);
+    }
+
     @Override
     boolean prepareSync() {
         if (!mDrawHandlers.isEmpty()) {
@@ -5928,7 +5938,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // to draw even if the children draw first or don't need to sync, so we start
         // in WAITING state rather than READY.
         mSyncState = SYNC_STATE_WAITING_FOR_DRAW;
+
+        if (mPrepareSyncSeqId > 0) {
+            // another prepareSync during existing sync (eg. reparented), so pre-emptively
+            // drop buffer (if exists). If the buffer hasn't been received yet, it will be
+            // dropped in finishDrawing.
+            ProtoLog.d(WM_DEBUG_SYNC_ENGINE, "Preparing to sync a window that was already in the"
+                            + " sync, so try dropping buffer. win=%s", this);
+            dropBufferFrom(mSyncTransaction);
+        }
+
         mSyncSeqId++;
+        mPrepareSyncSeqId = mSyncSeqId;
         requestRedrawForSync();
         return true;
     }
@@ -5949,7 +5970,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mSyncState == SYNC_STATE_WAITING_FOR_DRAW && mRedrawForSyncReported) {
             mClientWasDrawingForSync = true;
         }
-        mAlreadyRequestedSync = false;
+        mPrepareSyncSeqId = 0;
+        if (cancel) {
+            // This is leaving sync so any buffers left in the sync have a chance of
+            // being applied out-of-order and can also block the buffer queue for this
+            // window. To prevent this, drop the buffer.
+            dropBufferFrom(mSyncTransaction);
+        }
         super.finishSync(outMergedTransaction, cancel);
     }
 
@@ -5971,6 +5998,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     .notifyStartingWindowDrawn(mActivityRecord);
         }
 
+        final boolean syncActive = mPrepareSyncSeqId > 0;
+        final boolean syncStillPending = syncActive && mPrepareSyncSeqId > syncSeqId;
+        if (syncStillPending && postDrawTransaction != null) {
+            ProtoLog.d(WM_DEBUG_SYNC_ENGINE, "Got a buffer for request id=%d but latest request is"
+                    + " id=%d. Since the buffer is out-of-date, drop it. win=%s", syncSeqId,
+                    mPrepareSyncSeqId, this);
+            // sync is waiting for a newer seqId, so this buffer is obsolete and can be dropped
+            // to free up the buffer queue.
+            dropBufferFrom(postDrawTransaction);
+        }
+
         final boolean hasSyncHandlers = executeDrawHandlers(postDrawTransaction, syncSeqId);
 
         boolean skipLayout = false;
@@ -5983,10 +6021,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Layout is not needed because the window will be hidden by the fade leash.
             postDrawTransaction = null;
             skipLayout = true;
-        } else if (onSyncFinishedDrawing() && postDrawTransaction != null) {
-            mSyncTransaction.merge(postDrawTransaction);
-            // Consume the transaction because the sync group will merge it.
-            postDrawTransaction = null;
+        } else if (syncActive) {
+            if (!syncStillPending) {
+                onSyncFinishedDrawing();
+            }
+            if (postDrawTransaction != null) {
+                mSyncTransaction.merge(postDrawTransaction);
+                // Consume the transaction because the sync group will merge it.
+                postDrawTransaction = null;
+            }
         }
 
         final boolean layoutNeeded =
@@ -6218,6 +6261,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     public boolean cancelAndRedraw() {
-        return mSyncState != SYNC_STATE_NONE && mAlreadyRequestedSync;
+        // Cancel any draw requests during a sync.
+        return mPrepareSyncSeqId > 0;
     }
 }
