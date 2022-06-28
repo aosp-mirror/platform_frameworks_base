@@ -112,6 +112,7 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.LongArrayQueue;
@@ -2299,7 +2300,11 @@ public class AlarmManagerService extends SystemService {
                                 + " reached for uid: " + UserHandle.formatUid(callingUid)
                                 + ", callingPackage: " + callingPackage;
                 Slog.w(TAG, errorMsg);
-                throw new IllegalStateException(errorMsg);
+                if (callingUid != Process.SYSTEM_UID) {
+                    throw new IllegalStateException(errorMsg);
+                } else {
+                    EventLog.writeEvent(0x534e4554, "234441463", -1, errorMsg);
+                }
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, interval, operation,
                     directReceiver, listenerTag, flags, workSource, alarmClock, callingUid,
