@@ -142,7 +142,7 @@ public abstract class PreferenceFragment extends Fragment implements
      * switch to a new fragment.
      *
      * @deprecated Use {@link
-     * android.support.v7.preference.PreferenceFragmentCompat.OnPreferenceStartFragmentCallback}
+     * androidx.preference.PreferenceFragmentCompat.OnPreferenceStartFragmentCallback}
      */
     @Deprecated
     public interface OnPreferenceStartFragmentCallback {

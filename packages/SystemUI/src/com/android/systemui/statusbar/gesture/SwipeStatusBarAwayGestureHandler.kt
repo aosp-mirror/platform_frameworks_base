@@ -17,15 +17,13 @@
 package com.android.systemui.statusbar.gesture
 
 import android.content.Context
-import android.os.Looper
-import android.view.Choreographer
-import android.view.Display
 import android.view.InputEvent
 import android.view.MotionEvent
-import android.view.MotionEvent.*
+import android.view.MotionEvent.ACTION_CANCEL
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_MOVE
+import android.view.MotionEvent.ACTION_UP
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shared.system.InputChannelCompat
-import com.android.systemui.shared.system.InputMonitorCompat
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import javax.inject.Inject
 
@@ -38,43 +36,17 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
     context: Context,
     private val statusBarWindowController: StatusBarWindowController,
     private val logger: SwipeStatusBarAwayGestureLogger
-) {
-
-    /**
-     * Active callbacks, each associated with a tag. Gestures will only be monitored if
-     * [callbacks.size] > 0.
-     */
-    private val callbacks: MutableMap<String, () -> Unit> = mutableMapOf()
+) : GenericGestureDetector(SwipeStatusBarAwayGestureHandler::class.simpleName!!) {
 
     private var startY: Float = 0f
     private var startTime: Long = 0L
     private var monitoringCurrentTouch: Boolean = false
 
-    private var inputMonitor: InputMonitorCompat? = null
-    private var inputReceiver: InputChannelCompat.InputEventReceiver? = null
-
     private var swipeDistanceThreshold: Int = context.resources.getDimensionPixelSize(
         com.android.internal.R.dimen.system_gestures_start_threshold
     )
 
-    /** Adds a callback that will be triggered when the swipe away gesture is detected. */
-    fun addOnGestureDetectedCallback(tag: String, callback: () -> Unit) {
-        val callbacksWasEmpty = callbacks.isEmpty()
-        callbacks[tag] = callback
-        if (callbacksWasEmpty) {
-            startGestureListening()
-        }
-    }
-
-    /** Removes the callback. */
-    fun removeOnGestureDetectedCallback(tag: String) {
-        callbacks.remove(tag)
-        if (callbacks.isEmpty()) {
-             stopGestureListening()
-        }
-    }
-
-    private fun onInputEvent(ev: InputEvent) {
+    override fun onInputEvent(ev: InputEvent) {
         if (ev !is MotionEvent) {
             return
         }
@@ -108,7 +80,7 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
                 ) {
                     monitoringCurrentTouch = false
                     logger.logGestureDetected(ev.y.toInt())
-                    callbacks.values.forEach { it.invoke() }
+                    onGestureDetected(ev)
                 }
             }
             ACTION_CANCEL, ACTION_UP -> {
@@ -120,33 +92,15 @@ open class SwipeStatusBarAwayGestureHandler @Inject constructor(
         }
     }
 
-    /** Start listening for the swipe gesture. */
-    private fun startGestureListening() {
-        stopGestureListening()
-
+    override fun startGestureListening() {
+        super.startGestureListening()
         logger.logInputListeningStarted()
-        inputMonitor = InputMonitorCompat(TAG, Display.DEFAULT_DISPLAY).also {
-            inputReceiver = it.getInputReceiver(
-                Looper.getMainLooper(),
-                Choreographer.getInstance(),
-                this::onInputEvent
-            )
-        }
     }
 
-    /** Stop listening for the swipe gesture. */
-    private fun stopGestureListening() {
-        inputMonitor?.let {
-            logger.logInputListeningStopped()
-            inputMonitor = null
-            it.dispose()
-        }
-        inputReceiver?.let {
-            inputReceiver = null
-            it.dispose()
-        }
+    override fun stopGestureListening() {
+        super.stopGestureListening()
+        logger.logInputListeningStopped()
     }
 }
 
 private const val SWIPE_TIMEOUT_MS: Long = 500
-private val TAG = SwipeStatusBarAwayGestureHandler::class.simpleName

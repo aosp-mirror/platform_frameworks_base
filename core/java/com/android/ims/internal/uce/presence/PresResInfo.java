@@ -122,6 +122,6 @@ public class PresResInfo implements Parcelable {
     public void readFromParcel(Parcel source) {
         mResUri = source.readString();
         mDisplayName = source.readString();
-        mInstanceInfo = source.readParcelable(PresResInstanceInfo.class.getClassLoader());
+        mInstanceInfo = source.readParcelable(PresResInstanceInfo.class.getClassLoader(), com.android.ims.internal.uce.presence.PresResInstanceInfo.class);
     }
 }

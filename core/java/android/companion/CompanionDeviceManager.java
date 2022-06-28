@@ -16,22 +16,27 @@
 
 package android.companion;
 
-import android.Manifest;
+import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING;
+import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
+import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER;
+import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserHandleAware;
 import android.app.Activity;
-import android.app.Application;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.MacAddress;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -39,10 +44,16 @@ import android.service.notification.NotificationListenerService;
 import android.util.ExceptionUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.CollectionUtils;
+
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiConsumer;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * System level service for managing companion devices
@@ -65,6 +76,56 @@ public final class CompanionDeviceManager {
     private static final String LOG_TAG = "CompanionDeviceManager";
 
     /**
+     * The result code to propagate back to the originating activity, indicates the association
+     * dialog is explicitly declined by the users.
+     *
+     * @hide
+     */
+    public static final int RESULT_USER_REJECTED = 1;
+
+    /**
+     * The result code to propagate back to the originating activity, indicates the association
+     * dialog is dismissed if there's no device found after 20 seconds.
+     *
+     * @hide
+     */
+    public static final int RESULT_DISCOVERY_TIMEOUT = 2;
+
+    /**
+     * The result code to propagate back to the originating activity, indicates the internal error
+     * in CompanionDeviceManager.
+     *
+     * @hide
+     */
+    public static final int RESULT_INTERNAL_ERROR = 3;
+
+    /**
+     *  Requesting applications will receive the String in {@link Callback#onFailure} if the
+     *  association dialog is explicitly declined by the users. e.g. press the Don't allow button.
+     *
+     * @hide
+     */
+    public static final String REASON_USER_REJECTED = "user_rejected";
+
+    /**
+     *  Requesting applications will receive the String in {@link Callback#onFailure} if there's
+     *  no device found after 20 seconds.
+     *
+     * @hide
+     */
+    public static final String REASON_DISCOVERY_TIMEOUT = "discovery_timeout";
+
+    /**
+     *  Requesting applications will receive the String in {@link Callback#onFailure} if the
+     *  association dialog is in-explicitly declined by the users. e.g. phone is locked, switch to
+     *  another app or press outside the dialog.
+     *
+     * @hide
+     */
+    public static final String REASON_CANCELED = "canceled";
+
+
+    /**
      * A device, returned in the activity result of the {@link IntentSender} received in
      * {@link Callback#onDeviceFound}
      *
@@ -74,8 +135,19 @@ public final class CompanionDeviceManager {
      *     <li>for Bluetooth LE - {@link android.bluetooth.le.ScanResult}</li>
      *     <li>for WiFi - {@link android.net.wifi.ScanResult}</li>
      * </ul>
+     *
+     * @deprecated use {@link #EXTRA_ASSOCIATION} instead.
      */
+    @Deprecated
     public static final String EXTRA_DEVICE = "android.companion.extra.DEVICE";
+
+    /**
+     * Extra field name for the {@link AssociationInfo} object, included into
+     * {@link android.content.Intent} which application receive in
+     * {@link Activity#onActivityResult(int, int, Intent)} after the application's
+     * {@link AssociationRequest} was successfully processed and an association was created.
+     */
+    public static final String EXTRA_ASSOCIATION = "android.companion.extra.ASSOCIATION";
 
     /**
      * The package name of the companion device discovery component.
@@ -86,29 +158,120 @@ public final class CompanionDeviceManager {
             "com.android.companiondevicemanager";
 
     /**
-     * A callback to receive once at least one suitable device is found, or the search failed
-     * (e.g. timed out)
+     * Callback for applications to receive updates about and the outcome of
+     * {@link AssociationRequest} issued via {@code associate()} call.
+     *
+     * <p>
+     * The {@link Callback#onAssociationPending(IntentSender)} is invoked after the
+     * {@link AssociationRequest} has been checked by the Companion Device Manager Service and is
+     * pending user's approval.
+     *
+     * The {@link IntentSender} received as an argument to
+     * {@link Callback#onAssociationPending(IntentSender)} "encapsulates" an {@link Activity}
+     * that has UI for the user to:
+     * <ul>
+     * <li>
+     * choose the device to associate the application with (if multiple eligible devices are
+     * available)
+     * </li>
+     * <li>confirm the association</li>
+     * <li>
+     * approve the privileges the application will be granted if the association is to be created
+     * </li>
+     * </ul>
+     *
+     * If the Companion Device Manager Service needs to scan for the devices, the {@link Activity}
+     * will also display the status and the progress of the scan.
+     *
+     * Note that Companion Device Manager Service will only start the scanning after the
+     * {@link Activity} was launched and became visible.
+     *
+     * Applications are expected to launch the UI using the received {@link IntentSender} via
+     * {@link Activity#startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}.
+     * </p>
+     *
+     * <p>
+     * Upon receiving user's confirmation Companion Device Manager Service will create an
+     * association and will send an {@link AssociationInfo} object that represents the created
+     * association back to the application both via
+     * {@link Callback#onAssociationCreated(AssociationInfo)} and
+     * via {@link Activity#setResult(int, Intent)}.
+     * In the latter the {@code resultCode} will be set to {@link Activity#RESULT_OK} and the
+     * {@code data} {@link Intent} will contain {@link AssociationInfo} extra named
+     * {@link #EXTRA_ASSOCIATION}.
+     * <pre>
+     * <code>
+     *   if (resultCode == Activity.RESULT_OK) {
+     *     AssociationInfo associationInfo = data.getParcelableExtra(EXTRA_ASSOCIATION);
+     *   }
+     * </code>
+     * </pre>
+     * </p>
+     *
+     * <p>
+     *  If the Companion Device Manager Service is not able to create an association, it will
+     *  invoke {@link Callback#onFailure(CharSequence)}.
+     *
+     *  If this happened after the application has launched the UI (eg. the user chose to reject
+     *  the association), the outcome will also be delivered to the applications via
+     *  {@link Activity#setResult(int)} with the {@link Activity#RESULT_CANCELED}
+     *  {@code resultCode}.
+     * </p>
+     *
+     * <p>
+     * Note that in some cases the Companion Device Manager Service may not need to collect
+     * user's approval for creating an association. In such cases, this method will not be
+     * invoked, and {@link #onAssociationCreated(AssociationInfo)} may be invoked right away.
+     * </p>
+     *
+     * @see #associate(AssociationRequest, Executor, Callback)
+     * @see #associate(AssociationRequest, Callback, Handler)
+     * @see #EXTRA_ASSOCIATION
      */
     public abstract static class Callback {
+        /**
+         * @deprecated method was renamed to onAssociationPending() to provide better clarity; both
+         * methods are functionally equivalent and only one needs to be overridden.
+         *
+         * @see #onAssociationPending(IntentSender)
+         */
+        @Deprecated
+        public void onDeviceFound(@NonNull IntentSender intentSender) {}
 
         /**
-         * Called once at least one suitable device is found
+         * Invoked when the association needs to approved by the user.
          *
-         * @param chooserLauncher a {@link IntentSender} to launch the UI for user to select a
-         *                        device
+         * Applications should launch the {@link Activity} "encapsulated" in {@code intentSender}
+         * {@link IntentSender} object by calling
+         * {@link Activity#startIntentSenderForResult(IntentSender, int, Intent, int, int, int)}.
+         *
+         * @param intentSender an {@link IntentSender} which applications should use to launch
+         *                     the UI for the user to confirm the association.
          */
-        public abstract void onDeviceFound(IntentSender chooserLauncher);
+        public void onAssociationPending(@NonNull IntentSender intentSender) {
+            onDeviceFound(intentSender);
+        }
 
         /**
-         * Called if there was an error looking for device(s)
+         * Invoked when the association is created.
          *
-         * @param error the cause of the error
+         * @param associationInfo contains details of the newly-established association.
          */
-        public abstract void onFailure(CharSequence error);
+        public void onAssociationCreated(@NonNull AssociationInfo associationInfo) {}
+
+        /**
+         * Invoked if the association could not be created.
+         *
+         * @param error error message.
+         */
+        public abstract void onFailure(@Nullable CharSequence error);
     }
 
     private final ICompanionDeviceManager mService;
     private Context mContext;
+
+    @GuardedBy("mListeners")
+    private final ArrayList<OnAssociationsChangedListenerProxy> mListeners = new ArrayList<>();
 
     /** @hide */
     public CompanionDeviceManager(
@@ -118,59 +281,111 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Associate this app with a companion device, selected by user
+     * Request to associate this app with a companion device.
      *
-     * <p>Once at least one appropriate device is found, {@code callback} will be called with a
-     * {@link PendingIntent} that can be used to show the list of available devices for the user
-     * to select.
-     * It should be started for result (i.e. using
-     * {@link android.app.Activity#startIntentSenderForResult}), as the resulting
-     * {@link android.content.Intent} will contain extra {@link #EXTRA_DEVICE}, with the selected
-     * device. (e.g. {@link android.bluetooth.BluetoothDevice})</p>
+     * <p>Note that before creating establishing association the system may need to show UI to
+     * collect user confirmation.</p>
      *
-     * <p>If your app needs to be excluded from battery optimizations (run in the background)
-     * or to have unrestricted data access (use data in the background) you can declare that
-     * you use the {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND} and {@link
-     * android.Manifest.permission#REQUEST_COMPANION_USE_DATA_IN_BACKGROUND} respectively. Note that these
-     * special capabilities have a negative effect on the device's battery and user's data
-     * usage, therefore you should request them when absolutely necessary.</p>
+     * <p>If the app needs to be excluded from battery optimizations (run in the background)
+     * or to have unrestricted data access (use data in the background) it should declare use of
+     * {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND} and
+     * {@link android.Manifest.permission#REQUEST_COMPANION_USE_DATA_IN_BACKGROUND} in its
+     * AndroidManifest.xml respectively.
+     * Note that these special capabilities have a negative effect on the device's battery and
+     * user's data usage, therefore you should request them when absolutely necessary.</p>
      *
-     * <p>You can call {@link #getAssociations} to get the list of currently associated
-     * devices, and {@link #disassociate} to remove an association. Consider doing so when the
-     * association is no longer relevant to avoid unnecessary battery and/or data drain resulting
-     * from special privileges that the association provides</p>
+     * <p>Application can use {@link #getMyAssociations()} for retrieving the list of currently
+     * {@link AssociationInfo} objects, that represent their existing associations.
+     * Applications can also use {@link #disassociate(int)} to remove an association, and are
+     * recommended to do when an association is no longer relevant to avoid unnecessary battery
+     * and/or data drain resulting from special privileges that the association provides</p>
      *
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     **
+     * @param request A request object that describes details of the request.
+     * @param callback The callback used to notify application when the association is created.
+     * @param handler The handler which will be used to invoke the callback.
      *
-     * <p>When using {@link AssociationRequest#DEVICE_PROFILE_WATCH watch}
-     * {@link AssociationRequest.Builder#setDeviceProfile profile}, caller must also hold
-     * {@link Manifest.permission#REQUEST_COMPANION_PROFILE_WATCH}</p>
-     *
-     * @param request specific details about this request
-     * @param callback will be called once there's at least one device found for user to choose from
-     * @param handler A handler to control which thread the callback will be delivered on, or null,
-     *                to deliver it on main thread
-     *
-     * @see AssociationRequest
+     * @see AssociationRequest.Builder
+     * @see #getMyAssociations()
+     * @see #disassociate(int)
+     * @see #associate(AssociationRequest, Executor, Callback)
      */
-    @RequiresPermission(
-            value = Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH,
-            conditional = true)
+    @UserHandleAware
+    @RequiresPermission(anyOf = {
+            REQUEST_COMPANION_PROFILE_WATCH,
+            REQUEST_COMPANION_PROFILE_COMPUTER,
+            REQUEST_COMPANION_PROFILE_APP_STREAMING,
+            REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION,
+            }, conditional = true)
     public void associate(
             @NonNull AssociationRequest request,
             @NonNull Callback callback,
             @Nullable Handler handler) {
-        if (!checkFeaturePresent()) {
-            return;
-        }
+        if (!checkFeaturePresent()) return;
         Objects.requireNonNull(request, "Request cannot be null");
         Objects.requireNonNull(callback, "Callback cannot be null");
+        handler = Handler.mainIfNull(handler);
+
         try {
-            mService.associate(
-                    request,
-                    new CallbackProxy(request, callback, Handler.mainIfNull(handler)),
-                    getCallingPackage());
+            mService.associate(request, new AssociationRequestCallbackProxy(handler, callback),
+                    mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to associate this app with a companion device.
+     *
+     * <p>Note that before creating establishing association the system may need to show UI to
+     * collect user confirmation.</p>
+     *
+     * <p>If the app needs to be excluded from battery optimizations (run in the background)
+     * or to have unrestricted data access (use data in the background) it should declare use of
+     * {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND} and
+     * {@link android.Manifest.permission#REQUEST_COMPANION_USE_DATA_IN_BACKGROUND} in its
+     * AndroidManifest.xml respectively.
+     * Note that these special capabilities have a negative effect on the device's battery and
+     * user's data usage, therefore you should request them when absolutely necessary.</p>
+     *
+     * <p>Application can use {@link #getMyAssociations()} for retrieving the list of currently
+     * {@link AssociationInfo} objects, that represent their existing associations.
+     * Applications can also use {@link #disassociate(int)} to remove an association, and are
+     * recommended to do when an association is no longer relevant to avoid unnecessary battery
+     * and/or data drain resulting from special privileges that the association provides</p>
+     *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     **
+     * @param request A request object that describes details of the request.
+     * @param executor The executor which will be used to invoke the callback.
+     * @param callback The callback used to notify application when the association is created.
+     *
+     * @see AssociationRequest.Builder
+     * @see #getMyAssociations()
+     * @see #disassociate(int)
+     */
+    @UserHandleAware
+    @RequiresPermission(anyOf = {
+            REQUEST_COMPANION_PROFILE_WATCH,
+            REQUEST_COMPANION_PROFILE_COMPUTER,
+            REQUEST_COMPANION_PROFILE_APP_STREAMING,
+            REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION
+            }, conditional = true)
+    public void associate(
+            @NonNull AssociationRequest request,
+            @NonNull Executor executor,
+            @NonNull Callback callback) {
+        if (!checkFeaturePresent()) return;
+        Objects.requireNonNull(request, "Request cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
+        Objects.requireNonNull(callback, "Callback cannot be null");
+
+        try {
+            mService.associate(request, new AssociationRequestCallbackProxy(executor, callback),
+                    mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -181,15 +396,32 @@ public final class CompanionDeviceManager {
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      *
      * @return a list of MAC addresses of devices that have been previously associated with the
-     * current app. You can use these with {@link #disassociate}
+     * current app are managed by CompanionDeviceManager (ie. does not include devices managed by
+     * application itself even if they have a MAC address).
+     *
+     * @deprecated use {@link #getMyAssociations()}
      */
+    @Deprecated
+    @UserHandleAware
     @NonNull
     public List<String> getAssociations() {
-        if (!checkFeaturePresent()) {
-            return Collections.emptyList();
-        }
+        return CollectionUtils.mapNotNull(getMyAssociations(),
+                a -> a.isSelfManaged() ? null : a.getDeviceMacAddressAsString());
+    }
+
+    /**
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     *
+     * @return a list of associations that have been previously associated with the current app.
+     */
+    @UserHandleAware
+    @NonNull
+    public List<AssociationInfo> getMyAssociations() {
+        if (!checkFeaturePresent()) return Collections.emptyList();
+
         try {
-            return mService.getAssociations(getCallingPackage(), mContext.getUserId());
+            return mService.getAssociations(mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -208,13 +440,41 @@ public final class CompanionDeviceManager {
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      *
      * @param deviceMacAddress the MAC address of device to disassociate from this app
+     *
+     * @deprecated use {@link #disassociate(int)}
      */
+    @UserHandleAware
+    @Deprecated
     public void disassociate(@NonNull String deviceMacAddress) {
-        if (!checkFeaturePresent()) {
-            return;
-        }
+        if (!checkFeaturePresent()) return;
+
         try {
-            mService.disassociate(deviceMacAddress, getCallingPackage());
+            mService.legacyDisassociate(deviceMacAddress, mContext.getOpPackageName(),
+                    mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove an association.
+     *
+     * <p>Any privileges provided via being associated with a given device will be revoked</p>
+     *
+     * <p>Calling this API requires a uses-feature
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
+     *
+     * @param associationId id of the association to be removed.
+     *
+     * @see #associate(AssociationRequest, Executor, Callback)
+     * @see AssociationInfo#getId()
+     */
+    @UserHandleAware
+    public void disassociate(int associationId) {
+        if (!checkFeaturePresent()) return;
+
+        try {
+            mService.disassociate(associationId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -233,12 +493,14 @@ public final class CompanionDeviceManager {
      * <p>Calling this API requires a uses-feature
      * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} declaration in the manifest</p>
      */
+    @UserHandleAware
     public void requestNotificationAccess(ComponentName component) {
         if (!checkFeaturePresent()) {
             return;
         }
         try {
-            IntentSender intentSender = mService.requestNotificationAccess(component)
+            IntentSender intentSender = mService
+                    .requestNotificationAccess(component, mContext.getUserId())
                     .getIntentSender();
             mContext.startIntentSender(intentSender, null, 0, 0, 0);
         } catch (RemoteException e) {
@@ -259,7 +521,11 @@ public final class CompanionDeviceManager {
      *
      * @param component the name of the component
      * @return whether the given component has the notification listener permission
+     *
+     * @deprecated Use
+     * {@link NotificationManager#isNotificationListenerAccessGranted(ComponentName)} instead.
      */
+    @Deprecated
     public boolean hasNotificationAccess(ComponentName component) {
         if (!checkFeaturePresent()) {
             return false;
@@ -276,7 +542,7 @@ public final class CompanionDeviceManager {
      * Wi-Fi MAC address for a given user.
      *
      * <p>This is a system API protected by the
-     * {@link andrioid.Manifest.permission#MANAGE_COMPANION_DEVICES} permission, that’s currently
+     * {@link android.Manifest.permission#MANAGE_COMPANION_DEVICES} permission, that’s currently
      * called by the Android Wi-Fi stack to determine whether user consent is required to connect
      * to a Wi-Fi network. Devices that have been pre-registered as companion devices will not
      * require user consent to connect.</p>
@@ -299,9 +565,7 @@ public final class CompanionDeviceManager {
             @NonNull String packageName,
             @NonNull MacAddress macAddress,
             @NonNull UserHandle user) {
-        if (!checkFeaturePresent()) {
-            return false;
-        }
+        if (!checkFeaturePresent()) return false;
         Objects.requireNonNull(packageName, "package name cannot be null");
         Objects.requireNonNull(macAddress, "mac address cannot be null");
         Objects.requireNonNull(user, "user cannot be null");
@@ -314,20 +578,90 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Gets all package-device {@link Association}s for the current user.
+     * Gets all package-device {@link AssociationInfo}s for the current user.
      *
      * @return the associations list
+     * @see #addOnAssociationsChangedListener(Executor, OnAssociationsChangedListener)
+     * @see #removeOnAssociationsChangedListener(OnAssociationsChangedListener)
      * @hide
      */
+    @SystemApi
+    @UserHandleAware
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
-    public @NonNull List<Association> getAllAssociations() {
-        if (!checkFeaturePresent()) {
-            return Collections.emptyList();
-        }
+    public @NonNull List<AssociationInfo> getAllAssociations() {
+        if (!checkFeaturePresent()) return Collections.emptyList();
         try {
-            return mService.getAssociationsForUser(mContext.getUser().getIdentifier());
+            return mService.getAllAssociationsForUser(mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Listener for any changes to {@link AssociationInfo}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public interface OnAssociationsChangedListener {
+        /**
+         * Invoked when a change occurs to any of the associations for the user (including adding
+         * new associations and removing existing associations).
+         *
+         * @param associations all existing associations for the user (after the change).
+         */
+        void onAssociationsChanged(@NonNull List<AssociationInfo> associations);
+    }
+
+    /**
+     * Register listener for any changes to {@link AssociationInfo}.
+     *
+     * @see #getAllAssociations()
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public void addOnAssociationsChangedListener(
+            @NonNull Executor executor, @NonNull OnAssociationsChangedListener listener) {
+        if (!checkFeaturePresent()) return;
+        synchronized (mListeners) {
+            final OnAssociationsChangedListenerProxy proxy = new OnAssociationsChangedListenerProxy(
+                    executor, listener);
+            try {
+                mService.addOnAssociationsChangedListener(proxy, mContext.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mListeners.add(proxy);
+        }
+    }
+
+    /**
+     * Unregister listener for any changes to {@link AssociationInfo}.
+     *
+     * @see #getAllAssociations()
+     * @hide
+     */
+    @SystemApi
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public void removeOnAssociationsChangedListener(
+            @NonNull OnAssociationsChangedListener listener) {
+        if (!checkFeaturePresent()) return;
+        synchronized (mListeners) {
+            final Iterator<OnAssociationsChangedListenerProxy> iterator = mListeners.iterator();
+            while (iterator.hasNext()) {
+                final OnAssociationsChangedListenerProxy proxy = iterator.next();
+                if (proxy.mListener == listener) {
+                    try {
+                        mService.removeOnAssociationsChangedListener(proxy, mContext.getUserId());
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                    iterator.remove();
+                }
+            }
         }
     }
 
@@ -399,8 +733,8 @@ public final class CompanionDeviceManager {
         }
         Objects.requireNonNull(deviceAddress, "address cannot be null");
         try {
-            mService.registerDevicePresenceListenerService(
-                    mContext.getPackageName(), deviceAddress);
+            mService.registerDevicePresenceListenerService(deviceAddress,
+                    mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
             throw e.rethrowFromSystemServer();
@@ -432,10 +766,36 @@ public final class CompanionDeviceManager {
         }
         Objects.requireNonNull(deviceAddress, "address cannot be null");
         try {
-            mService.unregisterDevicePresenceListenerService(
-                    mContext.getPackageName(), deviceAddress);
+            mService.unregisterDevicePresenceListenerService(deviceAddress,
+                    mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+        }
+    }
+
+    /**
+     * Dispatch a message to system for processing.
+     *
+     * <p>Calling app must declare uses-permission
+     * {@link android.Manifest.permission#DELIVER_COMPANION_MESSAGES}</p>
+     *
+     * @param messageId id of the message
+     * @param associationId association id of the associated device where data is coming from
+     * @param message message received from the associated device
+     *
+     * @throws DeviceNotAssociatedException if the given device was not previously associated with
+     * this app
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
+    public void dispatchMessage(int messageId, int associationId, @NonNull byte[] message)
+            throws DeviceNotAssociatedException {
+        try {
+            mService.dispatchMessage(messageId, associationId, message);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -469,6 +829,51 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * Notify the system that the given self-managed association has just appeared.
+     * This causes the system to bind to the companion app to keep it running until the association
+     * is reported as disappeared
+     *
+     * <p>This API is only available for the companion apps that manage the connectivity by
+     * themselves.</p>
+     *
+     * @param associationId the unique {@link AssociationInfo#getId ID} assigned to the Association
+     * recorded by CompanionDeviceManager
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED)
+    public void notifyDeviceAppeared(int associationId) {
+        try {
+            mService.notifyDeviceAppeared(associationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify the system that the given self-managed association has just disappeared.
+     * This causes the system to unbind to the companion app.
+     *
+     * <p>This API is only available for the companion apps that manage the connectivity by
+     * themselves.</p>
+     *
+     * @param associationId the unique {@link AssociationInfo#getId ID} assigned to the Association
+     * recorded by CompanionDeviceManager
+
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED)
+    public void notifyDeviceDisappeared(int associationId) {
+        try {
+            mService.notifyDeviceDisappeared(associationId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private boolean checkFeaturePresent() {
         boolean featurePresent = mService != null;
         if (!featurePresent && DEBUG) {
@@ -478,78 +883,63 @@ public final class CompanionDeviceManager {
         return featurePresent;
     }
 
-    private Activity getActivity() {
-        return (Activity) mContext;
-    }
+    private static class AssociationRequestCallbackProxy extends IAssociationRequestCallback.Stub {
+        private final Handler mHandler;
+        private final Callback mCallback;
+        private final Executor mExecutor;
 
-    private String getCallingPackage() {
-        return mContext.getPackageName();
-    }
-
-    private class CallbackProxy extends IFindDeviceCallback.Stub
-            implements Application.ActivityLifecycleCallbacks {
-
-        private Callback mCallback;
-        private Handler mHandler;
-        private AssociationRequest mRequest;
-
-        final Object mLock = new Object();
-
-        private CallbackProxy(AssociationRequest request, Callback callback, Handler handler) {
+        private AssociationRequestCallbackProxy(
+                @NonNull Executor executor, @NonNull Callback callback) {
+            mExecutor = executor;
+            mHandler = null;
             mCallback = callback;
+        }
+
+        private AssociationRequestCallbackProxy(
+                @NonNull Handler handler, @NonNull Callback callback) {
             mHandler = handler;
-            mRequest = request;
-            getActivity().getApplication().registerActivityLifecycleCallbacks(this);
+            mExecutor = null;
+            mCallback = callback;
         }
 
         @Override
-        public void onSuccess(PendingIntent launcher) {
-            lockAndPost(Callback::onDeviceFound, launcher.getIntentSender());
+        public void onAssociationPending(@NonNull PendingIntent pi) {
+            execute(mCallback::onAssociationPending, pi.getIntentSender());
         }
 
         @Override
-        public void onFailure(CharSequence reason) {
-            lockAndPost(Callback::onFailure, reason);
+        public void onAssociationCreated(@NonNull AssociationInfo association) {
+            execute(mCallback::onAssociationCreated, association);
         }
 
-        <T> void lockAndPost(BiConsumer<Callback, T> action, T payload) {
-            synchronized (mLock) {
-                if (mHandler != null) {
-                    mHandler.post(() -> {
-                        Callback callback = null;
-                        synchronized (mLock) {
-                            callback = mCallback;
-                        }
-                        if (callback != null) {
-                            action.accept(callback, payload);
-                        }
-                    });
-                }
+        @Override
+        public void onFailure(CharSequence error) throws RemoteException {
+            execute(mCallback::onFailure, error);
+        }
+
+        private <T> void execute(Consumer<T> callback, T arg) {
+            if (mExecutor != null) {
+                mExecutor.execute(() -> callback.accept(arg));
+            } else {
+                mHandler.post(() -> callback.accept(arg));
             }
         }
+    }
 
-        @Override
-        public void onActivityDestroyed(Activity activity) {
-            synchronized (mLock) {
-                if (activity != getActivity()) return;
-                try {
-                    mService.stopScan(mRequest, this, getCallingPackage());
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
-                }
-                getActivity().getApplication().unregisterActivityLifecycleCallbacks(this);
-                mCallback = null;
-                mHandler = null;
-                mRequest = null;
-                mContext = null;
-            }
+    private static class OnAssociationsChangedListenerProxy
+            extends IOnAssociationsChangedListener.Stub {
+        private final Executor mExecutor;
+        private final OnAssociationsChangedListener mListener;
+
+        private OnAssociationsChangedListenerProxy(Executor executor,
+                OnAssociationsChangedListener listener) {
+            mExecutor = executor;
+            mListener = listener;
         }
 
-        @Override public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
-        @Override public void onActivityStarted(Activity activity) {}
-        @Override public void onActivityResumed(Activity activity) {}
-        @Override public void onActivityPaused(Activity activity) {}
-        @Override public void onActivityStopped(Activity activity) {}
-        @Override public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
+        @Override
+        public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
+            mExecutor.execute(() -> mListener.onAssociationsChanged(associations));
+        }
     }
 }

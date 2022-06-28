@@ -97,11 +97,11 @@ class ReferenceLinker : public IResourceTableConsumer {
 
   // Resolves the attribute reference and returns an xml::AaptAttribute if successful.
   // If resolution fails, outError holds the error message.
-  static Maybe<xml::AaptAttribute> CompileXmlAttribute(const Reference& reference,
-                                                       const CallSite& callsite,
-                                                       IAaptContext* context,
-                                                       SymbolTable* symbols,
-                                                       std::string* out_error);
+  static std::optional<xml::AaptAttribute> CompileXmlAttribute(const Reference& reference,
+                                                               const CallSite& callsite,
+                                                               IAaptContext* context,
+                                                               SymbolTable* symbols,
+                                                               std::string* out_error);
 
   // Writes the resource name to the DiagMessage, using the
   // "orig_name (aka <transformed_name>)" syntax.

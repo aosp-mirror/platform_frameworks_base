@@ -114,7 +114,6 @@ public abstract class StorageManagerInternal {
      */
     public abstract void prepareAppDataAfterInstall(@NonNull String packageName, int uid);
 
-
     /**
      * Return true if uid is external storage service.
      */
@@ -151,4 +150,23 @@ public abstract class StorageManagerInternal {
      * it's ok to access and modify CE directories on volumes for this user.
      */
     public abstract boolean isCeStoragePrepared(@UserIdInt int userId);
+
+    /**
+     * A listener for changes to the cloud provider.
+     */
+    public interface CloudProviderChangeListener {
+        /**
+         * Triggered when the cloud provider changes. A {@code null} value means there's currently
+         * no cloud provider.
+         */
+        void onCloudProviderChanged(int userId, @Nullable String authority);
+    }
+
+    /**
+     * Register a {@link CloudProviderChangeListener} to be notified when a cloud media provider
+     * changes. The listener will be called after registration with any currently set cloud media
+     * providers.
+     */
+    public abstract void registerCloudProviderChangeListener(
+            @NonNull CloudProviderChangeListener listener);
 }

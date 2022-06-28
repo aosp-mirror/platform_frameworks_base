@@ -18,11 +18,13 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.service.notification.NotificationListenerService
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -32,6 +34,7 @@ import javax.inject.Inject
 // TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
 class ShadeEventCoordinator @Inject internal constructor(
+    @Main private val mMainExecutor: Executor,
     private val mLogger: ShadeEventCoordinatorLogger
 ) : Coordinator, NotifShadeEventSource {
     private var mNotifRemovedByUserCallback: Runnable? = null
@@ -67,11 +70,13 @@ class ShadeEventCoordinator @Inject internal constructor(
     private fun onBeforeRenderList(entries: List<ListEntry>) {
         if (mEntryRemoved && entries.isEmpty()) {
             mLogger.logShadeEmptied()
-            mShadeEmptiedCallback?.run()
+            // TODO(b/206023518): This was bad. Do not copy this.
+            mShadeEmptiedCallback?.let { mMainExecutor.execute(it) }
         }
         if (mEntryRemoved && mEntryRemovedByUser) {
             mLogger.logNotifRemovedByUser()
-            mNotifRemovedByUserCallback?.run()
+            // TODO(b/206023518): This was bad. Do not copy this.
+            mNotifRemovedByUserCallback?.let { mMainExecutor.execute(it) }
         }
         mEntryRemoved = false
         mEntryRemovedByUser = false

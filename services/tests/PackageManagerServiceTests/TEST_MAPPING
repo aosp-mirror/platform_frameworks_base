@@ -1,0 +1,18 @@
+{
+  "presubmit": [
+    {
+      "name": "AppEnumerationInternalTests"
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "PackageManagerServiceHostTests"
+    }
+  ],
+  "imports": [
+    {
+      "path": "frameworks/base/services/tests/PackageManagerServiceTests/unit"
+    }
+  ]
+}
+

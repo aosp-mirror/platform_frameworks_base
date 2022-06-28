@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 
 /**
@@ -105,15 +106,6 @@ final class InputMethodSessionWrapper {
     }
 
     @AnyThread
-    void notifyImeHidden() {
-        try {
-            mSession.notifyImeHidden();
-        } catch (RemoteException e) {
-            Log.w(TAG, "IME died", e);
-        }
-    }
-
-    @AnyThread
     void viewClicked(boolean focusChanged) {
         try {
             mSession.viewClicked(focusChanged);
@@ -137,6 +129,15 @@ final class InputMethodSessionWrapper {
         try {
             mSession.updateSelection(
                     oldSelStart, oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd);
+        } catch (RemoteException e) {
+            Log.w(TAG, "IME died", e);
+        }
+    }
+
+    @AnyThread
+    void invalidateInput(EditorInfo editorInfo, IInputContext inputContext, int sessionId) {
+        try {
+            mSession.invalidateInput(editorInfo, inputContext, sessionId);
         } catch (RemoteException e) {
             Log.w(TAG, "IME died", e);
         }

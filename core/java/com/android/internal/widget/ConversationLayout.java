@@ -879,6 +879,10 @@ public class ConversationLayout extends FrameLayout
             if (newGroup == null) {
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
                 mAddedGroups.add(newGroup);
+            } else if (newGroup.getParent() != mMessagingLinearLayout) {
+                throw new IllegalStateException(
+                        "group parent was " + newGroup.getParent() + " but expected "
+                                + mMessagingLinearLayout);
             }
             newGroup.setImageDisplayLocation(mIsCollapsed
                     ? IMAGE_DISPLAY_LOCATION_EXTERNAL

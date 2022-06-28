@@ -147,5 +147,6 @@ class UserDetailViewAdapterTest : SysuiTestCase() {
                     current,
                     false /* isAddUser */,
                     false /* isRestricted */,
-                    true /* isSwitchToEnabled */)
+                    true /* isSwitchToEnabled */,
+                    false /* isAddSupervisedUser */)
 }

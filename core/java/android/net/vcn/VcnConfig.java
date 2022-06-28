@@ -173,7 +173,7 @@ public final class VcnConfig implements Parcelable {
             new Parcelable.Creator<VcnConfig>() {
                 @NonNull
                 public VcnConfig createFromParcel(Parcel in) {
-                    return new VcnConfig((PersistableBundle) in.readParcelable(null));
+                    return new VcnConfig((PersistableBundle) in.readParcelable(null, android.os.PersistableBundle.class));
                 }
 
                 @NonNull

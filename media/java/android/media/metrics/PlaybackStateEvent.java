@@ -31,6 +31,11 @@ import java.util.Objects;
  * Playback state event.
  */
 public final class PlaybackStateEvent extends Event implements Parcelable {
+
+        // RBE -- we should be getting these values from the proto, not doing them
+        // hand-coded values here.
+        // frameorks/proto_logging/stats/message/mediametrics_message.pb.h
+        // package libstatslog?
     /** Playback has not started (initial state) */
     public static final int STATE_NOT_STARTED = 0;
     /** Playback is buffering in the background for initial playback start */

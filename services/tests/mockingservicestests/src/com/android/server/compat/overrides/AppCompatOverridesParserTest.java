@@ -16,6 +16,8 @@
 
 package com.android.server.compat.overrides;
 
+import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,6 +32,8 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
+
+import libcore.util.HexEncoding;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -182,16 +186,18 @@ public class AppCompatOverridesParserTest {
 
     @Test
     public void parsePackageOverrides_emptyConfigNoOwnedChangeIds_returnsEmpty() {
-        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
-                /* configStr= */ "", /* versionCode= */ 0, /* changeIdsToSkip= */ emptySet());
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "", PACKAGE_1, /* versionCode= */ 0, /* changeIdsToSkip= */
+                emptySet());
 
         assertThat(result).isEmpty();
     }
 
     @Test
     public void parsePackageOverrides_configWithSingleOverride_returnsOverride() {
-        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
-                /* configStr= */ "123:::true", /* versionCode= */ 5, /* changeIdsToSkip= */
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "123:::true", PACKAGE_1, /* versionCode= */
+                5, /* changeIdsToSkip= */
                 emptySet());
 
         assertThat(result).hasSize(1);
@@ -201,10 +207,10 @@ public class AppCompatOverridesParserTest {
 
     @Test
     public void parsePackageOverrides_configWithMultipleOverrides_returnsOverrides() {
-        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
                 /* configStr= */ "910:3:4:false,78:10::false,12:::false,34:1:2:true,34:10::true,"
                         + "56::2:true,56:3:4:false,34:4:8:true,78:6:7:true,910:5::true,"
-                        + "1112::5:true,56:6::true,1112:6:7:false", /* versionCode= */
+                        + "1112::5:true,56:6::true,1112:6:7:false", PACKAGE_1, /* versionCode= */
                 5, /* changeIdsToSkip= */ emptySet());
 
         assertThat(result).hasSize(6);
@@ -228,8 +234,9 @@ public class AppCompatOverridesParserTest {
     @Test
     public void parsePackageOverrides_changeIdsToSkipSpecified_returnsWithoutChangeIdsToSkip() {
         ArraySet<Long> changeIdsToSkip = new ArraySet<>(Arrays.asList(34L, 56L));
-        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
-                /* configStr= */ "12:::true,56:3:7:true", /* versionCode= */ 5, changeIdsToSkip);
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "12:::true,56:3:7:true", PACKAGE_1, /* versionCode= */ 5,
+                changeIdsToSkip);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(12L)).isEqualTo(
@@ -239,8 +246,77 @@ public class AppCompatOverridesParserTest {
     @Test
     public void parsePackageOverrides_changeIdsToSkipContainsAllIds_returnsEmpty() {
         ArraySet<Long> changeIdsToSkip = new ArraySet<>(Arrays.asList(12L, 34L));
-        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
-                /* configStr= */ "12:::true", /* versionCode= */ 5, changeIdsToSkip);
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "12:::true", PACKAGE_1, /* versionCode= */ 5, changeIdsToSkip);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void parsePackageOverrides_signatureInvalid() {
+        when(mPackageManager.hasSigningCertificate(PACKAGE_1, HexEncoding.decode("aa"),
+                CERT_INPUT_SHA256)).thenReturn(false);
+
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "aa~12:::true,56:::true", PACKAGE_1,
+                /* versionCode= */ 0, /* changeIdsToSkip= */ emptySet());
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void parsePackageOverrides_signatureInvalid_oddNumberOfCharacters() {
+        // Valid hex encoding should always be an even number of characters.
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "a~12:::true,56:::true", PACKAGE_1,
+                /* versionCode= */ 0, /* changeIdsToSkip= */ emptySet());
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void parsePackageOverrides_signatureValid() {
+        when(mPackageManager.hasSigningCertificate(PACKAGE_1, HexEncoding.decode("bb"),
+                CERT_INPUT_SHA256)).thenReturn(true);
+
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "bb~12:::true,56:::false", PACKAGE_1,
+                /* versionCode= */ 0, /* changeIdsToSkip= */ emptySet());
+
+        assertThat(result.keySet()).containsExactly(12L, 56L);
+    }
+
+    @Test
+    public void parsePackageOverrides_emptySignature() {
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "~12:::true,56:::false", PACKAGE_1,
+                /* versionCode= */ 0, /* changeIdsToSkip= */ emptySet());
+
+        assertThat(result.keySet()).containsExactly(12L, 56L);
+    }
+
+    @Test
+    public void parsePackageOverrides_multipleSignatures() {
+        when(mPackageManager.hasSigningCertificate(PACKAGE_1, HexEncoding.decode("aa"),
+                CERT_INPUT_SHA256)).thenReturn(true);
+        when(mPackageManager.hasSigningCertificate(PACKAGE_1, HexEncoding.decode("bb"),
+                CERT_INPUT_SHA256)).thenReturn(true);
+
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "aa~bb~12:::true,56:::false", PACKAGE_1,
+                /* versionCode= */0, /* changeIdsToSkip= */ emptySet());
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void parsePackageOverrides_signatureOnly() {
+        when(mPackageManager.hasSigningCertificate(PACKAGE_1, HexEncoding.decode("aa"),
+                CERT_INPUT_SHA256)).thenReturn(true);
+
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
+                /* configStr= */ "aa~", PACKAGE_1,
+                /* versionCode= */ 0, /* changeIdsToSkip= */ emptySet());
 
         assertThat(result).isEmpty();
     }
@@ -248,9 +324,9 @@ public class AppCompatOverridesParserTest {
     @Test
     public void parsePackageOverrides_someOverridesAreInvalid_returnsWithoutInvalidOverrides() {
         // We add a valid entry before and after the invalid ones to make sure they are applied.
-        Map<Long, PackageOverride> result = AppCompatOverridesParser.parsePackageOverrides(
+        Map<Long, PackageOverride> result = mParser.parsePackageOverrides(
                 /* configStr= */ "12:::True,56:1:2:FALSE,56:3:true,78:4:8:true:,C1:::true,910:::no,"
-                        + "1112:1:ten:true,1112:one:10:true,,1314:7:3:false,34:::",
+                        + "1112:1:ten:true,1112:one:10:true,,1314:7:3:false,34:::", PACKAGE_1,
                 /* versionCode= */ 5, /* changeIdsToSkip= */ emptySet());
 
         assertThat(result).hasSize(2);

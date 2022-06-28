@@ -27,7 +27,7 @@ import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.pip.PipTestBase
 import org.junit.After
 import org.junit.Assert.assertFalse
-import org.junit.Assume
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 
 abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATION_0) {
@@ -37,7 +37,7 @@ abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATIO
     @Before
     final override fun televisionSetUp() {
         // Should run only on TVs.
-        Assume.assumeTrue(isTelevision)
+        assumeTrue(isTelevision)
 
         systemUiProcessObserver.start()
 

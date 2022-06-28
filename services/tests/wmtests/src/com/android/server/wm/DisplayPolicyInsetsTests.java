@@ -167,36 +167,34 @@ public class DisplayPolicyInsetsTests extends DisplayPolicyTestsBase {
 
     private Rect getStableInsetsLw(DisplayInfo di) {
         Rect result = new Rect();
-        mDisplayPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                di.displayCutout, result);
+        mDisplayPolicy.getStableInsetsLw(di.rotation, di.displayCutout, result);
         return result;
     }
 
     private Rect getNonDecorInsetsLw(DisplayInfo di) {
         Rect result = new Rect();
-        mDisplayPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                di.displayCutout, result);
+        mDisplayPolicy.getNonDecorInsetsLw(di.rotation, di.displayCutout, result);
         return result;
     }
 
     private int getNonDecorDisplayWidth(DisplayInfo di) {
-        return mDisplayPolicy.getNonDecorDisplaySize(di.logicalWidth, di.logicalHeight,
-                di.rotation, 0 /* ui */, di.displayCutout).x;
+        return mDisplayPolicy.getNonDecorDisplayWidth(di.logicalWidth, di.logicalHeight,
+                di.rotation, 0 /* ui */, di.displayCutout);
     }
 
     private int getNonDecorDisplayHeight(DisplayInfo di) {
-        return mDisplayPolicy.getNonDecorDisplaySize(di.logicalWidth, di.logicalHeight,
-                di.rotation, 0 /* ui */, di.displayCutout).y;
+        return mDisplayPolicy.getNonDecorDisplayHeight(di.logicalHeight, di.rotation,
+                di.displayCutout);
     }
 
     private int getConfigDisplayWidth(DisplayInfo di) {
-        return mDisplayPolicy.getConfigDisplaySize(di.logicalWidth, di.logicalHeight,
-                di.rotation, 0 /* ui */, di.displayCutout).x;
+        return mDisplayPolicy.getConfigDisplayWidth(di.logicalWidth, di.logicalHeight,
+                di.rotation, 0 /* ui */, di.displayCutout);
     }
 
     private int getConfigDisplayHeight(DisplayInfo di) {
-        return mDisplayPolicy.getConfigDisplaySize(di.logicalWidth, di.logicalHeight,
-                di.rotation, 0 /* ui */, di.displayCutout).y;
+        return mDisplayPolicy.getConfigDisplayHeight(di.logicalWidth, di.logicalHeight,
+                di.rotation, 0 /* ui */, di.displayCutout);
     }
 
     private static DisplayInfo displayInfoForRotation(int rotation, boolean withDisplayCutout) {

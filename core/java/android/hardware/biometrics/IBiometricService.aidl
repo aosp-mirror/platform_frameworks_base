@@ -63,7 +63,7 @@ interface IBiometricService {
 
     // Notify BiometricService when <Biometric>Service is ready to start the prepared client.
     // Client lifecycle is still managed in <Biometric>Service.
-    void onReadyForAuthentication(int cookie);
+    void onReadyForAuthentication(long requestId, int cookie);
 
     // Requests all BIOMETRIC_STRONG sensors to have their authenticatorId invalidated for the
     // specified user. This happens when enrollments have been added on devices with multiple

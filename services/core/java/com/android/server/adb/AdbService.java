@@ -323,14 +323,15 @@ public class AdbService extends IAdbManager.Stub {
     }
 
     /**
-     * @return true if the device supports secure ADB over Wi-Fi.
+     * @return true if the device supports secure ADB over Wi-Fi or Ethernet.
      * @hide
      */
     @Override
     public boolean isAdbWifiSupported() {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.MANAGE_DEBUGGING, "AdbService");
-        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI) ||
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_ETHERNET);
     }
 
     /**

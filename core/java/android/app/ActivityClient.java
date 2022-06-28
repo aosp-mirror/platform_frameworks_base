@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
@@ -92,6 +93,15 @@ public class ActivityClient {
     public void activityDestroyed(IBinder token) {
         try {
             getActivityClientController().activityDestroyed(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Reports the activity starts local relaunch. */
+    public void activityLocalRelaunch(IBinder token) {
+        try {
+            getActivityClientController().activityLocalRelaunch(token);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -323,6 +333,14 @@ public class ActivityClient {
         }
     }
 
+    void setShouldDockBigOverlays(IBinder token, boolean shouldDockBigOverlays) {
+        try {
+            getActivityClientController().setShouldDockBigOverlays(token, shouldDockBigOverlays);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     void toggleFreeformWindowingMode(IBinder token) {
         try {
             getActivityClientController().toggleFreeformWindowingMode(token);
@@ -427,25 +445,31 @@ public class ActivityClient {
         }
     }
 
-    void overridePendingTransition(IBinder token, String packageName,
-            int enterAnim, int exitAnim) {
+    void overridePendingTransition(IBinder token, String packageName, int enterAnim, int exitAnim,
+            int backgroundColor) {
         try {
             getActivityClientController().overridePendingTransition(token, packageName,
-                    enterAnim, exitAnim);
+                    enterAnim, exitAnim, backgroundColor);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
     }
 
-    void setDisablePreviewScreenshots(IBinder token, boolean disable) {
+    void setRecentsScreenshotEnabled(IBinder token, boolean enabled) {
         try {
-            getActivityClientController().setDisablePreviewScreenshots(token, disable);
+            getActivityClientController().setRecentsScreenshotEnabled(token, enabled);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
     }
 
-    /** Removes the snapshot of home task. */
+    /**
+     * Removes the outdated snapshot of the home task.
+     *
+     * @param homeToken The token of the home task, or null if you have the
+     *                  {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS} permission and
+     *                  want us to find the home task token for you.
+     */
     public void invalidateHomeTaskSnapshot(IBinder homeToken) {
         try {
             getActivityClientController().invalidateHomeTaskSnapshot(homeToken);
@@ -493,6 +517,28 @@ public class ActivityClient {
     void reportSplashScreenAttached(IBinder token) {
         try {
             getActivityClientController().splashScreenAttached(token);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Shows or hides a Camera app compat toggle for stretched issues with the requested state.
+     *
+     * @param token The token for the window that needs a control.
+     * @param showControl Whether the control should be shown or hidden.
+     * @param transformationApplied Whether the treatment is already applied.
+     * @param callback The callback executed when the user clicks on a control.
+     */
+    void requestCompatCameraControl(Resources res, IBinder token, boolean showControl,
+            boolean transformationApplied, ICompatCameraControlCallback callback) {
+        if (!res.getBoolean(com.android.internal.R.bool
+                .config_isCameraCompatControlForStretchedIssuesEnabled)) {
+            return;
+        }
+        try {
+            getActivityClientController().requestCompatCameraControl(
+                    token, showControl, transformationApplied, callback);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

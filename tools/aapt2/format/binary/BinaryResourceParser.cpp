@@ -556,8 +556,8 @@ bool BinaryResourceParser::ParseStagedAliases(const ResChunk_header* chunk) {
 std::unique_ptr<Item> BinaryResourceParser::ParseValue(const ResourceNameRef& name,
                                                        const ConfigDescription& config,
                                                        const android::Res_value& value) {
-  std::unique_ptr<Item> item = ResourceUtils::ParseBinaryResValue(name.type, config, value_pool_,
-                                                                  value, &table_->string_pool);
+  std::unique_ptr<Item> item = ResourceUtils::ParseBinaryResValue(
+      name.type.type, config, value_pool_, value, &table_->string_pool);
   if (files_ != nullptr) {
     FileReference* file_ref = ValueCast<FileReference>(item.get());
     if (file_ref != nullptr) {
@@ -575,8 +575,10 @@ std::unique_ptr<Item> BinaryResourceParser::ParseValue(const ResourceNameRef& na
 std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef& name,
                                                            const ConfigDescription& config,
                                                            const ResTable_map_entry* map) {
-  switch (name.type) {
+  switch (name.type.type) {
     case ResourceType::kStyle:
+      // fallthrough
+    case ResourceType::kConfigVarying:  // legacy thing used in tests
       return ParseStyle(name, config, map);
     case ResourceType::kAttrPrivate:
       // fallthrough
@@ -592,8 +594,8 @@ std::unique_ptr<Value> BinaryResourceParser::ParseMapEntry(const ResourceNameRef
       // We can ignore the value here.
       return util::make_unique<Id>();
     default:
-      diag_->Error(DiagMessage() << "illegal map type '" << to_string(name.type) << "' ("
-                                 << (int)name.type << ")");
+      diag_->Error(DiagMessage() << "illegal map type '" << name.type << "' ("
+                                 << (int)name.type.type << ")");
       break;
   }
   return {};

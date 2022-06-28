@@ -15,47 +15,52 @@
      limitations under the License.
 -->
 
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/control_detail_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/black">
+    android:layout_height="match_parent">
   <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_marginBottom="4dp">
-    <ImageView
-        android:id="@+id/control_detail_close"
-        android:contentDescription="@string/accessibility_desc_close"
-        android:src="@drawable/ic_arrow_back"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:tint="@color/control_primary_text"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp" />
-    <Space
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="1dp" />
-    <ImageView
-        android:id="@+id/control_detail_open_in_app"
-        android:contentDescription="@string/controls_open_app"
-        android:src="@drawable/ic_open_in_new"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:tint="@color/control_primary_text"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp" />
-  </LinearLayout>
-
-  <FrameLayout
-      android:id="@+id/controls_activity_view"
+      android:id="@+id/control_task_view_container"
       android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      android:orientation="vertical" />
-</LinearLayout>
+      android:layout_height="match_parent"
+      android:layout_gravity="right|top"
+      android:layout_marginRight="@dimen/controls_task_view_right_margin"
+      android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="4dp">
+      <ImageView
+          android:id="@+id/control_detail_close"
+          android:contentDescription="@string/accessibility_desc_close"
+          android:src="@drawable/ic_close"
+          android:background="?android:attr/selectableItemBackgroundBorderless"
+          android:tint="@color/control_primary_text"
+          android:layout_width="48dp"
+          android:layout_height="48dp"
+          android:padding="12dp" />
+      <Space
+          android:layout_width="0dp"
+          android:layout_weight="1"
+          android:layout_height="1dp" />
+      <ImageView
+          android:id="@+id/control_detail_open_in_app"
+          android:contentDescription="@string/controls_open_app"
+          android:src="@drawable/ic_open_in_new"
+          android:background="?android:attr/selectableItemBackgroundBorderless"
+          android:tint="@color/control_primary_text"
+          android:layout_width="48dp"
+          android:layout_height="48dp"
+          android:padding="12dp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/controls_activity_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+  </LinearLayout>
+</FrameLayout>
 

@@ -19,6 +19,7 @@ package android.hardware.soundtrigger;
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.SOUNDTRIGGER_DELEGATE_IDENTITY;
+import static android.system.OsConstants.EBUSY;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.ENODEV;
 import static android.system.OsConstants.ENOSYS;
@@ -28,6 +29,7 @@ import static android.system.OsConstants.EPIPE;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -41,9 +43,9 @@ import android.media.AudioFormat;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.SafeCloseable;
+import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.media.soundtrigger_middleware.Status;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -60,6 +62,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -91,6 +94,8 @@ public class SoundTrigger {
     public static final int STATUS_DEAD_OBJECT = -EPIPE;
     /** @hide */
     public static final int STATUS_INVALID_OPERATION = -ENOSYS;
+    /** @hide */
+    public static final int STATUS_BUSY = -EBUSY;
 
     /*****************************************************************************
      * A ModuleProperties describes a given sound trigger hardware module
@@ -1172,6 +1177,11 @@ public class SoundTrigger {
         @UnsupportedAppUsage
         @NonNull
         public final byte[] data;
+        /**
+         * Is recognition still active after this event.
+         * @hide
+         */
+        public final boolean recognitionStillActive;
 
         /** @hide */
         @TestApi
@@ -1179,6 +1189,16 @@ public class SoundTrigger {
         public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                 int captureSession, int captureDelayMs, int capturePreambleMs,
                 boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
+            this(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                    capturePreambleMs, triggerInData, captureFormat, data,
+                    status == RECOGNITION_STATUS_GET_STATE_RESPONSE);
+        }
+
+        /** @hide */
+        public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
+                int captureSession, int captureDelayMs, int capturePreambleMs,
+                boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+                boolean recognitionStillActive) {
             this.status = status;
             this.soundModelHandle = soundModelHandle;
             this.captureAvailable = captureAvailable;
@@ -1188,6 +1208,7 @@ public class SoundTrigger {
             this.triggerInData = triggerInData;
             this.captureFormat = requireNonNull(captureFormat);
             this.data = data != null ? data : new byte[0];
+            this.recognitionStillActive = recognitionStillActive;
         }
 
         /**
@@ -1263,8 +1284,10 @@ public class SoundTrigger {
                         .build();
             }
             byte[] data = in.readBlob();
+            boolean recognitionStillActive = in.readBoolean();
             return new RecognitionEvent(status, soundModelHandle, captureAvailable, captureSession,
-                    captureDelayMs, capturePreambleMs, triggerInData, captureFormat, data);
+                    captureDelayMs, capturePreambleMs, triggerInData, captureFormat, data,
+                    recognitionStillActive);
         }
 
         /** @hide */
@@ -1290,8 +1313,8 @@ public class SoundTrigger {
                 dest.writeByte((byte)0);
             }
             dest.writeBlob(data);
+            dest.writeBoolean(recognitionStillActive);
         }
-
         @Override
         public int hashCode() {
             final int prime = 31;
@@ -1309,6 +1332,7 @@ public class SoundTrigger {
             result = prime * result + Arrays.hashCode(data);
             result = prime * result + soundModelHandle;
             result = prime * result + status;
+            result = result + (recognitionStillActive ? 1289 : 1291);
             return result;
         }
 
@@ -1330,6 +1354,8 @@ public class SoundTrigger {
             if (captureSession != other.captureSession)
                 return false;
             if (!Arrays.equals(data, other.data))
+                return false;
+            if (recognitionStillActive != other.recognitionStillActive)
                 return false;
             if (soundModelHandle != other.soundModelHandle)
                 return false;
@@ -1367,7 +1393,9 @@ public class SoundTrigger {
                         (", encoding=" + captureFormat.getEncoding()))
                     + ((captureFormat == null) ? "" :
                         (", channelMask=" + captureFormat.getChannelMask()))
-                    + ", data=" + (data == null ? 0 : data.length) + "]";
+                    + ", data=" + (data == null ? 0 : data.length)
+                    + ", recognitionStillActive=" + recognitionStillActive
+                    + "]";
         }
     }
 
@@ -1550,33 +1578,61 @@ public class SoundTrigger {
     }
 
     /**
-     *  Additional data conveyed by a {@link KeyphraseRecognitionEvent}
-     *  for a key phrase detection.
-     *
-     * @hide
+     * Additional data conveyed by a {@link KeyphraseRecognitionEvent}
+     * for a key phrase detection.
      */
-    public static class KeyphraseRecognitionExtra implements Parcelable {
-        /** The keyphrase ID */
+    public static final class KeyphraseRecognitionExtra implements Parcelable {
+        /**
+         * The keyphrase ID
+         *
+         * @hide
+         */
         @UnsupportedAppUsage
         public final int id;
 
-        /** Recognition modes matched for this event */
+        /**
+         * Recognition modes matched for this event
+         *
+         * @hide
+         */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public final int recognitionModes;
 
-        /** Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER when user identification
-         * is not performed */
+        /**
+         * Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER when user identification
+         * is not performed
+         *
+         * @hide
+         */
         @UnsupportedAppUsage
         public final int coarseConfidenceLevel;
 
-        /** Confidence levels for all users recognized (KeyphraseRecognitionEvent) or to
-         * be recognized (RecognitionConfig) */
+        /**
+         * Confidence levels for all users recognized (KeyphraseRecognitionEvent) or to
+         * be recognized (RecognitionConfig)
+         *
+         * @hide
+         */
         @UnsupportedAppUsage
         @NonNull
         public final ConfidenceLevel[] confidenceLevels;
 
+
+        /**
+         * @hide
+         */
+        @TestApi
+        public KeyphraseRecognitionExtra(int id, @RecognitionModes int recognitionModes,
+                int coarseConfidenceLevel) {
+            this(id, recognitionModes, coarseConfidenceLevel, new ConfidenceLevel[0]);
+        }
+
+        /**
+         * @hide
+         */
         @UnsupportedAppUsage
-        public KeyphraseRecognitionExtra(int id, int recognitionModes, int coarseConfidenceLevel,
+        public KeyphraseRecognitionExtra(int id, int recognitionModes,
+                @IntRange(from = 0, to = 100) int coarseConfidenceLevel,
                 @Nullable ConfidenceLevel[] confidenceLevels) {
             this.id = id;
             this.recognitionModes = recognitionModes;
@@ -1585,7 +1641,48 @@ public class SoundTrigger {
                     confidenceLevels != null ? confidenceLevels : new ConfidenceLevel[0];
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseRecognitionExtra> CREATOR
+        /**
+         * The keyphrase ID associated with this class' additional data
+         */
+        public int getKeyphraseId() {
+            return id;
+        }
+
+        /**
+         * Recognition modes matched for this event
+         */
+        @RecognitionModes
+        public int getRecognitionModes() {
+            return recognitionModes;
+        }
+
+        /**
+         * Confidence level for mode RECOGNITION_MODE_VOICE_TRIGGER when user identification
+         * is not performed
+         *
+         * <p>The confidence level is expressed in percent (0% -100%).
+         */
+        @IntRange(from = 0, to = 100)
+        public int getCoarseConfidenceLevel() {
+            return coarseConfidenceLevel;
+        }
+
+        /**
+         * Detected confidence level for users defined in a keyphrase.
+         *
+         * <p>The confidence level is expressed in percent (0% -100%).
+         *
+         * <p>The user ID is derived from the system ID
+         * {@link android.os.UserHandle#getIdentifier()}.
+         *
+         * @hide
+         */
+        @NonNull
+        public Collection<ConfidenceLevel> getConfidenceLevels() {
+            return Arrays.asList(confidenceLevels);
+        }
+
+        public static final @NonNull Parcelable.Creator<KeyphraseRecognitionExtra> CREATOR
                 = new Parcelable.Creator<KeyphraseRecognitionExtra>() {
             public KeyphraseRecognitionExtra createFromParcel(Parcel in) {
                 return KeyphraseRecognitionExtra.fromParcel(in);
@@ -1606,7 +1703,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(recognitionModes);
             dest.writeInt(coarseConfidenceLevel);
@@ -1631,21 +1728,28 @@ public class SoundTrigger {
 
         @Override
         public boolean equals(@Nullable Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             KeyphraseRecognitionExtra other = (KeyphraseRecognitionExtra) obj;
-            if (!Arrays.equals(confidenceLevels, other.confidenceLevels))
+            if (!Arrays.equals(confidenceLevels, other.confidenceLevels)) {
                 return false;
-            if (id != other.id)
+            }
+            if (id != other.id) {
                 return false;
-            if (recognitionModes != other.recognitionModes)
+            }
+            if (recognitionModes != other.recognitionModes) {
                 return false;
-            if (coarseConfidenceLevel != other.coarseConfidenceLevel)
+            }
+            if (coarseConfidenceLevel != other.coarseConfidenceLevel) {
                 return false;
+            }
             return true;
         }
 
@@ -1670,16 +1774,26 @@ public class SoundTrigger {
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
-               int captureSession, int captureDelayMs, int capturePreambleMs,
-               boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
-               @Nullable KeyphraseRecognitionExtra[] keyphraseExtras) {
+                int captureSession, int captureDelayMs, int capturePreambleMs,
+                boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+                @Nullable KeyphraseRecognitionExtra[] keyphraseExtras) {
+            this(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                    capturePreambleMs, triggerInData, captureFormat, data, keyphraseExtras,
+                    status == RECOGNITION_STATUS_GET_STATE_RESPONSE);
+        }
+
+        public KeyphraseRecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
+                int captureSession, int captureDelayMs, int capturePreambleMs,
+                boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+                @Nullable KeyphraseRecognitionExtra[] keyphraseExtras,
+                boolean recognitionStillActive) {
             super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
-                  capturePreambleMs, triggerInData, captureFormat, data);
+                    capturePreambleMs, triggerInData, captureFormat, data, recognitionStillActive);
             this.keyphraseExtras =
                     keyphraseExtras != null ? keyphraseExtras : new KeyphraseRecognitionExtra[0];
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
+        public static final @NonNull Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
                 = new Parcelable.Creator<KeyphraseRecognitionEvent>() {
             public KeyphraseRecognitionEvent createFromParcel(Parcel in) {
                 return KeyphraseRecognitionEvent.fromParcelForKeyphrase(in);
@@ -1710,11 +1824,12 @@ public class SoundTrigger {
                     .build();
             }
             byte[] data = in.readBlob();
+            boolean recognitionStillActive = in.readBoolean();
             KeyphraseRecognitionExtra[] keyphraseExtras =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
             return new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
                     captureSession, captureDelayMs, capturePreambleMs, triggerInData,
-                    captureFormat, data, keyphraseExtras);
+                    captureFormat, data, keyphraseExtras, recognitionStillActive);
         }
 
         @Override
@@ -1735,6 +1850,7 @@ public class SoundTrigger {
                 dest.writeByte((byte)0);
             }
             dest.writeBlob(data);
+            dest.writeBoolean(recognitionStillActive);
             dest.writeTypedArray(keyphraseExtras, flags);
         }
 
@@ -1779,7 +1895,9 @@ public class SoundTrigger {
                         (", encoding=" + captureFormat.getEncoding()))
                     + ((captureFormat == null) ? "" :
                         (", channelMask=" + captureFormat.getChannelMask()))
-                    + ", data=" + (data == null ? 0 : data.length) + "]";
+                    + ", data=" + (data == null ? 0 : data.length)
+                    + ", recognitionStillActive=" + recognitionStillActive
+                    + "]";
         }
     }
 
@@ -1795,9 +1913,17 @@ public class SoundTrigger {
                 boolean captureAvailable, int captureSession, int captureDelayMs,
                 int capturePreambleMs, boolean triggerInData, @NonNull AudioFormat captureFormat,
                 @Nullable byte[] data) {
-            super(status, soundModelHandle, captureAvailable, captureSession,
-                    captureDelayMs, capturePreambleMs, triggerInData, captureFormat,
-                    data);
+            this(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                    capturePreambleMs, triggerInData, captureFormat, data,
+                    status == RECOGNITION_STATUS_GET_STATE_RESPONSE);
+        }
+
+        public GenericRecognitionEvent(int status, int soundModelHandle,
+                boolean captureAvailable, int captureSession, int captureDelayMs,
+                int capturePreambleMs, boolean triggerInData, @NonNull AudioFormat captureFormat,
+                @Nullable byte[] data, boolean recognitionStillActive) {
+            super(status, soundModelHandle, captureAvailable, captureSession, captureDelayMs,
+                    capturePreambleMs, triggerInData, captureFormat, data, recognitionStillActive);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<GenericRecognitionEvent> CREATOR
@@ -1815,7 +1941,8 @@ public class SoundTrigger {
             RecognitionEvent event = RecognitionEvent.fromParcel(in);
             return new GenericRecognitionEvent(event.status, event.soundModelHandle,
                     event.captureAvailable, event.captureSession, event.captureDelayMs,
-                    event.capturePreambleMs, event.triggerInData, event.captureFormat, event.data);
+                    event.capturePreambleMs, event.triggerInData, event.captureFormat, event.data,
+                    event.recognitionStillActive);
         }
 
         @Override
@@ -1835,120 +1962,6 @@ public class SoundTrigger {
         }
     }
 
-    /**
-     *  Status codes for {@link SoundModelEvent}
-     */
-    /**
-     * Sound Model was updated
-     *
-     * @hide
-     */
-    public static final int SOUNDMODEL_STATUS_UPDATED = 0;
-
-    /**
-     *  A SoundModelEvent is provided by the
-     *  {@link StatusListener#onSoundModelUpdate(SoundModelEvent)}
-     *  callback when a sound model has been updated by the implementation
-     *
-     *  @hide
-     */
-    public static class SoundModelEvent implements Parcelable {
-        /** Status e.g {@link #SOUNDMODEL_STATUS_UPDATED} */
-        public final int status;
-        /** The updated sound model handle */
-        public final int soundModelHandle;
-        /** New sound model data */
-        @NonNull
-        public final byte[] data;
-
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        SoundModelEvent(int status, int soundModelHandle, @Nullable byte[] data) {
-            this.status = status;
-            this.soundModelHandle = soundModelHandle;
-            this.data = data != null ? data : new byte[0];
-        }
-
-        public static final @android.annotation.NonNull Parcelable.Creator<SoundModelEvent> CREATOR
-                = new Parcelable.Creator<SoundModelEvent>() {
-            public SoundModelEvent createFromParcel(Parcel in) {
-                return SoundModelEvent.fromParcel(in);
-            }
-
-            public SoundModelEvent[] newArray(int size) {
-                return new SoundModelEvent[size];
-            }
-        };
-
-        private static SoundModelEvent fromParcel(Parcel in) {
-            int status = in.readInt();
-            int soundModelHandle = in.readInt();
-            byte[] data = in.readBlob();
-            return new SoundModelEvent(status, soundModelHandle, data);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(status);
-            dest.writeInt(soundModelHandle);
-            dest.writeBlob(data);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + Arrays.hashCode(data);
-            result = prime * result + soundModelHandle;
-            result = prime * result + status;
-            return result;
-        }
-
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            SoundModelEvent other = (SoundModelEvent) obj;
-            if (!Arrays.equals(data, other.data))
-                return false;
-            if (soundModelHandle != other.soundModelHandle)
-                return false;
-            if (status != other.status)
-                return false;
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "SoundModelEvent [status=" + status + ", soundModelHandle=" + soundModelHandle
-                    + ", data=" + (data == null ? 0 : data.length) + "]";
-        }
-    }
-
-    /**
-     *  Native service state. {@link StatusListener#onServiceStateChange(int)}
-     */
-    // Keep in sync with system/core/include/system/sound_trigger.h
-    /**
-     * Sound trigger service is enabled
-     *
-     * @hide
-     */
-    public static final int SERVICE_STATE_ENABLED = 0;
-    /**
-     * Sound trigger service is disabled
-     *
-     * @hide
-     */
-    public static final int SERVICE_STATE_DISABLED = 1;
     private static Object mServiceLock = new Object();
     private static ISoundTriggerMiddlewareService mService;
 
@@ -1975,6 +1988,8 @@ public class SoundTrigger {
                     return STATUS_DEAD_OBJECT;
                 case Status.INTERNAL_ERROR:
                     return STATUS_ERROR;
+                case Status.RESOURCE_CONTENTION:
+                    return STATUS_BUSY;
             }
             return STATUS_ERROR;
         }
@@ -2224,27 +2239,28 @@ public class SoundTrigger {
      *
      * @hide
      */
-    public static interface StatusListener {
+    public interface StatusListener {
         /**
          * Called when recognition succeeds of fails
          */
-        public abstract void onRecognition(RecognitionEvent event);
+        void onRecognition(RecognitionEvent event);
 
         /**
-         * Called when a sound model has been updated
+         * Called when a sound model has been preemptively unloaded by the underlying
+         * implementation.
          */
-        public abstract void onSoundModelUpdate(SoundModelEvent event);
+        void onModelUnloaded(int modelHandle);
 
         /**
-         * Called when the sound trigger native service state changes.
-         * @param state Native service state. One of {@link SoundTrigger#SERVICE_STATE_ENABLED},
-         * {@link SoundTrigger#SERVICE_STATE_DISABLED}
+         * Called whenever underlying conditions change, such that load/start operations that have
+         * previously failed or got preempted may now succeed. This is not a guarantee, merely a
+         * hint that the client may want to retry operations.
          */
-        public abstract void onServiceStateChange(int state);
+        void onResourcesAvailable();
 
         /**
          * Called when the sound trigger native service dies
          */
-        public abstract void onServiceDied();
+        void onServiceDied();
     }
 }

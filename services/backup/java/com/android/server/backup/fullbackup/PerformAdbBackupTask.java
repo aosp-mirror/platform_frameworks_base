@@ -37,6 +37,7 @@ import android.util.Slog;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.KeyValueAdbBackupEngine;
+import com.android.server.backup.OperationStorage;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.utils.BackupEligibilityRules;
 import com.android.server.backup.utils.PasswordUtils;
@@ -67,6 +68,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class PerformAdbBackupTask extends FullBackupTask implements BackupRestoreTask {
 
     private final UserBackupManagerService mUserBackupManagerService;
+    private final OperationStorage mOperationStorage;
     private final AtomicBoolean mLatch;
 
     private final ParcelFileDescriptor mOutputFile;
@@ -85,7 +87,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
     private final int mCurrentOpToken;
     private final BackupEligibilityRules mBackupEligibilityRules;
 
-    public PerformAdbBackupTask(UserBackupManagerService backupManagerService,
+    public PerformAdbBackupTask(
+            UserBackupManagerService backupManagerService, OperationStorage operationStorage,
             ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
             boolean includeApks, boolean includeObbs, boolean includeShared, boolean doWidgets,
             String curPassword, String encryptPassword, boolean doAllApps, boolean doSystem,
@@ -93,6 +96,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             BackupEligibilityRules backupEligibilityRules) {
         super(observer);
         mUserBackupManagerService = backupManagerService;
+        mOperationStorage = operationStorage;
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
         mLatch = latch;
 
@@ -499,6 +503,6 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
         if (target != null) {
             mUserBackupManagerService.tearDownAgentAndKill(mCurrentTarget.applicationInfo);
         }
-        mUserBackupManagerService.removeOperation(mCurrentOpToken);
+        mOperationStorage.removeOperation(mCurrentOpToken);
     }
 }

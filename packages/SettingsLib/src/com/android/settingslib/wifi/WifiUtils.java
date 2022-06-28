@@ -22,22 +22,53 @@ import static android.net.wifi.WifiConfiguration.NetworkSelectionStatus.getMaxNe
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.icu.text.MessageFormat;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class WifiUtils {
 
+    private static final String TAG = "WifiUtils";
+
     private static final int INVALID_RSSI = -127;
+
+    /**
+     * The intent action shows Wi-Fi dialog to connect Wi-Fi network.
+     * <p>
+     * Input: The calling package should put the chosen
+     * com.android.wifitrackerlib.WifiEntry#getKey() to a string extra in the request bundle into
+     * the {@link #EXTRA_CHOSEN_WIFI_ENTRY_KEY}.
+     * <p>
+     * Output: Nothing.
+     */
+    @VisibleForTesting
+    static final String ACTION_WIFI_DIALOG = "com.android.settings.WIFI_DIALOG";
+
+    /**
+     * Specify a key that indicates the WifiEntry to be configured.
+     */
+    @VisibleForTesting
+    static final String EXTRA_CHOSEN_WIFI_ENTRY_KEY = "key_chosen_wifientry_key";
+
+    /**
+     * The lookup key for a boolean that indicates whether a chosen WifiEntry request to connect to.
+     * {@code true} means a chosen WifiEntry request to connect to.
+     */
+    @VisibleForTesting
+    static final String EXTRA_CONNECT_FOR_CALLER = "connect_for_caller";
 
     /**
      * The intent action shows network details settings to allow configuration of Wi-Fi.
@@ -286,13 +317,17 @@ public class WifiUtils {
      *
      * @param level The number of bars to show (0-4)
      * @param noInternet True if a connected Wi-Fi network cannot access the Internet
-     * @throws IllegalArgumentException if an invalid RSSI level is given.
      */
     public static int getInternetIconResource(int level, boolean noInternet) {
-        if (level < 0 || level >= WIFI_PIE.length) {
-            throw new IllegalArgumentException("No Wifi icon found for level: " + level);
+        int wifiLevel = level;
+        if (wifiLevel < 0) {
+            Log.e(TAG, "Wi-Fi level is out of range! level:" + level);
+            wifiLevel = 0;
+        } else if (level >= WIFI_PIE.length) {
+            Log.e(TAG, "Wi-Fi level is out of range! level:" + level);
+            wifiLevel = WIFI_PIE.length - 1;
         }
-        return noInternet ? NO_INTERNET_WIFI_PIE[level] : WIFI_PIE[level];
+        return noInternet ? NO_INTERNET_WIFI_PIE[wifiLevel] : WIFI_PIE[wifiLevel];
     }
 
     /**
@@ -322,6 +357,19 @@ public class WifiUtils {
     }
 
     /**
+     * Returns the Intent for Wi-Fi dialog.
+     *
+     * @param key              The Wi-Fi entry key
+     * @param connectForCaller True if a chosen WifiEntry request to connect to
+     */
+    public static Intent getWifiDialogIntent(String key, boolean connectForCaller) {
+        final Intent intent = new Intent(ACTION_WIFI_DIALOG);
+        intent.putExtra(EXTRA_CHOSEN_WIFI_ENTRY_KEY, key);
+        intent.putExtra(EXTRA_CONNECT_FOR_CALLER, connectForCaller);
+        return intent;
+    }
+
+    /**
      * Returns the Intent for Wi-Fi network details settings.
      *
      * @param key The Wi-Fi entry key
@@ -332,5 +380,21 @@ public class WifiUtils {
         bundle.putString(KEY_CHOSEN_WIFIENTRY_KEY, key);
         intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGUMENTS, bundle);
         return intent;
+    }
+
+    /**
+     * Returns the string of Wi-Fi tethering summary for connected devices.
+     *
+     * @param context          The application context
+     * @param connectedDevices The count of connected devices
+     */
+    public static String getWifiTetherSummaryForConnectedDevices(Context context,
+            int connectedDevices) {
+        MessageFormat msgFormat = new MessageFormat(
+                context.getResources().getString(R.string.wifi_tether_connected_summary),
+                Locale.getDefault());
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("count", connectedDevices);
+        return msgFormat.format(arguments);
     }
 }

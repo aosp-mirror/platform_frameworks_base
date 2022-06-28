@@ -92,6 +92,8 @@ class PrivacyDotViewController @Inject constructor(
     private val views: Sequence<View>
         get() = if (!this::tl.isInitialized) sequenceOf() else sequenceOf(tl, tr, br, bl)
 
+    private var showingListener: ShowingListener? = null
+
     init {
         contentInsetsProvider.addCallback(object : StatusBarContentInsetsChangedListener {
             override fun onStatusBarContentInsetsChanged() {
@@ -99,14 +101,20 @@ class PrivacyDotViewController @Inject constructor(
                 setNewLayoutRects()
             }
         })
+
         configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
             override fun onLayoutDirectionChanged(isRtl: Boolean) {
-                synchronized(this) {
-                    val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
-                    nextViewState = nextViewState.copy(
-                            layoutRtl = isRtl,
-                            designatedCorner = corner
-                    )
+                uiExecutor?.execute {
+                    // If rtl changed, hide all dotes until the next state resolves
+                    setCornerVisibilities(View.INVISIBLE)
+
+                    synchronized(this) {
+                        val corner = selectDesignatedCorner(nextViewState.rotation, isRtl)
+                        nextViewState = nextViewState.copy(
+                                layoutRtl = isRtl,
+                                designatedCorner = corner
+                        )
+                    }
                 }
             }
         })
@@ -124,6 +132,10 @@ class PrivacyDotViewController @Inject constructor(
 
     fun setUiExecutor(e: DelayableExecutor) {
         uiExecutor = e
+    }
+
+    fun setShowingListener(l: ShowingListener?) {
+        showingListener = l
     }
 
     fun setQsExpanded(expanded: Boolean) {
@@ -170,15 +182,20 @@ class PrivacyDotViewController @Inject constructor(
                     .setDuration(DURATION)
                     .setInterpolator(Interpolators.ALPHA_OUT)
                     .alpha(0f)
-                    .withEndAction { dot.visibility = View.INVISIBLE }
+                    .withEndAction {
+                        dot.visibility = View.INVISIBLE
+                        showingListener?.onPrivacyDotHidden(dot)
+                    }
                     .start()
         } else {
             dot.visibility = View.INVISIBLE
+            showingListener?.onPrivacyDotHidden(dot)
         }
     }
 
     @UiThread
     private fun showDotView(dot: View, animate: Boolean) {
+        showingListener?.onPrivacyDotShown(dot)
         dot.clearAnimation()
         if (animate) {
             dot.visibility = View.VISIBLE
@@ -314,6 +331,7 @@ class PrivacyDotViewController @Inject constructor(
     @UiThread
     private fun updateDesignatedCorner(newCorner: View?, shouldShowDot: Boolean) {
         if (shouldShowDot) {
+            showingListener?.onPrivacyDotShown(newCorner)
             newCorner?.apply {
                 clearAnimation()
                 visibility = View.VISIBLE
@@ -330,6 +348,11 @@ class PrivacyDotViewController @Inject constructor(
     private fun setCornerVisibilities(vis: Int) {
         views.forEach { corner ->
             corner.visibility = vis
+            if (vis == View.VISIBLE) {
+                showingListener?.onPrivacyDotShown(corner)
+            } else {
+                showingListener?.onPrivacyDotHidden(corner)
+            }
         }
     }
 
@@ -456,7 +479,7 @@ class PrivacyDotViewController @Inject constructor(
     private fun resolveState(state: ViewState) {
         dlog("resolveState $state")
         if (!state.viewInitialized) {
-            dlog("resolveState: view is not initialized. skipping.")
+            dlog("resolveState: view is not initialized. skipping")
             return
         }
 
@@ -548,6 +571,11 @@ class PrivacyDotViewController @Inject constructor(
                     upsideDownRect = rects[3]
             )
         }
+    }
+
+    interface ShowingListener {
+        fun onPrivacyDotShown(v: View?)
+        fun onPrivacyDotHidden(v: View?)
     }
 }
 

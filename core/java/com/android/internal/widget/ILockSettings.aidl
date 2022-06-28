@@ -24,6 +24,8 @@ import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.RecoveryCertPath;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
+import com.android.internal.widget.IWeakEscrowTokenActivatedListener;
+import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 
@@ -94,4 +96,10 @@ interface ILockSettings {
     boolean hasSecureLockScreen();
     boolean tryUnlockWithCachedUnifiedChallenge(int userId);
     void removeCachedUnifiedChallenge(int userId);
+    boolean registerWeakEscrowTokenRemovedListener(in IWeakEscrowTokenRemovedListener listener);
+    boolean unregisterWeakEscrowTokenRemovedListener(in IWeakEscrowTokenRemovedListener listener);
+    long addWeakEscrowToken(in byte[] token, int userId, in IWeakEscrowTokenActivatedListener callback);
+    boolean removeWeakEscrowToken(long handle, int userId);
+    boolean isWeakEscrowTokenActive(long handle, int userId);
+    boolean isWeakEscrowTokenValid(long handle, in byte[] token, int userId);
 }

@@ -18,6 +18,8 @@ package com.android.server.pm.dex;
 
 import static org.mockito.Mockito.inOrder;
 
+import android.platform.test.annotations.Presubmit;
+
 import com.android.internal.art.ArtStatsLog;
 import com.android.server.pm.dex.ArtStatsLogUtils.ArtStatsLogger;
 
@@ -44,6 +46,7 @@ import java.util.zip.ZipOutputStream;
  *
  * Run with "atest ArtStatsLogUtilsTest".
  */
+@Presubmit
 @RunWith(JUnit4.class)
 public final class ArtStatsLogUtilsTest {
     private static final String TAG = ArtStatsLogUtilsTest.class.getSimpleName();

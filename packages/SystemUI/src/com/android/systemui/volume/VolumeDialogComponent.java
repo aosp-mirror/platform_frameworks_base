@@ -22,6 +22,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.media.VolumePolicy;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
@@ -37,7 +38,6 @@ import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.tuner.TunerService;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +58,11 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     public static final boolean DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT = false;
     public static final boolean DEFAULT_VOLUME_UP_TO_EXIT_SILENT = false;
     public static final boolean DEFAULT_DO_NOT_DISTURB_WHEN_SILENT = false;
+
+    private static final Intent ZEN_SETTINGS =
+            new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
+    private static final Intent ZEN_PRIORITY_SETTINGS =
+            new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS);
 
     protected final Context mContext;
     private final VolumeDialogControllerImpl mController;
@@ -147,7 +152,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     private void applyConfiguration() {
         mController.setVolumePolicy(mVolumePolicy);
-        mController.showDndTile(true);
+        mController.showDndTile();
     }
 
     @Override
@@ -181,7 +186,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
     }
 
     private void startSettings(Intent intent) {
@@ -191,12 +196,12 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     private final VolumeDialogImpl.Callback mVolumeDialogCallback = new VolumeDialogImpl.Callback() {
         @Override
         public void onZenSettingsClicked() {
-            startSettings(ZenModePanel.ZEN_SETTINGS);
+            startSettings(ZEN_SETTINGS);
         }
 
         @Override
         public void onZenPrioritySettingsClicked() {
-            startSettings(ZenModePanel.ZEN_PRIORITY_SETTINGS);
+            startSettings(ZEN_PRIORITY_SETTINGS);
         }
     };
 

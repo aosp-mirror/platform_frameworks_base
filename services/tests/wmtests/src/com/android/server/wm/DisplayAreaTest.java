@@ -24,7 +24,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
-import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -76,6 +75,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Tests for the {@link DisplayArea} container.
@@ -153,7 +153,7 @@ public class DisplayAreaTest extends WindowTestsBase {
     public void testForAllTaskDisplayAreas_onlyTraversesDisplayAreaOfTypeAny() {
         final RootDisplayArea root =
                 new DisplayAreaPolicyBuilderTest.SurfacelessDisplayAreaRoot(mWm);
-        final Function<TaskDisplayArea, Boolean> callback0 = tda -> false;
+        final Predicate<TaskDisplayArea> callback0 = tda -> false;
         final Consumer<TaskDisplayArea> callback1 = tda -> { };
         final BiFunction<TaskDisplayArea, Integer, Integer> callback2 = (tda, result) -> result;
         final Function<TaskDisplayArea, TaskDisplayArea> callback3 = tda -> null;

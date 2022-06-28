@@ -86,6 +86,7 @@ android_library {
         "res",
     ],
     static_libs: [
+        "WifiTrackerLib",
         "WindowManager-Shell",
         "SystemUIAnimationLib",
         "SystemUIPluginLib",
@@ -106,10 +107,12 @@ android_library {
         "androidx.slice_slice-view",
         "androidx.slice_slice-builders",
         "androidx.arch.core_core-runtime",
+        "androidx.lifecycle_lifecycle-common-java8",
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
+        "com.google.android.material_material",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
         "iconloader_base",
@@ -125,11 +128,22 @@ android_library {
     kotlincflags: ["-Xjvm-default=enable"],
 
     plugins: ["dagger2-compiler"],
+
+    lint: {
+        extra_check_modules: ["SystemUILintChecker"],
+    },
+}
+
+filegroup {
+    name: "AAA-src",
+    srcs: ["tests/src/com/android/AAAPlusPlusVerifySysuiRequiredTestPropertiesTest.java"],
+    path: "tests/src",
 }
 
 filegroup {
     name: "SystemUI-tests-utils",
     srcs: [
+        "tests/src/com/android/systemui/SysuiBaseFragmentTest.java",
         "tests/src/com/android/systemui/SysuiTestCase.java",
         "tests/src/com/android/systemui/TestableDependency.java",
         "tests/src/com/android/systemui/classifier/FalsingManagerFake.java",
@@ -137,6 +151,7 @@ filegroup {
         "tests/src/com/android/systemui/statusbar/RankingBuilder.java",
         "tests/src/com/android/systemui/statusbar/SbnBuilder.java",
         "tests/src/com/android/systemui/SysuiTestableContext.java",
+        "tests/src/com/android/systemui/util/**/*Fake.java",
         "tests/src/com/android/systemui/utils/leaks/BaseLeakChecker.java",
         "tests/src/com/android/systemui/utils/leaks/LeakCheckedTest.java",
         "tests/src/com/android/systemui/**/Fake*.java",
@@ -147,6 +162,17 @@ filegroup {
         "tests/src/com/android/systemui/**/*Test.kt",
     ],
     path: "tests/src",
+}
+
+java_library {
+    name: "SystemUI-tests-concurrency",
+    srcs: [
+        "src/com/android/systemui/util/concurrency/DelayableExecutor.java",
+        "src/com/android/systemui/util/time/SystemClock.java",
+        "tests/src/com/android/systemui/util/concurrency/FakeExecutor.java",
+        "tests/src/com/android/systemui/util/time/FakeSystemClock.java",
+    ],
+    jarjar_rules: ":jarjar-rules-shared",
 }
 
 android_library {
@@ -169,6 +195,7 @@ android_library {
         ":ReleaseJavaFiles",
     ],
     static_libs: [
+        "WifiTrackerLib",
         "SystemUIAnimationLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
@@ -188,6 +215,7 @@ android_library {
         "androidx.slice_slice-view",
         "androidx.slice_slice-builders",
         "androidx.arch.core_core-runtime",
+        "androidx.lifecycle_lifecycle-common-java8",
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
@@ -221,9 +249,44 @@ android_library {
     plugins: ["dagger2-compiler"],
 }
 
+// Opt-in config for optimizing the SystemUI target using R8.
+// Enabled via `export SYSTEMUI_OPTIMIZE_JAVA=true`, or explicitly in Make via
+// the `SOONG_CONFIG_ANDROID_SYSTEMUI_OPTIMIZE_JAVA` variable.
+// TODO(b/203472868): Enable optimizations by default after stabilizing and
+// building out retrace infrastructure.
+soong_config_module_type {
+    name: "systemui_optimized_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: ["SYSTEMUI_OPTIMIZE_JAVA"],
+    properties: ["optimize"],
+}
+
+systemui_optimized_java_defaults {
+    name: "SystemUI_app_defaults",
+    soong_config_variables: {
+        SYSTEMUI_OPTIMIZE_JAVA: {
+            optimize: {
+                enabled: true,
+                optimize: true,
+                shrink: true,
+                proguard_flags_files: ["proguard.flags"],
+            },
+            conditions_default: {
+                optimize: {
+                    proguard_flags_files: ["proguard.flags"],
+                },
+            },
+        },
+    },
+}
+
 android_app {
     name: "SystemUI",
-    defaults: ["platform_app_defaults"],
+    defaults: [
+        "platform_app_defaults",
+        "SystemUI_app_defaults",
+    ],
     static_libs: [
         "SystemUI-core",
     ],
@@ -233,10 +296,6 @@ android_app {
     system_ext_specific: true,
     certificate: "platform",
     privileged: true,
-
-    optimize: {
-        proguard_flags_files: ["proguard.flags"],
-    },
 
     kotlincflags: ["-Xjvm-default=enable"],
 

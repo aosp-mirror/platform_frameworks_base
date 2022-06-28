@@ -398,7 +398,7 @@ Lcom/android/internal/R$layout;->select_dialog_multichoice:I
 Lcom/android/internal/R$layout;->select_dialog_singlechoice:I
 Lcom/android/internal/R$layout;->webview_find:I
 Lcom/android/internal/R$layout;->zoom_magnify:I
-Lcom/android/internal/R$plurals;->matches_found:I
+Lcom/android/internal/R$string;->matches_found:I
 Lcom/android/internal/R$raw;->loaderror:I
 Lcom/android/internal/R$raw;->nodomain:I
 Lcom/android/internal/R$string;->byteShort:I

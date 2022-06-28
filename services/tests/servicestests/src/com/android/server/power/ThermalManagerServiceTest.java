@@ -17,6 +17,7 @@
 package com.android.server.power;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -456,5 +457,34 @@ public class ThermalManagerServiceTest {
         // If there are no thresholds, then we shouldn't receive a headroom value
         watcher.mSevereThresholds.erase();
         assertTrue(Float.isNaN(watcher.getForecast(0)));
+    }
+
+    @Test
+    public void testTemperatureWatcherGetForecastUpdate() throws Exception {
+        ThermalManagerService.TemperatureWatcher watcher = mService.mTemperatureWatcher;
+
+        // Reduce the inactivity threshold to speed up testing
+        watcher.mInactivityThresholdMillis = 2000;
+
+        // Make sure mSamples is empty before updateTemperature
+        assertTrue(isWatcherSamplesEmpty(watcher));
+
+        // Call getForecast once to trigger updateTemperature
+        watcher.getForecast(0);
+
+        // After 1 second, the samples should be updated
+        Thread.sleep(1000);
+        assertFalse(isWatcherSamplesEmpty(watcher));
+
+        // After mInactivityThresholdMillis, the samples should be cleared
+        Thread.sleep(watcher.mInactivityThresholdMillis);
+        assertTrue(isWatcherSamplesEmpty(watcher));
+    }
+
+    // Helper function to hold mSamples lock, avoid GuardedBy lint errors
+    private boolean isWatcherSamplesEmpty(ThermalManagerService.TemperatureWatcher watcher) {
+        synchronized (watcher.mSamples) {
+            return watcher.mSamples.isEmpty();
+        }
     }
 }

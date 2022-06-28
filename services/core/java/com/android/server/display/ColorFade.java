@@ -156,9 +156,15 @@ final class ColorFade {
 
         mMode = mode;
 
+        DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
+        if (displayInfo == null) {
+            // displayInfo can be null if the associated display has been removed. There
+            // is a delay between the display being removed and ColorFade being dismissed.
+            return false;
+        }
+
         // Get the display size and layer stack.
         // This is not expected to change while the color fade surface is showing.
-        DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(mDisplayId);
         mDisplayLayerStack = displayInfo.layerStack;
         mDisplayWidth = displayInfo.getNaturalWidth();
         mDisplayHeight = displayInfo.getNaturalHeight();

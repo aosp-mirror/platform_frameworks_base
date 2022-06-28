@@ -87,4 +87,8 @@ enum AudioSource {
      * hotword detection. Same tuning as VOICE_RECOGNITION.
      */
     HOTWORD = 1999,
+    /** Microphone audio source for ultrasound sound if available,
+     *  behaves like DEFAULT otherwise.
+     */
+    ULTRASOUND = 2000,
 }

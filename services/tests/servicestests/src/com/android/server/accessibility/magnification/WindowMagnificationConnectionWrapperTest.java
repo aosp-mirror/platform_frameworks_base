@@ -67,7 +67,7 @@ public class WindowMagnificationConnectionWrapperTest {
     @Test
     public void enableWindowMagnification() throws RemoteException {
         mConnectionWrapper.enableWindowMagnification(TEST_DISPLAY, 2, 100f, 200f,
-                mAnimationCallback);
+                0f, 0f, mAnimationCallback);
 
         verify(mAnimationCallback).onResult(true);
     }
@@ -91,6 +91,14 @@ public class WindowMagnificationConnectionWrapperTest {
     public void moveWindowMagnifier() throws RemoteException {
         mConnectionWrapper.moveWindowMagnifier(TEST_DISPLAY, 100, 150);
         verify(mConnection).moveWindowMagnifier(TEST_DISPLAY, 100, 150);
+    }
+
+    @Test
+    public void moveWindowMagnifierToPosition() throws RemoteException {
+        mConnectionWrapper.moveWindowMagnifierToPosition(TEST_DISPLAY, 100, 150,
+                mAnimationCallback);
+        verify(mConnection).moveWindowMagnifierToPosition(eq(TEST_DISPLAY),
+                eq(100f), eq(150f), any(IRemoteMagnificationAnimationCallback.class));
     }
 
     @Test

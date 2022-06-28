@@ -33,6 +33,7 @@ import android.app.ActivityOptions;
 import android.app.AnrController;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
+import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.usage.UsageStatsManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -523,6 +524,16 @@ class AppErrors {
             return;
         }
 
+        if (exceptionTypeId == CrashedByAdbException.TYPE_ID) {
+            String[] packages = proc.getPackageList();
+            for (int i = 0; i < packages.length; i++) {
+                if (mService.mPackageManagerInt.isPackageStateProtected(packages[i], proc.userId)) {
+                    Slog.w(TAG, "crashApplication: Can not crash protected package " + packages[i]);
+                    return;
+                }
+            }
+        }
+
         proc.scheduleCrashLocked(message, exceptionTypeId, extras);
         if (force) {
             // If the app is responsive, the scheduled crash will happen as expected
@@ -825,12 +836,18 @@ class AppErrors {
             report.type = ApplicationErrorReport.TYPE_CRASH;
             report.crashInfo = crashInfo;
         } else if (errState.isNotResponding()) {
+            final ActivityManager.ProcessErrorStateInfo anrReport =
+                    errState.getNotRespondingReport();
+            if (anrReport == null) {
+                // The ANR dump is still ongoing, ignore it for now.
+                return null;
+            }
             report.type = ApplicationErrorReport.TYPE_ANR;
             report.anrInfo = new ApplicationErrorReport.AnrInfo();
 
-            report.anrInfo.activity = errState.getNotRespondingReport().tag;
-            report.anrInfo.cause = errState.getNotRespondingReport().shortMsg;
-            report.anrInfo.info = errState.getNotRespondingReport().longMsg;
+            report.anrInfo.activity = anrReport.tag;
+            report.anrInfo.cause = anrReport.shortMsg;
+            report.anrInfo.info = anrReport.longMsg;
         }
 
         return report;
@@ -1020,6 +1037,7 @@ class AppErrors {
                         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                         0,
                         mService.mUserController.getCurrentUserId()) != 0;
+                final String packageName = proc.info.packageName;
                 final boolean crashSilenced = mAppsNotReportingCrashes != null
                         && mAppsNotReportingCrashes.contains(proc.info.packageName);
                 final long now = SystemClock.uptimeMillis();
@@ -1028,6 +1046,7 @@ class AppErrors {
                 if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
                         && !crashSilenced && !shouldThottle
                         && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
+                    Slog.i(TAG, "Showing crash dialog for package " + packageName + " u" + userId);
                     errState.getDialogController().showCrashDialogs(data);
                     if (!proc.isolated) {
                         mProcessCrashShowDialogTimes.put(proc.processName, proc.uid, now);
@@ -1062,6 +1081,7 @@ class AppErrors {
         }
         synchronized (mProcLock) {
             final ProcessErrorStateRecord errState = proc.mErrorState;
+            errState.setAnrData(data);
             if (!proc.isPersistent()) {
                 packageList = proc.getPackageListWithVersionCode();
             }
@@ -1110,6 +1130,24 @@ class AppErrors {
         if (packageList != null) {
             mPackageWatchdog.onPackageFailure(packageList,
                     PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING);
+        }
+    }
+
+    void handleDismissAnrDialogs(ProcessRecord proc) {
+        synchronized (mProcLock) {
+            final ProcessErrorStateRecord errState = proc.mErrorState;
+
+            // Cancel any rescheduled ANR dialogs
+            mService.mUiHandler.removeMessages(
+                    ActivityManagerService.SHOW_NOT_RESPONDING_UI_MSG, errState.getAnrData());
+
+            // Dismiss any ANR dialogs currently visible
+            if (errState.getDialogController().hasAnrDialogs()) {
+                errState.setNotResponding(false);
+                errState.setNotRespondingReport(null);
+                errState.getDialogController().clearAnrDialogs();
+            }
+            proc.mErrorState.setAnrData(null);
         }
     }
 

@@ -48,7 +48,7 @@ public class RemoteInputHistoryItem implements Parcelable {
     protected RemoteInputHistoryItem(Parcel in) {
         mText = in.readCharSequence();
         mMimeType = in.readStringNoHelper();
-        mUri = in.readParcelable(Uri.class.getClassLoader());
+        mUri = in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class);
     }
 
     public static final Creator<RemoteInputHistoryItem> CREATOR =

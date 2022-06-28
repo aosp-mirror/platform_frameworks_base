@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.bubble
 
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
@@ -24,6 +25,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import org.junit.runner.RunWith
+import org.junit.Test
 import org.junit.runners.Parameterized
 
 /**
@@ -40,20 +42,28 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @Group4
-class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
+open class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = buildTransition() {
+    override val transition: FlickerBuilder.() -> Unit
+        get() = buildTransition {
             setup {
                 test {
-                    addBubbleBtn?.run { addBubbleBtn.click() } ?: error("Bubble widget not found")
+                    val addBubbleBtn = waitAndGetAddBubbleBtn()
+                    addBubbleBtn?.click() ?: error("Add Bubble not found")
                 }
             }
             transitions {
                 val showBubble = device.wait(Until.findObject(
                         By.res("com.android.systemui", "bubble_view")), FIND_OBJECT_TIMEOUT)
                 showBubble?.run { showBubble.click() } ?: error("Bubble notify not found")
-                device.pressBack()
             }
         }
+
+    @Presubmit
+    @Test
+    open fun testAppIsAlwaysVisible() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+        }
+    }
 }

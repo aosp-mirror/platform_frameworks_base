@@ -53,8 +53,6 @@ public final class SomeArgs {
     public Object arg5;
     public Object arg6;
     public Object arg7;
-    public Object arg8;
-    public Object arg9;
     public int argi1;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int argi2;
@@ -123,8 +121,6 @@ public final class SomeArgs {
         arg5 = null;
         arg6 = null;
         arg7 = null;
-        arg8 = null;
-        arg9 = null;
         argi1 = 0;
         argi2 = 0;
         argi3 = 0;

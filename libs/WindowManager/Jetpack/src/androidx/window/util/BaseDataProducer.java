@@ -33,12 +33,16 @@ public abstract class BaseDataProducer<T> implements DataProducer<T> {
     @Override
     public final void addDataChangedCallback(@NonNull Runnable callback) {
         mCallbacks.add(callback);
+        onListenersChanged(mCallbacks);
     }
 
     @Override
     public final void removeDataChangedCallback(@NonNull Runnable callback) {
         mCallbacks.remove(callback);
+        onListenersChanged(mCallbacks);
     }
+
+    protected void onListenersChanged(Set<Runnable> callbacks) {}
 
     /**
      * Called to notify all registered callbacks that the data provided by {@link #getData()} has

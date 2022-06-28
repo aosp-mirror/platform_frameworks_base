@@ -23,6 +23,7 @@ import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.ime;
 
@@ -45,7 +46,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
@@ -61,6 +61,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.internal.inputmethod.ImeTracing;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -682,9 +683,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public boolean onStateChanged(InsetsState state) {
-        boolean stateChanged = !mState.equals(state, true /* excludingCaptionInsets */,
-                        false /* excludeInvisibleIme */)
-                || !captionInsetsUnchanged();
+        boolean stateChanged = false;
+        if (!CAPTION_ON_SHELL) {
+            stateChanged = !mState.equals(state, true /* excludingCaptionInsets */,
+                    false /* excludeInvisibleIme */)
+                    || captionInsetsUnchanged();
+        } else {
+            stateChanged = !mState.equals(state, false /* excludingCaptionInsets */,
+                    false /* excludeInvisibleIme */);
+        }
         if (!stateChanged && mLastDispatchedState.equals(state)) {
             return false;
         }
@@ -758,16 +765,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private boolean captionInsetsUnchanged() {
+        if (CAPTION_ON_SHELL) {
+            return false;
+        }
         if (mState.peekSource(ITYPE_CAPTION_BAR) == null
                 && mCaptionInsetsHeight == 0) {
-            return true;
+            return false;
         }
         if (mState.peekSource(ITYPE_CAPTION_BAR) != null
                 && mCaptionInsetsHeight
                 == mState.peekSource(ITYPE_CAPTION_BAR).getFrame().height()) {
-            return true;
+            return false;
         }
-        return false;
+
+        return true;
     }
 
     private void startResizingAnimationIfNeeded(InsetsState fromState) {
@@ -822,10 +833,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * @see InsetsState#calculateVisibleInsets(Rect, int)
+     * @see InsetsState#calculateVisibleInsets(Rect, int, int, int, int)
      */
-    public Insets calculateVisibleInsets(@SoftInputModeFlags int softInputMode) {
-        return mState.calculateVisibleInsets(mFrame, softInputMode);
+    public Insets calculateVisibleInsets(int windowType, int windowingMode,
+            @SoftInputModeFlags int softInputMode, int windowFlags) {
+        return mState.calculateVisibleInsets(mFrame, windowType, windowingMode, softInputMode,
+                windowFlags);
     }
 
     /**
@@ -1299,8 +1312,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private void cancelAnimation(InsetsAnimationControlRunner control, boolean invokeCallback) {
-        if (DEBUG) Log.d(TAG, String.format("cancelAnimation of types: %d, animType: %d",
-                control.getTypes(), control.getAnimationType()));
+        if (DEBUG) Log.d(TAG, String.format("cancelAnimation of types: %d, animType: %d, host: %s",
+                control.getTypes(), control.getAnimationType(), mHost.getRootViewTitle()));
         if (invokeCallback) {
             control.cancel();
         }
@@ -1582,11 +1595,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setCaptionInsetsHeight(int height) {
+        // This method is to be removed once the caption is moved to the shell.
+        if (CAPTION_ON_SHELL) {
+            return;
+        }
         if (mCaptionInsetsHeight != height) {
             mCaptionInsetsHeight = height;
             if (mCaptionInsetsHeight != 0) {
-                mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(mFrame.left, mFrame.top,
-                        mFrame.right, mFrame.top + mCaptionInsetsHeight));
+                mState.getSource(ITYPE_CAPTION_BAR).setFrame(mFrame.left, mFrame.top,
+                        mFrame.right, mFrame.top + mCaptionInsetsHeight);
             } else {
                 mState.removeSource(ITYPE_CAPTION_BAR);
             }

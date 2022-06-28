@@ -16,11 +16,17 @@
 
 package android.app;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledSince;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerExemptionManager;
@@ -34,7 +40,7 @@ import android.os.PowerExemptionManager.TempAllowListType;
  * {@hide}
  */
 @SystemApi
-public class BroadcastOptions {
+public class BroadcastOptions extends ComponentOptions {
     private long mTemporaryAppAllowlistDuration;
     private @TempAllowListType int mTemporaryAppAllowlistType;
     private @ReasonCode int mTemporaryAppAllowlistReasonCode;
@@ -43,6 +49,38 @@ public class BroadcastOptions {
     private int mMaxManifestReceiverApiLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
     private boolean mDontSendToRestrictedApps = false;
     private boolean mAllowBackgroundActivityStarts;
+    private String[] mRequireAllOfPermissions;
+    private String[] mRequireNoneOfPermissions;
+    private long mRequireCompatChangeId = CHANGE_INVALID;
+    private boolean mRequireCompatChangeEnabled = true;
+    private long mIdForResponseEvent;
+
+    /**
+     * Change ID which is invalid.
+     *
+     * @hide
+     */
+    public static final long CHANGE_INVALID = Long.MIN_VALUE;
+
+    /**
+     * Change ID which is always enabled, for testing purposes.
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.BASE)
+    public static final long CHANGE_ALWAYS_ENABLED = 209888056L;
+
+    /**
+     * Change ID which is always disabled, for testing purposes.
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @Disabled
+    public static final long CHANGE_ALWAYS_DISABLED = 210856463L;
 
     /**
      * How long to temporarily put an app on the power allowlist when executing this broadcast
@@ -85,6 +123,32 @@ public class BroadcastOptions {
             "android:broadcast.allowBackgroundActivityStarts";
 
     /**
+     * Corresponds to {@link #setRequireAllOfPermissions}
+     * @hide
+     */
+    public static final String KEY_REQUIRE_ALL_OF_PERMISSIONS =
+            "android:broadcast.requireAllOfPermissions";
+
+    /**
+     * Corresponds to {@link #setRequireNoneOfPermissions}
+     * @hide
+     */
+    public static final String KEY_REQUIRE_NONE_OF_PERMISSIONS =
+            "android:broadcast.requireNoneOfPermissions";
+
+    /**
+     * Corresponds to {@link #setRequireCompatChange(long, boolean)}
+     */
+    private static final String KEY_REQUIRE_COMPAT_CHANGE_ID =
+            "android:broadcast.requireCompatChangeId";
+
+    /**
+     * Corresponds to {@link #setRequireCompatChange(long, boolean)}
+     */
+    private static final String KEY_REQUIRE_COMPAT_CHANGE_ENABLED =
+            "android:broadcast.requireCompatChangeEnabled";
+
+    /**
      * @hide
      * @deprecated Use {@link android.os.PowerExemptionManager#
      * TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED} instead.
@@ -102,18 +166,26 @@ public class BroadcastOptions {
     public static final int TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED =
             PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 
+    /**
+     * Corresponds to {@link #recordResponseEventWhileInBackground(long)}.
+     */
+    private static final String KEY_ID_FOR_RESPONSE_EVENT =
+            "android:broadcast.idForResponseEvent";
+
     public static BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
         return opts;
     }
 
     private BroadcastOptions() {
+        super();
         resetTemporaryAppAllowlist();
     }
 
     /** @hide */
     @TestApi
     public BroadcastOptions(@NonNull Bundle opts) {
+        super(opts);
         // Match the logic in toBundle().
         if (opts.containsKey(KEY_TEMPORARY_APP_ALLOWLIST_DURATION)) {
             mTemporaryAppAllowlistDuration = opts.getLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION);
@@ -130,6 +202,11 @@ public class BroadcastOptions {
         mDontSendToRestrictedApps = opts.getBoolean(KEY_DONT_SEND_TO_RESTRICTED_APPS, false);
         mAllowBackgroundActivityStarts = opts.getBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS,
                 false);
+        mRequireAllOfPermissions = opts.getStringArray(KEY_REQUIRE_ALL_OF_PERMISSIONS);
+        mRequireNoneOfPermissions = opts.getStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS);
+        mRequireCompatChangeId = opts.getLong(KEY_REQUIRE_COMPAT_CHANGE_ID, CHANGE_INVALID);
+        mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
+        mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
     }
 
     /**
@@ -191,6 +268,26 @@ public class BroadcastOptions {
     }
 
     /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        super.setPendingIntentBackgroundActivityLaunchAllowed(allowed);
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
+    public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return super.isPendingIntentBackgroundActivityLaunchAllowed();
+    }
+
+    /**
      * Return {@link #setTemporaryAppAllowlist}.
      * @hide
      */
@@ -230,16 +327,32 @@ public class BroadcastOptions {
      * Set the minimum target API level of receivers of the broadcast.  If an application
      * is targeting an API level less than this, the broadcast will not be delivered to
      * them.  This only applies to receivers declared in the app's AndroidManifest.xml.
+     *
+     * @deprecated to give developers the most flexibility during beta releases,
+     *             we strongly encourage using {@link ChangeId} instead of
+     *             target SDK checks; callers should use
+     *             {@link #setRequireCompatChange(long, boolean)} instead,
+     *             possibly combined with
+     *             {@link Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
      * @hide
      */
+    @Deprecated
     public void setMinManifestReceiverApiLevel(int apiLevel) {
         mMinManifestReceiverApiLevel = apiLevel;
     }
 
     /**
      * Return {@link #setMinManifestReceiverApiLevel}.
+     *
+     * @deprecated to give developers the most flexibility during beta releases,
+     *             we strongly encourage using {@link ChangeId} instead of
+     *             target SDK checks; callers should use
+     *             {@link #setRequireCompatChange(long, boolean)} instead,
+     *             possibly combined with
+     *             {@link Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
      * @hide
      */
+    @Deprecated
     public int getMinManifestReceiverApiLevel() {
         return mMinManifestReceiverApiLevel;
     }
@@ -248,20 +361,36 @@ public class BroadcastOptions {
      * Set the maximum target API level of receivers of the broadcast.  If an application
      * is targeting an API level greater than this, the broadcast will not be delivered to
      * them.  This only applies to receivers declared in the app's AndroidManifest.xml.
+     *
+     * @deprecated to give developers the most flexibility during beta releases,
+     *             we strongly encourage using {@link ChangeId} instead of
+     *             target SDK checks; callers should use
+     *             {@link #setRequireCompatChange(long, boolean)} instead,
+     *             possibly combined with
+     *             {@link Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
      * @hide
      */
     @TestApi
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @Deprecated
     public void setMaxManifestReceiverApiLevel(int apiLevel) {
         mMaxManifestReceiverApiLevel = apiLevel;
     }
 
     /**
      * Return {@link #setMaxManifestReceiverApiLevel}.
+     *
+     * @deprecated to give developers the most flexibility during beta releases,
+     *             we strongly encourage using {@link ChangeId} instead of
+     *             target SDK checks; callers should use
+     *             {@link #setRequireCompatChange(long, boolean)} instead,
+     *             possibly combined with
+     *             {@link Intent#FLAG_RECEIVER_REGISTERED_ONLY}.
      * @hide
      */
     @TestApi
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @Deprecated
     public int getMaxManifestReceiverApiLevel() {
         return mMaxManifestReceiverApiLevel;
     }
@@ -301,6 +430,120 @@ public class BroadcastOptions {
     }
 
     /**
+     * Use this to configure a broadcast to be sent to apps that hold all permissions in
+     * the list. This is only for use with the {@link Context#sendBroadcast(Intent intent,
+     * @Nullable String receiverPermission, @Nullable Bundle options)}.
+     *
+     * <p> If both {@link #setRequireAllOfPermissions(String[])} and
+     * {@link #setRequireNoneOfPermissions(String[])} are used, then receivers must have all of the
+     * permissions set by {@link #setRequireAllOfPermissions(String[])}, and none of the
+     * permissions set by {@link #setRequireNoneOfPermissions(String[])} to get the broadcast.
+     *
+     * @param requiredPermissions a list of Strings of permission the receiver must have. Set to
+     *                            null or an empty array to clear any previously set value.
+     * @hide
+     */
+    @SystemApi
+    public void setRequireAllOfPermissions(@Nullable String[] requiredPermissions) {
+        mRequireAllOfPermissions = requiredPermissions;
+    }
+
+    /**
+     * Use this to configure a broadcast to be sent to apps that don't hold any permissions in
+     * list. This is only for use with the {@link Context#sendBroadcast(Intent intent,
+     * @Nullable String receiverPermission, @Nullable Bundle options)}.
+     *
+     * <p> If both {@link #setRequireAllOfPermissions(String[])} and
+     * {@link #setRequireNoneOfPermissions(String[])} are used, then receivers must have all of the
+     * permissions set by {@link #setRequireAllOfPermissions(String[])}, and none of the
+     * permissions set by {@link #setRequireNoneOfPermissions(String[])} to get the broadcast.
+     *
+     * @param excludedPermissions a list of Strings of permission the receiver must not have. Set to
+     *                            null or an empty array to clear any previously set value.
+     * @hide
+     */
+    @SystemApi
+    public void setRequireNoneOfPermissions(@Nullable String[] excludedPermissions) {
+        mRequireNoneOfPermissions = excludedPermissions;
+    }
+
+    /**
+     * When set, this broadcast will only be delivered to apps which have the
+     * given {@link ChangeId} in the given state.
+     * <p>
+     * Each {@link BroadcastOptions} instance supports only a single
+     * {@link ChangeId} requirement, so any subsequent calls will override any
+     * previously defined requirement.
+     * <p>
+     * This requirement applies to both manifest registered and runtime
+     * registered receivers.
+     *
+     * @param changeId the {@link ChangeId} to inspect
+     * @param enabled the required enabled state of the inspected
+     *            {@link ChangeId} for this broadcast to be delivered
+     * @see CompatChanges#isChangeEnabled
+     * @see #clearRequireCompatChange()
+     */
+    public void setRequireCompatChange(long changeId, boolean enabled) {
+        mRequireCompatChangeId = changeId;
+        mRequireCompatChangeEnabled = enabled;
+    }
+
+    /**
+     * Clear any previously defined requirement for this broadcast requested via
+     * {@link #setRequireCompatChange(long, boolean)}.
+     */
+    public void clearRequireCompatChange() {
+        mRequireCompatChangeId = CHANGE_INVALID;
+        mRequireCompatChangeEnabled = true;
+    }
+
+    /** {@hide} */
+    public long getRequireCompatChangeId() {
+        return mRequireCompatChangeId;
+    }
+
+    /**
+     * Test if the given app meets the {@link ChangeId} state required by this
+     * broadcast, if any.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean testRequireCompatChange(int uid) {
+        if (mRequireCompatChangeId != CHANGE_INVALID) {
+            return CompatChanges.isChangeEnabled(mRequireCompatChangeId,
+                    uid) == mRequireCompatChangeEnabled;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Sets whether events (such as posting a notification) originating from an app after it
+     * receives the broadcast while in background should be recorded as responses to the broadcast.
+     *
+     * <p> Note that this will only be considered when sending explicit broadcast intents.
+     *
+     * @param id ID to be used for the response events corresponding to this broadcast. If the
+     *           value is {@code 0} (default), then response events will not be recorded. Otherwise,
+     *           they will be recorded with the ID provided.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)
+    public void recordResponseEventWhileInBackground(@IntRange(from = 0) long id) {
+        mIdForResponseEvent = id;
+    }
+
+    /** @hide */
+    @IntRange(from = 0)
+    public long getIdForResponseEvent() {
+        return mIdForResponseEvent;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -308,8 +551,9 @@ public class BroadcastOptions {
      * object; you must not modify it, but can supply it to the sendBroadcast
      * methods that take an options Bundle.
      */
+    @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle();
+        Bundle b = super.toBundle();
         if (isTemporaryAppAllowlistSet()) {
             b.putLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION, mTemporaryAppAllowlistDuration);
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_TYPE, mTemporaryAppAllowlistType);
@@ -327,6 +571,19 @@ public class BroadcastOptions {
         }
         if (mAllowBackgroundActivityStarts) {
             b.putBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS, true);
+        }
+        if (mRequireAllOfPermissions != null) {
+            b.putStringArray(KEY_REQUIRE_ALL_OF_PERMISSIONS, mRequireAllOfPermissions);
+        }
+        if (mRequireNoneOfPermissions != null) {
+            b.putStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS, mRequireNoneOfPermissions);
+        }
+        if (mRequireCompatChangeId != CHANGE_INVALID) {
+            b.putLong(KEY_REQUIRE_COMPAT_CHANGE_ID, mRequireCompatChangeId);
+            b.putBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, mRequireCompatChangeEnabled);
+        }
+        if (mIdForResponseEvent != 0) {
+            b.putLong(KEY_ID_FOR_RESPONSE_EVENT, mIdForResponseEvent);
         }
         return b.isEmpty() ? null : b;
     }

@@ -22,11 +22,10 @@ import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputContentInfo;
+import android.view.inputmethod.TextAttribute;
 
-import com.android.internal.inputmethod.ICharSequenceResultCallback;
-import com.android.internal.inputmethod.IExtractedTextResultCallback;
-import com.android.internal.inputmethod.IIntResultCallback;
-import com.android.internal.inputmethod.ISurroundingTextResultCallback;
+import com.android.internal.infra.AndroidFuture;
+import com.android.internal.inputmethod.InputConnectionCommandHeader;
 
 /**
  * Interface from an input method to the application, allowing it to perform
@@ -34,57 +33,80 @@ import com.android.internal.inputmethod.ISurroundingTextResultCallback;
  * {@hide}
  */
  oneway interface IInputContext {
-    void getTextBeforeCursor(int length, int flags, ICharSequenceResultCallback callback);
+    void getTextBeforeCursor(in InputConnectionCommandHeader header, int length, int flags,
+            in AndroidFuture future /* T=CharSequence */);
 
-    void getTextAfterCursor(int length, int flags, ICharSequenceResultCallback callback);
+    void getTextAfterCursor(in InputConnectionCommandHeader header, int length, int flags,
+            in AndroidFuture future /* T=CharSequence */);
 
-    void getCursorCapsMode(int reqModes, IIntResultCallback callback);
+    void getCursorCapsMode(in InputConnectionCommandHeader header, int reqModes,
+            in AndroidFuture future /* T=Integer */);
 
-    void getExtractedText(in ExtractedTextRequest request, int flags,
-            IExtractedTextResultCallback callback);
+    void getExtractedText(in InputConnectionCommandHeader header, in ExtractedTextRequest request,
+            int flags, in AndroidFuture future /* T=ExtractedText */);
 
-    void deleteSurroundingText(int beforeLength, int afterLength);
-    void deleteSurroundingTextInCodePoints(int beforeLength, int afterLength);
+    void deleteSurroundingText(in InputConnectionCommandHeader header, int beforeLength,
+            int afterLength);
+    void deleteSurroundingTextInCodePoints(in InputConnectionCommandHeader header, int beforeLength,
+            int afterLength);
 
-    void setComposingText(CharSequence text, int newCursorPosition);
+    void setComposingText(in InputConnectionCommandHeader header, CharSequence text,
+            int newCursorPosition);
 
-    void finishComposingText();
-    
-    void commitText(CharSequence text, int newCursorPosition);
+    void setComposingTextWithTextAttribute(in InputConnectionCommandHeader header,
+                CharSequence text, int newCursorPosition, in TextAttribute textAttribute);
 
-    void commitCompletion(in CompletionInfo completion);
+    void finishComposingText(in InputConnectionCommandHeader header);
 
-    void commitCorrection(in CorrectionInfo correction);
+    void commitText(in InputConnectionCommandHeader header, CharSequence text,
+                int newCursorPosition);
 
-    void setSelection(int start, int end);
-    
-    void performEditorAction(int actionCode);
-    
-    void performContextMenuAction(int id);
-    
-    void beginBatchEdit();
-    
-    void endBatchEdit();
+    void commitTextWithTextAttribute(in InputConnectionCommandHeader header, CharSequence text,
+            int newCursorPosition, in TextAttribute textAttribute);
 
-    void sendKeyEvent(in KeyEvent event);
-    
-    void clearMetaKeyStates(int states);
-    
-    void performSpellCheck();
+    void commitCompletion(in InputConnectionCommandHeader header, in CompletionInfo completion);
 
-    void performPrivateCommand(String action, in Bundle data);
+    void commitCorrection(in InputConnectionCommandHeader header, in CorrectionInfo correction);
 
-    void setComposingRegion(int start, int end);
+    void setSelection(in InputConnectionCommandHeader header, int start, int end);
 
-    void getSelectedText(int flags, ICharSequenceResultCallback callback);
+    void performEditorAction(in InputConnectionCommandHeader header, int actionCode);
 
-    void requestUpdateCursorAnchorInfo(int cursorUpdateMode, IIntResultCallback callback);
+    void performContextMenuAction(in InputConnectionCommandHeader header, int id);
 
-    void commitContent(in InputContentInfo inputContentInfo, int flags, in Bundle opts,
-            IIntResultCallback callback);
+    void beginBatchEdit(in InputConnectionCommandHeader header);
 
-    void getSurroundingText(int beforeLength, int afterLength, int flags,
-            ISurroundingTextResultCallback callback);
+    void endBatchEdit(in InputConnectionCommandHeader header);
 
-    void setImeConsumesInput(boolean imeConsumesInput);
+    void sendKeyEvent(in InputConnectionCommandHeader header, in KeyEvent event);
+
+    void clearMetaKeyStates(in InputConnectionCommandHeader header, int states);
+
+    void performSpellCheck(in InputConnectionCommandHeader header);
+
+    void performPrivateCommand(in InputConnectionCommandHeader header, String action,
+            in Bundle data);
+
+    void setComposingRegion(in InputConnectionCommandHeader header, int start, int end);
+
+    void setComposingRegionWithTextAttribute(in InputConnectionCommandHeader header, int start,
+            int end, in TextAttribute textAttribute);
+
+    void getSelectedText(in InputConnectionCommandHeader header, int flags,
+            in AndroidFuture future /* T=CharSequence */);
+
+    void requestCursorUpdates(in InputConnectionCommandHeader header, int cursorUpdateMode,
+            int imeDisplayId, in AndroidFuture future /* T=Boolean */);
+
+    void requestCursorUpdatesWithFilter(in InputConnectionCommandHeader header,
+                int cursorUpdateMode, int cursorUpdateFilter, int imeDisplayId,
+                 in AndroidFuture future /* T=Boolean */);
+
+    void commitContent(in InputConnectionCommandHeader header, in InputContentInfo inputContentInfo,
+            int flags, in Bundle opts, in AndroidFuture future /* T=Boolean */);
+
+    void getSurroundingText(in InputConnectionCommandHeader header, int beforeLength,
+            int afterLength, int flags, in AndroidFuture future /* T=SurroundingText */);
+
+    void setImeConsumesInput(in InputConnectionCommandHeader header, boolean imeConsumesInput);
 }

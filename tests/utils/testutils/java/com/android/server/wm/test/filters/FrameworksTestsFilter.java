@@ -62,6 +62,7 @@ public final class FrameworksTestsFilter extends SelectTest {
             "android.view.PendingInsetsControllerTest",
             "android.window.", // all tests under the package.
             "android.app.activity.ActivityThreadTest",
+            "android.app.activity.RegisterComponentCallbacksTest"
     };
 
     public FrameworksTestsFilter(Bundle testArgs) {

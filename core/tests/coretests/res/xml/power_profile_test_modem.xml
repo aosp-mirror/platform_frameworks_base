@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2021, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<device name="test">
+    <test-modem name="testModemPowerProfile_defaultRat">
+        <!-- Modem sleep drain current value in mA. -->
+        <sleep>10</sleep>
+        <!-- Modem idle drain current value in mA. -->
+        <idle>20</idle>
+        <active rat="DEFAULT">
+            <!-- Transmit current drain in mA. -->
+            <receive>30</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">40</transmit>
+            <transmit level="1">50</transmit>
+            <transmit level="2">60</transmit>
+            <transmit level="3">70</transmit>
+            <transmit level="4">80</transmit>
+        </active>
+    </test-modem>
+
+    <test-modem name="testModemPowerProfile_partiallyDefined">
+        <!-- Modem sleep drain current value in mA. -->
+        <sleep>1</sleep>
+        <!-- Modem idle drain current value in mA. -->
+        <idle>2</idle>
+        <active rat="DEFAULT">
+            <!-- Transmit current drain in mA. -->
+            <receive>3</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">4</transmit>
+            <transmit level="1">5</transmit>
+            <transmit level="2">6</transmit>
+            <transmit level="3">7</transmit>
+            <transmit level="4">8</transmit>
+        </active>
+        <active rat="NR" nrFrequency="DEFAULT">
+            <!-- Transmit current drain in mA. -->
+            <receive>13</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">14</transmit>
+            <transmit level="1">15</transmit>
+            <transmit level="2">16</transmit>
+            <transmit level="3">17</transmit>
+            <transmit level="4">18</transmit>
+        </active>
+        <active rat="NR" nrFrequency="MMWAVE">
+            <!-- Transmit current drain in mA. -->
+            <receive>53</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">54</transmit>
+            <transmit level="1">55</transmit>
+            <transmit level="2">56</transmit>
+            <transmit level="3">57</transmit>
+            <transmit level="4">58</transmit>
+        </active>
+    </test-modem>
+
+    <test-modem name="testModemPowerProfile_fullyDefined">
+        <!-- Modem sleep drain current value in mA. -->
+        <sleep>1</sleep>
+        <!-- Modem idle drain current value in mA. -->
+        <idle>2</idle>
+        <active rat="DEFAULT">
+            <!-- Transmit current drain in mA. -->
+            <receive>3</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">4</transmit>
+            <transmit level="1">5</transmit>
+            <transmit level="2">6</transmit>
+            <transmit level="3">7</transmit>
+            <transmit level="4">8</transmit>
+        </active>
+        <active rat="LTE">
+            <!-- Transmit current drain in mA. -->
+            <receive>10</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">20</transmit>
+            <transmit level="1">30</transmit>
+            <transmit level="2">40</transmit>
+            <transmit level="3">50</transmit>
+            <transmit level="4">60</transmit>
+        </active>
+        <active rat="NR" nrFrequency="DEFAULT">
+            <!-- Transmit current drain in mA. -->
+            <receive>13</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">14</transmit>
+            <transmit level="1">15</transmit>
+            <transmit level="2">16</transmit>
+            <transmit level="3">17</transmit>
+            <transmit level="4">18</transmit>
+        </active>
+        <active rat="NR" nrFrequency="LOW">
+            <!-- Transmit current drain in mA. -->
+            <receive>23</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">24</transmit>
+            <transmit level="1">25</transmit>
+            <transmit level="2">26</transmit>
+            <transmit level="3">27</transmit>
+            <transmit level="4">28</transmit>
+        </active>
+        <active rat="NR" nrFrequency="MID">
+            <!-- Transmit current drain in mA. -->
+            <receive>33</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">34</transmit>
+            <transmit level="1">35</transmit>
+            <transmit level="2">36</transmit>
+            <transmit level="3">37</transmit>
+            <transmit level="4">38</transmit>
+        </active>
+        <active rat="NR" nrFrequency="HIGH">
+            <!-- Transmit current drain in mA. -->
+            <receive>43</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">44</transmit>
+            <transmit level="1">45</transmit>
+            <transmit level="2">46</transmit>
+            <transmit level="3">47</transmit>
+            <transmit level="4">48</transmit>
+        </active>
+        <active rat="NR" nrFrequency="MMWAVE">
+            <!-- Transmit current drain in mA. -->
+            <receive>53</receive>
+            <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+            <transmit level="0">54</transmit>
+            <transmit level="1">55</transmit>
+            <transmit level="2">56</transmit>
+            <transmit level="3">57</transmit>
+            <transmit level="4">58</transmit>
+        </active>
+    </test-modem>
+</device>

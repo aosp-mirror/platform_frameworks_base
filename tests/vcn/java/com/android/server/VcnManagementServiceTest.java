@@ -23,6 +23,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
 
@@ -276,7 +277,6 @@ public class VcnManagementServiceTest {
     @Test
     public void testSystemReady() throws Exception {
         mVcnMgmtSvc.systemReady();
-        mTestLooper.dispatchAll();
 
         verify(mConnMgr).registerNetworkProvider(any(VcnNetworkProvider.class));
         verify(mSubscriptionTracker).register();
@@ -494,8 +494,10 @@ public class VcnManagementServiceTest {
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
         triggerSubscriptionTrackerCbAndGetSnapshot(null, Collections.emptySet());
-        mTestLooper.dispatchAll();
 
+        // Verify teardown after delay
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
         verify(vcn).teardownAsynchronously();
         verify(mMockPolicyListener).onPolicyChanged();
     }
@@ -519,6 +521,92 @@ public class VcnManagementServiceTest {
 
         verify(vcn).teardownAsynchronously();
         assertEquals(0, mVcnMgmtSvc.getAllVcns().size());
+    }
+
+    /**
+     * Tests an intermediate state where carrier privileges are marked as lost before active data
+     * subId changes during a SIM ejection.
+     *
+     * <p>The expected outcome is that the VCN is torn down after a delay, as opposed to
+     * immediately.
+     */
+    @Test
+    public void testTelephonyNetworkTrackerCallbackLostCarrierPrivilegesBeforeActiveDataSubChanges()
+            throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn vcn = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Simulate privileges lost
+        triggerSubscriptionTrackerCbAndGetSnapshot(
+                TEST_SUBSCRIPTION_ID,
+                TEST_UUID_2,
+                Collections.emptySet(),
+                Collections.emptyMap(),
+                false /* hasCarrierPrivileges */);
+
+        // Verify teardown after delay
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(vcn).teardownAsynchronously();
+    }
+
+    @Test
+    public void testTelephonyNetworkTrackerCallbackSimSwitchesDoNotKillVcnInstances()
+            throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn vcn = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Simulate SIM unloaded
+        triggerSubscriptionTrackerCbAndGetSnapshot(
+                INVALID_SUBSCRIPTION_ID,
+                null /* activeDataSubscriptionGroup */,
+                Collections.emptySet(),
+                Collections.emptyMap(),
+                false /* hasCarrierPrivileges */);
+
+        // Simulate new SIM loaded right during teardown delay.
+        mTestLooper.moveTimeForward(
+                VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS / 2);
+        mTestLooper.dispatchAll();
+        triggerSubscriptionTrackerCbAndGetSnapshot(TEST_UUID_2, Collections.singleton(TEST_UUID_2));
+
+        // Verify that even after the full timeout duration, the VCN instance is not torn down
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(vcn, never()).teardownAsynchronously();
+    }
+
+    @Test
+    public void testTelephonyNetworkTrackerCallbackDoesNotKillNewVcnInstances() throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn oldInstance = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Simulate SIM unloaded
+        triggerSubscriptionTrackerCbAndGetSnapshot(null, Collections.emptySet());
+
+        // Config cleared, SIM reloaded & config re-added right before teardown delay, staring new
+        // vcnInstance.
+        mTestLooper.moveTimeForward(
+                VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS / 2);
+        mTestLooper.dispatchAll();
+        mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2, TEST_PACKAGE_NAME);
+        triggerSubscriptionTrackerCbAndGetSnapshot(TEST_UUID_2, Collections.singleton(TEST_UUID_2));
+        final Vcn newInstance = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Verify that new instance was different, and the old one was torn down
+        assertTrue(oldInstance != newInstance);
+        verify(oldInstance).teardownAsynchronously();
+
+        // Verify that even after the full timeout duration, the new VCN instance is not torn down
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(newInstance, never()).teardownAsynchronously();
     }
 
     @Test
@@ -910,8 +998,6 @@ public class VcnManagementServiceTest {
     private void setupSubscriptionAndStartVcn(
             int subId, ParcelUuid subGrp, boolean isVcnActive, boolean hasCarrierPrivileges) {
         mVcnMgmtSvc.systemReady();
-        mTestLooper.dispatchAll();
-
         triggerSubscriptionTrackerCbAndGetSnapshot(
                 subGrp,
                 Collections.singleton(subGrp),
@@ -1007,7 +1093,6 @@ public class VcnManagementServiceTest {
 
     private void setupTrackedCarrierWifiNetwork(NetworkCapabilities caps) {
         mVcnMgmtSvc.systemReady();
-        mTestLooper.dispatchAll();
 
         final ArgumentCaptor<NetworkCallback> captor =
                 ArgumentCaptor.forClass(NetworkCallback.class);
@@ -1252,14 +1337,15 @@ public class VcnManagementServiceTest {
                 true /* isActive */,
                 true /* hasCarrierPrivileges */);
 
-        // VCN is currently active. Lose carrier privileges for TEST_PACKAGE so the VCN goes
-        // inactive.
+        // VCN is currently active. Lose carrier privileges for TEST_PACKAGE and hit teardown
+        // timeout so the VCN goes inactive.
         final TelephonySubscriptionSnapshot snapshot =
                 triggerSubscriptionTrackerCbAndGetSnapshot(
                         TEST_UUID_1,
                         Collections.singleton(TEST_UUID_1),
                         Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_1),
                         false /* hasCarrierPrivileges */);
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
         mTestLooper.dispatchAll();
 
         // Giving TEST_PACKAGE privileges again will restart the VCN (which will indicate ACTIVE

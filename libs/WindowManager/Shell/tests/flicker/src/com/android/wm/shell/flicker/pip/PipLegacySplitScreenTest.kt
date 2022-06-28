@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.helpers.BaseAppHelper.Companion.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
@@ -64,10 +63,8 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
         assumeFalse(isShellTransitionsEnabled())
     }
 
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
                 test {
                     removeAllTasksButHome()
@@ -92,11 +89,16 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
             }
         }
 
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 206753786)
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
+
     @FlakyTest(bugId = 161435597)
     @Test
     fun pipWindowInsideDisplayBounds() {
-        testSpec.assertWm {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertWmVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 
@@ -113,8 +115,8 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     @FlakyTest(bugId = 161435597)
     @Test
     fun pipLayerInsideDisplayBounds() {
-        testSpec.assertLayers {
-            coversAtMost(displayBounds, pipApp.component)
+        testSpec.assertLayersVisibleRegion(pipApp.component) {
+            coversAtMost(displayBounds)
         }
     }
 

@@ -23,30 +23,22 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
-import com.android.systemui.unfold.updates.FOLD_UPDATE_ABORTED
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
-import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 
-/**
- * Maps fold updates to unfold transition progress using DynamicAnimation.
- *
- * TODO(b/193793338) Current limitations:
- *  - doesn't handle postures
- */
-internal class PhysicsBasedUnfoldTransitionProgressProvider(
+/** Maps fold updates to unfold transition progress using DynamicAnimation. */
+class PhysicsBasedUnfoldTransitionProgressProvider(
     private val foldStateProvider: FoldStateProvider
-) :
-    UnfoldTransitionProgressProvider,
-    FoldUpdatesListener,
-    DynamicAnimation.OnAnimationEndListener {
+) : UnfoldTransitionProgressProvider, FoldUpdatesListener, DynamicAnimation.OnAnimationEndListener {
 
-    private val springAnimation = SpringAnimation(this, AnimationProgressProperty)
-        .apply {
+    private val springAnimation =
+        SpringAnimation(this, AnimationProgressProperty).apply {
             addEndListener(this@PhysicsBasedUnfoldTransitionProgressProvider)
         }
 
@@ -85,11 +77,11 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
 
                 // Stop the animation if the device has already opened by the time when
                 // the display is available as we won't receive the full open event anymore
-                if (foldStateProvider.isFullyOpened) {
+                if (foldStateProvider.isFinishedOpening) {
                     cancelTransition(endValue = 1f, animate = true)
                 }
             }
-            FOLD_UPDATE_FINISH_FULL_OPEN, FOLD_UPDATE_ABORTED -> {
+            FOLD_UPDATE_FINISH_FULL_OPEN, FOLD_UPDATE_FINISH_HALF_OPEN -> {
                 // Do not cancel if we haven't started the transition yet.
                 // This could happen when we fully unfolded the device before the screen
                 // became available. In this case we start and immediately cancel the animation
@@ -105,7 +97,17 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
             FOLD_UPDATE_START_CLOSING -> {
                 // The transition might be already running as the device might start closing several
                 // times before reaching an end state.
-                if (!isTransitionRunning) {
+                if (isTransitionRunning) {
+                    // If we are cancelling the animation, reset that so we can resume it normally.
+                    // The animation could be 'cancelled' when the user stops folding/unfolding
+                    // for some period of time or fully unfolds the device. In this case,
+                    // it is forced to run to the end ignoring all further hinge angle events.
+                    // By resetting this flag we allow reacting to hinge angle events again, so
+                    // the transition continues running.
+                    if (isAnimatedCancelRunning) {
+                        isAnimatedCancelRunning = false
+                    }
+                } else {
                     startTransition(startValue = 1f)
                 }
             }
@@ -126,9 +128,7 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
             isTransitionRunning = false
             springAnimation.cancel()
 
-            listeners.forEach {
-                it.onTransitionFinished()
-            }
+            listeners.forEach { it.onTransitionFinished() }
 
             if (DEBUG) {
                 Log.d(TAG, "onTransitionFinished")
@@ -148,9 +148,7 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     private fun onStartTransition() {
-        listeners.forEach {
-            it.onTransitionStarted()
-        }
+        listeners.forEach { it.onTransitionStarted() }
         isTransitionRunning = true
 
         if (DEBUG) {
@@ -162,11 +160,12 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
         if (!isTransitionRunning) onStartTransition()
 
         springAnimation.apply {
-            spring = SpringForce().apply {
-                finalPosition = startValue
-                dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
-                stiffness = SPRING_STIFFNESS
-            }
+            spring =
+                SpringForce().apply {
+                    finalPosition = startValue
+                    dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
+                    stiffness = SPRING_STIFFNESS
+                }
             minimumVisibleChange = MINIMAL_VISIBLE_CHANGE
             setStartValue(startValue)
             setMinValue(0f)

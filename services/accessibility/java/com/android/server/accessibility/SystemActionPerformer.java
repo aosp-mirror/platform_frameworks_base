@@ -295,6 +295,21 @@ public class SystemActionPerformer {
                 case AccessibilityService.GLOBAL_ACTION_KEYCODE_HEADSETHOOK :
                     sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
                     return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_UP:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_UP);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_DOWN:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_DOWN);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_LEFT:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_RIGHT:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT);
+                    return true;
+                case AccessibilityService.GLOBAL_ACTION_DPAD_CENTER:
+                    sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_CENTER);
+                    return true;
                 default:
                     Slog.e(TAG, "Invalid action id: " + actionId);
                     return false;

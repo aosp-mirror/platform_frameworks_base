@@ -78,7 +78,7 @@ public final class DexoptUtils {
 
         String baseApkContextClassLoader = encodeClassLoader(
                 "", pkg.getClassLoaderName(), sharedLibrariesContext);
-        if (pkg.getSplitCodePaths() == null) {
+        if (ArrayUtils.isEmpty(pkg.getSplitCodePaths())) {
             // The application has no splits.
             return new String[] {baseApkContextClassLoader};
         }

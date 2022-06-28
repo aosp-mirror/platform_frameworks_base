@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Yönet"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balon kapatıldı."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Bu uygulamayı yeniden başlatmak ve tam ekrana geçmek için dokunun."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kameranızda sorun mu var?\nDüzeltmek için dokunun"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Bu işlem sorunu düzeltmedi mi?\nİşlemi geri almak için dokunun"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Kameranızda sorun yok mu? Kapatmak için dokunun."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Bazı uygulamalar dikey modda en iyi performansı gösterir"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Alanınızı en verimli şekilde kullanmak için bu seçeneklerden birini deneyin"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Tam ekrana geçmek için cihazınızı döndürün"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Yeniden konumlandırmak için uygulamanın yanına iki kez dokunun"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"Anladım"</string>
 </resources>

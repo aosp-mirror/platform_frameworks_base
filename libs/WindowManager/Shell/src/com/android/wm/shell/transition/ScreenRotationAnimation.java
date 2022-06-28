@@ -19,6 +19,8 @@ package com.android.wm.shell.transition;
 import static android.hardware.HardwareBuffer.RGBA_8888;
 import static android.hardware.HardwareBuffer.USAGE_PROTECTED_CONTENT;
 import static android.util.RotationUtils.deltaRotation;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
+import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
 import static com.android.wm.shell.transition.DefaultTransitionHandler.startSurfaceAnimation;
@@ -59,7 +61,7 @@ import java.util.Arrays;
  * This class handles the rotation animation when the device is rotated.
  *
  * <p>
- * The screen rotation animation is composed of 4 different part:
+ * The screen rotation animation is composed of 3 different part:
  * <ul>
  * <li> The screenshot: <p>
  *     A screenshot of the whole screen prior the change of orientation is taken to hide the
@@ -75,10 +77,6 @@ import java.util.Arrays;
  *      To have the animation seem more seamless, we add a color transitioning background behind the
  *      exiting and entering layouts. We compute the brightness of the start and end
  *      layouts and transition from the two brightness values as grayscale underneath the animation
- *
- * <li> The entering Blackframe: <p>
- *     The enter Blackframe is similar to the exit Blackframe but is only used when a custom
- *     rotation animation is used and matches the new content size instead of the screenshot.
  * </ul>
  */
 class ScreenRotationAnimation {
@@ -94,6 +92,7 @@ class ScreenRotationAnimation {
     private final Rect mStartBounds = new Rect();
     private final Rect mEndBounds = new Rect();
 
+    private final int mAnimHint;
     private final int mStartWidth;
     private final int mStartHeight;
     private final int mEndWidth;
@@ -117,6 +116,7 @@ class ScreenRotationAnimation {
     // rotations.
     private Animation mRotateExitAnimation;
     private Animation mRotateEnterAnimation;
+    private Animation mRotateAlphaAnimation;
 
     /** Intensity of light/whiteness of the layout before rotation occurs. */
     private float mStartLuma;
@@ -124,9 +124,10 @@ class ScreenRotationAnimation {
     private float mEndLuma;
 
     ScreenRotationAnimation(Context context, SurfaceSession session, TransactionPool pool,
-            Transaction t, TransitionInfo.Change change, SurfaceControl rootLeash) {
+            Transaction t, TransitionInfo.Change change, SurfaceControl rootLeash, int animHint) {
         mContext = context;
         mTransactionPool = pool;
+        mAnimHint = animHint;
 
         mSurfaceControl = change.getLeash();
         mStartWidth = change.getStartAbsBounds().width();
@@ -160,13 +161,6 @@ class ScreenRotationAnimation {
                 return;
             }
 
-            mBackColorSurface = new SurfaceControl.Builder(session)
-                    .setParent(rootLeash)
-                    .setColorLayer()
-                    .setCallsite("ShellRotationAnimation")
-                    .setName("BackColorSurface")
-                    .build();
-
             mScreenshotLayer = new SurfaceControl.Builder(session)
                     .setParent(mAnimLeash)
                     .setBLASTLayer()
@@ -175,16 +169,8 @@ class ScreenRotationAnimation {
                     .setName("RotationLayer")
                     .build();
 
-            HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-            mStartLuma = getMedianBorderLuma(hardwareBuffer, screenshotBuffer.getColorSpace());
-
             GraphicBuffer buffer = GraphicBuffer.createFromHardwareBuffer(
                     screenshotBuffer.getHardwareBuffer());
-
-            t.setLayer(mBackColorSurface, -1);
-            t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
-            t.setAlpha(mBackColorSurface, 1);
-            t.show(mBackColorSurface);
 
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
             t.setPosition(mAnimLeash, 0, 0);
@@ -195,12 +181,33 @@ class ScreenRotationAnimation {
             t.setColorSpace(mScreenshotLayer, screenshotBuffer.getColorSpace());
             t.show(mScreenshotLayer);
 
+            if (!isCustomRotate()) {
+                mBackColorSurface = new SurfaceControl.Builder(session)
+                        .setParent(rootLeash)
+                        .setColorLayer()
+                        .setCallsite("ShellRotationAnimation")
+                        .setName("BackColorSurface")
+                        .build();
+
+                HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+                mStartLuma = getMedianBorderLuma(hardwareBuffer, screenshotBuffer.getColorSpace());
+
+                t.setLayer(mBackColorSurface, -1);
+                t.setColor(mBackColorSurface, new float[]{mStartLuma, mStartLuma, mStartLuma});
+                t.setAlpha(mBackColorSurface, 1);
+                t.show(mBackColorSurface);
+            }
+
         } catch (Surface.OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
 
         setRotation(t);
         t.apply();
+    }
+
+    private boolean isCustomRotate() {
+        return mAnimHint == ROTATION_ANIMATION_CROSSFADE || mAnimHint == ROTATION_ANIMATION_JUMPCUT;
     }
 
     private void setRotation(SurfaceControl.Transaction t) {
@@ -244,33 +251,44 @@ class ScreenRotationAnimation {
         // color frame animation.
         //mEndLuma = getLumaOfSurfaceControl(mEndBounds, mSurfaceControl);
 
-        // Figure out how the screen has moved from the original rotation.
-        int delta = deltaRotation(mEndRotation, mStartRotation);
-        switch (delta) { /* Counter-Clockwise Rotations */
-            case Surface.ROTATION_0:
-                mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                        R.anim.screen_rotate_0_exit);
-                mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                        R.anim.rotation_animation_enter);
-                break;
-            case Surface.ROTATION_90:
-                mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                        R.anim.screen_rotate_plus_90_exit);
-                mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                        R.anim.screen_rotate_plus_90_enter);
-                break;
-            case Surface.ROTATION_180:
-                mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                        R.anim.screen_rotate_180_exit);
-                mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                        R.anim.screen_rotate_180_enter);
-                break;
-            case Surface.ROTATION_270:
-                mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                        R.anim.screen_rotate_minus_90_exit);
-                mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
-                        R.anim.screen_rotate_minus_90_enter);
-                break;
+        final boolean customRotate = isCustomRotate();
+        if (customRotate) {
+            mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                    mAnimHint == ROTATION_ANIMATION_JUMPCUT ? R.anim.rotation_animation_jump_exit
+                            : R.anim.rotation_animation_xfade_exit);
+            mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                    R.anim.rotation_animation_enter);
+            mRotateAlphaAnimation = AnimationUtils.loadAnimation(mContext,
+                    R.anim.screen_rotate_alpha);
+        } else {
+            // Figure out how the screen has moved from the original rotation.
+            int delta = deltaRotation(mEndRotation, mStartRotation);
+            switch (delta) { /* Counter-Clockwise Rotations */
+                case Surface.ROTATION_0:
+                    mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                            R.anim.screen_rotate_0_exit);
+                    mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                            R.anim.rotation_animation_enter);
+                    break;
+                case Surface.ROTATION_90:
+                    mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                            R.anim.screen_rotate_plus_90_exit);
+                    mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                            R.anim.screen_rotate_plus_90_enter);
+                    break;
+                case Surface.ROTATION_180:
+                    mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                            R.anim.screen_rotate_180_exit);
+                    mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                            R.anim.screen_rotate_180_enter);
+                    break;
+                case Surface.ROTATION_270:
+                    mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
+                            R.anim.screen_rotate_minus_90_exit);
+                    mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
+                            R.anim.screen_rotate_minus_90_enter);
+                    break;
+            }
         }
 
         mRotateExitAnimation.initialize(mEndWidth, mEndHeight, mStartWidth, mStartHeight);
@@ -281,9 +299,20 @@ class ScreenRotationAnimation {
         mRotateEnterAnimation.scaleCurrentDuration(animationScale);
 
         mTransaction = mTransactionPool.acquire();
-        startDisplayRotation(animations, finishCallback, mainExecutor, animExecutor);
-        startScreenshotRotationAnimation(animations, finishCallback, mainExecutor, animExecutor);
-        //startColorAnimation(mTransaction, animationScale);
+        if (customRotate) {
+            mRotateAlphaAnimation.initialize(mEndWidth, mEndHeight, mStartWidth, mStartHeight);
+            mRotateAlphaAnimation.restrictDuration(MAX_ANIMATION_DURATION);
+            mRotateAlphaAnimation.scaleCurrentDuration(animationScale);
+
+            startScreenshotAlphaAnimation(animations, finishCallback, mainExecutor,
+                    animExecutor);
+            startDisplayRotation(animations, finishCallback, mainExecutor, animExecutor);
+        } else {
+            startDisplayRotation(animations, finishCallback, mainExecutor, animExecutor);
+            startScreenshotRotationAnimation(animations, finishCallback, mainExecutor,
+                    animExecutor);
+            //startColorAnimation(mTransaction, animationScale);
+        }
 
         return true;
     }
@@ -292,14 +321,24 @@ class ScreenRotationAnimation {
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
             @NonNull ShellExecutor animExecutor) {
         startSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */);
+                mTransactionPool, mainExecutor, animExecutor, null /* position */,
+                0 /* cornerRadius */, null /* clipRect */);
     }
 
     private void startScreenshotRotationAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
             @NonNull ShellExecutor animExecutor) {
         startSurfaceAnimation(animations, mRotateExitAnimation, mAnimLeash, finishCallback,
-                mTransactionPool, mainExecutor, animExecutor, null /* position */);
+                mTransactionPool, mainExecutor, animExecutor, null /* position */,
+                0 /* cornerRadius */, null /* clipRect */);
+    }
+
+    private void startScreenshotAlphaAnimation(@NonNull ArrayList<Animator> animations,
+            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor,
+            @NonNull ShellExecutor animExecutor) {
+        startSurfaceAnimation(animations, mRotateAlphaAnimation, mAnimLeash, finishCallback,
+                mTransactionPool, mainExecutor, animExecutor, null /* position */,
+                0 /* cornerRadius */, null /* clipRect */);
     }
 
     private void startColorAnimation(float animationScale, @NonNull ShellExecutor animExecutor) {
@@ -349,13 +388,12 @@ class ScreenRotationAnimation {
                 t.remove(mScreenshotLayer);
             }
             mScreenshotLayer = null;
-
-            if (mBackColorSurface != null) {
-                if (mBackColorSurface.isValid()) {
-                    t.remove(mBackColorSurface);
-                }
-                mBackColorSurface = null;
+        }
+        if (mBackColorSurface != null) {
+            if (mBackColorSurface.isValid()) {
+                t.remove(mBackColorSurface);
             }
+            mBackColorSurface = null;
         }
         t.apply();
         mTransactionPool.release(t);

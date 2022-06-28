@@ -52,6 +52,7 @@ import com.android.server.wm.WindowManagerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -143,12 +144,8 @@ public class AccessibilityWindowManager {
 
         /**
          * Starts tracking windows changes from window manager by registering callback.
-         *
-         * @return true if callback registers successful.
          */
-        boolean startTrackingWindowsLocked() {
-            boolean result = true;
-
+        void startTrackingWindowsLocked() {
             if (!mTrackingWindows) {
                 // Turns on the flag before setup the callback.
                 // In some cases, onWindowsForAccessibilityChanged will be called immediately in
@@ -158,15 +155,9 @@ public class AccessibilityWindowManager {
                     logTraceWM("setWindowsForAccessibilityCallback",
                             "displayId=" + mDisplayId + ";callback=" + this);
                 }
-                result = mWindowManagerInternal.setWindowsForAccessibilityCallback(
+                mWindowManagerInternal.setWindowsForAccessibilityCallback(
                         mDisplayId, this);
-                if (!result) {
-                    mTrackingWindows = false;
-                    Slog.w(LOG_TAG, "set windowsObserver callbacks fail, displayId:"
-                            + mDisplayId);
-                }
             }
-            return result;
         }
 
         /**
@@ -384,20 +375,6 @@ public class AccessibilityWindowManager {
             }
         }
 
-        /**
-         * Called when the display is reparented and becomes an embedded
-         * display.
-         *
-         * @param embeddedDisplayId The embedded display Id.
-         */
-        @Override
-        public void onDisplayReparented(int embeddedDisplayId) {
-            // Removes the un-used window observer for the embedded display.
-            synchronized (mLock) {
-                mDisplayWindowsObservers.remove(embeddedDisplayId);
-            }
-        }
-
         private boolean shouldUpdateWindowsLocked(boolean forceSend,
                 @NonNull List<WindowInfo> windows) {
             if (forceSend) {
@@ -500,6 +477,9 @@ public class AccessibilityWindowManager {
                 return true;
             }
             if (oldWindow.taskId != newWindow.taskId) {
+                return true;
+            }
+            if (!Arrays.equals(oldWindow.mTransformMatrix, newWindow.mTransformMatrix)) {
                 return true;
             }
             return false;
@@ -691,6 +671,10 @@ public class AccessibilityWindowManager {
                 return null;
             }
 
+            // Don't need to add the embedded hierarchy windows into the accessibility windows list.
+            if (mHostEmbeddedMap.size() > 0 && isEmbeddedHierarchyWindowsLocked(windowId)) {
+                return null;
+            }
             final AccessibilityWindowInfo reportedWindow = AccessibilityWindowInfo.obtain();
 
             reportedWindow.setId(windowId);
@@ -721,6 +705,21 @@ public class AccessibilityWindowManager {
             }
 
             return reportedWindow;
+        }
+
+        private boolean isEmbeddedHierarchyWindowsLocked(int windowId) {
+            final IBinder leashToken = mWindowIdMap.get(windowId);
+            if (leashToken == null) {
+                return false;
+            }
+
+            for (int i = 0; i < mHostEmbeddedMap.size(); i++) {
+                if (mHostEmbeddedMap.keyAt(i).equals(leashToken)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private int getTypeForWindowManagerWindowType(int windowType) {
@@ -759,8 +758,7 @@ public class AccessibilityWindowManager {
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
                 case WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY:
-                case WindowManager.LayoutParams.TYPE_SCREENSHOT:
-                case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY: {
+                case WindowManager.LayoutParams.TYPE_SCREENSHOT: {
                     return AccessibilityWindowInfo.TYPE_SYSTEM;
                 }
 
@@ -770,6 +768,10 @@ public class AccessibilityWindowManager {
 
                 case TYPE_ACCESSIBILITY_OVERLAY: {
                     return AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY;
+                }
+
+                case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY: {
+                    return AccessibilityWindowInfo.TYPE_MAGNIFICATION_OVERLAY;
                 }
 
                 default: {
@@ -802,14 +804,24 @@ public class AccessibilityWindowManager {
                         pw.append(',');
                         pw.println();
                     }
-                    pw.append("Window[");
+                    pw.append("A11yWindow[");
                     AccessibilityWindowInfo window = mWindows.get(j);
                     pw.append(window.toString());
                     pw.append(']');
+                    pw.println();
+                    final WindowInfo windowInfo = findWindowInfoByIdLocked(window.getId());
+                    if (windowInfo != null) {
+                        pw.append("WindowInfo[");
+                        pw.append(windowInfo.toString());
+                        pw.append("]");
+                        pw.println();
+                    }
+
                 }
                 pw.println();
             }
         }
+
     }
     /**
      * Interface to send {@link AccessibilityEvent}.
@@ -904,9 +916,8 @@ public class AccessibilityWindowManager {
             if (observer.isTrackingWindowsLocked()) {
                 return;
             }
-            if (observer.startTrackingWindowsLocked()) {
-                mDisplayWindowsObservers.put(displayId, observer);
-            }
+            observer.startTrackingWindowsLocked();
+            mDisplayWindowsObservers.put(displayId, observer);
         }
     }
 
@@ -1408,20 +1419,9 @@ public class AccessibilityWindowManager {
             // the touched window are delivered is fine.
             final int oldActiveWindow = mActiveWindowId;
             setActiveWindowLocked(mTopFocusedWindowId);
-
-            // If there is no service that can operate with interactive windows
-            // then we keep the old behavior where a window loses accessibility
-            // focus if it is no longer active. This still changes the behavior
-            // for services that do not operate with interactive windows and run
-            // at the same time as the one(s) which does. In practice however,
-            // there is only one service that uses accessibility focus and it
-            // is typically the one that operates with interactive windows, So,
-            // this is fine. Note that to allow a service to work across windows
-            // we have to allow accessibility focus stay in any of them. Sigh...
-            final boolean accessibilityFocusOnlyInActiveWindow = !isTrackingWindowsLocked();
             if (oldActiveWindow != mActiveWindowId
                     && mAccessibilityFocusedWindowId == oldActiveWindow
-                    && accessibilityFocusOnlyInActiveWindow) {
+                    && accessibilityFocusOnlyInActiveWindowLocked()) {
                 clearAccessibilityFocusLocked(oldActiveWindow);
             }
         }
@@ -1642,6 +1642,15 @@ public class AccessibilityWindowManager {
         return displayList;
     }
 
+    // If there is no service that can operate with interactive windows
+    // then a window loses accessibility focus if it is no longer active.
+    // This inspection happens when the user interaction is ended.
+    // Note that to allow a service to work across windows,
+    // we have to allow accessibility focus stay in any of them.
+    boolean accessibilityFocusOnlyInActiveWindowLocked() {
+        return !isTrackingWindowsLocked();
+    }
+
     /**
      * Gets current input focused window token from window manager, and returns its windowId.
      *
@@ -1652,7 +1661,7 @@ public class AccessibilityWindowManager {
         if (traceWMEnabled()) {
             logTraceWM("getFocusedWindowToken", "");
         }
-        final IBinder token = mWindowManagerInternal.getFocusedWindowToken();
+        final IBinder token = mWindowManagerInternal.getFocusedWindowTokenFromWindowStates();
         synchronized (mLock) {
             return findWindowIdLocked(userId, token);
         }

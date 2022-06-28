@@ -1,12 +1,4 @@
 // Signature format: 2.0
-package android {
-
-  public static final class Manifest.permission {
-    field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
-  }
-
-}
-
 package android.app {
 
   public class AppOpsManager {

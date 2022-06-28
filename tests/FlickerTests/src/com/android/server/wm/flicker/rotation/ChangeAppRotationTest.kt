@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.rotation
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -26,13 +25,11 @@ import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.rules.WMFlickerServiceRuleForTestSpec
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import org.junit.FixMethodOrder
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -81,13 +78,10 @@ import org.junit.runners.Parameterized
 class ChangeAppRotationTest(
     testSpec: FlickerTestParameter
 ) : RotationTransition(testSpec) {
-    @get:Rule
-    val flickerRule = WMFlickerServiceRuleForTestSpec(testSpec)
-
     override val testApp = SimpleAppHelper(instrumentation)
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             setup {
                 test {
                     testApp.launchViaIntent(wmHelper)
@@ -95,29 +89,31 @@ class ChangeAppRotationTest(
             }
         }
 
-    @Postsubmit
+    /**
+     * Windows maybe recreated when rotated. Checks that the focus does not change or if it does,
+     * focus returns to [testApp]
+     */
+    @Presubmit
     @Test
-    fun runPresubmitAssertion() {
-        flickerRule.checkPresubmitAssertions()
+    fun focusChanges() {
+        testSpec.assertEventLog {
+            this.focusChanges(testApp.`package`)
+        }
     }
 
-    @Postsubmit
-    @Test
-    fun runPostsubmitAssertion() {
-        flickerRule.checkPostsubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runFlakyAssertion() {
-        flickerRule.checkFlakyAssertions()
-    }
-
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 190185577)
-    @Test
-    override fun focusDoesNotChange() {
-        super.focusDoesNotChange()
+    /**
+     * Checks that the [FlickerComponentName.ROTATION] layer appears during the transition,
+     * doesn't flicker, and disappears before the transition is complete
+     */
+    fun rotationLayerAppearsAndVanishesAssertion() {
+        testSpec.assertLayers {
+            this.isVisible(testApp.component)
+                .then()
+                .isVisible(FlickerComponentName.ROTATION)
+                .then()
+                .isVisible(testApp.component)
+                .isInvisible(FlickerComponentName.ROTATION)
+        }
     }
 
     /**
@@ -127,14 +123,7 @@ class ChangeAppRotationTest(
     @Presubmit
     @Test
     fun rotationLayerAppearsAndVanishes() {
-        testSpec.assertLayers {
-            this.isVisible(testApp.component)
-                .then()
-                .isVisible(FlickerComponentName.ROTATION)
-                .then()
-                .isVisible(testApp.component)
-                .isInvisible(FlickerComponentName.ROTATION)
-        }
+        rotationLayerAppearsAndVanishesAssertion()
     }
 
     /**
@@ -159,7 +148,7 @@ class ChangeAppRotationTest(
     /**
      * Checks the position of the status bar at the start and end of the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
@@ -187,7 +176,7 @@ class ChangeAppRotationTest(
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigRotationTests(repetitions = 5)
+                .getConfigRotationTests(repetitions = 3)
         }
     }
 }

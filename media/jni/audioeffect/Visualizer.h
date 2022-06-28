@@ -75,8 +75,8 @@ public:
      * See AudioEffect 'set' function for details on parameters.
      */
     status_t    set(int32_t priority = 0,
-                    effect_callback_t cbf = NULL,
-                    void* user = NULL,
+                    legacy_callback_t cbf = nullptr,
+                    void* user = nullptr,
                     audio_session_t sessionId = AUDIO_SESSION_OUTPUT_MIX,
                     audio_io_handle_t io = AUDIO_IO_HANDLE_NONE,
                     const AudioDeviceTypeAddr& device = {},

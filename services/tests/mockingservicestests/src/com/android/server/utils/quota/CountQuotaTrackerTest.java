@@ -588,37 +588,41 @@ public class CountQuotaTrackerTest {
 
         // No sessions saved yet.
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
-        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+        verify(mAlarmManager, never()).setWindow(
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test with timing sessions out of window.
         final long now = mInjector.getElapsedRealtime();
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - 10 * HOUR_IN_MILLIS, 20);
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
-        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+        verify(mAlarmManager, never()).setWindow(
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test with timing sessions in window but still in quota.
         final long start = now - (6 * HOUR_IN_MILLIS);
         final long expectedAlarmTime = start + 8 * HOUR_IN_MILLIS;
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, start, 5);
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
-        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+        verify(mAlarmManager, never()).setWindow(
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Add some more sessions, but still in quota.
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - 3 * HOUR_IN_MILLIS, 1);
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - HOUR_IN_MILLIS, 3);
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
-        verify(mAlarmManager, never()).set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+        verify(mAlarmManager, never()).setWindow(
+                anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Test when out of quota.
         logEventsAt(TEST_USER_ID, TEST_PACKAGE, TEST_TAG, now - HOUR_IN_MILLIS, 1);
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
-        verify(mAlarmManager, timeout(1000).times(1))
-                .set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+        verify(mAlarmManager, timeout(1000).times(1)).setWindow(
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
 
         // Alarm already scheduled, so make sure it's not scheduled again.
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
-        verify(mAlarmManager, times(1))
-                .set(anyInt(), eq(expectedAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+        verify(mAlarmManager, times(1)).setWindow(
+                anyInt(), eq(expectedAlarmTime), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
     }
 
     /** Tests that the start alarm is properly rescheduled if the app's category is changed. */
@@ -652,7 +656,7 @@ public class CountQuotaTrackerTest {
         mCategorizer.mCategoryToUse = ACTIVE_BUCKET_CATEGORY;
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, never())
-                .set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
         inOrder.verify(mAlarmManager, never()).cancel(any(AlarmManager.OnAlarmListener.class));
 
         // And down from there.
@@ -660,37 +664,42 @@ public class CountQuotaTrackerTest {
         mCategorizer.mCategoryToUse = WORKING_SET_BUCKET_CATEGORY;
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
-                .set(anyInt(), eq(expectedWorkingAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
+                        eq(TAG_QUOTA_CHECK), any(), any());
 
         final long expectedFrequentAlarmTime = outOfQuotaTime + (8 * HOUR_IN_MILLIS);
         mCategorizer.mCategoryToUse = FREQUENT_BUCKET_CATEGORY;
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
-                .set(anyInt(), eq(expectedFrequentAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
+                        eq(TAG_QUOTA_CHECK), any(), any());
 
         final long expectedRareAlarmTime = outOfQuotaTime + (24 * HOUR_IN_MILLIS);
         mCategorizer.mCategoryToUse = RARE_BUCKET_CATEGORY;
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
-                .set(anyInt(), eq(expectedRareAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), eq(expectedRareAlarmTime), anyLong(),
+                        eq(TAG_QUOTA_CHECK), any(), any());
 
         // And back up again.
         mCategorizer.mCategoryToUse = FREQUENT_BUCKET_CATEGORY;
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
-                .set(anyInt(), eq(expectedFrequentAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), eq(expectedFrequentAlarmTime), anyLong(),
+                        eq(TAG_QUOTA_CHECK), any(), any());
 
         mCategorizer.mCategoryToUse = WORKING_SET_BUCKET_CATEGORY;
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
-                .set(anyInt(), eq(expectedWorkingAlarmTime), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), eq(expectedWorkingAlarmTime), anyLong(),
+                        eq(TAG_QUOTA_CHECK), any(), any());
 
         mCategorizer.mCategoryToUse = ACTIVE_BUCKET_CATEGORY;
         mQuotaTracker.maybeScheduleStartAlarmLocked(TEST_USER_ID, TEST_PACKAGE, TEST_TAG);
         inOrder.verify(mAlarmManager, timeout(1000).times(1))
                 .cancel(any(AlarmManager.OnAlarmListener.class));
         inOrder.verify(mAlarmManager, timeout(1000).times(0))
-                .set(anyInt(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
+                .setWindow(anyInt(), anyLong(), anyLong(), eq(TAG_QUOTA_CHECK), any(), any());
     }
 
     @Test

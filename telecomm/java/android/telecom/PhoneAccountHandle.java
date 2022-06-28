@@ -46,6 +46,14 @@ import java.util.Objects;
  * See {@link PhoneAccount}, {@link TelecomManager}.
  */
 public final class PhoneAccountHandle implements Parcelable {
+    /**
+     * Expected component name of Telephony phone accounts; ONLY used to determine if we should log
+     * the phone account handle ID.
+     */
+    private static final ComponentName TELEPHONY_COMPONENT_NAME =
+            new ComponentName("com.android.phone",
+                    "com.android.services.telephony.TelephonyConnectionService");
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 127403196)
     private final ComponentName mComponentName;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -136,14 +144,23 @@ public final class PhoneAccountHandle implements Parcelable {
 
     @Override
     public String toString() {
-        // Note: Log.pii called for mId as it can contain personally identifying phone account
-        // information such as SIP account IDs.
-        return new StringBuilder().append(mComponentName)
-                    .append(", ")
-                    .append(Log.pii(mId))
-                    .append(", ")
-                    .append(mUserHandle)
-                    .toString();
+        StringBuilder sb = new StringBuilder()
+                .append(mComponentName)
+                .append(", ");
+
+        if (TELEPHONY_COMPONENT_NAME.equals(mComponentName)) {
+            // Telephony phone account handles are now keyed by subscription id which is not
+            // sensitive.
+            sb.append(mId);
+        } else {
+            // Note: Log.pii called for mId as it can contain personally identifying phone account
+            // information such as SIP account IDs.
+            sb.append(Log.pii(mId));
+        }
+        sb.append(", ");
+        sb.append(mUserHandle);
+
+        return sb.toString();
     }
 
     @Override

@@ -62,7 +62,7 @@ public class TestEnrollmentActivity extends Activity {
     public void onEnrollButtonClicked(View v) {
         Keyphrase kp = new Keyphrase(KEYPHRASE_ID, RECOGNITION_MODES,
                 Locale.forLanguageTag(BCP47_LOCALE), TEXT,
-                new int[] { UserManager.get(this).getUserHandle() /* current user */});
+                new int[] { UserManager.get(this).getProcessUserId() /* current user */});
         UUID modelUuid = UUID.randomUUID();
         // Generate a fake model to push.
         byte[] data = new byte[1024];

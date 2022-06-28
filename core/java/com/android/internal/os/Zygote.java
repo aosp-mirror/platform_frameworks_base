@@ -20,13 +20,21 @@ import static android.system.OsConstants.O_CLOEXEC;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ProcessInfo;
 import android.net.Credentials;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
+import android.os.Build;
 import android.os.FactoryTest;
 import android.os.IVold;
 import android.os.Process;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.provider.DeviceConfig;
@@ -34,6 +42,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.net.NetworkUtilsInternal;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -125,6 +134,7 @@ public final class Zygote {
     public static final int MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20);
 
     public static final int MEMORY_TAG_LEVEL_NONE = 0;
+
     /**
      * Enable pointer tagging in this process.
      * Tags are checked during memory deallocation, but not on access.
@@ -170,10 +180,8 @@ public final class Zygote {
      */
     public static final int GWP_ASAN_LEVEL_ALWAYS = 1 << 22;
 
-    /**
-     * Enable automatic zero-initialization of native heap memory allocations.
-     */
-    public static final int NATIVE_HEAP_ZERO_INIT = 1 << 23;
+    /** Enable automatic zero-initialization of native heap memory allocations. */
+    public static final int NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23;
 
     /**
      * Enable profiling from system services. This loads profiling related plugins in ART.
@@ -1170,4 +1178,251 @@ public final class Zygote {
      * we failed to determine the level.
      */
     public static native int nativeCurrentTaggingLevel();
+
+    /**
+     * Native heap allocations will now have a non-zero tag in the most significant byte.
+     *
+     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
+     *     Pointers</a>
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
+
+    /**
+     * Native heap allocations in AppZygote process and its descendants will now have a non-zero tag
+     * in the most significant byte.
+     *
+     * @see <a href="https://source.android.com/devices/tech/debug/tagged-pointers">Tagged
+     *     Pointers</a>
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long NATIVE_HEAP_POINTER_TAGGING_SECONDARY_ZYGOTE = 207557677;
+
+    /**
+     * Enable asynchronous (ASYNC) memory tag checking in this process. This flag will only have an
+     * effect on hardware supporting the ARM Memory Tagging Extension (MTE).
+     */
+    @ChangeId @Disabled
+    private static final long NATIVE_MEMTAG_ASYNC = 135772972; // This is a bug id.
+
+    /**
+     * Enable synchronous (SYNC) memory tag checking in this process. This flag will only have an
+     * effect on hardware supporting the ARM Memory Tagging Extension (MTE). If both
+     * NATIVE_MEMTAG_ASYNC and this option is selected, this option takes preference and MTE is
+     * enabled in SYNC mode.
+     */
+    @ChangeId @Disabled
+    private static final long NATIVE_MEMTAG_SYNC = 177438394; // This is a bug id.
+
+    /** Enable automatic zero-initialization of native heap memory allocations. */
+    @ChangeId @Disabled
+    private static final long NATIVE_HEAP_ZERO_INIT = 178038272; // This is a bug id.
+
+    /**
+     * Enable sampled memory bug detection in the app.
+     *
+     * @see <a href="https://source.android.com/devices/tech/debug/gwp-asan">GWP-ASan</a>.
+     */
+    @ChangeId @Disabled private static final long GWP_ASAN = 135634846; // This is a bug id.
+
+    private static int memtagModeToZygoteMemtagLevel(int memtagMode) {
+        switch (memtagMode) {
+            case ApplicationInfo.MEMTAG_ASYNC:
+                return MEMORY_TAG_LEVEL_ASYNC;
+            case ApplicationInfo.MEMTAG_SYNC:
+                return MEMORY_TAG_LEVEL_SYNC;
+            default:
+                return MEMORY_TAG_LEVEL_NONE;
+        }
+    }
+
+    private static boolean isCompatChangeEnabled(
+            long change,
+            @NonNull ApplicationInfo info,
+            @Nullable IPlatformCompat platformCompat,
+            int enabledAfter) {
+        try {
+            if (platformCompat != null) return platformCompat.isChangeEnabled(change, info);
+        } catch (RemoteException ignore) {
+        }
+        return enabledAfter > 0 && info.targetSdkVersion > enabledAfter;
+    }
+
+    // Returns the requested memory tagging level.
+    private static int getRequestedMemtagLevel(
+            @NonNull ApplicationInfo info,
+            @Nullable ProcessInfo processInfo,
+            @Nullable IPlatformCompat platformCompat) {
+        // Look at the process attribute first.
+        if (processInfo != null && processInfo.memtagMode != ApplicationInfo.MEMTAG_DEFAULT) {
+            return memtagModeToZygoteMemtagLevel(processInfo.memtagMode);
+        }
+
+        // Then at the application attribute.
+        if (info.getMemtagMode() != ApplicationInfo.MEMTAG_DEFAULT) {
+            return memtagModeToZygoteMemtagLevel(info.getMemtagMode());
+        }
+
+        if (isCompatChangeEnabled(NATIVE_MEMTAG_SYNC, info, platformCompat, 0)) {
+            return MEMORY_TAG_LEVEL_SYNC;
+        }
+
+        if (isCompatChangeEnabled(NATIVE_MEMTAG_ASYNC, info, platformCompat, 0)) {
+            return MEMORY_TAG_LEVEL_ASYNC;
+        }
+
+        // Check to ensure the app hasn't explicitly opted-out of TBI via. the manifest attribute.
+        if (!info.allowsNativeHeapPointerTagging()) {
+            return MEMORY_TAG_LEVEL_NONE;
+        }
+
+        String defaultLevel = SystemProperties.get("persist.arm64.memtag.app_default");
+        if ("sync".equals(defaultLevel)) {
+            return MEMORY_TAG_LEVEL_SYNC;
+        } else if ("async".equals(defaultLevel)) {
+            return MEMORY_TAG_LEVEL_ASYNC;
+        }
+
+        // Check to see that the compat feature for TBI is enabled.
+        if (isCompatChangeEnabled(
+                NATIVE_HEAP_POINTER_TAGGING, info, platformCompat, Build.VERSION_CODES.Q)) {
+            return MEMORY_TAG_LEVEL_TBI;
+        }
+
+        return MEMORY_TAG_LEVEL_NONE;
+    }
+
+    private static int decideTaggingLevel(
+            @NonNull ApplicationInfo info,
+            @Nullable ProcessInfo processInfo,
+            @Nullable IPlatformCompat platformCompat) {
+        // Get the desired tagging level (app manifest + compat features).
+        int level = getRequestedMemtagLevel(info, processInfo, platformCompat);
+
+        // Take into account the hardware capabilities.
+        if (nativeSupportsMemoryTagging()) {
+            // MTE devices can not do TBI, because the Zygote process already has live MTE
+            // allocations. Downgrade TBI to NONE.
+            if (level == MEMORY_TAG_LEVEL_TBI) {
+                level = MEMORY_TAG_LEVEL_NONE;
+            }
+        } else if (nativeSupportsTaggedPointers()) {
+            // TBI-but-not-MTE devices downgrade MTE modes to TBI.
+            // The idea is that if an app opts into full hardware tagging (MTE), it must be ok with
+            // the "fake" pointer tagging (TBI).
+            if (level == MEMORY_TAG_LEVEL_ASYNC || level == MEMORY_TAG_LEVEL_SYNC) {
+                level = MEMORY_TAG_LEVEL_TBI;
+            }
+        } else {
+            // Otherwise disable all tagging.
+            level = MEMORY_TAG_LEVEL_NONE;
+        }
+
+        return level;
+    }
+
+    private static int decideGwpAsanLevel(
+            @NonNull ApplicationInfo info,
+            @Nullable ProcessInfo processInfo,
+            @Nullable IPlatformCompat platformCompat) {
+        // Look at the process attribute first.
+        if (processInfo != null && processInfo.gwpAsanMode != ApplicationInfo.GWP_ASAN_DEFAULT) {
+            return processInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_ALWAYS
+                    ? GWP_ASAN_LEVEL_ALWAYS
+                    : GWP_ASAN_LEVEL_NEVER;
+        }
+        // Then at the application attribute.
+        if (info.getGwpAsanMode() != ApplicationInfo.GWP_ASAN_DEFAULT) {
+            return info.getGwpAsanMode() == ApplicationInfo.GWP_ASAN_ALWAYS
+                    ? GWP_ASAN_LEVEL_ALWAYS
+                    : GWP_ASAN_LEVEL_NEVER;
+        }
+        // If the app does not specify gwpAsanMode, the default behavior is lottery among the
+        // system apps, and disabled for user apps, unless overwritten by the compat feature.
+        if (isCompatChangeEnabled(GWP_ASAN, info, platformCompat, 0)) {
+            return GWP_ASAN_LEVEL_ALWAYS;
+        }
+        if ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            return GWP_ASAN_LEVEL_LOTTERY;
+        }
+        return GWP_ASAN_LEVEL_NEVER;
+    }
+
+    private static boolean enableNativeHeapZeroInit(
+            @NonNull ApplicationInfo info,
+            @Nullable ProcessInfo processInfo,
+            @Nullable IPlatformCompat platformCompat) {
+        // Look at the process attribute first.
+        if (processInfo != null
+                && processInfo.nativeHeapZeroInitialized != ApplicationInfo.ZEROINIT_DEFAULT) {
+            return processInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_ENABLED;
+        }
+        // Then at the application attribute.
+        if (info.getNativeHeapZeroInitialized() != ApplicationInfo.ZEROINIT_DEFAULT) {
+            return info.getNativeHeapZeroInitialized() == ApplicationInfo.ZEROINIT_ENABLED;
+        }
+        // Compat feature last.
+        if (isCompatChangeEnabled(NATIVE_HEAP_ZERO_INIT, info, platformCompat, 0)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns Zygote runtimeFlags for memory safety features (MTE, GWP-ASan, nativeHeadZeroInit)
+     * for a given app.
+     */
+    public static int getMemorySafetyRuntimeFlags(
+            @NonNull ApplicationInfo info,
+            @Nullable ProcessInfo processInfo,
+            @Nullable String instructionSet,
+            @Nullable IPlatformCompat platformCompat) {
+        int runtimeFlags = decideGwpAsanLevel(info, processInfo, platformCompat);
+        // If instructionSet is non-null, this indicates that the system_server is spawning a
+        // process with an ISA that may be different from its own. System (kernel and hardware)
+        // compatibility for these features is checked in the decideTaggingLevel in the
+        // system_server process (not the child process). As both MTE and TBI are only supported
+        // in aarch64, we can simply ensure that the new process is also aarch64. This prevents
+        // the mismatch where a 64-bit system server spawns a 32-bit child that thinks it should
+        // enable some tagging variant. Theoretically, a 32-bit system server could exist that
+        // spawns 64-bit processes, in which case the new process won't get any tagging. This is
+        // fine as we haven't seen this configuration in practice, and we can reasonable assume
+        // that if tagging is desired, the system server will be 64-bit.
+        if (instructionSet == null || instructionSet.equals("arm64")) {
+            runtimeFlags |= decideTaggingLevel(info, processInfo, platformCompat);
+        }
+        if (enableNativeHeapZeroInit(info, processInfo, platformCompat)) {
+            runtimeFlags |= NATIVE_HEAP_ZERO_INIT_ENABLED;
+        }
+        return runtimeFlags;
+    }
+
+    /**
+     * Returns Zygote runtimeFlags for memory safety features (MTE, GWP-ASan, nativeHeadZeroInit)
+     * for a secondary zygote (AppZygote or WebViewZygote).
+     */
+    public static int getMemorySafetyRuntimeFlagsForSecondaryZygote(
+            @NonNull ApplicationInfo info, @Nullable ProcessInfo processInfo) {
+        final IPlatformCompat platformCompat =
+                IPlatformCompat.Stub.asInterface(
+                        ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+        int runtimeFlags =
+                getMemorySafetyRuntimeFlags(
+                        info, processInfo, null /*instructionSet*/, platformCompat);
+
+        // TBI ("fake" pointer tagging) in AppZygote is controlled by a separate compat feature.
+        if ((runtimeFlags & MEMORY_TAG_LEVEL_MASK) == MEMORY_TAG_LEVEL_TBI
+                && isCompatChangeEnabled(
+                        NATIVE_HEAP_POINTER_TAGGING_SECONDARY_ZYGOTE,
+                        info,
+                        platformCompat,
+                        Build.VERSION_CODES.S)) {
+            // Reset memory tag level to NONE.
+            runtimeFlags &= ~MEMORY_TAG_LEVEL_MASK;
+            runtimeFlags |= MEMORY_TAG_LEVEL_NONE;
+        }
+        return runtimeFlags;
+    }
 }

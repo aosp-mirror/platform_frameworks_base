@@ -1022,7 +1022,7 @@ public final class MediaController {
             mVolumeControl = in.readInt();
             mMaxVolume = in.readInt();
             mCurrentVolume = in.readInt();
-            mAudioAttrs = in.readParcelable(null);
+            mAudioAttrs = in.readParcelable(null, android.media.AudioAttributes.class);
             mVolumeControlId = in.readString();
         }
 

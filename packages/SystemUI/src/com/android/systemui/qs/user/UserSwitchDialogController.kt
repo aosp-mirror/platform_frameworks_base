@@ -19,16 +19,19 @@ package com.android.systemui.qs.user
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.DialogInterface.BUTTON_NEUTRAL
 import android.content.Intent
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
@@ -43,6 +46,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
     private val activityStarter: ActivityStarter,
     private val falsingManager: FalsingManager,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val uiEventLogger: UiEventLogger,
     private val dialogFactory: (Context) -> SystemUIDialog
 ) {
 
@@ -51,12 +55,14 @@ class UserSwitchDialogController @VisibleForTesting constructor(
         userDetailViewAdapterProvider: Provider<UserDetailView.Adapter>,
         activityStarter: ActivityStarter,
         falsingManager: FalsingManager,
-        dialogLaunchAnimator: DialogLaunchAnimator
+        dialogLaunchAnimator: DialogLaunchAnimator,
+        uiEventLogger: UiEventLogger
     ) : this(
         userDetailViewAdapterProvider,
         activityStarter,
         falsingManager,
         dialogLaunchAnimator,
+        uiEventLogger,
         { SystemUIDialog(it) }
     )
 
@@ -76,16 +82,23 @@ class UserSwitchDialogController @VisibleForTesting constructor(
             setCanceledOnTouchOutside(true)
 
             setTitle(R.string.qs_user_switch_dialog_title)
-            setPositiveButton(R.string.quick_settings_done, null)
-            setNeutralButton(R.string.quick_settings_more_user_settings) { _, _ ->
-                if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                    dialogLaunchAnimator.disableAllCurrentDialogsExitAnimations()
-                    activityStarter.postStartActivityDismissingKeyguard(
-                        USER_SETTINGS_INTENT,
-                        0
-                    )
-                }
+            setPositiveButton(R.string.quick_settings_done) { _, _ ->
+                uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE)
             }
+            setNeutralButton(R.string.quick_settings_more_user_settings, { _, _ ->
+                if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                    uiEventLogger.log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
+                    val controller = dialogLaunchAnimator.createActivityLaunchController(
+                        getButton(BUTTON_NEUTRAL))
+
+                    if (controller == null) {
+                        dismiss()
+                    }
+
+                    activityStarter.postStartActivityDismissingKeyguard(
+                        USER_SETTINGS_INTENT, 0, controller)
+                }
+            }, false /* dismissOnClick */)
             val gridFrame = LayoutInflater.from(this.context)
                 .inflate(R.layout.qs_user_dialog_content, null)
             setView(gridFrame)
@@ -95,6 +108,7 @@ class UserSwitchDialogController @VisibleForTesting constructor(
             adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
 
             dialogLaunchAnimator.showFromView(this, view)
+            uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
             adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
         }
     }

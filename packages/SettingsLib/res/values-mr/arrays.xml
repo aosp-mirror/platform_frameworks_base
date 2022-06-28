@@ -31,7 +31,7 @@
     <item msgid="7852381437933824454">"डिस्कनेक्ट करत आहे..."</item>
     <item msgid="5046795712175415059">"डिस्कनेक्ट केले"</item>
     <item msgid="2473654476624070462">"अयशस्वी"</item>
-    <item msgid="9146847076036105115">"ब्लॉक केले"</item>
+    <item msgid="9146847076036105115">"अवरोधित"</item>
     <item msgid="4543924085816294893">"तात्पुरते खराब कनेक्शन टाळत आहे"</item>
   </string-array>
   <string-array name="wifi_status_with_ssid">
@@ -45,7 +45,7 @@
     <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> वरून डिस्कनेक्ट करत आहे…"</item>
     <item msgid="699832486578171722">"डिस्कनेक्ट केले"</item>
     <item msgid="522383512264986901">"अयशस्वी"</item>
-    <item msgid="3602596701217484364">"ब्लॉक केले"</item>
+    <item msgid="3602596701217484364">"अवरोधित"</item>
     <item msgid="1999413958589971747">"तात्पुरते खराब कनेक्शन टाळत आहे"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
@@ -266,5 +266,7 @@
     <item msgid="3825132913289380004">"RNDIS (USB इथरनेट)"</item>
     <item msgid="8828567335701536560">"ऑडिओ स्रोत"</item>
     <item msgid="8688681727755534982">"MIDI"</item>
+  </string-array>
+  <string-array name="avatar_image_descriptions">
   </string-array>
 </resources>

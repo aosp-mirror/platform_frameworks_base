@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
@@ -118,8 +119,8 @@ public final class BluetoothDeviceFilter {
                     return true;
                 }
             } else if (btClass != null) {
-                if (btClass.doesClassMatch(BluetoothClass.PROFILE_A2DP) ||
-                        btClass.doesClassMatch(BluetoothClass.PROFILE_HEADSET)) {
+                if (doesClassMatch(btClass, BluetoothClass.PROFILE_A2DP)
+                        || doesClassMatch(btClass, BluetoothClass.PROFILE_HEADSET)) {
                     return true;
                 }
             }
@@ -137,7 +138,7 @@ public final class BluetoothDeviceFilter {
                 }
             }
             return btClass != null
-                    && btClass.doesClassMatch(BluetoothClass.PROFILE_OPP);
+                    && doesClassMatch(btClass, BluetoothClass.PROFILE_OPP);
         }
     }
 
@@ -151,7 +152,7 @@ public final class BluetoothDeviceFilter {
                 }
             }
             return btClass != null
-                    && btClass.doesClassMatch(BluetoothClass.PROFILE_PANU);
+                    && doesClassMatch(btClass, BluetoothClass.PROFILE_PANU);
         }
     }
 
@@ -165,7 +166,12 @@ public final class BluetoothDeviceFilter {
                 }
             }
             return btClass != null
-                    && btClass.doesClassMatch(BluetoothClass.PROFILE_NAP);
+                    && doesClassMatch(btClass, BluetoothClass.PROFILE_NAP);
         }
+    }
+
+    @SuppressLint("NewApi") // Hidden API made public
+    private static boolean doesClassMatch(BluetoothClass btClass, int classId) {
+        return btClass.doesClassMatch(classId);
     }
 }

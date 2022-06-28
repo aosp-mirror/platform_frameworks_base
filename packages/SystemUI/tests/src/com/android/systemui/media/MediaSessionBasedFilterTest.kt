@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import android.graphics.Color
 import android.media.session.MediaController
 import android.media.session.MediaController.PlaybackInfo
 import android.media.session.MediaSession
@@ -39,7 +38,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.any
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -50,34 +48,11 @@ import org.mockito.Mockito.`when` as whenever
 private const val PACKAGE = "PKG"
 private const val KEY = "TEST_KEY"
 private const val NOTIF_KEY = "TEST_KEY"
-private const val SESSION_ARTIST = "SESSION_ARTIST"
-private const val SESSION_TITLE = "SESSION_TITLE"
-private const val APP_NAME = "APP_NAME"
-private const val USER_ID = 0
 
-private val info = MediaData(
-    userId = USER_ID,
-    initialized = true,
-    backgroundColor = Color.DKGRAY,
-    app = APP_NAME,
-    appIcon = null,
-    artist = SESSION_ARTIST,
-    song = SESSION_TITLE,
-    artwork = null,
-    actions = emptyList(),
-    actionsToShowInCompact = emptyList(),
+private val info = MediaTestUtils.emptyMediaData.copy(
     packageName = PACKAGE,
-    token = null,
-    clickIntent = null,
-    device = null,
-    active = true,
-    resumeAction = null,
-    resumption = false,
-    notificationKey = NOTIF_KEY,
-    hasCheckedForResume = false
+    notificationKey = NOTIF_KEY
 )
-
-private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)

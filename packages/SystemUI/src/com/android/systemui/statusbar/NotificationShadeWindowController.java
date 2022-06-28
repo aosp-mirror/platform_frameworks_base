@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.graphics.Region;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -159,6 +160,9 @@ public interface NotificationShadeWindowController extends RemoteInputController
     /** Sets the state of whether the notification shade is touchable or not. */
     default void setNotTouchable(boolean notTouchable) {}
 
+    /** Sets the region where touch is excluded from the parent window. */
+    default void setTouchExclusionRegion(Region region) {}
+
     /** Sets a {@link OtherwisedCollapsedListener}. */
     default void setStateListener(OtherwisedCollapsedListener listener) {}
 
@@ -174,13 +178,6 @@ public interface NotificationShadeWindowController extends RemoteInputController
      * are forcing SystemUI to be top-ui.
      */
     default void setRequestTopUi(boolean requestTopUi, String componentTag) {}
-
-    /**
-     * Under low light conditions, we might want to increase the display brightness on devices that
-     * don't have an IR camera.
-     * @param brightness float from 0 to 1 or {@code LayoutParams.BRIGHTNESS_OVERRIDE_NONE}
-     */
-    default void setFaceAuthDisplayBrightness(float brightness) {}
 
     /**
      * If {@link LightRevealScrim} obscures the UI.

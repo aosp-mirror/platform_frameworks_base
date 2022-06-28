@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ನಿರ್ವಹಿಸಿ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ಬಬಲ್ ವಜಾಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಲು ಮತ್ತು ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿವೆಯೇ?\nಮರುಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ಅದನ್ನು ಸರಿಪಡಿಸಲಿಲ್ಲವೇ?\nಹಿಂತಿರುಗಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ಕ್ಯಾಮರಾ ಸಮಸ್ಯೆಗಳಿಲ್ಲವೇ? ವಜಾಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"ಕೆಲವು ಆ್ಯಪ್‌ಗಳು ಪೋರ್ಟ್ರೇಟ್ ಮೋಡ್‌ನಲ್ಲಿ ಅತ್ಯುತ್ತಮವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ನಿಮ್ಮ ಸ್ಥಳಾವಕಾಶದ ಅತಿಹೆಚ್ಚು ಪ್ರಯೋಜನ ಪಡೆಯಲು ಈ ಆಯ್ಕೆಗಳಲ್ಲಿ ಒಂದನ್ನು ಬಳಸಿ ನೋಡಿ"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ಪೂರ್ಣ ಸ್ಕ್ರೀನ್‌ಗೆ ಹೋಗಲು ನಿಮ್ಮ ಸಾಧನವನ್ನು ತಿರುಗಿಸಿ"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ಆ್ಯಪ್ ಒಂದರ ಸ್ಥಾನವನ್ನು ಬದಲಾಯಿಸಲು ಅದರ ಪಕ್ಕದಲ್ಲಿ ಡಬಲ್-ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"ಸರಿ"</string>
 </resources>

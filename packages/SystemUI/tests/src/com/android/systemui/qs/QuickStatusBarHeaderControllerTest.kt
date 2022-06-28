@@ -26,6 +26,7 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.colorextraction.SysuiColorExtractor
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
@@ -119,9 +120,9 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
                 qsCarrierGroupControllerBuilder,
                 colorExtractor,
                 qsExpansionPathInterpolator,
-                batteryMeterViewController,
                 featureFlags,
                 variableDateViewControllerFactory,
+                batteryMeterViewController,
                 insetsProvider
         )
     }
@@ -161,11 +162,11 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testRSSISlot_notCombined() {
-        `when`(featureFlags.isCombinedStatusBarSignalIconsEnabled).thenReturn(false)
+        `when`(featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(false)
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor), anyBoolean(), any())
+        verify(view).onAttach(any(), any(), capture(captor), any(), anyBoolean())
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_mobile)
@@ -174,11 +175,11 @@ class QuickStatusBarHeaderControllerTest : SysuiTestCase() {
 
     @Test
     fun testRSSISlot_combined() {
-        `when`(featureFlags.isCombinedStatusBarSignalIconsEnabled).thenReturn(true)
+        `when`(featureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS)).thenReturn(true)
         controller.init()
 
         val captor = argumentCaptor<List<String>>()
-        verify(view).onAttach(any(), any(), capture(captor), anyBoolean(), any())
+        verify(view).onAttach(any(), any(), capture(captor), any(), anyBoolean())
 
         assertThat(captor.value).containsExactly(
             mContext.getString(com.android.internal.R.string.status_bar_no_calling),

@@ -16,16 +16,17 @@
 
 package com.android.wm.shell.util;
 
+import android.graphics.Point;
+import android.util.RotationUtils;
 import android.view.SurfaceControl;
 
-import java.util.ArrayList;
-
 /**
- * Utility class that takes care of counter-rotating surfaces during a transition animation.
+ * Utility class that takes care of rotating unchanging child-surfaces to match the parent rotation
+ * during a transition animation. This gives the illusion that the child surfaces haven't rotated
+ * relative to the screen.
  */
 public class CounterRotator {
-    SurfaceControl mSurface = null;
-    ArrayList<SurfaceControl> mRotateChildren = null;
+    private SurfaceControl mSurface = null;
 
     /** Gets the surface with the counter-rotation. */
     public SurfaceControl getSurface() {
@@ -36,52 +37,47 @@ public class CounterRotator {
      * Sets up this rotator.
      *
      * @param rotateDelta is the forward rotation change (the rotation the display is making).
-     * @param displayW (and H) Is the size of the rotating display.
+     * @param parentW (and H) Is the size of the rotating parent after the rotation.
      */
     public void setup(SurfaceControl.Transaction t, SurfaceControl parent, int rotateDelta,
-            float displayW, float displayH) {
+            float parentW, float parentH) {
         if (rotateDelta == 0) return;
-        mRotateChildren = new ArrayList<>();
-        // We want to counter-rotate, so subtract from 4
-        rotateDelta = 4 - (rotateDelta + 4) % 4;
         mSurface = new SurfaceControl.Builder()
                 .setName("Transition Unrotate")
                 .setContainerLayer()
                 .setParent(parent)
                 .build();
-        // column-major
-        if (rotateDelta == 1) {
-            t.setMatrix(mSurface, 0, 1, -1, 0);
-            t.setPosition(mSurface, displayW, 0);
-        } else if (rotateDelta == 2) {
-            t.setMatrix(mSurface, -1, 0, 0, -1);
-            t.setPosition(mSurface, displayW, displayH);
-        } else if (rotateDelta == 3) {
-            t.setMatrix(mSurface, 0, -1, 1, 0);
-            t.setPosition(mSurface, 0, displayH);
+        // Rotate forward to match the new rotation (rotateDelta is the forward rotation the parent
+        // already took). Child surfaces will be in the old rotation relative to the new parent
+        // rotation, so we need to forward-rotate the child surfaces to match.
+        RotationUtils.rotateSurface(t, mSurface, rotateDelta);
+        final Point tmpPt = new Point(0, 0);
+        // parentW/H are the size in the END rotation, the rotation utilities expect the starting
+        // size. So swap them if necessary
+        if ((rotateDelta % 2) != 0) {
+            final float w = parentW;
+            parentW = parentH;
+            parentH = w;
         }
+        RotationUtils.rotatePoint(tmpPt, rotateDelta, (int) parentW, (int) parentH);
+        t.setPosition(mSurface, tmpPt.x, tmpPt.y);
         t.show(mSurface);
     }
 
     /**
-     * Add a surface that needs to be counter-rotate.
+     * Adds a surface that needs to be counter-rotate.
      */
     public void addChild(SurfaceControl.Transaction t, SurfaceControl child) {
         if (mSurface == null) return;
         t.reparent(child, mSurface);
-        mRotateChildren.add(child);
     }
 
     /**
-     * Clean-up. This undoes any reparenting and effectively stops the counter-rotation.
+     * Clean-up. Since finishTransaction should reset all change leashes, we only need to remove the
+     * counter rotation surface.
      */
-    public void cleanUp(SurfaceControl rootLeash) {
+    public void cleanUp(SurfaceControl.Transaction finishTransaction) {
         if (mSurface == null) return;
-        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        for (int i = mRotateChildren.size() - 1; i >= 0; --i) {
-            t.reparent(mRotateChildren.get(i), rootLeash);
-        }
-        t.remove(mSurface);
-        t.apply();
+        finishTransaction.remove(mSurface);
     }
 }

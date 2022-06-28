@@ -213,16 +213,6 @@ package android.hardware {
 
 }
 
-package android.location {
-
-  public class Location implements android.os.Parcelable {
-    method @Deprecated public void removeBearingAccuracy();
-    method @Deprecated public void removeSpeedAccuracy();
-    method @Deprecated public void removeVerticalAccuracy();
-  }
-
-}
-
 package android.media {
 
   public final class AudioFormat implements android.os.Parcelable {
@@ -535,6 +525,14 @@ package android.view {
 
 }
 
+package android.view.accessibility {
+
+  public static final class AccessibilityNodeInfo.CollectionItemInfo {
+    method @Deprecated @NonNull public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(@Nullable String, int, int, @Nullable String, int, int, boolean, boolean);
+  }
+
+}
+
 package android.view.translation {
 
   public final class TranslationManager {
@@ -573,6 +571,16 @@ package android.view.translation {
 }
 
 package android.webkit {
+
+  public class WebChromeClient {
+    method @Deprecated public void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
+  }
+
+  public abstract class WebSettings {
+    method @Deprecated public void setAppCacheEnabled(boolean);
+    method @Deprecated public void setAppCacheMaxSize(long);
+    method @Deprecated public void setAppCachePath(String);
+  }
 
   public class WebViewClient {
     method public void onUnhandledInputEvent(android.webkit.WebView, android.view.InputEvent);

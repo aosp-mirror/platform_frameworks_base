@@ -18,19 +18,23 @@ package com.android.internal.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Parcel;
@@ -40,6 +44,7 @@ import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.RenderNodeAnimator;
@@ -52,6 +57,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.R;
+import com.android.internal.graphics.ColorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,12 +76,19 @@ public class LockPatternView extends View {
     private static final int ASPECT_LOCK_HEIGHT = 2; // Fixed height; width will be minimum of (w,h)
 
     private static final boolean PROFILE_DRAWING = false;
-    private static final float LINE_FADE_ALPHA_MULTIPLIER = 1.5f;
+    private static final int LINE_END_ANIMATION_DURATION_MILLIS = 50;
+    private static final int DOT_ACTIVATION_DURATION_MILLIS = 50;
+    private static final int DOT_RADIUS_INCREASE_DURATION_MILLIS = 96;
+    private static final int DOT_RADIUS_DECREASE_DURATION_MILLIS = 192;
+    private static final float MIN_DOT_HIT_FACTOR = 0.2f;
     private final CellState[][] mCellStates;
 
     private final int mDotSize;
     private final int mDotSizeActivated;
+    private final float mDotHitFactor;
     private final int mPathWidth;
+    private final int mLineFadeOutAnimationDurationMs;
+    private final int mLineFadeOutAnimationDelayMs;
 
     private boolean mDrawingProfilingStarted = false;
 
@@ -128,17 +141,16 @@ public class LockPatternView extends View {
     private boolean mInputEnabled = true;
     @UnsupportedAppUsage
     private boolean mInStealthMode = false;
-    private boolean mEnableHapticFeedback = true;
     @UnsupportedAppUsage
     private boolean mPatternInProgress = false;
     private boolean mFadePattern = true;
-
-    private float mHitFactor = 0.6f;
 
     @UnsupportedAppUsage
     private float mSquareWidth;
     @UnsupportedAppUsage
     private float mSquareHeight;
+    private float mDotHitRadius;
+    private final LinearGradient mFadeOutGradientShader;
 
     private final Path mCurrentPath = new Path();
     private final Rect mInvalidate = new Rect();
@@ -149,11 +161,11 @@ public class LockPatternView extends View {
     private int mErrorColor;
     private int mSuccessColor;
     private int mDotColor;
+    private int mDotActivatedColor;
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
-    private PatternExploreByTouchHelper mExploreByTouchHelper;
-    private AudioManager mAudioManager;
+    private final PatternExploreByTouchHelper mExploreByTouchHelper;
 
     private Drawable mSelectedDrawable;
     private Drawable mNotSelectedDrawable;
@@ -230,9 +242,11 @@ public class LockPatternView extends View {
         float radius;
         float translationY;
         float alpha = 1f;
+        float activationAnimationProgress;
         public float lineEndX = Float.MIN_VALUE;
         public float lineEndY = Float.MIN_VALUE;
-        public ValueAnimator lineAnimator;
+        @Nullable
+        Animator activationAnimator;
      }
 
     /**
@@ -320,6 +334,7 @@ public class LockPatternView extends View {
         mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, 0);
         mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, 0);
         mDotColor = a.getColor(R.styleable.LockPatternView_dotColor, mRegularColor);
+        mDotActivatedColor = a.getColor(R.styleable.LockPatternView_dotActivatedColor, mDotColor);
 
         int pathColor = a.getColor(R.styleable.LockPatternView_pathColor, mRegularColor);
         mPathPaint.setColor(pathColor);
@@ -331,9 +346,17 @@ public class LockPatternView extends View {
         mPathWidth = getResources().getDimensionPixelSize(R.dimen.lock_pattern_dot_line_width);
         mPathPaint.setStrokeWidth(mPathWidth);
 
+        mLineFadeOutAnimationDurationMs =
+            getResources().getInteger(R.integer.lock_pattern_line_fade_out_duration);
+        mLineFadeOutAnimationDelayMs =
+            getResources().getInteger(R.integer.lock_pattern_line_fade_out_delay);
+
         mDotSize = getResources().getDimensionPixelSize(R.dimen.lock_pattern_dot_size);
         mDotSizeActivated = getResources().getDimensionPixelSize(
                 R.dimen.lock_pattern_dot_size_activated);
+        TypedValue outValue = new TypedValue();
+        getResources().getValue(R.dimen.lock_pattern_dot_hit_factor, outValue, true);
+        mDotHitFactor = Math.max(Math.min(outValue.getFloat(), 1f), MIN_DOT_HIT_FACTOR);
 
         mUseLockPatternDrawable = getResources().getBoolean(R.bool.use_lock_pattern_drawable);
         if (mUseLockPatternDrawable) {
@@ -360,7 +383,14 @@ public class LockPatternView extends View {
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
         mExploreByTouchHelper = new PatternExploreByTouchHelper(this);
         setAccessibilityDelegate(mExploreByTouchHelper);
-        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+
+        int fadeAwayGradientWidth = getResources().getDimensionPixelSize(
+                R.dimen.lock_pattern_fade_away_gradient_width);
+        // Set up gradient shader with the middle in point (0, 0).
+        mFadeOutGradientShader = new LinearGradient(/* x0= */ -fadeAwayGradientWidth / 2f,
+                /* y0= */ 0,/* x1= */ fadeAwayGradientWidth / 2f, /* y1= */ 0,
+                Color.TRANSPARENT, pathColor, Shader.TileMode.CLAMP);
+
         a.recycle();
     }
 
@@ -374,13 +404,6 @@ public class LockPatternView extends View {
      */
     public boolean isInStealthMode() {
         return mInStealthMode;
-    }
-
-    /**
-     * @return Whether the view has tactile feedback enabled.
-     */
-    public boolean isTactileFeedbackEnabled() {
-        return mEnableHapticFeedback;
     }
 
     /**
@@ -400,17 +423,6 @@ public class LockPatternView extends View {
      */
     public void setFadePattern(boolean fadePattern) {
         mFadePattern = fadePattern;
-    }
-
-    /**
-     * Set whether the view will use tactile feedback.  If true, there will be
-     * tactile feedback as the user enters the pattern.
-     *
-     * @param tactileFeedbackEnabled Whether tactile feedback is enabled
-     */
-    @UnsupportedAppUsage
-    public void setTactileFeedbackEnabled(boolean tactileFeedbackEnabled) {
-        mEnableHapticFeedback = tactileFeedbackEnabled;
     }
 
     /**
@@ -674,6 +686,7 @@ public class LockPatternView extends View {
         final int height = h - mPaddingTop - mPaddingBottom;
         mSquareHeight = height / 3.0f;
         mExploreByTouchHelper.invalidateRoot();
+        mDotHitRadius = Math.min(mSquareHeight / 2, mSquareWidth / 2) * mDotHitFactor;
 
         if (mUseLockPatternDrawable) {
             mNotSelectedDrawable.setBounds(mPaddingLeft, mPaddingTop, width, height);
@@ -759,11 +772,8 @@ public class LockPatternView extends View {
                 addCellToPattern(fillInGapCell);
             }
             addCellToPattern(cell);
-            if (mEnableHapticFeedback) {
-                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
-                        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-                        | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-            }
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
             return cell;
         }
         return null;
@@ -780,123 +790,137 @@ public class LockPatternView extends View {
 
     private void startCellActivatedAnimation(Cell cell) {
         final CellState cellState = mCellStates[cell.row][cell.column];
-        startRadiusAnimation(mDotSize/2, mDotSizeActivated/2, 96, mLinearOutSlowInInterpolator,
-                cellState, new Runnable() {
-                    @Override
-                    public void run() {
-                        startRadiusAnimation(mDotSizeActivated/2, mDotSize/2, 192,
-                                mFastOutSlowInInterpolator,
-                                cellState, null);
-                    }
-                });
-        startLineEndAnimation(cellState, mInProgressX, mInProgressY,
-                getCenterXForColumn(cell.column), getCenterYForRow(cell.row));
-    }
 
-    private void startLineEndAnimation(final CellState state,
-            final float startX, final float startY, final float targetX, final float targetY) {
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                float t = (float) animation.getAnimatedValue();
-                state.lineEndX = (1 - t) * startX + t * targetX;
-                state.lineEndY = (1 - t) * startY + t * targetY;
-                invalidate();
-            }
-        });
-        valueAnimator.addListener(new AnimatorListenerAdapter() {
+        if (cellState.activationAnimator != null) {
+            cellState.activationAnimator.cancel();
+        }
+        AnimatorSet animatorSet = new AnimatorSet();
+        AnimatorSet.Builder animatorSetBuilder = animatorSet
+                .play(createLineDisappearingAnimation())
+                .with(createLineEndAnimation(cellState, mInProgressX, mInProgressY,
+                        getCenterXForColumn(cell.column), getCenterYForRow(cell.row)));
+        if (mDotSize != mDotSizeActivated) {
+            animatorSetBuilder.with(createDotRadiusAnimation(cellState));
+        }
+        if (mDotColor != mDotActivatedColor) {
+            animatorSetBuilder.with(createDotActivationColorAnimation(cellState));
+        }
+
+        animatorSet.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                state.lineAnimator = null;
-            }
-        });
-        valueAnimator.setInterpolator(mFastOutSlowInInterpolator);
-        valueAnimator.setDuration(100);
-        valueAnimator.start();
-        state.lineAnimator = valueAnimator;
-    }
-
-    private void startRadiusAnimation(float start, float end, long duration,
-            Interpolator interpolator, final CellState state, final Runnable endRunnable) {
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(start, end);
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                state.radius = (float) animation.getAnimatedValue();
+                cellState.activationAnimator = null;
                 invalidate();
             }
         });
-        if (endRunnable != null) {
-            valueAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    endRunnable.run();
-                }
-            });
-        }
-        valueAnimator.setInterpolator(interpolator);
-        valueAnimator.setDuration(duration);
-        valueAnimator.start();
+        cellState.activationAnimator = animatorSet;
+        animatorSet.start();
     }
 
-    // helper method to find which cell a point maps to
+    private Animator createDotActivationColorAnimation(CellState cellState) {
+        ValueAnimator.AnimatorUpdateListener updateListener =
+                valueAnimator -> {
+                    cellState.activationAnimationProgress =
+                            (float) valueAnimator.getAnimatedValue();
+                    invalidate();
+                };
+        ValueAnimator activateAnimator = ValueAnimator.ofFloat(0f, 1f);
+        ValueAnimator deactivateAnimator = ValueAnimator.ofFloat(1f, 0f);
+        activateAnimator.addUpdateListener(updateListener);
+        deactivateAnimator.addUpdateListener(updateListener);
+        activateAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        deactivateAnimator.setInterpolator(mLinearOutSlowInInterpolator);
+
+        // Align dot animation duration with line fade out animation.
+        activateAnimator.setDuration(DOT_ACTIVATION_DURATION_MILLIS);
+        deactivateAnimator.setDuration(DOT_ACTIVATION_DURATION_MILLIS);
+        AnimatorSet set = new AnimatorSet();
+        set.play(deactivateAnimator)
+                .after(mLineFadeOutAnimationDelayMs + mLineFadeOutAnimationDurationMs
+                        - DOT_ACTIVATION_DURATION_MILLIS * 2)
+                .after(activateAnimator);
+        return set;
+    }
+
+    /**
+     * On the last frame before cell activates the end point of in progress line is not aligned
+     * with dot center so we execute a short animation moving the end point to exact dot center.
+     */
+    private Animator createLineEndAnimation(final CellState state,
+            final float startX, final float startY, final float targetX, final float targetY) {
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
+        valueAnimator.addUpdateListener(animation -> {
+            float t = (float) animation.getAnimatedValue();
+            state.lineEndX = (1 - t) * startX + t * targetX;
+            state.lineEndY = (1 - t) * startY + t * targetY;
+            invalidate();
+        });
+        valueAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        valueAnimator.setDuration(LINE_END_ANIMATION_DURATION_MILLIS);
+        return valueAnimator;
+    }
+
+    /**
+     * Starts animator to fade out a line segment. It does only invalidate because all the
+     * transitions are applied in {@code onDraw} method.
+     */
+    private Animator createLineDisappearingAnimation() {
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
+        valueAnimator.addUpdateListener(animation -> invalidate());
+        valueAnimator.setStartDelay(mLineFadeOutAnimationDelayMs);
+        valueAnimator.setDuration(mLineFadeOutAnimationDurationMs);
+        return valueAnimator;
+    }
+
+    private Animator createDotRadiusAnimation(CellState state) {
+        float defaultRadius = mDotSize / 2f;
+        float activatedRadius = mDotSizeActivated / 2f;
+
+        ValueAnimator.AnimatorUpdateListener animatorUpdateListener =
+                animation -> {
+                    state.radius = (float) animation.getAnimatedValue();
+                    invalidate();
+                };
+
+        ValueAnimator activationAnimator = ValueAnimator.ofFloat(defaultRadius, activatedRadius);
+        activationAnimator.addUpdateListener(animatorUpdateListener);
+        activationAnimator.setInterpolator(mLinearOutSlowInInterpolator);
+        activationAnimator.setDuration(DOT_RADIUS_INCREASE_DURATION_MILLIS);
+
+        ValueAnimator deactivationAnimator = ValueAnimator.ofFloat(activatedRadius, defaultRadius);
+        deactivationAnimator.addUpdateListener(animatorUpdateListener);
+        deactivationAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        deactivationAnimator.setDuration(DOT_RADIUS_DECREASE_DURATION_MILLIS);
+
+        AnimatorSet set = new AnimatorSet();
+        set.playSequentially(activationAnimator, deactivationAnimator);
+        return set;
+    }
+
+    @Nullable
     private Cell checkForNewHit(float x, float y) {
-
-        final int rowHit = getRowHit(y);
-        if (rowHit < 0) {
-            return null;
+        Cell cellHit = detectCellHit(x, y);
+        if (cellHit != null && !mPatternDrawLookup[cellHit.row][cellHit.column]) {
+            return cellHit;
         }
-        final int columnHit = getColumnHit(x);
-        if (columnHit < 0) {
-            return null;
-        }
-
-        if (mPatternDrawLookup[rowHit][columnHit]) {
-            return null;
-        }
-        return Cell.of(rowHit, columnHit);
+        return null;
     }
 
-    /**
-     * Helper method to find the row that y falls into.
-     * @param y The y coordinate
-     * @return The row that y falls in, or -1 if it falls in no row.
-     */
-    private int getRowHit(float y) {
-
-        final float squareHeight = mSquareHeight;
-        float hitSize = squareHeight * mHitFactor;
-
-        float offset = mPaddingTop + (squareHeight - hitSize) / 2f;
-        for (int i = 0; i < 3; i++) {
-
-            final float hitTop = offset + squareHeight * i;
-            if (y >= hitTop && y <= hitTop + hitSize) {
-                return i;
+    /** Helper method to find which cell a point maps to. */
+    @Nullable
+    private Cell detectCellHit(float x, float y) {
+        final float hitRadiusSquared = mDotHitRadius * mDotHitRadius;
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                float centerY = getCenterYForRow(row);
+                float centerX = getCenterXForColumn(column);
+                if ((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY)
+                        < hitRadiusSquared) {
+                    return Cell.of(row, column);
+                }
             }
         }
-        return -1;
-    }
-
-    /**
-     * Helper method to find the column x fallis into.
-     * @param x The x coordinate.
-     * @return The column that x falls in, or -1 if it falls in no column.
-     */
-    private int getColumnHit(float x) {
-        final float squareWidth = mSquareWidth;
-        float hitSize = squareWidth * mHitFactor;
-
-        float offset = mPaddingLeft + (squareWidth - hitSize) / 2f;
-        for (int i = 0; i < 3; i++) {
-
-            final float hitLeft = offset + squareWidth * i;
-            if (x >= hitLeft && x <= hitLeft + hitSize) {
-                return i;
-            }
-        }
-        return -1;
+        return null;
     }
 
     @Override
@@ -1051,8 +1075,11 @@ public class LockPatternView extends View {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 CellState state = mCellStates[i][j];
-                if (state.lineAnimator != null) {
-                    state.lineAnimator.cancel();
+                if (state.activationAnimator != null) {
+                    state.activationAnimator.cancel();
+                    state.activationAnimator = null;
+                    state.radius = mDotSize / 2f;
+                    state.activationAnimationProgress = 0f;
                     state.lineEndX = Float.MIN_VALUE;
                     state.lineEndY = Float.MIN_VALUE;
                 }
@@ -1195,29 +1222,19 @@ public class LockPatternView extends View {
                 float centerX = getCenterXForColumn(cell.column);
                 float centerY = getCenterYForRow(cell.row);
                 if (i != 0) {
-                   // Set this line segment to fade away animated.
-                   int lineFadeVal = (int) Math.min((elapsedRealtime -
-                           mLineFadeStart[i]) * LINE_FADE_ALPHA_MULTIPLIER, 255f);
-
                     CellState state = mCellStates[cell.row][cell.column];
                     currentPath.rewind();
-                    currentPath.moveTo(lastX, lastY);
+                    float endX;
+                    float endY;
                     if (state.lineEndX != Float.MIN_VALUE && state.lineEndY != Float.MIN_VALUE) {
-                        currentPath.lineTo(state.lineEndX, state.lineEndY);
-                        if (mFadePattern) {
-                            mPathPaint.setAlpha((int) 255 - lineFadeVal );
-                        } else {
-                            mPathPaint.setAlpha(255);
-                        }
+                        endX = state.lineEndX;
+                        endY = state.lineEndY;
                     } else {
-                        currentPath.lineTo(centerX, centerY);
-                        if (mFadePattern) {
-                            mPathPaint.setAlpha((int) 255 - lineFadeVal );
-                        } else {
-                            mPathPaint.setAlpha(255);
-                        }
+                        endX = centerX;
+                        endY = centerY;
                     }
-                    canvas.drawPath(currentPath, mPathPaint);
+                    drawLineSegment(canvas, /* startX = */ lastX, /* startY = */ lastY, endX, endY,
+                            mLineFadeStart[i], elapsedRealtime);
                 }
                 lastX = centerX;
                 lastY = centerY;
@@ -1253,11 +1270,67 @@ public class LockPatternView extends View {
                                 cellState.hwRadius, cellState.hwPaint);
                     } else {
                         drawCircle(canvas, (int) centerX, (int) centerY + translationY,
-                                cellState.radius, drawLookup[i][j], cellState.alpha);
+                                cellState.radius, drawLookup[i][j], cellState.alpha,
+                                cellState.activationAnimationProgress);
                     }
                 }
             }
         }
+    }
+
+    private void drawLineSegment(Canvas canvas, float startX, float startY, float endX, float endY,
+            long lineFadeStart, long elapsedRealtime) {
+        float fadeAwayProgress;
+        if (mFadePattern) {
+            if (elapsedRealtime - lineFadeStart
+                    >= mLineFadeOutAnimationDelayMs + mLineFadeOutAnimationDurationMs) {
+                // Time for this segment animation is out so we don't need to draw it.
+                return;
+            }
+            // Set this line segment to fade away animated.
+            fadeAwayProgress = Math.max(
+                    ((float) (elapsedRealtime - lineFadeStart - mLineFadeOutAnimationDelayMs))
+                            / mLineFadeOutAnimationDurationMs, 0f);
+            drawFadingAwayLineSegment(canvas, startX, startY, endX, endY, fadeAwayProgress);
+        } else {
+            mPathPaint.setAlpha(255);
+            canvas.drawLine(startX, startY, endX, endY, mPathPaint);
+        }
+    }
+
+    private void drawFadingAwayLineSegment(Canvas canvas, float startX, float startY, float endX,
+            float endY, float fadeAwayProgress) {
+        mPathPaint.setAlpha((int) (255 * (1 - fadeAwayProgress)));
+
+        // To draw gradient segment we use mFadeOutGradientShader which has immutable coordinates
+        // thus we will need to translate and rotate the canvas.
+        mPathPaint.setShader(mFadeOutGradientShader);
+        canvas.save();
+
+        // First translate canvas to gradient middle point.
+        float gradientMidX = endX * fadeAwayProgress + startX * (1 - fadeAwayProgress);
+        float gradientMidY = endY * fadeAwayProgress + startY * (1 - fadeAwayProgress);
+        canvas.translate(gradientMidX, gradientMidY);
+
+        // Then rotate it to the direction of the segment.
+        double segmentAngleRad = Math.atan((endY - startY) / (endX - startX));
+        float segmentAngleDegrees = (float) Math.toDegrees(segmentAngleRad);
+        if (endX - startX < 0) {
+            // Arc tangent gives us angle degrees [-90; 90] thus to cover [90; 270] degrees we
+            // need this hack.
+            segmentAngleDegrees += 180f;
+        }
+        canvas.rotate(segmentAngleDegrees);
+
+        // Pythagoras theorem.
+        float segmentLength = (float) Math.hypot(endX - startX, endY - startY);
+
+        // Draw the segment in coordinates aligned with shader coordinates.
+        canvas.drawLine(/* startX= */ -segmentLength * fadeAwayProgress, /* startY= */
+                0,/* stopX= */ segmentLength * (1 - fadeAwayProgress), /* stopY= */ 0, mPathPaint);
+
+        canvas.restore();
+        mPathPaint.setShader(null);
     }
 
     private float calculateLastSegmentAlpha(float x, float y, float lastX, float lastY) {
@@ -1298,8 +1371,14 @@ public class LockPatternView extends View {
      * @param partOfPattern Whether this circle is part of the pattern.
      */
     private void drawCircle(Canvas canvas, float centerX, float centerY, float radius,
-            boolean partOfPattern, float alpha) {
-        mPaint.setColor(getDotColor());
+            boolean partOfPattern, float alpha, float activationAnimationProgress) {
+        if (mFadePattern && !mInStealthMode) {
+            int resultColor = ColorUtils.blendARGB(mDotColor, mDotActivatedColor,
+                    /* ratio= */ activationAnimationProgress);
+            mPaint.setColor(resultColor);
+        } else {
+            mPaint.setColor(getDotColor());
+        }
         mPaint.setAlpha((int) (alpha * 255));
         canvas.drawCircle(centerX, centerY, radius, mPaint);
     }
@@ -1336,7 +1415,7 @@ public class LockPatternView extends View {
         return new SavedState(superState,
                 patternString,
                 mPatternDisplayMode.ordinal(),
-                mInputEnabled, mInStealthMode, mEnableHapticFeedback);
+                mInputEnabled, mInStealthMode);
     }
 
     @Override
@@ -1349,7 +1428,6 @@ public class LockPatternView extends View {
         mPatternDisplayMode = DisplayMode.values()[ss.getDisplayMode()];
         mInputEnabled = ss.isInputEnabled();
         mInStealthMode = ss.isInStealthMode();
-        mEnableHapticFeedback = ss.isTactileFeedbackEnabled();
     }
 
     /**
@@ -1361,20 +1439,18 @@ public class LockPatternView extends View {
         private final int mDisplayMode;
         private final boolean mInputEnabled;
         private final boolean mInStealthMode;
-        private final boolean mTactileFeedbackEnabled;
 
         /**
          * Constructor called from {@link LockPatternView#onSaveInstanceState()}
          */
         @UnsupportedAppUsage
         private SavedState(Parcelable superState, String serializedPattern, int displayMode,
-                boolean inputEnabled, boolean inStealthMode, boolean tactileFeedbackEnabled) {
+                boolean inputEnabled, boolean inStealthMode) {
             super(superState);
             mSerializedPattern = serializedPattern;
             mDisplayMode = displayMode;
             mInputEnabled = inputEnabled;
             mInStealthMode = inStealthMode;
-            mTactileFeedbackEnabled = tactileFeedbackEnabled;
         }
 
         /**
@@ -1387,7 +1463,6 @@ public class LockPatternView extends View {
             mDisplayMode = in.readInt();
             mInputEnabled = (Boolean) in.readValue(null);
             mInStealthMode = (Boolean) in.readValue(null);
-            mTactileFeedbackEnabled = (Boolean) in.readValue(null);
         }
 
         public String getSerializedPattern() {
@@ -1406,10 +1481,6 @@ public class LockPatternView extends View {
             return mInStealthMode;
         }
 
-        public boolean isTactileFeedbackEnabled(){
-            return mTactileFeedbackEnabled;
-        }
-
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             super.writeToParcel(dest, flags);
@@ -1417,7 +1488,6 @@ public class LockPatternView extends View {
             dest.writeInt(mDisplayMode);
             dest.writeValue(mInputEnabled);
             dest.writeValue(mInStealthMode);
-            dest.writeValue(mTactileFeedbackEnabled);
         }
 
         @SuppressWarnings({ "unused", "hiding" }) // Found using reflection
@@ -1457,8 +1527,7 @@ public class LockPatternView extends View {
         protected int getVirtualViewAt(float x, float y) {
             // This must use the same hit logic for the screen to ensure consistency whether
             // accessibility is on or off.
-            int id = getVirtualViewIdForHit(x, y);
-            return id;
+            return getVirtualViewIdForHit(x, y);
         }
 
         @Override
@@ -1574,12 +1643,11 @@ public class LockPatternView extends View {
             final int col = ordinal % 3;
             float centerX = getCenterXForColumn(col);
             float centerY = getCenterYForRow(row);
-            float cellheight = mSquareHeight * mHitFactor * 0.5f;
-            float cellwidth = mSquareWidth * mHitFactor * 0.5f;
-            bounds.left = (int) (centerX - cellwidth);
-            bounds.right = (int) (centerX + cellwidth);
-            bounds.top = (int) (centerY - cellheight);
-            bounds.bottom = (int) (centerY + cellheight);
+            float cellHitRadius = mDotHitRadius;
+            bounds.left = (int) (centerX - cellHitRadius);
+            bounds.right = (int) (centerX + cellHitRadius);
+            bounds.top = (int) (centerY - cellHitRadius);
+            bounds.bottom = (int) (centerY + cellHitRadius);
             return bounds;
         }
 
@@ -1598,16 +1666,12 @@ public class LockPatternView extends View {
          * @return VIRTUAL_BASE_VIEW_ID+id or 0 if no view was hit
          */
         private int getVirtualViewIdForHit(float x, float y) {
-            final int rowHit = getRowHit(y);
-            if (rowHit < 0) {
+            Cell cellHit = detectCellHit(x, y);
+            if (cellHit == null) {
                 return ExploreByTouchHelper.INVALID_ID;
             }
-            final int columnHit = getColumnHit(x);
-            if (columnHit < 0) {
-                return ExploreByTouchHelper.INVALID_ID;
-            }
-            boolean dotAvailable = mPatternDrawLookup[rowHit][columnHit];
-            int dotId = (rowHit * 3 + columnHit) + VIRTUAL_BASE_VIEW_ID;
+            boolean dotAvailable = mPatternDrawLookup[cellHit.row][cellHit.column];
+            int dotId = (cellHit.row * 3 + cellHit.column) + VIRTUAL_BASE_VIEW_ID;
             int view = dotAvailable ? dotId : ExploreByTouchHelper.INVALID_ID;
             if (DEBUG_A11Y) Log.v(TAG, "getVirtualViewIdForHit(" + x + "," + y + ") => "
                     + view + "avail =" + dotAvailable);

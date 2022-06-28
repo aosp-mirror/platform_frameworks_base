@@ -45,6 +45,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.CallQuality;
+import android.telephony.CellIdentity;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.util.ArraySet;
 import android.view.Surface;
@@ -837,10 +838,10 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.AUDIO_CODEC_BANDWIDTH_KHZ";
 
     /**
-     * Last known cell identity key to be used to fill geo location header in case of an emergency
-     * call. This entry will not be filled if call is not identified as an emergency call.
-     * {@link Connection}. Only provided to the {@link ConnectionService} for the purpose
-     * of placing an emergency call; will not be present in the {@link InCallService} layer.
+     * Last known cell identity key {@link CellIdentity} to be used to fill geo location header
+     * in case of an emergency  call. This entry will not be filled if call is not identified as
+     * an emergency call. Only provided to the {@link ConnectionService}  for the purpose of
+     * placing an emergency call; will not be present in the  {@link InCallService} layer.
      * The {@link ConnectionService}'s implementation will be logged for fine location access
      * when an outgoing call is placed in this case.
      */
@@ -3549,9 +3550,9 @@ public abstract class Connection extends Conferenceable {
             mIsBlocked = in.readByte() != 0;
             mIsInContacts = in.readByte() != 0;
             CallScreeningService.ParcelableCallResponse response
-                    = in.readParcelable(CallScreeningService.class.getClassLoader());
+                    = in.readParcelable(CallScreeningService.class.getClassLoader(), android.telecom.CallScreeningService.ParcelableCallResponse.class);
             mCallResponse = response == null ? null : response.toCallResponse();
-            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader());
+            mCallScreeningComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
         }
 
         @NonNull

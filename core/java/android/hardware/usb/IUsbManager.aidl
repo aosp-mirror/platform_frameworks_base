@@ -136,8 +136,14 @@ interface IUsbManager
     /* Resets the USB gadget. */
     void resetUsbGadget();
 
+    /* Resets the USB port. */
+    void resetUsbPort(in String portId, int operationId, in IUsbOperationInternal callback);
+
     /* Set USB data on or off */
     boolean enableUsbData(in String portId, boolean enable, int operationId, in IUsbOperationInternal callback);
+
+    /* Enable USB data when disabled due to docking event  */
+    void enableUsbDataWhileDocked(in String portId, int operationId, in IUsbOperationInternal callback);
 
     /* Gets the USB Hal Version. */
     int getUsbHalVersion();
@@ -156,6 +162,11 @@ interface IUsbManager
 
     /* Sets the port's current role. */
     void setPortRoles(in String portId, int powerRole, int dataRole);
+
+    /* Limit power transfer in & out of the port within the allowed limit by the USB
+     * specification.
+     */
+    void enableLimitPowerTransfer(in String portId, boolean limit, int operationId, in IUsbOperationInternal callback);
 
     /* Enable/disable contaminant detection */
     void enableContaminantDetection(in String portId, boolean enable);

@@ -22,6 +22,7 @@ import static android.hardware.SensorPrivacyManager.Sensors.MICROPHONE;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors.Sensor;
 import android.hardware.SensorPrivacyManager.Sources.Source;
+import android.hardware.SensorPrivacyManager.ToggleType;
 import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 
@@ -34,7 +35,9 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     private static final int[] SENSORS = new int[] {CAMERA, MICROPHONE};
 
     private final @NonNull SensorPrivacyManager mSensorPrivacyManager;
-    private final SparseBooleanArray mState = new SparseBooleanArray();
+    private final SparseBooleanArray mSoftwareToggleState = new SparseBooleanArray();
+    private final SparseBooleanArray mHardwareToggleState = new SparseBooleanArray();
+    private Boolean mRequiresAuthentication;
     private final Set<Callback> mCallbacks = new ArraySet<>();
 
     public IndividualSensorPrivacyControllerImpl(
@@ -44,11 +47,27 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
 
     @Override
     public void init() {
-        for (int sensor : SENSORS) {
-            mSensorPrivacyManager.addSensorPrivacyListener(sensor,
-                    (s, enabled) -> onSensorPrivacyChanged(sensor, enabled));
+        mSensorPrivacyManager.addSensorPrivacyListener(
+                new SensorPrivacyManager.OnSensorPrivacyChangedListener() {
+                    @Override
+                    public void onSensorPrivacyChanged(SensorPrivacyChangedParams params) {
+                        IndividualSensorPrivacyControllerImpl.this.onSensorPrivacyChanged(
+                                params.getSensor(), params.getToggleType(), params.isEnabled());
+                    }
 
-            mState.put(sensor, mSensorPrivacyManager.isSensorPrivacyEnabled(sensor));
+                    @Override
+                    public void onSensorPrivacyChanged(int sensor, boolean enabled) {
+                        // handled in onSensorPrivacyChanged(SensorPrivacyChangedParams)
+                    }
+                });
+
+        for (int sensor : SENSORS) {
+            boolean softwarePrivacyEnabled = mSensorPrivacyManager.isSensorPrivacyEnabled(
+                    SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE, sensor);
+            boolean hardwarePrivacyEnabled = mSensorPrivacyManager.isSensorPrivacyEnabled(
+                    SensorPrivacyManager.TOGGLE_TYPE_HARDWARE, sensor);
+            mSoftwareToggleState.put(sensor, softwarePrivacyEnabled);
+            mHardwareToggleState.put(sensor, hardwarePrivacyEnabled);
         }
     }
 
@@ -59,7 +78,12 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
 
     @Override
     public boolean isSensorBlocked(@Sensor int sensor) {
-        return mState.get(sensor, false);
+        return mSoftwareToggleState.get(sensor, false) || mHardwareToggleState.get(sensor, false);
+    }
+
+    @Override
+    public boolean isSensorBlockedByHardwareToggle(@Sensor int sensor) {
+        return mHardwareToggleState.get(sensor, false);
     }
 
     @Override
@@ -73,6 +97,11 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
     }
 
     @Override
+    public boolean requiresAuthentication() {
+        return mSensorPrivacyManager.requiresAuthentication();
+    }
+
+    @Override
     public void addCallback(@NonNull Callback listener) {
         mCallbacks.add(listener);
     }
@@ -82,11 +111,16 @@ public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPr
         mCallbacks.remove(listener);
     }
 
-    private void onSensorPrivacyChanged(@Sensor int sensor, boolean blocked) {
-        mState.put(sensor, blocked);
+    private void onSensorPrivacyChanged(@Sensor int sensor, @ToggleType int toggleType,
+            boolean enabled) {
+        if (toggleType == SensorPrivacyManager.TOGGLE_TYPE_SOFTWARE) {
+            mSoftwareToggleState.put(sensor, enabled);
+        } else if (toggleType == SensorPrivacyManager.TOGGLE_TYPE_HARDWARE) {
+            mHardwareToggleState.put(sensor, enabled);
+        }
 
         for (Callback callback : mCallbacks) {
-            callback.onSensorBlockedChanged(sensor, blocked);
+            callback.onSensorBlockedChanged(sensor, isSensorBlocked(sensor));
         }
     }
 }

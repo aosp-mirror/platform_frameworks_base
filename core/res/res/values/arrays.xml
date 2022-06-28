@@ -185,6 +185,12 @@
         <item>@string/app_info</item>
     </string-array>
 
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner Wi-Fi
+         permissions. The digest should be computed over the DER encoding of the trusted certificate
+         using the SHA-256 digest algorithm. -->
+    <string-array name="wifi_known_signers">
+    </string-array>
+
     <!-- Device-specific array of SIM slot indexes which are are embedded eUICCs.
          e.g. If a device has two physical slots with indexes 0, 1, and slot 1 is an
          eUICC, then the value of this array should be:

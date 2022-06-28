@@ -1,9 +1,13 @@
 package com.android.settingslib.core;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.os.BuildCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceScreen;
@@ -16,9 +20,12 @@ public abstract class AbstractPreferenceController {
     private static final String TAG = "AbstractPrefController";
 
     protected final Context mContext;
+    private final DevicePolicyManager mDevicePolicyManager;
 
     public AbstractPreferenceController(Context context) {
         mContext = context;
+        mDevicePolicyManager =
+                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
     }
 
     /**
@@ -101,5 +108,41 @@ public abstract class AbstractPreferenceController {
      */
     public CharSequence getSummary() {
         return null;
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    protected void replaceEnterpriseStringTitle(PreferenceScreen screen,
+            String preferenceKey, String overrideKey, int resource) {
+        if (!BuildCompat.isAtLeastT() || mDevicePolicyManager == null) {
+            return;
+        }
+
+        Preference preference = screen.findPreference(preferenceKey);
+        if (preference == null) {
+            Log.d(TAG, "Could not find enterprise preference " + preferenceKey);
+            return;
+        }
+
+        preference.setTitle(
+                mDevicePolicyManager.getResources().getString(overrideKey,
+                        () -> mContext.getString(resource)));
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    protected void replaceEnterpriseStringSummary(
+            PreferenceScreen screen, String preferenceKey, String overrideKey, int resource) {
+        if (!BuildCompat.isAtLeastT() || mDevicePolicyManager == null) {
+            return;
+        }
+
+        Preference preference = screen.findPreference(preferenceKey);
+        if (preference == null) {
+            Log.d(TAG, "Could not find enterprise preference " + preferenceKey);
+            return;
+        }
+
+        preference.setSummary(
+                mDevicePolicyManager.getResources().getString(overrideKey,
+                        () -> mContext.getString(resource)));
     }
 }

@@ -25,6 +25,22 @@
       ]
     },
     {
+      "file_patterns": [
+        "ApexManager\\.java",
+        "SystemServer\\.java",
+        "services/tests/apexsystemservices/.*"
+      ],
+      "name": "ApexSystemServicesTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    },
+    {
       "name": "FrameworksUiServicesTests",
       "options": [
         {

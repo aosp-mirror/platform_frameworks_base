@@ -140,7 +140,7 @@ static status_t decode(int fd, int64_t offset, int64_t length,
                                 __func__);
                         break;
                     }
-                    const size_t dataSize = std::min((size_t)info.size, available);
+                    const size_t dataSize = std::min(available, (size_t)std::max(info.size, 0));
                     memcpy(writePos, buf + info.offset, dataSize);
                     writePos += dataSize;
                     written += dataSize;

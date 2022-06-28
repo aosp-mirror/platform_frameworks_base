@@ -16,261 +16,113 @@
   -->
 
 <!-- Layout for media recommendations inside QSPanel carousel -->
+<!-- See media_recommendation_expanded.xml and media_recommendation_collapsed.xml for the
+     constraints. -->
 <com.android.systemui.util.animation.TransitionLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/media_recommendations"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="@dimen/qs_media_padding"
-    android:paddingEnd="@dimen/qs_media_padding"
     android:clipChildren="false"
     android:clipToPadding="false"
     android:forceHasOverlappingRendering="false"
     android:background="@drawable/qs_media_background"
     android:theme="@style/MediaPlayer">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/media_vertical_start_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.25" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/media_horizontal_center_guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
+    <!-- This view just ensures the full media player is a certain height. -->
+    <View
+        android:id="@+id/sizing_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_expanded" />
 
     <com.android.internal.widget.CachingIconView
         android:id="@+id/recommendation_card_icon"
-        android:layout_width="@dimen/qs_media_icon_size"
-        android:layout_height="@dimen/qs_media_icon_size"
+        android:layout_width="@dimen/qs_media_app_icon_size"
+        android:layout_height="@dimen/qs_media_app_icon_size"
+        android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginTop="@dimen/qs_media_padding"
-        android:src="@drawable/ic_headset"
-        style="@style/MediaPlayer.AppIcon"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/media_vertical_start_guideline"
-        app:layout_constraintHorizontal_bias="0"/>
-
-    <TextView
-        android:id="@+id/recommendation_card_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:text="@string/controls_media_smartspace_rec_title"
-        android:fontFamily="google-sans-medium"
-        android:textDirection="locale"
-        android:textSize="@dimen/qq_aa_media_rec_header_text_size"
-        android:hyphenationFrequency="none"
-        app:layout_constraintTop_toBottomOf="@id/recommendation_card_icon"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/media_vertical_start_guideline"
-        app:layout_constraintHorizontal_bias="0"/>
-
-    <View
-        android:id="@+id/recommendation_gradient_view"
-        android:layout_width="@dimen/qs_aa_media_gradient_bg_width"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        android:background="@drawable/qs_media_recommendation_bg_gradient"
-        app:layout_constraintTop_toTopOf="@id/recommendation_card_text"
-        app:layout_constraintBottom_toBottomOf="@id/recommendation_card_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/media_vertical_start_guideline"
-        app:layout_constraintHorizontal_bias="1"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/media_cover1_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:background="@drawable/qs_media_light_source">
+        style="@style/MediaPlayer.Recommendation.AlbumContainer"
+        >
         <ImageView
             android:id="@+id/media_cover1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:adjustViewBounds="true"
             android:background="@drawable/bg_smartspace_media_item"
-            style="@style/MediaPlayer.Album"
+            style="@style/MediaPlayer.Recommendation.Album"
             android:clipToOutline="true"
             android:scaleType="centerCrop"/>
     </FrameLayout>
 
+    <TextView
+        android:id="@+id/media_title1"
+        style="@style/MediaPlayer.Recommendation.Text.Title"
+        />
+
+    <TextView
+        android:id="@+id/media_subtitle1"
+        style="@style/MediaPlayer.Recommendation.Text.Subtitle"
+        />
+
     <FrameLayout
         android:id="@+id/media_cover2_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:background="@drawable/qs_media_light_source">
+        style="@style/MediaPlayer.Recommendation.AlbumContainer"
+        >
         <ImageView
             android:id="@+id/media_cover2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:background="@drawable/bg_smartspace_media_item"
-            style="@style/MediaPlayer.Album"
+            style="@style/MediaPlayer.Recommendation.Album"
             android:clipToOutline="true"
             android:scaleType="centerCrop"/>
     </FrameLayout>
 
+    <TextView
+        android:id="@+id/media_title2"
+        style="@style/MediaPlayer.Recommendation.Text.Title"
+        />
+
+    <TextView
+        android:id="@+id/media_subtitle2"
+        style="@style/MediaPlayer.Recommendation.Text.Subtitle"
+        />
+
     <FrameLayout
         android:id="@+id/media_cover3_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:background="@drawable/qs_media_light_source">
+        style="@style/MediaPlayer.Recommendation.AlbumContainer"
+        >
         <ImageView
             android:id="@+id/media_cover3"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:background="@drawable/bg_smartspace_media_item"
-            style="@style/MediaPlayer.Album"
+            style="@style/MediaPlayer.Recommendation.Album"
             android:clipToOutline="true"
             android:scaleType="centerCrop"/>
     </FrameLayout>
 
-    <FrameLayout
-        android:id="@+id/media_cover4_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:background="@drawable/qs_media_light_source">
-        <ImageView
-            android:id="@+id/media_cover4"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            android:background="@drawable/bg_smartspace_media_item"
-            style="@style/MediaPlayer.Album"
-            android:clipToOutline="true"
-            android:scaleType="centerCrop"/>
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/media_cover5_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:background="@drawable/qs_media_light_source">
-        <ImageView
-            android:id="@+id/media_cover5"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            android:background="@drawable/bg_smartspace_media_item"
-            style="@style/MediaPlayer.Album"
-            android:clipToOutline="true"
-            android:scaleType="centerCrop"/>
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/media_cover6_container"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/qs_aa_media_rec_album_size_collapsed"
-        android:background="@drawable/qs_media_light_source">
-        <ImageView
-            android:id="@+id/media_cover6"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            android:background="@drawable/bg_smartspace_media_item"
-            style="@style/MediaPlayer.Album"
-            android:clipToOutline="true"
-            android:scaleType="centerCrop"/>
-    </FrameLayout>
-
-    <!-- Long press menu -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/qs_media_padding"
-        android:layout_marginStart="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_media_padding"
-        android:id="@+id/remove_text"
-        android:fontFamily="@*android:string/config_headlineFontFamily"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:text="@string/controls_media_close_session"
-        android:gravity="center_horizontal|top"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/cancel"/>
-
-    <FrameLayout
-        android:id="@+id/settings"
-        android:background="@drawable/qs_media_light_source"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_padding"
-        android:layout_marginEnd="@dimen/qs_media_action_spacing"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintWidth_min="48dp"
-        app:layout_constraintHeight_min="48dp"
-        app:layout_constraintHorizontal_chainStyle="spread_inside"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/cancel"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/remove_text">
-
-        <TextView
-            android:id="@+id/settings_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|bottom"
-            style="@style/MediaPlayer.OutlineButton"
-            android:text="@string/controls_media_settings_button" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/cancel"
-        android:background="@drawable/qs_media_light_source"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_action_spacing"
-        android:layout_marginEnd="@dimen/qs_media_action_spacing"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintWidth_min="48dp"
-        app:layout_constraintHeight_min="48dp"
-        app:layout_constraintStart_toEndOf="@id/settings"
-        app:layout_constraintEnd_toStartOf="@id/dismiss"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/remove_text">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|bottom"
-            style="@style/MediaPlayer.OutlineButton"
-            android:text="@string/cancel" />
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/dismiss"
-        android:background="@drawable/qs_media_light_source"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/qs_media_action_spacing"
-        android:layout_marginEnd="@dimen/qs_media_padding"
-        android:layout_marginBottom="@dimen/qs_media_padding"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintWidth_min="48dp"
-        app:layout_constraintHeight_min="48dp"
-        app:layout_constraintStart_toEndOf="@id/cancel"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/remove_text">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center|bottom"
-            style="@style/MediaPlayer.OutlineButton"
-            android:text="@string/controls_media_dismiss_button"
+        android:id="@+id/media_title3"
+        style="@style/MediaPlayer.Recommendation.Text.Title"
         />
-    </FrameLayout>
+
+    <TextView
+        android:id="@+id/media_subtitle3"
+        style="@style/MediaPlayer.Recommendation.Text.Subtitle"
+        />
+
+    <include
+        layout="@layout/media_long_press_menu" />
+
 </com.android.systemui.util.animation.TransitionLayout>

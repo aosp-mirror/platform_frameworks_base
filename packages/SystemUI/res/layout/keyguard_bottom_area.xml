@@ -94,6 +94,20 @@
         android:visibility="gone" />
 
     <ImageView
+        android:id="@+id/qr_code_scanner_button"
+        android:layout_height="@dimen/keyguard_affordance_fixed_height"
+        android:layout_width="@dimen/keyguard_affordance_fixed_width"
+        android:layout_gravity="bottom|end"
+        android:scaleType="center"
+        android:tint="?android:attr/textColorPrimary"
+        android:src="@drawable/ic_qr_code_scanner"
+        android:background="@drawable/keyguard_bottom_affordance_bg"
+        android:layout_marginEnd="@dimen/keyguard_affordance_horizontal_offset"
+        android:layout_marginBottom="@dimen/keyguard_affordance_vertical_offset"
+        android:contentDescription="@string/accessibility_qr_code_scanner_button"
+        android:visibility="gone" />
+
+    <ImageView
         android:id="@+id/controls_button"
         android:layout_height="@dimen/keyguard_affordance_fixed_height"
         android:layout_width="@dimen/keyguard_affordance_fixed_width"

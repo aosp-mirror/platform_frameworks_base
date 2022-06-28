@@ -32,21 +32,6 @@ import java.util.ArrayList;
  * Constants for supporting speech recognition through starting an {@link Intent}
  */
 public class RecognizerIntent {
-    /**
-     * The extra key used in an intent to the speech recognizer for voice search. Not
-     * generally to be used by developers. The system search dialog uses this, for example,
-     * to set a calling package for identification by a voice search API. If this extra
-     * is set by anyone but the system process, it should be overridden by the voice search
-     * implementation.
-     */
-    public static final String EXTRA_CALLING_PACKAGE = "calling_package";
-
-    /**
-     * The extra key used in an intent which is providing an already opened audio source for the
-     * RecognitionService to use. Data should be a URI to an audio resource.
-     */
-    public static final String EXTRA_AUDIO_INJECT_SOURCE =
-            "android.speech.extra.AUDIO_INJECT_SOURCE";
 
     private RecognizerIntent() {
         // Not for instantiating.
@@ -58,7 +43,7 @@ public class RecognizerIntent {
      * {@link Activity#onActivityResult}, if you start the intent using
      * {@link Activity#startActivityForResult(Intent, int)}), or forwarded via a PendingIntent
      * if one is provided.
-     * 
+     *
      * <p>Starting this intent with just {@link Activity#startActivity(Intent)} is not supported.
      * You must either use {@link Activity#startActivityForResult(Intent, int)}, or provide a
      * PendingIntent, to receive recognition results.
@@ -70,7 +55,7 @@ public class RecognizerIntent {
      * <ul>
      *   <li>{@link #EXTRA_LANGUAGE_MODEL}
      * </ul>
-     * 
+     *
      * <p>Optional extras:
      * <ul>
      *   <li>{@link #EXTRA_PROMPT}
@@ -79,12 +64,12 @@ public class RecognizerIntent {
      *   <li>{@link #EXTRA_RESULTS_PENDINGINTENT}
      *   <li>{@link #EXTRA_RESULTS_PENDINGINTENT_BUNDLE}
      * </ul>
-     * 
+     *
      * <p> Result extras (returned in the result, not to be specified in the request):
      * <ul>
      *   <li>{@link #EXTRA_RESULTS}
      * </ul>
-     * 
+     *
      * <p>NOTE: There may not be any applications installed to handle this action, so you should
      * make sure to catch {@link ActivityNotFoundException}.
      */
@@ -97,12 +82,12 @@ public class RecognizerIntent {
      *
      * <p>If you want to avoid triggering any type of action besides web search, you can use
      * the {@link #EXTRA_WEB_SEARCH_ONLY} extra.
-     * 
+     *
      * <p>Required extras:
      * <ul>
      *   <li>{@link #EXTRA_LANGUAGE_MODEL}
      * </ul>
-     * 
+     *
      * <p>Optional extras:
      * <ul>
      *   <li>{@link #EXTRA_PROMPT}
@@ -112,13 +97,13 @@ public class RecognizerIntent {
      *   <li>{@link #EXTRA_WEB_SEARCH_ONLY}
      *   <li>{@link #EXTRA_ORIGIN}
      * </ul>
-     * 
+     *
      * <p> Result extras (returned in the result, not to be specified in the request):
      * <ul>
      *   <li>{@link #EXTRA_RESULTS}
      *   <li>{@link #EXTRA_CONFIDENCE_SCORES} (optional)
      * </ul>
-     * 
+     *
      * <p>NOTE: There may not be any applications installed to handle this action, so you should
      * make sure to catch {@link ActivityNotFoundException}.
      */
@@ -157,6 +142,129 @@ public class RecognizerIntent {
             "android.speech.action.VOICE_SEARCH_HANDS_FREE";
 
     /**
+     * Optional {@link android.os.ParcelFileDescriptor} pointing to an already opened audio
+     * source for the recognizer to use. The caller of the recognizer is responsible for closing
+     * the audio. If this extra is not set or the recognizer does not support this feature, the
+     * recognizer will open the mic for audio and close it when the recognition is finished.
+     *
+     * <p>Along with this extra, please send {@link #EXTRA_AUDIO_SOURCE_CHANNEL_COUNT},
+     * {@link #EXTRA_AUDIO_SOURCE_ENCODING}, and {@link #EXTRA_AUDIO_SOURCE_SAMPLING_RATE}
+     * extras, otherwise the default values of these extras will be used.
+     *
+     * <p>Additionally, {@link #EXTRA_ENABLE_BIASING_DEVICE_CONTEXT} may have no effect when this
+     * extra is set.
+     *
+     * <p>This can also be used as the string value for {@link #EXTRA_SEGMENTED_SESSION} to
+     * enable segmented session mode. The audio must be passed in using this extra. The
+     * recognition session will end when and only when the audio is closed.
+     *
+     * @see #EXTRA_SEGMENTED_SESSION
+     */
+    public static final String EXTRA_AUDIO_SOURCE = "android.speech.extra.AUDIO_SOURCE";
+
+    /**
+     * Optional integer, to be used with {@link #EXTRA_AUDIO_SOURCE}, to indicate the number of
+     * channels in the audio. The default value is 1.
+     */
+    public static final String EXTRA_AUDIO_SOURCE_CHANNEL_COUNT =
+            "android.speech.extra.AUDIO_SOURCE_CHANNEL_COUNT";
+
+    /**
+     * Optional integer (from {@link android.media.AudioFormat}), to be used with
+     * {@link #EXTRA_AUDIO_SOURCE}, to indicate the audio encoding. The default value is
+     * {@link android.media.AudioFormat#ENCODING_PCM_16BIT}.
+     */
+    public static final String EXTRA_AUDIO_SOURCE_ENCODING =
+            "android.speech.extra.AUDIO_SOURCE_ENCODING";
+
+    /**
+     * Optional integer, to be used with {@link #EXTRA_AUDIO_SOURCE}, to indicate the sampling
+     * rate of the audio. The default value is 16000.
+     */
+    public static final String EXTRA_AUDIO_SOURCE_SAMPLING_RATE =
+            "android.speech.extra.AUDIO_SOURCE_SAMPLING_RATE";
+
+    /**
+     * Optional boolean to enable biasing towards device context. The recognizer will use the
+     * device context to tune the recognition results.
+     *
+     * <p>Depending on the recognizer implementation, this value may have no effect.
+     */
+    public static final String EXTRA_ENABLE_BIASING_DEVICE_CONTEXT =
+            "android.speech.extra.ENABLE_BIASING_DEVICE_CONTEXT";
+
+    /**
+     * Optional list of strings, towards which the recognizer should bias the recognition results.
+     * These are separate from the device context.
+     */
+    public static final String EXTRA_BIASING_STRINGS = "android.speech.extra.BIASING_STRINGS";
+
+    /**
+     * Optional string to enable text formatting (e.g. unspoken punctuation (examples: question
+     * mark, comma, period, etc.), capitalization, etc.) and specify the optimization strategy.
+     * If set, the partial and final result texts will be formatted. Each result list will
+     * contain two hypotheses in the order of 1) formatted text 2) raw text.
+     *
+     * <p>Depending on the recognizer implementation, this value may have no effect.
+     *
+     * @see #FORMATTING_OPTIMIZE_QUALITY
+     * @see #FORMATTING_OPTIMIZE_LATENCY
+     */
+    public static final String EXTRA_ENABLE_FORMATTING = "android.speech.extra.ENABLE_FORMATTING";
+
+    /**
+     * Optimizes formatting quality. This will increase latency but provide the highest
+     * punctuation quality. This is a value to use for {@link #EXTRA_ENABLE_FORMATTING}.
+     *
+     * @see #EXTRA_ENABLE_FORMATTING
+     */
+    public static final String FORMATTING_OPTIMIZE_QUALITY = "quality";
+    /**
+     * Optimizes formatting latency. This will result in a slightly lower quality of punctuation
+     * but can improve the experience for real-time use cases. This is a value to use for
+     * {@link #EXTRA_ENABLE_FORMATTING}.
+     *
+     * @see #EXTRA_ENABLE_FORMATTING
+     */
+    public static final String FORMATTING_OPTIMIZE_LATENCY = "latency";
+
+    /**
+     * Optional boolean, to be used with {@link #EXTRA_ENABLE_FORMATTING}, to prevent the
+     * recognizer adding punctuation after the last word of the partial results. The default is
+     * false.
+     */
+    public static final String EXTRA_HIDE_PARTIAL_TRAILING_PUNCTUATION =
+            "android.speech.extra.HIDE_PARTIAL_TRAILING_PUNCTUATION";
+
+    /**
+     * Optional boolean indicating whether the recognizer should mask the offensive words in
+     * recognition results. The Default is true.
+     */
+    public static final String EXTRA_MASK_OFFENSIVE_WORDS =
+            "android.speech.extra.MASK_OFFENSIVE_WORDS";
+
+    /**
+     * The extra key used in an intent to the speech recognizer for voice search. Not
+     * generally to be used by developers. The system search dialog uses this, for example,
+     * to set a calling package for identification by a voice search API. If this extra
+     * is set by anyone but the system process, it should be overridden by the voice search
+     * implementation.
+     */
+    public static final String EXTRA_CALLING_PACKAGE = "calling_package";
+
+    /**
+     * The extra key used in an intent which is providing an already opened audio source for the
+     * RecognitionService to use. Data should be a URI to an audio resource.
+     *
+     * <p>Depending on the recognizer implementation, this value may have no effect.
+     *
+     * @deprecated Replaced with {@link #EXTRA_AUDIO_SOURCE}
+     */
+    @Deprecated
+    public static final String EXTRA_AUDIO_INJECT_SOURCE =
+            "android.speech.extra.AUDIO_INJECT_SOURCE";
+
+    /**
      * Optional boolean to indicate that a "hands free" voice search was performed while the device
      * was in a secure mode. An example of secure mode is when the device's screen lock is active,
      * and it requires some form of authentication to be unlocked.
@@ -168,24 +276,29 @@ public class RecognizerIntent {
     public static final String EXTRA_SECURE = "android.speech.extras.EXTRA_SECURE";
 
     /**
-     * The minimum length of an utterance. We will not stop recording before this amount of time.
-     * 
-     * Note that it is extremely rare you'd want to specify this value in an intent. If you don't
-     * have a very good reason to change these, you should leave them as they are. Note also that
-     * certain values may cause undesired or unexpected results - use judiciously! Additionally,
-     * depending on the recognizer implementation, these values may have no effect.
+     * Optional integer to indicate the minimum length of the recognition session. The recognizer
+     * will not stop recognizing speech before this amount of time.
+     *
+     * <p>Note that it is extremely rare you'd want to specify this value in an intent.
+     * Generally, it should be specified only when it is also used as the value for
+     * {@link #EXTRA_SEGMENTED_SESSION} to enable segmented session mode. Note also that certain
+     * values may cause undesired or unexpected results - use judiciously!
+     *
+     * <p>Depending on the recognizer implementation, these values may have no effect.
      */
     public static final String EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS =
             "android.speech.extras.SPEECH_INPUT_MINIMUM_LENGTH_MILLIS";
 
     /**
-     * The amount of time that it should take after we stop hearing speech to consider the input
-     * complete. 
-     * 
-     * Note that it is extremely rare you'd want to specify this value in an intent. If
-     * you don't have a very good reason to change these, you should leave them as they are. Note
-     * also that certain values may cause undesired or unexpected results - use judiciously!
-     * Additionally, depending on the recognizer implementation, these values may have no effect.
+     * The amount of time that it should take after the recognizer stops hearing speech to
+     * consider the input complete hence end the recognition session.
+     *
+     * <p>Note that it is extremely rare you'd want to specify this value in an intent.
+     * Generally, it should be specified only when it is also used as the value for
+     * {@link #EXTRA_SEGMENTED_SESSION} to enable segmented session mode. Note also that certain
+     * values may cause undesired or unexpected results - use judiciously!
+     *
+     * <p>Depending on the recognizer implementation, these values may have no effect.
      */
     public static final String EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS =
             "android.speech.extras.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS";
@@ -193,8 +306,8 @@ public class RecognizerIntent {
     /**
      * The amount of time that it should take after we stop hearing speech to consider the input
      * possibly complete. This is used to prevent the endpointer cutting off during very short
-     * mid-speech pauses. 
-     * 
+     * mid-speech pauses.
+     *
      * Note that it is extremely rare you'd want to specify this value in an intent. If
      * you don't have a very good reason to change these, you should leave them as they are. Note
      * also that certain values may cause undesired or unexpected results - use judiciously!
@@ -208,21 +321,21 @@ public class RecognizerIntent {
      * {@link #ACTION_RECOGNIZE_SPEECH}. The recognizer uses this
      * information to fine tune the results. This extra is required. Activities implementing
      * {@link #ACTION_RECOGNIZE_SPEECH} may interpret the values as they see fit.
-     * 
+     *
      *  @see #LANGUAGE_MODEL_FREE_FORM
      *  @see #LANGUAGE_MODEL_WEB_SEARCH
      */
     public static final String EXTRA_LANGUAGE_MODEL = "android.speech.extra.LANGUAGE_MODEL";
 
-    /** 
-     * Use a language model based on free-form speech recognition.  This is a value to use for 
-     * {@link #EXTRA_LANGUAGE_MODEL}. 
+    /**
+     * Use a language model based on free-form speech recognition.  This is a value to use for
+     * {@link #EXTRA_LANGUAGE_MODEL}.
      * @see #EXTRA_LANGUAGE_MODEL
      */
     public static final String LANGUAGE_MODEL_FREE_FORM = "free_form";
-    /** 
-     * Use a language model based on web search terms.  This is a value to use for 
-     * {@link #EXTRA_LANGUAGE_MODEL}. 
+    /**
+     * Use a language model based on web search terms.  This is a value to use for
+     * {@link #EXTRA_LANGUAGE_MODEL}.
      * @see #EXTRA_LANGUAGE_MODEL
      */
     public static final String LANGUAGE_MODEL_WEB_SEARCH = "web_search";
@@ -236,7 +349,7 @@ public class RecognizerIntent {
      * {@link java.util.Locale#getDefault()}.
      */
     public static final String EXTRA_LANGUAGE = "android.speech.extra.LANGUAGE";
-    
+
     /**
      * Optional value which can be used to indicate the referer url of a page in which
      * speech was requested. For example, a web browser may choose to provide this for
@@ -244,12 +357,12 @@ public class RecognizerIntent {
      */
     public static final String EXTRA_ORIGIN = "android.speech.extra.ORIGIN";
 
-    /** 
+    /**
      * Optional limit on the maximum number of results to return. If omitted the recognizer
      * will choose how many results to return. Must be an integer.
      */
     public static final String EXTRA_MAX_RESULTS = "android.speech.extra.MAX_RESULTS";
-    
+
     /**
      * Optional boolean, to be used with {@link #ACTION_WEB_SEARCH}, to indicate whether to
      * only fire web searches in response to a user's speech. The default is false, meaning
@@ -267,18 +380,18 @@ public class RecognizerIntent {
     /**
      * When the intent is {@link #ACTION_RECOGNIZE_SPEECH}, the speech input activity will
      * return results to you via the activity results mechanism.  Alternatively, if you use this
-     * extra to supply a PendingIntent, the results will be added to its bundle and the 
+     * extra to supply a PendingIntent, the results will be added to its bundle and the
      * PendingIntent will be sent to its target.
      */
-    public static final String EXTRA_RESULTS_PENDINGINTENT = 
+    public static final String EXTRA_RESULTS_PENDINGINTENT =
             "android.speech.extra.RESULTS_PENDINGINTENT";
-    
+
     /**
      * If you use {@link #EXTRA_RESULTS_PENDINGINTENT} to supply a forwarding intent, you can
      * also use this extra to supply additional extras for the final intent.  The search results
      * will be added to this bundle, and the combined bundle will be sent to the target.
      */
-    public static final String EXTRA_RESULTS_PENDINGINTENT_BUNDLE = 
+    public static final String EXTRA_RESULTS_PENDINGINTENT_BUNDLE =
             "android.speech.extra.RESULTS_PENDINGINTENT_BUNDLE";
 
     /** Result code returned when no matches are found for the given speech */
@@ -301,7 +414,7 @@ public class RecognizerIntent {
      * the lack of this extra indicates failure.
      */
     public static final String EXTRA_RESULTS = "android.speech.extra.RESULTS";
-    
+
     /**
      * A float array of confidence scores of the recognition results when performing
      * {@link #ACTION_RECOGNIZE_SPEECH}. The array should be the same size as the ArrayList
@@ -317,7 +430,7 @@ public class RecognizerIntent {
      * returned in an activity result.
      */
     public static final String EXTRA_CONFIDENCE_SCORES = "android.speech.extra.CONFIDENCE_SCORES";
-    
+
     /**
      * Returns the broadcast intent to fire with
      * {@link Context#sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler, int, String, Bundle)}
@@ -334,7 +447,7 @@ public class RecognizerIntent {
      * (Whether these are actually provided is up to the particular implementation. It is
      * recommended that {@link Activity}s implementing {@link #ACTION_WEB_SEARCH} provide this
      * information, but it is not required.)
-     * 
+     *
      * @param context a context object
      * @return the broadcast intent to fire or null if not available
      */
@@ -343,15 +456,15 @@ public class RecognizerIntent {
         ResolveInfo ri = context.getPackageManager().resolveActivity(
                 voiceSearchIntent, PackageManager.GET_META_DATA);
         if (ri == null || ri.activityInfo == null || ri.activityInfo.metaData == null) return null;
-        
+
         String className = ri.activityInfo.metaData.getString(DETAILS_META_DATA);
         if (className == null) return null;
-        
+
         Intent detailsIntent = new Intent(ACTION_GET_LANGUAGE_DETAILS);
         detailsIntent.setComponent(new ComponentName(ri.activityInfo.packageName, className));
         return detailsIntent;
     }
-    
+
     /**
      * Meta-data name under which an {@link Activity} implementing {@link #ACTION_WEB_SEARCH} can
      * use to expose the class name of a {@link BroadcastReceiver} which can respond to request for
@@ -370,7 +483,7 @@ public class RecognizerIntent {
      * are required to implement this. Thus retrieving this meta-data may be null.
      */
     public static final String DETAILS_META_DATA = "android.speech.DETAILS";
-    
+
     /**
      * A broadcast intent which can be fired to the {@link BroadcastReceiver} component specified
      * in the meta-data defined in the {@link #DETAILS_META_DATA} meta-data of an
@@ -388,7 +501,7 @@ public class RecognizerIntent {
      */
     public static final String ACTION_GET_LANGUAGE_DETAILS =
             "android.speech.action.GET_LANGUAGE_DETAILS";
-    
+
     /**
      * Specify this boolean extra in a broadcast of {@link #ACTION_GET_LANGUAGE_DETAILS} to
      * indicate that only the current language preference is needed in the response. This
@@ -397,7 +510,7 @@ public class RecognizerIntent {
      */
     public static final String EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE =
             "android.speech.extra.ONLY_RETURN_LANGUAGE_PREFERENCE";
-    
+
     /**
      * The key to the extra in the {@link Bundle} returned by {@link #ACTION_GET_LANGUAGE_DETAILS}
      * which is a {@link String} that represents the current language preference this user has
@@ -405,7 +518,7 @@ public class RecognizerIntent {
      */
     public static final String EXTRA_LANGUAGE_PREFERENCE =
             "android.speech.extra.LANGUAGE_PREFERENCE";
-    
+
     /**
      * The key to the extra in the {@link Bundle} returned by {@link #ACTION_GET_LANGUAGE_DETAILS}
      * which is an {@link ArrayList} of {@link String}s that represents the languages supported by
@@ -426,4 +539,23 @@ public class RecognizerIntent {
      *
      */
     public static final String EXTRA_PREFER_OFFLINE = "android.speech.extra.PREFER_OFFLINE";
+
+    /**
+     * Optional string to enable segmented session mode of the specified type, which can be
+     * {@link #EXTRA_AUDIO_SOURCE}, {@link #EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS} or
+     * {@link #EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS}. When segmented session mode is
+     * supported by the recognizer implementation and this extra is set, it will return the
+     * recognition results in segments via {@link RecognitionListener#onSegmentResults(Bundle)}
+     * and terminate the session with {@link RecognitionListener#onEndOfSegmentedSession()}.
+     *
+     * <p>When setting this extra, make sure the extra used as the string value here is also set
+     * in the same intent with proper value.
+     *
+     * <p>Depending on the recognizer implementation, this value may have no effect.
+     *
+     * @see #EXTRA_AUDIO_SOURCE
+     * @see #EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS
+     * @see #EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS
+     */
+    public static final String EXTRA_SEGMENTED_SESSION = "android.speech.extra.SEGMENTED_SESSION";
 }

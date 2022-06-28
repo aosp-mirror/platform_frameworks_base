@@ -107,8 +107,8 @@ public final class DataProfile implements Parcelable {
 
     private DataProfile(Parcel source) {
         mType = source.readInt();
-        mApnSetting = source.readParcelable(ApnSetting.class.getClassLoader());
-        mTrafficDescriptor = source.readParcelable(TrafficDescriptor.class.getClassLoader());
+        mApnSetting = source.readParcelable(ApnSetting.class.getClassLoader(), android.telephony.data.ApnSetting.class);
+        mTrafficDescriptor = source.readParcelable(TrafficDescriptor.class.getClassLoader(), android.telephony.data.TrafficDescriptor.class);
         mPreferred = source.readBoolean();
         mSetupTimestamp = source.readLong();
     }

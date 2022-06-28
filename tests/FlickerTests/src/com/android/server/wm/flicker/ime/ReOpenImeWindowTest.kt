@@ -17,10 +17,10 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.os.SystemProperties
 import android.platform.test.annotations.Presubmit
+import android.view.Display
 import android.view.Surface
-import android.view.WindowManagerPolicyConstants
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -37,12 +37,16 @@ import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
-import com.android.server.wm.flicker.startRotation
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.common.ConditionList
 import com.android.server.wm.traces.common.FlickerComponentName
-import org.junit.Assume
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,11 +62,20 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group2
-class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
+open class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.config.startRotation)
-    private val isShellTransitionsEnabled =
-            SystemProperties.getBoolean("persist.debug.shell_transit", false)
+    private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
+
+    private val waitConditionSetup = ConditionList(listOf(
+        WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY),
+        WindowManagerConditionsFactory.hasLayersAnimating().negate(),
+        WindowManagerConditionsFactory.isHomeActivityVisible()
+    ))
+
+    @Before
+    open fun before() {
+        assumeFalse(isShellTransitionsEnabled)
+    }
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -74,9 +87,8 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                 }
                 eachRun {
                     device.pressRecentApps()
-                    wmHelper.waitImeGone()
-                    wmHelper.waitForAppTransitionIdle()
-                    this.setRotation(testSpec.config.startRotation)
+                    wmHelper.waitFor(waitConditionSetup)
+                    this.setRotation(testSpec.startRotation)
                 }
             }
             transitions {
@@ -129,7 +141,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun imeAppWindowVisibilityLegacy() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
+        assumeFalse(isShellTransitionsEnabled)
         // the app starts visible in live tile, and stays visible for the duration of entering
         // and exiting overview. However, legacy transitions seem to have a bug which causes
         // everything to restart during the test, so expect the app to disappear and come back.
@@ -144,10 +156,10 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 204570898)
     @Test
     fun imeAppWindowVisibility() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+        assumeTrue(isShellTransitionsEnabled)
         // the app starts visible in live tile, and stays visible for the duration of entering
         // and exiting overview. Since we log 1x per frame, sometimes the activity visibility
         // and the app visibility are updated together, sometimes not, thus ignore activity
@@ -173,7 +185,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun imeLayerIsBecomesVisibleLegacy() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
+        assumeFalse(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.isVisible(FlickerComponentName.IME)
                     .then()
@@ -183,10 +195,10 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         }
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 204570898)
     @Test
     fun imeLayerIsBecomesVisible() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
+        assumeTrue(isShellTransitionsEnabled)
         testSpec.assertLayers {
             this.isVisible(FlickerComponentName.IME)
         }
@@ -208,7 +220,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
@@ -232,11 +244,8 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 1,
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    repetitions = 3,
+                    supportedRotations = listOf(Surface.ROTATION_0)
                 )
         }
     }

@@ -650,22 +650,25 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
               }
 
               // Retrieve all the resource ids belonging to this policy chunk
-              std::unordered_set<uint32_t> ids;
               const auto ids_begin = overlayable_child_chunk.data_ptr().convert<ResTable_ref>();
               const auto ids_end = ids_begin + dtohl(policy_header->entry_count);
+              std::unordered_set<uint32_t> ids;
+              ids.reserve(ids_end - ids_begin);
               for (auto id_iter = ids_begin; id_iter != ids_end; ++id_iter) {
                 if (!id_iter) {
+                  LOG(ERROR) << "NULL ResTable_ref record??";
                   return {};
                 }
                 ids.insert(dtohl(id_iter->ident));
               }
 
               // Add the pairing of overlayable properties and resource ids to the package
-              OverlayableInfo overlayable_info{};
-              overlayable_info.name = name;
-              overlayable_info.actor = actor;
-              overlayable_info.policy_flags = policy_header->policy_flags;
-              loaded_package->overlayable_infos_.emplace_back(overlayable_info, ids);
+              OverlayableInfo overlayable_info {
+                .name = name,
+                .actor = actor,
+                .policy_flags = policy_header->policy_flags
+              };
+              loaded_package->overlayable_infos_.emplace_back(std::move(overlayable_info), std::move(ids));
               loaded_package->defines_overlayable_ = true;
               break;
             }
@@ -692,7 +695,6 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           break;
         }
 
-        std::unordered_set<uint32_t> finalized_ids;
         const auto lib_alias = child_chunk.header<ResTable_staged_alias_header>();
         if (!lib_alias) {
           LOG(ERROR) << "RES_TABLE_STAGED_ALIAS_TYPE is too small.";
@@ -705,8 +707,11 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         }
         const auto entry_begin = child_chunk.data_ptr().convert<ResTable_staged_alias_entry>();
         const auto entry_end = entry_begin + dtohl(lib_alias->count);
+        std::unordered_set<uint32_t> finalized_ids;
+        finalized_ids.reserve(entry_end - entry_begin);
         for (auto entry_iter = entry_begin; entry_iter != entry_end; ++entry_iter) {
           if (!entry_iter) {
+            LOG(ERROR) << "NULL ResTable_staged_alias_entry record??";
             return {};
           }
           auto finalized_id = dtohl(entry_iter->finalizedResId);
@@ -717,8 +722,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           }
 
           auto staged_id = dtohl(entry_iter->stagedResId);
-          auto [_, success] = loaded_package->alias_id_map_.insert(std::make_pair(staged_id,
-                                                                                  finalized_id));
+          auto [_, success] = loaded_package->alias_id_map_.emplace(staged_id, finalized_id);
           if (!success) {
             LOG(ERROR) << StringPrintf("Repeated staged resource id '%08x' in staged aliases.",
                                        staged_id);

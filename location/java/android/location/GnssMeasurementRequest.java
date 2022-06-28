@@ -16,10 +16,14 @@
 
 package android.location;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.TimeUtils;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 
@@ -29,13 +33,16 @@ import java.util.Objects;
 public final class GnssMeasurementRequest implements Parcelable {
     private final boolean mCorrelationVectorOutputsEnabled;
     private final boolean mFullTracking;
+    private final int mIntervalMillis;
 
     /**
      * Creates a {@link GnssMeasurementRequest} with a full list of parameters.
      */
-    private GnssMeasurementRequest(boolean fullTracking, boolean correlationVectorOutputsEnabled) {
+    private GnssMeasurementRequest(boolean fullTracking, boolean correlationVectorOutputsEnabled,
+            int intervalMillis) {
         mFullTracking = fullTracking;
         mCorrelationVectorOutputsEnabled = correlationVectorOutputsEnabled;
+        mIntervalMillis = intervalMillis;
     }
 
     /**
@@ -68,13 +75,26 @@ public final class GnssMeasurementRequest implements Parcelable {
         return mFullTracking;
     }
 
+    /**
+     * Represents the requested time interval between the reported measurements in milliseconds.
+     *
+     * <p>If the time interval is not set, the default value is 0, which means the fastest rate the
+     * GNSS chipset can report.
+     *
+     * <p>The GNSS chipset may report measurements with a rate faster than requested.
+     */
+    public @IntRange(from = 0) int getIntervalMillis() {
+        return mIntervalMillis;
+    }
+
     @NonNull
     public static final Creator<GnssMeasurementRequest> CREATOR =
             new Creator<GnssMeasurementRequest>() {
                 @Override
                 @NonNull
                 public GnssMeasurementRequest createFromParcel(@NonNull Parcel parcel) {
-                    return new GnssMeasurementRequest(parcel.readBoolean(), parcel.readBoolean());
+                    return new GnssMeasurementRequest(parcel.readBoolean(), parcel.readBoolean(),
+                            parcel.readInt());
                 }
 
                 @Override
@@ -87,6 +107,7 @@ public final class GnssMeasurementRequest implements Parcelable {
     public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeBoolean(mFullTracking);
         parcel.writeBoolean(mCorrelationVectorOutputsEnabled);
+        parcel.writeInt(mIntervalMillis);
     }
 
     @NonNull
@@ -94,11 +115,13 @@ public final class GnssMeasurementRequest implements Parcelable {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("GnssMeasurementRequest[");
+        s.append("@");
+        TimeUtils.formatDuration(mIntervalMillis, s);
         if (mFullTracking) {
-            s.append("FullTracking");
+            s.append(", FullTracking");
         }
         if (mCorrelationVectorOutputsEnabled) {
-            s.append(", CorrelationVectorOutPuts");
+            s.append(", CorrelationVectorOutputs");
         }
         s.append(']');
         return s.toString();
@@ -115,12 +138,15 @@ public final class GnssMeasurementRequest implements Parcelable {
         if (mCorrelationVectorOutputsEnabled != other.mCorrelationVectorOutputsEnabled) {
             return false;
         }
+        if (mIntervalMillis != other.mIntervalMillis) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFullTracking, mCorrelationVectorOutputsEnabled);
+        return Objects.hash(mFullTracking, mCorrelationVectorOutputsEnabled, mIntervalMillis);
     }
 
     @Override
@@ -132,6 +158,7 @@ public final class GnssMeasurementRequest implements Parcelable {
     public static final class Builder {
         private boolean mCorrelationVectorOutputsEnabled;
         private boolean mFullTracking;
+        private int mIntervalMillis;
 
         /**
          * Constructs a {@link Builder} instance.
@@ -145,6 +172,7 @@ public final class GnssMeasurementRequest implements Parcelable {
         public Builder(@NonNull GnssMeasurementRequest request) {
             mCorrelationVectorOutputsEnabled = request.isCorrelationVectorOutputsEnabled();
             mFullTracking = request.isFullTracking();
+            mIntervalMillis = request.getIntervalMillis();
         }
 
         /**
@@ -183,10 +211,25 @@ public final class GnssMeasurementRequest implements Parcelable {
             return this;
         }
 
+        /**
+         * Set the time interval between the reported measurements in milliseconds, which is 0 by
+         * default.
+         *
+         * <p>An interval of 0 milliseconds means the fastest rate the chipset can report.
+         *
+         * <p>The GNSS chipset may report measurements with a rate faster than requested.
+         */
+        @NonNull public Builder setIntervalMillis(@IntRange(from = 0) int value) {
+            mIntervalMillis = Preconditions.checkArgumentInRange(value, 0, Integer.MAX_VALUE,
+                    "intervalMillis");
+            return this;
+        }
+
         /** Builds a {@link GnssMeasurementRequest} instance as specified by this builder. */
         @NonNull
         public GnssMeasurementRequest build() {
-            return new GnssMeasurementRequest(mFullTracking, mCorrelationVectorOutputsEnabled);
+            return new GnssMeasurementRequest(mFullTracking, mCorrelationVectorOutputsEnabled,
+                    mIntervalMillis);
         }
     }
 }

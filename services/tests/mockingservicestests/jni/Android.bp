@@ -8,7 +8,7 @@ package {
 }
 
 cc_library_shared {
-    name: "libactivitymanagermockingservicestestjni",
+    name: "libmockingservicestestjni",
 
     cflags: [
         "-Wall",
@@ -19,12 +19,15 @@ cc_library_shared {
 
     srcs: [
         ":lib_cachedAppOptimizer_native",
+        ":lib_gameManagerService_native",
         "onload.cpp",
     ],
 
     include_dirs: [
         "frameworks/base/libs",
         "frameworks/native/services",
+        "frameworks/native/libs/math/include",
+        "frameworks/native/libs/ui/include",
         "system/memory/libmeminfo/include",
     ],
 
@@ -33,10 +36,20 @@ cc_library_shared {
         "libandroid_runtime",
         "libbase",
         "libbinder",
+        "libgralloctypes",
+        "libgui",
+        "libhidlbase",
         "liblog",
         "libmeminfo",
         "libnativehelper",
         "libprocessgroup",
         "libutils",
+        "libcutils",
+        "android.hardware.graphics.bufferqueue@1.0",
+        "android.hardware.graphics.bufferqueue@2.0",
+        "android.hardware.graphics.common@1.2",
+        "android.hardware.graphics.common-V3-ndk",
+        "android.hardware.graphics.mapper@4.0",
+        "android.hidl.token@1.0-utils",
     ],
 }

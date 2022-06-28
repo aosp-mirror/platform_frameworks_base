@@ -22,6 +22,7 @@ import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER
+import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.util.Log
 import com.android.wm.shell.bubbles.storage.BubbleEntity
@@ -71,6 +72,22 @@ internal class BubbleDataRepository(
         val entities = transform(bubbles).also {
             b -> volatileRepository.removeBubbles(userId, b) }
         if (entities.isNotEmpty()) persistToDisk()
+    }
+
+    /**
+     * Removes all the bubbles associated with the provided user from memory. Then persists the
+     * snapshot to disk asynchronously.
+     */
+    fun removeBubblesForUser(@UserIdInt userId: Int, @UserIdInt parentId: Int) {
+        if (volatileRepository.removeBubblesForUser(userId, parentId)) persistToDisk()
+    }
+
+    /**
+     * Remove any bubbles that don't have a user id from the provided list of users.
+     */
+    fun sanitizeBubbles(users: List<UserInfo>) {
+        val userIds = users.map { u -> u.id }
+        if (volatileRepository.sanitizeBubbles(userIds)) persistToDisk()
     }
 
     private fun transform(bubbles: List<Bubble>): List<BubbleEntity> {

@@ -23,10 +23,13 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.testing.AndroidTestingRunner;
@@ -36,6 +39,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -60,8 +65,16 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private QuickAccessWalletClient.OnWalletCardsRetrievedCallback mCardsRetriever;
+    @Mock
+    private ActivityStarter mActivityStarter;
+    @Mock
+    private ActivityLaunchAnimator.Controller mAnimationController;
     @Captor
     private ArgumentCaptor<GetWalletCardsRequest> mRequestCaptor;
+    @Captor
+    private ArgumentCaptor<Intent> mIntentCaptor;
+    @Captor
+    private ArgumentCaptor<PendingIntent> mPendingIntentCaptor;
 
     private FakeSystemClock mClock = new FakeSystemClock();
     private QuickAccessWalletController mController;
@@ -69,13 +82,23 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked()).thenReturn(true);
         mClock.setElapsedRealtime(100L);
 
+        doAnswer(invocation -> {
+            QuickAccessWalletClient.WalletPendingIntentCallback callback =
+                    (QuickAccessWalletClient.WalletPendingIntentCallback) invocation
+                            .getArguments()[1];
+            callback.onWalletPendingIntentRetrieved(null);
+            return null;
+        }).when(mQuickAccessWalletClient).getWalletPendingIntent(any(), any());
+
         mController = new QuickAccessWalletController(
                 mContext,
+                MoreExecutors.directExecutor(),
                 MoreExecutors.directExecutor(),
                 mSecureSettings,
                 mQuickAccessWalletClient,
@@ -151,8 +174,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
 
         verify(mQuickAccessWalletClient)
                 .getWalletCards(
-                        eq(MoreExecutors.directExecutor()),
-                        mRequestCaptor.capture(),
+                        eq(MoreExecutors.directExecutor()), mRequestCaptor.capture(),
                         eq(mCardsRetriever));
 
         GetWalletCardsRequest request = mRequestCaptor.getValue();
@@ -172,5 +194,53 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         mController.queryWalletCards(mCardsRetriever);
 
         verify(mQuickAccessWalletClient, never()).getWalletCards(any(), any(), any());
+    }
+
+    @Test
+    public void getQuickAccessUiIntent_hasCards_noPendingIntent_startsWalletActivity() {
+        mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, true);
+        verify(mActivityStarter).startActivity(mIntentCaptor.capture(), eq(true),
+                any(ActivityLaunchAnimator.Controller.class), eq(true));
+        Intent intent = mIntentCaptor.getValue();
+        assertEquals(intent.getAction(), Intent.ACTION_VIEW);
+        assertEquals(
+                intent.getComponent().getClassName(),
+                "com.android.systemui.wallet.ui.WalletActivity");
+    }
+
+    @Test
+    public void getQuickAccessUiIntent_noCards_noPendingIntent_startsWalletActivity() {
+        mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, false);
+        verify(mActivityStarter).postStartActivityDismissingKeyguard(mIntentCaptor.capture(), eq(0),
+                any(ActivityLaunchAnimator.Controller.class));
+        Intent intent = mIntentCaptor.getValue();
+        assertEquals(intent.getAction(), Intent.ACTION_VIEW);
+        assertEquals(
+                intent.getComponent().getClassName(),
+                "com.android.systemui.wallet.ui.WalletActivity");
+    }
+
+    @Test
+    public void getQuickAccessUiIntent_targetActivityViaPendingIntent_intentComponentIsCorrect() {
+        doAnswer(invocation -> {
+            QuickAccessWalletClient.WalletPendingIntentCallback callback =
+                    (QuickAccessWalletClient.WalletPendingIntentCallback) invocation
+                            .getArguments()[1];
+            Intent intent = new Intent(Intent.ACTION_VIEW).setClassName(
+                    "com.google.android.apps.testapp",
+                    "com.google.android.apps.testapp.TestActivity");
+            callback.onWalletPendingIntentRetrieved(
+                    PendingIntent.getActivity(mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE));
+            return null;
+        }).when(mQuickAccessWalletClient).getWalletPendingIntent(any(), any());
+        mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, true);
+        verify(mActivityStarter).postStartActivityDismissingKeyguard(mPendingIntentCaptor.capture(),
+                any(ActivityLaunchAnimator.Controller.class));
+        PendingIntent pendingIntent = mPendingIntentCaptor.getValue();
+        Intent intent = pendingIntent.getIntent();
+        assertEquals(intent.getAction(), Intent.ACTION_VIEW);
+        assertEquals(
+                intent.getComponent().getClassName(),
+                "com.google.android.apps.testapp.TestActivity");
     }
 }

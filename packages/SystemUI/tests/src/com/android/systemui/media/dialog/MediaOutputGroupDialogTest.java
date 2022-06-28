@@ -21,24 +21,25 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.media.AudioManager;
 import android.media.session.MediaSessionManager;
+import android.os.PowerExemptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastSender;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -47,6 +48,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -58,16 +60,18 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
     // Mock
     private MediaSessionManager mMediaSessionManager = mock(MediaSessionManager.class);
     private LocalBluetoothManager mLocalBluetoothManager = mock(LocalBluetoothManager.class);
-    private ShadeController mShadeController = mock(ShadeController.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
+    private BroadcastSender mBroadcastSender = mock(BroadcastSender.class);
     private LocalMediaManager mLocalMediaManager = mock(LocalMediaManager.class);
     private MediaDevice mMediaDevice = mock(MediaDevice.class);
     private MediaDevice mMediaDevice1 = mock(MediaDevice.class);
     private NotificationEntryManager mNotificationEntryManager =
             mock(NotificationEntryManager.class);
-    private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
-    private final SystemUIDialogManager mDialogManager = mock(SystemUIDialogManager.class);
+    private NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
+            NearbyMediaDevicesManager.class);
+    private final AudioManager mAudioManager = mock(AudioManager.class);
+    private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
 
     private MediaOutputGroupDialog mMediaOutputGroupDialog;
     private MediaOutputController mMediaOutputController;
@@ -75,12 +79,13 @@ public class MediaOutputGroupDialogTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE, false,
-                mMediaSessionManager, mLocalBluetoothManager, mShadeController, mStarter,
-                mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator, mDialogManager);
+        mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
+                mMediaSessionManager, mLocalBluetoothManager, mStarter,
+                mNotificationEntryManager, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
-        mMediaOutputGroupDialog = new MediaOutputGroupDialog(mContext, false,
-                mMediaOutputController, mDialogManager);
+        mMediaOutputGroupDialog = new MediaOutputGroupDialog(mContext, false, mBroadcastSender,
+                mMediaOutputController);
         mMediaOutputGroupDialog.show();
         when(mLocalMediaManager.getSelectedMediaDevice()).thenReturn(mMediaDevices);
     }

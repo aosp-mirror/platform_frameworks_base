@@ -40,6 +40,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -47,10 +48,12 @@ import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ImageUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +74,7 @@ public class PolicyWarningUIController {
     @VisibleForTesting
     protected static final String ACTION_DISMISS_NOTIFICATION =
             TAG + ".ACTION_DISMISS_NOTIFICATION";
+    private static final String EXTRA_TIME_FOR_LOGGING = "start_time_to_log_a11y_tool";
     private static final int SEND_NOTIFICATION_DELAY_HOURS = 24;
 
     /** Current enabled accessibility services. */
@@ -92,25 +96,24 @@ public class PolicyWarningUIController {
         filter.addAction(ACTION_A11Y_SETTINGS);
         filter.addAction(ACTION_DISMISS_NOTIFICATION);
         mContext.registerReceiver(mNotificationController, filter,
-                Manifest.permission.MANAGE_ACCESSIBILITY, mMainHandler);
-
-    }
-
-    protected void setAccessibilityPolicyManager(
-            AccessibilitySecurityPolicy accessibilitySecurityPolicy) {
-        mNotificationController.setAccessibilityPolicyManager(accessibilitySecurityPolicy);
+                Manifest.permission.MANAGE_ACCESSIBILITY, mMainHandler, Context.RECEIVER_EXPORTED);
     }
 
     /**
      * Updates enabled accessibility services and notified accessibility services after switching
      * to another user.
      *
-     * @param enabledServices The current enabled services
+     * @param enabledServices the current enabled services
      */
-    public void onSwitchUserLocked(int userId, Set<ComponentName> enabledServices) {
+    public void onSwitchUser(int userId, Set<ComponentName> enabledServices) {
+        mMainHandler.sendMessage(
+                obtainMessage(this::onSwitchUserInternal, userId, enabledServices));
+    }
+
+    private void onSwitchUserInternal(int userId, Set<ComponentName> enabledServices) {
         mEnabledA11yServices.clear();
         mEnabledA11yServices.addAll(enabledServices);
-        mMainHandler.sendMessage(obtainMessage(mNotificationController::onSwitchUser, userId));
+        mNotificationController.onSwitchUser(userId);
     }
 
     /**
@@ -119,10 +122,14 @@ public class PolicyWarningUIController {
      * setting {@link Settings.Secure#ENABLED_ACCESSIBILITY_SERVICES} changed.
      *
      * @param userId          The user id
-     * @param enabledServices The enabled services
+     * @param enabledServices The enabled services set
      */
-    public void onEnabledServicesChangedLocked(int userId,
-            Set<ComponentName> enabledServices) {
+    public void onEnabledServicesChanged(int userId, Set<ComponentName> enabledServices) {
+        mMainHandler.sendMessage(
+                obtainMessage(this::onEnabledServicesChangedInternal, userId, enabledServices));
+    }
+
+    void onEnabledServicesChangedInternal(int userId, Set<ComponentName> enabledServices) {
         final ArraySet<ComponentName> disabledServices = new ArraySet<>(mEnabledA11yServices);
         disabledServices.removeAll(enabledServices);
         mEnabledA11yServices.clear();
@@ -179,8 +186,21 @@ public class PolicyWarningUIController {
         intent.setPackage(context.getPackageName())
                 .setIdentifier(serviceComponentName.flattenToShortString())
                 .putExtra(Intent.EXTRA_COMPONENT_NAME, serviceComponentName)
-                .putExtra(Intent.EXTRA_USER_ID, userId);
+                .putExtra(Intent.EXTRA_USER_ID, userId)
+                .putExtra(Intent.EXTRA_TIME, SystemClock.elapsedRealtime());
         return intent;
+    }
+
+    /**
+     * Enables to send the notification for non-Accessibility services.
+     */
+    public void enableSendingNonA11yToolNotification(boolean enable) {
+        mMainHandler.sendMessage(
+                obtainMessage(this::enableSendingNonA11yToolNotificationInternal, enable));
+    }
+
+    private void enableSendingNonA11yToolNotificationInternal(boolean enable) {
+        mNotificationController.setSendingNotification(enable);
     }
 
     /** A sub class to handle notifications and settings on the main thread. */
@@ -190,20 +210,17 @@ public class PolicyWarningUIController {
 
         /** All accessibility services which are notified to the user by the policy warning rule. */
         private final ArraySet<ComponentName> mNotifiedA11yServices = new ArraySet<>();
+        /** The component name of sent notifications. */
+        private final List<ComponentName> mSentA11yServiceNotification = new ArrayList<>();
         private final NotificationManager mNotificationManager;
         private final Context mContext;
 
         private int mCurrentUserId;
-        private AccessibilitySecurityPolicy mAccessibilitySecurityPolicy;
+        private boolean mSendNotification;
 
         public NotificationController(Context context) {
             mContext = context;
             mNotificationManager = mContext.getSystemService(NotificationManager.class);
-        }
-
-        protected void setAccessibilityPolicyManager(
-                AccessibilitySecurityPolicy accessibilitySecurityPolicy) {
-            mAccessibilitySecurityPolicy = accessibilitySecurityPolicy;
         }
 
         @Override
@@ -214,22 +231,38 @@ public class PolicyWarningUIController {
             if (TextUtils.isEmpty(action) || componentName == null) {
                 return;
             }
+            final long startTimeMills = intent.getLongExtra(Intent.EXTRA_TIME, 0);
+            final long durationMills =
+                    startTimeMills > 0 ? SystemClock.elapsedRealtime() - startTimeMills : 0;
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_SYSTEM);
             if (ACTION_SEND_NOTIFICATION.equals(action)) {
-                trySendNotification(userId, componentName);
+                if (trySendNotification(userId, componentName)) {
+                    AccessibilityStatsLogUtils.logNonA11yToolServiceWarningReported(
+                            componentName.getPackageName(),
+                            AccessibilityStatsLogUtils.ACCESSIBILITY_PRIVACY_WARNING_STATUS_SHOWN,
+                            durationMills);
+                }
             } else if (ACTION_A11Y_SETTINGS.equals(action)) {
-                launchSettings(userId, componentName);
+                if (tryLaunchSettings(userId, componentName)) {
+                    AccessibilityStatsLogUtils.logNonA11yToolServiceWarningReported(
+                            componentName.getPackageName(),
+                            AccessibilityStatsLogUtils.ACCESSIBILITY_PRIVACY_WARNING_STATUS_CLICKED,
+                            durationMills);
+                }
                 mNotificationManager.cancel(componentName.flattenToShortString(),
                         NOTE_A11Y_VIEW_AND_CONTROL_ACCESS);
+                mSentA11yServiceNotification.remove(componentName);
                 onNotificationCanceled(userId, componentName);
             } else if (ACTION_DISMISS_NOTIFICATION.equals(action)) {
+                mSentA11yServiceNotification.remove(componentName);
                 onNotificationCanceled(userId, componentName);
             }
         }
 
         protected void onSwitchUser(int userId) {
-            mCurrentUserId = userId;
+            cancelSentNotifications();
             mNotifiedA11yServices.clear();
+            mCurrentUserId = userId;
             mNotifiedA11yServices.addAll(readNotifiedServiceList(userId));
         }
 
@@ -240,12 +273,13 @@ public class PolicyWarningUIController {
             }
         }
 
-        private void trySendNotification(int userId, ComponentName componentName) {
-            if (!AccessibilitySecurityPolicy.POLICY_WARNING_ENABLED) {
-                return;
-            }
+        private boolean trySendNotification(int userId, ComponentName componentName) {
             if (userId != mCurrentUserId) {
-                return;
+                return false;
+            }
+
+            if (!mSendNotification) {
+                return false;
             }
 
             List<AccessibilityServiceInfo> enabledServiceInfos = getEnabledServiceInfos();
@@ -253,7 +287,7 @@ public class PolicyWarningUIController {
                 final AccessibilityServiceInfo a11yServiceInfo = enabledServiceInfos.get(i);
                 if (componentName.flattenToShortString().equals(
                         a11yServiceInfo.getComponentName().flattenToShortString())) {
-                    if (!mAccessibilitySecurityPolicy.isA11yCategoryService(a11yServiceInfo)
+                    if (!a11yServiceInfo.isAccessibilityTool()
                             && !mNotifiedA11yServices.contains(componentName)) {
                         final CharSequence displayName =
                                 a11yServiceInfo.getResolveInfo().serviceInfo.loadLabel(
@@ -264,23 +298,27 @@ public class PolicyWarningUIController {
                                 android.R.dimen.app_icon_size);
                         sendNotification(userId, componentName, displayName,
                                 ImageUtils.buildScaledBitmap(drawable, size, size));
+                        return true;
                     }
                     break;
                 }
             }
+            return false;
         }
 
-        private void launchSettings(int userId, ComponentName componentName) {
+        private boolean tryLaunchSettings(int userId, ComponentName componentName) {
             if (userId != mCurrentUserId) {
-                return;
+                return false;
             }
             final Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             intent.putExtra(Intent.EXTRA_COMPONENT_NAME, componentName.flattenToShortString());
+            intent.putExtra(EXTRA_TIME_FOR_LOGGING, SystemClock.elapsedRealtime());
             final Bundle bundle = ActivityOptions.makeBasic().setLaunchDisplayId(
                     mContext.getDisplayId()).toBundle();
             mContext.startActivityAsUser(intent, bundle, UserHandle.of(userId));
             mContext.getSystemService(StatusBarManager.class).collapsePanels();
+            return true;
         }
 
         protected void onNotificationCanceled(int userId, ComponentName componentName) {
@@ -323,6 +361,7 @@ public class PolicyWarningUIController {
             mNotificationManager.notify(serviceComponentName.flattenToShortString(),
                     NOTE_A11Y_VIEW_AND_CONTROL_ACCESS,
                     notificationBuilder.build());
+            mSentA11yServiceNotification.add(serviceComponentName);
         }
 
         private ArraySet<ComponentName> readNotifiedServiceList(int userId) {
@@ -371,6 +410,16 @@ public class PolicyWarningUIController {
                     mContext);
             return accessibilityManager.getEnabledAccessibilityServiceList(
                     AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+        }
+
+        private void cancelSentNotifications() {
+            mSentA11yServiceNotification.forEach(componentName -> mNotificationManager.cancel(
+                    componentName.flattenToShortString(), NOTE_A11Y_VIEW_AND_CONTROL_ACCESS));
+            mSentA11yServiceNotification.clear();
+        }
+
+        void setSendingNotification(boolean enable) {
+            mSendNotification = enable;
         }
     }
 }

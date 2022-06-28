@@ -118,6 +118,7 @@ public class LocalDisplayAdapterTest {
         LocalServices.removeServiceForTest(LightsManager.class);
         LocalServices.addService(LightsManager.class, mMockedLightsManager);
         mInjector = new Injector();
+        when(mSurfaceControlProxy.getBootDisplayModeSupport()).thenReturn(true);
         mAdapter = new LocalDisplayAdapter(mMockedSyncRoot, mMockedContext, mHandler,
                 mListener, mInjector);
         spyOn(mAdapter);
@@ -177,7 +178,7 @@ public class LocalDisplayAdapterTest {
         // This should be public
         assertDisplayPrivateFlag(mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked(),
                 PORT_A, false);
-        // This should be public
+        // This should be private
         assertDisplayPrivateFlag(mListener.addedDisplays.get(1).getDisplayDeviceInfoLocked(),
                 PORT_B, true);
         // This should be public
@@ -336,6 +337,62 @@ public class LocalDisplayAdapterTest {
     }
 
     @Test
+    public void testAfterDisplayChange_DefaultDisplayModeIsUpdated() throws Exception {
+        SurfaceControl.DisplayMode displayMode = createFakeDisplayMode(0, 1920, 1080, 60f);
+        SurfaceControl.DisplayMode[] modes =
+                new SurfaceControl.DisplayMode[]{displayMode};
+        FakeDisplay display = new FakeDisplay(PORT_A, modes, 0);
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays).isEmpty();
+
+        DisplayDeviceInfo displayDeviceInfo = mListener.addedDisplays.get(
+                0).getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.supportedModes.length).isEqualTo(modes.length);
+        assertModeIsSupported(displayDeviceInfo.supportedModes, displayMode);
+
+        Display.Mode defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
+        assertThat(matches(defaultMode, displayMode)).isTrue();
+
+        // Set the display mode to an unsupported mode
+        SurfaceControl.DisplayMode displayMode2 = createFakeDisplayMode(1, 1920, 1080, 120f);
+        mListener.addedDisplays.get(0).setUserPreferredDisplayModeLocked(
+                new Display.Mode(displayMode2.width, displayMode2.height,
+                        displayMode2.refreshRate));
+        updateAvailableDisplays();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
+        assertThat(matches(defaultMode, displayMode2)).isFalse();
+
+        // Change the display
+        modes = new SurfaceControl.DisplayMode[]{displayMode, displayMode2};
+        display.dynamicInfo.supportedDisplayModes = modes;
+        setUpDisplay(display);
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertTrue(mListener.traversalRequested);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+
+        DisplayDevice displayDevice = mListener.changedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        displayDeviceInfo = mListener.addedDisplays.get(0).getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.supportedModes.length).isEqualTo(modes.length);
+        assertModeIsSupported(displayDeviceInfo.supportedModes, displayMode);
+        assertModeIsSupported(displayDeviceInfo.supportedModes, displayMode2);
+
+        defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
+        assertThat(matches(defaultMode, displayMode2)).isTrue();
+    }
+
+    @Test
     public void testAfterDisplayChange_DisplayModesAreUpdated() throws Exception {
         SurfaceControl.DisplayMode displayMode = createFakeDisplayMode(0, 1920, 1080, 60f);
         SurfaceControl.DisplayMode[] modes =
@@ -356,12 +413,10 @@ public class LocalDisplayAdapterTest {
         assertModeIsSupported(displayDeviceInfo.supportedModes, displayMode);
 
         Display.Mode defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
-        assertThat(defaultMode.matches(displayMode.width, displayMode.height,
-                displayMode.refreshRate)).isTrue();
+        assertThat(matches(defaultMode, displayMode)).isTrue();
 
         Display.Mode activeMode = getModeById(displayDeviceInfo, displayDeviceInfo.modeId);
-        assertThat(activeMode.matches(displayMode.width, displayMode.height,
-                displayMode.refreshRate)).isTrue();
+        assertThat(matches(activeMode, displayMode)).isTrue();
 
         // Change the display
         SurfaceControl.DisplayMode addedDisplayInfo = createFakeDisplayMode(1, 3840, 2160, 60f);
@@ -385,12 +440,10 @@ public class LocalDisplayAdapterTest {
         assertModeIsSupported(displayDeviceInfo.supportedModes, addedDisplayInfo);
 
         activeMode = getModeById(displayDeviceInfo, displayDeviceInfo.modeId);
-        assertThat(activeMode.matches(addedDisplayInfo.width, addedDisplayInfo.height,
-                addedDisplayInfo.refreshRate)).isTrue();
+        assertThat(matches(activeMode, addedDisplayInfo)).isTrue();
 
         defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
-        assertThat(defaultMode.matches(addedDisplayInfo.width, addedDisplayInfo.height,
-                addedDisplayInfo.refreshRate)).isTrue();
+        assertThat(matches(defaultMode, addedDisplayInfo)).isTrue();
     }
 
     @Test
@@ -702,6 +755,57 @@ public class LocalDisplayAdapterTest {
         verify(mMockedBacklight, never()).setBrightness(anyFloat());
     }
 
+    @Test
+    public void testGetSystemPreferredDisplayMode() throws Exception {
+        SurfaceControl.DisplayMode displayMode1 = createFakeDisplayMode(0, 1920, 1080, 60f);
+        // preferred mode
+        SurfaceControl.DisplayMode displayMode2 = createFakeDisplayMode(1, 3840, 2160, 60f);
+
+        SurfaceControl.DisplayMode[] modes =
+                new SurfaceControl.DisplayMode[]{displayMode1, displayMode2};
+        FakeDisplay display = new FakeDisplay(PORT_A, modes, 0, 1);
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays).isEmpty();
+
+        DisplayDeviceInfo displayDeviceInfo = mListener.addedDisplays.get(
+                0).getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.supportedModes.length).isEqualTo(modes.length);
+
+        Display.Mode defaultMode = getModeById(displayDeviceInfo, displayDeviceInfo.defaultModeId);
+        assertThat(matches(defaultMode, displayMode2)).isTrue();
+
+        // Change the display and add new preferred mode
+        SurfaceControl.DisplayMode addedDisplayInfo = createFakeDisplayMode(2, 2340, 1080, 60f);
+        modes = new SurfaceControl.DisplayMode[]{displayMode1, displayMode2, addedDisplayInfo};
+        display.dynamicInfo.supportedDisplayModes = modes;
+        display.dynamicInfo.preferredBootDisplayMode = 2;
+        setUpDisplay(display);
+        mInjector.getTransmitter().sendHotplug(display, /* connected */ true);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+
+        assertTrue(mListener.traversalRequested);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+
+        DisplayDevice displayDevice = mListener.changedDisplays.get(0);
+        displayDevice.applyPendingDisplayDeviceInfoChangesLocked();
+        displayDeviceInfo = displayDevice.getDisplayDeviceInfoLocked();
+
+        assertThat(displayDeviceInfo.supportedModes.length).isEqualTo(modes.length);
+        assertModeIsSupported(displayDeviceInfo.supportedModes, displayMode1);
+        assertModeIsSupported(displayDeviceInfo.supportedModes, displayMode2);
+        assertModeIsSupported(displayDeviceInfo.supportedModes, addedDisplayInfo);
+
+        assertThat(matches(displayDevice.getSystemPreferredDisplayModeLocked(), addedDisplayInfo))
+                .isTrue();
+    }
+
     private void assertDisplayDpi(DisplayDeviceInfo info, int expectedPort,
                                   float expectedXdpi,
                                   float expectedYDpi,
@@ -779,6 +883,16 @@ public class LocalDisplayAdapterTest {
             dynamicInfo.supportedDisplayModes = modes;
             dynamicInfo.activeDisplayModeId = activeMode;
         }
+
+        private FakeDisplay(int port, SurfaceControl.DisplayMode[] modes, int activeMode,
+                int preferredMode) {
+            address = createDisplayAddress(port);
+            info = createFakeDisplayInfo();
+            dynamicInfo.supportedDisplayModes = modes;
+            dynamicInfo.activeDisplayModeId = activeMode;
+            dynamicInfo.preferredBootDisplayMode = preferredMode;
+        }
+
     }
 
     private void setUpDisplay(FakeDisplay display) {
@@ -917,5 +1031,10 @@ public class LocalDisplayAdapterTest {
             }
         });
         return mockArray;
+    }
+
+    private boolean matches(Display.Mode a, SurfaceControl.DisplayMode b) {
+        return a.getPhysicalWidth() == b.width && a.getPhysicalHeight() == b.height
+                && Float.floatToIntBits(a.getRefreshRate()) == Float.floatToIntBits(b.refreshRate);
     }
 }

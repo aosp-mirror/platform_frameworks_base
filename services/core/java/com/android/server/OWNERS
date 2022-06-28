@@ -10,9 +10,6 @@ per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com
 # Userspace reboot
 per-file UserspaceRebootLogger.java = ioffe@google.com, dvander@google.com
 
-# Sensor Privacy
-per-file SensorPrivacyService.java = file:platform/frameworks/native:/libs/sensorprivacy/OWNERS
-
 # ServiceWatcher
 per-file ServiceWatcher.java = sooniln@google.com
 
@@ -22,6 +19,7 @@ per-file BatteryService.java = file:platform/hardware/interfaces:/health/aidl/OW
 per-file *Alarm* = file:/apex/jobscheduler/OWNERS
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
 per-file *Battery* = file:/BATTERY_STATS_OWNERS
+per-file *BinaryTransparency* = file:/core/java/android/transparency/OWNERS
 per-file *Binder* = file:/core/java/com/android/internal/os/BINDER_OWNERS
 per-file *Gnss* = file:/services/core/java/com/android/server/location/OWNERS
 per-file **IpSec* = file:/services/core/java/com/android/server/net/OWNERS

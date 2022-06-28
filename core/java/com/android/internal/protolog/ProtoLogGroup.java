@@ -60,6 +60,7 @@ public enum ProtoLogGroup implements IProtoLogGroup {
             Consts.TAG_WM),
     WM_DEBUG_APP_TRANSITIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
+    WM_DEBUG_ANIM(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
     WM_DEBUG_APP_TRANSITIONS_ANIM(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
     WM_DEBUG_RECENTS_ANIMATIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
@@ -82,9 +83,11 @@ public enum ProtoLogGroup implements IProtoLogGroup {
             Consts.TAG_WM),
     WM_DEBUG_WINDOW_INSETS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
-    WM_DEBUG_LAYER_MIRRORING(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
+    WM_DEBUG_CONTENT_RECORDING(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
             Consts.TAG_WM),
     WM_DEBUG_WALLPAPER(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
+    WM_DEBUG_BACK_PREVIEW(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
+            "CoreBackPreview"),
     TEST_GROUP(true, true, false, "WindowManagerProtoLogTest");
 
     private final boolean mEnabled;

@@ -79,6 +79,29 @@ public class ContextHubInfo implements Parcelable {
         mSupportedSensors = new int[0];
         mMemoryRegions = new MemoryRegion[0];
     }
+    /**
+     * @hide
+     */
+    public ContextHubInfo(android.hardware.contexthub.ContextHubInfo contextHub) {
+        mId = contextHub.id;
+        mName = contextHub.name;
+        mVendor = contextHub.vendor;
+        mToolchain = contextHub.toolchain;
+        mPlatformVersion = 0;
+        mToolchainVersion = 0;
+        mPeakMips = contextHub.peakMips;
+        mStoppedPowerDrawMw = 0;
+        mSleepPowerDrawMw = 0;
+        mPeakPowerDrawMw = 0;
+        mMaxPacketLengthBytes = contextHub.maxSupportedMessageLengthBytes;
+        mChrePlatformId = contextHub.chrePlatformId;
+        mChreApiMajorVersion = contextHub.chreApiMajorVersion;
+        mChreApiMinorVersion = contextHub.chreApiMinorVersion;
+        mChrePatchVersion = (short) contextHub.chrePatchVersion;
+
+        mSupportedSensors = new int[0];
+        mMemoryRegions = new MemoryRegion[0];
+    }
 
     /**
      * returns the maximum number of bytes that can be sent per message to the hub

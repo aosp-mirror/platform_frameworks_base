@@ -338,7 +338,7 @@ class OverlayManagerServiceImplTestsBase {
                 when(pkg.getBaseApkPath()).thenReturn(apkPath);
                 when(pkg.getLongVersionCode()).thenReturn((long) versionCode);
                 when(pkg.getOverlayTarget()).thenReturn(targetPackageName);
-                when(pkg.getOverlayTargetName()).thenReturn(targetOverlayableName);
+                when(pkg.getOverlayTargetOverlayableName()).thenReturn(targetOverlayableName);
                 when(pkg.getOverlayCategory()).thenReturn("Fake-category-" + targetPackageName);
                 return pkg;
             }

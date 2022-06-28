@@ -17,8 +17,9 @@
 package com.android.server.pm.parsing
 
 import android.content.pm.PackageManager
-import android.content.pm.PackageParser
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import android.platform.test.annotations.Postsubmit
+import com.android.server.pm.PackageManagerException
 import com.android.server.pm.PackageManagerService
 import com.android.server.pm.PackageManagerServiceUtils
 import org.junit.Rule
@@ -80,11 +81,12 @@ class SystemPartitionParseTest {
         val exceptions = buildApks()
                 .map {
                     runCatching {
-                        parser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
+                        parser.parsePackage(
+                                it, ParsingPackageUtils.PARSE_IS_SYSTEM_DIR, false /*useCaches*/)
                     }
                 }
                 .mapNotNull { it.exceptionOrNull() }
-                .filterNot { (it as? PackageParser.PackageParserException)?.error ==
+                .filterNot { (it as? PackageManagerException)?.error ==
                         PackageManager.INSTALL_PARSE_FAILED_SKIPPED }
 
         if (exceptions.isEmpty()) return

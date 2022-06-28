@@ -48,7 +48,7 @@ public final class PrinterId implements Parcelable {
     }
 
     private PrinterId(@NonNull Parcel parcel) {
-        mServiceName = Preconditions.checkNotNull((ComponentName) parcel.readParcelable(null));
+        mServiceName = Preconditions.checkNotNull((ComponentName) parcel.readParcelable(null, android.content.ComponentName.class));
         mLocalId = Preconditions.checkNotNull(parcel.readString());
     }
 

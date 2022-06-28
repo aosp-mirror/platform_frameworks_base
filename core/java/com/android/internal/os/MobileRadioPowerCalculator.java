@@ -20,19 +20,18 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.telephony.CellSignalStrength;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.List;
-
 public class MobileRadioPowerCalculator extends PowerCalculator {
     private static final String TAG = "MobRadioPowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
 
     private static final int NUM_SIGNAL_STRENGTH_LEVELS =
             CellSignalStrength.getNumSignalStrengthLevels();
+
+    private static final BatteryConsumer.Key[] UNINITIALIZED_KEYS = new BatteryConsumer.Key[0];
 
     private final UsageBasedPowerEstimator mActivePowerEstimator;
     private final UsageBasedPowerEstimator[] mIdlePowerEstimators =
@@ -84,19 +83,32 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
     }
 
     @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO;
+    }
+
+    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
 
         PowerAndDuration total = new PowerAndDuration();
 
-        final double powerPerPacketMah = getMobilePowerPerPacket(batteryStats, rawRealtimeUs,
-                BatteryStats.STATS_SINCE_CHARGED);
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
+        BatteryConsumer.Key[] keys = UNINITIALIZED_KEYS;
+
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             final BatteryStats.Uid uid = app.getBatteryStatsUid();
-            calculateApp(app, uid, powerPerPacketMah, total, query);
+            if (keys == UNINITIALIZED_KEYS) {
+                if (query.isProcessStateDataNeeded()) {
+                    keys = app.getKeys(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO);
+                } else {
+                    keys = null;
+                }
+            }
+
+            calculateApp(app, uid, total, query, keys);
         }
 
         final long totalConsumptionUC = batteryStats.getMobileRadioMeasuredBatteryConsumptionUC();
@@ -121,82 +133,39 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
     }
 
     private void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
-            double powerPerPacketMah, PowerAndDuration total,
-            BatteryUsageStatsQuery query) {
+            PowerAndDuration total,
+            BatteryUsageStatsQuery query, BatteryConsumer.Key[] keys) {
         final long radioActiveDurationMs = calculateDuration(u, BatteryStats.STATS_SINCE_CHARGED);
-        total.totalAppDurationMs += radioActiveDurationMs;
-
         final long consumptionUC = u.getMobileRadioMeasuredBatteryConsumptionUC();
         final int powerModel = getPowerModel(consumptionUC, query);
-        final double powerMah = calculatePower(u, powerModel, powerPerPacketMah,
-                radioActiveDurationMs, consumptionUC);
-        total.totalAppPowerMah += powerMah;
+        final double powerMah = calculatePower(u, powerModel, radioActiveDurationMs, consumptionUC);
+
+        if (!app.isVirtualUid()) {
+            total.totalAppDurationMs += radioActiveDurationMs;
+            total.totalAppPowerMah += powerMah;
+        }
 
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO,
                         radioActiveDurationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO, powerMah,
                         powerModel);
-    }
 
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final double mobilePowerPerPacket = getMobilePowerPerPacket(batteryStats, rawRealtimeUs,
-                statsType);
-        PowerAndDuration total = new PowerAndDuration();
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                final BatteryStats.Uid u = app.uidObj;
-                calculateApp(app, u, statsType, mobilePowerPerPacket, total);
+        if (query.isProcessStateDataNeeded() && keys != null) {
+            for (BatteryConsumer.Key key: keys) {
+                final int processState = key.processState;
+                if (processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                    // Already populated with the total across all process states
+                    continue;
+                }
+
+                final long durationInStateMs =
+                        u.getMobileRadioActiveTimeInProcessState(processState) / 1000;
+                final long consumptionInStateUc =
+                        u.getMobileRadioMeasuredBatteryConsumptionUC(processState);
+                final double powerInStateMah = calculatePower(u, powerModel, durationInStateMs,
+                        consumptionInStateUc);
+                app.setConsumedPower(key, powerInStateMah, powerModel);
             }
-        }
-
-        BatterySipper radio = new BatterySipper(BatterySipper.DrainType.CELL, null, 0);
-        final long consumptionUC = batteryStats.getMobileRadioMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC);
-        calculateRemaining(total, powerModel, batteryStats, rawRealtimeUs, consumptionUC);
-        if (total.remainingPowerMah != 0) {
-            if (total.signalDurationMs != 0) {
-                radio.noCoveragePercent =
-                        total.noCoverageDurationMs * 100.0 / total.signalDurationMs;
-            }
-            radio.mobileActive = total.durationMs;
-            radio.mobileActiveCount = batteryStats.getMobileRadioActiveUnknownCount(statsType);
-            radio.mobileRadioPowerMah = total.remainingPowerMah;
-            radio.sumPower();
-        }
-        if (radio.totalPowerMah > 0) {
-            sippers.add(radio);
-        }
-    }
-
-    private void calculateApp(BatterySipper app, BatteryStats.Uid u, int statsType,
-            double powerPerPacketMah, PowerAndDuration total) {
-        app.mobileActive = calculateDuration(u, statsType);
-
-        final long consumptionUC =  u.getMobileRadioMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC);
-        app.mobileRadioPowerMah = calculatePower(u, powerModel, powerPerPacketMah, app.mobileActive,
-                consumptionUC);
-        total.totalAppDurationMs += app.mobileActive;
-
-        // Add cost of mobile traffic.
-        app.mobileRxPackets = u.getNetworkActivityPackets(BatteryStats.NETWORK_MOBILE_RX_DATA,
-                statsType);
-        app.mobileTxPackets = u.getNetworkActivityPackets(BatteryStats.NETWORK_MOBILE_TX_DATA,
-                statsType);
-        app.mobileActiveCount = u.getMobileRadioActiveCount(statsType);
-        app.mobileRxBytes = u.getNetworkActivityBytes(BatteryStats.NETWORK_MOBILE_RX_DATA,
-                statsType);
-        app.mobileTxBytes = u.getNetworkActivityBytes(BatteryStats.NETWORK_MOBILE_TX_DATA,
-                statsType);
-
-        if (DEBUG && app.mobileRadioPowerMah != 0) {
-            Log.d(TAG, "UID " + u.getUid() + ": mobile packets "
-                    + (app.mobileRxPackets + app.mobileTxPackets)
-                    + " active time " + app.mobileActive
-                    + " power=" + formatCharge(app.mobileRadioPowerMah));
         }
     }
 
@@ -205,26 +174,15 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
     }
 
     private double calculatePower(BatteryStats.Uid u, @BatteryConsumer.PowerModel int powerModel,
-            double powerPerPacketMah, long radioActiveDurationMs, long measuredChargeUC) {
+            long radioActiveDurationMs, long measuredChargeUC) {
         if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
             return uCtoMah(measuredChargeUC);
         }
 
         if (radioActiveDurationMs > 0) {
-            // We are tracking when the radio is up, so can use the active time to
-            // determine power use.
             return calcPowerFromRadioActiveDurationMah(radioActiveDurationMs);
-        } else {
-            // We are not tracking when the radio is up, so must approximate power use
-            // based on the number of packets.
-            final long mobileRxPackets = u.getNetworkActivityPackets(
-                    BatteryStats.NETWORK_MOBILE_RX_DATA,
-                    BatteryStats.STATS_SINCE_CHARGED);
-            final long mobileTxPackets = u.getNetworkActivityPackets(
-                    BatteryStats.NETWORK_MOBILE_TX_DATA,
-                    BatteryStats.STATS_SINCE_CHARGED);
-            return (mobileRxPackets + mobileTxPackets) * powerPerPacketMah;
         }
+        return 0;
     }
 
     private void calculateRemaining(PowerAndDuration total,
@@ -245,7 +203,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
                 final double p = calcIdlePowerAtSignalStrengthMah(strengthTimeMs, i);
                 if (DEBUG && p != 0) {
                     Log.d(TAG, "Cell strength #" + i + ": time=" + strengthTimeMs + " power="
-                            + formatCharge(p));
+                            + BatteryStats.formatCharge(p));
                 }
                 powerMah += p;
             }
@@ -264,8 +222,8 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
         if (powerModel == BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
             final double p = calcScanTimePowerMah(scanningTimeMs);
             if (DEBUG && p != 0) {
-                Log.d(TAG, "Cell radio scanning: time=" + scanningTimeMs + " power=" + formatCharge(
-                        p));
+                Log.d(TAG, "Cell radio scanning: time=" + scanningTimeMs
+                        + " power=" + BatteryStats.formatCharge(p));
             }
             powerMah += p;
 
@@ -299,22 +257,5 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
      */
     public double calcScanTimePowerMah(long scanningTimeMs) {
         return mScanPowerEstimator.calculatePower(scanningTimeMs);
-    }
-
-    /**
-     * Return estimated power (in mAh) of sending or receiving a packet with the mobile radio.
-     */
-    private double getMobilePowerPerPacket(BatteryStats stats, long rawRealtimeUs, int statsType) {
-        final long radioDataUptimeMs =
-                stats.getMobileRadioActiveTime(rawRealtimeUs, statsType) / 1000;
-        final double mobilePower = calcPowerFromRadioActiveDurationMah(radioDataUptimeMs);
-
-        final long mobileRx = stats.getNetworkActivityPackets(BatteryStats.NETWORK_MOBILE_RX_DATA,
-                statsType);
-        final long mobileTx = stats.getNetworkActivityPackets(BatteryStats.NETWORK_MOBILE_TX_DATA,
-                statsType);
-        final long mobilePackets = mobileRx + mobileTx;
-
-        return mobilePackets != 0 ? mobilePower / mobilePackets : 0;
     }
 }

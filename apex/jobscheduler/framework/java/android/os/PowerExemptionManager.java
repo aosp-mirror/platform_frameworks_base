@@ -258,6 +258,11 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = 207;
+    /**
+     * Broadcast {@link android.safetycenter.SafetyCenterManager#ACTION_REFRESH_SAFETY_SOURCES}.
+     */
+    public static final int REASON_REFRESH_SAFETY_SOURCES = 208;
+
     /* Reason code range 300-399 are reserved for other internal reasons */
     /**
      * Device idle system allow list, including EXCEPT-IDLE
@@ -344,6 +349,47 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_MEDIA_SESSION_CALLBACK = 317;
+    /**
+     * Dialer app.
+     * @hide
+     */
+    public static final int REASON_ROLE_DIALER = 318;
+    /**
+     * Emergency app.
+     * @hide
+     */
+    public static final int REASON_ROLE_EMERGENCY = 319;
+    /**
+     * System Module.
+     * @hide
+     */
+    public static final int REASON_SYSTEM_MODULE = 320;
+    /**
+     * Carrier privileged app.
+     * @hide
+     */
+    public static final int REASON_CARRIER_PRIVILEGED_APP = 321;
+    /**
+     * Device/Profile owner protected apps.
+     * @hide
+     */
+    public static final int REASON_DPO_PROTECTED_APP = 322;
+    /**
+     * Apps control is disallowed for the user.
+     * @hide
+     */
+    public static final int REASON_DISALLOW_APPS_CONTROL = 323;
+    /**
+     * Active device admin package.
+     * @hide
+     */
+    public static final int REASON_ACTIVE_DEVICE_ADMIN = 324;
+
+    /**
+     * Media notification re-generate during transferring.
+     * @hide
+     */
+    public static final int REASON_MEDIA_NOTIFICATION_TRANSFER = 325;
 
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
@@ -398,6 +444,7 @@ public class PowerExemptionManager {
             REASON_TIME_CHANGED,
             REASON_LOCALE_CHANGED,
             REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
+            REASON_REFRESH_SAFETY_SOURCES,
             REASON_SYSTEM_ALLOW_LISTED,
             REASON_ALARM_MANAGER_ALARM_CLOCK,
             REASON_ALARM_MANAGER_WHILE_IDLE,
@@ -416,7 +463,15 @@ public class PowerExemptionManager {
             REASON_EVENT_MMS,
             REASON_SHELL,
             REASON_MEDIA_SESSION_CALLBACK,
+            REASON_ROLE_DIALER,
+            REASON_ROLE_EMERGENCY,
+            REASON_SYSTEM_MODULE,
+            REASON_CARRIER_PRIVILEGED_APP,
             REASON_OPT_OUT_REQUESTED,
+            REASON_DPO_PROTECTED_APP,
+            REASON_DISALLOW_APPS_CONTROL,
+            REASON_ACTIVE_DEVICE_ADMIN,
+            REASON_MEDIA_NOTIFICATION_TRANSFER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ReasonCode {}
@@ -588,6 +643,53 @@ public class PowerExemptionManager {
     }
 
     /**
+     * @hide
+     * @return the reason code mapped to statsd for the AppBackgroundRestrictionsInfo atom.
+     */
+    public static int getExemptionReasonForStatsd(@ReasonCode int reasonCode) {
+        switch (reasonCode) {
+            case REASON_SYSTEM_UID:
+                return AppBackgroundRestrictionsInfo.REASON_SYSTEM_UID;
+            case REASON_ALLOWLISTED_PACKAGE:
+                return AppBackgroundRestrictionsInfo.REASON_ALLOWLISTED_PACKAGE;
+            case REASON_COMPANION_DEVICE_MANAGER:
+                return AppBackgroundRestrictionsInfo.REASON_COMPANION_DEVICE_MANAGER;
+            case REASON_DEVICE_DEMO_MODE:
+                return AppBackgroundRestrictionsInfo.REASON_DEVICE_DEMO_MODE;
+            case REASON_DEVICE_OWNER:
+                return AppBackgroundRestrictionsInfo.REASON_DEVICE_OWNER;
+            case REASON_PROFILE_OWNER:
+                return AppBackgroundRestrictionsInfo.REASON_PROFILE_OWNER;
+            case REASON_PROC_STATE_PERSISTENT:
+                return AppBackgroundRestrictionsInfo.REASON_PROC_STATE_PERSISTENT;
+            case REASON_PROC_STATE_PERSISTENT_UI:
+                return AppBackgroundRestrictionsInfo.REASON_PROC_STATE_PERSISTENT_UI;
+            case REASON_OP_ACTIVATE_VPN:
+                return AppBackgroundRestrictionsInfo.REASON_OP_ACTIVATE_VPN;
+            case REASON_OP_ACTIVATE_PLATFORM_VPN:
+                return AppBackgroundRestrictionsInfo.REASON_OP_ACTIVATE_PLATFORM_VPN;
+            case REASON_SYSTEM_MODULE:
+                return AppBackgroundRestrictionsInfo.REASON_SYSTEM_MODULE;
+            case REASON_CARRIER_PRIVILEGED_APP:
+                return AppBackgroundRestrictionsInfo.REASON_CARRIER_PRIVILEGED_APP;
+            case REASON_SYSTEM_ALLOW_LISTED:
+                return AppBackgroundRestrictionsInfo.REASON_SYSTEM_ALLOW_LISTED;
+            case REASON_ROLE_DIALER:
+                return AppBackgroundRestrictionsInfo.REASON_ROLE_DIALER;
+            case REASON_ROLE_EMERGENCY:
+                return AppBackgroundRestrictionsInfo.REASON_ROLE_EMERGENCY;
+            case REASON_DPO_PROTECTED_APP:
+                return AppBackgroundRestrictionsInfo.REASON_DPO_PROTECTED_APP;
+            case REASON_DISALLOW_APPS_CONTROL:
+                return AppBackgroundRestrictionsInfo.REASON_DISALLOW_APPS_CONTROL;
+            case REASON_ACTIVE_DEVICE_ADMIN:
+                return AppBackgroundRestrictionsInfo.REASON_ACTIVE_DEVICE_ADMIN;
+            default:
+                return AppBackgroundRestrictionsInfo.REASON_DENIED;
+        }
+    }
+
+    /**
      * Return string name of the integer reason code.
      * @hide
      * @param reasonCode
@@ -681,6 +783,8 @@ public class PowerExemptionManager {
                 return "LOCALE_CHANGED";
             case REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED:
                 return "REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
+            case REASON_REFRESH_SAFETY_SOURCES:
+                return "REASON_REFRESH_SAFETY_SOURCES";
             case REASON_SYSTEM_ALLOW_LISTED:
                 return "SYSTEM_ALLOW_LISTED";
             case REASON_ALARM_MANAGER_ALARM_CLOCK:
@@ -717,8 +821,24 @@ public class PowerExemptionManager {
                 return "SHELL";
             case REASON_MEDIA_SESSION_CALLBACK:
                 return "MEDIA_SESSION_CALLBACK";
+            case REASON_ROLE_DIALER:
+                return "ROLE_DIALER";
+            case REASON_ROLE_EMERGENCY:
+                return "ROLE_EMERGENCY";
+            case REASON_SYSTEM_MODULE:
+                return "SYSTEM_MODULE";
+            case REASON_CARRIER_PRIVILEGED_APP:
+                return "CARRIER_PRIVILEGED_APP";
+            case REASON_DPO_PROTECTED_APP:
+                return "DPO_PROTECTED_APP";
+            case REASON_DISALLOW_APPS_CONTROL:
+                return "DISALLOW_APPS_CONTROL";
+            case REASON_ACTIVE_DEVICE_ADMIN:
+                return "ACTIVE_DEVICE_ADMIN";
             case REASON_OPT_OUT_REQUESTED:
                 return "REASON_OPT_OUT_REQUESTED";
+            case REASON_MEDIA_NOTIFICATION_TRANSFER:
+                return "REASON_MEDIA_NOTIFICATION_TRANSFER";
             default:
                 return "(unknown:" + reasonCode + ")";
         }

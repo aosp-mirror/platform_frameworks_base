@@ -243,6 +243,56 @@ public class UiModeManager {
      */
     public static final int MODE_NIGHT_YES = 2;
 
+    /**
+     * Granular types for {@link #setNightModeCustomType(int)}
+     * @hide
+     */
+    @IntDef(prefix = { "MODE_NIGHT_CUSTOM_TYPE_" }, value = {
+            MODE_NIGHT_CUSTOM_TYPE_SCHEDULE,
+            MODE_NIGHT_CUSTOM_TYPE_BEDTIME,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NightModeCustomType {}
+
+    /**
+     * Granular types for {@link #getNightModeCustomType()}
+     * @hide
+     */
+    @IntDef(prefix = { "MODE_NIGHT_CUSTOM_TYPE_" }, value = {
+            MODE_NIGHT_CUSTOM_TYPE_UNKNOWN,
+            MODE_NIGHT_CUSTOM_TYPE_SCHEDULE,
+            MODE_NIGHT_CUSTOM_TYPE_BEDTIME,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NightModeCustomReturnType {}
+
+    /**
+     * A granular type for {@link #MODE_NIGHT_CUSTOM} which is unknown.
+     * <p>
+     * This is the default value when the night mode is set to value other than
+     * {@link #MODE_NIGHT_CUSTOM}.
+     * @hide
+     */
+    @SystemApi
+    public static final int MODE_NIGHT_CUSTOM_TYPE_UNKNOWN = -1;
+
+    /**
+     * A granular type for {@link #MODE_NIGHT_CUSTOM} which is based on a custom schedule.
+     * <p>
+     * This is the default value when night mode is set to {@link #MODE_NIGHT_CUSTOM} unless the
+     * the night mode custom type is specified by calling {@link #setNightModeCustomType(int)}.
+     * @hide
+     */
+    @SystemApi
+    public static final int MODE_NIGHT_CUSTOM_TYPE_SCHEDULE = 0;
+
+    /**
+     * A granular type for {@link #MODE_NIGHT_CUSTOM} which is based on the bedtime schedule.
+     * @hide
+     */
+    @SystemApi
+    public static final int MODE_NIGHT_CUSTOM_TYPE_BEDTIME = 1;
+
     private IUiModeManager mService;
 
     /**
@@ -478,7 +528,7 @@ public class UiModeManager {
      * (and potentially an Activity lifecycle event) being applied to all running apps.
      * Developers interested in an app-local implementation of night mode should consider using
      * {@link #setApplicationNightMode(int)} to set and persist the -night qualifier locally or
-     * {@link android.support.v7.app.AppCompatDelegate#setDefaultNightMode(int)} for the
+     * {@link androidx.appcompat.app.AppCompatDelegate#setDefaultNightMode(int)} for the
      * backward compatible implementation.
      *
      * @param mode the night mode to set
@@ -493,6 +543,47 @@ public class UiModeManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Sets the current night mode to {@link #MODE_NIGHT_CUSTOM} with the custom night mode type
+     * {@code nightModeCustomType}.
+     *
+     * @param nightModeCustomType
+     * @throws IllegalArgumentException if passed an unsupported type to
+     *         {@code nightModeCustomType}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+    public void setNightModeCustomType(@NightModeCustomType int nightModeCustomType) {
+        if (mService != null) {
+            try {
+                mService.setNightModeCustomType(nightModeCustomType);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the custom night mode type.
+     * <p>
+     * If the current night mode is not {@link #MODE_NIGHT_CUSTOM}, returns
+     * {@link #MODE_NIGHT_CUSTOM_TYPE_UNKNOWN}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+    public @NightModeCustomReturnType int getNightModeCustomType() {
+        if (mService != null) {
+            try {
+                return mService.getNightModeCustomType();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
     }
 
     /**
@@ -517,7 +608,7 @@ public class UiModeManager {
      * user clears the data for the application, or this application is uninstalled.
      * <p>
      * Developers interested in a non-persistent app-local implementation of night mode should
-     * consider using {@link android.support.v7.app.AppCompatDelegate#setDefaultNightMode(int)}
+     * consider using {@link androidx.appcompat.app.AppCompatDelegate#setDefaultNightMode(int)}
      * to manage the -night qualifier locally.
      *
      * @param mode the night mode to set
@@ -599,11 +690,36 @@ public class UiModeManager {
     }
 
     /**
+     * [De]activating night mode for the current user if the current night mode is custom and the
+     * custom type matches {@code nightModeCustomType}.
+     *
+     * @param nightModeCustomType the specify type of custom mode
+     * @param active {@code true} to activate night mode. Otherwise, deactivate night mode
+     * @return {@code true} if night mode has successfully activated for the requested
+     *         {@code nightModeCustomType}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+    public boolean setNightModeActivatedForCustomMode(@NightModeCustomType int nightModeCustomType,
+            boolean active) {
+        if (mService != null) {
+            try {
+                return mService.setNightModeActivatedForCustomMode(nightModeCustomType, active);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Activating night mode for the current user
      *
      * @return {@code true} if the change is successful
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
     public boolean setNightModeActivated(boolean active) {
         if (mService != null) {
             try {

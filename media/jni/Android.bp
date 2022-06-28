@@ -39,6 +39,7 @@ cc_library_shared {
         "android_media_MediaProfiles.cpp",
         "android_media_MediaRecorder.cpp",
         "android_media_MediaSync.cpp",
+        "android_media_PublicFormatUtils.cpp",
         "android_media_ResampleInputStream.cpp",
         "android_media_Streams.cpp",
         "android_media_SyncParams.cpp",
@@ -86,6 +87,7 @@ cc_library_shared {
         "android.hardware.drm@1.4",
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
+        "android.hardware.drm-V1-ndk",
     ],
 
     header_libs: [
@@ -172,8 +174,7 @@ cc_library_shared {
 
     shared_libs: [
         "android.hardware.graphics.bufferqueue@2.0",
-        "android.hardware.tv.tuner@1.0",
-        "android.hardware.tv.tuner@1.1",
+        "android.hardware.tv.tuner-V1-ndk",
         "libbinder_ndk",
         "libandroid_runtime",
         "libcutils",
@@ -184,7 +185,6 @@ cc_library_shared {
         "libnativehelper",
         "libutils",
         "tv_tuner_aidl_interface-ndk",
-        "tv_tuner_resource_manager_aidl_interface-ndk",
     ],
 
     static_libs: [

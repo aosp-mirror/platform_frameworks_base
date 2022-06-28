@@ -33,6 +33,7 @@ import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_CRO
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -41,6 +42,7 @@ import static org.junit.Assume.assumeThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -151,6 +153,9 @@ public class WallpaperManagerServiceTests {
                 PackageManager.PERMISSION_GRANTED);
         sContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.SET_WALLPAPER,
+                PackageManager.PERMISSION_GRANTED);
+        sContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT,
                 PackageManager.PERMISSION_GRANTED);
         doNothing().when(sContext).sendBroadcastAsUser(any(), any());
 
@@ -316,14 +321,14 @@ public class WallpaperManagerServiceTests {
         final int lastUserId = 5;
         final ServiceInfo pi = mIpm.getServiceInfo(sDefaultWallpaperComponent,
                 PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS, 0);
-        doReturn(pi).when(mIpm).getServiceInfo(any(), anyInt(), anyInt());
+        doReturn(pi).when(mIpm).getServiceInfo(any(), anyLong(), anyInt());
 
         final Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
         final ParceledListSlice ris =
                 mIpm.queryIntentServices(intent,
                         intent.resolveTypeIfNeeded(sContext.getContentResolver()),
                         PackageManager.GET_META_DATA, 0);
-        doReturn(ris).when(mIpm).queryIntentServices(any(), any(), anyInt(), anyInt());
+        doReturn(ris).when(mIpm).queryIntentServices(any(), any(), anyLong(), anyInt());
         doReturn(PackageManager.PERMISSION_GRANTED).when(mIpm).checkPermission(
                 eq(android.Manifest.permission.AMBIENT_WALLPAPER), any(), anyInt());
 
@@ -348,7 +353,7 @@ public class WallpaperManagerServiceTests {
         final int lastUserId = 5;
         final ServiceInfo pi = mIpm.getServiceInfo(sDefaultWallpaperComponent,
                 PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS, 0);
-        doReturn(pi).when(mIpm).getServiceInfo(any(), anyInt(), anyInt());
+        doReturn(pi).when(mIpm).getServiceInfo(any(), anyLong(), anyInt());
 
         final Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
         final ParceledListSlice ris =
@@ -362,7 +367,7 @@ public class WallpaperManagerServiceTests {
             mService.switchUser(userId, null);
             verifyLastWallpaperData(userId, sImageWallpaperComponentName);
             // Simulate user unlocked
-            doReturn(ris).when(mIpm).queryIntentServices(any(), any(), anyInt(), eq(userId));
+            doReturn(ris).when(mIpm).queryIntentServices(any(), any(), anyLong(), eq(userId));
             mService.onUnlockUser(userId);
             verifyLastWallpaperData(userId, sDefaultWallpaperComponent);
             verifyCurrentSystemData(userId);
@@ -430,6 +435,57 @@ public class WallpaperManagerServiceTests {
 
         // ACTION_WALLPAPER_CHANGED should be invoked before onWallpaperColorsChanged.
         assertTrue(timestamps[1] > timestamps[0]);
+    }
+
+    @Test
+    public void testSetWallpaperDimAmount() throws RemoteException {
+        mService.switchUser(USER_SYSTEM, null);
+        float dimAmount = 0.7f;
+        mService.setWallpaperDimAmount(dimAmount);
+        assertEquals("Getting dim amount should match after setting the dim amount",
+                mService.getWallpaperDimAmount(), dimAmount, 0.0);
+    }
+
+    @Test
+    public void testGetAdjustedWallpaperColorsOnDimming() throws RemoteException {
+        final int testUserId = USER_SYSTEM;
+        mService.switchUser(testUserId, null);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent);
+        WallpaperData wallpaper = mService.getCurrentWallpaperData(FLAG_SYSTEM, testUserId);
+
+        // Mock a wallpaper data with color hints that support dark text and dark theme
+        // but not HINT_FROM_BITMAP
+        wallpaper.primaryColors = new WallpaperColors(Color.valueOf(Color.WHITE), null, null,
+                WallpaperColors.HINT_SUPPORTS_DARK_TEXT | WallpaperColors.HINT_SUPPORTS_DARK_THEME);
+        mService.setWallpaperDimAmount(0.6f);
+        int colorHints = mService.getAdjustedWallpaperColorsOnDimming(wallpaper).getColorHints();
+        // Dimmed wallpaper not extracted from bitmap does not support dark text and dark theme
+        assertNotEquals(WallpaperColors.HINT_SUPPORTS_DARK_TEXT,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
+        assertNotEquals(WallpaperColors.HINT_SUPPORTS_DARK_THEME,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME);
+
+        // Remove dimming
+        mService.setWallpaperDimAmount(0f);
+        colorHints = mService.getAdjustedWallpaperColorsOnDimming(wallpaper).getColorHints();
+        // Undimmed wallpaper not extracted from bitmap does support dark text and dark theme
+        assertEquals(WallpaperColors.HINT_SUPPORTS_DARK_TEXT,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
+        assertEquals(WallpaperColors.HINT_SUPPORTS_DARK_THEME,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME);
+
+        // Mock a wallpaper data with color hints that support dark text and dark theme
+        // and was extracted from bitmap
+        wallpaper.primaryColors = new WallpaperColors(Color.valueOf(Color.WHITE), null, null,
+                WallpaperColors.HINT_SUPPORTS_DARK_TEXT | WallpaperColors.HINT_SUPPORTS_DARK_THEME
+                        | WallpaperColors.HINT_FROM_BITMAP);
+        mService.setWallpaperDimAmount(0.6f);
+        colorHints = mService.getAdjustedWallpaperColorsOnDimming(wallpaper).getColorHints();
+        // Dimmed wallpaper should still support dark text and dark theme
+        assertEquals(WallpaperColors.HINT_SUPPORTS_DARK_TEXT,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
+        assertEquals(WallpaperColors.HINT_SUPPORTS_DARK_THEME,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME);
     }
 
     // Verify that after continue switch user from userId 0 to lastUserId, the wallpaper data for

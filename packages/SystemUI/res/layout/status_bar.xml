@@ -103,14 +103,6 @@
             android:gravity="center_horizontal|center_vertical"
         />
 
-        <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
-            android:id="@+id/centered_icon_area"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:clipChildren="false"
-            android:gravity="center_horizontal|center_vertical"/>
-
         <com.android.keyguard.AlphaOptimizedLinearLayout android:id="@+id/system_icon_area"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -118,6 +110,32 @@
             android:orientation="horizontal"
             android:gravity="center_vertical|end"
             >
+
+            <com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer
+                android:id="@+id/user_switcher_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/status_bar_user_chip_bg"
+                android:visibility="visible" >
+                <ImageView android:id="@+id/current_user_avatar"
+                    android:layout_width="@dimen/multi_user_avatar_keyguard_size"
+                    android:layout_height="@dimen/multi_user_avatar_keyguard_size"
+                    android:scaleType="centerInside"
+                    android:paddingEnd="4dp" />
+
+                <TextView android:id="@+id/current_user_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                    />
+            </com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer>
 
             <include layout="@layout/system_icons" />
         </com.android.keyguard.AlphaOptimizedLinearLayout>

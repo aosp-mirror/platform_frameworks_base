@@ -235,9 +235,7 @@ void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int 
 void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
     ALOGV("%s pid=%d grp=%" PRId32, __func__, pid, grp);
-    DIR *d;
     char proc_path[255];
-    struct dirent *de;
 
     if (!verifyGroup(env, grp)) {
         return;
@@ -277,84 +275,8 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         }
     }
 
-    sprintf(proc_path, "/proc/%d/task", pid);
-    if (!(d = opendir(proc_path))) {
-        // If the process exited on us, don't generate an exception
-        if (errno != ENOENT)
-            signalExceptionForGroupError(env, errno, pid);
-        return;
-    }
-
-    while ((de = readdir(d))) {
-        int t_pid;
-        int t_pri;
-        std::string taskprofile;
-
-        if (de->d_name[0] == '.')
-            continue;
-        t_pid = atoi(de->d_name);
-
-        if (!t_pid) {
-            ALOGE("Error getting pid for '%s'\n", de->d_name);
-            continue;
-        }
-
-        t_pri = getpriority(PRIO_PROCESS, t_pid);
-
-        if (t_pri <= ANDROID_PRIORITY_AUDIO) {
-            int scheduler = sched_getscheduler(t_pid) & ~SCHED_RESET_ON_FORK;
-            if ((scheduler == SCHED_FIFO) || (scheduler == SCHED_RR)) {
-                // This task wants to stay in its current audio group so it can keep its budget
-                // don't update its cpuset or cgroup
-                continue;
-            }
-        }
-
-        errno = 0;
-        // grp == SP_BACKGROUND. Set background cpuset policy profile for all threads.
-        if (grp == SP_BACKGROUND) {
-            if (!SetTaskProfiles(t_pid, {"CPUSET_SP_BACKGROUND"}, true)) {
-                signalExceptionForGroupError(env, errno ? errno : EPERM, t_pid);
-                break;
-            }
-            continue;
-        }
-
-        // grp != SP_BACKGROUND. Only change the cpuset cgroup for low priority thread, so it could
-        // preserve it sched policy profile setting.
-        if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
-            switch (grp) {
-                case SP_SYSTEM:
-                    taskprofile = "ServiceCapacityLow";
-                    break;
-                case SP_RESTRICTED:
-                    taskprofile = "ServiceCapacityRestricted";
-                    break;
-                case SP_FOREGROUND:
-                case SP_AUDIO_APP:
-                case SP_AUDIO_SYS:
-                    taskprofile = "ProcessCapacityHigh";
-                    break;
-                case SP_TOP_APP:
-                    taskprofile = "ProcessCapacityMax";
-                    break;
-                default:
-                    taskprofile = "ProcessCapacityNormal";
-                    break;
-            }
-            if (!SetTaskProfiles(t_pid, {taskprofile}, true)) {
-                signalExceptionForGroupError(env, errno ? errno : EPERM, t_pid);
-                break;
-            }
-        // Change the cpuset policy profile for non-low priority thread according to the grp
-        } else {
-            if (!SetTaskProfiles(t_pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true)) {
-                signalExceptionForGroupError(env, errno ? errno : EPERM, t_pid);
-                break;
-            }
-        }
-    }
-    closedir(d);
+    if (!SetProcessProfilesCached(0, pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}))
+        signalExceptionForGroupError(env, errno ? errno : EPERM, pid);
 }
 
 void android_os_Process_setProcessFrozen(
@@ -1346,7 +1268,7 @@ static const JNINativeMethod methods[] = {
         {"createProcessGroup", "(II)I", (void*)android_os_Process_createProcessGroup},
         {"getExclusiveCores", "()[I", (void*)android_os_Process_getExclusiveCores},
         {"setSwappiness", "(IZ)Z", (void*)android_os_Process_setSwappiness},
-        {"setArgV0", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
+        {"setArgV0Native", "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
         {"setUid", "(I)I", (void*)android_os_Process_setUid},
         {"setGid", "(I)I", (void*)android_os_Process_setGid},
         {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},

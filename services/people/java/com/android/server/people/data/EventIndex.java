@@ -254,7 +254,7 @@ public class EventIndex {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mLastUpdatedTime, mEventBitmaps);
+        return Objects.hash(mLastUpdatedTime, Arrays.hashCode(mEventBitmaps));
     }
 
     synchronized void writeToProto(@NonNull ProtoOutputStream protoOutputStream) {

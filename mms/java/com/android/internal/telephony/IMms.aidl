@@ -26,7 +26,7 @@ import android.os.Bundle;
  */
 interface IMms {
     /**
-     * Send an MMS message
+     * Send an MMS message with attribution tag.
      *
      * @param subId the SIM id
      * @param callingPkg the package name of the calling app
@@ -38,10 +38,11 @@ interface IMms {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      * @param messageId An id that uniquely identifies the message requested to be sent.
+     * @param attributionTag a tag that attributes the call to a client App.
      */
     void sendMessage(int subId, String callingPkg, in Uri contentUri,
             String locationUrl, in Bundle configOverrides, in PendingIntent sentIntent,
-            in long messageId);
+            in long messageId, String attributionTag);
 
     /**
      * Download an MMS message using known location and transaction id
@@ -57,10 +58,11 @@ interface IMms {
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
      * @param messageId An id that uniquely identifies the message requested to be downloaded.
+     * @param attributionTag a tag that attributes the call to a client App.
     */
     void downloadMessage(int subId, String callingPkg, String locationUrl,
             in Uri contentUri, in Bundle configOverrides,
-            in PendingIntent downloadedIntent, in long messageId);
+            in PendingIntent downloadedIntent, in long messageId, String attributionTag);
 
     /**
      * Import a text message into system's SMS store

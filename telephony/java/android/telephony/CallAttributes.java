@@ -53,9 +53,9 @@ public final class CallAttributes implements Parcelable {
     }
 
     private CallAttributes(Parcel in) {
-        this.mPreciseCallState = in.readParcelable(PreciseCallState.class.getClassLoader());
+        this.mPreciseCallState = in.readParcelable(PreciseCallState.class.getClassLoader(), android.telephony.PreciseCallState.class);
         this.mNetworkType = in.readInt();
-        this.mCallQuality = in.readParcelable(CallQuality.class.getClassLoader());
+        this.mCallQuality = in.readParcelable(CallQuality.class.getClassLoader(), android.telephony.CallQuality.class);
     }
 
     // getters

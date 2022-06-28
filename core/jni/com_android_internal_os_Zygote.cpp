@@ -352,7 +352,7 @@ enum RuntimeFlags : uint32_t {
     GWP_ASAN_LEVEL_NEVER = 0 << 21,
     GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
     GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
-    NATIVE_HEAP_ZERO_INIT = 1 << 23,
+    NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23,
     PROFILEABLE = 1 << 24,
 };
 
@@ -1728,13 +1728,13 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     // would be nice to have them for apps, we will have to wait until they are
     // proven out, have more efficient hardware, and/or apply them only to new
     // applications.
-    if (!(runtime_flags & RuntimeFlags::NATIVE_HEAP_ZERO_INIT)) {
+    if (!(runtime_flags & RuntimeFlags::NATIVE_HEAP_ZERO_INIT_ENABLED)) {
         mallopt(M_BIONIC_ZERO_INIT, 0);
     }
 
     // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART
     // runtime.
-    runtime_flags &= ~RuntimeFlags::NATIVE_HEAP_ZERO_INIT;
+    runtime_flags &= ~RuntimeFlags::NATIVE_HEAP_ZERO_INIT_ENABLED;
 
     const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
     android_mallopt_gwp_asan_options_t gwp_asan_options;

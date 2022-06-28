@@ -27,11 +27,12 @@ import java.util.List;
 public class AidlTest extends TestCase {
 
     private IAidlTest mRemote;
+    private AidlObject mLocal;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        AidlObject mLocal = new AidlObject();
+        mLocal = new AidlObject();
         mRemote = IAidlTest.Stub.asInterface(mLocal);
     }
 
@@ -416,6 +417,25 @@ public class AidlTest extends TestCase {
             good = true;
         }
         assertEquals(good, true);
+    }
+
+    @SmallTest
+    public void testGetTransactionName() throws Exception {
+        assertEquals(15, mLocal.getMaxTransactionId());
+
+        assertEquals("booleanArray",
+                mLocal.getTransactionName(IAidlTest.Stub.TRANSACTION_booleanArray));
+        assertEquals("voidSecurityException",
+                mLocal.getTransactionName(IAidlTest.Stub.TRANSACTION_voidSecurityException));
+        assertEquals("parcelableIn",
+                mLocal.getTransactionName(IAidlTest.Stub.TRANSACTION_parcelableIn));
+
+        assertEquals("IAidlTest:booleanArray",
+                mLocal.getTransactionTraceName(IAidlTest.Stub.TRANSACTION_booleanArray));
+        assertEquals("IAidlTest:voidSecurityException",
+                mLocal.getTransactionTraceName(IAidlTest.Stub.TRANSACTION_voidSecurityException));
+        assertEquals("IAidlTest:parcelableIn",
+                mLocal.getTransactionTraceName(IAidlTest.Stub.TRANSACTION_parcelableIn));
     }
 }
 

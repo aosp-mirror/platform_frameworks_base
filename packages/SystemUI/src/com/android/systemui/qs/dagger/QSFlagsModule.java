@@ -21,6 +21,7 @@ import android.hardware.display.ColorDisplayManager;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import javax.inject.Named;
@@ -48,7 +49,7 @@ public interface QSFlagsModule {
     @SysUISingleton
     @Named(PM_LITE_ENABLED)
     static boolean isPMLiteEnabled(FeatureFlags featureFlags, GlobalSettings globalSettings) {
-        return featureFlags.isPMLiteEnabled()
+        return featureFlags.isEnabled(Flags.POWER_MENU_LITE)
                 && globalSettings.getInt(PM_LITE_SETTING, PM_LITE_SETTING_DEFAULT) != 0;
     }
 }

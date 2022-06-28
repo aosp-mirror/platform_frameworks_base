@@ -17,8 +17,11 @@
 package com.android.systemui.util.wrapper
 
 import android.content.Context
+import android.provider.Settings.Secure.CAMERA_AUTOROTATE
 import com.android.internal.view.RotationPolicy
 import com.android.internal.view.RotationPolicy.RotationPolicyListener
+import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -30,15 +33,21 @@ interface RotationPolicyWrapper {
     fun getRotationLockOrientation(): Int
     fun isRotationLockToggleVisible(): Boolean
     fun isRotationLocked(): Boolean
+    fun isCameraRotationEnabled(): Boolean
     fun registerRotationPolicyListener(listener: RotationPolicyListener, userHandle: Int)
     fun unregisterRotationPolicyListener(listener: RotationPolicyListener)
 }
 
-class RotationPolicyWrapperImpl @Inject constructor(private val context: Context) :
-    RotationPolicyWrapper {
+class RotationPolicyWrapperImpl @Inject constructor(
+    private val context: Context,
+    private val secureSettings: SecureSettings
+) :
+        RotationPolicyWrapper {
 
     override fun setRotationLock(enabled: Boolean) {
-        RotationPolicy.setRotationLock(context, enabled)
+        traceSection("RotationPolicyWrapperImpl#setRotationLock") {
+            RotationPolicy.setRotationLock(context, enabled)
+        }
     }
 
     override fun setRotationLockAtAngle(enabled: Boolean, rotation: Int) {
@@ -53,6 +62,9 @@ class RotationPolicyWrapperImpl @Inject constructor(private val context: Context
 
     override fun isRotationLocked(): Boolean =
         RotationPolicy.isRotationLocked(context)
+
+    override fun isCameraRotationEnabled(): Boolean =
+            secureSettings.getInt(CAMERA_AUTOROTATE, 0) == 1
 
     override fun registerRotationPolicyListener(
         listener: RotationPolicyListener,

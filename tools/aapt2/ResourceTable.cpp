@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <tuple>
 
 #include "android-base/logging.h"
@@ -68,7 +69,7 @@ struct NameEqualRange {
 
 template <typename T, typename U>
 bool less_than_struct_with_name_and_id(const T& lhs,
-                                       const std::pair<std::string_view, Maybe<U>>& rhs) {
+                                       const std::pair<std::string_view, std::optional<U>>& rhs) {
   if (lhs.id != rhs.second) {
     return lhs.id < rhs.second;
   }
@@ -341,20 +342,20 @@ struct EntryViewComparer {
 
 void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePackage* package,
                               const ResourceTableType* type, const std::string& entry_name,
-                              const Maybe<ResourceId>& id, const Visibility& visibility,
-                              const Maybe<AllowNew>& allow_new,
-                              const Maybe<OverlayableItem>& overlayable_item,
-                              const Maybe<StagedId>& staged_id,
+                              const std::optional<ResourceId>& id, const Visibility& visibility,
+                              const std::optional<AllowNew>& allow_new,
+                              const std::optional<OverlayableItem>& overlayable_item,
+                              const std::optional<StagedId>& staged_id,
                               const std::vector<std::unique_ptr<ResourceConfigValue>>& values) {
   SortedVectorInserter<ResourceTablePackageView, PackageViewComparer> package_inserter;
   SortedVectorInserter<ResourceTableTypeView, TypeViewComparer> type_inserter;
   SortedVectorInserter<ResourceTableEntryView, EntryViewComparer> entry_inserter;
 
   ResourceTablePackageView new_package{package->name,
-                                       id ? id.value().package_id() : Maybe<uint8_t>{}};
+                                       id ? id.value().package_id() : std::optional<uint8_t>{}};
   auto view_package = package_inserter.Insert(table.packages, std::move(new_package));
 
-  ResourceTableTypeView new_type{type->type, id ? id.value().type_id() : Maybe<uint8_t>{}};
+  ResourceTableTypeView new_type{type->type, id ? id.value().type_id() : std::optional<uint8_t>{}};
   auto view_type = type_inserter.Insert(view_package->types, std::move(new_type));
 
   if (visibility.level == Visibility::Level::kPublic) {
@@ -363,7 +364,7 @@ void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePacka
   }
 
   ResourceTableEntryView new_entry{.name = entry_name,
-                                   .id = id ? id.value().entry_id() : Maybe<uint16_t>{},
+                                   .id = id ? id.value().entry_id() : std::optional<uint16_t>{},
                                    .visibility = visibility,
                                    .allow_new = allow_new,
                                    .overlayable_item = overlayable_item,
@@ -435,11 +436,11 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
       const size_t index = type_index_iter->second;
       if (new_packages.size() == index) {
         new_packages.emplace_back(ResourceTablePackageView{package.name, package.id});
-        type_new_package_index[type.type] = index + 1;
       }
 
       // Move the type into a new package
       auto& other_package = new_packages[index];
+      type_new_package_index[type.type] = index + 1;
       type_inserter.Insert(other_package.types, std::move(type));
       type_it = package.types.erase(type_it);
     }
@@ -472,7 +473,7 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
   }
 
   auto package = FindOrCreatePackage(res.name.package);
-  auto type = package->FindOrCreateType(res.name.type);
+  auto type = package->FindOrCreateType(res.name.type.type);
   auto entry_it = std::equal_range(type->entries.begin(), type->entries.end(), res.name.entry,
                                    NameEqualRange<ResourceEntry>{});
   const size_t entry_count = std::distance(entry_it.first, entry_it.second);
@@ -585,13 +586,14 @@ bool ResourceTable::AddResource(NewResource&& res, IDiagnostics* diag) {
   return true;
 }
 
-Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNameRef& name) const {
+std::optional<ResourceTable::SearchResult> ResourceTable::FindResource(
+    const ResourceNameRef& name) const {
   ResourceTablePackage* package = FindPackage(name.package);
   if (package == nullptr) {
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type);
+  ResourceTableType* type = package->FindType(name.type.type);
   if (type == nullptr) {
     return {};
   }
@@ -603,14 +605,14 @@ Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNam
   return SearchResult{package, type, entry};
 }
 
-Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNameRef& name,
-                                                               ResourceId id) const {
+std::optional<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNameRef& name,
+                                                                       ResourceId id) const {
   ResourceTablePackage* package = FindPackage(name.package);
   if (package == nullptr) {
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type);
+  ResourceTableType* type = package->FindType(name.type.type);
   if (type == nullptr) {
     return {};
   }
@@ -631,7 +633,7 @@ bool ResourceTable::RemoveResource(const ResourceNameRef& name, ResourceId id) c
     return {};
   }
 
-  ResourceTableType* type = package->FindType(name.type);
+  ResourceTableType* type = package->FindType(name.type.type);
   if (type == nullptr) {
     return {};
   }

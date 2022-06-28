@@ -145,6 +145,14 @@ final class LetterboxUiController {
             return;
         }
         updateRoundedCorners(w);
+        // If there is another main window that is not an application-starting window, we should
+        // update rounded corners for it as well, to avoid flickering rounded corners.
+        final WindowState nonStartingAppW = mActivityRecord.findMainWindow(
+                /* includeStartingApp= */ false);
+        if (nonStartingAppW != null && nonStartingAppW != w) {
+            updateRoundedCorners(nonStartingAppW);
+        }
+
         updateWallpaperForLetterbox(w);
         if (shouldShowLetterboxUi(w)) {
             if (mLetterbox == null) {
@@ -167,7 +175,7 @@ final class LetterboxUiController {
             final Rect spaceToFill = transformedBounds != null
                     ? transformedBounds
                     : mActivityRecord.inMultiWindowMode()
-                            ? mActivityRecord.getRootTask().getBounds()
+                            ? mActivityRecord.getTask().getBounds()
                             : mActivityRecord.getRootTask().getParent().getBounds();
             mLetterbox.layout(spaceToFill, w.getFrame(), mTmpPoint);
         } else if (mLetterbox != null) {
@@ -324,17 +332,18 @@ final class LetterboxUiController {
         if (windowSurface != null && windowSurface.isValid()) {
             Transaction transaction = mActivityRecord.getSyncTransaction();
 
+            final InsetsState insetsState = mainWindow.getInsetsState();
+            final InsetsSource taskbarInsetsSource =
+                    insetsState.peekSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+
             if (!isLetterboxedNotForDisplayCutout(mainWindow)
-                    || !mLetterboxConfiguration.isLetterboxActivityCornersRounded()) {
+                    || !mLetterboxConfiguration.isLetterboxActivityCornersRounded()
+                    || taskbarInsetsSource == null) {
                 transaction
                         .setWindowCrop(windowSurface, null)
                         .setCornerRadius(windowSurface, 0);
                 return;
             }
-
-            final InsetsState insetsState = mainWindow.getInsetsState();
-            final InsetsSource taskbarInsetsSource =
-                    insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
 
             Rect cropBounds = null;
 
@@ -342,7 +351,10 @@ final class LetterboxUiController {
             // an insets frame is equal to a navigation bar which shouldn't affect position of
             // rounded corners since apps are expected to handle navigation bar inset.
             // This condition checks whether the taskbar is visible.
-            if (taskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
+            // Do not crop the taskbar inset if the window is in immersive mode - the user can
+            // swipe to show/hide the taskbar as an overlay.
+            if (taskbarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight
+                    && taskbarInsetsSource.isVisible()) {
                 cropBounds = new Rect(mActivityRecord.getBounds());
                 // Activity bounds are in screen coordinates while (0,0) for activity's surface
                 // control is at the top left corner of an app window so offsetting bounds

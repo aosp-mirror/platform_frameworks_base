@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.common.split;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,11 +23,14 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -37,6 +39,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.DisplayImeController;
 
 import org.junit.Before;
@@ -55,6 +58,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Mock SplitWindowManager.ParentContainerCallbacks mCallbacks;
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
+    @Mock WindowContainerTransaction mWct;
     @Captor ArgumentCaptor<Runnable> mRunnableCaptor;
     private SplitLayout mSplitLayout;
 
@@ -69,7 +73,7 @@ public class SplitLayoutTests extends ShellTestCase {
                 mCallbacks,
                 mDisplayImeController,
                 mTaskOrganizer,
-                false /* applyDismissingParallax */));
+                SplitLayout.PARALLAX_NONE));
     }
 
     @Test
@@ -79,10 +83,6 @@ public class SplitLayoutTests extends ShellTestCase {
 
         // Verify it returns true if new config won't affect split layout.
         assertThat(mSplitLayout.updateConfiguration(config)).isFalse();
-
-        // Verify updateConfiguration returns true if the orientation changed.
-        config.orientation = ORIENTATION_LANDSCAPE;
-        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
 
         // Verify updateConfiguration returns true if it rotated.
         config.windowConfiguration.setRotation(1);
@@ -101,14 +101,21 @@ public class SplitLayoutTests extends ShellTestCase {
 
     @Test
     public void testSetDividePosition() {
-        mSplitLayout.setDividePosition(anyInt());
+        mSplitLayout.setDividePosition(100, false /* applyLayoutChange */);
+        assertThat(mSplitLayout.getDividePosition()).isEqualTo(100);
+        verify(mSplitLayoutHandler, never()).onLayoutSizeChanged(any(SplitLayout.class));
+
+        mSplitLayout.setDividePosition(200, true /* applyLayoutChange */);
+        assertThat(mSplitLayout.getDividePosition()).isEqualTo(200);
         verify(mSplitLayoutHandler).onLayoutSizeChanged(any(SplitLayout.class));
     }
 
     @Test
     public void testSetDivideRatio() {
+        mSplitLayout.setDividePosition(200, false /* applyLayoutChange */);
         mSplitLayout.setDivideRatio(0.5f);
-        verify(mSplitLayoutHandler).onLayoutSizeChanged(any(SplitLayout.class));
+        assertThat(mSplitLayout.getDividePosition()).isEqualTo(
+                mSplitLayout.mDividerSnapAlgorithm.getMiddleTarget().position);
     }
 
     @Test
@@ -139,6 +146,16 @@ public class SplitLayoutTests extends ShellTestCase {
         mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true));
+    }
+
+    @Test
+    public void testApplyTaskChanges_updatesSmallestScreenWidthDp() {
+        final ActivityManager.RunningTaskInfo task1 = new TestRunningTaskInfoBuilder().build();
+        final ActivityManager.RunningTaskInfo task2 = new TestRunningTaskInfoBuilder().build();
+        mSplitLayout.applyTaskChanges(mWct, task1, task2);
+
+        verify(mWct).setSmallestScreenWidthDp(eq(task1.token), anyInt());
+        verify(mWct).setSmallestScreenWidthDp(eq(task2.token), anyInt());
     }
 
     private void waitDividerFlingFinished() {

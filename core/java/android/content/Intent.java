@@ -18,6 +18,7 @@ package android.content;
 
 import static android.content.ContentProvider.maybeAddUserId;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyRes;
 import android.annotation.BroadcastBehavior;
@@ -30,6 +31,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1456,6 +1458,18 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
+
+    /**
+     * Activity Action: Action to show the list of all work apps in the launcher. For example,
+     * shows the work apps folder or tab.
+     *
+     * <p>Input: Nothing.
+     * <p>Output: nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_WORK_APPS =
+            "android.intent.action.SHOW_WORK_APPS";
+
     /**
      * Activity Action: Show settings for choosing wallpaper.
      * <p>Input: Nothing.
@@ -1809,7 +1823,7 @@ public class Intent implements Parcelable, Cloneable {
      * the package name of the current installed package to be uninstalled.
      * You can optionally supply {@link #EXTRA_RETURN_RESULT}.
      * <p>
-     * Output: If {@link #EXTRA_RETURN_RESULT}, returns whether the install
+     * Output: If {@link #EXTRA_RETURN_RESULT}, returns whether the uninstall
      * succeeded.
      * <p>
      * Requires {@link android.Manifest.permission#REQUEST_DELETE_PACKAGES}
@@ -1860,17 +1874,22 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGE_APP_PERMISSIONS";
 
     /**
-     * Activity action: Launch UI to manage a specific permissions of an app.
+     * Activity action: Launch UI to manage a specific permission group of an app.
      * <p>
      * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose permission
      * will be managed by the launched UI.
      * </p>
      * <p>
      * Input: {@link #EXTRA_PERMISSION_NAME} specifies the (individual) permission
-     * that should be managed by the launched UI.
+     * whose group should be managed by the launched UI.
      * </p>
      * <p>
-     * <li> {@link #EXTRA_USER} specifies the UserHandle of the user that owns the app.
+     * Input: {@link #EXTRA_PERMISSION_GROUP_NAME} specifies the permission group
+     * that should be managed by the launched UI. Do not send both this and EXTRA_PERMISSION_NAME
+     * together.
+     * </p>
+     * <p>
+     * <li> {@link #EXTRA_USER} specifies the {@link UserHandle} of the user that owns the app.
      * </p>
      * <p>
      * Output: Nothing.
@@ -1878,6 +1897,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #EXTRA_PACKAGE_NAME
      * @see #EXTRA_PERMISSION_NAME
+     * @see #EXTRA_PERMISSION_GROUP_NAME
      * @see #EXTRA_USER
      *
      * @hide
@@ -2034,6 +2054,24 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.VIEW_PERMISSION_USAGE_FOR_PERIOD";
 
     /**
+     * Activity action: Launch the Safety Center Quick Settings UI.
+     *
+     * <p>
+     * Input: Nothing.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @RequiresPermission(Manifest.permission.MANAGE_SENSOR_PRIVACY)
+    public static final String ACTION_VIEW_SAFETY_CENTER_QS =
+            "android.intent.action.VIEW_SAFETY_CENTER_QS";
+
+    /**
      * Activity action: Launch UI to manage a default app.
      * <p>
      * Input: {@link #EXTRA_ROLE_NAME} specifies the role of the default app which will be managed
@@ -2102,6 +2140,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
 
     /**
+     * Intent extra: A {@link android.os.LocaleList}
+     * <p>
+     * Type: LocaleList
+     * </p>
+     */
+    public static final String EXTRA_LOCALE_LIST = "android.intent.extra.LOCALE_LIST";
+
+    /**
      * Intent extra: A {@link Bundle} of extras for a package being suspended. Will be sent as an
      * extra with {@link #ACTION_MY_PACKAGE_SUSPENDED}.
      *
@@ -2158,14 +2204,15 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity action: Launch UI to manage which apps have a given permission.
      * <p>
-     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission group
-     * which will be managed by the launched UI.
+     * Input: {@link #EXTRA_PERMISSION_NAME} or {@link #EXTRA_PERMISSION_GROUP_NAME} specifies the
+     * permission group which will be managed by the launched UI.
      * </p>
      * <p>
      * Output: Nothing.
      * </p>
      *
      * @see #EXTRA_PERMISSION_NAME
+     * @see #EXTRA_PERMISSION_GROUP_NAME
      *
      * @hide
      */
@@ -2300,6 +2347,79 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REVIEW_ACCESSIBILITY_SERVICES =
             "android.intent.action.REVIEW_ACCESSIBILITY_SERVICES";
+
+    /**
+     * Activity action: Launch UI to manage the usage of a given permission group.
+     * This action would be handled by apps that want to show controls about the features
+     * which use the permission group.
+     *
+     * <p>
+     * Input: {@link #EXTRA_PERMISSION_GROUP_NAME} specifies the permission group for
+     * which the launched UI would be targeted.
+     * Input: {@link #EXTRA_ATTRIBUTION_TAGS} specifies the attribution tags for the usage entry.
+     * Input: {@link #EXTRA_START_TIME} specifies the start time of the period (epoch time in
+     * millis). If both start time and end time are present, start time must be <= end time.
+     * Input: {@link #EXTRA_END_TIME} specifies the end time of the period (epoch time in
+     * millis). If the end time is empty, that implies that the permission usage is still in use.
+     * If both start time and end time are present, start time must be <= end time.
+     * Input: {@link #EXTRA_SHOWING_ATTRIBUTION} specifies whether the subattribution was shown
+     * in the UI.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     * <p class="note">
+     * You must protect the activity that handles this action with the
+     * {@link android.Manifest.permission#START_VIEW_PERMISSION_USAGE} permission to ensure that
+     * only the system can launch this activity. The system will not launch activities
+     * that are not properly protected.
+     * </p>
+     *
+     * @see #EXTRA_PERMISSION_GROUP_NAME
+     * @see #EXTRA_ATTRIBUTION_TAGS
+     * @see #EXTRA_START_TIME
+     * @see #EXTRA_END_TIME
+     * @see #EXTRA_SHOWING_ATTRIBUTION
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.START_VIEW_PERMISSION_USAGE)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_PERMISSION_USAGE =
+            "android.intent.action.MANAGE_PERMISSION_USAGE";
+
+    /**
+     * Activity action: Launch UI to view the app's feature's information.
+     *
+     * <p>
+     * Output: Nothing.
+     * </p>
+     * <p class="note">
+     * You must protect the activity that handles this action with the
+     * {@link android.Manifest.permission#START_VIEW_APP_FEATURES} permission to ensure that
+     * only the system can launch this activity. The system will not launch activities
+     * that are not properly protected.
+     *
+     * An optional <meta-data> tag in the activity's manifest with
+     * android:name=app_features_preference_summary and android:resource=@string/<string name> will
+     * be used to add a summary line for the "All Services" preference in settings.
+     * </p>
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.START_VIEW_APP_FEATURES)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VIEW_APP_FEATURES =
+            "android.intent.action.VIEW_APP_FEATURES";
+
+    /**
+     * Activity action: Launch UI to open the Safety Center, which highlights the user's security
+     * and privacy status.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SAFETY_CENTER =
+            "android.intent.action.SAFETY_CENTER";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -2870,8 +2990,11 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MY_PACKAGE_UNSUSPENDED = "android.intent.action.MY_PACKAGE_UNSUSPENDED";
 
     /**
-     * Broadcast Action: A user ID has been removed from the system.  The user
-     * ID number is stored in the extra data under {@link #EXTRA_UID}.
+     * Broadcast Action: A uid has been removed from the system.  The uid
+     * number is stored in the extra data under {@link #EXTRA_UID}.
+     *
+     * In certain instances, {@link #EXTRA_REPLACING} is set to true if the UID is not being
+     * fully removed.
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
@@ -3073,13 +3196,45 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_SPLIT_CONFIGURATION_CHANGED =
             "android.intent.action.SPLIT_CONFIGURATION_CHANGED";
     /**
-     * Broadcast Action: The current device's locale has changed.
+     * Broadcast Action: The receiver's effective locale has changed.
+     *
+     * This happens when the device locale, or the receiving app's locale
+     * (set via {@link android.app.LocaleManager#setApplicationLocales}) changed.
+     *
+     * Can be received by manifest-declared receivers.
+     *
+     * <p class="note"> If only the app locale changed, includes the following extras:
+     * <ul>
+     * <li>{@link #EXTRA_PACKAGE_NAME} is the name of the package for which locale changed.
+     * <li>{@link #EXTRA_LOCALE_LIST} contains locales that are currently set for specified app
+     * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
+    /**
+     * Broadcast Action: Locale of a particular app has changed.
+     *
+     * <p class="note"> This broadcast is explicitly sent to the
+     * {@link android.content.pm.InstallSourceInfo#getInstallingPackageName} installer
+     *     of the app whose locale has changed.
+     * <p class="note"> The broadcast could also be received by manifest-declared receivers with
+     * {@code android.permission.READ_APP_SPECIFIC_LOCALES}
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * <p>Includes the following extras:
+     * <ul>
+     * <li>{@link #EXTRA_PACKAGE_NAME} is the name of the package for which locale changed.
+     * <li>{@link #EXTRA_LOCALE_LIST} contains locales that are currently set for specified app
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_APPLICATION_LOCALE_CHANGED =
+            "android.intent.action.APPLICATION_LOCALE_CHANGED";
     /**
      * Broadcast Action:  This is a <em>sticky broadcast</em> containing the
      * charging state, level, and other information about the battery.
@@ -3104,7 +3259,7 @@ public class Intent implements Parcelable, Cloneable {
 
 
     /**
-     * Broadcast Action: Sent when the current battery level changes.
+     * Broadcast Action: Sent when the current battery level or plug type changes.
      *
      * It has {@link android.os.BatteryManager#EXTRA_EVENTS} that carries a list of {@link Bundle}
      * instances representing individual battery level changes with associated
@@ -3746,10 +3901,12 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_BACKGROUND";
 
     /**
-     * Broadcast sent to the system when a user is added. Carries an extra
-     * EXTRA_USER_HANDLE that has the userHandle of the new user.  It is sent to
-     * all running users.  You must hold
-     * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
+     * Broadcast sent to the system when a user is added.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the new user
+     * (and for legacy reasons, also carries an int extra {@link #EXTRA_USER_HANDLE} specifying that
+     * user's user ID).
+     * It is sent to all running users.
+     * You must hold {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
      */
     @SystemApi
@@ -3758,7 +3915,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent by the system when a user is started. Carries an extra
-     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only sent to
+     * {@link #EXTRA_USER_HANDLE} that has the user ID of the user.  This is only sent to
      * registered receivers, not manifest receivers.  It is sent to the user
      * that has been started.  This is sent as a foreground
      * broadcast, since it is part of a visible user interaction; be as quick
@@ -3770,7 +3927,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent when a user is in the process of starting.  Carries an extra
-     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only
+     * {@link #EXTRA_USER_HANDLE} that has the user ID of the user.  This is only
      * sent to registered receivers, not manifest receivers.  It is sent to all
      * users (including the one that is being started).  You must hold
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} to receive
@@ -3787,7 +3944,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent when a user is going to be stopped.  Carries an extra
-     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only
+     * {@link #EXTRA_USER_HANDLE} that has the user ID of the user.  This is only
      * sent to registered receivers, not manifest receivers.  It is sent to all
      * users (including the one that is being stopped).  You must hold
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} to receive
@@ -3805,7 +3962,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent to the system when a user is stopped. Carries an extra
-     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is similar to
+     * {@link #EXTRA_USER_HANDLE} that has the user ID of the user.  This is similar to
      * {@link #ACTION_PACKAGE_RESTARTED}, but for an entire user instead of a
      * specific package.  This is only sent to registered receivers, not manifest
      * receivers.  It is sent to all running users <em>except</em> the one that
@@ -3817,8 +3974,12 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_STOPPED";
 
     /**
-     * Broadcast sent to the system when a user is removed. Carries an extra EXTRA_USER_HANDLE that has
-     * the userHandle of the user.  It is sent to all running users except the
+     * Broadcast sent to the system when a user is removed.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the user that
+     * was removed
+     * (and for legacy reasons, also carries an int extra {@link #EXTRA_USER_HANDLE} specifying that
+     * user's user ID).
+     * It is sent to all running users except the
      * one that has been removed. The user will not be completely removed until all receivers have
      * handled the broadcast. You must hold
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
@@ -3829,9 +3990,13 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USER_REMOVED";
 
     /**
-     * Broadcast sent to the system when the user switches. Carries an extra EXTRA_USER_HANDLE that has
-     * the userHandle of the user to become the current one. This is only sent to
-     * registered receivers, not manifest receivers.  It is sent to all running users.
+     * Broadcast sent to the system when the user switches.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle}
+     * of the user to become the current one
+     * (and for legacy reasons, also carries an int extra {@link #EXTRA_USER_HANDLE} specifying that
+     * user's user ID).
+     * This is only sent to registered receivers, not manifest receivers.
+     * It is sent to all running users.
      * You must hold
      * {@link android.Manifest.permission#MANAGE_USERS} to receive this broadcast.
      * @hide
@@ -3860,17 +4025,18 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when an associated managed profile is added (the profile
      * was created and is ready to be used). Carries an extra {@link #EXTRA_USER} that specifies
-     * the UserHandle of the profile that was added. Only applications (for example Launchers)
-     * that need to display merged content across both primary and managed profiles need to
-     * worry about this broadcast. This is only sent to registered receivers,
+     * the {@link UserHandle} of the profile that was added. Only applications (for example
+     * Launchers) that need to display merged content across both primary and managed profiles need
+     * to worry about this broadcast. This is only sent to registered receivers,
      * not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_ADDED =
             "android.intent.action.MANAGED_PROFILE_ADDED";
 
     /**
-     * Broadcast sent to the primary user when an associated managed profile is removed. Carries an
-     * extra {@link #EXTRA_USER} that specifies the UserHandle of the profile that was removed.
+     * Broadcast sent to the primary user when an associated managed profile is removed.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile
+     * that was removed.
      * Only applications (for example Launchers) that need to display merged content across both
      * primary and managed profiles need to worry about this broadcast. This is only sent to
      * registered receivers, not manifest receivers.
@@ -3881,9 +4047,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when the credential-encrypted private storage for
      * an associated managed profile is unlocked. Carries an extra {@link #EXTRA_USER} that
-     * specifies the UserHandle of the profile that was unlocked. Only applications (for example
-     * Launchers) that need to display merged content across both primary and managed profiles
-     * need to worry about this broadcast. This is only sent to registered receivers,
+     * specifies the {@link UserHandle} of the profile that was unlocked. Only applications (for
+     * example Launchers) that need to display merged content across both primary and managed
+     * profiles need to worry about this broadcast. This is only sent to registered receivers,
      * not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_UNLOCKED =
@@ -3892,9 +4058,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when an associated managed profile has become available.
      * Currently this includes when the user disables quiet mode for the profile. Carries an extra
-     * {@link #EXTRA_USER} that specifies the UserHandle of the profile. When quiet mode is changed,
-     * this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the new state
-     * of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     * {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile. When quiet mode is
+     * changed, this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the
+     * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_AVAILABLE =
             "android.intent.action.MANAGED_PROFILE_AVAILABLE";
@@ -3902,9 +4068,9 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast sent to the primary user when an associated managed profile has become unavailable.
      * Currently this includes when the user enables quiet mode for the profile. Carries an extra
-     * {@link #EXTRA_USER} that specifies the UserHandle of the profile. When quiet mode is changed,
-     * this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the new state
-     * of quiet mode. This is only sent to registered receivers, not manifest receivers.
+     * {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile. When quiet mode is
+     * changed, this broadcast will carry a boolean extra {@link #EXTRA_QUIET_MODE} indicating the
+     * new state of quiet mode. This is only sent to registered receivers, not manifest receivers.
      */
     public static final String ACTION_MANAGED_PROFILE_UNAVAILABLE =
             "android.intent.action.MANAGED_PROFILE_UNAVAILABLE";
@@ -4865,6 +5031,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION =
             "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
 
+    /**
+     * Broadcast Action: Start the foreground service manager.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide
+     */
+    public static final String ACTION_SHOW_FOREGROUND_SERVICE_MANAGER =
+            "android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -4956,6 +5133,12 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_CAR_LAUNCHER = "android.intent.category.CAR_LAUNCHER";
+    /**
+     * Used to indicate that the activity can be used in communal mode.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_COMMUNAL_MODE = "android.intent.category.COMMUNAL_MODE";
     /**
      * Indicates a Leanback settings activity to be displayed in the Leanback launcher.
      * @hide
@@ -5084,7 +5267,7 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_CAR_DOCK = "android.intent.category.CAR_DOCK";
     /**
-     * An activity to run when device is inserted into a car dock.
+     * An activity to run when device is inserted into a desk dock.
      * Used with {@link #ACTION_MAIN} to launch an activity.  For more
      * information, see {@link android.app.UiModeManager}.
      */
@@ -5304,6 +5487,30 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_APP_FILES = "android.intent.category.APP_FILES";
 
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the weather application.
+     * The activity should be able to give the user information about the weather
+     * <p>NOTE: This should not be used as the primary key of an Intent,
+     * since it will not result in the app launching with the correct
+     * action and category.  Instead, use this with
+     * {@link #makeMainSelectorActivity(String, String)} to generate a main
+     * Intent with this category in the selector.</p>
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_WEATHER = "android.intent.category.APP_WEATHER";
+
+    /**
+     * Used with {@link #ACTION_MAIN} to launch the fitness application.
+     * The activity should be able to give the user fitness information and manage workouts
+     * <p>NOTE: This should not be used as the primary key of an Intent,
+     * since it will not result in the app launching with the correct
+     * action and category.  Instead, use this with
+     * {@link #makeMainSelectorActivity(String, String)} to generate a main
+     * Intent with this category in the selector.</p>
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_APP_FITNESS = "android.intent.category.APP_FITNESS";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard extra data keys.
@@ -5366,7 +5573,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INTENT = "android.intent.extra.INTENT";
 
     /**
-     * An int representing the user id to be used.
+     * An int representing the user ID to be used.
      *
      * @hide
      */
@@ -5384,6 +5591,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A String[] holding attribution tags when used with
      * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      *
      * E.g. an attribution tag could be location_provider, com.google.android.gms.*, etc.
      */
@@ -5392,14 +5600,33 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A long representing the start timestamp (epoch time in millis) of the permission usage
      * when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      */
     public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
 
     /**
      * A long representing the end timestamp (epoch time in millis) of the permission usage when
      * used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      */
     public static final String EXTRA_END_TIME = "android.intent.extra.END_TIME";
+
+    /**
+     * A boolean extra, when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and {@link #ACTION_MANAGE_PERMISSION_USAGE},
+     * that specifies whether the permission usage system UI is showing attribution information
+     * for the chosen entry.
+     *
+     * <p> The extra can only be true if application has specified attributionsAreUserVisible
+     * in its manifest. </p>
+     *
+     * <p> Applications can use this extra to improve their permission usage explanation
+     * experience. </p>
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SHOWING_ATTRIBUTION =
+            "android.intent.extra.SHOWING_ATTRIBUTION";
 
     /**
      * An Intent[] describing additional, alternate choices you would like shown with
@@ -5964,7 +6191,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.ALLOW_MULTIPLE";
 
     /**
-     * The integer userHandle (i.e. userId) carried with broadcast intents related to addition,
+     * The user ID integer carried with broadcast intents related to addition,
      * removal and switching of users and managed profiles - {@link #ACTION_USER_ADDED},
      * {@link #ACTION_USER_REMOVED} and {@link #ACTION_USER_SWITCHED}.
      *
@@ -5976,7 +6203,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.user_handle";
 
     /**
-     * The UserHandle carried with intents.
+     * The {@link UserHandle} carried with intents.
      */
     public static final String EXTRA_USER =
             "android.intent.extra.USER";
@@ -6286,6 +6513,7 @@ public class Intent implements Parcelable, Cloneable {
             FLAG_RECEIVER_FROM_SHELL,
             FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS,
             FLAG_RECEIVER_OFFLOAD,
+            FLAG_RECEIVER_OFFLOAD_FOREGROUND,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
@@ -6331,6 +6559,7 @@ public class Intent implements Parcelable, Cloneable {
             FLAG_RECEIVER_FROM_SHELL,
             FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS,
             FLAG_RECEIVER_OFFLOAD,
+            FLAG_RECEIVER_OFFLOAD_FOREGROUND,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MutableFlags {}
@@ -6785,6 +7014,13 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int FLAG_RECEIVER_OFFLOAD = 0x80000000;
     /**
+     * If set, when sending a broadcast the recipient will run on the system dedicated queue.
+     *
+     * @hide
+     */
+    public static final int FLAG_RECEIVER_OFFLOAD_FOREGROUND = 0x00000800;
+
+    /**
      * If this is an ordered broadcast, don't allow receivers to abort the broadcast.
      * They can still propagate results through to later receivers, but they can not prevent
      * later receivers from seeing the broadcast.
@@ -7016,6 +7252,7 @@ public class Intent implements Parcelable, Cloneable {
     private int mContentUserHint = UserHandle.USER_CURRENT;
     /** Token to track instant app launches. Local only; do not copy cross-process. */
     private String mLaunchToken;
+    private Intent mOriginalIntent; // Used for the experimental "component alias" feature.
 
     // ---------------------------------------------------------------------
 
@@ -7052,6 +7289,7 @@ public class Intent implements Parcelable, Cloneable {
         this.mIdentifier = o.mIdentifier;
         this.mPackage = o.mPackage;
         this.mComponent = o.mComponent;
+        this.mOriginalIntent = o.mOriginalIntent;
 
         if (o.mCategories != null) {
             this.mCategories = new ArraySet<>(o.mCategories);
@@ -7859,6 +8097,37 @@ public class Intent implements Parcelable, Cloneable {
                     hasIntentInfo = true;
                 }
                 break;
+                case "--ed": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    intent.putExtra(key, Double.valueOf(value));
+                    hasIntentInfo = true;
+                }
+                break;
+                case "--eda": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    String[] strings = value.split(",");
+                    double[] list = new double[strings.length];
+                    for (int i = 0; i < strings.length; i++) {
+                        list[i] = Double.valueOf(strings[i]);
+                    }
+                    intent.putExtra(key, list);
+                    hasIntentInfo = true;
+                }
+                break;
+                case "--edal": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    String[] strings = value.split(",");
+                    ArrayList<Double> list = new ArrayList<>(strings.length);
+                    for (int i = 0; i < strings.length; i++) {
+                        list.add(Double.valueOf(strings[i]));
+                    }
+                    intent.putExtra(key, list);
+                    hasIntentInfo = true;
+                }
+                break;
                 case "--esa": {
                     String key = cmd.getNextArgRequired();
                     String value = cmd.getNextArgRequired();
@@ -8104,25 +8373,30 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]",
                 "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]",
                 "    [--ef <EXTRA_KEY> <EXTRA_FLOAT_VALUE> ...]",
+                "    [--ed <EXTRA_KEY> <EXTRA_DOUBLE_VALUE> ...]",
                 "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]",
                 "    [--ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>]",
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]",
-                "        (mutiple extras passed as Integer[])",
+                "        (multiple extras passed as Integer[])",
                 "    [--eial <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]",
-                "        (mutiple extras passed as List<Integer>)",
+                "        (multiple extras passed as List<Integer>)",
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]",
-                "        (mutiple extras passed as Long[])",
+                "        (multiple extras passed as Long[])",
                 "    [--elal <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]",
-                "        (mutiple extras passed as List<Long>)",
+                "        (multiple extras passed as List<Long>)",
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]",
-                "        (mutiple extras passed as Float[])",
+                "        (multiple extras passed as Float[])",
                 "    [--efal <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]",
-                "        (mutiple extras passed as List<Float>)",
+                "        (multiple extras passed as List<Float>)",
+                "    [--eda <EXTRA_KEY> <EXTRA_DOUBLE_VALUE>[,<EXTRA_DOUBLE_VALUE...]]",
+                "        (multiple extras passed as Double[])",
+                "    [--edal <EXTRA_KEY> <EXTRA_DOUBLE_VALUE>[,<EXTRA_DOUBLE_VALUE...]]",
+                "        (multiple extras passed as List<Double>)",
                 "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]",
-                "        (mutiple extras passed as String[]; to embed a comma into a string,",
+                "        (multiple extras passed as String[]; to embed a comma into a string,",
                 "         escape it using \"\\,\")",
                 "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]",
-                "        (mutiple extras passed as List<String>; to embed a comma into a string,",
+                "        (multiple extras passed as List<String>; to embed a comma into a string,",
                 "         escape it using \"\\,\")",
                 "    [-f <FLAG>]",
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]",
@@ -8216,6 +8490,22 @@ public class Intent implements Parcelable, Cloneable {
         return mType;
     }
 
+
+    /**
+     * @hide For the experimental component alias feature. Do not use, unless you know what it is.
+     */
+    @Nullable
+    public Intent getOriginalIntent() {
+        return mOriginalIntent;
+    }
+
+    /**
+     * @hide For the experimental component alias feature. Do not use, unless you know what it is.
+     */
+    public void setOriginalIntent(@Nullable Intent originalIntent) {
+        mOriginalIntent = originalIntent;
+    }
+
     /**
      * Return the MIME data type of this intent.  If the type field is
      * explicitly set, that is simply returned.  Otherwise, if the data is set,
@@ -8270,7 +8560,10 @@ public class Intent implements Parcelable, Cloneable {
      *         needed.
      */
     public @Nullable String resolveTypeIfNeeded(@NonNull ContentResolver resolver) {
-        if (mComponent != null) {
+        // Match logic in PackageManagerService#applyEnforceIntentFilterMatching(...)
+        if (mComponent != null && (Process.myUid() == Process.ROOT_UID
+                || Process.myUid() == Process.SYSTEM_UID
+                || mComponent.getPackageName().equals(ActivityThread.currentPackageName()))) {
             return mType;
         }
         return resolveType(resolver);
@@ -8975,6 +9268,16 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
+     * Returns the total size of the extras in bytes, or 0 if no extras are present.
+     * @hide
+     */
+    public int getExtrasTotalSize() {
+        return (mExtras != null)
+                ? mExtras.getSize()
+                : 0;
+    }
+
+    /**
      * @return Whether {@link #maybeStripForHistory} will return an lightened intent or
      * return itself as-is.
      * @hide
@@ -9136,7 +9439,7 @@ public class Intent implements Parcelable, Cloneable {
      * @see #resolveActivity
      */
     public ActivityInfo resolveActivityInfo(@NonNull PackageManager pm,
-            @PackageManager.ComponentInfoFlags int flags) {
+            @PackageManager.ComponentInfoFlagsBits int flags) {
         ActivityInfo ai = null;
         if (mComponent != null) {
             try {
@@ -9164,7 +9467,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     @UnsupportedAppUsage
     public @Nullable ComponentName resolveSystemService(@NonNull PackageManager pm,
-            @PackageManager.ComponentInfoFlags int flags) {
+            @PackageManager.ComponentInfoFlagsBits int flags) {
         if (mComponent != null) {
             return mComponent;
         }
@@ -9524,7 +9827,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * This is NOT a secure mechanism to identify the user who sent the intent.
-     * When the intent is sent to a different user, it is used to fix uris by adding the userId
+     * When the intent is sent to a different user, it is used to fix uris by adding the user ID
      * who sent the intent.
      * @hide
      */
@@ -10933,6 +11236,11 @@ public class Intent implements Parcelable, Cloneable {
             mSelector.toShortString(b, secure, comp, extras, clip);
             b.append("}");
         }
+        if (mOriginalIntent != null) {
+            b.append(" org={");
+            mOriginalIntent.toShortString(b, secure, comp, extras, clip);
+            b.append("}");
+        }
     }
 
     /** @hide */
@@ -11228,6 +11536,13 @@ public class Intent implements Parcelable, Cloneable {
         }
         out.writeInt(mContentUserHint);
         out.writeBundle(mExtras);
+
+        if (mOriginalIntent != null) {
+            out.writeInt(1);
+            mOriginalIntent.writeToParcel(out, flags);
+        } else {
+            out.writeInt(0);
+        }
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<Intent> CREATOR
@@ -11281,6 +11596,9 @@ public class Intent implements Parcelable, Cloneable {
         }
         mContentUserHint = in.readInt();
         mExtras = in.readBundle();
+        if (in.readInt() != 0) {
+            mOriginalIntent = new Intent(in);
+        }
     }
 
     /**
@@ -11477,8 +11795,17 @@ public class Intent implements Parcelable, Cloneable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void prepareToLeaveProcess(Context context) {
-        final boolean leavingPackage = (mComponent == null)
-                || !Objects.equals(mComponent.getPackageName(), context.getPackageName());
+        final boolean leavingPackage;
+        if (mComponent != null) {
+            leavingPackage = !Objects.equals(mComponent.getPackageName(), context.getPackageName());
+        } else if (mPackage != null) {
+            leavingPackage = !Objects.equals(mPackage, context.getPackageName());
+        } else {
+            // When no specific component or package has been defined, we have
+            // to assume that we might be routed through an intent
+            // disambiguation dialog which might leave our package
+            leavingPackage = true;
+        }
         prepareToLeaveProcess(leavingPackage);
     }
 
@@ -11495,6 +11822,9 @@ public class Intent implements Parcelable, Cloneable {
         }
         if (mClipData != null) {
             mClipData.prepareToLeaveProcess(leavingPackage, getFlags());
+        }
+        if (mOriginalIntent != null) {
+            mOriginalIntent.prepareToLeaveProcess(leavingPackage);
         }
 
         if (mExtras != null && !mExtras.isParcelled()) {
@@ -11590,6 +11920,9 @@ public class Intent implements Parcelable, Cloneable {
         }
         if (mClipData != null) {
             mClipData.prepareToEnterProcess(source);
+        }
+        if (mOriginalIntent != null) {
+            mOriginalIntent.prepareToEnterProcess(false, source);
         }
 
         if (mContentUserHint != UserHandle.USER_CURRENT) {

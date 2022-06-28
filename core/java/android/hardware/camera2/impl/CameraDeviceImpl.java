@@ -2495,10 +2495,10 @@ public class CameraDeviceImpl extends CameraDevice
             if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
-                                this, mContext, extensionConfiguration);
+                                this, mContext, extensionConfiguration, mNextSessionId++);
             } else {
                 mCurrentExtensionSession = CameraExtensionSessionImpl.createCameraExtensionSession(
-                        this, mContext, extensionConfiguration);
+                        this, mContext, extensionConfiguration, mNextSessionId++);
             }
         } catch (RemoteException e) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);

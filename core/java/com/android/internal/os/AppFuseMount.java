@@ -57,7 +57,7 @@ public class AppFuseMount implements Parcelable {
             new Parcelable.Creator<AppFuseMount>() {
         @Override
         public AppFuseMount createFromParcel(Parcel in) {
-            return new AppFuseMount(in.readInt(), in.readParcelable(null));
+            return new AppFuseMount(in.readInt(), in.readParcelable(null, android.os.ParcelFileDescriptor.class));
         }
 
         @Override

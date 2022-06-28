@@ -60,11 +60,17 @@ class StructureAdapter(
             val margin = itemView.context.resources
                 .getDimensionPixelSize(R.dimen.controls_card_margin)
             val itemDecorator = MarginItemDecorator(margin, margin)
+            val spanCount = ControlAdapter.findMaxColumns(itemView.resources)
 
             recyclerView.apply {
                 this.adapter = controlAdapter
-                layoutManager = GridLayoutManager(recyclerView.context, 2).apply {
-                    spanSizeLookup = controlAdapter.spanSizeLookup
+                layoutManager = GridLayoutManager(recyclerView.context, spanCount).apply {
+                    spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                        override fun getSpanSize(position: Int): Int {
+                            return if (adapter?.getItemViewType(position)
+                                    != ControlAdapter.TYPE_CONTROL) spanCount else 1
+                        }
+                    }
                 }
                 addItemDecoration(itemDecorator)
             }

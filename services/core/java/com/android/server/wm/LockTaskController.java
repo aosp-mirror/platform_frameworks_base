@@ -64,6 +64,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.telephony.CellBroadcastUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
@@ -392,6 +393,10 @@ public class LockTaskController {
             return false;
         }
 
+        if (isWirelessEmergencyAlert(intent)) {
+            return false;
+        }
+
         return !(isTaskAuthAllowlisted(taskAuth) || mLockTaskModeTasks.isEmpty());
     }
 
@@ -422,6 +427,25 @@ public class LockTaskController {
             default:
         }
         return isPackageAllowlisted(userId, packageName);
+    }
+
+    private boolean isWirelessEmergencyAlert(Intent intent) {
+        if (intent == null) {
+            return false;
+        }
+
+        final ComponentName cellBroadcastAlertDialogComponentName =
+                CellBroadcastUtils.getDefaultCellBroadcastAlertDialogComponent(mContext);
+
+        if (cellBroadcastAlertDialogComponentName == null) {
+            return false;
+        }
+
+        if (cellBroadcastAlertDialogComponentName.equals(intent.getComponent())) {
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isEmergencyCallIntent(Intent intent) {
@@ -542,7 +566,7 @@ public class LockTaskController {
         if (mLockTaskModeTasks.isEmpty()) {
             return;
         }
-        task.performClearTaskLocked();
+        task.performClearTaskForReuse(false /* excludingTaskOverlay*/);
         mSupervisor.mRootWindowContainer.resumeFocusedTasksTopActivities();
     }
 
@@ -740,7 +764,7 @@ public class LockTaskController {
             ProtoLog.d(WM_DEBUG_LOCKTASK, "onLockTaskPackagesUpdated: removing %s"
                     + " mLockTaskAuth()=%s", lockedTask, lockedTask.lockTaskAuthToString());
             removeLockedTask(lockedTask);
-            lockedTask.performClearTaskLocked();
+            lockedTask.performClearTaskForReuse(false /* excludingTaskOverlay*/);
             taskChanged = true;
         }
 

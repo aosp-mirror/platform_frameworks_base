@@ -22,14 +22,18 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 
+import java.util.Map;
+
 /**
  * AmbientDisplayConfiguration encapsulates reading access to the configuration of ambient display.
  *
- * {@hide}
+ * @hide
  */
 @TestApi
 public class AmbientDisplayConfiguration {
@@ -37,14 +41,33 @@ public class AmbientDisplayConfiguration {
     private final Context mContext;
     private final boolean mAlwaysOnByDefault;
 
-    /** {@hide} */
+    /** Copied from android.provider.Settings.Secure since these keys are hidden. */
+    private static final String[] DOZE_SETTINGS = {
+            Settings.Secure.DOZE_ENABLED,
+            Settings.Secure.DOZE_ALWAYS_ON,
+            Settings.Secure.DOZE_PICK_UP_GESTURE,
+            Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
+            Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
+            Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
+            Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
+            Settings.Secure.DOZE_TAP_SCREEN_GESTURE
+    };
+
+    /** Non-user configurable doze settings */
+    private static final String[] NON_USER_CONFIGURABLE_DOZE_SETTINGS = {
+            Settings.Secure.DOZE_QUICK_PICKUP_GESTURE
+    };
+
+    final SparseArray<Map<String, String>> mUsersInitialValues = new SparseArray<>();
+
+    /** @hide */
     @TestApi
     public AmbientDisplayConfiguration(Context context) {
         mContext = context;
         mAlwaysOnByDefault = mContext.getResources().getBoolean(R.bool.config_dozeAlwaysOnEnabled);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean enabled(int user) {
         return pulseOnNotificationEnabled(user)
                 || pulseOnLongPressEnabled(user)
@@ -58,35 +81,35 @@ public class AmbientDisplayConfiguration {
                 || screenOffUdfpsEnabled(user);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean pulseOnNotificationEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_ENABLED, user)
                 && pulseOnNotificationAvailable();
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean pulseOnNotificationAvailable() {
         return ambientDisplayAvailable();
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean pickupGestureEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_PICK_UP_GESTURE, user)
                 && dozePickupSensorAvailable();
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean dozePickupSensorAvailable() {
         return mContext.getResources().getBoolean(R.bool.config_dozePulsePickup);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean tapGestureEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_TAP_SCREEN_GESTURE, user)
                 && tapSensorAvailable();
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean tapSensorAvailable() {
         for (String tapType : tapSensorTypeMapping()) {
             if (!TextUtils.isEmpty(tapType)) {
@@ -96,18 +119,18 @@ public class AmbientDisplayConfiguration {
         return false;
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean doubleTapGestureEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_DOUBLE_TAP_GESTURE, user)
                 && doubleTapSensorAvailable();
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean doubleTapSensorAvailable() {
         return !TextUtils.isEmpty(doubleTapSensorType());
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean quickPickupSensorEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_QUICK_PICKUP_GESTURE, user)
                 && !TextUtils.isEmpty(quickPickupSensorType())
@@ -115,41 +138,41 @@ public class AmbientDisplayConfiguration {
                 && !alwaysOnEnabled(user);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean screenOffUdfpsEnabled(int user) {
         return !TextUtils.isEmpty(udfpsLongPressSensorType())
             && boolSettingDefaultOff("screen_off_udfps_enabled", user);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean wakeScreenGestureAvailable() {
         return mContext.getResources()
                 .getBoolean(R.bool.config_dozeWakeLockScreenSensorAvailable);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean wakeLockScreenGestureEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE, user)
                 && wakeScreenGestureAvailable();
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean wakeDisplayGestureEnabled(int user) {
         return boolSettingDefaultOn(Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE, user)
                 && wakeScreenGestureAvailable();
     }
 
-    /** {@hide} */
+    /** @hide */
     public long getWakeLockScreenDebounce() {
         return mContext.getResources().getInteger(R.integer.config_dozeWakeLockScreenDebounce);
     }
 
-    /** {@hide} */
+    /** @hide */
     public String doubleTapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
     }
 
-    /** {@hide}
+    /** @hide
      * May support multiple postures.
      */
     public String[] tapSensorTypeMapping() {
@@ -163,22 +186,22 @@ public class AmbientDisplayConfiguration {
         return postureMapping;
     }
 
-    /** {@hide} */
+    /** @hide */
     public String longPressSensorType() {
         return mContext.getResources().getString(R.string.config_dozeLongPressSensorType);
     }
 
-    /** {@hide} */
+    /** @hide */
     public String udfpsLongPressSensorType() {
         return mContext.getResources().getString(R.string.config_dozeUdfpsLongPressSensorType);
     }
 
-    /** {@hide} */
+    /** @hide */
     public String quickPickupSensorType() {
         return mContext.getResources().getString(R.string.config_quickPickupSensorType);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean pulseOnLongPressEnabled(int user) {
         return pulseOnLongPressAvailable() && boolSettingDefaultOff(
                 Settings.Secure.DOZE_PULSE_ON_LONG_PRESS, user);
@@ -191,7 +214,7 @@ public class AmbientDisplayConfiguration {
     /**
      * Returns if Always-on-Display functionality is enabled on the display for a specified user.
      *
-     * {@hide}
+     * @hide
      */
     @TestApi
     public boolean alwaysOnEnabled(int user) {
@@ -202,7 +225,7 @@ public class AmbientDisplayConfiguration {
     /**
      * Returns if Always-on-Display functionality is available on the display.
      *
-     * {@hide}
+     * @hide
      */
     @TestApi
     public boolean alwaysOnAvailable() {
@@ -213,29 +236,29 @@ public class AmbientDisplayConfiguration {
     /**
      * Returns if Always-on-Display functionality is available on the display for a specified user.
      *
-     *  {@hide}
+     *  @hide
      */
     @TestApi
     public boolean alwaysOnAvailableForUser(int user) {
         return alwaysOnAvailable() && !accessibilityInversionEnabled(user);
     }
 
-    /** {@hide} */
+    /** @hide */
     public String ambientDisplayComponent() {
         return mContext.getResources().getString(R.string.config_dozeComponent);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean accessibilityInversionEnabled(int user) {
         return boolSettingDefaultOff(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, user);
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean ambientDisplayAvailable() {
         return !TextUtils.isEmpty(ambientDisplayComponent());
     }
 
-    /** {@hide} */
+    /** @hide */
     public boolean dozeSuppressed(int user) {
         return boolSettingDefaultOff(Settings.Secure.SUPPRESS_DOZE, user);
     }
@@ -258,5 +281,53 @@ public class AmbientDisplayConfiguration {
 
     private boolean boolSetting(String name, int user, int def) {
         return Settings.Secure.getIntForUser(mContext.getContentResolver(), name, def, user) != 0;
+    }
+
+    /** @hide */
+    @TestApi
+    public void disableDozeSettings(int userId) {
+        disableDozeSettings(false /* shouldDisableNonUserConfigurable */, userId);
+    }
+
+    /** @hide */
+    @TestApi
+    public void disableDozeSettings(boolean shouldDisableNonUserConfigurable, int userId) {
+        Map<String, String> initialValues = mUsersInitialValues.get(userId);
+        if (initialValues != null && !initialValues.isEmpty()) {
+            throw new IllegalStateException("Don't call #disableDozeSettings more than once,"
+                    + "without first calling #restoreDozeSettings");
+        }
+        initialValues = new ArrayMap<>();
+        for (String name : DOZE_SETTINGS) {
+            initialValues.put(name, getDozeSetting(name, userId));
+            putDozeSetting(name, "0", userId);
+        }
+        if (shouldDisableNonUserConfigurable) {
+            for (String name : NON_USER_CONFIGURABLE_DOZE_SETTINGS) {
+                initialValues.put(name, getDozeSetting(name, userId));
+                putDozeSetting(name, "0", userId);
+            }
+        }
+        mUsersInitialValues.put(userId, initialValues);
+    }
+
+    /** @hide */
+    @TestApi
+    public void restoreDozeSettings(int userId) {
+        final Map<String, String> initialValues = mUsersInitialValues.get(userId);
+        if (initialValues != null && !initialValues.isEmpty()) {
+            for (String name : DOZE_SETTINGS) {
+                putDozeSetting(name, initialValues.get(name), userId);
+            }
+            mUsersInitialValues.remove(userId);
+        }
+    }
+
+    private String getDozeSetting(String name, int userId) {
+        return Settings.Secure.getStringForUser(mContext.getContentResolver(), name, userId);
+    }
+
+    private void putDozeSetting(String name, String value, int userId) {
+        Settings.Secure.putStringForUser(mContext.getContentResolver(), name, value, userId);
     }
 }

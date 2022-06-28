@@ -16,6 +16,9 @@
 
 package com.android.updatablesystemfont;
 
+import static android.graphics.fonts.FontStyle.FONT_SLANT_UPRIGHT;
+import static android.graphics.fonts.FontStyle.FONT_WEIGHT_BOLD;
+import static android.graphics.fonts.FontStyle.FONT_WEIGHT_NORMAL;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -30,6 +33,7 @@ import android.content.Context;
 import android.graphics.fonts.FontFamilyUpdateRequest;
 import android.graphics.fonts.FontFileUpdateRequest;
 import android.graphics.fonts.FontManager;
+import android.graphics.fonts.FontStyle;
 import android.os.ParcelFileDescriptor;
 import android.platform.test.annotations.RootPermissionTest;
 import android.security.FileIntegrityManager;
@@ -77,31 +81,45 @@ public class UpdatableSystemFontTest {
     private static final String SYSTEM_FONTS_DIR = "/system/fonts/";
     private static final String DATA_FONTS_DIR = "/data/fonts/files/";
     private static final String CERT_PATH = "/data/local/tmp/UpdatableSystemFontTestCert.der";
-    private static final String NOTO_COLOR_EMOJI_POSTSCRIPT_NAME = "NotoColorEmoji";
 
-    private static final String ORIGINAL_NOTO_COLOR_EMOJI_TTF =
-            "/data/local/tmp/NotoColorEmoji.ttf";
-    private static final String ORIGINAL_NOTO_COLOR_EMOJI_TTF_FSV_SIG =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmoji.ttf.fsv_sig";
+    private static final String NOTO_COLOR_EMOJI_POSTSCRIPT_NAME = "NotoColorEmoji";
+    private static final String NOTO_COLOR_EMOJI_TTF =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmoji.ttf";
+    private static final String NOTO_COLOR_EMOJI_SIG =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmoji.sig";
     // A font with revision == 0.
     private static final String TEST_NOTO_COLOR_EMOJI_V0_TTF =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV0.ttf";
-    private static final String TEST_NOTO_COLOR_EMOJI_V0_TTF_FSV_SIG =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiV0.ttf.fsv_sig";
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiV0.ttf";
+    private static final String TEST_NOTO_COLOR_EMOJI_V0_SIG =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiV0.sig";
     // A font with revision == original + 1
     private static final String TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf";
-    private static final String TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus1.ttf.fsv_sig";
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiVPlus1.ttf";
+    private static final String TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiVPlus1.sig";
     // A font with revision == original + 2
     private static final String TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf";
-    private static final String TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG =
-            "/data/local/tmp/UpdatableSystemFontTestNotoColorEmojiVPlus2.ttf.fsv_sig";
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiVPlus2.ttf";
+    private static final String TEST_NOTO_COLOR_EMOJI_VPLUS2_SIG =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoColorEmojiVPlus2.sig";
+
+    private static final String NOTO_SERIF_REGULAR_POSTSCRIPT_NAME = "NotoSerif";
+    private static final String NOTO_SERIF_REGULAR_TTF =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Regular.ttf";
+    private static final String NOTO_SERIF_REGULAR_SIG =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Regular.sig";
+
+    private static final String NOTO_SERIF_BOLD_POSTSCRIPT_NAME = "NotoSerif-Bold";
+    private static final String NOTO_SERIF_BOLD_TTF =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Bold.ttf";
+    private static final String NOTO_SERIF_BOLD_SIG =
+            "/data/local/tmp/UpdatableSystemFontTest_NotoSerif-Bold.sig";
 
     private static final String EMOJI_RENDERING_TEST_APP_ID = "com.android.emojirenderingtestapp";
     private static final String EMOJI_RENDERING_TEST_ACTIVITY =
             EMOJI_RENDERING_TEST_APP_ID + "/.EmojiRenderingTestActivity";
+    // This should be the same as the one in EmojiRenderingTestActivity.
+    private static final String TEST_NOTO_SERIF = "test-noto-serif";
     private static final long ACTIVITY_TIMEOUT_MILLIS = SECONDS.toMillis(10);
 
     private static final String GET_AVAILABLE_FONTS_TEST_ACTIVITY =
@@ -141,11 +159,20 @@ public class UpdatableSystemFontTest {
 
     @Test
     public void updateFont() throws Exception {
+        FontConfig oldFontConfig =
+                SystemUtil.callWithShellPermissionIdentity(mFontManager::getFontConfig);
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
+        // Check that font config is updated.
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath).startsWith(DATA_FONTS_DIR);
+        FontConfig newFontConfig =
+                SystemUtil.callWithShellPermissionIdentity(mFontManager::getFontConfig);
+        assertThat(newFontConfig.getConfigVersion())
+                .isGreaterThan(oldFontConfig.getConfigVersion());
+        assertThat(newFontConfig.getLastModifiedTimeMillis())
+                .isGreaterThan(oldFontConfig.getLastModifiedTimeMillis());
         // The updated font should be readable and unmodifiable.
         expectCommandToSucceed("dd status=none if=" + fontPath + " of=/dev/null");
         expectCommandToFail("dd status=none if=" + CERT_PATH + " of=" + fontPath);
@@ -154,11 +181,11 @@ public class UpdatableSystemFontTest {
     @Test
     public void updateFont_twice() throws Exception {
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_SIG))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
         String fontPath2 = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath2).startsWith(DATA_FONTS_DIR);
@@ -173,16 +200,16 @@ public class UpdatableSystemFontTest {
     public void updateFont_allowSameVersion() throws Exception {
         // Update original font to the same version
         assertThat(updateFontFile(
-                ORIGINAL_NOTO_COLOR_EMOJI_TTF, ORIGINAL_NOTO_COLOR_EMOJI_TTF_FSV_SIG))
+                NOTO_COLOR_EMOJI_TTF, NOTO_COLOR_EMOJI_SIG))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
         String fontPath2 = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         // Update updated font to the same version
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
         String fontPath3 = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath).startsWith(DATA_FONTS_DIR);
@@ -195,25 +222,55 @@ public class UpdatableSystemFontTest {
     @Test
     public void updateFont_invalidCert() throws Exception {
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_SIG))
                 .isEqualTo(FontManager.RESULT_ERROR_VERIFICATION_FAILURE);
     }
 
     @Test
     public void updateFont_downgradeFromSystem() throws Exception {
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_V0_TTF, TEST_NOTO_COLOR_EMOJI_V0_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_V0_TTF, TEST_NOTO_COLOR_EMOJI_V0_SIG))
                 .isEqualTo(FontManager.RESULT_ERROR_DOWNGRADING);
     }
 
     @Test
     public void updateFont_downgradeFromData() throws Exception {
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS2_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS2_SIG))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG))
                 .isEqualTo(FontManager.RESULT_ERROR_DOWNGRADING);
+    }
+
+    @Test
+    public void updateFontFamily() throws Exception {
+        assertThat(updateNotoSerifAs("serif")).isEqualTo(FontManager.RESULT_SUCCESS);
+        FontConfig.FontFamily family = findFontFamilyOrThrow("serif");
+        assertThat(family.getFontList()).hasSize(2);
+        assertThat(family.getFontList().get(0).getPostScriptName())
+                .isEqualTo(NOTO_SERIF_REGULAR_POSTSCRIPT_NAME);
+        assertThat(family.getFontList().get(0).getFile().getAbsolutePath())
+                .startsWith(DATA_FONTS_DIR);
+        assertThat(family.getFontList().get(0).getStyle().getWeight())
+                .isEqualTo(FONT_WEIGHT_NORMAL);
+        assertThat(family.getFontList().get(1).getPostScriptName())
+                .isEqualTo(NOTO_SERIF_BOLD_POSTSCRIPT_NAME);
+        assertThat(family.getFontList().get(1).getFile().getAbsolutePath())
+                .startsWith(DATA_FONTS_DIR);
+        assertThat(family.getFontList().get(1).getStyle().getWeight()).isEqualTo(FONT_WEIGHT_BOLD);
+    }
+
+    @Test
+    public void updateFontFamily_asNewFont() throws Exception {
+        assertThat(updateNotoSerifAs("UpdatableSystemFontTest-serif"))
+                .isEqualTo(FontManager.RESULT_SUCCESS);
+        FontConfig.FontFamily family = findFontFamilyOrThrow("UpdatableSystemFontTest-serif");
+        assertThat(family.getFontList()).hasSize(2);
+        assertThat(family.getFontList().get(0).getPostScriptName())
+                .isEqualTo(NOTO_SERIF_REGULAR_POSTSCRIPT_NAME);
+        assertThat(family.getFontList().get(1).getPostScriptName())
+                .isEqualTo(NOTO_SERIF_BOLD_POSTSCRIPT_NAME);
     }
 
     @Test
@@ -231,22 +288,25 @@ public class UpdatableSystemFontTest {
         String originalFontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(originalFontPath).startsWith(SYSTEM_FONTS_DIR);
         assertThat(updateFontFile(
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG))
                 .isEqualTo(FontManager.RESULT_SUCCESS);
         String updatedFontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(updatedFontPath).startsWith(DATA_FONTS_DIR);
+        updateNotoSerifAs(TEST_NOTO_SERIF);
+        String notoSerifPath = getFontPath(NOTO_SERIF_REGULAR_POSTSCRIPT_NAME);
         startActivity(EMOJI_RENDERING_TEST_APP_ID, EMOJI_RENDERING_TEST_ACTIVITY);
         // The original font should NOT be opened by the app.
         SystemUtil.eventually(() -> {
             assertThat(isFileOpenedBy(updatedFontPath, EMOJI_RENDERING_TEST_APP_ID)).isTrue();
             assertThat(isFileOpenedBy(originalFontPath, EMOJI_RENDERING_TEST_APP_ID)).isFalse();
+            assertThat(isFileOpenedBy(notoSerifPath, EMOJI_RENDERING_TEST_APP_ID)).isTrue();
         }, ACTIVITY_TIMEOUT_MILLIS);
     }
 
     @Test
     public void reboot() throws Exception {
         expectCommandToSucceed(String.format("cmd font update %s %s",
-                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
+                TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG));
         String fontPath = getFontPath(NOTO_COLOR_EMOJI_POSTSCRIPT_NAME);
         assertThat(fontPath).startsWith(DATA_FONTS_DIR);
 
@@ -264,7 +324,7 @@ public class UpdatableSystemFontTest {
                 Pattern.compile(Pattern.quote(TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF));
         for (int i = 0; i < 10; i++) {
             assertThat(updateFontFile(
-                    TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG))
+                    TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF, TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG))
                     .isEqualTo(FontManager.RESULT_SUCCESS);
             List<String> openFiles = getOpenFiles("system_server");
             for (Pattern p : Arrays.asList(PATTERN_FONT_FILES, PATTERN_SYSTEM_FONT_FILES,
@@ -285,7 +345,7 @@ public class UpdatableSystemFontTest {
     public void fdLeakTest_withoutPermission() throws Exception {
         Pattern patternEmojiVPlus1 =
                 Pattern.compile(Pattern.quote(TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF));
-        byte[] signature = Files.readAllBytes(Paths.get(TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF_FSV_SIG));
+        byte[] signature = Files.readAllBytes(Paths.get(TEST_NOTO_COLOR_EMOJI_VPLUS1_SIG));
         try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(
                 new File(TEST_NOTO_COLOR_EMOJI_VPLUS1_TTF), MODE_READ_ONLY)) {
             assertThrows(SecurityException.class,
@@ -340,18 +400,56 @@ public class UpdatableSystemFontTest {
                 configVersion);
     }
 
+    private int updateNotoSerifAs(String familyName) throws IOException {
+        List<FontFamilyUpdateRequest.Font> fonts = Arrays.asList(
+                new FontFamilyUpdateRequest.Font.Builder(NOTO_SERIF_REGULAR_POSTSCRIPT_NAME,
+                        new FontStyle(FONT_WEIGHT_NORMAL, FONT_SLANT_UPRIGHT)).build(),
+                new FontFamilyUpdateRequest.Font.Builder(NOTO_SERIF_BOLD_POSTSCRIPT_NAME,
+                        new FontStyle(FONT_WEIGHT_BOLD, FONT_SLANT_UPRIGHT)).build());
+        FontFamilyUpdateRequest.FontFamily fontFamily =
+                new FontFamilyUpdateRequest.FontFamily.Builder(familyName, fonts).build();
+        byte[] regularSig = Files.readAllBytes(Paths.get(NOTO_SERIF_REGULAR_SIG));
+        byte[] boldSig = Files.readAllBytes(Paths.get(NOTO_SERIF_BOLD_SIG));
+        try (ParcelFileDescriptor regularFd = ParcelFileDescriptor.open(
+                    new File(NOTO_SERIF_REGULAR_TTF), MODE_READ_ONLY);
+             ParcelFileDescriptor boldFd = ParcelFileDescriptor.open(
+                    new File(NOTO_SERIF_BOLD_TTF), MODE_READ_ONLY)) {
+            return SystemUtil.runWithShellPermissionIdentity(() -> {
+                FontConfig fontConfig = mFontManager.getFontConfig();
+                return mFontManager.updateFontFamily(new FontFamilyUpdateRequest.Builder()
+                        .addFontFileUpdateRequest(
+                                new FontFileUpdateRequest(regularFd, regularSig))
+                        .addFontFileUpdateRequest(
+                                new FontFileUpdateRequest(boldFd, boldSig))
+                        .addFontFamily(fontFamily)
+                        .build(), fontConfig.getConfigVersion());
+            });
+        }
+    }
+
     private String getFontPath(String psName) {
-        return SystemUtil.runWithShellPermissionIdentity(() -> {
-            FontConfig fontConfig = mFontManager.getFontConfig();
-            for (FontConfig.FontFamily family : fontConfig.getFontFamilies()) {
-                for (FontConfig.Font font : family.getFontList()) {
-                    if (psName.equals(font.getPostScriptName())) {
-                        return font.getFile().getAbsolutePath();
-                    }
-                }
-            }
-            throw new AssertionError("Font not found: " + psName);
-        });
+        FontConfig fontConfig =
+                SystemUtil.runWithShellPermissionIdentity(mFontManager::getFontConfig);
+        return fontConfig.getFontFamilies().stream()
+                .flatMap(family -> family.getFontList().stream())
+                .filter(font -> psName.equals(font.getPostScriptName()))
+                // Return the last match, because the latter family takes precedence if two families
+                // have the same name.
+                .reduce((first, second) -> second)
+                .orElseThrow(() -> new AssertionError("Font not found: " + psName))
+                .getFile()
+                .getAbsolutePath();
+    }
+
+    private FontConfig.FontFamily findFontFamilyOrThrow(String familyName) {
+        FontConfig fontConfig =
+                SystemUtil.runWithShellPermissionIdentity(mFontManager::getFontConfig);
+        return fontConfig.getFontFamilies().stream()
+                .filter(family -> familyName.equals(family.getName()))
+                // Return the last match, because the latter family takes precedence if two families
+                // have the same name.
+                .reduce((first, second) -> second)
+                .orElseThrow(() -> new AssertionError("Family not found: " + familyName));
     }
 
     private static void startActivity(String appId, String activityId) throws Exception {

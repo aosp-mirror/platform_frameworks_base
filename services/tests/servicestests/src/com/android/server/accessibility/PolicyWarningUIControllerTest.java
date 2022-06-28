@@ -29,6 +29,7 @@ import static junit.framework.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,12 +47,16 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.TestableContext;
+import android.util.ArraySet;
+
+import com.google.common.collect.ImmutableSet;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -67,6 +72,8 @@ public class PolicyWarningUIControllerTest {
     private static final ComponentName TEST_COMPONENT_NAME = new ComponentName(
             "com.android.server.accessibility", "PolicyWarningUIControllerTest");
 
+    private static final ComponentName TEST_COMPONENT_NAME2 = new ComponentName(
+            "com.android.server.accessibility", "nonAccessibilityToolService");
     private final List<AccessibilityServiceInfo> mEnabledServiceList = new ArrayList<>();
 
     @Rule
@@ -79,15 +86,9 @@ public class PolicyWarningUIControllerTest {
     @Mock
     private StatusBarManager mStatusBarManager;
     @Mock
-    private AccessibilityServiceInfo mMockA11yServiceInfo;
-    @Mock
-    private ResolveInfo mMockResolveInfo;
-    @Mock
     private ServiceInfo mMockServiceInfo;
     @Mock
     private Context mSpyContext;
-    @Mock
-    private AccessibilitySecurityPolicy mAccessibilitySecurityPolicy;
 
     private PolicyWarningUIController mPolicyWarningUIController;
     private FakeNotificationController mFakeNotificationController;
@@ -102,22 +103,18 @@ public class PolicyWarningUIControllerTest {
         mPolicyWarningUIController = new PolicyWarningUIController(
                 getInstrumentation().getTargetContext().getMainThreadHandler(), mContext,
                 mFakeNotificationController);
-        mPolicyWarningUIController.setAccessibilityPolicyManager(mAccessibilitySecurityPolicy);
-        mPolicyWarningUIController.onSwitchUserLocked(TEST_USER_ID, new HashSet<>());
         mEnabledServiceList.clear();
         Settings.Secure.putStringForUser(mContext.getContentResolver(),
                 Settings.Secure.NOTIFIED_NON_ACCESSIBILITY_CATEGORY_SERVICES,
                 "", TEST_USER_ID);
+        mPolicyWarningUIController.enableSendingNonA11yToolNotification(true);
+        mPolicyWarningUIController.onSwitchUser(TEST_USER_ID, new HashSet<>());
+        getInstrumentation().waitForIdleSync();
     }
 
     @Test
     public void receiveActionSendNotification_isNonA11yCategoryService_sendNotification() {
-        mEnabledServiceList.add(mMockA11yServiceInfo);
-        mMockResolveInfo.serviceInfo = mMockServiceInfo;
-        when(mMockA11yServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
-        when(mMockA11yServiceInfo.getComponentName()).thenReturn(TEST_COMPONENT_NAME);
-        when(mAccessibilitySecurityPolicy.isA11yCategoryService(
-                mMockA11yServiceInfo)).thenReturn(false);
+        addEnabledServiceInfo(TEST_COMPONENT_NAME, false);
 
         mFakeNotificationController.onReceive(mContext,
                 PolicyWarningUIController.createIntent(mContext, TEST_USER_ID,
@@ -125,6 +122,39 @@ public class PolicyWarningUIControllerTest {
                         TEST_COMPONENT_NAME));
 
         verify(mNotificationManager).notify(eq(TEST_COMPONENT_NAME.flattenToShortString()),
+                eq(NOTE_A11Y_VIEW_AND_CONTROL_ACCESS), any(Notification.class));
+    }
+
+    @Test
+    public void receiveActionSendNotification_sendNotificationDisabled_doNothing() {
+        mPolicyWarningUIController.enableSendingNonA11yToolNotification(false);
+        addEnabledServiceInfo(TEST_COMPONENT_NAME, false);
+
+        mFakeNotificationController.onReceive(mContext,
+                PolicyWarningUIController.createIntent(mContext, TEST_USER_ID,
+                        PolicyWarningUIController.ACTION_SEND_NOTIFICATION,
+                        TEST_COMPONENT_NAME));
+
+        verify(mNotificationManager, never()).notify(eq(TEST_COMPONENT_NAME.flattenToShortString()),
+                eq(NOTE_A11Y_VIEW_AND_CONTROL_ACCESS), any(Notification.class));
+    }
+
+    @Test
+    public void receiveActionSendNotificationWithNotifiedService_doNothing() {
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.NOTIFIED_NON_ACCESSIBILITY_CATEGORY_SERVICES,
+                TEST_COMPONENT_NAME.flattenToShortString(), TEST_USER_ID);
+        mEnabledServiceList.clear();
+        mPolicyWarningUIController.onSwitchUser(TEST_USER_ID, new HashSet<>());
+        getInstrumentation().waitForIdleSync();
+        addEnabledServiceInfo(TEST_COMPONENT_NAME, false);
+
+        mFakeNotificationController.onReceive(mContext,
+                PolicyWarningUIController.createIntent(mContext, TEST_USER_ID,
+                        PolicyWarningUIController.ACTION_SEND_NOTIFICATION,
+                        TEST_COMPONENT_NAME));
+
+        verify(mNotificationManager, never()).notify(eq(TEST_COMPONENT_NAME.flattenToShortString()),
                 eq(NOTE_A11Y_VIEW_AND_CONTROL_ACCESS), any(Notification.class));
     }
 
@@ -155,11 +185,11 @@ public class PolicyWarningUIControllerTest {
     public void onEnabledServicesChangedLocked_serviceDisabled_removedFromNotifiedSettings() {
         final Set<ComponentName> enabledServices = new HashSet<>();
         enabledServices.add(TEST_COMPONENT_NAME);
-        mPolicyWarningUIController.onEnabledServicesChangedLocked(TEST_USER_ID, enabledServices);
+        mPolicyWarningUIController.onEnabledServicesChanged(TEST_USER_ID, enabledServices);
         getInstrumentation().waitForIdleSync();
         receiveActionDismissNotification_addToNotifiedSettings();
 
-        mPolicyWarningUIController.onEnabledServicesChangedLocked(TEST_USER_ID, new HashSet<>());
+        mPolicyWarningUIController.onEnabledServicesChanged(TEST_USER_ID, new HashSet<>());
         getInstrumentation().waitForIdleSync();
 
         assertNotifiedSettingsEqual(TEST_USER_ID, "");
@@ -186,6 +216,29 @@ public class PolicyWarningUIControllerTest {
                         PolicyWarningUIController.ACTION_SEND_NOTIFICATION, TEST_COMPONENT_NAME)));
     }
 
+    @Test
+    public void onSwitchUserLocked_hasAlarmAndSentNotification_cancelNotification() {
+        addEnabledServiceInfo(TEST_COMPONENT_NAME2, false);
+        final Set<ComponentName> enabledNonA11yServices = new ArraySet<>();
+        enabledNonA11yServices.add(TEST_COMPONENT_NAME);
+        enabledNonA11yServices.add(TEST_COMPONENT_NAME2);
+        mPolicyWarningUIController.onEnabledServicesChanged(TEST_USER_ID,
+                enabledNonA11yServices);
+        mPolicyWarningUIController.onNonA11yCategoryServiceBound(TEST_USER_ID, TEST_COMPONENT_NAME);
+        mFakeNotificationController.onReceive(mContext,
+                PolicyWarningUIController.createIntent(mContext, TEST_USER_ID,
+                        PolicyWarningUIController.ACTION_SEND_NOTIFICATION,
+                        TEST_COMPONENT_NAME2));
+        getInstrumentation().waitForIdleSync();
+
+        mPolicyWarningUIController.onSwitchUser(TEST_USER_ID,
+                ImmutableSet.copyOf(new ArraySet<>()));
+        getInstrumentation().waitForIdleSync();
+
+        verify(mNotificationManager).cancel(TEST_COMPONENT_NAME2.flattenToShortString(),
+                NOTE_A11Y_VIEW_AND_CONTROL_ACCESS);
+    }
+
     private void assertNotifiedSettingsEqual(int userId, String settingString) {
         final String notifiedServicesSetting = Settings.Secure.getStringForUser(
                 mContext.getContentResolver(),
@@ -204,6 +257,17 @@ public class PolicyWarningUIControllerTest {
                 Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS);
         assertThat(userHandleCaptor.getValue().getIdentifier()).isEqualTo(TEST_USER_ID);
         verify(mStatusBarManager).collapsePanels();
+    }
+
+    private void addEnabledServiceInfo(ComponentName componentName, boolean isAccessibilityTool) {
+        final AccessibilityServiceInfo a11yServiceInfo = Mockito.mock(
+                AccessibilityServiceInfo.class);
+        when(a11yServiceInfo.getComponentName()).thenReturn(componentName);
+        when(a11yServiceInfo.isAccessibilityTool()).thenReturn(isAccessibilityTool);
+        final ResolveInfo resolveInfo = Mockito.mock(ResolveInfo.class);
+        when(a11yServiceInfo.getResolveInfo()).thenReturn(resolveInfo);
+        resolveInfo.serviceInfo = mMockServiceInfo;
+        mEnabledServiceList.add(a11yServiceInfo);
     }
 
     private class A11yTestableContext extends TestableContext {

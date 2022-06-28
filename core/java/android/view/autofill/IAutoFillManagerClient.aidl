@@ -140,4 +140,9 @@ oneway interface IAutoFillManagerClient {
     * Requests to show the soft input method if the focus is on the given id.
     */
    void requestShowSoftInput(in AutofillId id);
+
+    /**
+     * Notifies autofill ids that require to show the fill dialog.
+     */
+    void notifyFillDialogTriggerIds(in List<AutofillId> ids);
 }

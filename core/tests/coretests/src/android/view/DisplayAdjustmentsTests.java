@@ -19,9 +19,6 @@ package android.view;
 import static org.junit.Assert.assertEquals;
 
 import android.content.res.Configuration;
-import android.graphics.Point;
-import android.util.DisplayMetrics;
-import android.view.DisplayAdjustments.FixedRotationAdjustments;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -69,49 +66,5 @@ public class DisplayAdjustmentsTests {
         DisplayAdjustments newAdjustments = new DisplayAdjustments(oldAdjustments);
 
         assertEquals(configuration, newAdjustments.getConfiguration());
-    }
-
-    @Test
-    public void testFixedRotationAdjustments() {
-        final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
-        final int realRotation = Surface.ROTATION_0;
-        final int fixedRotation = Surface.ROTATION_90;
-
-        final int appWidth = 1080;
-        final int appHeight = 1920;
-        mDisplayAdjustments.setFixedRotationAdjustments(new FixedRotationAdjustments(
-                fixedRotation, appWidth, appHeight, null /* cutout */));
-
-        final int w = 1000;
-        final int h = 2000;
-        final Point size = new Point(w, h);
-        mDisplayAdjustments.adjustSize(size, realRotation);
-
-        assertEquals(fixedRotation, mDisplayAdjustments.getRotation(realRotation));
-        assertEquals(new Point(h, w), size);
-
-        final DisplayMetrics metrics = new DisplayMetrics();
-        metrics.xdpi = metrics.noncompatXdpi = w;
-        metrics.widthPixels = metrics.noncompatWidthPixels = w;
-        metrics.ydpi = metrics.noncompatYdpi = h;
-        metrics.heightPixels = metrics.noncompatHeightPixels = h;
-
-        final DisplayMetrics flippedMetrics = new DisplayMetrics();
-        // The physical dpi should not be adjusted.
-        flippedMetrics.xdpi = flippedMetrics.noncompatXdpi = w;
-        flippedMetrics.widthPixels = flippedMetrics.noncompatWidthPixels = h;
-        flippedMetrics.ydpi = flippedMetrics.noncompatYdpi = h;
-        flippedMetrics.heightPixels = flippedMetrics.noncompatHeightPixels = w;
-
-        mDisplayAdjustments.adjustMetrics(metrics, realRotation);
-
-        assertEquals(flippedMetrics, metrics);
-
-        mDisplayAdjustments.adjustGlobalAppMetrics(metrics);
-
-        assertEquals(appWidth, metrics.widthPixels);
-        assertEquals(appWidth, metrics.noncompatWidthPixels);
-        assertEquals(appHeight, metrics.heightPixels);
-        assertEquals(appHeight, metrics.noncompatHeightPixels);
     }
 }

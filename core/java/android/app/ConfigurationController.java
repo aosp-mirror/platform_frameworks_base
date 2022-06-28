@@ -185,14 +185,7 @@ class ConfigurationController {
 
             final Application app = mActivityThread.getApplication();
             final Resources appResources = app.getResources();
-            if (appResources.hasOverrideDisplayAdjustments()) {
-                // The value of Display#getRealSize will be adjusted by FixedRotationAdjustments,
-                // but Display#getSize refers to DisplayAdjustments#mConfiguration. So the rotated
-                // configuration also needs to set to the adjustments for consistency.
-                appResources.getDisplayAdjustments().getConfiguration().updateFrom(config);
-            }
-            mResourcesManager.applyConfigurationToResources(config, compat,
-                    appResources.getDisplayAdjustments());
+            mResourcesManager.applyConfigurationToResources(config, compat);
             updateLocaleListFromAppContext(app.getApplicationContext());
 
             if (mConfiguration == null) {

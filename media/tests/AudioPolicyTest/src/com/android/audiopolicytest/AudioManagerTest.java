@@ -255,7 +255,7 @@ public class AudioManagerTest extends AudioVolumesTestBase {
         AudioVolumeGroupCallbackHelper vgCbReceiver = new AudioVolumeGroupCallbackHelper();
         mAudioManager.registerVolumeGroupCallback(mContext.getMainExecutor(), vgCbReceiver);
 
-        final List<Integer> publicStreams = Ints.asList(PUBLIC_STREAM_TYPES);
+        final List<Integer> publicStreams = Ints.asList(AudioManager.getPublicStreamTypes());
         try {
             // Validate Audio Volume Groups callback reception
             for (final AudioVolumeGroup audioVolumeGroup : audioVolumeGroups) {

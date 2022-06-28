@@ -94,7 +94,6 @@ public final class UiccSlotMapping implements Parcelable {
      * @param physicalSlotIndex is unique index referring to a physical SIM slot.
      * @param logicalSlotIndex is unique index referring to a logical SIM slot.
      *
-     * @hide
      */
     public UiccSlotMapping(int portIndex, int physicalSlotIndex, int logicalSlotIndex) {
         this.mPortIndex = portIndex;

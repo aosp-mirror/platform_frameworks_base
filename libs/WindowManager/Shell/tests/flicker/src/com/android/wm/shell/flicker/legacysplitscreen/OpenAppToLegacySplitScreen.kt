@@ -49,9 +49,9 @@ import org.junit.runners.Parameterized
 class OpenAppToLegacySplitScreen(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            super.transition(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            super.transition(this)
             transitions {
                 device.launchSplitScreen(wmHelper)
                 wmHelper.waitForAppTransitionIdle()

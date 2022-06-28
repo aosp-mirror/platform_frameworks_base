@@ -44,21 +44,10 @@ oneway interface IPinnedTaskListener {
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight);
 
     /**
-     * Called when the set of actions for the current PiP activity changes, or when the listener
-     * is first registered to allow the listener to synchronize its state with the controller.
-     */
-    void onActionsChanged(in ParceledListSlice<RemoteAction> actions);
-
-    /**
      * Called by the window manager to notify the listener that Activity (was or is in pinned mode)
      * is hidden (either stopped or removed). This is generally used as a signal to reset saved
      * reentry fraction and size.
      * {@param componentName} represents the application component of PiP window.
      */
     void onActivityHidden(in ComponentName componentName);
-
-    /**
-     * Called by the window manager when the aspect ratio is reset.
-     */
-    void onAspectRatioChanged(float aspectRatio);
 }

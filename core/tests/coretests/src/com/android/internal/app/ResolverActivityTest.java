@@ -39,6 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.fail;
 
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -52,6 +53,7 @@ import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.espresso.Espresso;
+import androidx.test.espresso.NoMatchingViewException;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -384,10 +386,10 @@ public class ResolverActivityTest {
         info = createPackageManagerMockedInfo(true);
         pg = new ResolveInfoPresentationGetter(
                 info.ctx, 0, info.resolveInfo);
-        assertThat("With override permission label should match resolve info label if set",
-                pg.getLabel().equals(info.setResolveInfoLabel));
-        assertThat("With override permission sublabel should be empty",
-                TextUtils.isEmpty(pg.getSubLabel()));
+        assertThat("With override permission label should match activity label if set",
+                pg.getLabel().equals(info.setActivityLabel));
+        assertThat("With override permission the sublabel should be the resolve info label",
+                pg.getSubLabel().equals(info.setResolveInfoLabel));
     }
 
     @Test
@@ -514,8 +516,6 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab))
                 .perform(click());
         waitForIdle();
-        // wait for the share sheet to expand
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
         onView(first(allOf(withText(workResolvedComponentInfos.get(0)
                 .getResolveInfoAt(0).activityInfo.applicationInfo.name), isCompletelyDisplayed())))
                 .perform(click());
@@ -614,8 +614,6 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab))
                 .perform(click());
         waitForIdle();
-        // wait for the share sheet to expand
-        Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
         onView(first(allOf(
                 withText(workResolvedComponentInfos.get(0)
                         .getResolveInfoAt(0).activityInfo.applicationInfo.name),
@@ -728,6 +726,53 @@ public class ResolverActivityTest {
 
         onView(withText(R.string.resolver_cross_profile_blocked))
                 .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testMiniResolver() {
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(1);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(1);
+        // Personal profile only has a browser
+        personalResolvedComponentInfos.get(0).getResolveInfoAt(0).handleAllWebDataURI = true;
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        onView(withId(R.id.open_cross_profile)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testMiniResolver_noCurrentProfileTarget() {
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(0);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(1);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+
+        // Need to ensure mini resolver doesn't trigger here.
+        assertNotMiniResolver();
+    }
+
+    private void assertNotMiniResolver() {
+        try {
+            onView(withId(R.id.open_cross_profile)).check(matches(isDisplayed()));
+        } catch (NoMatchingViewException e) {
+            return;
+        }
+        fail("Mini resolver present but shouldn't be");
     }
 
     @Test

@@ -18,6 +18,7 @@ package com.android.internal.util;
 
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.SparseLongArray;
 
 import java.io.IOException;
 
@@ -28,8 +29,9 @@ import java.io.IOException;
 public class PerfettoTrigger {
     private static final String TAG = "PerfettoTrigger";
     private static final String TRIGGER_COMMAND = "/system/bin/trigger_perfetto";
-    private static final long THROTTLE_MILLIS = 60000;
-    private static volatile long sLastTriggerTime = -THROTTLE_MILLIS;
+    private static final long THROTTLE_MILLIS = 300000;
+    private static final SparseLongArray sLastInvocationPerTrigger = new SparseLongArray(100);
+    private static final Object sLock = new Object();
 
     /**
      * @param triggerName The name of the trigger. Must match the value defined in the AOT
@@ -38,18 +40,23 @@ public class PerfettoTrigger {
     public static void trigger(String triggerName) {
         // Trace triggering has a non-negligible cost (fork+exec).
         // To mitigate potential excessive triggering by the API client we ignore calls that happen
-        // too quickl after the most recent trigger.
-        long sinceLastTrigger = SystemClock.elapsedRealtime() - sLastTriggerTime;
-        if (sinceLastTrigger < THROTTLE_MILLIS) {
-            Log.v(TAG, "Not triggering " + triggerName + " - not enough time since last trigger");
-            return;
+        // too quickly after the most recent trigger.
+        synchronized (sLock) {
+            long lastTrigger = sLastInvocationPerTrigger.get(triggerName.hashCode());
+            long sinceLastTrigger = SystemClock.elapsedRealtime() - lastTrigger;
+            if (sinceLastTrigger < THROTTLE_MILLIS) {
+                Log.v(TAG, "Not triggering " + triggerName
+                        + " - not enough time since last trigger");
+                return;
+            }
+
+            sLastInvocationPerTrigger.put(triggerName.hashCode(), SystemClock.elapsedRealtime());
         }
 
         try {
             ProcessBuilder pb = new ProcessBuilder(TRIGGER_COMMAND, triggerName);
             Log.v(TAG, "Triggering " + String.join(" ", pb.command()));
             pb.start();
-            sLastTriggerTime = SystemClock.elapsedRealtime();
         } catch (IOException e) {
             Log.w(TAG, "Failed to trigger " + triggerName, e);
         }

@@ -65,7 +65,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.WeakHashMap;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** @hide */
@@ -337,6 +336,25 @@ public class ResourcesManager {
                 ? displayManagerGlobal.getDisplayInfo(displayId) : null;
         if (displayInfo != null) {
             displayInfo.getAppMetrics(dm, da);
+        } else {
+            dm.setToDefaults();
+        }
+        return dm;
+    }
+
+    /**
+     * Like getDisplayMetrics, but will adjust the result based on the display information in
+     * config. This is used to make sure that the global configuration matches the activity's
+     * apparent display.
+     */
+    private DisplayMetrics getDisplayMetrics(Configuration config) {
+        final DisplayManagerGlobal displayManagerGlobal = DisplayManagerGlobal.getInstance();
+        final DisplayMetrics dm = new DisplayMetrics();
+        final DisplayInfo displayInfo = displayManagerGlobal != null
+                ? displayManagerGlobal.getDisplayInfo(mResDisplayId) : null;
+        if (displayInfo != null) {
+            displayInfo.getAppMetrics(dm,
+                    DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS.getCompatibilityInfo(), config);
         } else {
             dm.setToDefaults();
         }
@@ -1311,12 +1329,6 @@ public class ResourcesManager {
 
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
             @Nullable CompatibilityInfo compat) {
-        return applyConfigurationToResources(config, compat, null /* adjustments */);
-    }
-
-    /** Applies the global configuration to the managed resources. */
-    public final boolean applyConfigurationToResources(@NonNull Configuration config,
-            @Nullable CompatibilityInfo compat, @Nullable DisplayAdjustments adjustments) {
         synchronized (mLock) {
             try {
                 Trace.traceBegin(Trace.TRACE_TAG_RESOURCES,
@@ -1346,12 +1358,7 @@ public class ResourcesManager {
                     applyAllPendingAppInfoUpdates();
                 }
 
-                DisplayMetrics displayMetrics = getDisplayMetrics();
-                if (adjustments != null) {
-                    // Currently the only case where the adjustment takes effect is to simulate
-                    // placing an app in a rotated display.
-                    adjustments.adjustGlobalAppMetrics(displayMetrics);
-                }
+                final DisplayMetrics displayMetrics = getDisplayMetrics(config);
                 Resources.updateSystemConfiguration(config, displayMetrics, compat);
 
                 ApplicationPackageManager.configurationChanged();
@@ -1589,41 +1596,6 @@ public class ResourcesManager {
                 }
             }
         }
-    }
-
-    /**
-     * Overrides the display adjustments of all resources which are associated with the given token.
-     *
-     * @param token The token that owns the resources.
-     * @param override The operation to override the existing display adjustments. If it is null,
-     *                 the override adjustments will be cleared.
-     * @return {@code true} if the override takes effect.
-     */
-    public boolean overrideTokenDisplayAdjustments(IBinder token,
-            @Nullable Consumer<DisplayAdjustments> override) {
-        boolean handled = false;
-        synchronized (mLock) {
-            final ActivityResources tokenResources = mActivityResourceReferences.get(token);
-            if (tokenResources == null) {
-                return false;
-            }
-            final ArrayList<ActivityResource> resourcesRefs = tokenResources.activityResources;
-            for (int i = resourcesRefs.size() - 1; i >= 0; i--) {
-                final ActivityResource activityResource = resourcesRefs.get(i);
-                if (activityResource.overrideDisplayId != null) {
-                    // This resource overrides the display of the token so we should not be
-                    // modifying its display adjustments here.
-                    continue;
-                }
-
-                final Resources res = activityResource.resources.get();
-                if (res != null) {
-                    res.overrideDisplayAdjustments(override);
-                    handled = true;
-                }
-            }
-        }
-        return handled;
     }
 
     private class UpdateHandler implements Resources.UpdateCallbacks {

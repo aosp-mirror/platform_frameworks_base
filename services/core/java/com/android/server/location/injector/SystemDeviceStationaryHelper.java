@@ -41,7 +41,7 @@ public class SystemDeviceStationaryHelper extends DeviceStationaryHelper {
     public void addListener(DeviceIdleInternal.StationaryListener listener) {
         Preconditions.checkState(mDeviceIdle != null);
 
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             mDeviceIdle.registerStationaryListener(listener);
         } finally {
@@ -53,7 +53,7 @@ public class SystemDeviceStationaryHelper extends DeviceStationaryHelper {
     public void removeListener(DeviceIdleInternal.StationaryListener listener) {
         Preconditions.checkState(mDeviceIdle != null);
 
-        long identity = Binder.clearCallingIdentity();
+        final long identity = Binder.clearCallingIdentity();
         try {
             mDeviceIdle.unregisterStationaryListener(listener);
         } finally {

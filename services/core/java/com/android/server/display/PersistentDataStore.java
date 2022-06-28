@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.WifiDisplay;
+import android.os.Handler;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -31,12 +32,14 @@ import android.util.Xml;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -141,13 +144,22 @@ final class PersistentDataStore {
     // The interface for methods which should be replaced by the test harness.
     private Injector mInjector;
 
+    private final Handler mHandler;
+    private final Object mFileAccessLock = new Object();
+
     public PersistentDataStore() {
         this(new Injector());
     }
 
     @VisibleForTesting
     PersistentDataStore(Injector injector) {
+        this(injector, new Handler(BackgroundThread.getHandler().getLooper()));
+    }
+
+    @VisibleForTesting
+    PersistentDataStore(Injector injector, Handler handler) {
         mInjector = injector;
+        mHandler = handler;
     }
 
     public void saveIfNeeded() {
@@ -291,6 +303,54 @@ final class PersistentDataStore {
         return false;
     }
 
+    public boolean setUserPreferredRefreshRate(DisplayDevice displayDevice, float refreshRate) {
+        final String displayDeviceUniqueId = displayDevice.getUniqueId();
+        if (!displayDevice.hasStableUniqueId() || displayDeviceUniqueId == null) {
+            return false;
+        }
+        DisplayState state = getDisplayState(displayDevice.getUniqueId(), true);
+        if (state.setRefreshRate(refreshRate)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public float getUserPreferredRefreshRate(DisplayDevice device) {
+        if (device == null || !device.hasStableUniqueId()) {
+            return Float.NaN;
+        }
+        final DisplayState state = getDisplayState(device.getUniqueId(), false);
+        if (state == null) {
+            return Float.NaN;
+        }
+        return state.getRefreshRate();
+    }
+
+    public boolean setUserPreferredResolution(DisplayDevice displayDevice, int width, int height) {
+        final String displayDeviceUniqueId = displayDevice.getUniqueId();
+        if (!displayDevice.hasStableUniqueId() || displayDeviceUniqueId == null) {
+            return false;
+        }
+        DisplayState state = getDisplayState(displayDevice.getUniqueId(), true);
+        if (state.setResolution(width, height)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public Point getUserPreferredResolution(DisplayDevice displayDevice) {
+        if (displayDevice == null || !displayDevice.hasStableUniqueId()) {
+            return null;
+        }
+        final DisplayState state = getDisplayState(displayDevice.getUniqueId(), false);
+        if (state == null) {
+            return null;
+        }
+        return state.getResolution();
+    }
+
     public Point getStableDisplaySize() {
         loadIfNeeded();
         return mStableDeviceValues.getDisplaySize();
@@ -370,45 +430,60 @@ final class PersistentDataStore {
     }
 
     private void load() {
-        clearState();
-
-        final InputStream is;
-        try {
-            is = mInjector.openRead();
-        } catch (FileNotFoundException ex) {
-            return;
-        }
-
-        TypedXmlPullParser parser;
-        try {
-            parser = Xml.resolvePullParser(is);
-            loadFromXml(parser);
-        } catch (IOException ex) {
-            Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
+        synchronized (mFileAccessLock) {
             clearState();
-        } catch (XmlPullParserException ex) {
-            Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
-            clearState();
-        } finally {
-            IoUtils.closeQuietly(is);
+
+            final InputStream is;
+            try {
+                is = mInjector.openRead();
+            } catch (FileNotFoundException ex) {
+                return;
+            }
+
+            TypedXmlPullParser parser;
+            try {
+                parser = Xml.resolvePullParser(is);
+                loadFromXml(parser);
+            } catch (IOException ex) {
+                Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
+                clearState();
+            } catch (XmlPullParserException ex) {
+                Slog.w(TAG, "Failed to load display manager persistent store data.", ex);
+                clearState();
+            } finally {
+                IoUtils.closeQuietly(is);
+            }
         }
     }
 
     private void save() {
-        final OutputStream os;
+        final ByteArrayOutputStream os;
         try {
-            os = mInjector.startWrite();
-            boolean success = false;
-            try {
-                TypedXmlSerializer serializer = Xml.resolveSerializer(os);
-                saveToXml(serializer);
-                serializer.flush();
-                success = true;
-            } finally {
-                mInjector.finishWrite(os, success);
-            }
+            os = new ByteArrayOutputStream();
+
+            TypedXmlSerializer serializer = Xml.resolveSerializer(os);
+            saveToXml(serializer);
+            serializer.flush();
+
+            mHandler.removeCallbacksAndMessages(/* token */ null);
+            mHandler.post(() -> {
+                synchronized (mFileAccessLock) {
+                    OutputStream fileOutput = null;
+                    try {
+                        fileOutput = mInjector.startWrite();
+                        os.writeTo(fileOutput);
+                        fileOutput.flush();
+                    } catch (IOException ex) {
+                        Slog.w(TAG, "Failed to save display manager persistent store data.", ex);
+                    } finally {
+                        if (fileOutput != null) {
+                            mInjector.finishWrite(fileOutput, true);
+                        }
+                    }
+                }
+            });
         } catch (IOException ex) {
-            Slog.w(TAG, "Failed to save display manager persistent store data.", ex);
+            Slog.w(TAG, "Failed to process the XML serializer.", ex);
         }
     }
 
@@ -536,6 +611,9 @@ final class PersistentDataStore {
     private static final class DisplayState {
         private int mColorMode;
         private float mBrightness;
+        private int mWidth;
+        private int mHeight;
+        private float mRefreshRate;
 
         // Brightness configuration by user
         private BrightnessConfigurations mDisplayBrightnessConfigurations =
@@ -574,6 +652,31 @@ final class PersistentDataStore {
 
         public BrightnessConfiguration getBrightnessConfiguration(int userSerial) {
             return mDisplayBrightnessConfigurations.mConfigurations.get(userSerial);
+        }
+
+        public boolean setResolution(int width, int height) {
+            if (width == mWidth && height == mHeight) {
+                return false;
+            }
+            mWidth = width;
+            mHeight = height;
+            return true;
+        }
+
+        public Point getResolution() {
+            return new Point(mWidth, mHeight);
+        }
+
+        public boolean setRefreshRate(float refreshRate) {
+            if (refreshRate == mRefreshRate) {
+                return false;
+            }
+            mRefreshRate = refreshRate;
+            return true;
+        }
+
+        public float getRefreshRate() {
+            return mRefreshRate;
         }
 
         public void loadFromXml(TypedXmlPullParser parser)

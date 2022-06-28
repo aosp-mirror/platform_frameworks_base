@@ -29,45 +29,51 @@ import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
+import com.android.systemui.biometrics.AlternateUdfpsTouchProvider;
 import com.android.systemui.biometrics.UdfpsHbmProvider;
+import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
+import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlagManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.FlagReader;
-import com.android.systemui.flags.FlagWriter;
 import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.log.dagger.LogModule;
+import com.android.systemui.lowlightclock.LowLightClockController;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.navigationbar.NavigationBarComponent;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.privacy.PrivacyModule;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
+import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.QsFrameTranslateModule;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.dagger.SmartRepliesInflationModule;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
@@ -84,6 +90,7 @@ import com.android.systemui.util.time.SystemClockImpl;
 import com.android.systemui.wallet.dagger.WalletModule;
 import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.dagger.DynamicOverride;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -94,13 +101,21 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * A dagger module for injecting components of System UI that are not overridden by the System UI
- * implementation.
+ * A dagger module for injecting components of System UI that are required by System UI.
+ *
+ * If your feature can be excluded, subclassed, or re-implemented by a variant of SystemUI, put
+ * your Dagger Module in {@link ReferenceSystemUIModule} and/or any variant modules that
+ * rely on the feature.
+ *
+ * Adding an entry in this file means that _all_ variants of SystemUI will receive that code. They
+ * may not appreciate that.
  */
 @Module(includes = {
             AppOpsModule.class,
             AssistModule.class,
+            BiometricsModule.class,
             ClockModule.class,
+            DreamModule.class,
             ControlsModule.class,
             DemoModeModule.class,
             FalsingModule.class,
@@ -108,11 +123,14 @@ import dagger.Provides;
             LogModule.class,
             PeopleHubModule.class,
             PluginModule.class,
+            PrivacyModule.class,
+            QsFrameTranslateModule.class,
             ScreenshotModule.class,
             SensorModule.class,
             SettingsModule.class,
             SettingsUtilModule.class,
             SmartRepliesInflationModule.class,
+            SmartspaceModule.class,
             StatusBarPolicyModule.class,
             StatusBarWindowModule.class,
             SysUIConcurrencyModule.class,
@@ -123,7 +141,8 @@ import dagger.Provides;
             WalletModule.class
         },
         subcomponents = {
-            StatusBarComponent.class,
+            CentralSurfacesComponent.class,
+            NavigationBarComponent.class,
             NotificationRowComponent.class,
             DozeComponent.class,
             ExpandableNotificationRowComponent.class,
@@ -154,12 +173,6 @@ public abstract class SystemUIModule {
         return state;
     }
 
-    @Binds
-    abstract FlagReader provideFlagReader(FeatureFlagManager impl);
-
-    @Binds
-    abstract FlagWriter provideFlagWriter(FeatureFlagManager impl);
-
     @BindsOptionalOf
     abstract CommandQueue optionalCommandQueue();
 
@@ -173,10 +186,13 @@ public abstract class SystemUIModule {
     abstract Recents optionalRecents();
 
     @BindsOptionalOf
-    abstract StatusBar optionalStatusBar();
+    abstract CentralSurfaces optionalCentralSurfaces();
 
     @BindsOptionalOf
     abstract UdfpsHbmProvider optionalUdfpsHbmProvider();
+
+    @BindsOptionalOf
+    abstract AlternateUdfpsTouchProvider optionalUdfpsTouchProvider();
 
     @SysUISingleton
     @Binds
@@ -187,12 +203,6 @@ public abstract class SystemUIModule {
         return SystemUIFactory.getInstance();
     }
 
-    @SysUISingleton
-    @Provides
-    static SmartspaceTransitionController provideSmartspaceTransitionController() {
-        return new SmartspaceTransitionController();
-    }
-
     // TODO: This should provided by the WM component
     /** Provides Optional of BubbleManager */
     @SysUISingleton
@@ -200,19 +210,57 @@ public abstract class SystemUIModule {
     static Optional<BubblesManager> provideBubblesManager(Context context,
             Optional<Bubbles> bubblesOptional,
             NotificationShadeWindowController notificationShadeWindowController,
-            StatusBarStateController statusBarStateController, ShadeController shadeController,
+            KeyguardStateController keyguardStateController,
+            ShadeController shadeController,
             ConfigurationController configurationController,
-            @Nullable IStatusBarService statusBarService, INotificationManager notificationManager,
+            @Nullable IStatusBarService statusBarService,
+            INotificationManager notificationManager,
+            NotificationVisibilityProvider visibilityProvider,
             NotificationInterruptStateProvider interruptionStateProvider,
-            ZenModeController zenModeController, NotificationLockscreenUserManager notifUserManager,
-            NotificationGroupManagerLegacy groupManager, NotificationEntryManager entryManager,
-            NotifPipeline notifPipeline, SysUiState sysUiState, FeatureFlags featureFlags,
-            DumpManager dumpManager, @Main Executor sysuiMainExecutor) {
-        return Optional.ofNullable(BubblesManager.create(context, bubblesOptional,
-                notificationShadeWindowController, statusBarStateController, shadeController,
-                configurationController, statusBarService, notificationManager,
-                interruptionStateProvider, zenModeController, notifUserManager,
-                groupManager, entryManager, notifPipeline, sysUiState, featureFlags, dumpManager,
+            ZenModeController zenModeController,
+            NotificationLockscreenUserManager notifUserManager,
+            NotificationGroupManagerLegacy groupManager,
+            NotificationEntryManager entryManager,
+            CommonNotifCollection notifCollection,
+            NotifPipeline notifPipeline,
+            SysUiState sysUiState,
+            NotifPipelineFlags notifPipelineFlags,
+            DumpManager dumpManager,
+            @Main Executor sysuiMainExecutor) {
+        return Optional.ofNullable(BubblesManager.create(context,
+                bubblesOptional,
+                notificationShadeWindowController,
+                keyguardStateController,
+                shadeController,
+                configurationController,
+                statusBarService,
+                notificationManager,
+                visibilityProvider,
+                interruptionStateProvider,
+                zenModeController,
+                notifUserManager,
+                groupManager,
+                entryManager,
+                notifCollection,
+                notifPipeline,
+                sysUiState,
+                notifPipelineFlags,
+                dumpManager,
                 sysuiMainExecutor));
+    }
+
+    @BindsOptionalOf
+    @DynamicOverride
+    abstract LowLightClockController optionalLowLightClockController();
+
+    @SysUISingleton
+    @Provides
+    static Optional<LowLightClockController> provideLowLightClockController(
+            @DynamicOverride Optional<LowLightClockController> optionalController) {
+        if (optionalController.isPresent() && optionalController.get().isLowLightClockEnabled()) {
+            return optionalController;
+        } else {
+            return Optional.empty();
+        }
     }
 }

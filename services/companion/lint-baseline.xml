@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 7.1.0-dev" type="baseline" client="" dependencies="true" name="" variant="all" version="7.1.0-dev">
+
+    <issue
+        id="NonUserGetterCalled"
+        message="`android.provider.Settings.Secure#getString()` called from system process. Please call `android.provider.Settings.Secure#getStringForUser()` instead. "
+        errorLine1="            String setting = Settings.Secure.getString(getContext().getContentResolver(),"
+        errorLine2="             ~~~~~~~~~">
+        <location
+            file="frameworks/base/services/companion/java/com/android/server/companion/CompanionDeviceManagerService.java"
+            line="590"
+            column="14"/>
+    </issue>
+
+</issues>

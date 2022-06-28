@@ -253,7 +253,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                     RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                     IRemoteAnimationFinishedCallback finishedCallback,
                     SurfaceControl.Transaction t) {
-                mStageCoordinator.updateSurfaceBounds(null /* layout */, t);
+                mStageCoordinator.updateSurfaceBounds(null /* layout */, t,
+                        false /* applyResizingOffset */);
 
                 if (apps != null) {
                     for (int i = 0; i < apps.length; ++i) {

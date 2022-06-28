@@ -26,6 +26,8 @@ import java.util.Set;
 /**
  * Parcelable containing compat config change IDs for which to remove overrides for a given
  * application.
+ *
+ * <p>This class is separate from CompatibilityOverrideConfig since we only need change IDs.
  * @hide
  */
 public final class CompatibilityOverridesToRemoveConfig implements Parcelable {

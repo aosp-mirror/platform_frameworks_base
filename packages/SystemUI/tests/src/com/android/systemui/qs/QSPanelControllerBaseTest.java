@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -46,6 +45,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.MediaHost;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.logging.QSLogger;
@@ -58,10 +58,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -88,6 +88,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     private DumpManager mDumpManager = new DumpManager();
     @Mock
     QSTileImpl mQSTile;
+    @Mock
+    QSTile mOtherTile;
     @Mock
     QSTileView mQSTileView;
     @Mock
@@ -135,6 +137,10 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
         when(mQSPanel.getResources()).thenReturn(mResources);
         when(mResources.getConfiguration()).thenReturn(mConfiguration);
+        doAnswer(invocation -> {
+            when(mQSPanel.isListening()).thenReturn(invocation.getArgument(0));
+            return null;
+        }).when(mQSPanel).setListening(anyBoolean());
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSTileHost,
                 mQSCustomizerController, mMediaHost,
@@ -205,20 +211,20 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         String mockTileViewString = "Mock Tile View";
         String mockTileString = "Mock Tile";
         doAnswer(invocation -> {
-            PrintWriter pw = invocation.getArgument(1);
+            PrintWriter pw = invocation.getArgument(0);
             pw.println(mockTileString);
             return null;
-        }).when(mQSTile).dump(any(FileDescriptor.class), any(PrintWriter.class),
-                any(String[].class));
+        }).when(mQSTile).dump(any(PrintWriter.class), any(String[].class));
         when(mQSTileView.toString()).thenReturn(mockTileViewString);
 
         StringWriter w = new StringWriter();
         PrintWriter pw = new PrintWriter(w);
-        mController.dump(mock(FileDescriptor.class), pw, new String[]{});
+        mController.dump(pw, new String[]{});
         String expected = "TestableQSPanelControllerBase:\n"
                 + "  Tile records:\n"
                 + "    " + mockTileString + "\n"
-                + "    " + mockTileViewString + "\n";
+                + "    " + mockTileViewString + "\n"
+                + "  media bounds: null\n";
         assertEquals(expected, w.getBuffer().toString());
     }
 
@@ -278,5 +284,18 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
         // Then the layout changes back
         assertThat(mController.shouldUseHorizontalLayout()).isFalse();
         verify(mHorizontalLayoutListener, times(2)).run();
+    }
+
+    @Test
+    public void testRefreshAllTilesDoesntRefreshListeningTiles() {
+        when(mQSTileHost.getTiles()).thenReturn(List.of(mQSTile, mOtherTile));
+        mController.setTiles();
+
+        when(mQSTile.isListening()).thenReturn(false);
+        when(mOtherTile.isListening()).thenReturn(true);
+
+        mController.refreshAllTiles();
+        verify(mQSTile).refreshState();
+        verify(mOtherTile, never()).refreshState();
     }
 }

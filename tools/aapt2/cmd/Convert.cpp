@@ -367,8 +367,7 @@ int ConvertCommand::Action(const std::vector<std::string>& args) {
     return 1;
   }
 
-  Maybe<AppInfo> app_info = ExtractAppInfoFromBinaryManifest(*apk->GetManifest(),
-                                                             context.GetDiagnostics());
+  auto app_info = ExtractAppInfoFromBinaryManifest(*apk->GetManifest(), context.GetDiagnostics());
   if (!app_info) {
     return 1;
   }

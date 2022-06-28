@@ -242,8 +242,8 @@ public final class DownloadRequest implements Parcelable {
 
     private DownloadRequest(Parcel in) {
         fileServiceId = in.readString();
-        sourceUri = in.readParcelable(getClass().getClassLoader());
-        destinationUri = in.readParcelable(getClass().getClassLoader());
+        sourceUri = in.readParcelable(getClass().getClassLoader(), android.net.Uri.class);
+        destinationUri = in.readParcelable(getClass().getClassLoader(), android.net.Uri.class);
         subscriptionId = in.readInt();
         serializedResultIntentForApp = in.readString();
         version = in.readInt();

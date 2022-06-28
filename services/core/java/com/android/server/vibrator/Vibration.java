@@ -33,6 +33,7 @@ import android.util.proto.ProtoOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 /** Represents a vibration request to the vibrator service. */
@@ -46,24 +47,32 @@ final class Vibration {
         FINISHED,
         FINISHED_UNEXPECTED,  // Didn't terminate in the usual way.
         FORWARDED_TO_INPUT_DEVICES,
-        CANCELLED,
+        CANCELLED_BINDER_DIED,
+        CANCELLED_BY_SCREEN_OFF,
+        CANCELLED_BY_SETTINGS_UPDATE,
+        CANCELLED_BY_USER,
+        CANCELLED_BY_UNKNOWN_REASON,
+        CANCELLED_SUPERSEDED,
         IGNORED_ERROR_APP_OPS,
+        IGNORED_ERROR_CANCELLING,
+        IGNORED_ERROR_SCHEDULING,
         IGNORED_ERROR_TOKEN,
-        IGNORED,
         IGNORED_APP_OPS,
         IGNORED_BACKGROUND,
-        IGNORED_RINGTONE,
         IGNORED_UNKNOWN_VIBRATION,
         IGNORED_UNSUPPORTED,
         IGNORED_FOR_ALARM,
         IGNORED_FOR_EXTERNAL,
         IGNORED_FOR_ONGOING,
         IGNORED_FOR_POWER,
+        IGNORED_FOR_RINGER_MODE,
+        IGNORED_FOR_RINGTONE,
         IGNORED_FOR_SETTINGS,
+        IGNORED_SUPERSEDED,
     }
 
-    /** Start time in CLOCK_BOOTTIME base. */
-    public final long startTime;
+    /** Start time using {@link SystemClock#uptimeMillis()}, for calculations. */
+    public final long startUptimeMillis;
     public final VibrationAttributes attrs;
     public final long id;
     public final int uid;
@@ -85,19 +94,25 @@ final class Vibration {
 
     /**
      * Start/end times in unix epoch time. Only to be used for debugging purposes and to correlate
-     * with other system events, any duration calculations should be done use {@link #startTime} so
-     * as not to be affected by discontinuities created by RTC adjustments.
+     * with other system events, any duration calculations should be done use
+     * {@link #startUptimeMillis} so as not to be affected by discontinuities created by RTC
+     * adjustments.
      */
     private final long mStartTimeDebug;
     private long mEndTimeDebug;
+    /** End time using {@link SystemClock#uptimeMillis()}, for calculations. */
+    private long mEndUptimeMillis;
     private Status mStatus;
+
+    /** A {@link CountDownLatch} to enable waiting for completion. */
+    private final CountDownLatch mCompletionLatch = new CountDownLatch(1);
 
     Vibration(IBinder token, int id, CombinedVibration effect,
             VibrationAttributes attrs, int uid, String opPkg, String reason) {
         this.token = token;
         this.mEffect = effect;
         this.id = id;
-        this.startTime = SystemClock.elapsedRealtime();
+        this.startUptimeMillis = SystemClock.uptimeMillis();
         this.attrs = attrs;
         this.uid = uid;
         this.opPkg = opPkg;
@@ -119,7 +134,14 @@ final class Vibration {
             return;
         }
         mStatus = status;
+        mEndUptimeMillis = SystemClock.uptimeMillis();
         mEndTimeDebug = System.currentTimeMillis();
+        mCompletionLatch.countDown();
+    }
+
+    /** Waits indefinitely until another thread calls {@link #end(Status)} on this vibration. */
+    public void waitForEnd() throws InterruptedException {
+        mCompletionLatch.await();
     }
 
     /**
@@ -207,15 +229,17 @@ final class Vibration {
 
     /** Return {@link Vibration.DebugInfo} with read-only debug information about this vibration. */
     public Vibration.DebugInfo getDebugInfo() {
+        long durationMs = hasEnded() ? mEndUptimeMillis - startUptimeMillis : -1;
         return new Vibration.DebugInfo(
-                mStartTimeDebug, mEndTimeDebug, mEffect, mOriginalEffect, /* scale= */ 0, attrs,
-                uid, opPkg, reason, mStatus);
+                mStartTimeDebug, mEndTimeDebug, durationMs, mEffect, mOriginalEffect,
+                /* scale= */ 0, attrs, uid, opPkg, reason, mStatus);
     }
 
     /** Debug information about vibrations. */
     static final class DebugInfo {
         private final long mStartTimeDebug;
         private final long mEndTimeDebug;
+        private final long mDurationMs;
         private final CombinedVibration mEffect;
         private final CombinedVibration mOriginalEffect;
         private final float mScale;
@@ -225,11 +249,12 @@ final class Vibration {
         private final String mReason;
         private final Status mStatus;
 
-        DebugInfo(long startTimeDebug, long endTimeDebug, CombinedVibration effect,
-                CombinedVibration originalEffect, float scale, VibrationAttributes attrs,
-                int uid, String opPkg, String reason, Status status) {
+        DebugInfo(long startTimeDebug, long endTimeDebug, long durationMs,
+                CombinedVibration effect, CombinedVibration originalEffect, float scale,
+                VibrationAttributes attrs, int uid, String opPkg, String reason, Status status) {
             mStartTimeDebug = startTimeDebug;
             mEndTimeDebug = endTimeDebug;
+            mDurationMs = durationMs;
             mEffect = effect;
             mOriginalEffect = originalEffect;
             mScale = scale;
@@ -248,6 +273,8 @@ final class Vibration {
                     .append(", endTime: ")
                     .append(mEndTimeDebug == 0 ? null
                             : DEBUG_DATE_FORMAT.format(new Date(mEndTimeDebug)))
+                    .append(", durationMs: ")
+                    .append(mDurationMs)
                     .append(", status: ")
                     .append(mStatus.name().toLowerCase())
                     .append(", effect: ")
@@ -272,6 +299,7 @@ final class Vibration {
             final long token = proto.start(fieldId);
             proto.write(VibrationProto.START_TIME, mStartTimeDebug);
             proto.write(VibrationProto.END_TIME, mEndTimeDebug);
+            proto.write(VibrationProto.DURATION_MS, mDurationMs);
             proto.write(VibrationProto.STATUS, mStatus.ordinal());
 
             final long attrsToken = proto.start(VibrationProto.ATTRIBUTES);
@@ -362,7 +390,7 @@ final class Vibration {
             final long token = proto.start(fieldId);
             proto.write(StepSegmentProto.DURATION, segment.getDuration());
             proto.write(StepSegmentProto.AMPLITUDE, segment.getAmplitude());
-            proto.write(StepSegmentProto.FREQUENCY, segment.getFrequency());
+            proto.write(StepSegmentProto.FREQUENCY, segment.getFrequencyHz());
             proto.end(token);
         }
 
@@ -371,8 +399,8 @@ final class Vibration {
             proto.write(RampSegmentProto.DURATION, segment.getDuration());
             proto.write(RampSegmentProto.START_AMPLITUDE, segment.getStartAmplitude());
             proto.write(RampSegmentProto.END_AMPLITUDE, segment.getEndAmplitude());
-            proto.write(RampSegmentProto.START_FREQUENCY, segment.getStartFrequency());
-            proto.write(RampSegmentProto.END_FREQUENCY, segment.getEndFrequency());
+            proto.write(RampSegmentProto.START_FREQUENCY, segment.getStartFrequencyHz());
+            proto.write(RampSegmentProto.END_FREQUENCY, segment.getEndFrequencyHz());
             proto.end(token);
         }
 

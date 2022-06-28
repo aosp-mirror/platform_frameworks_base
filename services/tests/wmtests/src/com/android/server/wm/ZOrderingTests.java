@@ -22,7 +22,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -275,6 +274,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 "imeAppTargetChildBelowWindow");
 
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
+        makeWindowVisible(mImeWindow);
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for child windows that are z-ordered above it
@@ -363,7 +363,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
                 "pinnedStackWindow");
         final WindowState dockedStackWindow = createWindow(null,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "dockedStackWindow");
         final WindowState assistantStackWindow = createWindow(null,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
@@ -600,6 +600,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 WINDOWING_MODE_MULTI_WINDOW);
         mDisplayContent.setImeLayeringTarget(mAppWindow);
         mDisplayContent.setImeInputTarget(mAppWindow);
+        makeWindowVisible(mImeWindow);
 
         // Create a popupWindow
         assertWindowHigher(mImeWindow, mAppWindow);

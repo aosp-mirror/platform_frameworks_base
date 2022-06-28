@@ -1168,7 +1168,7 @@ public class Build {
         /**
          * Tiramisu.
          */
-        public static final int TIRAMISU = CUR_DEVELOPMENT;
+        public static final int TIRAMISU = 33;
 
         /**
          * Upside Down Cake.
@@ -1326,6 +1326,18 @@ public class Build {
     public static class Partition {
         /** The name identifying the system partition. */
         public static final String PARTITION_NAME_SYSTEM = "system";
+        /** @hide */
+        public static final String PARTITION_NAME_BOOTIMAGE = "bootimage";
+        /** @hide */
+        public static final String PARTITION_NAME_ODM = "odm";
+        /** @hide */
+        public static final String PARTITION_NAME_OEM = "oem";
+        /** @hide */
+        public static final String PARTITION_NAME_PRODUCT = "product";
+        /** @hide */
+        public static final String PARTITION_NAME_SYSTEM_EXT = "system_ext";
+        /** @hide */
+        public static final String PARTITION_NAME_VENDOR = "vendor";
 
         private final String mName;
         private final String mFingerprint;
@@ -1382,8 +1394,12 @@ public class Build {
         ArrayList<Partition> partitions = new ArrayList();
 
         String[] names = new String[] {
-            "bootimage", "odm", "product", "system_ext", Partition.PARTITION_NAME_SYSTEM,
-            "vendor"
+                Partition.PARTITION_NAME_BOOTIMAGE,
+                Partition.PARTITION_NAME_ODM,
+                Partition.PARTITION_NAME_PRODUCT,
+                Partition.PARTITION_NAME_SYSTEM_EXT,
+                Partition.PARTITION_NAME_SYSTEM,
+                Partition.PARTITION_NAME_VENDOR
         };
         for (String name : names) {
             String fingerprint = SystemProperties.get("ro." + name + ".build.fingerprint");
@@ -1438,7 +1454,11 @@ public class Build {
     public static final boolean IS_USER = "user".equals(TYPE);
 
     /**
-     * Whether this build is running inside a container.
+     * Whether this build is running on ARC, the Android Runtime for Chrome
+     * (https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md).
+     * Prior to R this was implemented as a container but from R this will be
+     * a VM. The name of the property remains ro.boot.conntainer as it is
+     * referenced in other projects.
      *
      * We should try to avoid checking this flag if possible to minimize
      * unnecessarily diverging from non-container Android behavior.
@@ -1449,7 +1469,7 @@ public class Build {
      * For higher-level behavior differences, other checks should be preferred.
      * @hide
      */
-    public static final boolean IS_CONTAINER =
+    public static final boolean IS_ARC =
             SystemProperties.getBoolean("ro.boot.container", false);
 
     /**

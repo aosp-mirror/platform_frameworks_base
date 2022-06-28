@@ -70,6 +70,11 @@ public final class AccessibilityShortcutInfo {
     private final ActivityInfo mActivityInfo;
 
     /**
+     * Resource id of the intro of the accessibility shortcut target.
+     */
+    private final int mIntroResId;
+
+    /**
      * Resource id of the summary of the accessibility shortcut target.
      */
     private final int mSummaryResId;
@@ -94,6 +99,13 @@ public final class AccessibilityShortcutInfo {
      * settings to launch the setting activity of this accessibility shortcut target.
      */
     private String mSettingsActivityName;
+
+    /**
+     * The name of {@link android.service.quicksettings.TileService} is associated with this
+     * accessibility shortcut target for one to one mapping. It is used by system settings to remind
+     * users this accessibility service has a {@link android.service.quicksettings.TileService}.
+     */
+    private String mTileServiceName;
 
     /**
      * Creates a new instance.
@@ -150,11 +162,13 @@ public final class AccessibilityShortcutInfo {
             // Get settings activity name
             mSettingsActivityName = asAttributes.getString(
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_settingsActivity);
+            // Get tile service class name
+            mTileServiceName = asAttributes.getString(
+                    com.android.internal.R.styleable.AccessibilityShortcutTarget_tileService);
+            // Gets intro
+            mIntroResId = asAttributes.getResourceId(
+                    com.android.internal.R.styleable.AccessibilityShortcutTarget_intro, 0);
             asAttributes.recycle();
-
-            if ((mDescriptionResId == 0 && mHtmlDescriptionRes == 0) || mSummaryResId == 0) {
-                throw new XmlPullParserException("No description or summary in meta-data");
-            }
         } catch (PackageManager.NameNotFoundException e) {
             throw new XmlPullParserException("Unable to create context for: "
                     + mActivityInfo.packageName);
@@ -190,6 +204,16 @@ public final class AccessibilityShortcutInfo {
     @Nullable
     public String loadSummary(@NonNull PackageManager packageManager) {
         return loadResourceString(packageManager, mActivityInfo, mSummaryResId);
+    }
+
+    /**
+     * The localized intro of the accessibility shortcut target.
+     *
+     * @return The localized intro.
+     */
+    @Nullable
+    public String loadIntro(@NonNull PackageManager packageManager) {
+        return loadResourceString(packageManager, mActivityInfo, mIntroResId);
     }
 
     /**
@@ -256,6 +280,17 @@ public final class AccessibilityShortcutInfo {
     @Nullable
     public String getSettingsActivityName() {
         return mSettingsActivityName;
+    }
+
+    /**
+     * Gets the name of {@link android.service.quicksettings.TileService} is associated with
+     * this accessibility shortcut target.
+     *
+     * @return The class name of {@link android.service.quicksettings.TileService}.
+     */
+    @Nullable
+    public String getTileServiceName() {
+        return mTileServiceName;
     }
 
     /**

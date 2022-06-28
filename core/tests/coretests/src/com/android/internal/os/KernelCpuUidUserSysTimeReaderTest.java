@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.os.FileUtils;
-import android.os.SystemClock;
 import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -56,7 +55,7 @@ public class KernelCpuUidUserSysTimeReaderTest {
     private KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader mReader;
     private VerifiableCallback mCallback;
 
-    private Random mRand = new Random(12345);
+    private final Random mRand = new Random(12345);
     private final int[] mUids = {0, 1, 22, 333, 4444, 55555};
     private final long[][] mInitialTimes = new long[][]{
             {15334000, 310964000},
@@ -67,6 +66,8 @@ public class KernelCpuUidUserSysTimeReaderTest {
             {47000, 17000}
     };
 
+    private final MockClock mMockClock = new MockClock();
+
     private Context getContext() {
         return InstrumentationRegistry.getContext();
     }
@@ -76,7 +77,8 @@ public class KernelCpuUidUserSysTimeReaderTest {
         mTestDir = getContext().getDir("test", Context.MODE_PRIVATE);
         mTestFile = new File(mTestDir, "test.file");
         mReader = new KernelCpuUidUserSysTimeReader(
-                new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), false);
+                new KernelCpuProcStringReader(mTestFile.getAbsolutePath(), mMockClock),
+                false, mMockClock);
         mCallback = new VerifiableCallback();
     }
 
@@ -87,10 +89,13 @@ public class KernelCpuUidUserSysTimeReaderTest {
     }
 
     @Test
-    @SkipPresubmit("b/180015146")
     public void testThrottler() throws Exception {
+        mMockClock.realtime = 1000;
+
         mReader = new KernelCpuUidUserSysTimeReader(
-                new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), true);
+                new KernelCpuProcStringReader(mTestFile.getAbsolutePath(), mMockClock),
+                true, mMockClock);
+
         mReader.setThrottle(500);
 
         writeToFile(uidLines(mUids, mInitialTimes));
@@ -103,8 +108,7 @@ public class KernelCpuUidUserSysTimeReaderTest {
         mReader.readDelta(false, mCallback);
         assertEquals(0, mCallback.mData.size());
 
-        // TODO(b/180473895): Replace sleeps with injected simulated time.
-        SystemClock.sleep(600);
+        mMockClock.realtime += 600;
 
         long[][] times2 = increaseTime(times1);
         writeToFile(uidLines(mUids, times2));
@@ -123,7 +127,7 @@ public class KernelCpuUidUserSysTimeReaderTest {
         mReader.readDelta(true, mCallback);
         assertEquals(6, mCallback.mData.size());
 
-        SystemClock.sleep(600);
+        mMockClock.realtime += 600;
 
         long[][] times4 = increaseTime(times3);
         writeToFile(uidLines(mUids, times4));
@@ -138,7 +142,7 @@ public class KernelCpuUidUserSysTimeReaderTest {
         mReader.readDelta(false, mCallback);
         assertEquals(0, mCallback.mData.size());
 
-        SystemClock.sleep(600);
+        mMockClock.realtime += 600;
 
         mCallback.clear();
         mReader.readDelta(false, mCallback);

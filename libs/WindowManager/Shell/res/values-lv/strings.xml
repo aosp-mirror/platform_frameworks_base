@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Pārvaldīt"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Burbulis ir noraidīts."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"Pieskarieties, lai restartētu šo lietotni un pārietu pilnekrāna režīmā."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Vai ir problēmas ar kameru?\nPieskarieties, lai tās novērstu."</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Vai problēma netika novērsta?\nPieskarieties, lai atjaunotu."</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Vai nav problēmu ar kameru? Pieskarieties, lai nerādītu."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Dažas lietotnes vislabāk darbojas portreta režīmā"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Izmēģiniet vienu no šīm iespējām, lai efektīvi izmantotu pieejamo vietu"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Pagrieziet ierīci, lai aktivizētu pilnekrāna režīmu"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Veiciet dubultskārienu blakus lietotnei, lai manītu tās pozīciju"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"Labi"</string>
 </resources>

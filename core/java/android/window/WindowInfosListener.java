@@ -16,6 +16,9 @@
 
 package android.window;
 
+import android.graphics.Matrix;
+import android.util.Pair;
+import android.util.Size;
 import android.view.InputWindowHandle;
 
 import libcore.util.NativeAllocationRegistry;
@@ -40,13 +43,18 @@ public abstract class WindowInfosListener {
      * @param windowHandles Reverse Z ordered array of window information that was on screen,
      *                      where the first value is the topmost window.
      */
-    public abstract void onWindowInfosChanged(InputWindowHandle[] windowHandles);
+    public abstract void onWindowInfosChanged(InputWindowHandle[] windowHandles,
+            DisplayInfo[] displayInfos);
 
     /**
      * Register the WindowInfosListener.
+     *
+     * @return The cached values for InputWindowHandles and DisplayInfos. This is the last updated
+     * value that was sent from SurfaceFlinger to this particular process. If there was nothing
+     * registered previously, then the data can be empty.
      */
-    public void register() {
-        nativeRegister(mNativeListener);
+    public Pair<InputWindowHandle[], DisplayInfo[]> register() {
+        return nativeRegister(mNativeListener);
     }
 
     /**
@@ -57,7 +65,37 @@ public abstract class WindowInfosListener {
     }
 
     private static native long nativeCreate(WindowInfosListener thiz);
-    private static native void nativeRegister(long ptr);
+    private static native Pair<InputWindowHandle[], DisplayInfo[]> nativeRegister(long ptr);
     private static native void nativeUnregister(long ptr);
     private static native long nativeGetFinalizer();
+
+    /**
+     * Describes information about a display that can have windows in it.
+     */
+    public static final class DisplayInfo {
+        public final int mDisplayId;
+
+        /**
+         * Logical display dimensions.
+         */
+        public final Size mLogicalSize;
+
+        /**
+         * The display transform. This takes display coordinates to logical display coordinates.
+         */
+        public final Matrix mTransform;
+
+        private DisplayInfo(int displayId, int logicalWidth, int logicalHeight, Matrix transform) {
+            mDisplayId = displayId;
+            mLogicalSize = new Size(logicalWidth, logicalHeight);
+            mTransform = transform;
+        }
+
+        @Override
+        public String toString() {
+            return "displayId=" + mDisplayId
+                    + ", mLogicalSize=" + mLogicalSize
+                    + ", mTransform=" + mTransform;
+        }
+    }
 }

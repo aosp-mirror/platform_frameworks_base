@@ -28,13 +28,16 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeRenderListListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.withArgCaptor
+import dagger.BindsInstance
+import dagger.Component
 import org.junit.Test
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -50,9 +53,16 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
     val statusBarStateController: StatusBarStateController = mock()
     val keyguardStateController: KeyguardStateController = mock()
 
-    val coordinator: SensitiveContentCoordinator = SensitiveContentCoordinatorModule
-            .provideCoordinator(dynamicPrivacyController, lockscreenUserManager,
-            keyguardUpdateMonitor, statusBarStateController, keyguardStateController)
+    val coordinator: SensitiveContentCoordinator =
+        DaggerTestSensitiveContentCoordinatorComponent
+                .factory()
+                .create(
+                        dynamicPrivacyController,
+                        lockscreenUserManager,
+                        keyguardUpdateMonitor,
+                        statusBarStateController,
+                        keyguardStateController)
+                .coordinator
 
     @Test
     fun onDynamicPrivacyChanged_invokeInvalidationListener() {
@@ -237,5 +247,22 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
         return object : ListEntry("key", 0) {
             override fun getRepresentativeEntry(): NotificationEntry = mockEntry
         }
+    }
+}
+
+@CoordinatorScope
+@Component(modules = [SensitiveContentCoordinatorModule::class])
+interface TestSensitiveContentCoordinatorComponent {
+    val coordinator: SensitiveContentCoordinator
+
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance dynamicPrivacyController: DynamicPrivacyController,
+            @BindsInstance lockscreenUserManager: NotificationLockscreenUserManager,
+            @BindsInstance keyguardUpdateMonitor: KeyguardUpdateMonitor,
+            @BindsInstance statusBarStateController: StatusBarStateController,
+            @BindsInstance keyguardStateController: KeyguardStateController
+        ): TestSensitiveContentCoordinatorComponent
     }
 }

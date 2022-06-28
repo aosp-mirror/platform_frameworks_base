@@ -135,6 +135,15 @@ asked for it -->
             android:layout_height="wrap_content"
             style="@*android:style/TextAppearance.DeviceDefault.Notification" />
 
+        <!-- Non configurable app/channel text. appears instead of @+id/interruptiveness_settings-->
+        <TextView
+            android:id="@+id/non_configurable_call_text"
+            android:text="@string/notification_unblockable_call_desc"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@*android:style/TextAppearance.DeviceDefault.Notification" />
+
         <!-- Non configurable multichannel text. appears instead of @+id/interruptiveness_settings-->
         <TextView
             android:id="@+id/non_configurable_multichannel_text"

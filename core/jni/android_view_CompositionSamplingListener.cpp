@@ -16,21 +16,19 @@
 
 #define LOG_TAG "CompositionSamplingListener"
 
-#include "android_util_Binder.h"
-#include "core_jni_helpers.h"
-
-#include <nativehelper/JNIHelp.h>
-
+#include <android/gui/BnRegionSamplingListener.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
-#include <utils/Log.h>
-#include <utils/RefBase.h>
 #include <binder/IServiceManager.h>
-
-#include <gui/IRegionSamplingListener.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
+#include <nativehelper/JNIHelp.h>
 #include <ui/Rect.h>
+#include <utils/Log.h>
+#include <utils/RefBase.h>
+
+#include "android_util_Binder.h"
+#include "core_jni_helpers.h"
 
 namespace android {
 
@@ -41,18 +39,18 @@ struct {
     jmethodID mDispatchOnSampleCollected;
 } gListenerClassInfo;
 
-struct CompositionSamplingListener : public BnRegionSamplingListener {
+struct CompositionSamplingListener : public gui::BnRegionSamplingListener {
     CompositionSamplingListener(JNIEnv* env, jobject listener)
             : mListener(env->NewWeakGlobalRef(listener)) {}
 
-    void onSampleCollected(float medianLuma) override {
+    binder::Status onSampleCollected(float medianLuma) override {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         LOG_ALWAYS_FATAL_IF(env == nullptr, "Unable to retrieve JNIEnv in onSampleCollected.");
 
         jobject listener = env->NewGlobalRef(mListener);
         if (listener == NULL) {
             // Weak reference went out of scope
-            return;
+            return binder::Status::ok();
         }
         env->CallStaticVoidMethod(gListenerClassInfo.mClass,
                 gListenerClassInfo.mDispatchOnSampleCollected, listener,
@@ -64,6 +62,8 @@ struct CompositionSamplingListener : public BnRegionSamplingListener {
             LOGE_EX(env);
             env->ExceptionClear();
         }
+
+        return binder::Status::ok();
     }
 
 protected:

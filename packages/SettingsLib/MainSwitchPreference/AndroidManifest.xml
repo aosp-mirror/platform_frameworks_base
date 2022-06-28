@@ -18,8 +18,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.settingslib.widget">
 
-    <uses-sdk
-        android:minSdkVersion="28"
-        android:targetSdkVersion="31"/>
-
 </manifest>

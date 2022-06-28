@@ -17,6 +17,7 @@
 package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
@@ -36,7 +37,8 @@ class FakeBroadcastDispatcher(
     dumpManager: DumpManager,
     logger: BroadcastDispatcherLogger,
     userTracker: UserTracker
-) : BroadcastDispatcher(context, looper, executor, dumpManager, logger, userTracker) {
+) : BroadcastDispatcher(
+    context, looper, executor, dumpManager, logger, userTracker, PendingRemovalStore(logger)) {
 
     private val registeredReceivers = ArraySet<BroadcastReceiver>()
 
@@ -44,7 +46,9 @@ class FakeBroadcastDispatcher(
         receiver: BroadcastReceiver,
         filter: IntentFilter,
         handler: Handler,
-        user: UserHandle
+        user: UserHandle,
+        @Context.RegisterReceiverFlags flags: Int,
+        permission: String?
     ) {
         registeredReceivers.add(receiver)
     }
@@ -53,7 +57,9 @@ class FakeBroadcastDispatcher(
         receiver: BroadcastReceiver,
         filter: IntentFilter,
         executor: Executor?,
-        user: UserHandle?
+        user: UserHandle?,
+        @Context.RegisterReceiverFlags flags: Int,
+        permission: String?
     ) {
         registeredReceivers.add(receiver)
     }

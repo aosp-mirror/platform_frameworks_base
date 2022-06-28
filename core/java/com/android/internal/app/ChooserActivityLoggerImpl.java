@@ -51,12 +51,14 @@ public class ChooserActivityLoggerImpl implements ChooserActivityLogger {
     }
 
     @Override
-    public void logShareTargetSelected(int targetType, String packageName, int positionPicked) {
+    public void logShareTargetSelected(int targetType, String packageName, int positionPicked,
+            boolean isPinned) {
         FrameworkStatsLog.write(FrameworkStatsLog.RANKING_SELECTED,
                 /* event_id = 1 */ SharesheetTargetSelectedEvent.fromTargetType(targetType).getId(),
                 /* package_name = 2 */ packageName,
                 /* instance_id = 3 */ getInstanceId().getId(),
-                /* position_picked = 4 */ positionPicked);
+                /* position_picked = 4 */ positionPicked,
+                /* is_pinned = 5 */ isPinned);
     }
 
     @Override

@@ -56,12 +56,12 @@ public class RotateAnimation extends Animation {
         mToDegrees = a.getFloat(com.android.internal.R.styleable.RotateAnimation_toDegrees, 0.0f);
 
         Description d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.RotateAnimation_pivotX));
+                com.android.internal.R.styleable.RotateAnimation_pivotX), context);
         mPivotXType = d.type;
         mPivotXValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.RotateAnimation_pivotY));
+                com.android.internal.R.styleable.RotateAnimation_pivotY), context);
         mPivotYType = d.type;
         mPivotYValue = d.value;
 

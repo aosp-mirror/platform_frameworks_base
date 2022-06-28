@@ -21,7 +21,9 @@ import com.android.systemui.util.WallpaperController
 import javax.inject.Inject
 
 @SysUIUnfoldScope
-class UnfoldTransitionWallpaperController @Inject constructor(
+class UnfoldTransitionWallpaperController
+@Inject
+constructor(
     private val unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider,
     private val wallpaperController: WallpaperController
 ) {

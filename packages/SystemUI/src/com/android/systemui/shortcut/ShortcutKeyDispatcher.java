@@ -23,13 +23,8 @@ import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.wm.shell.legacysplitscreen.DividerView;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
-
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -37,11 +32,10 @@ import javax.inject.Inject;
  * Dispatches shortcut to System UI components
  */
 @SysUISingleton
-public class ShortcutKeyDispatcher extends SystemUI
+public class ShortcutKeyDispatcher extends CoreStartable
         implements ShortcutKeyServiceProxy.Callbacks {
 
     private static final String TAG = "ShortcutKeyDispatcher";
-    private final Optional<LegacySplitScreen> mSplitScreenOptional;
 
     private ShortcutKeyServiceProxy mShortcutKeyServiceProxy = new ShortcutKeyServiceProxy(this);
     private IWindowManager mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -55,9 +49,8 @@ public class ShortcutKeyDispatcher extends SystemUI
     protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
 
     @Inject
-    public ShortcutKeyDispatcher(Context context, Optional<LegacySplitScreen> splitScreenOptional) {
+    public ShortcutKeyDispatcher(Context context) {
         super(context);
-        mSplitScreenOptional = splitScreenOptional;
     }
 
     /**
@@ -89,24 +82,6 @@ public class ShortcutKeyDispatcher extends SystemUI
     }
 
     private void handleDockKey(long shortcutCode) {
-        mSplitScreenOptional.ifPresent(splitScreen -> {
-            if (splitScreen.isDividerVisible()) {
-                // If there is already a docked window, we respond by resizing the docking pane.
-                DividerView dividerView = splitScreen.getDividerView();
-                DividerSnapAlgorithm snapAlgorithm = dividerView.getSnapAlgorithm();
-                int dividerPosition = dividerView.getCurrentPosition();
-                DividerSnapAlgorithm.SnapTarget currentTarget =
-                        snapAlgorithm.calculateNonDismissingSnapTarget(dividerPosition);
-                DividerSnapAlgorithm.SnapTarget target = (shortcutCode == SC_DOCK_LEFT)
-                        ? snapAlgorithm.getPreviousTarget(currentTarget)
-                        : snapAlgorithm.getNextTarget(currentTarget);
-                dividerView.startDragging(true /* animate */, false /* touching */);
-                dividerView.stopDragging(target.position, 0f, false /* avoidDismissStart */,
-                        true /* logMetrics */);
-                return;
-            } else {
-                splitScreen.splitPrimaryTask();
-            }
-        });
+        // TODO(b/220262470) : implement it with new split screen.
     }
 }

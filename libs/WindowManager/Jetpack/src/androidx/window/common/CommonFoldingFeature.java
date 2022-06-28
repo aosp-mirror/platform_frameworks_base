@@ -208,7 +208,7 @@ public final class CommonFoldingFeature {
         return mType;
     }
 
-    /** Returns the state of the feature, or {@code null} if the feature has no state. */
+    /** Returns the state of the feature.*/
     @State
     public int getState() {
         return mState;

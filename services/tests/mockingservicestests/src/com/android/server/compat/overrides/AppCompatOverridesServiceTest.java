@@ -57,9 +57,11 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.compat.CompatibilityOverrideConfig;
+import com.android.internal.compat.CompatibilityOverridesByPackageConfig;
+import com.android.internal.compat.CompatibilityOverridesToRemoveByPackageConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
 import com.android.internal.compat.IPlatformCompat;
-import com.android.server.testables.TestableDeviceConfig.TestableDeviceConfigRule;
+import com.android.modules.utils.testing.TestableDeviceConfig.TestableDeviceConfigRule;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -108,7 +110,13 @@ public class AppCompatOverridesServiceTest {
     @Captor
     private ArgumentCaptor<CompatibilityOverrideConfig> mOverridesToAddConfigCaptor;
     @Captor
+    private ArgumentCaptor<CompatibilityOverridesByPackageConfig>
+            mOverridesToAddByPackageConfigCaptor;
+    @Captor
     private ArgumentCaptor<CompatibilityOverridesToRemoveConfig> mOverridesToRemoveConfigCaptor;
+    @Captor
+    private ArgumentCaptor<CompatibilityOverridesToRemoveByPackageConfig>
+            mOverridesToRemoveByPackageConfigCaptor;
 
     @Rule
     public TestableDeviceConfigRule mDeviceConfigRule = new TestableDeviceConfigRule();
@@ -165,13 +173,20 @@ public class AppCompatOverridesServiceTest {
                 .setString(PACKAGE_3, "123:1:9:true,123:10:11:false,123:11::true")
                 .setString(PACKAGE_4, "").build());
 
+        verify(mPlatformCompat).putAllOverridesOnReleaseBuilds(
+                mOverridesToAddByPackageConfigCaptor.capture());
+        verify(mPlatformCompat).removeAllOverridesOnReleaseBuilds(
+                mOverridesToRemoveByPackageConfigCaptor.capture());
+        Map<String, CompatibilityOverrideConfig> packageNameToAddedOverrides =
+                mOverridesToAddByPackageConfigCaptor.getValue().packageNameToOverrides;
+        Map<String, CompatibilityOverridesToRemoveConfig> packageNameToRemovedOverrides =
+                mOverridesToRemoveByPackageConfigCaptor.getValue().packageNameToOverridesToRemove;
         Map<Long, PackageOverride> addedOverrides;
+        assertThat(packageNameToAddedOverrides.keySet()).containsExactly(PACKAGE_1, PACKAGE_3);
+        assertThat(packageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_2, PACKAGE_3,
+                PACKAGE_4);
         // Package 1
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
-                eq(PACKAGE_1));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
-        addedOverrides = mOverridesToAddConfigCaptor.getValue().overrides;
+        addedOverrides = packageNameToAddedOverrides.get(PACKAGE_1).overrides;
         assertThat(addedOverrides).hasSize(3);
         assertThat(addedOverrides.get(123L)).isEqualTo(
                 new PackageOverride.Builder().setEnabled(true).build());
@@ -180,28 +195,19 @@ public class AppCompatOverridesServiceTest {
         assertThat(addedOverrides.get(789L)).isEqualTo(
                 new PackageOverride.Builder().setEnabled(false).build());
         // Package 2
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_2));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_2));
+        assertThat(packageNameToRemovedOverrides.get(PACKAGE_2).changeIds).containsExactly(123L,
+                456L, 789L);
         // Package 3
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
-                eq(PACKAGE_3));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_3));
-        addedOverrides = mOverridesToAddConfigCaptor.getValue().overrides;
+        addedOverrides = packageNameToAddedOverrides.get(PACKAGE_3).overrides;
         assertThat(addedOverrides).hasSize(1);
         assertThat(addedOverrides.get(123L)).isEqualTo(
                 new PackageOverride.Builder().setMinVersionCode(10).setMaxVersionCode(
                         11).setEnabled(false).build());
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(456L, 789L);
-        // Package 4
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_4));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_4));
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 456L,
+        assertThat(packageNameToRemovedOverrides.get(PACKAGE_3).changeIds).containsExactly(456L,
                 789L);
+        // Package 4
+        assertThat(packageNameToRemovedOverrides.get(PACKAGE_4).changeIds).containsExactly(123L,
+                456L, 789L);
     }
 
     @Test
@@ -213,11 +219,15 @@ public class AppCompatOverridesServiceTest {
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
                 .setString(PACKAGE_1, "123:::true").build());
 
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
-                eq(PACKAGE_1));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
-        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(123L);
+        verify(mPlatformCompat).putAllOverridesOnReleaseBuilds(
+                mOverridesToAddByPackageConfigCaptor.capture());
+        verify(mPlatformCompat, never()).removeAllOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveByPackageConfig.class));
+        Map<String, CompatibilityOverrideConfig> packageNameToAddedOverrides =
+                mOverridesToAddByPackageConfigCaptor.getValue().packageNameToOverrides;
+        assertThat(packageNameToAddedOverrides.keySet()).containsExactly(PACKAGE_1);
+        assertThat(packageNameToAddedOverrides.get(PACKAGE_1).overrides.keySet()).containsExactly(
+                123L);
     }
 
     @Test
@@ -238,30 +248,28 @@ public class AppCompatOverridesServiceTest {
                 .setString(PACKAGE_2, "123:::true")
                 .setString(PACKAGE_3, "456:::true").build());
 
+        verify(mPlatformCompat).putAllOverridesOnReleaseBuilds(
+                mOverridesToAddByPackageConfigCaptor.capture());
+        verify(mPlatformCompat).removeAllOverridesOnReleaseBuilds(
+                mOverridesToRemoveByPackageConfigCaptor.capture());
+        Map<String, CompatibilityOverrideConfig> packageNameToAddedOverrides =
+                mOverridesToAddByPackageConfigCaptor.getValue().packageNameToOverrides;
+        Map<String, CompatibilityOverridesToRemoveConfig> packageNameToRemovedOverrides =
+                mOverridesToRemoveByPackageConfigCaptor.getValue().packageNameToOverridesToRemove;
+        assertThat(packageNameToAddedOverrides.keySet()).containsExactly(PACKAGE_1, PACKAGE_3);
+        assertThat(packageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_2, PACKAGE_3);
         // Package 1
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
-                eq(PACKAGE_1));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
-        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(789L);
+        assertThat(packageNameToAddedOverrides.get(PACKAGE_1).overrides.keySet()).containsExactly(
+                789L);
         // Package 2
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_2));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_2));
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(456L, 789L);
+        assertThat(packageNameToRemovedOverrides.get(PACKAGE_2).changeIds).containsExactly(456L,
+                789L);
         // Package 3
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
-                eq(PACKAGE_3));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_3));
-        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(456L);
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 789L);
+        assertThat(packageNameToAddedOverrides.get(PACKAGE_3).overrides.keySet()).containsExactly(
+                456L);
+        assertThat(packageNameToRemovedOverrides.get(PACKAGE_3).changeIds).containsExactly(123L,
+                789L);
         // Package 4 (not applied because it hasn't changed after the listener was added)
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_4));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_4));
     }
 
     @Test
@@ -279,23 +287,28 @@ public class AppCompatOverridesServiceTest {
                 .setString(FLAG_REMOVE_OVERRIDES,
                         PACKAGE_1 + "=123:456," + PACKAGE_2 + "=*").build());
 
-        // Package 1
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
-        verify(mPlatformCompat, times(2)).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
-        List<CompatibilityOverridesToRemoveConfig> configs =
-                mOverridesToRemoveConfigCaptor.getAllValues();
+        verify(mPlatformCompat, never()).putAllOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesByPackageConfig.class));
+        verify(mPlatformCompat, times(2)).removeAllOverridesOnReleaseBuilds(
+                mOverridesToRemoveByPackageConfigCaptor.capture());
+        List<CompatibilityOverridesToRemoveByPackageConfig> configs =
+                mOverridesToRemoveByPackageConfigCaptor.getAllValues();
         assertThat(configs.size()).isAtLeast(2);
-        assertThat(configs.get(configs.size() - 2).changeIds).containsExactly(123L, 456L);
-        assertThat(configs.get(configs.size() - 1).changeIds).containsExactly(789L);
-        // Package 2
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_2));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_2));
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 456L,
+        Map<String, CompatibilityOverridesToRemoveConfig> firstPackageNameToRemovedOverrides =
+                configs.get(configs.size() - 2).packageNameToOverridesToRemove;
+        Map<String, CompatibilityOverridesToRemoveConfig> secondPackageNameToRemovedOverrides =
+                configs.get(configs.size() - 1).packageNameToOverridesToRemove;
+        assertThat(firstPackageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_1,
+                PACKAGE_2);
+        assertThat(secondPackageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_1);
+        // Package 1
+        assertThat(firstPackageNameToRemovedOverrides.get(PACKAGE_1).changeIds).containsExactly(
+                123L, 456L);
+        assertThat(secondPackageNameToRemovedOverrides.get(PACKAGE_1).changeIds).containsExactly(
                 789L);
+        // Package 2
+        assertThat(firstPackageNameToRemovedOverrides.get(PACKAGE_2).changeIds).containsExactly(
+                123L, 456L, 789L);
     }
 
     @Test
@@ -315,34 +328,42 @@ public class AppCompatOverridesServiceTest {
                 .setString(FLAG_REMOVE_OVERRIDES, PACKAGE_2 + "=123," + PACKAGE_3 + "=789")
                 .setString(PACKAGE_2, "123:::true").build());
 
+        verify(mPlatformCompat).putAllOverridesOnReleaseBuilds(
+                mOverridesToAddByPackageConfigCaptor.capture());
+        verify(mPlatformCompat, times(2)).removeAllOverridesOnReleaseBuilds(
+                mOverridesToRemoveByPackageConfigCaptor.capture());
+        Map<String, CompatibilityOverrideConfig> packageNameToAddedOverrides =
+                mOverridesToAddByPackageConfigCaptor.getValue().packageNameToOverrides;
+        List<CompatibilityOverridesToRemoveByPackageConfig> removeConfigs =
+                mOverridesToRemoveByPackageConfigCaptor.getAllValues();
+        assertThat(removeConfigs.size()).isAtLeast(2);
+        Map<String, CompatibilityOverridesToRemoveConfig> firstPackageNameToRemovedOverrides =
+                removeConfigs.get(removeConfigs.size() - 2).packageNameToOverridesToRemove;
+        Map<String, CompatibilityOverridesToRemoveConfig> secondPackageNameToRemovedOverrides =
+                removeConfigs.get(removeConfigs.size() - 1).packageNameToOverridesToRemove;
+        assertThat(packageNameToAddedOverrides.keySet()).containsExactly(PACKAGE_1, PACKAGE_3);
+        assertThat(firstPackageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_2,
+                PACKAGE_3);
+        assertThat(secondPackageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_1,
+                PACKAGE_2,
+                PACKAGE_3);
         // Package 1
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
-                eq(PACKAGE_1));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
-        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(123L,
-                789L);
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(456L);
+        assertThat(packageNameToAddedOverrides.get(PACKAGE_1).overrides.keySet()).containsExactly(
+                123L, 789L);
+        assertThat(secondPackageNameToRemovedOverrides.get(PACKAGE_1).changeIds).containsExactly(
+                456L);
         // Package 2
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_2));
-        verify(mPlatformCompat, times(2)).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_2));
-        List<CompatibilityOverridesToRemoveConfig> configs =
-                mOverridesToRemoveConfigCaptor.getAllValues();
-        assertThat(configs.size()).isAtLeast(2);
-        assertThat(configs.get(configs.size() - 2).changeIds).containsExactly(123L);
-        assertThat(configs.get(configs.size() - 1).changeIds).containsExactly(456L, 789L);
+        assertThat(firstPackageNameToRemovedOverrides.get(PACKAGE_2).changeIds).containsExactly(
+                123L);
+        assertThat(secondPackageNameToRemovedOverrides.get(PACKAGE_2).changeIds).containsExactly(
+                456L, 789L);
         // Package 3
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
-                eq(PACKAGE_3));
-        verify(mPlatformCompat, times(2)).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_3));
-        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(456L);
-        configs = mOverridesToRemoveConfigCaptor.getAllValues();
-        assertThat(configs.size()).isAtLeast(2);
-        assertThat(configs.get(configs.size() - 2).changeIds).containsExactly(789L);
-        assertThat(configs.get(configs.size() - 1).changeIds).containsExactly(123L);
+        assertThat(packageNameToAddedOverrides.get(PACKAGE_3).overrides.keySet()).containsExactly(
+                456L);
+        assertThat(firstPackageNameToRemovedOverrides.get(PACKAGE_3).changeIds).containsExactly(
+                789L);
+        assertThat(secondPackageNameToRemovedOverrides.get(PACKAGE_3).changeIds).containsExactly(
+                123L);
     }
 
     @Test
@@ -362,38 +383,41 @@ public class AppCompatOverridesServiceTest {
                 .setString(FLAG_OWNED_CHANGE_IDS, "123,456,789")
                 .setString(PACKAGE_2, "123:::true").build());
 
+        verify(mPlatformCompat).putAllOverridesOnReleaseBuilds(
+                mOverridesToAddByPackageConfigCaptor.capture());
+        verify(mPlatformCompat, times(2)).removeAllOverridesOnReleaseBuilds(
+                mOverridesToRemoveByPackageConfigCaptor.capture());
+        Map<String, CompatibilityOverrideConfig> packageNameToAddedOverrides =
+                mOverridesToAddByPackageConfigCaptor.getValue().packageNameToOverrides;
+        List<CompatibilityOverridesToRemoveByPackageConfig> removeConfigs =
+                mOverridesToRemoveByPackageConfigCaptor.getAllValues();
+        assertThat(removeConfigs.size()).isAtLeast(2);
+        Map<String, CompatibilityOverridesToRemoveConfig> firstPackageNameToRemovedOverrides =
+                removeConfigs.get(removeConfigs.size() - 2).packageNameToOverridesToRemove;
+        Map<String, CompatibilityOverridesToRemoveConfig> secondPackageNameToRemovedOverrides =
+                removeConfigs.get(removeConfigs.size() - 1).packageNameToOverridesToRemove;
+        assertThat(packageNameToAddedOverrides.keySet()).containsExactly(PACKAGE_2);
+        assertThat(firstPackageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_1);
+        assertThat(secondPackageNameToRemovedOverrides.keySet()).containsExactly(PACKAGE_2);
         // Package 1
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_1));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_1));
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(123L, 456L,
-                789L);
+        assertThat(firstPackageNameToRemovedOverrides.get(PACKAGE_1).changeIds).containsExactly(
+                123L, 456L, 789L);
         // Package 2
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(mOverridesToAddConfigCaptor.capture(),
-                eq(PACKAGE_2));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                mOverridesToRemoveConfigCaptor.capture(), eq(PACKAGE_2));
-        assertThat(mOverridesToAddConfigCaptor.getValue().overrides.keySet()).containsExactly(123L);
-        assertThat(mOverridesToRemoveConfigCaptor.getValue().changeIds).containsExactly(456L, 789L);
-        // Package 3
-        verify(mPlatformCompat, never()).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_3));
-        verify(mPlatformCompat, never()).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_3));
+        assertThat(packageNameToAddedOverrides.get(PACKAGE_2).overrides.keySet()).containsExactly(
+                123L);
+        assertThat(secondPackageNameToRemovedOverrides.get(PACKAGE_2).changeIds).containsExactly(
+                456L, 789L);
     }
 
     @Test
-    public void onPropertiesChanged_platformCompatThrowsExceptionForSomeCalls_skipsFailedCalls()
+    public void onPropertiesChanged_platformCompatThrowsExceptionForPutCall_skipsFailedCall()
             throws Exception {
         mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
         mockGetApplicationInfo(PACKAGE_2, /* versionCode= */ 0);
         mockGetApplicationInfo(PACKAGE_3, /* versionCode= */ 0);
         mockGetApplicationInfo(PACKAGE_4, /* versionCode= */ 0);
-        doThrow(new RemoteException()).when(mPlatformCompat).putOverridesOnReleaseBuilds(
-                any(CompatibilityOverrideConfig.class), eq(PACKAGE_2));
-        doThrow(new RemoteException()).when(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_3));
+        doThrow(new RemoteException()).when(mPlatformCompat).putAllOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesByPackageConfig.class));
 
         mService.registerDeviceConfigListeners();
         DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
@@ -403,26 +427,34 @@ public class AppCompatOverridesServiceTest {
                 .setString(PACKAGE_3, "123:::true")
                 .setString(PACKAGE_4, "123:::true").build());
 
-        // Package 1
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(any(CompatibilityOverrideConfig.class),
-                eq(PACKAGE_1));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_1));
-        // Package 2
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(any(CompatibilityOverrideConfig.class),
-                eq(PACKAGE_2));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_2));
-        // Package 3
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(any(CompatibilityOverrideConfig.class),
-                eq(PACKAGE_3));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_3));
-        // Package 4
-        verify(mPlatformCompat).putOverridesOnReleaseBuilds(any(CompatibilityOverrideConfig.class),
-                eq(PACKAGE_1));
-        verify(mPlatformCompat).removeOverridesOnReleaseBuilds(
-                any(CompatibilityOverridesToRemoveConfig.class), eq(PACKAGE_4));
+        verify(mPlatformCompat).putAllOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesByPackageConfig.class));
+        verify(mPlatformCompat).removeAllOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveByPackageConfig.class));
+    }
+
+    @Test
+    public void onPropertiesChanged_platformCompatThrowsExceptionForRemoveCall_skipsFailedCall()
+            throws Exception {
+        mockGetApplicationInfo(PACKAGE_1, /* versionCode= */ 0);
+        mockGetApplicationInfo(PACKAGE_2, /* versionCode= */ 0);
+        mockGetApplicationInfo(PACKAGE_3, /* versionCode= */ 0);
+        mockGetApplicationInfo(PACKAGE_4, /* versionCode= */ 0);
+        doThrow(new RemoteException()).when(mPlatformCompat).removeAllOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveByPackageConfig.class));
+
+        mService.registerDeviceConfigListeners();
+        DeviceConfig.setProperties(new Properties.Builder(NAMESPACE_1)
+                .setString(FLAG_OWNED_CHANGE_IDS, "123,456")
+                .setString(PACKAGE_1, "123:::true")
+                .setString(PACKAGE_2, "123:::true")
+                .setString(PACKAGE_3, "123:::true")
+                .setString(PACKAGE_4, "123:::true").build());
+
+        verify(mPlatformCompat).putAllOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesByPackageConfig.class));
+        verify(mPlatformCompat).removeAllOverridesOnReleaseBuilds(
+                any(CompatibilityOverridesToRemoveByPackageConfig.class));
     }
 
     @Test

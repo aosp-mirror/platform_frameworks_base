@@ -103,6 +103,7 @@ public class PlatLogoActivity extends Activity {
         mBg.padding = 0.5f * dp;
         mBg.minR = 1 * dp;
         layout.setBackground(mBg);
+        layout.setOnLongClickListener(mBg);
 
         setContentView(layout);
     }
@@ -291,8 +292,8 @@ public class PlatLogoActivity extends Activity {
 
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (mOverrideMinute == 0 && (mOverrideHour % 12) == 0) {
-                        Log.v(TAG, "12:00 let's gooooo");
+                    if (mOverrideMinute == 0 && (mOverrideHour % 12) == 1) {
+                        Log.v(TAG, "13:00");
                         performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                         launchNextStage(false);
                     }
@@ -302,18 +303,45 @@ public class PlatLogoActivity extends Activity {
         }
     }
 
+    private static final String[][] EMOJI_SETS = {
+            {"🍇", "🍈", "🍉", "🍊", "🍋", "🍌", "🍍", "🥭", "🍎", "🍏", "🍐", "🍑",
+                    "🍒", "🍓", "🫐", "🥝"},
+            {"😺", "😸", "😹", "😻", "😼", "😽", "🙀", "😿", "😾"},
+            {"😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🙂", "🙃", "🫠", "😉", "😊",
+                    "😇", "🥰", "😍", "🤩", "😘", "😗", "☺️", "😚", "😙", "🥲", "😋", "😛", "😜",
+                    "🤪", "😝", "🤑", "🤗", "🤭", "🫢", "🫣", "🤫", "🤔", "🫡", "🤐", "🤨", "😐",
+                    "😑", "😶", "🫥", "😏", "😒", "🙄", "😬", "🤥", "😌", "😔", "😪", "🤤", "😴",
+                    "😷"},
+            { "🤩", "😍", "🥰", "😘", "🥳", "🥲", "🥹" },
+            { "🫠" },
+            {"💘", "💝", "💖", "💗", "💓", "💞", "💕", "❣", "💔", "❤", "🧡", "💛",
+                    "💚", "💙", "💜", "🤎", "🖤", "🤍"},
+            // {"👁", "️🫦", "👁️"}, // this one is too much
+            {"👽", "🛸", "✨", "🌟", "💫", "🚀", "🪐", "🌙", "⭐", "🌍"},
+            {"🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"},
+            {"🐙", "🪸", "🦑", "🦀", "🦐", "🐡", "🦞", "🐠", "🐟", "🐳", "🐋", "🐬", "🫧", "🌊",
+                    "🦈"},
+            {"🙈", "🙉", "🙊", "🐵", "🐒"},
+            {"♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"},
+            {"🕛", "🕧", "🕐", "🕜", "🕑", "🕝", "🕒", "🕞", "🕓", "🕟", "🕔", "🕠", "🕕", "🕡",
+                    "🕖", "🕢", "🕗", "🕣", "🕘", "🕤", "🕙", "🕥", "🕚", "🕦"},
+            {"🌺", "🌸", "💮", "🏵️", "🌼", "🌿"},
+            {"🐢", "✨", "🌟", "👑"}
+    };
+
     static class Bubble {
         public float x, y, r;
         public int color;
+        public String text = null;
     }
 
-    class BubblesDrawable extends Drawable {
+    class BubblesDrawable extends Drawable implements View.OnLongClickListener {
         private static final int MAX_BUBBS = 2000;
 
         private final int[] mColorIds = {
-                android.R.color.system_accent1_400,
-                android.R.color.system_accent1_500,
-                android.R.color.system_accent1_600,
+                android.R.color.system_accent3_400,
+                android.R.color.system_accent3_500,
+                android.R.color.system_accent3_600,
 
                 android.R.color.system_accent2_400,
                 android.R.color.system_accent2_500,
@@ -321,6 +349,8 @@ public class PlatLogoActivity extends Activity {
         };
 
         private int[] mColors = new int[mColorIds.length];
+
+        private int mEmojiSet = -1;
 
         private final Bubble[] mBubbs = new Bubble[MAX_BUBBS];
         private int mNumBubbs;
@@ -342,15 +372,32 @@ public class PlatLogoActivity extends Activity {
 
         @Override
         public void draw(Canvas canvas) {
+            if (getLevel() == 0) return;
             final float f = getLevel() / 10000f;
             mPaint.setStyle(Paint.Style.FILL);
+            mPaint.setTextAlign(Paint.Align.CENTER);
             int drawn = 0;
             for (int j = 0; j < mNumBubbs; j++) {
                 if (mBubbs[j].color == 0 || mBubbs[j].r == 0) continue;
-                mPaint.setColor(mBubbs[j].color);
-                canvas.drawCircle(mBubbs[j].x, mBubbs[j].y, mBubbs[j].r * f, mPaint);
+                if (mBubbs[j].text != null) {
+                    mPaint.setTextSize(mBubbs[j].r * 1.75f);
+                    canvas.drawText(mBubbs[j].text, mBubbs[j].x,
+                            mBubbs[j].y  + mBubbs[j].r * f * 0.6f, mPaint);
+                } else {
+                    mPaint.setColor(mBubbs[j].color);
+                    canvas.drawCircle(mBubbs[j].x, mBubbs[j].y, mBubbs[j].r * f, mPaint);
+                }
                 drawn++;
             }
+        }
+
+        public void chooseEmojiSet() {
+            mEmojiSet = (int) (Math.random() * EMOJI_SETS.length);
+            final String[] emojiSet = EMOJI_SETS[mEmojiSet];
+            for (int j = 0; j < mBubbs.length; j++) {
+                mBubbs[j].text = emojiSet[(int) (Math.random() * emojiSet.length)];
+            }
+            invalidateSelf();
         }
 
         @Override
@@ -422,6 +469,13 @@ public class PlatLogoActivity extends Activity {
         @Override
         public int getOpacity() {
             return TRANSLUCENT;
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (getLevel() == 0) return false;
+            chooseEmojiSet();
+            return true;
         }
     }
 

@@ -19,6 +19,7 @@ package android.service.quickaccesswallet;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
@@ -238,6 +239,14 @@ public abstract class QuickAccessWalletService extends Service {
             mHandler.post(QuickAccessWalletService.this::onWalletDismissed);
         }
 
+        @Override
+        public void onTargetActivityIntentRequested(
+                @NonNull IQuickAccessWalletServiceCallbacks callbacks) {
+            mHandler.post(
+                    () -> QuickAccessWalletService.this.onTargetActivityIntentRequestedInternal(
+                            callbacks));
+        }
+
         public void registerWalletServiceEventListener(
                 @NonNull WalletServiceEventListenerRequest request,
                 @NonNull IQuickAccessWalletServiceCallbacks callback) {
@@ -255,6 +264,15 @@ public abstract class QuickAccessWalletService extends Service {
             IQuickAccessWalletServiceCallbacks callback) {
         onWalletCardsRequested(request,
                 new GetWalletCardsCallbackImpl(request, callback, mHandler));
+    }
+
+    private void onTargetActivityIntentRequestedInternal(
+            IQuickAccessWalletServiceCallbacks callbacks) {
+        try {
+            callbacks.onTargetActivityPendingIntentReceived(getTargetActivityPendingIntent());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error returning wallet cards", e);
+        }
     }
 
     @Override
@@ -316,6 +334,19 @@ public abstract class QuickAccessWalletService extends Service {
      */
     public final void sendWalletServiceEvent(@NonNull WalletServiceEvent serviceEvent) {
         mHandler.post(() -> sendWalletServiceEventInternal(serviceEvent));
+    }
+
+    /**
+     * Specify a {@link PendingIntent} to be launched as the "Quick Access" activity.
+     *
+     * This activity will be launched directly by the system in lieu of the card switcher activity
+     * provided by the system.
+     *
+     * In order to use the system-provided card switcher activity, return null from this method.
+     */
+    @Nullable
+    public PendingIntent getTargetActivityPendingIntent() {
+        return null;
     }
 
     private void sendWalletServiceEventInternal(WalletServiceEvent serviceEvent) {

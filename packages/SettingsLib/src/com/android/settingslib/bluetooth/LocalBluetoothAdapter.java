@@ -19,11 +19,13 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothStatusCodes;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.content.Context;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 
@@ -143,7 +145,7 @@ public class LocalBluetoothAdapter {
     }
 
     public void setDiscoverableTimeout(int timeout) {
-        mAdapter.setDiscoverableTimeout(timeout);
+        mAdapter.setDiscoverableTimeout(Duration.ofSeconds(timeout));
     }
 
     public long getDiscoveryEndMillis() {
@@ -159,7 +161,9 @@ public class LocalBluetoothAdapter {
     }
 
     public boolean setScanMode(int mode, int duration) {
-        return mAdapter.setScanMode(mode, duration);
+        return (mAdapter.setDiscoverableTimeout(Duration.ofSeconds(duration))
+                == BluetoothStatusCodes.SUCCESS
+                && mAdapter.setScanMode(mode) == BluetoothStatusCodes.SUCCESS);
     }
 
     public void startScanning(boolean force) {

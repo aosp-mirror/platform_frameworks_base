@@ -31,6 +31,9 @@ The first line defines the general parameters of the animation:
       + The percentage will be displayed with an x-coordinate of 'c', and a
         y-coordinate set to 1/3 of the animation height.
 
+Next, provide an optional line for dynamic coloring attributes, should dynamic coloring be used.
+See the dyanmic coloring section for format details. Skip if you don't use dynamic coloring.
+
 It is followed by a number of rows of the form:
 
     TYPE COUNT PAUSE PATH [FADE [#RGBHEX [CLOCK1 [CLOCK2]]]]
@@ -140,3 +143,35 @@ Some animations benefit from being reduced to 256 colors:
 
 Note that the ZIP archive is not actually compressed! The PNG files are already as compressed
 as they can reasonably get, and there is unlikely to be any redundancy between files.
+
+### Dynamic coloring
+
+Dynamic coloring is a render mode that draws the boot animation using a color transition.
+In this mode, instead of directly rendering the PNG images, it treats the R, G, B, A channels
+of input images as area masks of dynamic colors, which interpolates between start and end colors
+based on animation progression.
+
+To enable it, add the following line as the second line of desc.txt:
+
+    dynamic_colors PATH #RGBHEX0 #RGBHEX1 #RGBHEX2 #RGBHEX3
+
+  * **PATH:** file path of the part to apply dynamic color transition to.
+    Any part before this part will be rendered in the start colors.
+    Any part after will be rendered in the end colors.
+  * **RGBHEX1:** the first start color (masked by the R channel), specified as `#RRGGBB`.
+  * **RGBHEX2:** the second start color (masked by the G channel), specified as `#RRGGBB`.
+  * **RGBHEX3:** the thrid start color (masked by the B channel), specified as `#RRGGBB`.
+  * **RGBHEX4:** the forth start color (masked by the A channel), specified as `#RRGGBB`.
+
+The end colors will be read from the following system properties:
+
+  * persist.bootanim.color1
+  * persist.bootanim.color2
+  * persist.bootanim.color3
+  * persist.bootanim.color4
+
+When missing, the end colors will default to the start colors, effectively producing no color
+transition.
+
+Prepare your PNG images so that the R, G, B, A channels indicates the areas to draw color1,
+color2, color3 and color4 respectively.

@@ -14,6 +14,10 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.view.ContentInfo.SOURCE_CLIPBOARD;
+
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -25,21 +29,26 @@ import static org.mockito.Mockito.spy;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Process;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.ContentInfo;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -49,6 +58,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -79,7 +89,6 @@ public class RemoteInputViewTest extends SysuiTestCase {
     @Mock private LightBarController mLightBarController;
     private BlockingQueueIntentReceiver mReceiver;
     private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
-    private RemoteInputView mView;
 
     @Before
     public void setUp() throws Exception {
@@ -95,7 +104,8 @@ public class RemoteInputViewTest extends SysuiTestCase {
 
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION), null,
-                Handler.createAsync(Dependency.get(Dependency.BG_LOOPER)));
+                Handler.createAsync(Dependency.get(Dependency.BG_LOOPER)),
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         // Avoid SecurityException RemoteInputView#sendRemoteInput().
         mContext.addMockSystemService(ShortcutManager.class, mShortcutManager);
@@ -106,13 +116,15 @@ public class RemoteInputViewTest extends SysuiTestCase {
         mContext.unregisterReceiver(mReceiver);
     }
 
-    private void setTestPendingIntent(RemoteInputView view) {
+    private void setTestPendingIntent(RemoteInputViewController controller) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), PendingIntent.FLAG_MUTABLE);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).build();
+        RemoteInput[] inputs = {input};
 
-        view.setPendingIntent(pendingIntent);
-        view.setRemoteInput(new RemoteInput[]{input}, input, null /* editedSuggestionInfo */);
+        controller.setPendingIntent(pendingIntent);
+        controller.setRemoteInput(input);
+        controller.setRemoteInputs(inputs);
     }
 
     @Test
@@ -123,8 +135,9 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 TestableLooper.get(this));
         ExpandableNotificationRow row = helper.createRow();
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view);
+        setTestPendingIntent(controller);
 
         view.focus();
 
@@ -134,6 +147,7 @@ public class RemoteInputViewTest extends SysuiTestCase {
         sendButton.performClick();
 
         Intent resultIntent = mReceiver.waitForIntent();
+        assertNotNull(resultIntent);
         assertEquals(TEST_REPLY,
                 RemoteInput.getResultsFromIntent(resultIntent).get(TEST_RESULT_KEY));
         assertEquals(RemoteInput.SOURCE_FREE_FORM_INPUT,
@@ -161,12 +175,16 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 UserHandle.getUid(fromUser.getIdentifier(), DUMMY_MESSAGE_APP_ID),
                 toUser);
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        RemoteInputViewController controller = bindController(view, row.getEntry());
+        EditText editText = view.findViewById(R.id.remote_input_text);
 
-        setTestPendingIntent(view);
+        setTestPendingIntent(controller);
+        assertThat(editText.isEnabled()).isFalse();
+        view.onVisibilityAggregated(true);
+        assertThat(editText.isEnabled()).isTrue();
 
         view.focus();
 
-        EditText editText = view.findViewById(R.id.remote_input_text);
         EditorInfo editorInfo = new EditorInfo();
         editorInfo.packageName = DUMMY_MESSAGE_APP_PKG;
         editorInfo.fieldId = editText.getId();
@@ -218,8 +236,9 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 TestableLooper.get(this));
         ExpandableNotificationRow row = helper.createRow();
         RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        RemoteInputViewController controller = bindController(view, row.getEntry());
 
-        setTestPendingIntent(view);
+        setTestPendingIntent(controller);
 
         // Open view, send a reply
         view.focus();
@@ -237,5 +256,58 @@ public class RemoteInputViewTest extends SysuiTestCase {
         assertEquals(
                 RemoteInputView.NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_SEND.getId(),
                 mUiEventLoggerFake.eventId(1));
+    }
+
+    @Test
+    public void testUiEventLogging_openAndAttach() throws Exception {
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        RemoteInputViewController controller = bindController(view, row.getEntry());
+
+        setTestPendingIntent(controller);
+
+        // Open view, attach an image
+        view.focus();
+        EditText editText = view.findViewById(R.id.remote_input_text);
+        editText.setText(TEST_REPLY);
+        ClipDescription description = new ClipDescription("", new String[] {"image/png"});
+        // We need to use an (arbitrary) real resource here so that an actual image gets attached.
+        ClipData clip = new ClipData(description, new ClipData.Item(
+                Uri.parse("android.resource://com.android.systemui/"
+                        + R.drawable.default_thumbnail)));
+        ContentInfo payload =
+                new ContentInfo.Builder(clip, SOURCE_CLIPBOARD).build();
+        view.setAttachment(payload);
+        mReceiver.waitForIntent();
+
+        assertEquals(2, mUiEventLoggerFake.numLogs());
+        assertEquals(
+                RemoteInputView.NotificationRemoteInputEvent.NOTIFICATION_REMOTE_INPUT_OPEN.getId(),
+                mUiEventLoggerFake.eventId(0));
+        assertEquals(
+                RemoteInputView.NotificationRemoteInputEvent
+                        .NOTIFICATION_REMOTE_INPUT_ATTACH_IMAGE.getId(),
+                mUiEventLoggerFake.eventId(1));
+    }
+
+    // NOTE: because we're refactoring the RemoteInputView and moving logic into the
+    //  RemoteInputViewController, it's easiest to just test the system of the two classes together.
+    @NonNull
+    private RemoteInputViewController bindController(
+            RemoteInputView view,
+            NotificationEntry entry) {
+        RemoteInputViewControllerImpl viewController = new RemoteInputViewControllerImpl(
+                view,
+                entry,
+                mRemoteInputQuickSettingsDisabler,
+                mController,
+                mShortcutManager,
+                mUiEventLoggerFake);
+        viewController.bind();
+        return viewController;
     }
 }

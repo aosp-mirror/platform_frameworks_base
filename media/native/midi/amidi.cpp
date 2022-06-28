@@ -138,6 +138,7 @@ static media_status_t AMIDI_getDeviceInfo(const AMidiDevice *device,
     outDeviceInfoPtr->type = deviceInfo.getType();
     outDeviceInfoPtr->inputPortCount = deviceInfo.getInputPortNames().size();
     outDeviceInfoPtr->outputPortCount = deviceInfo.getOutputPortNames().size();
+    outDeviceInfoPtr->defaultProtocol = deviceInfo.getDefaultProtocol();
 
     return AMEDIA_OK;
 }
@@ -236,6 +237,13 @@ ssize_t AMIDI_API AMidiDevice_getNumOutputPorts(const AMidiDevice *device) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
     }
     return device->deviceInfo.outputPortCount;
+}
+
+AMidiDevice_Protocol AMIDI_API AMidiDevice_getDefaultProtocol(const AMidiDevice *device) {
+    if (device == nullptr) {
+        return AMIDI_DEVICE_PROTOCOL_UNKNOWN;
+    }
+    return static_cast<AMidiDevice_Protocol>(device->deviceInfo.defaultProtocol);
 }
 
 /*
@@ -393,8 +401,12 @@ ssize_t AMIDI_API AMidiInputPort_send(const AMidiInputPort *inputPort, const uin
 
 ssize_t AMIDI_API AMidiInputPort_sendWithTimestamp(const AMidiInputPort *inputPort,
         const uint8_t *data, size_t numBytes, int64_t timestamp) {
-    if (inputPort == nullptr || data == nullptr) {
+    if (inputPort == nullptr || data == nullptr || numBytes < 0 || timestamp < 0) {
         return AMEDIA_ERROR_INVALID_PARAMETER;
+    }
+
+    if (numBytes == 0) {
+        return 0;
     }
 
     // AMIDI_logBuffer(data, numBytes);

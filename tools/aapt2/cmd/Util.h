@@ -26,14 +26,14 @@
 #include "SdkConstants.h"
 #include "filter/ConfigFilter.h"
 #include "split/TableSplitter.h"
-#include "util/Maybe.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
 
 // Parses a configuration density (ex. hdpi, xxhdpi, 234dpi, anydpi, etc).
 // Returns Nothing and logs a human friendly error message if the string was not legal.
-Maybe<uint16_t> ParseTargetDensityParameter(const android::StringPiece& arg, IDiagnostics* diag);
+std::optional<uint16_t> ParseTargetDensityParameter(const android::StringPiece& arg,
+                                                    IDiagnostics* diag);
 
 // Parses a string of the form 'path/to/output.apk:<config>[,<config>...]' and fills in
 // `out_path` with the path and `out_split` with the set of ConfigDescriptions.
@@ -59,8 +59,8 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
                                                         const SplitConstraints& constraints);
 
 // Extracts relevant info from the AndroidManifest.xml.
-Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
-                                                IDiagnostics* diag);
+std::optional<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
+                                                        IDiagnostics* diag);
 
 // Returns a copy of 'name' which conforms to the regex '[a-zA-Z]+[a-zA-Z0-9_]*' by
 // replacing nonconforming characters with underscores.

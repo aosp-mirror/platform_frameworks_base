@@ -34,6 +34,9 @@ TEST(JankTracker, noJank) {
     JankTracker jankTracker(&container);
     std::unique_ptr<FrameMetricsReporter> reporter = std::make_unique<FrameMetricsReporter>();
 
+    uint64_t frameNumber = 0;
+    uint32_t surfaceId = 0;
+
     FrameInfo* info = jankTracker.startFrame();
     info->set(FrameInfoIndex::IntendedVsync) = 100_ms;
     info->set(FrameInfoIndex::Vsync) = 101_ms;
@@ -42,7 +45,7 @@ TEST(JankTracker, noJank) {
     info->set(FrameInfoIndex::FrameCompleted) = 115_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 120_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     info = jankTracker.startFrame();
     info->set(FrameInfoIndex::IntendedVsync) = 116_ms;
@@ -52,7 +55,7 @@ TEST(JankTracker, noJank) {
     info->set(FrameInfoIndex::FrameCompleted) = 131_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 136_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     ASSERT_EQ(2, container.get()->totalFrameCount());
     ASSERT_EQ(0, container.get()->jankFrameCount());
@@ -65,6 +68,9 @@ TEST(JankTracker, jank) {
     JankTracker jankTracker(&container);
     std::unique_ptr<FrameMetricsReporter> reporter = std::make_unique<FrameMetricsReporter>();
 
+    uint64_t frameNumber = 0;
+    uint32_t surfaceId = 0;
+
     FrameInfo* info = jankTracker.startFrame();
     info->set(FrameInfoIndex::IntendedVsync) = 100_ms;
     info->set(FrameInfoIndex::Vsync) = 101_ms;
@@ -73,7 +79,7 @@ TEST(JankTracker, jank) {
     info->set(FrameInfoIndex::FrameCompleted) = 121_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 120_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     ASSERT_EQ(1, container.get()->totalFrameCount());
     ASSERT_EQ(1, container.get()->jankFrameCount());
@@ -85,6 +91,9 @@ TEST(JankTracker, legacyJankButNoRealJank) {
     JankTracker jankTracker(&container);
     std::unique_ptr<FrameMetricsReporter> reporter = std::make_unique<FrameMetricsReporter>();
 
+    uint64_t frameNumber = 0;
+    uint32_t surfaceId = 0;
+
     FrameInfo* info = jankTracker.startFrame();
     info->set(FrameInfoIndex::IntendedVsync) = 100_ms;
     info->set(FrameInfoIndex::Vsync) = 101_ms;
@@ -93,7 +102,7 @@ TEST(JankTracker, legacyJankButNoRealJank) {
     info->set(FrameInfoIndex::FrameCompleted) = 118_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 120_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     ASSERT_EQ(1, container.get()->totalFrameCount());
     ASSERT_EQ(0, container.get()->jankFrameCount());
@@ -106,6 +115,9 @@ TEST(JankTracker, doubleStuffed) {
     JankTracker jankTracker(&container);
     std::unique_ptr<FrameMetricsReporter> reporter = std::make_unique<FrameMetricsReporter>();
 
+    uint64_t frameNumber = 0;
+    uint32_t surfaceId = 0;
+
     // First frame janks
     FrameInfo* info = jankTracker.startFrame();
     info->set(FrameInfoIndex::IntendedVsync) = 100_ms;
@@ -115,7 +127,7 @@ TEST(JankTracker, doubleStuffed) {
     info->set(FrameInfoIndex::FrameCompleted) = 121_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 120_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     ASSERT_EQ(1, container.get()->jankFrameCount());
 
@@ -128,7 +140,7 @@ TEST(JankTracker, doubleStuffed) {
     info->set(FrameInfoIndex::FrameCompleted) = 137_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 136_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     ASSERT_EQ(2, container.get()->totalFrameCount());
     ASSERT_EQ(1, container.get()->jankFrameCount());
@@ -140,6 +152,9 @@ TEST(JankTracker, doubleStuffedThenPauseThenJank) {
     JankTracker jankTracker(&container);
     std::unique_ptr<FrameMetricsReporter> reporter = std::make_unique<FrameMetricsReporter>();
 
+    uint64_t frameNumber = 0;
+    uint32_t surfaceId = 0;
+
     // First frame janks
     FrameInfo* info = jankTracker.startFrame();
     info->set(FrameInfoIndex::IntendedVsync) = 100_ms;
@@ -149,7 +164,7 @@ TEST(JankTracker, doubleStuffedThenPauseThenJank) {
     info->set(FrameInfoIndex::FrameCompleted) = 121_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 120_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     ASSERT_EQ(1, container.get()->jankFrameCount());
 
@@ -162,7 +177,7 @@ TEST(JankTracker, doubleStuffedThenPauseThenJank) {
     info->set(FrameInfoIndex::FrameCompleted) = 137_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 136_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     ASSERT_EQ(1, container.get()->jankFrameCount());
 
@@ -175,7 +190,7 @@ TEST(JankTracker, doubleStuffedThenPauseThenJank) {
     info->set(FrameInfoIndex::FrameCompleted) = 169_ms;
     info->set(FrameInfoIndex::FrameInterval) = 16_ms;
     info->set(FrameInfoIndex::FrameDeadline) = 168_ms;
-    jankTracker.finishFrame(*info, reporter);
+    jankTracker.finishFrame(*info, reporter, frameNumber, surfaceId);
 
     ASSERT_EQ(3, container.get()->totalFrameCount());
     ASSERT_EQ(2, container.get()->jankFrameCount());

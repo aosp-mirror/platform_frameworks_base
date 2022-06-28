@@ -21,12 +21,14 @@ import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.media.projection.IMediaProjection;
+import android.view.Display.Mode;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -34,7 +36,7 @@ import android.view.Surface;
 interface IDisplayManager {
     @UnsupportedAppUsage
     DisplayInfo getDisplayInfo(int displayId);
-    int[] getDisplayIds();
+    int[] getDisplayIds(boolean includeDisabled);
 
     boolean isUidPresentOnDisplay(int uid, int displayId);
 
@@ -162,6 +164,12 @@ interface IDisplayManager {
     // based on hardware capability.
     int getPreferredWideGamutColorSpaceId();
 
+    // Sets the user preferred display mode.
+    // Requires MODIFY_USER_PREFERRED_DISPLAY_MODE permission.
+    void setUserPreferredDisplayMode(int displayId, in Mode mode);
+    Mode getUserPreferredDisplayMode(int displayId);
+    Mode getSystemPreferredDisplayMode(int displayId);
+
     // When enabled the app requested display resolution and refresh rate is always selected
     // in DisplayModeDirector regardless of user settings and policies for low brightness, low
     // battery etc.
@@ -173,4 +181,7 @@ interface IDisplayManager {
 
     // Returns the refresh rate switching type.
     int getRefreshRateSwitchingType();
+
+    // Query for DISPLAY_DECORATION support.
+    DisplayDecorationSupport getDisplayDecorationSupport(int displayId);
 }

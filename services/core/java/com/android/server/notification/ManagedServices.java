@@ -1065,7 +1065,7 @@ abstract public class ManagedServices {
         }
     }
 
-    protected void setComponentState(ComponentName component, boolean enabled) {
+    protected void setComponentState(ComponentName component, int userId, boolean enabled) {
         boolean previous = !mSnoozingForCurrentProfiles.contains(component);
         if (previous == enabled) {
             return;
@@ -1082,20 +1082,15 @@ abstract public class ManagedServices {
                 component.flattenToShortString());
 
         synchronized (mMutex) {
-            final IntArray userIds = mUserProfiles.getCurrentProfileIds();
-
-            for (int i = 0; i < userIds.size(); i++) {
-                final int userId = userIds.get(i);
-                if (enabled) {
-                    if (isPackageOrComponentAllowed(component.flattenToString(), userId)
-                            || isPackageOrComponentAllowed(component.getPackageName(), userId)) {
-                        registerServiceLocked(component, userId);
-                    } else {
-                        Slog.d(TAG, component + " no longer has permission to be bound");
-                    }
+            if (enabled) {
+                if (isPackageOrComponentAllowed(component.flattenToString(), userId)
+                        || isPackageOrComponentAllowed(component.getPackageName(), userId)) {
+                    registerServiceLocked(component, userId);
                 } else {
-                    unregisterServiceLocked(component, userId);
+                    Slog.d(TAG, component + " no longer has permission to be bound");
                 }
+            } else {
+                unregisterServiceLocked(component, userId);
             }
         }
     }

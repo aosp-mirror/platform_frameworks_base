@@ -28,8 +28,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.Constants.LocalActivePort;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
-import com.google.android.collect.Lists;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,14 +105,22 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void sendStandby(int deviceId) {
         assertRunOnServiceThread();
-        String sendStandbyOnSleep = mService.getHdmiCecConfig().getStringValue(
+        String powerControlMode = mService.getHdmiCecConfig().getStringValue(
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
-        if (sendStandbyOnSleep.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST)) {
+        if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST)) {
             mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_BROADCAST));
+                    HdmiCecMessageBuilder.buildStandby(
+                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST));
             return;
         }
-        mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(mAddress, Constants.ADDR_TV));
+        mService.sendCecCommand(
+                HdmiCecMessageBuilder.buildStandby(
+                        getDeviceInfo().getLogicalAddress(), Constants.ADDR_TV));
+        if (powerControlMode.equals(HdmiControlManager.POWER_CONTROL_MODE_TV_AND_AUDIO_SYSTEM)) {
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildStandby(
+                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_AUDIO_SYSTEM));
+        }
     }
 
     @ServiceThreadOnly
@@ -301,6 +307,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
         removeAction(OneTouchPlayAction.class);
         removeAction(DevicePowerStatusAction.class);
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
 
         super.disableDevice(initiatedByCec, callback);
     }
@@ -324,35 +331,30 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         HdmiCecConfig hdmiCecConfig = mService.getHdmiCecConfig();
         if (hdmiCecConfig.getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU)
-                == HdmiControlManager.RC_PROFILE_SOURCE_ROOT_MENU_HANDLED) {
+                == HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED) {
             features.add(Constants.RC_PROFILE_SOURCE_HANDLES_ROOT_MENU);
         }
         if (hdmiCecConfig.getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU)
-                == HdmiControlManager.RC_PROFILE_SOURCE_SETUP_MENU_HANDLED) {
+                == HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED) {
             features.add(Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU);
         }
         if (hdmiCecConfig.getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU)
-                == HdmiControlManager.RC_PROFILE_SOURCE_CONTENTS_MENU_HANDLED) {
+                == HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED) {
             features.add(Constants.RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU);
         }
         if (hdmiCecConfig.getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU)
-                == HdmiControlManager.RC_PROFILE_SOURCE_TOP_MENU_HANDLED) {
+                == HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED) {
             features.add(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU);
         }
         if (hdmiCecConfig.getIntValue(HdmiControlManager
                 .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU)
-                == HdmiControlManager.RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_HANDLED) {
+                == HdmiControlManager.RC_PROFILE_SOURCE_MENU_HANDLED) {
             features.add(Constants.RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
         }
         return features;
-    }
-
-    @Override
-    protected List<Integer> getDeviceFeatures() {
-        return Lists.newArrayList();
     }
 
     // Active source claiming needs to be handled in Service

@@ -18,6 +18,8 @@ android_test {
     static_libs: [
         "androidx.test.ext.junit",
         "androidx.test.rules",
+        "services.core.unboosted",
+        "testables",
         "truth-prebuilt",
         "ub-uiautomator",
     ],

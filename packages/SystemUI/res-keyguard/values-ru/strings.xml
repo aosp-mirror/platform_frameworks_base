@@ -26,6 +26,7 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Ошибка SIM-карты."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Батарея заряжена"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Беспроводная зарядка"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарядка от док-станции"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"Идет зарядка (<xliff:g id="PERCENTAGE">%s</xliff:g>)"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"Идет быстрая зарядка (<xliff:g id="PERCENTAGE">%s</xliff:g>)"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"Идет медленная зарядка (<xliff:g id="PERCENTAGE">%s</xliff:g>)"</string>
@@ -52,12 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Неверный графический ключ"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Неверный пароль"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"Неверный PIN-код"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
-      <item quantity="one">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
-      <item quantity="few">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
-      <item quantity="many">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунд.</item>
-      <item quantity="other">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Повторите попытку через # секунду.}one{Повторите попытку через # секунду.}few{Повторите попытку через # секунды.}many{Повторите попытку через # секунд.}other{Повторите попытку через # секунды.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Введите PIN-код SIM-карты."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Введите PIN-код SIM-карты \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Чтобы пользоваться устройством без мобильной связи, отключите eSIM."</string>
@@ -97,7 +93,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"В качестве дополнительной меры безопасности введите пароль"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Устройство заблокировано администратором"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Устройство было заблокировано вручную"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"Не распознано"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Не распознано"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Чтобы использовать фейсконтроль, разрешите "<b>"доступ к камере"</b>". Для этого перейдите в настройки и нажмите \"Конфиденциальность\"."</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

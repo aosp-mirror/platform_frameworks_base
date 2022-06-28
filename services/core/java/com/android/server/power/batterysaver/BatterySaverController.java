@@ -17,7 +17,6 @@ package com.android.server.power.batterysaver;
 
 import android.Manifest;
 import android.annotation.Nullable;
-import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,13 +33,11 @@ import android.os.PowerManagerInternal;
 import android.os.PowerManagerInternal.LowPowerModeListener;
 import android.os.PowerSaveState;
 import android.os.UserHandle;
-import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.power.PowerManagerService;
@@ -70,7 +67,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     private final Object mLock;
     private final Context mContext;
     private final MyHandler mHandler;
-    private final FileUpdater mFileUpdater;
 
     private PowerManager mPowerManager;
 
@@ -212,7 +208,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         mHandler = new MyHandler(looper);
         mBatterySaverPolicy = policy;
         mBatterySaverPolicy.addListener(this);
-        mFileUpdater = new FileUpdater(context);
         mBatterySavingStats = batterySavingStats;
 
         PowerManager.invalidatePowerSaveModeCaches();
@@ -238,8 +233,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         filter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
 
-        mFileUpdater.systemReady(LocalServices.getService(ActivityManagerInternal.class)
-                .isRuntimeRestarted());
         mHandler.postSystemReady();
     }
 
@@ -436,7 +429,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
         final boolean enabled;
         final boolean isInteractive = getPowerManager().isInteractive();
-        final ArrayMap<String, String> fileValues;
 
         synchronized (mLock) {
             enabled = getFullEnabledLocked() || getAdaptiveEnabledLocked();
@@ -456,12 +448,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             listeners = mListeners.toArray(new LowPowerModeListener[0]);
 
             mIsInteractive = isInteractive;
-
-            if (enabled) {
-                fileValues = mBatterySaverPolicy.getFileValues(isInteractive);
-            } else {
-                fileValues = null;
-            }
         }
 
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
@@ -470,12 +456,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         }
 
         updateBatterySavingStats();
-
-        if (ArrayUtils.isEmpty(fileValues)) {
-            mFileUpdater.restoreDefault();
-        } else {
-            mFileUpdater.writeFiles(fileValues);
-        }
 
         if (sendBroadcast) {
 

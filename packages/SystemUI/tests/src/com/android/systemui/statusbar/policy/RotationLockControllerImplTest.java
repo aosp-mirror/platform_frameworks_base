@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.testing.TestableResources;
 
 import androidx.test.filters.SmallTest;
 
@@ -43,25 +42,19 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class RotationLockControllerImplTest extends SysuiTestCase {
 
-    private static final String[] DEFAULT_SETTINGS = new String[]{
-            "0:0",
-            "1:2"
-    };
+    private static final String[] DEFAULT_SETTINGS = new String[] {"0:0", "1:2"};
 
     @Mock RotationPolicyWrapper mRotationPolicyWrapper;
     @Mock DeviceStateRotationLockSettingController mDeviceStateRotationLockSettingController;
 
-    private TestableResources mResources;
-    private ArgumentCaptor<RotationPolicy.RotationPolicyListener>
-            mRotationPolicyListenerCaptor;
+    private ArgumentCaptor<RotationPolicy.RotationPolicyListener> mRotationPolicyListenerCaptor;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(/* testClass= */ this);
-        mResources = mContext.getOrCreateTestableResources();
 
-        mRotationPolicyListenerCaptor = ArgumentCaptor.forClass(
-                RotationPolicy.RotationPolicyListener.class);
+        mRotationPolicyListenerCaptor =
+                ArgumentCaptor.forClass(RotationPolicy.RotationPolicyListener.class);
     }
 
     @Test
@@ -79,14 +72,7 @@ public class RotationLockControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void whenFlagOn_initializesDeviceStateRotationController() {
-        createRotationLockController();
-
-        verify(mDeviceStateRotationLockSettingController).initialize();
-    }
-
-    @Test
-    public void whenFlagOn_dviceStateRotationControllerAddedToCallbacks() {
+    public void whenFlagOn_deviceStateRotationControllerAddedToCallbacks() {
         createRotationLockController();
         captureRotationPolicyListener().onChange();
 
@@ -103,11 +89,11 @@ public class RotationLockControllerImplTest extends SysuiTestCase {
     private void createRotationLockController() {
         createRotationLockController(DEFAULT_SETTINGS);
     }
+
     private void createRotationLockController(String[] deviceStateRotationLockDefaults) {
         new RotationLockControllerImpl(
                 mRotationPolicyWrapper,
                 mDeviceStateRotationLockSettingController,
-                deviceStateRotationLockDefaults
-        );
+                deviceStateRotationLockDefaults);
     }
 }

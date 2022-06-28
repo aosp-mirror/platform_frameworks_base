@@ -249,7 +249,7 @@ interface IVoiceInteractionManagerService {
             in PersistableBundle options,
             in SharedMemory sharedMemory,
             in IHotwordRecognitionStatusCallback callback,
-                        int detectorType);
+            int detectorType);
 
     /**
      * Requests to shutdown hotword detection service.
@@ -284,4 +284,9 @@ interface IVoiceInteractionManagerService {
      * Stops to listen the status of visible activity.
      */
     void stopListeningVisibleActivityChanged(in IBinder token);
+
+    /**
+     * Notifies when the session window is shown or hidden.
+     */
+    void setSessionWindowVisible(in IBinder token, boolean visible);
 }

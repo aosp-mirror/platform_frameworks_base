@@ -38,7 +38,7 @@ TEST(CommandTest, LongFullyQualifiedPathWindows) {
   TestCommand command;
   std::string required_flag;
   command.AddRequiredFlag("--rflag", "", &required_flag, Command::kPath);
-  Maybe<std::string> optional_flag;
+  std::optional<std::string> optional_flag;
   command.AddOptionalFlag("--oflag", "", &optional_flag, Command::kPath);
   std::vector<std::string> required_flag_list;
   command.AddRequiredFlagList("--rlflag", "", &required_flag_list, Command::kPath);

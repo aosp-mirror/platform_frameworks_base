@@ -19,6 +19,9 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
@@ -526,9 +529,17 @@ public class CamcorderProfile
     }
 
     /**
-     * Returns all encoder profiles of a camcorder profile for the given camera at
-     * the given quality level.
-     *
+     * This change id controls the kind of video profiles returned by {@link #getAll}.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long RETURN_ADVANCED_VIDEO_PROFILES = 206033068L; // buganizer id
+
+    /**
+     * Returns all encoder profiles of a camcorder profile for
+     * the given camera at the given quality level.
+     * <p>
      * Quality levels QUALITY_LOW, QUALITY_HIGH are guaranteed to be supported, while
      * other levels may or may not be supported. The supported levels can be checked using
      * {@link #hasProfile(int, int)}.
@@ -537,19 +548,26 @@ public class CamcorderProfile
      * QUALITY_LOW/QUALITY_HIGH have to match one of qcif, cif, 480p, 720p, 1080p or 2160p.
      * E.g. if the device supports 480p, 720p, 1080p and 2160p, then low is 480p and high is
      * 2160p.
-     *
+     * <p>
      * The same is true for time lapse quality levels, i.e. QUALITY_TIME_LAPSE_LOW,
      * QUALITY_TIME_LAPSE_HIGH are guaranteed to be supported and have to match one of
      * qcif, cif, 480p, 720p, 1080p, or 2160p.
-     *
+     * <p>
      * For high speed quality levels, they may or may not be supported. If a subset of the levels
      * are supported, QUALITY_HIGH_SPEED_LOW and QUALITY_HIGH_SPEED_HIGH are guaranteed to be
      * supported and have to match one of 480p, 720p, or 1080p.
-     *
+     * <p>
      * A camcorder recording session with higher quality level usually has higher output
      * bit rate, better video and/or audio recording quality, larger video frame
      * resolution and higher audio sampling rate, etc, than those with lower quality
      * level.
+     * <p>
+     * <b>Note:</b> as of {@link android.os.Build.VERSION_CODES#TIRAMISU Android TIRAMISU},
+     * this method can return advanced encoder profiles.
+     * <p>Apps targeting {@link Build.VERSION_CODES#S_V2} or before will only receive basic
+     * video encoder profiles that use output YUV 4:2:0 8-bit content.
+     * Apps targeting {@link Build.VERSION_CODES#TIRAMISU} or above will also receive advanced
+     * video encoder profiles that may output 10-bit, YUV 4:2:2/4:4:4 or HDR content.
      *
      * @param cameraId the id for the camera. Numeric camera ids from the list received by invoking
      *                 {@link CameraManager#getCameraIdList} can be used as long as they are
@@ -602,7 +620,9 @@ public class CamcorderProfile
         } catch (NumberFormatException e) {
             return null;
         }
-        return native_get_camcorder_profiles(id, quality);
+        return native_get_camcorder_profiles(
+                id, quality,
+                CompatChanges.isChangeEnabled(RETURN_ADVANCED_VIDEO_PROFILES));
     }
 
     /**
@@ -712,7 +732,7 @@ public class CamcorderProfile
     private static native final CamcorderProfile native_get_camcorder_profile(
             int cameraId, int quality);
     private static native final EncoderProfiles native_get_camcorder_profiles(
-            int cameraId, int quality);
+            int cameraId, int quality, boolean advanced);
     private static native final boolean native_has_camcorder_profile(
             int cameraId, int quality);
 }

@@ -17,7 +17,7 @@
 #ifndef ANDROID_GRAPHICS_BLURDRAWLOOPER_H_
 #define ANDROID_GRAPHICS_BLURDRAWLOOPER_H_
 
-#include <SkPaint.h>
+#include <hwui/Paint.h>
 #include <SkRefCnt.h>
 
 class SkColorSpace;
@@ -30,10 +30,10 @@ public:
 
     ~BlurDrawLooper() override;
 
-    // proc(SkPoint offset, const SkPaint& modifiedPaint)
+    // proc(SkPoint offset, const Paint& modifiedPaint)
     template <typename DrawProc>
-    void apply(const SkPaint& paint, DrawProc proc) const {
-        SkPaint p(paint);
+    void apply(const Paint& paint, DrawProc proc) const {
+        Paint p(paint);
         proc(this->apply(&p), p);  // draw the shadow
         proc({0, 0}, paint);       // draw the original (on top)
     }
@@ -43,7 +43,7 @@ private:
     const float mBlurSigma;
     const SkPoint mOffset;
 
-    SkPoint apply(SkPaint* paint) const;
+    SkPoint apply(Paint* paint) const;
 
     BlurDrawLooper(SkColor4f, float, SkPoint);
 };

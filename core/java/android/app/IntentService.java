@@ -52,7 +52,7 @@ import android.os.Message;
  * guide.</p>
  * </div>
  *
- * @see android.support.v4.app.JobIntentService
+ * @see androidx.core.app.JobIntentService
  *
  * @deprecated IntentService is subject to all the
  *   <a href="{@docRoot}about/versions/oreo/background.html">background execution limits</a>

@@ -26,7 +26,7 @@ import static com.android.server.timezonedetector.location.LocationTimeZoneProvi
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.RemoteCallback;
+import android.service.timezone.TimeZoneProviderEvent;
 import android.util.IndentingPrintWriter;
 
 import java.time.Duration;
@@ -45,9 +45,10 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
             @NonNull ProviderMetricsLogger providerMetricsLogger,
             @NonNull ThreadingDomain threadingDomain,
             @NonNull String providerName,
-            @NonNull LocationTimeZoneProviderProxy proxy) {
+            @NonNull LocationTimeZoneProviderProxy proxy,
+            boolean recordStateChanges) {
         super(providerMetricsLogger, threadingDomain, providerName,
-                new ZoneInfoDbTimeZoneProviderEventPreProcessor());
+                new ZoneInfoDbTimeZoneProviderEventPreProcessor(), recordStateChanges);
         mProxy = Objects.requireNonNull(proxy);
     }
 
@@ -67,7 +68,7 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
 
             @Override
             public void onProviderUnbound() {
-                handleProviderLost("onProviderUnbound()");
+                handleTemporaryFailure("onProviderUnbound()");
             }
         });
     }
@@ -75,50 +76,6 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     @Override
     void onDestroy() {
         mProxy.destroy();
-    }
-
-    private void handleProviderLost(String reason) {
-        mThreadingDomain.assertCurrentThread();
-
-        synchronized (mSharedLock) {
-            ProviderState currentState = mCurrentState.get();
-            switch (currentState.stateEnum) {
-                case PROVIDER_STATE_STARTED_INITIALIZING:
-                case PROVIDER_STATE_STARTED_UNCERTAIN:
-                case PROVIDER_STATE_STARTED_CERTAIN: {
-                    // Losing a remote provider is treated as becoming uncertain.
-                    String msg = "handleProviderLost reason=" + reason
-                            + ", mProviderName=" + mProviderName
-                            + ", currentState=" + currentState;
-                    debugLog(msg);
-                    // This is an unusual PROVIDER_STATE_STARTED_UNCERTAIN state because
-                    // event == null
-                    ProviderState newState = currentState.newState(
-                            PROVIDER_STATE_STARTED_UNCERTAIN, null,
-                            currentState.currentUserConfiguration, msg);
-                    setCurrentState(newState, true);
-                    break;
-                }
-                case PROVIDER_STATE_STOPPED: {
-                    debugLog("handleProviderLost reason=" + reason
-                            + ", mProviderName=" + mProviderName
-                            + ", currentState=" + currentState
-                            + ": No state change required, provider is stopped.");
-                    break;
-                }
-                case PROVIDER_STATE_PERM_FAILED:
-                case PROVIDER_STATE_DESTROYED: {
-                    debugLog("handleProviderLost reason=" + reason
-                            + ", mProviderName=" + mProviderName
-                            + ", currentState=" + currentState
-                            + ": No state change required, provider is terminated.");
-                    break;
-                }
-                default: {
-                    throw new IllegalStateException("Unknown currentState=" + currentState);
-                }
-            }
-        }
     }
 
     private void handleOnProviderBound() {
@@ -155,11 +112,12 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     }
 
     @Override
-    void onStartUpdates(@NonNull Duration initializationTimeout) {
+    void onStartUpdates(@NonNull Duration initializationTimeout,
+            @NonNull Duration eventFilteringAgeThreshold) {
         // Set a request on the proxy - it will be sent immediately if the service is bound,
         // or will be sent as soon as the service becomes bound.
-        TimeZoneProviderRequest request =
-                TimeZoneProviderRequest.createStartUpdatesRequest(initializationTimeout);
+        TimeZoneProviderRequest request = TimeZoneProviderRequest.createStartUpdatesRequest(
+                initializationTimeout, eventFilteringAgeThreshold);
         mProxy.setRequest(request);
     }
 
@@ -167,16 +125,6 @@ class BinderLocationTimeZoneProvider extends LocationTimeZoneProvider {
     void onStopUpdates() {
         TimeZoneProviderRequest request = TimeZoneProviderRequest.createStopUpdatesRequest();
         mProxy.setRequest(request);
-    }
-
-    /**
-     * Passes the supplied test command to the current proxy.
-     */
-    @Override
-    void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
-        mThreadingDomain.assertCurrentThread();
-
-        mProxy.handleTestCommand(testCommand, callback);
     }
 
     @Override

@@ -55,7 +55,6 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         rippleShader.progress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
         ripplePaint.shader = rippleShader
-        visibility = View.GONE
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
@@ -86,12 +85,10 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
         animator.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 rippleInProgress = false
-                visibility = View.GONE
                 onAnimationEnd?.run()
             }
         })
         animator.start()
-        visibility = View.VISIBLE
         rippleInProgress = true
     }
 
@@ -100,6 +97,11 @@ class ChargingRippleView(context: Context?, attrs: AttributeSet?) : View(context
     }
 
     override fun onDraw(canvas: Canvas?) {
+        if (canvas == null || !canvas.isHardwareAccelerated) {
+            // Drawing with the ripple shader requires hardware acceleration, so skip
+            // if it's unsupported.
+            return
+        }
         // To reduce overdraw, we mask the effect to a circle whose radius is big enough to cover
         // the active effect area. Values here should be kept in sync with the
         // animation implementation in the ripple shader.

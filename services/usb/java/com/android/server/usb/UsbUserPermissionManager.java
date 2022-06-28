@@ -246,9 +246,13 @@ class UsbUserPermissionManager {
      * @param uid to check permission for
      * @return {@code true} if caller has permssion
      */
-    boolean hasPermission(@NonNull UsbAccessory accessory, int uid) {
+    boolean hasPermission(@NonNull UsbAccessory accessory, int pid, int uid) {
         synchronized (mLock) {
-            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
+            if (uid == Process.SYSTEM_UID
+                    || mDisablePermissionDialogs
+                    || mContext.checkPermission(
+                        android.Manifest.permission.MANAGE_USB, pid, uid)
+                         == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 return true;
             }
             AccessoryFilter filter = new AccessoryFilter(accessory);
@@ -675,8 +679,8 @@ class UsbUserPermissionManager {
         }
     }
 
-    public void checkPermission(UsbAccessory accessory, int uid) {
-        if (!hasPermission(accessory, uid)) {
+    public void checkPermission(UsbAccessory accessory, int pid, int uid) {
+        if (!hasPermission(accessory, pid, uid)) {
             throw new SecurityException("User has not given " + uid + " permission to accessory "
                     + accessory);
         }
@@ -745,9 +749,9 @@ class UsbUserPermissionManager {
     }
 
     public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi,
-            int uid) {
+            int pid, int uid) {
         // respond immediately if permission has already been granted
-        if (hasPermission(accessory, uid)) {
+        if (hasPermission(accessory, pid, uid)) {
             Intent intent = new Intent();
             intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
             intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);

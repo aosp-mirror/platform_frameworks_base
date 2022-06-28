@@ -303,6 +303,11 @@ public class CameraBinderTest extends AndroidTestCase {
         public void onCameraClosed(String cameraId) {
             Log.v(TAG, String.format("Camera %s is closed", cameraId));
         }
+        @Override
+        public void onTorchStrengthLevelChanged(String cameraId, int torchStrength) {
+            Log.v(TAG, String.format("Camera " + cameraId + " torch strength level changed to "
+                    + torchStrength ));
+        }
     }
 
     /**

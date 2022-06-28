@@ -45,7 +45,6 @@ import android.util.SparseIntArray;
 import com.android.internal.R;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -132,6 +131,10 @@ class BluetoothRouteProvider {
 
         mContext.registerReceiverAsUser(mBroadcastReceiver, user,
                 mIntentFilter, null, null);
+    }
+
+    public void stop() {
+        mContext.unregisterReceiver(mBroadcastReceiver);
     }
 
     /**
@@ -450,15 +453,16 @@ class BluetoothRouteProvider {
                 case BluetoothProfile.A2DP:
                     mA2dpProfile = (BluetoothA2dp) proxy;
                     // It may contain null.
-                    activeDevices = Collections.singletonList(mA2dpProfile.getActiveDevice());
+                    activeDevices = mBluetoothAdapter.getActiveDevices(BluetoothProfile.A2DP);
                     break;
                 case BluetoothProfile.HEARING_AID:
                     mHearingAidProfile = (BluetoothHearingAid) proxy;
-                    activeDevices = mHearingAidProfile.getActiveDevices();
+                    activeDevices = mBluetoothAdapter.getActiveDevices(
+                            BluetoothProfile.HEARING_AID);
                     break;
                 case BluetoothProfile.LE_AUDIO:
                     mLeAudioProfile = (BluetoothLeAudio) proxy;
-                    activeDevices = mLeAudioProfile.getActiveDevices();
+                    activeDevices = mBluetoothAdapter.getActiveDevices(BluetoothProfile.LE_AUDIO);
                     break;
                 default:
                     return;

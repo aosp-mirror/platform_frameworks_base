@@ -18,5 +18,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="enabled_by_admin" msgid="6630472777476410137">"Do quản trị viên bật"</string>
-    <string name="disabled_by_admin" msgid="4023569940620832713">"Quản trị viên đã vô hiệu hóa chế độ này"</string>
+    <string name="disabled_by_admin" msgid="4023569940620832713">"Đã bị quản trị viên vô hiệu hóa"</string>
 </resources>

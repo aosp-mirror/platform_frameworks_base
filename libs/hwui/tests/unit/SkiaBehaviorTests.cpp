@@ -61,11 +61,11 @@ TEST(SkiaBehavior, lightingColorFilter_simplify) {
 TEST(SkiaBehavior, porterDuffCreateIsCached) {
     SkPaint paint;
     paint.setBlendMode(SkBlendMode::kOverlay);
-    auto expected = paint.getBlendMode();
+    auto expected = paint.asBlendMode();
     paint.setBlendMode(SkBlendMode::kClear);
-    ASSERT_NE(expected, paint.getBlendMode());
+    ASSERT_NE(expected, paint.asBlendMode());
     paint.setBlendMode(SkBlendMode::kOverlay);
-    ASSERT_EQ(expected, paint.getBlendMode());
+    ASSERT_EQ(expected, paint.asBlendMode());
 }
 
 TEST(SkiaBehavior, pathIntersection) {

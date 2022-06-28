@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.notifcollection
 
 import android.os.RemoteException
+import android.service.notification.NotificationListenerService
 import android.service.notification.NotificationListenerService.RankingMap
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
@@ -25,8 +26,41 @@ import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.LogLevel.WTF
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.collection.NotifCollection
+import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason
+import com.android.systemui.statusbar.notification.collection.NotifCollection.FutureDismissal
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
+
+fun cancellationReasonDebugString(@CancellationReason reason: Int) =
+    "$reason:" + when (reason) {
+        -1 -> "REASON_NOT_CANCELED" // NotifCollection.REASON_NOT_CANCELED
+        NotifCollection.REASON_UNKNOWN -> "REASON_UNKNOWN"
+        NotificationListenerService.REASON_CLICK -> "REASON_CLICK"
+        NotificationListenerService.REASON_CANCEL -> "REASON_CANCEL"
+        NotificationListenerService.REASON_CANCEL_ALL -> "REASON_CANCEL_ALL"
+        NotificationListenerService.REASON_ERROR -> "REASON_ERROR"
+        NotificationListenerService.REASON_PACKAGE_CHANGED -> "REASON_PACKAGE_CHANGED"
+        NotificationListenerService.REASON_USER_STOPPED -> "REASON_USER_STOPPED"
+        NotificationListenerService.REASON_PACKAGE_BANNED -> "REASON_PACKAGE_BANNED"
+        NotificationListenerService.REASON_APP_CANCEL -> "REASON_APP_CANCEL"
+        NotificationListenerService.REASON_APP_CANCEL_ALL -> "REASON_APP_CANCEL_ALL"
+        NotificationListenerService.REASON_LISTENER_CANCEL -> "REASON_LISTENER_CANCEL"
+        NotificationListenerService.REASON_LISTENER_CANCEL_ALL -> "REASON_LISTENER_CANCEL_ALL"
+        NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED -> "REASON_GROUP_SUMMARY_CANCELED"
+        NotificationListenerService.REASON_GROUP_OPTIMIZATION -> "REASON_GROUP_OPTIMIZATION"
+        NotificationListenerService.REASON_PACKAGE_SUSPENDED -> "REASON_PACKAGE_SUSPENDED"
+        NotificationListenerService.REASON_PROFILE_TURNED_OFF -> "REASON_PROFILE_TURNED_OFF"
+        NotificationListenerService.REASON_UNAUTOBUNDLED -> "REASON_UNAUTOBUNDLED"
+        NotificationListenerService.REASON_CHANNEL_BANNED -> "REASON_CHANNEL_BANNED"
+        NotificationListenerService.REASON_SNOOZED -> "REASON_SNOOZED"
+        NotificationListenerService.REASON_TIMEOUT -> "REASON_TIMEOUT"
+        NotificationListenerService.REASON_CHANNEL_REMOVED -> "REASON_CHANNEL_REMOVED"
+        NotificationListenerService.REASON_CLEAR_DATA -> "REASON_CLEAR_DATA"
+        NotificationListenerService.REASON_ASSISTANT_CANCEL -> "REASON_ASSISTANT_CANCEL"
+        else -> "unknown"
+    }
 
 class NotifCollectionLogger @Inject constructor(
     @NotificationLog private val buffer: LogBuffer
@@ -56,12 +90,12 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
-    fun logNotifRemoved(key: String, reason: Int) {
+    fun logNotifRemoved(key: String, @CancellationReason reason: Int) {
         buffer.log(TAG, INFO, {
             str1 = key
             int1 = reason
         }, {
-            "REMOVED $str1 reason=$int1"
+            "REMOVED $str1 reason=${cancellationReasonDebugString(int1)}"
         })
     }
 
@@ -78,6 +112,14 @@ class NotifCollectionLogger @Inject constructor(
             str1 = key
         }, {
             "DISMISSED $str1"
+        })
+    }
+
+    fun logNonExistentNotifDismissed(key: String) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+        }, {
+            "DISMISSED Non Existent $str1"
         })
     }
 
@@ -141,11 +183,12 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
-    fun logNoNotificationToRemoveWithKey(key: String) {
+    fun logNoNotificationToRemoveWithKey(key: String, @CancellationReason reason: Int) {
         buffer.log(TAG, ERROR, {
             str1 = key
+            int1 = reason
         }, {
-            "No notification to remove with key $str1"
+            "No notification to remove with key $str1 reason=${cancellationReasonDebugString(int1)}"
         })
     }
 
@@ -202,6 +245,81 @@ class NotifCollectionLogger @Inject constructor(
             str1 = message
         }, {
             "ERROR suppressed due to initialization forgiveness: $str1"
+        })
+    }
+
+    fun logFutureDismissalReused(dismissal: FutureDismissal) {
+        buffer.log(TAG, INFO, {
+            str1 = dismissal.label
+        }, {
+            "Reusing existing registration: $str1"
+        })
+    }
+
+    fun logFutureDismissalRegistered(dismissal: FutureDismissal) {
+        buffer.log(TAG, DEBUG, {
+            str1 = dismissal.label
+        }, {
+            "Registered: $str1"
+        })
+    }
+
+    fun logFutureDismissalDoubleCancelledByServer(dismissal: FutureDismissal) {
+        buffer.log(TAG, WARNING, {
+            str1 = dismissal.label
+        }, {
+            "System server double cancelled: $str1"
+        })
+    }
+
+    fun logFutureDismissalDoubleRun(dismissal: FutureDismissal) {
+        buffer.log(TAG, WARNING, {
+            str1 = dismissal.label
+        }, {
+            "Double run: $str1"
+        })
+    }
+
+    fun logFutureDismissalAlreadyCancelledByServer(dismissal: FutureDismissal) {
+        buffer.log(TAG, DEBUG, {
+            str1 = dismissal.label
+        }, {
+            "Ignoring: entry already cancelled by server: $str1"
+        })
+    }
+
+    fun logFutureDismissalGotSystemServerCancel(
+        dismissal: FutureDismissal,
+        @CancellationReason cancellationReason: Int
+    ) {
+        buffer.log(TAG, DEBUG, {
+            str1 = dismissal.label
+            int1 = cancellationReason
+        }, {
+            "SystemServer cancelled: $str1 reason=${cancellationReasonDebugString(int1)}"
+        })
+    }
+
+    fun logFutureDismissalDismissing(dismissal: FutureDismissal, type: String) {
+        buffer.log(TAG, DEBUG, {
+            str1 = dismissal.label
+            str2 = type
+        }, {
+            "Dismissing $str2 for: $str1"
+        })
+    }
+
+    fun logFutureDismissalMismatchedEntry(
+        dismissal: FutureDismissal,
+        type: String,
+        latestEntry: NotificationEntry?
+    ) {
+        buffer.log(TAG, WARNING, {
+            str1 = dismissal.label
+            str2 = type
+            str3 = latestEntry.logKey
+        }, {
+            "Mismatch: current $str2 is $str3 for: $str1"
         })
     }
 }

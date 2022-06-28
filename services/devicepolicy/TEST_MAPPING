@@ -16,5 +16,15 @@
     {
       "name": "CtsDevicePolicyManagerTestCases"
     }
+  ],
+  "presubmit": [
+    {
+      "name": "CtsDevicePolicyManagerTestCases",
+      "options": [
+        {
+          "include-filter": "com.android.cts.devicepolicy.ManagedProfileTest#testParentProfileApiDisabled"
+        }
+      ]
+    }
   ]
 }

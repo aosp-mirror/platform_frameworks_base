@@ -88,6 +88,10 @@ static void clipOutline(const Outline& outline, SkCanvas* canvas, const SkRect* 
         if (pendingClip) {
             canvas->clipRect(*pendingClip);
         }
+        const SkPath* path = outline.getPath();
+        if (path) {
+            canvas->clipPath(*path, SkClipOp::kIntersect, true);
+        }
         return;
     }
 

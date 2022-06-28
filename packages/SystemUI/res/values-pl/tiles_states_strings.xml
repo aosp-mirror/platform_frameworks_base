@@ -62,9 +62,9 @@
     <item msgid="8527389108867454098">"Włączona"</item>
   </string-array>
   <string-array name="tile_states_rotation">
-    <item msgid="4578491772376121579">"Niedostępne"</item>
-    <item msgid="5776427577477729185">"Wyłączone"</item>
-    <item msgid="7105052717007227415">"Włączone"</item>
+    <item msgid="4578491772376121579">"Niedostępny"</item>
+    <item msgid="5776427577477729185">"Wyłączony"</item>
+    <item msgid="7105052717007227415">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_bt">
     <item msgid="5330252067413512277">"Niedostępny"</item>
@@ -85,6 +85,11 @@
     <item msgid="3145597331197351214">"Niedostępny"</item>
     <item msgid="5715725170633593906">"Wyłączony"</item>
     <item msgid="2075645297847971154">"Włączony"</item>
+  </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"Niedostępna"</item>
+    <item msgid="1909756493418256167">"Wyłączona"</item>
+    <item msgid="4531508423703413340">"Włączona"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Niedostępne"</item>
@@ -122,9 +127,9 @@
     <item msgid="578444932039713369">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_reverse">
-    <item msgid="3574611556622963971">"Niedostępne"</item>
-    <item msgid="8707481475312432575">"Wyłączone"</item>
-    <item msgid="8031106212477483874">"Włączone"</item>
+    <item msgid="3574611556622963971">"Niedostępny"</item>
+    <item msgid="8707481475312432575">"Wyłączony"</item>
+    <item msgid="8031106212477483874">"Włączony"</item>
   </string-array>
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"Niedostępny"</item>
@@ -151,9 +156,19 @@
     <item msgid="7571394439974244289">"Wyłączony"</item>
     <item msgid="6866424167599381915">"Włączony"</item>
   </string-array>
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"Niedostępny"</item>
+    <item msgid="3301403109049256043">"Wyłączony"</item>
+    <item msgid="8878684975184010135">"Włączony"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"Niedostępny"</item>
     <item msgid="2710157085538036590">"Wyłączony"</item>
     <item msgid="7809470840976856149">"Włączony"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"Niedostępny"</item>
+    <item msgid="146088982397753810">"Wyłączony"</item>
+    <item msgid="460891964396502657">"Włączony"</item>
   </string-array>
 </resources>

@@ -34,10 +34,7 @@ public enum StatusBarStateEvent implements UiEventLogger.UiEventEnum {
     STATUS_BAR_STATE_KEYGUARD(430),
 
     @UiEvent(doc = "StatusBarState changed to SHADE_LOCKED state")
-    STATUS_BAR_STATE_SHADE_LOCKED(431),
-
-    @UiEvent(doc = "StatusBarState changed to FULLSCREEN_USER_SWITCHER state")
-    STATUS_BAR_STATE_FULLSCREEN_USER_SWITCHER(432);
+    STATUS_BAR_STATE_SHADE_LOCKED(431);
 
     private int mId;
     StatusBarStateEvent(int id) {
@@ -60,8 +57,6 @@ public enum StatusBarStateEvent implements UiEventLogger.UiEventEnum {
                 return STATUS_BAR_STATE_KEYGUARD;
             case StatusBarState.SHADE_LOCKED:
                 return STATUS_BAR_STATE_SHADE_LOCKED;
-            case StatusBarState.FULLSCREEN_USER_SWITCHER:
-                return STATUS_BAR_STATE_FULLSCREEN_USER_SWITCHER;
             default:
                 return STATUS_BAR_STATE_UNKNOWN;
         }

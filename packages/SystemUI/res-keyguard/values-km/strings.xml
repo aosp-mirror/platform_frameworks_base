@@ -26,6 +26,7 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"បណ្ណមិនត្រឹមត្រូវទេ។"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"បាន​សាក​ថ្មពេញ"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុងសាកថ្ម​ឥតខ្សែ"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ឧបករណ៍ភ្ជាប់សាកថ្ម"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
@@ -52,10 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"លំនាំមិនត្រឹមត្រូវ"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
-      <item quantity="other">ព្យាយាមម្តងទៀតក្នុងរយៈពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី។</item>
-      <item quantity="one">ព្យាយាមម្តងទៀតក្នុងរយៈពេល 1 វិនាទី។</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{ព្យាយាមម្តងទៀតក្នុងរយៈពេល # វិនាទីទៀត។}other{ព្យាយាមម្តងទៀតក្នុងរយៈពេល # វិនាទីទៀត។}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"បញ្ចូល​កូដ PIN របស់​ស៊ីម។"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"បញ្ចូល​កូដ PIN របស់​ស៊ីម​សម្រាប់ \"<xliff:g id="CARRIER">%1$s</xliff:g>\"។"</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> បិទ eSIM ដើម្បី​ប្រើ​ឧបករណ៍​ដោយ​គ្មាន​សេវាកម្ម​ទូរសព្ទ​ចល័ត។"</string>
@@ -91,7 +89,6 @@
     <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់ ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ឧបករណ៍​ត្រូវបាន​ចាក់សោ​ដោយអ្នក​គ្រប់គ្រង"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ឧបករណ៍ត្រូវបានចាក់សោដោយអ្នកប្រើផ្ទាល់"</string>
-    <string name="kg_fingerprint_not_recognized" msgid="5982606907039479545">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"ដើម្បីប្រើមុខងារដោះសោតាមទម្រង់មុខ សូមបើក"<b>"ការចូលប្រើកាមេរ៉ា"</b>"នៅក្នុងការកំណត់ &gt; ឯកជនភាព"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">

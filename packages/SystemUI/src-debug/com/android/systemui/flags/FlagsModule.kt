@@ -19,17 +19,31 @@ package com.android.systemui.flags
 import android.content.Context
 import android.os.Handler
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlagsDebug.ALL_FLAGS
 import com.android.systemui.util.settings.SettingsUtilModule
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 
 @Module(includes = [
     SettingsUtilModule::class
 ])
-object FlagsModule {
-    @JvmStatic
-    @Provides
-    fun provideFlagManager(context: Context, @Main handler: Handler): FlagManager {
-        return FlagManager(context, handler)
+abstract class FlagsModule {
+    @Binds
+    abstract fun bindsFeatureFlagDebug(impl: FeatureFlagsDebug): FeatureFlags
+
+    @Module
+    companion object {
+        @JvmStatic
+        @Provides
+        fun provideFlagManager(context: Context, @Main handler: Handler): FlagManager {
+            return FlagManager(context, handler)
+        }
+
+        @JvmStatic
+        @Provides
+        @Named(ALL_FLAGS)
+        fun providesAllFlags(): Map<Int, Flag<*>> = Flags.collectFlags()
     }
 }

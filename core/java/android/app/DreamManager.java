@@ -16,7 +16,10 @@
 
 package android.app;
 
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -25,6 +28,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 
@@ -44,6 +49,40 @@ public class DreamManager {
         mService = IDreamManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(DreamService.DREAM_SERVICE));
         mContext = context;
+    }
+
+    /**
+     * Returns whether Settings.Secure.SCREENSAVER_ENABLED is enabled.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isScreensaverEnabled() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    /**
+     * Sets whether Settings.Secure.SCREENSAVER_ENABLED is enabled.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    public void setScreensaverEnabled(boolean enabled) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, enabled ? 1 : 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Returns whether dreams are supported.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean areDreamsSupported() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_dreamsSupported);
     }
 
     /**
@@ -91,10 +130,30 @@ public class DreamManager {
     @TestApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
-    public void setActiveDream(@NonNull ComponentName dreamComponent) {
+    public void setActiveDream(@Nullable ComponentName dreamComponent) {
         ComponentName[] dreams = {dreamComponent};
+
         try {
-            mService.setDreamComponentsForUser(mContext.getUserId(), dreams);
+            mService.setDreamComponentsForUser(mContext.getUserId(),
+                    dreamComponent != null ? dreams : null);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the active dream on the device to be "dreamComponent".
+     *
+     * <p>This is only used for testing the dream service APIs.
+     *
+     * @hide
+     */
+    @TestApi
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void setDreamOverlay(@Nullable ComponentName dreamOverlayComponent) {
+        try {
+            mService.registerDreamOverlayService(dreamOverlayComponent);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

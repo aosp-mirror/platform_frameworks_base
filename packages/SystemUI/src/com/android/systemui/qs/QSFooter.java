@@ -42,21 +42,11 @@ public interface QSFooter {
      */
     void setExpansion(float expansion);
 
-    /**
-     * Sets whether or not this footer should set itself to listen for changes in any callbacks
-     * that it has implemented.
-     */
-    void setListening(boolean listening);
 
     /**
      * Sets whether or not the keyguard is currently being shown.
      */
     void setKeyguardShowing(boolean keyguardShowing);
-
-    /**
-     * Sets the {@link android.view.View.OnClickListener to be used on elements that expend QS.
-     */
-    void setExpandClickListener(View.OnClickListener onClickListener);
 
     default void disable(int state1, int state2, boolean animate) {}
 }

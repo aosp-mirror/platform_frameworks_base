@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.TRANSIT_OLD_NONE;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DRAW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
@@ -34,7 +35,6 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMAT
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
@@ -60,6 +60,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -118,9 +119,6 @@ class WindowStateAnimator {
      * window is first added or shown, cleared when the callback has been made. */
     boolean mEnteringAnimation;
 
-    /** The pixel format of the underlying SurfaceControl */
-    int mSurfaceFormat;
-
     /** This is set when there is no Surface */
     static final int NO_SURFACE = 0;
     /** This is set after the Surface has been created but before the window has been drawn. During
@@ -153,8 +151,6 @@ class WindowStateAnimator {
 
     int mAttrType;
 
-    private final Rect mTmpSize = new Rect();
-
     /**
      * Handles surface changes synchronized to after the client has drawn the surface. This
      * transaction is currently used to reparent the old surface children to the new surface once
@@ -183,10 +179,9 @@ class WindowStateAnimator {
 
     void onAnimationFinished() {
         // Done animating, clean up.
-        if (DEBUG_ANIM) Slog.v(
-                TAG, "Animation done in " + this + ": exiting=" + mWin.mAnimatingExit
-                        + ", reportedVisible="
-                        + (mWin.mActivityRecord != null && mWin.mActivityRecord.reportedVisible));
+        ProtoLog.v(WM_DEBUG_ANIM, "Animation done in %s: exiting=%b, reportedVisible=%b",
+                this, mWin.mAnimatingExit,
+                (mWin.mActivityRecord != null && mWin.mActivityRecord.reportedVisible));
 
         mWin.checkPolicyVisibilityChange();
         final DisplayContent displayContent = mWin.getDisplayContent();
@@ -269,9 +264,8 @@ class WindowStateAnimator {
         if (mDrawState != COMMIT_DRAW_PENDING && mDrawState != READY_TO_SHOW) {
             return false;
         }
-        if (DEBUG_ANIM) {
-            Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurfaceController);
-        }
+        ProtoLog.i(WM_DEBUG_ANIM, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW %s",
+                mSurfaceController);
         mDrawState = READY_TO_SHOW;
         boolean result = false;
         final ActivityRecord activity = mWin.mActivityRecord;
@@ -294,7 +288,7 @@ class WindowStateAnimator {
         }
     }
 
-    WindowSurfaceController createSurfaceLocked(int windowType) {
+    WindowSurfaceController createSurfaceLocked() {
         final WindowState w = mWin;
 
         if (mSurfaceController != null) {
@@ -303,9 +297,7 @@ class WindowStateAnimator {
 
         w.setHasSurface(false);
 
-        if (DEBUG_ANIM) {
-            Slog.i(TAG, "createSurface " + this + ": mDrawState=DRAW_PENDING");
-        }
+        ProtoLog.i(WM_DEBUG_ANIM, "createSurface %s: mDrawState=DRAW_PENDING", this);
 
         resetDrawState();
 
@@ -322,16 +314,9 @@ class WindowStateAnimator {
             flags |= SurfaceControl.SKIP_SCREENSHOT;
         }
 
-        w.calculateSurfaceBounds(attrs, mTmpSize);
-
-        final int width = mTmpSize.width();
-        final int height = mTmpSize.height();
-
         if (DEBUG_VISIBILITY) {
             Slog.v(TAG, "Creating surface in session "
                     + mSession.mSurfaceSession + " window " + this
-                    + " w=" + width + " h=" + height
-                    + " x=" + mTmpSize.left + " y=" + mTmpSize.top
                     + " format=" + attrs.format + " flags=" + flags);
         }
 
@@ -342,12 +327,10 @@ class WindowStateAnimator {
             final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
             final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
 
-            mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), width,
-                    height, format, flags, this, windowType);
+            mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), format,
+                    flags, this, attrs.type);
             mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
-
-            mSurfaceFormat = format;
 
             w.setHasSurface(true);
             // The surface instance is changed. Make sure the input info can be applied to the
@@ -377,8 +360,7 @@ class WindowStateAnimator {
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
             WindowManagerService.logSurface(w, "CREATE pos=("
-                    + w.getFrame().left + "," + w.getFrame().top + ") ("
-                    + width + "x" + height + ")" + " HIDE", false);
+                    + w.getFrame().left + "," + w.getFrame().top + ") HIDE", false);
         }
 
         mLastHidden = true;
@@ -457,50 +439,6 @@ class WindowStateAnimator {
         return mService.useBLASTSync() && mWin.useBLASTSync();
     }
 
-    private boolean shouldConsumeMainWindowSizeTransaction() {
-        // We only consume the transaction when the client is calling relayout
-        // because this is the only time we know the frameNumber will be valid
-        // due to the client renderer being paused. Put otherwise, only when
-        // mInRelayout is true can we guarantee the next frame will contain
-        // the most recent configuration.
-        if (!mWin.mInRelayout) return false;
-        // Since we can only do this for one window, we focus on the main application window
-        if (mAttrType != TYPE_BASE_APPLICATION) return false;
-        final Task task = mWin.getTask();
-        if (task == null) return false;
-        if (task.getMainWindowSizeChangeTransaction() == null) return false;
-        // Likewise we only focus on the task root, since we can only use one window
-        if (!mWin.mActivityRecord.isRootOfTask()) return false;
-        return true;
-    }
-
-    void setSurfaceBoundariesLocked(SurfaceControl.Transaction t) {
-        if (mSurfaceController == null) {
-            return;
-        }
-
-        final WindowState w = mWin;
-        final Task task = w.getTask();
-        if (shouldConsumeMainWindowSizeTransaction()) {
-            if (isInBlastSync()) {
-                // If we're in a sync transaction, there's no need to call defer transaction.
-                // The sync transaction will contain the buffer so the bounds change transaction
-                // will only be applied with the buffer.
-                t.merge(task.getMainWindowSizeChangeTransaction());
-                task.setMainWindowSizeChangeTransaction(null);
-            } else {
-                mWin.applyWithNextDraw(finishedFrame -> {
-                      final SurfaceControl.Transaction sizeChangedTransaction =
-                          task.getMainWindowSizeChangeTransaction();
-                      if (sizeChangedTransaction != null) {
-                          finishedFrame.merge(sizeChangedTransaction);
-                          task.setMainWindowSizeChangeTransaction(null);
-                      }
-                });
-            }
-        }
-    }
-
     void prepareSurfaceLocked(SurfaceControl.Transaction t) {
         final WindowState w = mWin;
         if (!hasSurface()) {
@@ -514,11 +452,7 @@ class WindowStateAnimator {
             return;
         }
 
-        boolean displayed = false;
-
         computeShownFrameLocked();
-
-        setSurfaceBoundariesLocked(t);
 
         if (w.isParentWindowHidden() || !w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
@@ -535,7 +469,6 @@ class WindowStateAnimator {
             }
         } else if (mLastAlpha != mShownAlpha
                 || mLastHidden) {
-            displayed = true;
             mLastAlpha = mShownAlpha;
             ProtoLog.i(WM_SHOW_TRANSACTIONS,
                     "SURFACE controller=%s alpha=%f HScale=%f, VScale=%f: %s",
@@ -566,19 +499,15 @@ class WindowStateAnimator {
                     }
                 }
             }
-            if (hasSurface()) {
-                w.mToken.hasVisible = true;
-            }
         } else {
-            if (DEBUG_ANIM && mWin.isAnimating(TRANSITION | PARENTS)) {
-                Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
+            if (mWin.isAnimating(TRANSITION | PARENTS)) {
+                ProtoLog.v(WM_DEBUG_ANIM, "prepareSurface: No changes in animation for %s", this);
             }
-            displayed = true;
         }
 
         if (w.getOrientationChanging()) {
             if (!w.isDrawn()) {
-                if (w.mDisplayContent.waitForUnfreeze(w)) {
+                if (w.mDisplayContent.shouldSyncRotationChange(w)) {
                     w.mWmService.mRoot.mOrientationChangeComplete = false;
                     mAnimator.mLastWindowFreezeSource = w;
                 }
@@ -589,31 +518,6 @@ class WindowStateAnimator {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change complete in %s", w);
             }
         }
-
-        if (displayed) {
-            w.mToken.hasVisible = true;
-        }
-    }
-
-    /**
-     * Try to change the pixel format without recreating the surface. This
-     * will be common in the case of changing from PixelFormat.OPAQUE to
-     * PixelFormat.TRANSLUCENT in the hardware-accelerated case as both
-     * requested formats resolve to the same underlying SurfaceControl format
-     * @return True if format was succesfully changed, false otherwise
-     */
-    boolean tryChangeFormatInPlaceLocked() {
-        if (mSurfaceController == null) {
-            return false;
-        }
-        final LayoutParams attrs = mWin.getAttrs();
-        final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
-        final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
-        if (format == mSurfaceFormat) {
-            setOpaqueLocked(!PixelFormat.formatHasAlpha(attrs.format));
-            return true;
-        }
-        return false;
     }
 
     void setOpaqueLocked(boolean isOpaque) {
@@ -739,15 +643,12 @@ class WindowStateAnimator {
                             mWin.mAttrs, attr, TRANSIT_OLD_NONE);
                 }
             }
-            if (DEBUG_ANIM) Slog.v(TAG,
-                    "applyAnimation: win=" + this
-                    + " anim=" + anim + " attr=0x" + Integer.toHexString(attr)
-                    + " a=" + a
-                    + " transit=" + transit
-                    + " type=" + mAttrType
-                    + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
+            if (ProtoLogImpl.isEnabled(WM_DEBUG_ANIM)) {
+                ProtoLog.v(WM_DEBUG_ANIM, "applyAnimation: win=%s"
+                        + " anim=%d attr=0x%x a=%s transit=%d type=%d isEntrance=%b Callers %s",
+                        this, anim, attr, a, transit, mAttrType, isEntrance, Debug.getCallers(20));
+            }
             if (a != null) {
-                if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + this);
                 Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#startAnimation");
                 mWin.startAnimation(a);
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);

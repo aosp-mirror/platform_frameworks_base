@@ -24,7 +24,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
-import android.graphics.Color
 import android.media.MediaDescription
 import android.media.session.MediaSession
 import android.provider.Settings
@@ -57,13 +56,9 @@ import org.mockito.MockitoAnnotations
 
 private const val KEY = "TEST_KEY"
 private const val OLD_KEY = "RESUME_KEY"
-private const val APP = "APP"
-private const val BG_COLOR = Color.RED
 private const val PACKAGE_NAME = "PKG"
 private const val CLASS_NAME = "CLASS"
-private const val ARTIST = "ARTIST"
 private const val TITLE = "TITLE"
-private const val USER_ID = 0
 private const val MEDIA_PREFERENCES = "media_control_prefs"
 private const val RESUME_COMPONENTS = "package1/class1:package2/class2:package3/class3"
 
@@ -130,24 +125,10 @@ class MediaResumeListenerTest : SysuiTestCase() {
         resumeListener.setManager(mediaDataManager)
         mediaDataManager.addListener(resumeListener)
 
-        data = MediaData(
-                userId = USER_ID,
-                initialized = true,
-                backgroundColor = BG_COLOR,
-                app = APP,
-                appIcon = null,
-                artist = ARTIST,
+        data = MediaTestUtils.emptyMediaData.copy(
                 song = TITLE,
-                artwork = null,
-                actions = emptyList(),
-                actionsToShowInCompact = emptyList(),
                 packageName = PACKAGE_NAME,
-                token = token,
-                clickIntent = null,
-                device = device,
-                active = true,
-                notificationKey = KEY,
-                resumeAction = null)
+                token = token)
     }
 
     @After
@@ -168,7 +149,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 resumeBrowserFactory, dumpManager, clock)
         listener.setManager(mediaDataManager)
         verify(broadcastDispatcher, never()).registerReceiver(eq(listener.userChangeReceiver),
-            any(), any(), any())
+            any(), any(), any(), anyInt(), any())
 
         // When data is loaded, we do NOT execute or update anything
         listener.onMediaDataLoaded(KEY, OLD_KEY, data)
@@ -187,16 +168,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
     @Test
     fun testOnLoad_checksForResume_badService() {
-        // Set up MBS that will allow connection but not return valid media
-        val pm = mock(PackageManager::class.java)
-        whenever(mockContext.packageManager).thenReturn(pm)
-        val resolveInfo = ResolveInfo()
-        val serviceInfo = ServiceInfo()
-        serviceInfo.packageName = PACKAGE_NAME
-        resolveInfo.serviceInfo = serviceInfo
-        resolveInfo.serviceInfo.name = CLASS_NAME
-        val resumeInfo = listOf(resolveInfo)
-        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
+        setUpMbsWithValidResolveInfo()
 
         whenever(resumeBrowser.testConnection()).thenAnswer {
             callbackCaptor.value.onError()
@@ -232,16 +204,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
     @Test
     fun testOnLoad_checksForResume_hasService() {
-        // Set up mocks to successfully find a MBS that returns valid media
-        val pm = mock(PackageManager::class.java)
-        whenever(mockContext.packageManager).thenReturn(pm)
-        val resolveInfo = ResolveInfo()
-        val serviceInfo = ServiceInfo()
-        serviceInfo.packageName = PACKAGE_NAME
-        resolveInfo.serviceInfo = serviceInfo
-        resolveInfo.serviceInfo.name = CLASS_NAME
-        val resumeInfo = listOf(resolveInfo)
-        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
+        setUpMbsWithValidResolveInfo()
 
         val description = MediaDescription.Builder().setTitle(TITLE).build()
         val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
@@ -291,7 +254,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
         // Make sure broadcast receiver is registered
         resumeListener.setManager(mediaDataManager)
         verify(broadcastDispatcher).registerReceiver(eq(resumeListener.userChangeReceiver),
-                any(), any(), any())
+                any(), any(), any(), anyInt(), any())
 
         // When we get an unlock event
         val intent = Intent(Intent.ACTION_USER_UNLOCKED)
@@ -307,16 +270,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
 
     @Test
     fun testGetResumeAction_restarts() {
-        // Set up mocks to successfully find a MBS that returns valid media
-        val pm = mock(PackageManager::class.java)
-        whenever(mockContext.packageManager).thenReturn(pm)
-        val resolveInfo = ResolveInfo()
-        val serviceInfo = ServiceInfo()
-        serviceInfo.packageName = PACKAGE_NAME
-        resolveInfo.serviceInfo = serviceInfo
-        resolveInfo.serviceInfo.name = CLASS_NAME
-        val resumeInfo = listOf(resolveInfo)
-        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
+        setUpMbsWithValidResolveInfo()
 
         val description = MediaDescription.Builder().setTitle(TITLE).build()
         val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
@@ -444,5 +398,92 @@ class MediaResumeListenerTest : SysuiTestCase() {
                     assertThat(result[2].toLong()).isEqualTo(currentTime)
                 }
         verify(sharedPrefsEditor, times(1)).apply()
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_newKeyDifferent_oldMediaBrowserDisconnected() {
+        setUpMbsWithValidResolveInfo()
+
+        resumeListener.onMediaDataLoaded(key = KEY, oldKey = null, data)
+        executor.runAllReady()
+
+        resumeListener.onMediaDataLoaded(key = "newKey", oldKey = KEY, data)
+
+        verify(resumeBrowser).disconnect()
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_updatingResumptionListError_mediaBrowserDisconnected() {
+        setUpMbsWithValidResolveInfo()
+
+        // Set up mocks to return with an error
+        whenever(resumeBrowser.testConnection()).thenAnswer {
+            callbackCaptor.value.onError()
+        }
+
+        resumeListener.onMediaDataLoaded(key = KEY, oldKey = null, data)
+        executor.runAllReady()
+
+        // Ensure we disconnect the browser
+        verify(resumeBrowser).disconnect()
+    }
+
+    @Test
+    fun testOnMediaDataLoaded_trackAdded_mediaBrowserDisconnected() {
+        setUpMbsWithValidResolveInfo()
+
+        // Set up mocks to return with a track added
+        val description = MediaDescription.Builder().setTitle(TITLE).build()
+        val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
+        whenever(resumeBrowser.testConnection()).thenAnswer {
+            callbackCaptor.value.addTrack(description, component, resumeBrowser)
+        }
+
+        resumeListener.onMediaDataLoaded(key = KEY, oldKey = null, data)
+        executor.runAllReady()
+
+        // Ensure we disconnect the browser
+        verify(resumeBrowser).disconnect()
+    }
+
+    @Test
+    fun testResumeAction_oldMediaBrowserDisconnected() {
+        setUpMbsWithValidResolveInfo()
+
+        val description = MediaDescription.Builder().setTitle(TITLE).build()
+        val component = ComponentName(PACKAGE_NAME, CLASS_NAME)
+        whenever(resumeBrowser.testConnection()).thenAnswer {
+            callbackCaptor.value.addTrack(description, component, resumeBrowser)
+        }
+
+        // Load media data that will require us to get the resume action
+        val dataCopy = data.copy(resumeAction = null, hasCheckedForResume = false)
+        resumeListener.onMediaDataLoaded(KEY, null, dataCopy)
+        executor.runAllReady()
+        verify(mediaDataManager, times(2)).setResumeAction(eq(KEY), capture(actionCaptor))
+
+        // Set up our factory to return a new browser so we can verify we disconnected the old one
+        val newResumeBrowser = mock(ResumeMediaBrowser::class.java)
+        whenever(resumeBrowserFactory.create(capture(callbackCaptor), any()))
+            .thenReturn(newResumeBrowser)
+
+        // When the resume action is run
+        actionCaptor.value.run()
+
+        // Then we disconnect the old one
+        verify(resumeBrowser).disconnect()
+    }
+
+    /** Sets up mocks to successfully find a MBS that returns valid media. */
+    private fun setUpMbsWithValidResolveInfo() {
+        val pm = mock(PackageManager::class.java)
+        whenever(mockContext.packageManager).thenReturn(pm)
+        val resolveInfo = ResolveInfo()
+        val serviceInfo = ServiceInfo()
+        serviceInfo.packageName = PACKAGE_NAME
+        resolveInfo.serviceInfo = serviceInfo
+        resolveInfo.serviceInfo.name = CLASS_NAME
+        val resumeInfo = listOf(resolveInfo)
+        whenever(pm.queryIntentServices(any(), anyInt())).thenReturn(resumeInfo)
     }
 }

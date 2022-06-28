@@ -28,6 +28,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -745,6 +746,23 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     @Override
     public int size() {
         return mSize;
+    }
+
+    /**
+     * Performs the given action for all elements in the stored order. This implementation overrides
+     * the default implementation to avoid using the {@link #iterator()}.
+     *
+     * @param action The action to be performed for each element
+     */
+    @Override
+    public void forEach(Consumer<? super E> action) {
+        if (action == null) {
+            throw new NullPointerException("action must not be null");
+        }
+
+        for (int i = 0; i < mSize; ++i) {
+            action.accept(valueAt(i));
+        }
     }
 
     @Override

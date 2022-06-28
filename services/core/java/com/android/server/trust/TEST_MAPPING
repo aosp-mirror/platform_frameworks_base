@@ -1,0 +1,28 @@
+{
+    "presubmit": [
+      {
+        "name": "TrustTests",
+        "options": [
+          {
+            "include-filter": "android.trust.test"
+          },
+          {
+            "exclude-annotation": "androidx.test.filters.FlakyTest"
+          }
+        ]
+      }
+    ],
+    "trust-tablet": [
+      {
+        "name": "TrustTests",
+        "options": [
+          {
+            "include-filter": "android.trust.test"
+          },
+          {
+            "exclude-annotation": "androidx.test.filters.FlakyTest"
+          }
+        ]
+      }
+    ]
+  }

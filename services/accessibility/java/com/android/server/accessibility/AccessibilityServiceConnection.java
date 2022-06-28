@@ -16,12 +16,17 @@
 
 package com.android.server.accessibility;
 
+import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
+import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.accessibilityservice.TouchInteractionController;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,12 +35,15 @@ import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.Display;
+import android.view.MotionEvent;
+
 
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -119,11 +127,14 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     public void unbindLocked() {
+        if (requestImeApis()) {
+            mSystemSupport.unbindImeLocked(this);
+        }
         mContext.unbindService(this);
         AccessibilityUserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
         userState.removeServiceLocked(this);
-        mSystemSupport.getFullScreenMagnificationController().resetAllIfNeeded(mId);
+        mSystemSupport.getMagnificationProcessor().resetAllIfNeeded(mId);
         mActivityTaskManagerService.setAllowAppSwitches(mComponentName.flattenToString(), -1,
                 userState.mUserId);
         resetLocked();
@@ -180,6 +191,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             // the new configuration (for example, initializing the input filter).
             mMainHandler.sendMessage(obtainMessage(
                     AccessibilityServiceConnection::initializeService, this));
+            if (requestImeApis()) {
+                mSystemSupport.requestImeLocked(this);
+            }
         }
     }
 
@@ -306,6 +320,41 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     @Override
+    @AccessibilityService.SoftKeyboardController.EnableImeResult
+    public int setInputMethodEnabled(String imeId, boolean enabled) throws SecurityException {
+        if (svcConnTracingEnabled()) {
+            logTraceSvcConn("switchToInputMethod", "imeId=" + imeId);
+        }
+        synchronized (mLock) {
+            if (!hasRightsToCurrentUserLocked()) {
+                return ENABLE_IME_FAIL_UNKNOWN;
+            }
+        }
+
+        final int callingUserId = UserHandle.getCallingUserId();
+        final InputMethodManagerInternal inputMethodManagerInternal =
+                InputMethodManagerInternal.get();
+
+        final @AccessibilityService.SoftKeyboardController.EnableImeResult int checkResult;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                checkResult = mSecurityPolicy.canEnableDisableInputMethod(imeId, this);
+            }
+            if (checkResult != ENABLE_IME_SUCCESS) {
+                return checkResult;
+            }
+            if (inputMethodManagerInternal.setInputMethodEnabled(imeId,
+                        enabled, callingUserId)) {
+                return ENABLE_IME_SUCCESS;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return ENABLE_IME_FAIL_UNKNOWN;
+    }
+
+    @Override
     public boolean isAccessibilityButtonAvailable() {
         if (svcConnTracingEnabled()) {
             logTraceSvcConn("isAccessibilityButtonAvailable", "");
@@ -328,13 +377,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!isConnectedLocked()) {
                 return;
             }
+            if (requestImeApis()) {
+                mSystemSupport.unbindImeLocked(this);
+            }
             mAccessibilityServiceInfo.crashed = true;
             AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState != null) {
                 userState.serviceDisconnectedLocked(this);
             }
             resetLocked();
-            mSystemSupport.getFullScreenMagnificationController().resetAllIfNeeded(mId);
+            mSystemSupport.getMagnificationProcessor().resetAllIfNeeded(mId);
             mSystemSupport.onClientChangeLocked(false);
         }
     }
@@ -452,6 +504,54 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             userState.setFocusAppearanceLocked(strokeWidth, color);
             // Updates the appearance data in the A11yManager.
             mSystemSupport.onClientChangeLocked(false);
+        }
+    }
+
+    public void notifyMotionEvent(MotionEvent event) {
+        final Message msg = obtainMessage(
+                AccessibilityServiceConnection::notifyMotionEventInternal,
+                AccessibilityServiceConnection.this, event);
+        mMainHandler.sendMessage(msg);
+    }
+
+    public void notifyTouchState(int displayId, int state) {
+        final Message msg = obtainMessage(
+                AccessibilityServiceConnection::notifyTouchStateInternal,
+                AccessibilityServiceConnection.this, displayId, state);
+        mMainHandler.sendMessage(msg);
+    }
+
+    public boolean requestImeApis() {
+        return mRequestImeApis;
+    }
+
+    private void notifyMotionEventInternal(MotionEvent event) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (mTrace.isA11yTracingEnabled()) {
+                    logTraceSvcClient(".onMotionEvent ",
+                            event.toString());
+                }
+                listener.onMotionEvent(event);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error sending motion event to" + mService, re);
+            }
+        }
+    }
+
+    private void notifyTouchStateInternal(int displayId, int state) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (mTrace.isA11yTracingEnabled()) {
+                    logTraceSvcClient(".onTouchStateChanged ",
+                            TouchInteractionController.stateToString(state));
+                }
+                listener.onTouchStateChanged(displayId, state);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error sending motion event to" + mService, re);
+            }
         }
     }
 }

@@ -38,6 +38,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Collections;
+
 /** Tests for {@link SystemAudioInitiationActionFromAvr} */
 @SmallTest
 @Presubmit
@@ -45,6 +47,7 @@ import org.junit.runners.JUnit4;
 public class SystemAudioInitiationActionFromAvrTest {
 
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
+    private FakePowerManagerWrapper mPowerManager;
     private TestLooper mTestLooper = new TestLooper();
 
     private boolean mShouldDispatchActiveSource;
@@ -61,11 +64,12 @@ public class SystemAudioInitiationActionFromAvrTest {
 
     @Before
     public void SetUp() {
-        mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
+        mDeviceInfoForTests = HdmiDeviceInfo.hardwarePort(1001, 1234);
 
         Context context = InstrumentationRegistry.getTargetContext();
 
-        HdmiControlService hdmiControlService = new HdmiControlService(context) {
+        HdmiControlService hdmiControlService = new HdmiControlService(context,
+                Collections.emptyList(), new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     void sendCecCommand(
                             HdmiCecMessage command, @Nullable SendMessageCallback callback) {
@@ -140,9 +144,6 @@ public class SystemAudioInitiationActionFromAvrTest {
                     }
 
                     @Override
-                    void wakeUp() {}
-
-                    @Override
                     int getPhysicalAddress() {
                         return 0;
                     }
@@ -172,6 +173,8 @@ public class SystemAudioInitiationActionFromAvrTest {
                 hdmiControlService, nativeWrapper, hdmiControlService.getAtomWriter());
         hdmiControlService.setCecController(hdmiCecController);
         hdmiControlService.initService();
+        mPowerManager = new FakePowerManagerWrapper(context);
+        hdmiControlService.setPowerManager(mPowerManager);
         mHdmiCecLocalDeviceAudioSystem =
                 new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
                     @Override
@@ -194,6 +197,7 @@ public class SystemAudioInitiationActionFromAvrTest {
                     }
                 };
         mHdmiCecLocalDeviceAudioSystem.init();
+        mHdmiCecLocalDeviceAudioSystem.setDeviceInfo(mDeviceInfoForTests);
     }
 
     @Test

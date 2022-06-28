@@ -24,7 +24,9 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Handler;
 import android.provider.DeviceConfig;
-import android.util.Pair;
+import android.util.SparseArray;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.R;
 import com.android.systemui.dagger.SysUISingleton;
@@ -52,6 +54,8 @@ public class AssistantFeedbackController {
     public static final int STATUS_PROMOTED = 3;
     public static final int STATUS_DEMOTED = 4;
 
+    private final SparseArray<FeedbackIcon> mIcons;
+
     private volatile boolean mFeedbackEnabled;
 
     private final DeviceConfig.OnPropertiesChangedListener mPropertiesChangedListener =
@@ -76,6 +80,16 @@ public class AssistantFeedbackController {
                 ENABLE_NAS_FEEDBACK, false);
         mDeviceConfigProxy.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
                 this::postToHandler, mPropertiesChangedListener);
+        // Populate the array of statuses.
+        mIcons = new SparseArray<>(4);
+        mIcons.set(STATUS_ALERTED, new FeedbackIcon(R.drawable.ic_feedback_alerted,
+                R.string.notification_feedback_indicator_alerted));
+        mIcons.set(STATUS_SILENCED, new FeedbackIcon(R.drawable.ic_feedback_silenced,
+                R.string.notification_feedback_indicator_silenced));
+        mIcons.set(STATUS_PROMOTED, new FeedbackIcon(R.drawable.ic_feedback_uprank,
+                R.string.notification_feedback_indicator_promoted));
+        mIcons.set(STATUS_DEMOTED, new FeedbackIcon(R.drawable.ic_feedback_downrank,
+                R.string.notification_feedback_indicator_demoted));
     }
 
     private void postToHandler(Runnable r) {
@@ -120,40 +134,15 @@ public class AssistantFeedbackController {
     }
 
     /**
-     * Determines whether to show feedback indicator. The feedback indicator will be shown
-     * if {@link #isFeedbackEnabled()} is enabled and assistant has changed this notification's rank
-     * or importance.
-     *
-     * @param entry Notification Entry to show feedback for
-     */
-    public boolean showFeedbackIndicator(NotificationEntry entry) {
-        return getFeedbackStatus(entry) != STATUS_UNCHANGED;
-    }
-
-    /**
      * Get the feedback indicator image and content description resources according to assistant's
      * changes on this notification's rank or importance.
      *
      * @param entry Notification Entry to show feedback for
      */
-    public Pair<Integer, Integer> getFeedbackResources(NotificationEntry entry) {
+    @Nullable
+    public FeedbackIcon getFeedbackIcon(NotificationEntry entry) {
         int feedbackStatus = getFeedbackStatus(entry);
-        switch (feedbackStatus) {
-            case STATUS_ALERTED:
-                return new Pair(R.drawable.ic_feedback_alerted,
-                        R.string.notification_feedback_indicator_alerted);
-            case STATUS_SILENCED:
-                return new Pair(R.drawable.ic_feedback_silenced,
-                        R.string.notification_feedback_indicator_silenced);
-            case STATUS_PROMOTED:
-                return new Pair(R.drawable.ic_feedback_uprank,
-                        R.string.notification_feedback_indicator_promoted);
-            case STATUS_DEMOTED:
-                return new Pair(R.drawable.ic_feedback_downrank,
-                        R.string.notification_feedback_indicator_demoted);
-            default:
-                return new Pair(0, 0);
-        }
+        return mIcons.get(feedbackStatus);
     }
 
     /**

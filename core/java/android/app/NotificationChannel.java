@@ -253,7 +253,6 @@ public final class NotificationChannel implements Parcelable {
     // If this is a blockable system notification channel.
     private boolean mBlockableSystem = false;
     private int mAllowBubbles = DEFAULT_ALLOW_BUBBLE;
-    private boolean mImportanceLockedByOEM;
     private boolean mImportanceLockedDefaultApp;
     private String mParentId = null;
     private String mConversationId = null;
@@ -322,13 +321,13 @@ public final class NotificationChannel implements Parcelable {
         mLightColor = in.readInt();
         mBlockableSystem = in.readBoolean();
         mAllowBubbles = in.readInt();
-        mImportanceLockedByOEM = in.readBoolean();
         mOriginalImportance = in.readInt();
         mParentId = in.readString();
         mConversationId = in.readString();
         mDemoted = in.readBoolean();
         mImportantConvo = in.readBoolean();
         mDeletedTime = in.readLong();
+        mImportanceLockedDefaultApp = in.readBoolean();
     }
 
     @Override
@@ -382,13 +381,13 @@ public final class NotificationChannel implements Parcelable {
         dest.writeInt(mLightColor);
         dest.writeBoolean(mBlockableSystem);
         dest.writeInt(mAllowBubbles);
-        dest.writeBoolean(mImportanceLockedByOEM);
         dest.writeInt(mOriginalImportance);
         dest.writeString(mParentId);
         dest.writeString(mConversationId);
         dest.writeBoolean(mDemoted);
         dest.writeBoolean(mImportantConvo);
         dest.writeLong(mDeletedTime);
+        dest.writeBoolean(mImportanceLockedDefaultApp);
     }
 
     /**
@@ -440,15 +439,13 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Allows users to block notifications sent through this channel, if this channel belongs to
-     * a package that is signed with the system signature.
+     * a package that otherwise would have notifications "fixed" as enabled.
      *
-     * If the channel does not belong to a package that is signed with the system signature, this
+     * If the channel does not belong to a package that has a fixed notification permission, this
      * method does nothing, since such channels are blockable by default and cannot be set to be
      * unblockable.
      * @param blockable if {@code true}, allows users to block notifications on this channel.
-     * @hide
      */
-    @SystemApi
     public void setBlockable(boolean blockable) {
         mBlockableSystem = blockable;
     }
@@ -842,9 +839,9 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * @hide
+     * Returns whether this channel is always blockable, even if the app is 'fixed' as
+     * non-blockable.
      */
-    @TestApi
     public boolean isBlockable() {
         return mBlockableSystem;
     }
@@ -853,24 +850,8 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setImportanceLockedByOEM(boolean locked) {
-        mImportanceLockedByOEM = locked;
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
     public void setImportanceLockedByCriticalDeviceFunction(boolean locked) {
         mImportanceLockedDefaultApp = locked;
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public boolean isImportanceLockedByOEM() {
-        return mImportanceLockedByOEM;
     }
 
     /**
@@ -1117,8 +1098,8 @@ public final class NotificationChannel implements Parcelable {
             out.attributeBoolean(null, ATT_IMP_CONVERSATION, isImportantConversation());
         }
 
-        // mImportanceLockedDefaultApp and mImportanceLockedByOEM have a different source of
-        // truth and so aren't written to this xml file
+        // mImportanceLockedDefaultApp has a different source of truth and so isn't written to
+        // this xml file
 
         out.endTag(null, TAG_CHANNEL);
     }
@@ -1261,7 +1242,6 @@ public final class NotificationChannel implements Parcelable {
                 && Arrays.equals(mVibration, that.mVibration)
                 && Objects.equals(getGroup(), that.getGroup())
                 && Objects.equals(getAudioAttributes(), that.getAudioAttributes())
-                && mImportanceLockedByOEM == that.mImportanceLockedByOEM
                 && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp
                 && mOriginalImportance == that.mOriginalImportance
                 && Objects.equals(getParentChannelId(), that.getParentChannelId())
@@ -1277,7 +1257,7 @@ public final class NotificationChannel implements Parcelable {
                 getUserLockedFields(),
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getDeletedTimeMs(),
                 getGroup(), getAudioAttributes(), isBlockable(), mAllowBubbles,
-                mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance,
+                mImportanceLockedDefaultApp, mOriginalImportance,
                 mParentId, mConversationId, mDemoted, mImportantConvo);
         result = 31 * result + Arrays.hashCode(mVibration);
         return result;
@@ -1322,7 +1302,6 @@ public final class NotificationChannel implements Parcelable {
                 + ", mAudioAttributes=" + mAudioAttributes
                 + ", mBlockableSystem=" + mBlockableSystem
                 + ", mAllowBubbles=" + mAllowBubbles
-                + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
                 + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
                 + ", mOriginalImp=" + mOriginalImportance
                 + ", mParent=" + mParentId

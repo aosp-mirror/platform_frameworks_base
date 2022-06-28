@@ -17,7 +17,6 @@
 package android.graphics.drawable;
 
 import android.annotation.ColorInt;
-import android.graphics.Color;
 import android.graphics.RuntimeShader;
 import android.graphics.Shader;
 
@@ -37,8 +36,8 @@ final class RippleShader extends RuntimeShader {
             + "uniform vec2 in_tRotation1;\n"
             + "uniform vec2 in_tRotation2;\n"
             + "uniform vec2 in_tRotation3;\n"
-            + "uniform vec4 in_color;\n"
-            + "uniform vec4 in_sparkleColor;\n"
+            + "layout(color) uniform vec4 in_color;\n"
+            + "layout(color) uniform vec4 in_sparkleColor;\n"
             + "uniform shader in_shader;\n";
     private static final String SHADER_LIB =
             "float triangleNoise(vec2 n) {\n"
@@ -119,7 +118,7 @@ final class RippleShader extends RuntimeShader {
             + "    vec4 waveColor = vec4(in_color.rgb * waveAlpha, waveAlpha);\n"
             + "    vec4 sparkleColor = vec4(in_sparkleColor.rgb * in_sparkleColor.a, "
             + "in_sparkleColor.a);\n"
-            + "    float mask = in_hasMask == 1. ? sample(in_shader, p).a > 0. ? 1. : 0. : 1.;\n"
+            + "    float mask = in_hasMask == 1. ? in_shader.eval(p).a > 0. ? 1. : 0. : 1.;\n"
             + "    return mix(waveColor, sparkleColor, sparkleAlpha) * mask;\n"
             + "}";
     private static final String SHADER = SHADER_UNIFORMS + SHADER_LIB + SHADER_MAIN;
@@ -127,85 +126,75 @@ final class RippleShader extends RuntimeShader {
     private static final double PI_ROTATE_LEFT = Math.PI * -0.0078125;
 
     RippleShader() {
-        super(SHADER, false);
+        super(SHADER);
     }
 
     public void setShader(Shader shader) {
         if (shader != null) {
             setInputShader("in_shader", shader);
         }
-        setUniform("in_hasMask", shader == null ? 0 : 1);
+        setFloatUniform("in_hasMask", shader == null ? 0 : 1);
     }
 
     public void setRadius(float radius) {
-        setUniform("in_maxRadius", radius * 2.3f);
+        setFloatUniform("in_maxRadius", radius * 2.3f);
     }
 
     public void setOrigin(float x, float y) {
-        setUniform("in_origin", new float[] {x, y});
+        setFloatUniform("in_origin", x, y);
     }
 
     public void setTouch(float x, float y) {
-        setUniform("in_touch", new float[] {x, y});
+        setFloatUniform("in_touch", x, y);
     }
 
     public void setProgress(float progress) {
-        setUniform("in_progress", progress);
+        setFloatUniform("in_progress", progress);
     }
 
     /**
      * Continuous offset used as noise phase.
      */
     public void setNoisePhase(float phase) {
-        setUniform("in_noisePhase", phase * 0.001f);
+        setFloatUniform("in_noisePhase", phase * 0.001f);
 
         //
         // Keep in sync with: frameworks/base/libs/hwui/pipeline/skia/AnimatedDrawables.h
         //
         final float turbulencePhase = phase;
-        setUniform("in_turbulencePhase", turbulencePhase);
+        setFloatUniform("in_turbulencePhase", turbulencePhase);
         final float scale = 1.5f;
-        setUniform("in_tCircle1", new float[]{
+        setFloatUniform("in_tCircle1",
                 (float) (scale * 0.5 + (turbulencePhase * 0.01 * Math.cos(scale * 0.55))),
-                (float) (scale * 0.5 + (turbulencePhase * 0.01 * Math.sin(scale * 0.55)))
-        });
-        setUniform("in_tCircle2", new float[]{
+                (float) (scale * 0.5 + (turbulencePhase * 0.01 * Math.sin(scale * 0.55))));
+        setFloatUniform("in_tCircle2",
                 (float) (scale * 0.2 + (turbulencePhase * -0.0066 * Math.cos(scale * 0.45))),
-                (float) (scale * 0.2 + (turbulencePhase * -0.0066 * Math.sin(scale * 0.45)))
-        });
-        setUniform("in_tCircle3", new float[]{
+                (float) (scale * 0.2 + (turbulencePhase * -0.0066 * Math.sin(scale * 0.45))));
+        setFloatUniform("in_tCircle3",
                 (float) (scale + (turbulencePhase * -0.0066 * Math.cos(scale * 0.35))),
-                (float) (scale + (turbulencePhase * -0.0066 * Math.sin(scale * 0.35)))
-        });
+                (float) (scale + (turbulencePhase * -0.0066 * Math.sin(scale * 0.35))));
         final double rotation1 = turbulencePhase * PI_ROTATE_RIGHT + 1.7 * Math.PI;
-        setUniform("in_tRotation1", new float[]{
-                (float) Math.cos(rotation1), (float) Math.sin(rotation1)
-        });
+        setFloatUniform("in_tRotation1",
+                (float) Math.cos(rotation1), (float) Math.sin(rotation1));
         final double rotation2 = turbulencePhase * PI_ROTATE_LEFT + 2 * Math.PI;
-        setUniform("in_tRotation2", new float[]{
-                (float) Math.cos(rotation2), (float) Math.sin(rotation2)
-        });
+        setFloatUniform("in_tRotation2",
+                (float) Math.cos(rotation2), (float) Math.sin(rotation2));
         final double rotation3 = turbulencePhase * PI_ROTATE_RIGHT + 2.75 * Math.PI;
-        setUniform("in_tRotation3", new float[]{
-                (float) Math.cos(rotation3), (float) Math.sin(rotation3)
-        });
+        setFloatUniform("in_tRotation3",
+                (float) Math.cos(rotation3), (float) Math.sin(rotation3));
     }
 
     /**
      * Color of the circle that's under the sparkles. Sparkles will always be white.
      */
     public void setColor(@ColorInt int colorInt, @ColorInt int sparkleColorInt) {
-        Color color = Color.valueOf(colorInt);
-        Color sparkleColor = Color.valueOf(sparkleColorInt);
-        setUniform("in_color", new float[] {color.red(),
-                color.green(), color.blue(), color.alpha()});
-        setUniform("in_sparkleColor", new float[] {sparkleColor.red(),
-                sparkleColor.green(), sparkleColor.blue(), sparkleColor.alpha()});
+        setColorUniform("in_color", colorInt);
+        setColorUniform("in_sparkleColor", sparkleColorInt);
     }
 
     public void setResolution(float w, float h) {
         final float densityScale = 2.1f;
-        setUniform("in_resolutionScale", new float[] {1f / w, 1f / h});
-        setUniform("in_noiseScale", new float[] {densityScale / w, densityScale / h});
+        setFloatUniform("in_resolutionScale", 1f / w, 1f / h);
+        setFloatUniform("in_noiseScale", densityScale / w, densityScale / h);
     }
 }
