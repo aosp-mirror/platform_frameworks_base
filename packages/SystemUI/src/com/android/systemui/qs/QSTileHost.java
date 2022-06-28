@@ -396,7 +396,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     void saveTilesToSettings(List<String> tileSpecs) {
-        if (tileSpecs.contains("work")) Log.wtfStack(TAG, "Saving work tile");
         mSecureSettings.putStringForUser(TILES_SETTING, TextUtils.join(",", tileSpecs),
                 null /* tag */, false /* default */, mCurrentUser,
                 true /* overrideable by restore */);
