@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
+import android.hardware.biometrics.BiometricStateListener;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.PointerContext;
@@ -139,7 +140,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 controller.onEnrollmentHelp(getSensorId());
             }
         });
-
+        mCallback.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
         super.onAcquired(acquiredInfo, vendorCode);
     }
 

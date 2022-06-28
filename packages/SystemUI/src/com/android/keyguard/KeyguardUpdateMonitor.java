@@ -789,8 +789,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private Runnable mRetryFingerprintAuthentication = new Runnable() {
         @Override
         public void run() {
-            Log.w(TAG, "Retrying fingerprint after HW unavailable, attempt " +
-                    mHardwareFingerprintUnavailableRetryCount);
+            Log.w(TAG,
+                    "Retrying fingerprint attempt: " + mHardwareFingerprintUnavailableRetryCount);
             if (mFpm.isHardwareDetected()) {
                 updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
             } else if (mHardwareFingerprintUnavailableRetryCount < HAL_ERROR_RETRY_MAX) {
@@ -817,7 +817,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
         }
 
-        if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE) {
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE
+                || msgId == FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED) {
+            Log.d(TAG, "Fingerprint retrying auth due to(" + msgId + ") -> " + errString);
             mHandler.postDelayed(mRetryFingerprintAuthentication, HAL_ERROR_RETRY_TIMEOUT);
         }
 

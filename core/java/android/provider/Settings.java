@@ -9739,6 +9739,43 @@ public final class Settings {
         public static final String FACE_UNLOCK_RE_ENROLL = "face_unlock_re_enroll";
 
         /**
+         * The time (in millis) to wait for a power button before sending a
+         * successful auth in to keyguard(for side fingerprint)
+         * @hide
+         */
+        @Readable
+        public static final String FINGERPRINT_SIDE_FPS_KG_POWER_WINDOW =
+                "fingerprint_side_fps_kg_power_window";
+
+        /**
+         * The time (in millis) to wait for a power button before sending
+         * a successful auth in biometric prompt(for side fingerprint)
+         * @hide
+         */
+        @Readable
+        public static final String FINGERPRINT_SIDE_FPS_BP_POWER_WINDOW =
+                "fingerprint_side_fps_bp_power_window";
+
+        /**
+         * The time (in millis) that a finger tap will wait for a power button
+         * before dismissing the power dialog during enrollment(for side
+         * fingerprint)
+         * @hide
+         */
+        @Readable
+        public static final String FINGERPRINT_SIDE_FPS_ENROLL_TAP_WINDOW =
+                "fingerprint_side_fps_enroll_tap_window";
+
+        /**
+         * The time (in millis) that a power event will ignore future authentications
+         * (for side fingerprint)
+         * @hide
+         */
+        @Readable
+        public static final String FINGERPRINT_SIDE_FPS_AUTH_DOWNTIME =
+                "fingerprint_side_fps_auth_downtime";
+
+        /**
          * Whether or not debugging is enabled.
          * @hide
          */

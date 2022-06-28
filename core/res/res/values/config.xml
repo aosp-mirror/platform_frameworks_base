@@ -3461,6 +3461,22 @@
     <!-- Specify if the fingerprint hardware support gestures-->
     <bool name="config_fingerprintSupportsGestures">false</bool>
 
+    <!-- The time (in millis) to wait for a power button before sending
+         a successful auth in biometric prompt(for side fingerprint) -->
+    <integer name="config_sidefpsBpPowerPressWindow">300</integer>
+
+    <!-- The time (in millis) to wait for a power button before sending a
+         successful auth in to keyguard(for side fingerprint) -->
+    <integer name="config_sidefpsKeyguardPowerPressWindow">300</integer>
+
+    <!-- The time (in millis) that a power event will ignore future authentications
+         (for side fingerprint) -->
+    <integer name="config_sidefpsPostAuthDowntime">400</integer>
+
+    <!-- The time (in millis) that a finger tap will wait for a power button
+         before dismissing the power dialog during enrollment(for side fingerprint) -->
+    <integer name="config_sidefpsEnrollPowerPressWindow">300</integer>
+
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
          It declares the package name of VoiceInteractionService that should be started. -->
     <string translatable="false" name="config_forceVoiceInteractionServicePackage"></string>
