@@ -1540,6 +1540,7 @@ public class ParsingPackageUtils {
             try {
                 int minVers = ParsingUtils.DEFAULT_MIN_SDK_VERSION;
                 String minCode = null;
+                boolean minAssigned = false;
                 int targetVers = ParsingUtils.DEFAULT_TARGET_SDK_VERSION;
                 String targetCode = null;
                 int maxVers = Integer.MAX_VALUE;
@@ -1548,9 +1549,11 @@ public class ParsingPackageUtils {
                 if (val != null) {
                     if (val.type == TypedValue.TYPE_STRING && val.string != null) {
                         minCode = val.string.toString();
+                        minAssigned = !TextUtils.isEmpty(minCode);
                     } else {
                         // If it's not a string, it's an integer.
                         minVers = val.data;
+                        minAssigned = true;
                     }
                 }
 
@@ -1558,7 +1561,7 @@ public class ParsingPackageUtils {
                 if (val != null) {
                     if (val.type == TypedValue.TYPE_STRING && val.string != null) {
                         targetCode = val.string.toString();
-                        if (minCode == null) {
+                        if (!minAssigned) {
                             minCode = targetCode;
                         }
                     } else {
