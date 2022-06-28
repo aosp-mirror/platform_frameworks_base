@@ -58,6 +58,7 @@ import android.view.SurfaceView;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -82,7 +83,9 @@ import java.util.Objects;
  * </p>
  * <p>
  * Once an accessibility node info is delivered to an accessibility service it is
- * made immutable and calling a state mutation method generates an error.
+ * made immutable and calling a state mutation method generates an error. See
+ * {@link #makeQueryableFromAppProcess(View)} if you would like to inspect the
+ * node tree from the app process for testing or debugging tools.
  * </p>
  * <p>
  * Please refer to {@link android.accessibilityservice.AccessibilityService} for
@@ -1171,8 +1174,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param index The child index.
      * @return The child node.
      *
-     * @throws IllegalStateException If called outside of an AccessibilityService.
-     *
+     * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
+     *                               calling {@link #makeQueryableFromAppProcess(View)}.
      */
     public AccessibilityNodeInfo getChild(int index) {
         return getChild(index, FLAG_PREFETCH_DESCENDANTS_HYBRID);
@@ -1186,7 +1189,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param prefetchingStrategy the prefetching strategy.
      * @return The child node.
      *
-     * @throws IllegalStateException If called outside of an AccessibilityService.
+     * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
+     *                               calling {@link #makeQueryableFromAppProcess(View)}.
      *
      * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
      */
@@ -1908,6 +1912,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Gets the parent.
      *
      * @return The parent.
+     *
+     * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
+     *                               calling {@link #makeQueryableFromAppProcess(View)}.
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
@@ -1935,7 +1942,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param prefetchingStrategy the prefetching strategy.
      * @return The parent.
      *
-     * @throws IllegalStateException If called outside of an AccessibilityService.
+     * @throws IllegalStateException If called outside of an {@link AccessibilityService} and before
+     *                               calling {@link #makeQueryableFromAppProcess(View)}.
      *
      * @see #FLAG_PREFETCH_ANCESTORS
      * @see #FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST
@@ -3657,6 +3665,47 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Connects this node to the View's root so that operations on this node can query the entire
+     * {@link AccessibilityNodeInfo} tree and perform accessibility actions on nodes.
+     *
+     * <p>
+     * This is intended for short-lived inspections from testing or debugging tools in the app
+     * process. After calling this method, all nodes linked to this node (children, ancestors, etc.)
+     * are also queryable. Operations on this node tree will only succeed as long as the associated
+     * view hierarchy remains attached to a window.
+     * </p>
+     *
+     * <p>
+     * Calling this method more than once on the same node is a no-op; if you wish to inspect a
+     * different view hierarchy then create a new node from any view in that hierarchy and call this
+     * method on that node.
+     * </p>
+     *
+     * <p>
+     * Testing or debugging tools should create this {@link AccessibilityNodeInfo} node using
+     * {@link View#createAccessibilityNodeInfo()} or {@link AccessibilityNodeProvider} and call this
+     * method, then navigate and interact with the node tree by calling methods on the node.
+     * </p>
+     *
+     * @param view The view that generated this node, or any view in the same view-root hierarchy.
+     * @throws IllegalStateException If called from an {@link AccessibilityService}, or if provided
+     *                               a {@link View} that is not attached to a window.
+     */
+    public void makeQueryableFromAppProcess(@NonNull View view) {
+        enforceNotSealed();
+        if (mConnectionId != UNDEFINED_CONNECTION_ID) {
+            return;
+        }
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        if (viewRootImpl == null) {
+            throw new IllegalStateException(
+                    "Cannot link a node to a view that is not attached to a window.");
+        }
+        setConnectionId(viewRootImpl.getDirectAccessibilityConnectionId());
+    }
+
+    /**
      * Sets if this instance is sealed.
      *
      * @param sealed Whether is sealed.
@@ -3680,15 +3729,21 @@ public class AccessibilityNodeInfo implements Parcelable {
         return mSealed;
     }
 
+    private static boolean usingDirectConnection(int connectionId) {
+        return AccessibilityInteractionClient.getConnection(
+                connectionId) instanceof DirectAccessibilityConnection;
+    }
+
     /**
-     * Enforces that this instance is sealed.
+     * Enforces that this instance is sealed, unless using a {@link DirectAccessibilityConnection}
+     * which allows queries while the node is not sealed.
      *
      * @throws IllegalStateException If this instance is not sealed.
      *
      * @hide
      */
     protected void enforceSealed() {
-        if (!isSealed()) {
+        if (!usingDirectConnection(mConnectionId) && !isSealed()) {
             throw new IllegalStateException("Cannot perform this "
                     + "action on a not sealed instance.");
         }
@@ -4514,7 +4569,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static boolean canPerformRequestOverConnection(int connectionId,
             int windowId, long accessibilityNodeId) {
-        return ((windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID)
+        final boolean hasWindowId = windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+        return ((usingDirectConnection(connectionId) || hasWindowId)
                 && (getAccessibilityViewId(accessibilityNodeId) != UNDEFINED_ITEM_ID)
                 && (connectionId != UNDEFINED_CONNECTION_ID));
     }

@@ -51972,6 +51972,7 @@ package android.view.accessibility {
     method public boolean isTextEntryKey();
     method public boolean isTextSelectable();
     method public boolean isVisibleToUser();
+    method public void makeQueryableFromAppProcess(@NonNull android.view.View);
     method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
     method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
     method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain();
