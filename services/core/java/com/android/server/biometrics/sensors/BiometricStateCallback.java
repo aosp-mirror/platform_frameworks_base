@@ -108,6 +108,17 @@ public class BiometricStateCallback implements ClientMonitorCallback {
         }
     }
 
+    @Override
+    public void onBiometricAction(@BiometricStateListener.Action int action) {
+        for (IBiometricStateListener listener : mBiometricStateListeners) {
+            try {
+                listener.onBiometricAction(action);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception in onBiometricAction", e);
+            }
+        }
+    }
+
     /**
      * This should be invoked when:
      * 1) Enrolled --> None-enrolled
