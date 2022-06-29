@@ -3979,7 +3979,6 @@ public class NotificationPanelViewController extends PanelViewController {
      * {@link ShadeViewManager}.
      */
     public void updateNotificationViews(String reason) {
-        mNotificationStackScrollLayoutController.updateSectionBoundaries(reason);
         mNotificationStackScrollLayoutController.updateFooter();
 
         mNotificationIconAreaController.updateNotificationIcons(createVisibleEntriesList());
