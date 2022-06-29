@@ -3643,6 +3643,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mHandler.sendEmptyMessage(MSG_KEYGUARD_DISMISS_ANIMATION_FINISHED);
     }
 
+    /**
+     * @return true when the screen is on (including when a screensaver is showing),
+     * false when the screen is OFF or DOZE (including showing AOD UI)
+     */
     public boolean isDeviceInteractive() {
         return mDeviceInteractive;
     }
@@ -3785,6 +3789,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    mFingerprintLockedOut=" + mFingerprintLockedOut);
             pw.println("    mFingerprintLockedOutPermanent=" + mFingerprintLockedOutPermanent);
             pw.println("    enabledByUser=" + mBiometricEnabledForUser.get(userId));
+            pw.println("    mKeyguardOccluded=" + mKeyguardOccluded);
+            pw.println("    mIsDreaming=" + mIsDreaming);
             if (isUdfpsSupported()) {
                 pw.println("        udfpsEnrolled=" + isUdfpsEnrolled());
                 pw.println("        shouldListenForUdfps=" + shouldListenForFingerprint(true));
