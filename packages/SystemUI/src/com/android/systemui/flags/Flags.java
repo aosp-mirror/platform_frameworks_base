@@ -162,6 +162,11 @@ public class Flags {
             new ResourceBooleanFlag(800, R.bool.flag_monet);
 
     /***************************************/
+    // 801 - region sampling
+    public static final BooleanFlag REGION_SAMPLING =
+            new BooleanFlag(801, false);
+
+    /***************************************/
     // 900 - media
     public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, true);
     public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, false);
