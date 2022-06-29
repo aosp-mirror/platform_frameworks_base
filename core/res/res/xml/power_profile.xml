@@ -144,17 +144,49 @@
     <value>2</value>    <!-- 4097-/hr -->
   </array>
 
-  <!-- Cellular modem related values. Default is 0.-->
-  <item name="modem.controller.sleep">0</item>
-  <item name="modem.controller.idle">0</item>
-  <item name="modem.controller.rx">0</item>
-  <array name="modem.controller.tx"> <!-- Strength 0 to 4 -->
-    <value>0</value>
-    <value>0</value>
-    <value>0</value>
-    <value>0</value>
-    <value>0</value>
-  </array>
+  <!-- Cellular modem related values.-->
+  <modem>
+    <!-- Modem sleep drain current value in mA. -->
+    <sleep>0</sleep>
+    <!-- Modem idle drain current value in mA. -->
+    <idle>0</idle>
+    <!-- Modem active drain current values.
+         Multiple <active /> can be defined to specify current drain for different modes of
+         operation.
+         Available attributes:
+             rat - Specify the current drain for a Radio Access Technology.
+                   Available options are "LTE", "NR" and "DEFAULT".
+                   <active rat="default" /> will be used for any usage that does not match any other
+                   defined <active /> rat.
+
+             nrFrequency - Specify the current drain for a frequency level while NR is active.
+                           Available options are "LOW", "MID", "HIGH", "MMWAVE", and "DEFAULT",
+                           where,
+                           "LOW" indicated <1GHz frequencies,
+                           "MID" indicates 1GHz to 3GHz frequencies,
+                           "HIGH" indicates 3GHz to 6GHz frequencies,
+                           "MMWAVE"indicates >6GHz frequencies.
+                           <active rat="NR" nrFrequency="default"/> will be used for any usage that
+                           does not match any other defined <active rat="NR" /> nrFrequency.
+    -->
+    <active rat="DEFAULT">
+      <!-- Transmit current drain in mA. -->
+      <receive>0</receive>
+
+      <!-- Transmit current drains in mA. Must be defined for all levels (0 to 4) -->
+      <transmit level="0">0</transmit>
+      <transmit level="1">0</transmit>
+      <transmit level="2">0</transmit>
+      <transmit level="3">0</transmit>
+      <transmit level="4">0</transmit>
+    </active>
+    <!-- Additional <active /> may be defined.
+         Example:
+             <active rat="LTE"> ... </active>
+             <active rat="NR" nrFrequency="MMWAVE"> ... </active>
+             <active rat="NR" nrFrequency="DEFAULT"> ... </active>
+    -->
+  </modem>
   <item name="modem.controller.voltage">0</item>
 
   <!-- GPS related values. Default is 0.-->
@@ -163,5 +195,4 @@
     <value>0</value>
   </array>
   <item name="gps.voltage">0</item>
-
 </device>

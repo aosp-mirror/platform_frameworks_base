@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.android.settingslib.collapsingtoolbar.widget.CollapsingCoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:id="@+id/id_collapsing_test"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/text_hello_world"
+        android:text="Hello World!"/>
+
+</com.android.settingslib.collapsingtoolbar.widget.CollapsingCoordinatorLayout>

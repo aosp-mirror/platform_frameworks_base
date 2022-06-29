@@ -67,4 +67,11 @@ import android.graphics.Rect;
      */
     void onAccessibilityActionPerformed(int displayId);
 
+    /**
+     * Called when the user is performing move action.
+     *
+     * @param displayId The logical display id.
+     */
+    void onMove(int displayId);
+
 }

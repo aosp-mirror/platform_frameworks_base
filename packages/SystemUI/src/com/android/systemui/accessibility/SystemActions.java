@@ -49,12 +49,12 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.R;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.util.ScreenshotHelper;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.util.Assert;
 
@@ -69,7 +69,7 @@ import dagger.Lazy;
  * Class to register system actions with accessibility framework.
  */
 @SysUISingleton
-public class SystemActions extends SystemUI {
+public class SystemActions extends CoreStartable {
     private static final String TAG = "SystemActions";
 
     /**
@@ -120,6 +120,13 @@ public class SystemActions extends SystemUI {
             AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT; // = 9
 
     /**
+     * Action ID to send the KEYCODE_HEADSETHOOK KeyEvent, which is used to answer/hang up calls and
+     * play/stop media
+     */
+    private static final int SYSTEM_ACTION_ID_KEYCODE_HEADSETHOOK =
+            AccessibilityService.GLOBAL_ACTION_KEYCODE_HEADSETHOOK; // = 10
+
+    /**
      * Action ID to trigger the accessibility button
      */
     public static final int SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON =
@@ -137,13 +144,43 @@ public class SystemActions extends SystemUI {
     public static final int SYSTEM_ACTION_ID_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE =
             AccessibilityService.GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE; // 15
 
+    /**
+     * Action ID to trigger the dpad up button
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_UP =
+            AccessibilityService.GLOBAL_ACTION_DPAD_UP; // 16
+
+    /**
+     * Action ID to trigger the dpad down button
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_DOWN =
+            AccessibilityService.GLOBAL_ACTION_DPAD_DOWN; // 17
+
+    /**
+     * Action ID to trigger the dpad left button
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_LEFT =
+            AccessibilityService.GLOBAL_ACTION_DPAD_LEFT; // 18
+
+    /**
+     * Action ID to trigger the dpad right button
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_RIGHT =
+            AccessibilityService.GLOBAL_ACTION_DPAD_RIGHT; // 19
+
+    /**
+     * Action ID to trigger dpad center keyevent
+     */
+    private static final int SYSTEM_ACTION_ID_DPAD_CENTER =
+            AccessibilityService.GLOBAL_ACTION_DPAD_CENTER; // 20
+
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     private final SystemActionsBroadcastReceiver mReceiver;
     private final Optional<Recents> mRecentsOptional;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
     private final StatusBarWindowCallback mNotificationShadeCallback;
     private boolean mDismissNotificationShadeActionRegistered;
@@ -151,7 +188,7 @@ public class SystemActions extends SystemUI {
     @Inject
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             Optional<Recents> recentsOptional) {
         super(context);
         mRecentsOptional = recentsOptional;
@@ -164,7 +201,7 @@ public class SystemActions extends SystemUI {
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
         mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing) ->
                 registerOrUnregisterDismissNotificationShadeAction();
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
     }
 
     @Override
@@ -174,7 +211,8 @@ public class SystemActions extends SystemUI {
                 mReceiver,
                 mReceiver.createIntentFilter(),
                 PERMISSION_SELF,
-                null);
+                null,
+                Context.RECEIVER_EXPORTED);
         registerActions();
     }
 
@@ -221,9 +259,33 @@ public class SystemActions extends SystemUI {
                 R.string.accessibility_system_action_screenshot_label,
                 SystemActionsBroadcastReceiver.INTENT_ACTION_TAKE_SCREENSHOT);
 
+        RemoteAction actionHeadsetHook = createRemoteAction(
+                R.string.accessibility_system_action_headset_hook_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_HEADSET_HOOK);
+
         RemoteAction actionAccessibilityShortcut = createRemoteAction(
                 R.string.accessibility_system_action_hardware_a11y_shortcut_label,
                 SystemActionsBroadcastReceiver.INTENT_ACTION_ACCESSIBILITY_SHORTCUT);
+
+        RemoteAction actionDpadUp = createRemoteAction(
+                R.string.accessibility_system_action_dpad_up_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_UP);
+
+        RemoteAction actionDpadDown = createRemoteAction(
+                R.string.accessibility_system_action_dpad_down_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_DOWN);
+
+        RemoteAction actionDpadLeft = createRemoteAction(
+                R.string.accessibility_system_action_dpad_left_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_LEFT);
+
+        RemoteAction actionDpadRight = createRemoteAction(
+                R.string.accessibility_system_action_dpad_right_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_RIGHT);
+
+        RemoteAction actionDpadCenter = createRemoteAction(
+                R.string.accessibility_system_action_dpad_center_label,
+                SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_CENTER);
 
         mA11yManager.registerSystemAction(actionBack, SYSTEM_ACTION_ID_BACK);
         mA11yManager.registerSystemAction(actionHome, SYSTEM_ACTION_ID_HOME);
@@ -233,8 +295,14 @@ public class SystemActions extends SystemUI {
         mA11yManager.registerSystemAction(actionPowerDialog, SYSTEM_ACTION_ID_POWER_DIALOG);
         mA11yManager.registerSystemAction(actionLockScreen, SYSTEM_ACTION_ID_LOCK_SCREEN);
         mA11yManager.registerSystemAction(actionTakeScreenshot, SYSTEM_ACTION_ID_TAKE_SCREENSHOT);
+        mA11yManager.registerSystemAction(actionHeadsetHook, SYSTEM_ACTION_ID_KEYCODE_HEADSETHOOK);
         mA11yManager.registerSystemAction(
                 actionAccessibilityShortcut, SYSTEM_ACTION_ID_ACCESSIBILITY_SHORTCUT);
+        mA11yManager.registerSystemAction(actionDpadUp, SYSTEM_ACTION_ID_DPAD_UP);
+        mA11yManager.registerSystemAction(actionDpadDown, SYSTEM_ACTION_ID_DPAD_DOWN);
+        mA11yManager.registerSystemAction(actionDpadLeft, SYSTEM_ACTION_ID_DPAD_LEFT);
+        mA11yManager.registerSystemAction(actionDpadRight, SYSTEM_ACTION_ID_DPAD_RIGHT);
+        mA11yManager.registerSystemAction(actionDpadCenter, SYSTEM_ACTION_ID_DPAD_CENTER);
         registerOrUnregisterDismissNotificationShadeAction();
     }
 
@@ -243,9 +311,10 @@ public class SystemActions extends SystemUI {
 
         // Saving state in instance variable since this callback is called quite often to avoid
         // binder calls
-        final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
-        if (statusBarOptional.map(StatusBar::isPanelExpanded).orElse(false)
-                && !statusBarOptional.get().isKeyguardShowing()) {
+        final Optional<CentralSurfaces> centralSurfacesOptional =
+                mCentralSurfacesOptionalLazy.get();
+        if (centralSurfacesOptional.map(CentralSurfaces::isPanelExpanded).orElse(false)
+                && !centralSurfacesOptional.get().isKeyguardShowing()) {
             if (!mDismissNotificationShadeActionRegistered) {
                 mA11yManager.registerSystemAction(
                         createRemoteAction(
@@ -304,6 +373,10 @@ public class SystemActions extends SystemUI {
                 labelId = R.string.accessibility_system_action_screenshot_label;
                 intent = SystemActionsBroadcastReceiver.INTENT_ACTION_TAKE_SCREENSHOT;
                 break;
+            case SYSTEM_ACTION_ID_KEYCODE_HEADSETHOOK:
+                labelId = R.string.accessibility_system_action_headset_hook_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_HEADSET_HOOK;
+                break;
             case SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON:
                 labelId = R.string.accessibility_system_action_on_screen_a11y_shortcut_label;
                 intent = SystemActionsBroadcastReceiver.INTENT_ACTION_ACCESSIBILITY_BUTTON;
@@ -321,6 +394,26 @@ public class SystemActions extends SystemUI {
                 labelId = R.string.accessibility_system_action_dismiss_notification_shade;
                 intent = SystemActionsBroadcastReceiver
                         .INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_UP:
+                labelId = R.string.accessibility_system_action_dpad_up_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_UP;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_DOWN:
+                labelId = R.string.accessibility_system_action_dpad_down_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_DOWN;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_LEFT:
+                labelId = R.string.accessibility_system_action_dpad_left_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_LEFT;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_RIGHT:
+                labelId = R.string.accessibility_system_action_dpad_right_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_RIGHT;
+                break;
+            case SYSTEM_ACTION_ID_DPAD_CENTER:
+                labelId = R.string.accessibility_system_action_dpad_center_label;
+                intent = SystemActionsBroadcastReceiver.INTENT_ACTION_DPAD_CENTER;
                 break;
             default:
                 return;
@@ -374,12 +467,12 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleNotifications() {
-        mStatusBarOptionalLazy.get().ifPresent(StatusBar::animateExpandNotificationsPanel);
+        mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::animateExpandNotificationsPanel);
     }
 
     private void handleQuickSettings() {
-        mStatusBarOptionalLazy.get().ifPresent(
-                statusBar -> statusBar.animateExpandSettingsPanel(null));
+        mCentralSurfacesOptionalLazy.get().ifPresent(
+                centralSurfaces -> centralSurfaces.animateExpandSettingsPanel(null));
     }
 
     private void handlePowerDialog() {
@@ -410,6 +503,10 @@ public class SystemActions extends SystemUI {
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 
+    private void handleHeadsetHook() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+    }
+
     private void handleAccessibilityButton() {
         AccessibilityManager.getInstance(mContext).notifyAccessibilityButtonClicked(
                 Display.DEFAULT_DISPLAY);
@@ -428,9 +525,29 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleAccessibilityDismissNotificationShade() {
-        mStatusBarOptionalLazy.get().ifPresent(
-                statusBar -> statusBar.animateCollapsePanels(
+        mCentralSurfacesOptionalLazy.get().ifPresent(
+                centralSurfaces -> centralSurfaces.animateCollapsePanels(
                         CommandQueue.FLAG_EXCLUDE_NONE, false /* force */));
+    }
+
+    private void handleDpadUp() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_UP);
+    }
+
+    private void handleDpadDown() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_DOWN);
+    }
+
+    private void handleDpadLeft() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_LEFT);
+    }
+
+    private void handleDpadRight() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_RIGHT);
+    }
+
+    private void handleDpadCenter() {
+        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_DPAD_CENTER);
     }
 
     private class SystemActionsBroadcastReceiver extends BroadcastReceiver {
@@ -442,6 +559,7 @@ public class SystemActions extends SystemUI {
         private static final String INTENT_ACTION_POWER_DIALOG = "SYSTEM_ACTION_POWER_DIALOG";
         private static final String INTENT_ACTION_LOCK_SCREEN = "SYSTEM_ACTION_LOCK_SCREEN";
         private static final String INTENT_ACTION_TAKE_SCREENSHOT = "SYSTEM_ACTION_TAKE_SCREENSHOT";
+        private static final String INTENT_ACTION_HEADSET_HOOK = "SYSTEM_ACTION_HEADSET_HOOK";
         private static final String INTENT_ACTION_ACCESSIBILITY_BUTTON =
                 "SYSTEM_ACTION_ACCESSIBILITY_BUTTON";
         private static final String INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER =
@@ -450,6 +568,11 @@ public class SystemActions extends SystemUI {
                 "SYSTEM_ACTION_ACCESSIBILITY_SHORTCUT";
         private static final String INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE =
                 "SYSTEM_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE";
+        private static final String INTENT_ACTION_DPAD_UP = "SYSTEM_ACTION_DPAD_UP";
+        private static final String INTENT_ACTION_DPAD_DOWN = "SYSTEM_ACTION_DPAD_DOWN";
+        private static final String INTENT_ACTION_DPAD_LEFT = "SYSTEM_ACTION_DPAD_LEFT";
+        private static final String INTENT_ACTION_DPAD_RIGHT = "SYSTEM_ACTION_DPAD_RIGHT";
+        private static final String INTENT_ACTION_DPAD_CENTER = "SYSTEM_ACTION_DPAD_CENTER";
 
         private PendingIntent createPendingIntent(Context context, String intentAction) {
             switch (intentAction) {
@@ -461,10 +584,16 @@ public class SystemActions extends SystemUI {
                 case INTENT_ACTION_POWER_DIALOG:
                 case INTENT_ACTION_LOCK_SCREEN:
                 case INTENT_ACTION_TAKE_SCREENSHOT:
+                case INTENT_ACTION_HEADSET_HOOK:
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON:
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER:
                 case INTENT_ACTION_ACCESSIBILITY_SHORTCUT:
-                case INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE: {
+                case INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE:
+                case INTENT_ACTION_DPAD_UP:
+                case INTENT_ACTION_DPAD_DOWN:
+                case INTENT_ACTION_DPAD_LEFT:
+                case INTENT_ACTION_DPAD_RIGHT:
+                case INTENT_ACTION_DPAD_CENTER: {
                     Intent intent = new Intent(intentAction);
                     intent.setPackage(context.getPackageName());
                     return PendingIntent.getBroadcast(context, 0, intent,
@@ -486,10 +615,16 @@ public class SystemActions extends SystemUI {
             intentFilter.addAction(INTENT_ACTION_POWER_DIALOG);
             intentFilter.addAction(INTENT_ACTION_LOCK_SCREEN);
             intentFilter.addAction(INTENT_ACTION_TAKE_SCREENSHOT);
+            intentFilter.addAction(INTENT_ACTION_HEADSET_HOOK);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_BUTTON);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_BUTTON_CHOOSER);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_SHORTCUT);
             intentFilter.addAction(INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE);
+            intentFilter.addAction(INTENT_ACTION_DPAD_UP);
+            intentFilter.addAction(INTENT_ACTION_DPAD_DOWN);
+            intentFilter.addAction(INTENT_ACTION_DPAD_LEFT);
+            intentFilter.addAction(INTENT_ACTION_DPAD_RIGHT);
+            intentFilter.addAction(INTENT_ACTION_DPAD_CENTER);
             return intentFilter;
         }
 
@@ -529,6 +664,10 @@ public class SystemActions extends SystemUI {
                     handleTakeScreenshot();
                     break;
                 }
+                case INTENT_ACTION_HEADSET_HOOK: {
+                    handleHeadsetHook();
+                    break;
+                }
                 case INTENT_ACTION_ACCESSIBILITY_BUTTON: {
                     handleAccessibilityButton();
                     break;
@@ -543,6 +682,26 @@ public class SystemActions extends SystemUI {
                 }
                 case INTENT_ACTION_ACCESSIBILITY_DISMISS_NOTIFICATION_SHADE: {
                     handleAccessibilityDismissNotificationShade();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_UP: {
+                    handleDpadUp();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_DOWN: {
+                    handleDpadDown();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_LEFT: {
+                    handleDpadLeft();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_RIGHT: {
+                    handleDpadRight();
+                    break;
+                }
+                case INTENT_ACTION_DPAD_CENTER: {
+                    handleDpadCenter();
                     break;
                 }
                 default:

@@ -19,39 +19,15 @@ package com.android.systemui.util
 import android.util.IndentingPrintWriter
 import android.view.View
 import java.io.PrintWriter
-import java.util.function.Consumer
 
 /**
- * Run some code that will print to an [IndentingPrintWriter] that wraps the given [PrintWriter].
+ * Get an [IndentingPrintWriter] which either is or wraps the given [PrintWriter].
  *
- * If the given [PrintWriter] is an [IndentingPrintWriter], the block will be passed that same
- * instance with [IndentingPrintWriter.increaseIndent] having been called, and calling
- * [IndentingPrintWriter.decreaseIndent] after completion of the block, so the passed [PrintWriter]
- * should not be used before the block completes.
+ * The original [PrintWriter] should not be used until the returned [IndentingPrintWriter] is no
+ * longer being used, to avoid inconsistent writing.
  */
-inline fun PrintWriter.withIndenting(block: (IndentingPrintWriter) -> Unit) {
-    if (this is IndentingPrintWriter) {
-        this.withIncreasedIndent { block(this) }
-    } else {
-        block(IndentingPrintWriter(this))
-    }
-}
-
-/**
- * Run some code that will print to an [IndentingPrintWriter] that wraps the given [PrintWriter].
- *
- * If the given [PrintWriter] is an [IndentingPrintWriter], the block will be passed that same
- * instance with [IndentingPrintWriter.increaseIndent] having been called, and calling
- * [IndentingPrintWriter.decreaseIndent] after completion of the block, so the passed [PrintWriter]
- * should not be used before the block completes.
- */
-fun PrintWriter.withIndenting(consumer: Consumer<IndentingPrintWriter>) {
-    if (this is IndentingPrintWriter) {
-        this.withIncreasedIndent { consumer.accept(this) }
-    } else {
-        consumer.accept(IndentingPrintWriter(this))
-    }
-}
+fun PrintWriter.asIndenting(): IndentingPrintWriter =
+    (this as? IndentingPrintWriter) ?: IndentingPrintWriter(this)
 
 /**
  * Run some code inside a block, with [IndentingPrintWriter.increaseIndent] having been called on
@@ -61,6 +37,19 @@ inline fun IndentingPrintWriter.withIncreasedIndent(block: () -> Unit) {
     this.increaseIndent()
     try {
         block()
+    } finally {
+        this.decreaseIndent()
+    }
+}
+
+/**
+ * Run some code inside a block, with [IndentingPrintWriter.increaseIndent] having been called on
+ * the given argument, and calling [IndentingPrintWriter.decreaseIndent] after completion.
+ */
+fun IndentingPrintWriter.withIncreasedIndent(runnable: Runnable) {
+    this.increaseIndent()
+    try {
+        runnable.run()
     } finally {
         this.decreaseIndent()
     }

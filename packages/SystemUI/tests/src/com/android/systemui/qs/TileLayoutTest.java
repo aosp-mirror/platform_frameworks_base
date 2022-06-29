@@ -28,6 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.test.suitebuilder.annotation.SmallTest;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -58,10 +59,9 @@ public class TileLayoutTest extends SysuiTestCase {
     }
 
     private QSPanelControllerBase.TileRecord createTileRecord() {
-        QSPanelControllerBase.TileRecord tileRecord = new QSPanelControllerBase.TileRecord();
-        tileRecord.tile = mock(QSTile.class);
-        tileRecord.tileView = spy(new QSTileViewImpl(mContext, new QSIconViewImpl(mContext)));
-        return tileRecord;
+        return new QSPanelControllerBase.TileRecord(
+                mock(QSTile.class),
+                spy(new QSTileViewImpl(mContext, new QSIconViewImpl(mContext))));
     }
 
     @Test
@@ -170,5 +170,37 @@ public class TileLayoutTest extends SysuiTestCase {
     public void testEmptyHeight() {
         mTileLayout.measure(mLayoutSizeForOneTile, mLayoutSizeForOneTile);
         assertEquals(0, mTileLayout.getMeasuredHeight());
+    }
+
+    @Test
+    public void testCollectionInfo() {
+        QSPanelControllerBase.TileRecord tileRecord1 = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord2 = createTileRecord();
+        AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain(mTileLayout);
+        mTileLayout.addTile(tileRecord1);
+
+        mTileLayout.onInitializeAccessibilityNodeInfo(info);
+        AccessibilityNodeInfo.CollectionInfo collectionInfo = info.getCollectionInfo();
+        assertEquals(1, collectionInfo.getRowCount());
+        assertEquals(1, collectionInfo.getColumnCount()); // always use one column
+
+        mTileLayout.addTile(tileRecord2);
+        mTileLayout.onInitializeAccessibilityNodeInfo(info);
+        collectionInfo = info.getCollectionInfo();
+        assertEquals(2, collectionInfo.getRowCount());
+        assertEquals(1, collectionInfo.getColumnCount()); // always use one column
+    }
+
+    @Test
+    public void testSetPositionOnTiles() {
+        QSPanelControllerBase.TileRecord tileRecord1 = createTileRecord();
+        QSPanelControllerBase.TileRecord tileRecord2 = createTileRecord();
+        mTileLayout.addTile(tileRecord1);
+        mTileLayout.addTile(tileRecord2);
+        mTileLayout.measure(mLayoutSizeForOneTile * 2, mLayoutSizeForOneTile * 2);
+        mTileLayout.layout(0, 0, mLayoutSizeForOneTile * 2, mLayoutSizeForOneTile * 2);
+
+        verify(tileRecord1.tileView).setPosition(0);
+        verify(tileRecord2.tileView).setPosition(1);
     }
 }

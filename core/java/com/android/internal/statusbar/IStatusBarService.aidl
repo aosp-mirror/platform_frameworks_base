@@ -18,16 +18,24 @@ package com.android.internal.statusbar;
 
 import android.app.Notification;
 import android.content.ComponentName;
+import android.graphics.drawable.Icon;
 import android.graphics.Rect;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.media.INearbyMediaDevicesProvider;
+import android.media.MediaRoute2Info;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
+import com.android.internal.logging.InstanceId;
+import com.android.internal.statusbar.IAddTileResultCallback;
+import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBar;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -53,7 +61,7 @@ interface IStatusBarService
     @UnsupportedAppUsage
     void removeIcon(String slot);
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher, boolean isMultiClientImeEnabled);
+            boolean showImeSwitcher);
     void expandSettingsPanel(String subPanel);
 
     // ---- Methods below are for use by the status bar policy services ----
@@ -62,7 +70,7 @@ interface IStatusBarService
     void onPanelRevealed(boolean clearNotificationEffects, int numItems);
     void onPanelHidden();
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.
-    void clearNotificationEffects();
+    oneway void clearNotificationEffects();
     void onNotificationClick(String key, in NotificationVisibility nv);
     void onNotificationActionClick(String key, int actionIndex, in Notification.Action action, in NotificationVisibility nv, boolean generatedByAssistant);
     void onNotificationError(String pkg, String tag, int id,
@@ -80,10 +88,10 @@ interface IStatusBarService
             in int notificationLocation, boolean modifiedBeforeSending);
     void onNotificationSettingsViewed(String key);
     void onNotificationBubbleChanged(String key, boolean isBubble, int flags);
-    void onBubbleNotificationSuppressionChanged(String key, boolean isNotifSuppressed, boolean isBubbleSuppressed);
+    void onBubbleMetadataFlagChanged(String key, int flags);
     void hideCurrentInputMethodForBubbles();
     void grantInlineReplyUriPermission(String key, in Uri uri, in UserHandle user, String packageName);
-    void clearInlineReplyUriPermissions(String key);
+    oneway void clearInlineReplyUriPermissions(String key);
     void onNotificationFeedbackReceived(String key, in Bundle feedback);
 
     void onGlobalActionsShown();
@@ -94,6 +102,9 @@ interface IStatusBarService
      */
     void shutdown();
     void reboot(boolean safeMode);
+
+    /** just restarts android without rebooting device. Used for some feature flags. */
+    void restart();
 
     void addTile(in ComponentName tile);
     void remTile(in ComponentName tile);
@@ -114,13 +125,15 @@ interface IStatusBarService
             int multiSensorConfig);
 
     // Used to notify the authentication dialog that a biometric has been authenticated
-    void onBiometricAuthenticated();
+    void onBiometricAuthenticated(int modality);
     // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
     void onBiometricHelp(int modality, String message);
     // Used to show an error - the dialog will dismiss after a certain amount of time
     void onBiometricError(int modality, int error, int vendorCode);
     // Used to hide the authentication dialog, e.g. when the application cancels authentication
-    void hideAuthenticationDialog();
+    void hideAuthenticationDialog(long requestId);
+    // Used to notify the biometric service of events that occur outside of an operation.
+    void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
      * Sets an instance of IUdfpsHbmListener for UdfpsController.
@@ -157,4 +170,60 @@ interface IStatusBarService
      * display.
      */
     void suppressAmbientDisplay(boolean suppress);
+
+    /**
+     * Send a request to SystemUI to put a given active tile in listening state
+     */
+    void requestTileServiceListeningState(in ComponentName componentName, int userId);
+
+    void requestAddTile(in ComponentName componentName, in CharSequence label, in Icon icon, int userId, in IAddTileResultCallback callback);
+    void cancelRequestAddTile(in String packageName);
+
+    /**
+    * Sets the navigation bar mode.
+    *
+    * @param navBarMode the mode of the navigation bar to be set.
+    *
+    * @hide
+    */
+    void setNavBarMode(int navBarMode);
+
+    /**
+    * Gets the navigation bar mode.
+    *
+    * @hide
+    */
+    int getNavBarMode();
+
+    /**
+    * Register a listener for certain sessions. Each session may be guarded by its own permission.
+    */
+    void registerSessionListener(int sessionFlags, in ISessionListener listener);
+    void unregisterSessionListener(int sessionFlags, in ISessionListener listener);
+
+    /**
+    * Informs all registered listeners that a session has begun and has the following instanceId.
+    * Can only be set by callers with certain permission based on the session type being updated.
+    */
+    void onSessionStarted(int sessionType, in InstanceId instanceId);
+    void onSessionEnded(int sessionType, in InstanceId instanceId);
+
+    /** Notifies System UI about an update to the media tap-to-transfer sender state. */
+    void updateMediaTapToTransferSenderDisplay(
+        int displayState,
+        in MediaRoute2Info routeInfo,
+        in IUndoMediaTransferCallback undoCallback);
+
+    /** Notifies System UI about an update to the media tap-to-transfer receiver state. */
+    void updateMediaTapToTransferReceiverDisplay(
+        int displayState,
+        in MediaRoute2Info routeInfo,
+        in Icon appIcon,
+        in CharSequence appName);
+
+    /** Registers a nearby media devices provider. */
+    void registerNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
+
+    /** Unregisters a nearby media devices provider. */
+    void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
 }

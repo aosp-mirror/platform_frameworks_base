@@ -90,6 +90,10 @@ public abstract class AbstractWifiMacAddressPreferenceController
             macAddress = macAddresses[0];
         }
 
+        if (mWifiMacAddress == null) {
+            return;
+        }
+
         if (TextUtils.isEmpty(macAddress) || macAddress.equals(WifiInfo.DEFAULT_MAC_ADDRESS)) {
             mWifiMacAddress.setSummary(R.string.status_unavailable);
         } else {

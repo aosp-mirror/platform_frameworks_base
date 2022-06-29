@@ -23,6 +23,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -304,6 +305,34 @@ public interface Parcelling<T> {
             public UUID unparcel(Parcel source) {
                 String string = source.readString();
                 return string == null ? null : UUID.fromString(string);
+            }
+        }
+
+        /**
+         * A {@link Parcelling} for {@link Instant}.
+         *
+         * The minimum value of an instant uses a millisecond offset of about -3.15e19 which is
+         * larger than Long.MIN_VALUE, so we can use Long.MIN_VALUE as a sentinel value to indicate
+         * a null Instant.
+         */
+        class ForInstant implements Parcelling<Instant> {
+
+            @Override
+            public void parcel(Instant item, Parcel dest, int parcelFlags) {
+                dest.writeLong(item == null ? Long.MIN_VALUE : item.getEpochSecond());
+                dest.writeInt(item == null ? Integer.MIN_VALUE : item.getNano());
+            }
+
+            @Override
+            public Instant unparcel(Parcel source) {
+                long epochSecond = source.readLong();
+                int afterNano = source.readInt();
+
+                if (epochSecond == Long.MIN_VALUE) {
+                    return null;
+                } else {
+                    return Instant.ofEpochSecond(epochSecond, afterNano);
+                }
             }
         }
     }

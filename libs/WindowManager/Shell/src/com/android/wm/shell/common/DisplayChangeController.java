@@ -27,7 +27,6 @@ import androidx.annotation.BinderThread;
 
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -71,12 +70,18 @@ public class DisplayChangeController {
         mRotationListener.remove(listener);
     }
 
+    /** Query all listeners for changes that should happen on rotation. */
+    public void dispatchOnRotateDisplay(WindowContainerTransaction outWct, int displayId,
+            final int fromRotation, final int toRotation) {
+        for (OnDisplayChangingListener c : mRotationListener) {
+            c.onRotateDisplay(displayId, fromRotation, toRotation, outWct);
+        }
+    }
+
     private void onRotateDisplay(int displayId, final int fromRotation, final int toRotation,
             IDisplayWindowRotationCallback callback) {
         WindowContainerTransaction t = new WindowContainerTransaction();
-        for (OnDisplayChangingListener c : mRotationListener) {
-            c.onRotateDisplay(displayId, fromRotation, toRotation, t);
-        }
+        dispatchOnRotateDisplay(t, displayId, fromRotation, toRotation);
         try {
             callback.continueRotateDisplay(toRotation, t);
         } catch (RemoteException e) {

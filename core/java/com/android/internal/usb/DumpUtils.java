@@ -244,8 +244,12 @@ public class DumpUtils {
         writeContaminantPresenceStatus(dump, "contaminant_presence_status",
                 UsbPortStatusProto.CONTAMINANT_PRESENCE_STATUS,
                 status.getContaminantDetectionStatus());
-        dump.write("usb_data_enabled", UsbPortStatusProto.USB_DATA_ENABLED,
-                status.getUsbDataStatus());
+        dump.write("usb_data_status", UsbPortStatusProto.USB_DATA_STATUS,
+                UsbPort.usbDataStatusToString(status.getUsbDataStatus()));
+        dump.write("is_power_transfer_limited", UsbPortStatusProto.IS_POWER_TRANSFER_LIMITED,
+                status.isPowerTransferLimited());
+        dump.write("usb_power_brick_status", UsbPortStatusProto.USB_POWER_BRICK_STATUS,
+                UsbPort.powerBrickConnectionStatusToString(status.getPowerBrickConnectionStatus()));
         dump.end(token);
     }
 }

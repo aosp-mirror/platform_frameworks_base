@@ -16,16 +16,13 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.appPairsPrimaryBoundsIsVisibleAtEnd
@@ -33,6 +30,7 @@ import com.android.wm.shell.flicker.appPairsSecondaryBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -50,26 +48,26 @@ import org.junit.runners.Parameterized
 class RotateTwoLaunchedAppsInAppPairsMode(
     testSpec: FlickerTestParameter
 ) : RotateTwoLaunchedAppsTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
+    override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this, it)
+            super.transition(this)
             transitions {
                 executeShellCommand(composePairsCommand(
                     primaryTaskId, secondaryTaskId, true /* pair */))
                 waitAppsShown(primaryApp, secondaryApp)
-                setRotation(testSpec.config.endRotation)
+                setRotation(testSpec.endRotation)
             }
         }
 
-    @Presubmit
+    @Ignore
     @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
-    @Presubmit
+    @Ignore
     @Test
     override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
 
-    @Presubmit
+    @Ignore
     @Test
     fun bothAppWindowsVisible() {
         testSpec.assertWmEnd {
@@ -78,21 +76,25 @@ class RotateTwoLaunchedAppsInAppPairsMode(
         }
     }
 
-    @Presubmit
+    @Ignore
     @Test
     fun appPairsDividerIsVisibleAtEnd() = testSpec.appPairsDividerIsVisibleAtEnd()
 
-    @Presubmit
+    @Ignore
     @Test
     fun appPairsPrimaryBoundsIsVisibleAtEnd() =
-        testSpec.appPairsPrimaryBoundsIsVisibleAtEnd(testSpec.config.endRotation,
+        testSpec.appPairsPrimaryBoundsIsVisibleAtEnd(testSpec.endRotation,
             primaryApp.component)
 
-    @FlakyTest
+    @Ignore
     @Test
     fun appPairsSecondaryBoundsIsVisibleAtEnd() =
-        testSpec.appPairsSecondaryBoundsIsVisibleAtEnd(testSpec.config.endRotation,
+        testSpec.appPairsSecondaryBoundsIsVisibleAtEnd(testSpec.endRotation,
             secondaryApp.component)
+
+    @Ignore
+    @Test
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

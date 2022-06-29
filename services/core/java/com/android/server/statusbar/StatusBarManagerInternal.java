@@ -144,11 +144,11 @@ public interface StatusBarManagerInternal {
 
     /**
      * @see com.android.internal.statusbar.IStatusBar#showToast(String, IBinder, CharSequence,
-     * IBinder, int, ITransientNotificationCallback)
+     * IBinder, int, ITransientNotificationCallback, int)
      */
     void showToast(int uid, String packageName, IBinder token, CharSequence text,
             IBinder windowToken, int duration,
-            @Nullable ITransientNotificationCallback textCallback);
+            @Nullable ITransientNotificationCallback textCallback, int displayId);
 
     /** @see com.android.internal.statusbar.IStatusBar#hideToast(String, IBinder)  */
     void hideToast(String packageName, IBinder token);
@@ -157,7 +157,7 @@ public interface StatusBarManagerInternal {
      * @see com.android.internal.statusbar.IStatusBar#requestWindowMagnificationConnection(boolean
      * request)
      */
-    void requestWindowMagnificationConnection(boolean request);
+    boolean requestWindowMagnificationConnection(boolean request);
 
     /**
      * Handles a logging command from the WM shell command.

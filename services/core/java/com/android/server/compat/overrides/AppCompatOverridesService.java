@@ -25,6 +25,7 @@ import static android.provider.DeviceConfig.NAMESPACE_APP_COMPAT_OVERRIDES;
 import static com.android.server.compat.overrides.AppCompatOverridesParser.FLAG_OWNED_CHANGE_IDS;
 import static com.android.server.compat.overrides.AppCompatOverridesParser.FLAG_REMOVE_OVERRIDES;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 
 import android.annotation.NonNull;
@@ -41,11 +42,14 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.CompatibilityOverrideConfig;
+import com.android.internal.compat.CompatibilityOverridesByPackageConfig;
+import com.android.internal.compat.CompatibilityOverridesToRemoveByPackageConfig;
 import com.android.internal.compat.CompatibilityOverridesToRemoveConfig;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.server.SystemService;
@@ -150,18 +154,40 @@ public final class AppCompatOverridesService {
         Set<String> packageNames = new ArraySet<>(properties.getKeyset());
         packageNames.remove(FLAG_OWNED_CHANGE_IDS);
         packageNames.remove(FLAG_REMOVE_OVERRIDES);
+        Map<String, CompatibilityOverrideConfig> packageNameToOverridesToAdd = new ArrayMap<>();
+        Map<String, CompatibilityOverridesToRemoveConfig> packageNameToOverridesToRemove =
+                new ArrayMap<>();
         for (String packageName : packageNames) {
+            Set<Long> changeIdsToSkip = packageToChangeIdsToSkip.getOrDefault(packageName,
+                    emptySet());
+
+            Map<Long, PackageOverride> overridesToAdd = emptyMap();
             Long versionCode = getVersionCodeOrNull(packageName);
-            if (versionCode == null) {
-                // Package isn't installed yet.
-                continue;
+            if (versionCode != null) {
+                // Only if package installed add overrides, otherwise just remove.
+                overridesToAdd = mOverridesParser.parsePackageOverrides(
+                        properties.getString(packageName, /* defaultValue= */ ""), packageName,
+                        versionCode, changeIdsToSkip);
+            }
+            if (!overridesToAdd.isEmpty()) {
+                packageNameToOverridesToAdd.put(packageName,
+                        new CompatibilityOverrideConfig(overridesToAdd));
             }
 
-            applyPackageOverrides(properties.getString(packageName, /* defaultValue= */ ""),
-                    packageName, versionCode, ownedChangeIds,
-                    packageToChangeIdsToSkip.getOrDefault(packageName, emptySet()),
-                    /* removeOtherOwnedOverrides= */ true);
+            Set<Long> overridesToRemove = new ArraySet<>();
+            for (Long changeId : ownedChangeIds) {
+                if (!overridesToAdd.containsKey(changeId) && !changeIdsToSkip.contains(changeId)) {
+                    overridesToRemove.add(changeId);
+                }
+            }
+            if (!overridesToRemove.isEmpty()) {
+                packageNameToOverridesToRemove.put(packageName,
+                        new CompatibilityOverridesToRemoveConfig(overridesToRemove));
+            }
         }
+
+        putAllPackageOverrides(packageNameToOverridesToAdd);
+        removeAllPackageOverrides(packageNameToOverridesToRemove);
     }
 
     /**
@@ -177,39 +203,12 @@ public final class AppCompatOverridesService {
             // We apply overrides for each namespace separately so that if there is a failure for
             // one namespace, the other namespaces won't be affected.
             Set<Long> ownedChangeIds = getOwnedChangeIds(namespace);
-            applyPackageOverrides(
-                    DeviceConfig.getString(namespace, packageName, /* defaultValue= */ ""),
-                    packageName, versionCode, ownedChangeIds,
+            putPackageOverrides(packageName, mOverridesParser.parsePackageOverrides(
+                    DeviceConfig.getString(namespace, packageName, /* defaultValue= */""),
+                    packageName, versionCode,
                     getOverridesToRemove(namespace, ownedChangeIds).getOrDefault(packageName,
-                            emptySet()), /* removeOtherOwnedOverrides */ false);
+                            emptySet())));
         }
-    }
-
-    /**
-     * Calls {@link AppCompatOverridesParser#parsePackageOverrides} on the given arguments and adds
-     * the resulting overrides via {@link IPlatformCompat#putOverridesOnReleaseBuilds}.
-     *
-     * <p>In addition, if {@code removeOtherOwnedOverrides} is true, removes any override that
-     * wasn't just added, whose change ID is in {@code ownedChangeIds} but not in {@code
-     * changeIdsToSkip}, via {@link IPlatformCompat#removeOverridesOnReleaseBuilds}.
-     */
-    private void applyPackageOverrides(String configStr, String packageName, long versionCode,
-            Set<Long> ownedChangeIds, Set<Long> changeIdsToSkip,
-            boolean removeOtherOwnedOverrides) {
-        Map<Long, PackageOverride> overridesToAdd = AppCompatOverridesParser.parsePackageOverrides(
-                configStr, versionCode, changeIdsToSkip);
-        putPackageOverrides(packageName, overridesToAdd);
-
-        if (!removeOtherOwnedOverrides) {
-            return;
-        }
-        Set<Long> overridesToRemove = new ArraySet<>();
-        for (Long changeId : ownedChangeIds) {
-            if (!overridesToAdd.containsKey(changeId) && !changeIdsToSkip.contains(changeId)) {
-                overridesToRemove.add(changeId);
-            }
-        }
-        removePackageOverrides(packageName, overridesToRemove);
     }
 
     /**
@@ -231,14 +230,18 @@ public final class AppCompatOverridesService {
     }
 
     /**
-     * Calls {@link IPlatformCompat#removeOverridesOnReleaseBuilds} on each package name and
-     * respective change IDs in {@code overridesToRemove}.
+     * Calls {@link IPlatformCompat#removeAllOverridesOnReleaseBuilds} on {@code
+     * packageNameToOverridesToRemove}.
      */
-    private void removeOverrides(Map<String, Set<Long>> overridesToRemove) {
-        for (Map.Entry<String, Set<Long>> packageNameAndOverrides : overridesToRemove.entrySet()) {
-            removePackageOverrides(packageNameAndOverrides.getKey(),
-                    packageNameAndOverrides.getValue());
+    private void removeOverrides(Map<String, Set<Long>> packageNameToOverridesToRemove) {
+        Map<String, CompatibilityOverridesToRemoveConfig> packageNameToConfig =
+                new ArrayMap<>();
+        for (Map.Entry<String, Set<Long>> packageNameAndChangeIds :
+                packageNameToOverridesToRemove.entrySet()) {
+            packageNameToConfig.put(packageNameAndChangeIds.getKey(),
+                    new CompatibilityOverridesToRemoveConfig(packageNameAndChangeIds.getValue()));
         }
+        removeAllPackageOverrides(packageNameToConfig);
     }
 
     /**
@@ -262,6 +265,20 @@ public final class AppCompatOverridesService {
                 DeviceConfig.getString(namespace, FLAG_OWNED_CHANGE_IDS, /* defaultValue= */ ""));
     }
 
+    private void putAllPackageOverrides(
+            Map<String, CompatibilityOverrideConfig> packageNameToOverrides) {
+        if (packageNameToOverrides.isEmpty()) {
+            return;
+        }
+        CompatibilityOverridesByPackageConfig config = new CompatibilityOverridesByPackageConfig(
+                packageNameToOverrides);
+        try {
+            mPlatformCompat.putAllOverridesOnReleaseBuilds(config);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to call IPlatformCompat#putAllOverridesOnReleaseBuilds", e);
+        }
+    }
+
     private void putPackageOverrides(String packageName,
             Map<Long, PackageOverride> overridesToAdd) {
         if (overridesToAdd.isEmpty()) {
@@ -271,7 +288,21 @@ public final class AppCompatOverridesService {
         try {
             mPlatformCompat.putOverridesOnReleaseBuilds(config, packageName);
         } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to call IPlatformCompat#putOverridesOnReleaseBuilds", e);
+            Slog.e(TAG, "Failed to call IPlatformCompat#putOverridesOnReleaseBuilds", e);
+        }
+    }
+
+    private void removeAllPackageOverrides(
+            Map<String, CompatibilityOverridesToRemoveConfig> packageNameToOverridesToRemove) {
+        if (packageNameToOverridesToRemove.isEmpty()) {
+            return;
+        }
+        CompatibilityOverridesToRemoveByPackageConfig config =
+                new CompatibilityOverridesToRemoveByPackageConfig(packageNameToOverridesToRemove);
+        try {
+            mPlatformCompat.removeAllOverridesOnReleaseBuilds(config);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to call IPlatformCompat#removeAllOverridesOnReleaseBuilds", e);
         }
     }
 
@@ -284,7 +315,7 @@ public final class AppCompatOverridesService {
         try {
             mPlatformCompat.removeOverridesOnReleaseBuilds(config, packageName);
         } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to call IPlatformCompat#removeOverridesOnReleaseBuilds", e);
+            Slog.e(TAG, "Failed to call IPlatformCompat#removeOverridesOnReleaseBuilds", e);
         }
     }
 
@@ -426,5 +457,5 @@ public final class AppCompatOverridesService {
                     break;
             }
         }
-    };
+    }
 }

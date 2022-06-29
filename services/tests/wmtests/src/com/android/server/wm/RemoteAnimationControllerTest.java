@@ -665,9 +665,9 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testNonAppTarget_notSendNavBar_controlledByFadeRotation() throws Exception {
-        final FadeRotationAnimationController mockController =
-                mock(FadeRotationAnimationController.class);
-        doReturn(mockController).when(mDisplayContent).getFadeRotationAnimationController();
+        final AsyncRotationController mockController =
+                mock(AsyncRotationController.class);
+        doReturn(mockController).when(mDisplayContent).getAsyncRotationController();
         final int transit = TRANSIT_OLD_TASK_OPEN;
         setupForNonAppTargetNavBar(transit, true);
 

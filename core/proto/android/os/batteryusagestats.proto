@@ -62,6 +62,27 @@ message BatteryUsageStatsAtomsProto {
             optional int64 duration_millis = 3;
         }
         repeated PowerComponentUsage power_components = 2;
+
+        // Represents a slice of power attribution, e.g. "cpu while in the background"
+        // or "wifi when running a background service".  Queries that care about
+        // PowerComponentUsage slices need to be aware of all supported dimensions.
+        // There are no roll-ups included in the slices - it is up to the clients
+        // of this data to aggregate values as needed.
+        message PowerComponentUsageSlice {
+            optional PowerComponentUsage power_component = 1;
+
+            enum ProcessState {
+                UNSPECIFIED = 0;
+                FOREGROUND = 1;
+                BACKGROUND = 2;
+                FOREGROUND_SERVICE = 3;
+                CACHED = 4;
+            }
+
+            optional ProcessState process_state = 2;
+        }
+
+        repeated PowerComponentUsageSlice slices = 3;
     }
 
     // Total power usage for the device during this session.
@@ -78,4 +99,7 @@ message BatteryUsageStatsAtomsProto {
 
     // Sum of all discharge percentage point drops during the reported session.
     optional int32 session_discharge_percentage = 6;
+
+    // Total amount of time battery was discharging during the reported session
+    optional int64 discharge_duration_millis = 7;
 }

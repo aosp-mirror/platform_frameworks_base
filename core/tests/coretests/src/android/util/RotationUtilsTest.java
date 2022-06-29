@@ -17,12 +17,14 @@
 package android.util;
 
 import static android.util.RotationUtils.rotateBounds;
+import static android.util.RotationUtils.rotatePoint;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import static org.junit.Assert.assertEquals;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -57,5 +59,24 @@ public class RotationUtilsTest {
         testResult.set(testInner);
         rotateBounds(testResult, testParent, ROTATION_270);
         assertEquals(new Rect(520, 40, 580, 120), testResult);
+    }
+
+    @Test
+    public void testRotatePoint() {
+        int parentW = 1000;
+        int parentH = 600;
+        Point testPt = new Point(60, 40);
+
+        Point testResult = new Point(testPt);
+        rotatePoint(testResult, ROTATION_90, parentW, parentH);
+        assertEquals(new Point(40, 940), testResult);
+
+        testResult.set(testPt.x, testPt.y);
+        rotatePoint(testResult, ROTATION_180, parentW, parentH);
+        assertEquals(new Point(940, 560), testResult);
+
+        testResult.set(testPt.x, testPt.y);
+        rotatePoint(testResult, ROTATION_270, parentW, parentH);
+        assertEquals(new Point(560, 60), testResult);
     }
 }

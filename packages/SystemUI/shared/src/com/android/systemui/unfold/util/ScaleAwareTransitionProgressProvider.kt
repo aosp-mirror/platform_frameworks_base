@@ -6,27 +6,33 @@ import android.database.ContentObserver
 import android.provider.Settings
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 /** Wraps [UnfoldTransitionProgressProvider] to disable transitions when animations are disabled. */
-class ScaleAwareTransitionProgressProvider(
-    unfoldTransitionProgressProvider: UnfoldTransitionProgressProvider,
+class ScaleAwareTransitionProgressProvider
+@AssistedInject
+constructor(
+    @Assisted progressProviderToWrap: UnfoldTransitionProgressProvider,
     private val contentResolver: ContentResolver
 ) : UnfoldTransitionProgressProvider {
 
     private val scopedUnfoldTransitionProgressProvider =
-            ScopedUnfoldTransitionProgressProvider(unfoldTransitionProgressProvider)
+        ScopedUnfoldTransitionProgressProvider(progressProviderToWrap)
 
-    private val animatorDurationScaleObserver = object : ContentObserver(null) {
-        override fun onChange(selfChange: Boolean) {
-            onAnimatorScaleChanged()
+    private val animatorDurationScaleObserver =
+        object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                onAnimatorScaleChanged()
+            }
         }
-    }
 
     init {
         contentResolver.registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
-                /* notifyForDescendants= */ false,
-                animatorDurationScaleObserver)
+            Settings.Global.getUriFor(Settings.Global.ANIMATOR_DURATION_SCALE),
+            /* notifyForDescendants= */ false,
+            animatorDurationScaleObserver)
         onAnimatorScaleChanged()
     }
 
@@ -46,5 +52,12 @@ class ScaleAwareTransitionProgressProvider(
     override fun destroy() {
         contentResolver.unregisterContentObserver(animatorDurationScaleObserver)
         scopedUnfoldTransitionProgressProvider.destroy()
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun wrap(
+            progressProvider: UnfoldTransitionProgressProvider
+        ): ScaleAwareTransitionProgressProvider
     }
 }

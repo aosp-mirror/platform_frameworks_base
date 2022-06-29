@@ -107,7 +107,13 @@ public class PipUiEventLogger {
         PICTURE_IN_PICTURE_STASH_LEFT(710),
 
         @UiEvent(doc = "User stashed picture-in-picture to the right side")
-        PICTURE_IN_PICTURE_STASH_RIGHT(711);
+        PICTURE_IN_PICTURE_STASH_RIGHT(711),
+
+        @UiEvent(doc = "User taps on the settings button in PiP menu")
+        PICTURE_IN_PICTURE_SHOW_SETTINGS(933),
+
+        @UiEvent(doc = "Closes PiP with app-provided close action")
+        PICTURE_IN_PICTURE_CUSTOM_CLOSE(1058);
 
         private final int mId;
 

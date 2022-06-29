@@ -97,6 +97,10 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
         }
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
+        if (mSwitch.getVisibility() == VISIBLE) {
+            mSwitch.setOnCheckedChangeListener(this);
+        }
+
         setChecked(mSwitch.isChecked());
 
         if (attrs != null) {
@@ -109,7 +113,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
             a.recycle();
         }
 
-        setBackground(true);
+        setBackground(mSwitch.isChecked());
     }
 
     @Override
@@ -119,7 +123,8 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
 
     @Override
     public boolean performClick() {
-        return mSwitch.performClick();
+        mSwitch.performClick();
+        return super.performClick();
     }
 
     /**

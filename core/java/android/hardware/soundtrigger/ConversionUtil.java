@@ -18,20 +18,21 @@ package android.hardware.soundtrigger;
 
 import android.annotation.Nullable;
 import android.media.AudioFormat;
+import android.media.audio.common.AidlConversion;
 import android.media.audio.common.AudioConfig;
-import android.media.soundtrigger_middleware.AudioCapabilities;
-import android.media.soundtrigger_middleware.ConfidenceLevel;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.Phrase;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.RecognitionMode;
-import android.media.soundtrigger_middleware.SoundModel;
+import android.media.soundtrigger.AudioCapabilities;
+import android.media.soundtrigger.ConfidenceLevel;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.Phrase;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseRecognitionExtra;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.Properties;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.RecognitionMode;
+import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
 import android.os.ParcelFileDescriptor;
 import android.os.SharedMemory;
 
@@ -43,7 +44,7 @@ import java.util.UUID;
 class ConversionUtil {
     public static SoundTrigger.ModuleProperties aidl2apiModuleDescriptor(
             SoundTriggerModuleDescriptor aidlDesc) {
-        SoundTriggerModuleProperties properties = aidlDesc.properties;
+        Properties properties = aidlDesc.properties;
         return new SoundTrigger.ModuleProperties(
                 aidlDesc.handle,
                 properties.implementor,
@@ -194,19 +195,20 @@ class ConversionUtil {
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiRecognitionEvent(
-            int modelHandle, RecognitionEvent aidlEvent) {
+            int modelHandle, int captureSession, RecognitionEvent aidlEvent) {
         // The API recognition event doesn't allow for a null audio format, even though it doesn't
         // always make sense. We thus replace it with a default.
-        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(aidlEvent.audioConfig);
+        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(
+                aidlEvent.audioConfig, true /*isInput*/);
         return new SoundTrigger.GenericRecognitionEvent(
                 aidlEvent.status,
-                modelHandle, aidlEvent.captureAvailable, aidlEvent.captureSession,
+                modelHandle, aidlEvent.captureAvailable, captureSession,
                 aidlEvent.captureDelayMs, aidlEvent.capturePreambleMs, aidlEvent.triggerInData,
-                audioFormat, aidlEvent.data);
+                audioFormat, aidlEvent.data, aidlEvent.recognitionStillActive);
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiPhraseRecognitionEvent(
-            int modelHandle,
+            int modelHandle, int captureSession,
             PhraseRecognitionEvent aidlEvent) {
         SoundTrigger.KeyphraseRecognitionExtra[] apiExtras =
                 new SoundTrigger.KeyphraseRecognitionExtra[aidlEvent.phraseExtras.length];
@@ -215,129 +217,32 @@ class ConversionUtil {
         }
         // The API recognition event doesn't allow for a null audio format, even though it doesn't
         // always make sense. We thus replace it with a default.
-        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(aidlEvent.common.audioConfig);
+        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(
+                aidlEvent.common.audioConfig, true /*isInput*/);
         return new SoundTrigger.KeyphraseRecognitionEvent(aidlEvent.common.status, modelHandle,
                 aidlEvent.common.captureAvailable,
-                aidlEvent.common.captureSession, aidlEvent.common.captureDelayMs,
+                captureSession, aidlEvent.common.captureDelayMs,
                 aidlEvent.common.capturePreambleMs, aidlEvent.common.triggerInData,
                 audioFormat, aidlEvent.common.data,
                 apiExtras);
     }
 
-    public static AudioFormat aidl2apiAudioFormat(AudioConfig audioConfig) {
-        AudioFormat.Builder apiBuilder = new AudioFormat.Builder();
-        apiBuilder.setSampleRate(audioConfig.sampleRateHz);
-        apiBuilder.setChannelMask(aidl2apiChannelInMask(audioConfig.channelMask));
-        apiBuilder.setEncoding(aidl2apiEncoding(audioConfig.format));
-        return apiBuilder.build();
-    }
-
-    // Same as above, but in case of a null input returns a non-null valid output.
-    public static AudioFormat aidl2apiAudioFormatWithDefault(@Nullable AudioConfig audioConfig) {
+    // In case of a null input returns a non-null valid output.
+    public static AudioFormat aidl2apiAudioFormatWithDefault(
+            @Nullable AudioConfig audioConfig, boolean isInput) {
         if (audioConfig != null) {
-            return aidl2apiAudioFormat(audioConfig);
+            return AidlConversion.aidl2api_AudioConfig_AudioFormat(audioConfig, isInput);
         }
         return new AudioFormat.Builder().build();
-    }
-
-    public static int aidl2apiEncoding(int aidlFormat) {
-        switch (aidlFormat) {
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_16_BIT:
-                return AudioFormat.ENCODING_PCM_16BIT;
-
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_8_BIT:
-                return AudioFormat.ENCODING_PCM_8BIT;
-
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_FLOAT:
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_8_24_BIT:
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_24_BIT_PACKED:
-            case android.media.audio.common.AudioFormat.PCM
-                    | android.media.audio.common.AudioFormat.PCM_SUB_32_BIT:
-                return AudioFormat.ENCODING_PCM_FLOAT;
-
-            case android.media.audio.common.AudioFormat.AC3:
-                return AudioFormat.ENCODING_AC3;
-
-            case android.media.audio.common.AudioFormat.E_AC3:
-                return AudioFormat.ENCODING_E_AC3;
-
-            case android.media.audio.common.AudioFormat.DTS:
-                return AudioFormat.ENCODING_DTS;
-
-            case android.media.audio.common.AudioFormat.DTS_HD:
-                return AudioFormat.ENCODING_DTS_HD;
-
-            case android.media.audio.common.AudioFormat.MP3:
-                return AudioFormat.ENCODING_MP3;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_LC:
-                return AudioFormat.ENCODING_AAC_LC;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_HE_V1:
-                return AudioFormat.ENCODING_AAC_HE_V1;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_HE_V2:
-                return AudioFormat.ENCODING_AAC_HE_V2;
-
-            case android.media.audio.common.AudioFormat.IEC61937:
-                return AudioFormat.ENCODING_IEC61937;
-
-            case android.media.audio.common.AudioFormat.DOLBY_TRUEHD:
-                return AudioFormat.ENCODING_DOLBY_TRUEHD;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_ELD:
-                return AudioFormat.ENCODING_AAC_ELD;
-
-            case android.media.audio.common.AudioFormat.AAC
-                    | android.media.audio.common.AudioFormat.AAC_SUB_XHE:
-                return AudioFormat.ENCODING_AAC_XHE;
-
-            case android.media.audio.common.AudioFormat.AC4:
-                return AudioFormat.ENCODING_AC4;
-
-            case android.media.audio.common.AudioFormat.E_AC3
-                    | android.media.audio.common.AudioFormat.E_AC3_SUB_JOC:
-                return AudioFormat.ENCODING_E_AC3_JOC;
-
-            case android.media.audio.common.AudioFormat.MAT:
-            case android.media.audio.common.AudioFormat.MAT
-                    | android.media.audio.common.AudioFormat.MAT_SUB_1_0:
-            case android.media.audio.common.AudioFormat.MAT
-                    | android.media.audio.common.AudioFormat.MAT_SUB_2_0:
-            case android.media.audio.common.AudioFormat.MAT
-                    | android.media.audio.common.AudioFormat.MAT_SUB_2_1:
-                return AudioFormat.ENCODING_DOLBY_MAT;
-
-            case android.media.audio.common.AudioFormat.DEFAULT:
-                return AudioFormat.ENCODING_DEFAULT;
-
-            default:
-                return AudioFormat.ENCODING_INVALID;
-        }
     }
 
     public static int api2aidlModelParameter(int apiParam) {
         switch (apiParam) {
             case ModelParams.THRESHOLD_FACTOR:
-                return android.media.soundtrigger_middleware.ModelParameter.THRESHOLD_FACTOR;
+                return android.media.soundtrigger.ModelParameter.THRESHOLD_FACTOR;
             default:
-                return android.media.soundtrigger_middleware.ModelParameter.INVALID;
+                return android.media.soundtrigger.ModelParameter.INVALID;
         }
-    }
-
-    public static int aidl2apiChannelInMask(int aidlMask) {
-        // We're assuming AudioFormat.CHANNEL_IN_* constants are kept in sync with
-        // android.media.audio.common.AudioChannelMask.
-        return aidlMask;
     }
 
     public static SoundTrigger.ModelParamRange aidl2apiModelParameterRange(

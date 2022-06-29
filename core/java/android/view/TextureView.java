@@ -34,64 +34,126 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 /**
- * <p>A TextureView can be used to display a content stream. Such a content
- * stream can for instance be a video or an OpenGL scene. The content stream
+ * <p>A TextureView can be used to display a content stream, such as that
+ * coming from a camera preview, a video, or an OpenGL scene. The content stream
  * can come from the application's process as well as a remote process.</p>
  *
  * <p>TextureView can only be used in a hardware accelerated window. When
  * rendered in software, TextureView will draw nothing.</p>
  *
+ * <p><b>TextureView vs. SurfaceView Capabilities</b></p>
+
+ * <p>
+ *   <table>
+ *     <tr>
+ *       <th>&nbsp;</th>
+ *       <th style="text-align: center;">TextureView</th>
+ *       <th style="text-align: center;">SurfaceView</th>
+ *     </tr>
+ *     <tr>
+ *       <td>Supports alpha</td>
+ *       <td style="text-align: center;">X</td>
+ *       <td style="text-align: center;">&nbsp;</td>
+ *     </tr>
+ *     <tr>
+ *       <td>Supports rotations</td>
+ *       <td style="text-align: center;">X</td>
+ *       <td style="text-align: center;">&nbsp;</td>
+ *     </tr>
+ *     <tr>
+ *       <td>Supports clipping</td>
+ *       <td style="text-align: center;">X</td>
+ *       <td style="text-align: center;">&nbsp;</td>
+ *     </tr>
+ *     <tr>
+ *       <td>HDR support</td>
+ *       <td style="text-align: center;">Limited (on Android T+)</td>
+ *       <td style="text-align: center;">Full</td>
+ *     </tr>
+ *     <tr>
+ *       <td>Renders DRM content</td>
+ *       <td style="text-align: center;">&nbsp;</td>
+ *       <td style="text-align: center;">X</td>
+ *     </tr>
+ *   </table>
+ * </p>
+ *
  * <p>Unlike {@link SurfaceView}, TextureView does not create a separate
  * window but behaves as a regular View. This key difference allows a
- * TextureView to be moved, transformed, animated, etc. For instance, you
- * can make a TextureView semi-translucent by calling
- * <code>myView.setAlpha(0.5f)</code>.</p>
+ * TextureView to have translucency, arbitrary rotations, and complex
+ * clipping. For example, you can make a TextureView semi-translucent by
+ * calling <code>myView.setAlpha(0.5f)</code>.</p>
+ *
+ * <p>One implication of this integration of TextureView into the view
+ * hierarchy is that it may have slower performance than
+ * SurfaceView. TextureView contents must be copied, internally, from the
+ * underlying surface into the view displaying those contents. For
+ * that reason, <b>SurfaceView is recommended as a more general solution
+ * to problems requiring rendering to surfaces.</b></p>
  *
  * <p>Using a TextureView is simple: all you need to do is get its
  * {@link SurfaceTexture}. The {@link SurfaceTexture} can then be used to
- * render content. The following example demonstrates how to render the
- * camera preview into a TextureView:</p>
+ * render content. The following example demonstrates how to render a video
+ * into a TextureView:</p>
  *
  * <pre>
- *  public class LiveCameraActivity extends Activity implements TextureView.SurfaceTextureListener {
- *      private Camera mCamera;
+ *  public class MyActivity extends Activity implements TextureView.SurfaceTextureListener {
+ *      private MediaPlayer mMediaPlayer;
  *      private TextureView mTextureView;
  *
  *      protected void onCreate(Bundle savedInstanceState) {
  *          super.onCreate(savedInstanceState);
  *
+ *          mMediaPlayer = new MediaPlayer();
+ *
  *          mTextureView = new TextureView(this);
  *          mTextureView.setSurfaceTextureListener(this);
- *
  *          setContentView(mTextureView);
  *      }
  *
- *      public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
- *          mCamera = Camera.open();
- *
- *          try {
- *              mCamera.setPreviewTexture(surface);
- *              mCamera.startPreview();
- *          } catch (IOException ioe) {
- *              // Something bad happened
- *          }
+ *      public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surfaceTexture,
+ *                                            int width, int height) {
+ *          AssetFileDescriptor fileDescriptor = // get file descriptor
+ *          mMediaPlayer.setDataSource(fileDescriptor);
+ *          mMediaPlayer.setSurface(new Surface(surfaceTexture));
+ *          mMediaPlayer.prepareAsync();
+ *          mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+ *              &#64;Override
+ *              public void onPrepared(MediaPlayer mp) {
+ *                  mMediaPlayer.start();
+ *              }
+ *          });
+ *         } catch (IOException e) {
+ *             e.printStackTrace();
+ *         }
  *      }
  *
- *      public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
- *          // Ignored, Camera does all the work for us
- *      }
+ *     &#64;Override
+ *     public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surfaceTexture,
+ *                                             int width, int height) {
+ *         // Handle size change depending on media needs
+ *     }
  *
- *      public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
- *          mCamera.stopPreview();
- *          mCamera.release();
- *          return true;
- *      }
+ *     &#64;Override
+ *     public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surfaceTexture) {
+ *         // Release unneeded resources
+ *         mMediaPlayer.stop();
+ *         mMediaPlayer.release();
+ *         return true;
+ *     }
  *
- *      public void onSurfaceTextureUpdated(SurfaceTexture surface) {
- *          // Invoked every time there's a new Camera preview frame
- *      }
+ *     &#64;Override
+ *     public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surfaceTexture) {
+ *          // Invoked every time there's a new video frame
+ *     }
+ *
  *  }
  * </pre>
+ *
+ * <p>Similarly, TextureView can supply the surface needed for GL rendering or
+ * camera previews. Camera2 APIs require the surface created by TextureView,
+ * although developers are recommended to use the CameraX APIs instead, for which
+ * PreviewView creates its own TextureView or SurfaceView internally.</p>
  *
  * <p>A TextureView's SurfaceTexture can be obtained either by invoking
  * {@link #getSurfaceTexture()} or by using a {@link SurfaceTextureListener}.

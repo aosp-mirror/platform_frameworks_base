@@ -39,8 +39,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.os.Bundle;
 import android.os.Process;
@@ -376,9 +376,9 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
         packageInfo.signingInfo = new SigningInfo(
-                new PackageParser.SigningDetails(
+                new SigningDetails(
                         new Signature[] {FAKE_SIGNATURE_2},
-                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         PackageManagerStub.sPackageInfo = packageInfo;
@@ -413,9 +413,9 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.uid = Process.SYSTEM_UID;
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
         packageInfo.signingInfo = new SigningInfo(
-                new PackageParser.SigningDetails(
+                new SigningDetails(
                         new Signature[] {FAKE_SIGNATURE_1},
-                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         PackageManagerStub.sPackageInfo = packageInfo;
@@ -451,9 +451,9 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
         packageInfo.signingInfo = new SigningInfo(
-                new PackageParser.SigningDetails(
+                new SigningDetails(
                         new Signature[] {FAKE_SIGNATURE_1},
-                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         PackageManagerStub.sPackageInfo = packageInfo;
@@ -492,9 +492,9 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
         packageInfo.signingInfo = new SigningInfo(
-                new PackageParser.SigningDetails(
+                new SigningDetails(
                         new Signature[] {FAKE_SIGNATURE_1},
-                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.versionCode = 2;
@@ -536,9 +536,9 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
         packageInfo.signingInfo = new SigningInfo(
-                new PackageParser.SigningDetails(
+                new SigningDetails(
                         new Signature[] {FAKE_SIGNATURE_1},
-                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.versionCode = 1;
@@ -576,9 +576,9 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
         packageInfo.signingInfo = new SigningInfo(
-                new PackageParser.SigningDetails(
+                new SigningDetails(
                         new Signature[] {FAKE_SIGNATURE_1},
-                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         packageInfo.versionCode = 1;

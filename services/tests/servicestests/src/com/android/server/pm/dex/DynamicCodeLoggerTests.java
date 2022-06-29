@@ -31,6 +31,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -51,6 +52,7 @@ import org.mockito.junit.MockitoRule;
 import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Stubber;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class DynamicCodeLoggerTests {

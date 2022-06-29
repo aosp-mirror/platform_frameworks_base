@@ -19,6 +19,7 @@ package android.media.audiopolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.media.AudioAttributes;
 import android.media.AudioSystem;
 import android.media.MediaRecorder;
@@ -240,6 +241,7 @@ public final class AudioProductStrategy implements Parcelable {
      * @return the legacy stream type relevant for the given {@link AudioAttributes}.
      *         If none is found, it return DEFAULT stream type.
      */
+    @TestApi
     public int getLegacyStreamTypeForAudioAttributes(@NonNull AudioAttributes aa) {
         Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
@@ -273,6 +275,7 @@ public final class AudioProductStrategy implements Parcelable {
      * @return the volume group id relevant for the given streamType.
      *         If none is found, {@link AudioVolumeGroup#DEFAULT_VOLUME_GROUP} is returned.
      */
+    @TestApi
     public int getVolumeGroupIdForLegacyStreamType(int streamType) {
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
             if (aag.supportsStreamType(streamType)) {
@@ -288,6 +291,7 @@ public final class AudioProductStrategy implements Parcelable {
      * @return the volume group id associated with the given audio attributes if found,
      *         {@link AudioVolumeGroup#DEFAULT_VOLUME_GROUP} otherwise.
      */
+    @TestApi
     public int getVolumeGroupIdForAudioAttributes(@NonNull AudioAttributes aa) {
         Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
@@ -352,9 +356,17 @@ public final class AudioProductStrategy implements Parcelable {
      * @hide
      * Default attributes, with default source to be aligned with native.
      */
-    public static final @NonNull AudioAttributes sDefaultAttributes =
+    private static final @NonNull AudioAttributes DEFAULT_ATTRIBUTES =
             new AudioAttributes.Builder().setCapturePreset(MediaRecorder.AudioSource.DEFAULT)
                                          .build();
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public static @NonNull AudioAttributes getDefaultAttributes() {
+        return DEFAULT_ATTRIBUTES;
+    }
 
     /**
      * To avoid duplicating the logic in java and native, we shall make use of
@@ -369,7 +381,7 @@ public final class AudioProductStrategy implements Parcelable {
         Preconditions.checkNotNull(attr, "attr must not be null");
         String refFormattedTags = TextUtils.join(";", refAttr.getTags());
         String cliFormattedTags = TextUtils.join(";", attr.getTags());
-        if (refAttr.equals(sDefaultAttributes)) {
+        if (refAttr.equals(DEFAULT_ATTRIBUTES)) {
             return false;
         }
         return ((refAttr.getSystemUsage() == AudioAttributes.USAGE_UNKNOWN)

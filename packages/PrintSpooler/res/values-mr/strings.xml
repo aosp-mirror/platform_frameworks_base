@@ -82,7 +82,7 @@
     <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> प्रिंट करत आहे"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> रद्द करत आहे"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"प्रिंटर एरर <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
-    <string name="blocked_notification_title_template" msgid="1175435827331588646">"प्रिंटरने <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ब्लॉक केला"</string>
+    <string name="blocked_notification_title_template" msgid="1175435827331588646">"प्रिंटरने <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> अवरोधित केले"</string>
     <string name="cancel" msgid="4373674107267141885">"रद्द करा"</string>
     <string name="restart" msgid="2472034227037808749">"रीस्टार्ट करा"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटरवर कोणतेही कनेक्‍शन नाही"</string>

@@ -405,5 +405,46 @@ apps using the
 <a href="#get_list_of_already_plugged_in_entities">MIDI device discovery calls described above</a>.
 </p>
 
+<h1 id=using_midi_2_0_over_usb>Using MIDI 2.0 over USB</h1>
+
+<p>An app can use MIDI 2.0 over USB starting in Android T. MIDI 2.0 packets are embedded in
+Universal MIDI Packets, or UMP for short. A MIDI 2.0 USB device should create two interfaces,
+one endpoint that accepts only MIDI 1.0 packets and one that accepts only UMP packets.
+For more info about MIDI 2.0 and UMP, please read the MIDI 2.0 USB spec.</p>
+
+<p>MidiManager.getDevices() would simply return the 1.0 interface. This interface should work
+exactly the same as before. In order to use the new UMP interface, retrieve the device with the
+following code snippet.</p>
+
+<pre class=prettyprint>
+Collection&#60;MidiDeviceInfo&#62; universalDeviceInfos = midiManager.getDevicesForTransport(
+        MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS);
+</pre>
+
+<p>UMP Packets are always in multiple of 4 bytes. For each set of 4 bytes, they are sent in network
+order. Compare the following NoteOn code snippet with the NoteOn code snippet above. </p>
+
+<pre class=prettyprint>
+byte[] buffer = new byte[32];
+int numBytes = 0;
+int channel = 3; // MIDI channels 1-16 are encoded as 0-15.
+int group = 0;
+buffer[numBytes++] = (byte)(0x20 + group); // MIDI 1.0 voice message
+buffer[numBytes++] = (byte)(0x90 + (channel - 1)); // note on
+buffer[numBytes++] = (byte)60; // pitch is middle C
+buffer[numBytes++] = (byte)127; // max velocity
+int offset = 0;
+// post is non-blocking
+inputPort.send(buffer, offset, numBytes);
+</pre>
+
+<p>MIDI 2.0 messages can be sent through UMP after negotiating with the device. This is called
+MIDI-CI and is documented in the MIDI 2.0 spec. Some USB devices support pre-negotiated MIDI 2.0.
+For a MidiDeviceInfo, you can query the defaultProtocol.</p>
+
+<pre class=prettyprint>
+int defaultProtocol = info.getDefaultProtocol();
+</pre>
+
 </body>
 </html>

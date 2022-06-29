@@ -29,6 +29,9 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * See {@link com.android.server.trust.TrustManagerService}
  * @hide
@@ -43,6 +46,7 @@ public class TrustManager {
     private static final String TAG = "TrustManager";
     private static final String DATA_FLAGS = "initiatedByUser";
     private static final String DATA_MESSAGE = "message";
+    private static final String DATA_GRANTED_MESSAGES = "grantedMessages";
 
     private final ITrustManager mService;
     private final ArrayMap<TrustListener, ITrustListener> mTrustListeners;
@@ -79,6 +83,34 @@ public class TrustManager {
     public void reportUnlockAttempt(boolean successful, int userId) {
         try {
             mService.reportUnlockAttempt(successful, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports that the user {@code userId} is likely interested in unlocking the device.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     *
+     * @param dismissKeyguard whether the user wants to dismiss keyguard
+     */
+    public void reportUserRequestedUnlock(int userId, boolean dismissKeyguard) {
+        try {
+            mService.reportUserRequestedUnlock(userId, dismissKeyguard);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports that the user {@code userId} may want to unlock the device soon.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     */
+    public void reportUserMayRequestUnlock(int userId) {
+        try {
+            mService.reportUserMayRequestUnlock(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -139,12 +171,15 @@ public class TrustManager {
         try {
             ITrustListener.Stub iTrustListener = new ITrustListener.Stub() {
                 @Override
-                public void onTrustChanged(boolean enabled, int userId, int flags) {
+                public void onTrustChanged(boolean enabled, int userId, int flags,
+                        List<String> trustGrantedMessages) {
                     Message m = mHandler.obtainMessage(MSG_TRUST_CHANGED, (enabled ? 1 : 0), userId,
                             trustListener);
                     if (flags != 0) {
                         m.getData().putInt(DATA_FLAGS, flags);
                     }
+                    m.getData().putCharSequenceArrayList(
+                            DATA_GRANTED_MESSAGES, (ArrayList) trustGrantedMessages);
                     m.sendToTarget();
                 }
 
@@ -156,7 +191,7 @@ public class TrustManager {
 
                 @Override
                 public void onTrustError(CharSequence message) {
-                    Message m = mHandler.obtainMessage(MSG_TRUST_ERROR);
+                    Message m = mHandler.obtainMessage(MSG_TRUST_ERROR, trustListener);
                     m.getData().putCharSequence(DATA_MESSAGE, message);
                     m.sendToTarget();
                 }
@@ -217,9 +252,9 @@ public class TrustManager {
      * Clears authentication by the specified biometric type for all users.
      */
     @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
-    public void clearAllBiometricRecognized(BiometricSourceType source) {
+    public void clearAllBiometricRecognized(BiometricSourceType source, int unlockedUser) {
         try {
-            mService.clearAllBiometricRecognized(source);
+            mService.clearAllBiometricRecognized(source, unlockedUser);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -231,14 +266,15 @@ public class TrustManager {
             switch(msg.what) {
                 case MSG_TRUST_CHANGED:
                     int flags = msg.peekData() != null ? msg.peekData().getInt(DATA_FLAGS) : 0;
-                    ((TrustListener)msg.obj).onTrustChanged(msg.arg1 != 0, msg.arg2, flags);
+                    ((TrustListener) msg.obj).onTrustChanged(msg.arg1 != 0, msg.arg2, flags,
+                            msg.getData().getStringArrayList(DATA_GRANTED_MESSAGES));
                     break;
                 case MSG_TRUST_MANAGED_CHANGED:
                     ((TrustListener)msg.obj).onTrustManagedChanged(msg.arg1 != 0, msg.arg2);
                     break;
                 case MSG_TRUST_ERROR:
                     final CharSequence message = msg.peekData().getCharSequence(DATA_MESSAGE);
-                    ((TrustListener)msg.obj).onTrustError(message);
+                    ((TrustListener) msg.obj).onTrustError(message);
             }
         }
     };
@@ -252,8 +288,11 @@ public class TrustManager {
          * @param flags Flags specified by the trust agent when granting trust. See
          *     {@link android.service.trust.TrustAgentService#grantTrust(CharSequence, long, int)
          *                 TrustAgentService.grantTrust(CharSequence, long, int)}.
+         * @param trustGrantedMessages Messages to display to the user when trust has been granted
+         *        by one or more trust agents.
          */
-        void onTrustChanged(boolean enabled, int userId, int flags);
+        void onTrustChanged(boolean enabled, int userId, int flags,
+                List<String> trustGrantedMessages);
 
         /**
          * Reports that whether trust is managed has changed

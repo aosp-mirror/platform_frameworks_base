@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenshot;
 
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.SCREENSHOT_BLOCKED_BY_ADMIN;
 import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
 
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_COMPLETE;
@@ -24,9 +25,11 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SERVICE;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER;
 
 import android.annotation.MainThread;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -42,17 +45,20 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.R;
-import com.android.systemui.shared.recents.utilities.BitmapUtil;
+import com.android.systemui.dagger.qualifiers.Background;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -63,9 +69,12 @@ public class TakeScreenshotService extends Service {
     private ScreenshotController mScreenshot;
 
     private final UserManager mUserManager;
+    private final DevicePolicyManager mDevicePolicyManager;
     private final UiEventLogger mUiEventLogger;
     private final ScreenshotNotificationsController mNotificationsController;
     private final Handler mHandler;
+    private final Context mContext;
+    private final @Background Executor mBgExecutor;
 
     private final BroadcastReceiver mCloseSystemDialogs = new BroadcastReceiver() {
         @Override
@@ -75,6 +84,7 @@ public class TakeScreenshotService extends Service {
                     Log.d(TAG, "Received ACTION_CLOSE_SYSTEM_DIALOGS");
                 }
                 if (!mScreenshot.isPendingSharedTransition()) {
+                    mUiEventLogger.log(SCREENSHOT_DISMISSED_OTHER);
                     mScreenshot.dismissScreenshot(false);
                 }
             }
@@ -83,7 +93,7 @@ public class TakeScreenshotService extends Service {
 
     /** Informs about coarse grained state of the Controller. */
     interface RequestCallback {
-        /** Respond to the current request indicating the screenshot request failed.*/
+        /** Respond to the current request indicating the screenshot request failed. */
         void reportError();
 
         /** The controller has completed handling this request UI has been removed */
@@ -92,16 +102,20 @@ public class TakeScreenshotService extends Service {
 
     @Inject
     public TakeScreenshotService(ScreenshotController screenshotController, UserManager userManager,
-            UiEventLogger uiEventLogger,
-            ScreenshotNotificationsController notificationsController) {
+            DevicePolicyManager devicePolicyManager, UiEventLogger uiEventLogger,
+            ScreenshotNotificationsController notificationsController, Context context,
+            @Background Executor bgExecutor) {
         if (DEBUG_SERVICE) {
             Log.d(TAG, "new " + this);
         }
         mHandler = new Handler(Looper.getMainLooper(), this::handleMessage);
         mScreenshot = screenshotController;
         mUserManager = userManager;
+        mDevicePolicyManager = devicePolicyManager;
         mUiEventLogger = uiEventLogger;
         mNotificationsController = notificationsController;
+        mContext = context;
+        mBgExecutor = bgExecutor;
     }
 
     @Override
@@ -113,7 +127,8 @@ public class TakeScreenshotService extends Service {
 
     @Override
     public IBinder onBind(@NonNull Intent intent) {
-        registerReceiver(mCloseSystemDialogs, new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS));
+        registerReceiver(mCloseSystemDialogs, new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS),
+                Context.RECEIVER_EXPORTED);
         final Messenger m = new Messenger(mHandler);
         if (DEBUG_SERVICE) {
             Log.d(TAG, "onBind: returning connection: " + m);
@@ -138,8 +153,7 @@ public class TakeScreenshotService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (mScreenshot != null) {
-            mScreenshot.removeWindow();
-            mScreenshot.releaseContext();
+            mScreenshot.onDestroy();
             mScreenshot = null;
         }
         if (DEBUG_SERVICE) {
@@ -183,6 +197,20 @@ public class TakeScreenshotService extends Service {
             return true;
         }
 
+        if (mDevicePolicyManager.getScreenCaptureDisabled(null, UserHandle.USER_ALL)) {
+            mBgExecutor.execute(() -> {
+                Log.w(TAG, "Skipping screenshot because an IT admin has disabled "
+                        + "screenshots on the device");
+                String blockedByAdminText = mDevicePolicyManager.getResources().getString(
+                        SCREENSHOT_BLOCKED_BY_ADMIN,
+                        () -> mContext.getString(R.string.screenshot_blocked_by_admin));
+                mHandler.post(() ->
+                        Toast.makeText(mContext, blockedByAdminText, Toast.LENGTH_SHORT).show());
+                requestCallback.reportError();
+            });
+            return true;
+        }
+
         ScreenshotHelper.ScreenshotRequest screenshotRequest =
                 (ScreenshotHelper.ScreenshotRequest) msg.obj;
 
@@ -207,7 +235,7 @@ public class TakeScreenshotService extends Service {
                 if (DEBUG_SERVICE) {
                     Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_PROVIDED_IMAGE");
                 }
-                Bitmap screenshot = BitmapUtil.bundleToHardwareBitmap(
+                Bitmap screenshot = ScreenshotHelper.HardwareBitmapBundler.bundleToHardwareBitmap(
                         screenshotRequest.getBitmapBundle());
                 Rect screenBounds = screenshotRequest.getBoundsInScreen();
                 Insets insets = screenshotRequest.getInsets();
@@ -229,7 +257,7 @@ public class TakeScreenshotService extends Service {
                 return false;
         }
         return true;
-    };
+    }
 
     private static void sendComplete(Messenger target) {
         try {

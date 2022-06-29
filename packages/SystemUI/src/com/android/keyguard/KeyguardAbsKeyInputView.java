@@ -30,7 +30,6 @@ import com.android.systemui.R;
  */
 public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
     protected View mEcaView;
-    protected boolean mEnableHaptics;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -43,10 +42,6 @@ public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
 
     public KeyguardAbsKeyInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    void setEnableHaptics(boolean enableHaptics) {
-        mEnableHaptics = enableHaptics;
     }
 
     protected abstract int getPasswordTextViewId();
@@ -80,11 +75,8 @@ public abstract class KeyguardAbsKeyInputView extends KeyguardInputView {
 
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
-        if (mEnableHaptics) {
-            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
-                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
-                    | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
-        }
+        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
     }
 
     public void setKeyDownListener(KeyDownListener keyDownListener) {

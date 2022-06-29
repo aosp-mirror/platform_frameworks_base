@@ -20,14 +20,14 @@ import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
 import java.util.ArrayList;
 
 public class BackupParams {
 
-    public TransportClient transportClient;
+    public TransportConnection mTransportConnection;
     public String dirName;
     public ArrayList<String> kvPackages;
     public ArrayList<String> fullPackages;
@@ -38,11 +38,11 @@ public class BackupParams {
     public boolean nonIncrementalBackup;
     public BackupEligibilityRules mBackupEligibilityRules;
 
-    public BackupParams(TransportClient transportClient, String dirName,
+    public BackupParams(TransportConnection transportConnection, String dirName,
             ArrayList<String> kvPackages, ArrayList<String> fullPackages, IBackupObserver observer,
             IBackupManagerMonitor monitor, OnTaskFinishedListener listener, boolean userInitiated,
             boolean nonIncrementalBackup, BackupEligibilityRules backupEligibilityRules) {
-        this.transportClient = transportClient;
+        this.mTransportConnection = transportConnection;
         this.dirName = dirName;
         this.kvPackages = kvPackages;
         this.fullPackages = fullPackages;

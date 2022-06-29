@@ -28,7 +28,8 @@ import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
-import android.provider.Settings
+import android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS
+import android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -44,6 +45,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
@@ -84,6 +86,7 @@ class LockscreenSmartspaceController @Inject constructor(
     // Smartspace can be used on multiple displays, such as when the user casts their screen
     private var smartspaceViews = mutableSetOf<SmartspaceView>()
 
+    private var showNotifications = false
     private var showSensitiveContentForCurrentUser = false
     private var showSensitiveContentForManagedUser = false
     private var managedUserHandle: UserHandle? = null
@@ -158,7 +161,7 @@ class LockscreenSmartspaceController @Inject constructor(
     fun isEnabled(): Boolean {
         execution.assertIsMainThread()
 
-        return featureFlags.isSmartspaceEnabled && plugin != null
+        return featureFlags.isEnabled(Flags.SMARTSPACE) && plugin != null
     }
 
     /**
@@ -232,7 +235,13 @@ class LockscreenSmartspaceController @Inject constructor(
         deviceProvisionedController.removeCallback(deviceProvisionedListener)
         userTracker.addCallback(userTrackerCallback, uiExecutor)
         contentResolver.registerContentObserver(
-                secureSettings.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
+                secureSettings.getUriFor(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
+                true,
+                settingsObserver,
+                UserHandle.USER_ALL
+        )
+        contentResolver.registerContentObserver(
+                secureSettings.getUriFor(LOCK_SCREEN_SHOW_NOTIFICATIONS),
                 true,
                 settingsObserver,
                 UserHandle.USER_ALL
@@ -285,6 +294,9 @@ class LockscreenSmartspaceController @Inject constructor(
     }
 
     private fun filterSmartspaceTarget(t: SmartspaceTarget): Boolean {
+        if (!showNotifications) {
+            return t.getFeatureType() == SmartspaceTarget.FEATURE_WEATHER
+        }
         return when (t.userHandle) {
             userTracker.userHandle -> {
                 !t.isSensitive || showSensitiveContentForCurrentUser
@@ -309,16 +321,26 @@ class LockscreenSmartspaceController @Inject constructor(
     }
 
     private fun reloadSmartspace() {
-        val setting = Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS
+        showNotifications = secureSettings.getIntForUser(
+            LOCK_SCREEN_SHOW_NOTIFICATIONS,
+            0,
+            userTracker.userId
+        ) == 1
 
-        showSensitiveContentForCurrentUser =
-                secureSettings.getIntForUser(setting, 0, userTracker.userId) == 1
+        showSensitiveContentForCurrentUser = secureSettings.getIntForUser(
+            LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+            0,
+            userTracker.userId
+        ) == 1
 
         managedUserHandle = getWorkProfileUser()
         val managedId = managedUserHandle?.identifier
         if (managedId != null) {
-            showSensitiveContentForManagedUser =
-                    secureSettings.getIntForUser(setting, 0, managedId) == 1
+            showSensitiveContentForManagedUser = secureSettings.getIntForUser(
+                LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
+                0,
+                managedId
+            ) == 1
         }
 
         session?.requestSmartspaceUpdate()

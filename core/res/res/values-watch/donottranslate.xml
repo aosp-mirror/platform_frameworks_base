@@ -17,6 +17,6 @@
 <resources>
     <!-- DO NOT TRANSLATE Spans within this text are applied to style composing regions
     within an EditText widget. The text content is ignored and not used.
-    Note: This is @color/material_deep_teal_200, cannot use @color references here. -->
-    <string name="candidates_style" translatable="false"><font color="#80cbc4">candidates</font></string>
+    Note: This is @color/GM2_blue_300, cannot use @color references here. -->
+    <string name="candidates_style" translatable="false"><font color="#8AB4F8">candidates</font></string>
  </resources>

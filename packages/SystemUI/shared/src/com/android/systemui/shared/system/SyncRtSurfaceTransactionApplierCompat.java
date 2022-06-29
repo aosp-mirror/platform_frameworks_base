@@ -205,13 +205,6 @@ public class SyncRtSurfaceTransactionApplierCompat {
             /**
              * @param surface The surface to modify.
              */
-            public Builder(SurfaceControlCompat surface) {
-                this(surface.mSurfaceControl);
-            }
-
-            /**
-             * @param surface The surface to modify.
-             */
             public Builder(SurfaceControl surface) {
                 this.surface = surface;
             }

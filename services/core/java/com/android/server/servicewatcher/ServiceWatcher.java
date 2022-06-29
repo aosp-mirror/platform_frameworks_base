@@ -70,7 +70,7 @@ public interface ServiceWatcher {
          * cleanup in response to a single binder operation, it should not be used to propagate
          * errors further. Run on the ServiceWatcher thread.
          */
-        default void onError() {}
+        default void onError(Throwable t) {}
     }
 
     /**

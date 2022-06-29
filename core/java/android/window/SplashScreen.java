@@ -22,6 +22,7 @@ import android.annotation.StyleRes;
 import android.annotation.SuppressLint;
 import android.annotation.UiThread;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.content.Context;
@@ -48,20 +49,20 @@ public interface SplashScreen {
      */
     int SPLASH_SCREEN_STYLE_UNDEFINED = -1;
     /**
-     * Force splash screen to be empty.
-     * @hide
+     * Flag to be used with {@link ActivityOptions#setSplashScreenStyle}, to avoid showing the
+     * splash screen icon of the launched activity
      */
-    int SPLASH_SCREEN_STYLE_EMPTY = 0;
+    int SPLASH_SCREEN_STYLE_SOLID_COLOR = 0;
     /**
-     * Force splash screen to show icon.
-     * @hide
+     * Flag to be used with {@link ActivityOptions#setSplashScreenStyle}, to show the splash screen
+     * icon of the launched activity.
      */
     int SPLASH_SCREEN_STYLE_ICON = 1;
 
     /** @hide */
     @IntDef(prefix = { "SPLASH_SCREEN_STYLE_" }, value = {
             SPLASH_SCREEN_STYLE_UNDEFINED,
-            SPLASH_SCREEN_STYLE_EMPTY,
+            SPLASH_SCREEN_STYLE_SOLID_COLOR,
             SPLASH_SCREEN_STYLE_ICON
     })
     @interface SplashScreenStyle {}

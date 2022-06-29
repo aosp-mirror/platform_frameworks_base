@@ -25,8 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,16 +32,10 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
-import android.util.Slog;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnAttachStateChangeListener;
-import android.view.ViewGroup;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -52,23 +44,21 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.SysUIToast;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.tiles.dialog.QSZenModeDialogMetricsLogger;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.settings.SecureSettings;
-import com.android.systemui.volume.ZenModePanel;
 
 import javax.inject.Inject;
 
@@ -82,13 +72,12 @@ public class DndTile extends QSTileImpl<BooleanState> {
             new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS);
 
     private final ZenModeController mController;
-    private final DndDetailAdapter mDetailAdapter;
     private final SharedPreferences mSharedPreferences;
-    private final SecureSetting mSettingZenDuration;
+    private final SettingObserver mSettingZenDuration;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final QSZenModeDialogMetricsLogger mQSZenDialogMetricsLogger;
 
     private boolean mListening;
-    private boolean mShowingDetail;
 
     @Inject
     public DndTile(
@@ -109,16 +98,16 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 statusBarStateController, activityStarter, qsLogger);
         mController = zenModeController;
         mSharedPreferences = sharedPreferences;
-        mDetailAdapter = new DndDetailAdapter();
         mController.observe(getLifecycle(), mZenCallback);
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mSettingZenDuration = new SecureSetting(secureSettings, mUiHandler,
+        mSettingZenDuration = new SettingObserver(secureSettings, mUiHandler,
                 Settings.Secure.ZEN_DURATION, getHost().getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 refreshState();
             }
         };
+        mQSZenDialogMetricsLogger = new QSZenModeDialogMetricsLogger(mContext);
     }
 
     public static void setVisible(Context context, boolean visible) {
@@ -136,11 +125,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
     public static boolean isCombinedIcon(SharedPreferences sharedPreferences) {
         return sharedPreferences.getBoolean(Prefs.Key.DND_TILE_COMBINED_ICON,
                 false /* defaultValue */);
-    }
-
-    @Override
-    public DetailAdapter getDetailAdapter() {
-        return mDetailAdapter;
     }
 
     @Override
@@ -211,7 +195,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private Dialog makeZenModeDialog() {
         AlertDialog dialog = new EnableZenModeDialog(mContext, R.style.Theme_SystemUI_Dialog,
-                true /* cancelIsNeutral */).createDialog();
+                true /* cancelIsNeutral */,
+                mQSZenDialogMetricsLogger).createDialog();
         SystemUIDialog.applyFlags(dialog);
         SystemUIDialog.setShowForAllUsers(dialog, true);
         SystemUIDialog.registerDismissListener(dialog);
@@ -221,28 +206,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleSecondaryClick(@Nullable View view) {
-        if (mController.isVolumeRestricted()) {
-            // Collapse the panels, so the user can see the toast.
-            mHost.collapsePanels();
-            SysUIToast.makeText(mContext, mContext.getString(
-                    com.android.internal.R.string.error_message_change_not_allowed),
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
-        if (!mState.value) {
-            // Because of the complexity of the zen panel, it needs to be shown after
-            // we turn on zen below.
-            mController.addCallback(new ZenModeController.Callback() {
-                @Override
-                public void onZenChanged(int zen) {
-                    mController.removeCallback(this);
-                    showDetail(true);
-                }
-            });
-            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
-        } else {
-            showDetail(true);
-        }
+        handleLongClick(view);
     }
 
     @Override
@@ -291,9 +255,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
                         R.string.accessibility_quick_settings_dnd);
                 break;
         }
-        if (valueChanged) {
-            fireToggleStateChanged(state.value);
-        }
         state.dualLabelContentDescription = mContext.getResources().getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
@@ -304,15 +265,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_DND;
-    }
-
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_dnd_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_dnd_changed_off);
-        }
     }
 
     @Override
@@ -354,145 +306,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final ZenModeController.Callback mZenCallback = new ZenModeController.Callback() {
         public void onZenChanged(int zen) {
             refreshState(zen);
-            if (isShowingDetail()) {
-                mDetailAdapter.updatePanel();
-            }
-        }
-
-        @Override
-        public void onConfigChanged(ZenModeConfig config) {
-            if (isShowingDetail()) {
-                mDetailAdapter.updatePanel();
-            }
-        }
-    };
-
-    private final class DndDetailAdapter implements DetailAdapter, OnAttachStateChangeListener {
-
-        private ZenModePanel mZenPanel;
-        private boolean mAuto;
-
-        @Override
-        public CharSequence getTitle() {
-            return mContext.getString(R.string.quick_settings_dnd_label);
-        }
-
-        @Override
-        public Boolean getToggleState() {
-            return mState.value;
-        }
-
-        @Override
-        public Intent getSettingsIntent() {
-            return ZEN_SETTINGS;
-        }
-
-        @Override
-        public void setToggleState(boolean state) {
-            MetricsLogger.action(mContext, MetricsEvent.QS_DND_TOGGLE, state);
-            if (!state) {
-                mController.setZen(ZEN_MODE_OFF, null, TAG);
-                mAuto = false;
-            } else {
-                mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
-            }
-        }
-
-        @Override
-        public int getMetricsCategory() {
-            return MetricsEvent.QS_DND_DETAILS;
-        }
-
-        @Override
-        public View createDetailView(Context context, View convertView, ViewGroup parent) {
-            mZenPanel = convertView != null ? (ZenModePanel) convertView
-                    : (ZenModePanel) LayoutInflater.from(context).inflate(
-                            R.layout.zen_mode_panel, parent, false);
-            if (convertView == null) {
-                mZenPanel.init(mController);
-                mZenPanel.addOnAttachStateChangeListener(this);
-                mZenPanel.setCallback(mZenModePanelCallback);
-                mZenPanel.setEmptyState(R.drawable.ic_qs_dnd_detail_empty, R.string.dnd_is_off);
-            }
-            updatePanel();
-            return mZenPanel;
-        }
-
-        private void updatePanel() {
-            if (mZenPanel == null) return;
-            mAuto = false;
-            if (mController.getZen() == ZEN_MODE_OFF) {
-                mZenPanel.setState(ZenModePanel.STATE_OFF);
-            } else {
-                ZenModeConfig config = mController.getConfig();
-                String summary = "";
-                if (config.manualRule != null && config.manualRule.enabler != null) {
-                    summary = getOwnerCaption(config.manualRule.enabler);
-                }
-                for (ZenRule automaticRule : config.automaticRules.values()) {
-                    if (automaticRule.isAutomaticActive()) {
-                        if (summary.isEmpty()) {
-                            summary = mContext.getString(R.string.qs_dnd_prompt_auto_rule,
-                                    automaticRule.name);
-                        } else {
-                            summary = mContext.getString(R.string.qs_dnd_prompt_auto_rule_app);
-                        }
-                    }
-                }
-                if (summary.isEmpty()) {
-                    mZenPanel.setState(ZenModePanel.STATE_MODIFY);
-                } else {
-                    mAuto = true;
-                    mZenPanel.setState(ZenModePanel.STATE_AUTO_RULE);
-                    mZenPanel.setAutoText(summary);
-                }
-            }
-        }
-
-        private String getOwnerCaption(String owner) {
-            final PackageManager pm = mContext.getPackageManager();
-            try {
-                final ApplicationInfo info = pm.getApplicationInfo(owner, 0);
-                if (info != null) {
-                    final CharSequence seq = info.loadLabel(pm);
-                    if (seq != null) {
-                        final String str = seq.toString().trim();
-                        return mContext.getString(R.string.qs_dnd_prompt_app, str);
-                    }
-                }
-            } catch (Throwable e) {
-                Slog.w(TAG, "Error loading owner caption", e);
-            }
-            return "";
-        }
-
-        @Override
-        public void onViewAttachedToWindow(View v) {
-            mShowingDetail = true;
-        }
-
-        @Override
-        public void onViewDetachedFromWindow(View v) {
-            mShowingDetail = false;
-            mZenPanel = null;
-        }
-    }
-
-    private final ZenModePanel.Callback mZenModePanelCallback = new ZenModePanel.Callback() {
-        @Override
-        public void onPrioritySettings() {
-            mActivityStarter.postStartActivityDismissingKeyguard(
-                    ZEN_PRIORITY_SETTINGS, 0);
-        }
-
-        @Override
-        public void onInteraction() {
-            // noop
-        }
-
-        @Override
-        public void onExpanded(boolean expanded) {
-            // noop
         }
     };
 

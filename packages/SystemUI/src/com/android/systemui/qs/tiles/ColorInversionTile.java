@@ -38,7 +38,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
-import com.android.systemui.qs.SecureSetting;
+import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.settings.UserTracker;
@@ -49,14 +49,8 @@ import javax.inject.Inject;
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
-    private static final String EXTRA_FRAGMENT_ARGS_KEY = ":settings:fragment_args_key";
-    private static final String EXTRA_SHOW_FRAGMENT_ARGS_KEY = ":settings:show_fragment_args";
-    private static final String COLOR_INVERSION_PREFERENCE_KEY = "toggle_inversion_preference";
-
     private final Icon mIcon = ResourceIcon.get(drawable.ic_invert_colors);
-    private final SecureSetting mSetting;
-
-    private boolean mListening;
+    private final SettingObserver mSetting;
 
     @Inject
     public ColorInversionTile(
@@ -74,7 +68,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
-        mSetting = new SecureSetting(secureSettings, mHandler,
+        mSetting = new SettingObserver(secureSettings, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
@@ -126,11 +120,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
         state.value = enabled;
-        state.slash.isSlashed = !state.value;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.icon = mIcon;
@@ -141,16 +131,5 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_COLORINVERSION;
-    }
-
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(
-                    R.string.accessibility_quick_settings_color_inversion_changed_on);
-        } else {
-            return mContext.getString(
-                    R.string.accessibility_quick_settings_color_inversion_changed_off);
-        }
     }
 }

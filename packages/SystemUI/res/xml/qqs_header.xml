@@ -49,6 +49,14 @@
     </Constraint>
 
     <Constraint
+        android:id="@+id/statusIcons">
+    </Constraint>
+
+    <Constraint
+        android:id="@+id/batteryRemainingIcon" >
+    </Constraint>
+
+    <Constraint
         android:id="@+id/carrier_group">
         <CustomAttribute
             app:attributeName="alpha"
@@ -56,6 +64,15 @@
         />
     </Constraint>
 
-
+    <Constraint
+        android:id="@+id/privacy_container">
+        <Layout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/date"
+            app:layout_constraintBottom_toBottomOf="@id/date"
+        />
+    </Constraint>
 
 </ConstraintSet>

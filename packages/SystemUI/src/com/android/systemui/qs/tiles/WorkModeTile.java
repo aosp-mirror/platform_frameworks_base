@@ -16,6 +16,9 @@
 
 package com.android.systemui.qs.tiles;
 
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_WORK_PROFILE_LABEL;
+
+import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -100,7 +103,9 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public CharSequence getTileLabel() {
-        return mContext.getString(R.string.quick_settings_work_mode_label);
+        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        return dpm.getResources().getString(QS_WORK_PROFILE_LABEL,
+                () -> mContext.getString(R.string.quick_settings_work_mode_label));
     }
 
     @Override

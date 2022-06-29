@@ -16,7 +16,10 @@
 
 package com.android.server.pm;
 
-/** Provides access to individual sessions managed by the install service */
+/**
+ * Provides access to individual sessions managed by the install service as well as utilities
+ * used by the install process.
+ */
 public interface PackageSessionProvider {
 
     /**
@@ -25,4 +28,5 @@ public interface PackageSessionProvider {
      */
     PackageInstallerSession getSession(int sessionId);
 
+    PackageSessionVerifier getSessionVerifier();
 }

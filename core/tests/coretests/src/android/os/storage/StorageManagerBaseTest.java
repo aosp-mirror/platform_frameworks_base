@@ -16,12 +16,20 @@
 
 package android.os.storage;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
 import libcore.io.Streams;
+
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -39,6 +47,7 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
 
     protected Context mContext = null;
     protected StorageManager mSm = null;
+    @Mock private File mFile;
     private static String LOG_TAG = "StorageManagerBaseTest";
     protected static final long MAX_WAIT_TIME = 120*1000;
     protected static final long WAIT_TIME_INCR = 5*1000;
@@ -117,9 +126,47 @@ public class StorageManagerBaseTest extends InstrumentationTestCase {
      */
     @Override
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mContext = getInstrumentation().getContext();
         mSm = (StorageManager)mContext.getSystemService(android.content.Context.STORAGE_SERVICE);
 
+    }
+
+    /**
+     * Tests the space reserved for cache when system has high free space i.e. more than
+     * StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH of total space.
+     */
+    @Test
+    public void testGetStorageCacheBytesUnderHighStorage() throws Exception {
+        when(mFile.getUsableSpace()).thenReturn(10000L);
+        when(mFile.getTotalSpace()).thenReturn(15000L);
+        long result = mSm.getStorageCacheBytes(mFile, 0);
+        assertThat(result).isEqualTo(1500L);
+    }
+
+    /**
+     * Tests the space reserved for cache when system has low free space i.e. less than
+     * StorageManager.STORAGE_THRESHOLD_PERCENT_LOW of total space.
+     */
+    @Test
+    public void testGetStorageCacheBytesUnderLowStorage() throws Exception {
+        when(mFile.getUsableSpace()).thenReturn(10000L);
+        when(mFile.getTotalSpace()).thenReturn(250000L);
+        long result = mSm.getStorageCacheBytes(mFile, 0);
+        assertThat(result).isEqualTo(5000L);
+    }
+
+    /**
+     * Tests the space reserved for cache when system has moderate free space i.e.more than
+     * StorageManager.STORAGE_THRESHOLD_PERCENT_LOW of total space but less than
+     * StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH of total space.
+     */
+    @Test
+    public void testGetStorageCacheBytesUnderModerateStorage() throws Exception {
+        when(mFile.getUsableSpace()).thenReturn(10000L);
+        when(mFile.getTotalSpace()).thenReturn(100000L);
+        long result = mSm.getStorageCacheBytes(mFile, 0);
+        assertThat(result).isEqualTo(4667L);
     }
 
     /**

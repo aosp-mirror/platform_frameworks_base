@@ -18,4 +18,8 @@
 -->
 <resources>
     <dimen name="chooser_grid_padding">16dp</dimen>
+
+    <!-- Copied from SysUI's @dimen/navigation_key_width for the embedded nav bar in the IME -->
+    <dimen name="input_method_navigation_key_width">80dip</dimen>
+
 </resources>

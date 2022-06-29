@@ -1,10 +1,31 @@
 {
   "imports": [
     {
+      "path": "frameworks/base/core/tests/coretests/src/android/content/pm"
+    },
+    {
+      "path": "frameworks/base/services/tests/PackageManagerServiceTests"
+    },
+    {
+      "path": "frameworks/base/services/tests/PackageManager"
+    },
+    {
+      "path": "frameworks/base/services/tests/PackageManagerComponentOverrideTests"
+    },
+    {
+      "path": "frameworks/base/services/tests/servicestests/src/com/android/server/pm"
+    },
+    {
       "path": "cts/tests/tests/packageinstaller"
     },
     {
       "path": "cts/hostsidetests/stagedinstall"
+    },
+    {
+      "path": "cts/hostsidetests/packagemanager"
+    },
+    {
+      "path": "cts/hostsidetests/os/test_mappings/packagemanager"
     },
     {
       "path": "system/apex/tests"
@@ -17,6 +38,9 @@
     },
     {
       "name": "CarrierAppIntegrationTestCases"
+    },
+    {
+      "name": "ApkVerityTest"
     },
     {
       "name": "CtsIncrementalInstallHostTestCases",
@@ -41,6 +65,89 @@
           "include-filter": "android.content.pm.cts"
         }
       ]
+    },
+    {
+      "name": "CtsUsesNativeLibraryTest",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    },
+    {
+      "name": "CtsAppSearchHostTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    },
+    {
+      "name": "CtsSilentUpdateHostTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    },
+    {
+      "name": "CtsSuspendAppsTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    },
+    {
+      "name": "CtsSecureFrpInstallTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    },
+    {
+      "name": "CtsSuspendAppsPermissionTestCases",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    },
+    {
+      "name": "CtsAppSecurityHostTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
     }
   ],
   "postsubmit": [
@@ -51,6 +158,68 @@
           "include-filter": "android.appsecurity.cts.AppSecurityTests#testPermissionDiffCert"
         }
       ]
+    },
+    {
+      "name": "CtsInstallHostTestCases"
     }
+  ],
+  "staged-platinum-postsubmit": [
+    {
+      "name": "CtsIncrementalInstallHostTestCases"
+    },
+    {
+      "name": "CtsAppSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "android.appsecurity.cts.SplitTests"
+        },
+        {
+          "include-filter": "android.appsecurity.cts.EphemeralTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "include-filter": "android.content.cts.IntentFilterTest"
+        }
+      ]
+    }
+  ],
+  "platinum-postsubmit": [
+      {
+        "name": "CtsIncrementalInstallHostTestCases",
+        "options": [
+            {
+                "exclude-annotation": "androidx.test.filters.FlakyTest"
+            }
+        ]
+      },
+      {
+        "name": "CtsAppSecurityHostTestCases",
+        "options": [
+            {
+                "include-filter": "android.appsecurity.cts.SplitTests"
+            },
+            {
+                "include-filter": "android.appsecurity.cts.EphemeralTest"
+            },
+            {
+                "exclude-annotation": "androidx.test.filters.FlakyTest"
+            }
+        ]
+      },
+      {
+        "name": "CtsContentTestCases",
+        "options":[
+            {
+                "include-filter": "android.content.cts.IntentFilterTest"
+            },
+            {
+                "exclude-annotation": "androidx.test.filters.FlakyTest"
+            }
+        ]
+      }
   ]
 }

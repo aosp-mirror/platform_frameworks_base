@@ -15,6 +15,8 @@
  */
 package android.view.animation;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -61,7 +63,7 @@ public class PathInterpolator extends BaseInterpolator implements NativeInterpol
      *
      * @param path The <code>Path</code> to use to make the line representing the interpolator.
      */
-    public PathInterpolator(Path path) {
+    public PathInterpolator(@NonNull Path path) {
         initPath(path);
     }
 
@@ -94,7 +96,7 @@ public class PathInterpolator extends BaseInterpolator implements NativeInterpol
     }
 
     /** @hide */
-    public PathInterpolator(Resources res, Theme theme, AttributeSet attrs) {
+    public PathInterpolator(Resources res, @Nullable Theme theme, @NonNull AttributeSet attrs) {
         TypedArray a;
         if (theme != null) {
             a = theme.obtainStyledAttributes(attrs, R.styleable.PathInterpolator, 0, 0);

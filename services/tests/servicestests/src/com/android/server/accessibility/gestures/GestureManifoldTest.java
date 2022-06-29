@@ -27,18 +27,20 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.os.Handler;
+import android.view.Display;
 import android.view.MotionEvent;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.server.accessibility.AccessibilityManagerService;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import java.util.ArrayList;
 
-/**
- * Tests for GestureManifold
- */
+/** Tests for GestureManifold */
 public class GestureManifoldTest {
 
     // Constants for testRecognizeGesturePath()
@@ -50,25 +52,23 @@ public class GestureManifoldTest {
     private GestureManifold mManifold;
     private TouchState mState;
     private GestureManifold.Listener mResultListener;
+    @Mock private AccessibilityManagerService mMockAms;
 
     @Before
     public void setUp() {
         Context context = InstrumentationRegistry.getContext();
         // Construct a testable GestureManifold.
         mResultListener = mock(GestureManifold.Listener.class);
-        mState = new TouchState();
+        mState = new TouchState(Display.DEFAULT_DISPLAY, mMockAms);
         Handler handler = new Handler(context.getMainLooper());
         mManifold = new GestureManifold(context, mResultListener, mState, handler);
         // Play the role of touch explorer in updating the shared state.
         when(mResultListener.onGestureStarted()).thenReturn(onGestureStarted());
-
-
     }
-
 
     @Test
     public void testRecognizeGesturePath() {
-        final int d = 1000;  // Length of each segment in the test gesture, in pixels.
+        final int d = 1000; // Length of each segment in the test gesture, in pixels.
 
         testPath(p(-d, +0), AccessibilityService.GESTURE_SWIPE_LEFT);
         testPath(p(+d, +0), AccessibilityService.GESTURE_SWIPE_RIGHT);
@@ -138,9 +138,10 @@ public class GestureManifoldTest {
 
         // For each path step from start (non-inclusive) to end ... add a motion point.
         for (int step = 1; step < numSteps; ++step) {
-            path.add(new PointF(
-                    (start.x + (stepX * (float) step)),
-                    (start.y + (stepY * (float) step))));
+            path.add(
+                    new PointF(
+                            (start.x + (stepX * (float) step)),
+                            (start.y + (stepY * (float) step))));
         }
     }
 
@@ -164,11 +165,12 @@ public class GestureManifoldTest {
             } else if (pointIndex == path.size() - 1) {
                 action = MotionEvent.ACTION_UP;
             }
-            MotionEvent event = MotionEvent.obtain(eventDownTimeMs, eventTimeMs, action,
-                    point.x, point.y, 0);
+            MotionEvent event =
+                    MotionEvent.obtain(eventDownTimeMs, eventTimeMs, action, point.x, point.y, 0);
 
             // Send event.
-            mState.onReceivedMotionEvent(event);
+            // In this case the event and raw event values are the same.
+            mState.onReceivedMotionEvent(event, event, policyFlags);
             mManifold.onMotionEvent(event, event, policyFlags);
             eventTimeMs += PATH_STEP_MILLISEC;
             if (mState.isClear()) {
@@ -178,8 +180,9 @@ public class GestureManifoldTest {
 
         mState.clear();
         // Check that correct gesture was recognized.
-        verify(mResultListener).onGestureCompleted(
-                argThat(gestureEvent -> gestureEvent.getGestureId() == gestureId));
+        verify(mResultListener)
+                .onGestureCompleted(
+                        argThat(gestureEvent -> gestureEvent.getGestureId() == gestureId));
     }
 
     private boolean onGestureStarted() {

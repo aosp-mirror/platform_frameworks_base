@@ -113,4 +113,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <ImageView
+        android:id="@+id/chevron_icon"
+        android:autoMirrored="true"
+        android:src="@drawable/ic_chevron_icon"
+        android:visibility="invisible"
+        android:layout_width="@dimen/control_chevron_icon_size"
+        android:layout_height="@dimen/control_chevron_icon_size"
+        android:clickable="false"
+        android:focusable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

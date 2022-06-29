@@ -310,7 +310,7 @@ public class WatchedSparseBooleanArray extends WatchableImpl
         }
         final int end = src.size();
         for (int i = 0; i < end; i++) {
-            dst.put(src.keyAt(i), src.valueAt(i));
+            dst.mStorage.put(src.keyAt(i), src.valueAt(i));
         }
         dst.seal();
     }

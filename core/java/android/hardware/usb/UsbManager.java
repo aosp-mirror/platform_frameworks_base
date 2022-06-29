@@ -17,6 +17,8 @@
 
 package android.hardware.usb;
 
+import static android.hardware.usb.UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
+
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
@@ -36,8 +38,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
 import android.hardware.usb.gadget.V1_2.UsbSpeed;
-import android.hardware.usb.IUsbOperationInternal;
-import android.hardware.usb.UsbPort;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -387,8 +387,9 @@ public class UsbManager {
             "android.hardware.usb.extra.ACCESSORY_START";
 
     /**
-     * A long extra indicating ms from boot to sent {@link #ACTION_USB_ACCESSORY_HANDSHAKE}
-     * This is obtained with SystemClock.elapsedRealtime()
+
+     * A long extra indicating the timestamp just before
+     * sending {@link #ACTION_USB_ACCESSORY_HANDSHAKE}.
      * Used in extras for {@link #ACTION_USB_ACCESSORY_HANDSHAKE} broadcasts.
      *
      * {@hide}
@@ -1188,9 +1189,8 @@ public class UsbManager {
     /**
      * Enable/Disable the USB data signaling.
      * <p>
-     * Enables/Disables USB data path of the first port..
+     * Enables/Disables USB data path of all USB ports.
      * It will force to stop or restore USB data signaling.
-     * Call UsbPort API if the device has more than one UsbPort.
      * </p>
      *
      * @param enable enable or disable USB data signaling
@@ -1201,11 +1201,30 @@ public class UsbManager {
      */
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     public boolean enableUsbDataSignal(boolean enable) {
-        List<UsbPort> usbPorts = getPorts();
-        if (usbPorts.size() == 1) {
-            return usbPorts.get(0).enableUsbData(enable) == UsbPort.ENABLE_USB_DATA_SUCCESS;
+        return setUsbDataSignal(getPorts(), !enable, /* revertOnFailure= */ true);
+    }
+
+    private boolean setUsbDataSignal(List<UsbPort> usbPorts, boolean disable,
+            boolean revertOnFailure) {
+        List<UsbPort> changedPorts = new ArrayList<>();
+        for (int i = 0; i < usbPorts.size(); i++) {
+            UsbPort port = usbPorts.get(i);
+            if (isPortDisabled(port) != disable) {
+                changedPorts.add(port);
+                if (port.enableUsbData(!disable) != UsbPort.ENABLE_USB_DATA_SUCCESS
+                        && revertOnFailure) {
+                    Log.e(TAG, "Failed to set usb data signal for portID(" + port.getId() + ")");
+                    setUsbDataSignal(changedPorts, !disable, /* revertOnFailure= */ false);
+                    return false;
+                }
+            }
         }
-        return false;
+        return true;
+    }
+
+    private boolean isPortDisabled(UsbPort usbPort) {
+        return (getPortStatus(usbPort).getUsbDataStatus() & DATA_STATUS_DISABLED_FORCE)
+                == DATA_STATUS_DISABLED_FORCE;
     }
 
     /**
@@ -1291,6 +1310,74 @@ public class UsbManager {
     }
 
     /**
+     * Should only be called by {@link UsbPort#enableLimitPowerTransfer}.
+     * <p>
+     * limits or restores power transfer in and out of USB port.
+     *
+     * @param port USB port for which power transfer has to be limited or restored.
+     * @param limit limit power transfer when true.
+     *              relax power transfer restrictions when false.
+     * @param operationId operationId for the request.
+     * @param callback callback object to be invoked when the operation is complete.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    void enableLimitPowerTransfer(@NonNull UsbPort port, boolean limit, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(port, "enableLimitPowerTransfer:port must not be null. opId:"
+                + operationId);
+        try {
+            mService.enableLimitPowerTransfer(port.getId(), limit, operationId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "enableLimitPowerTransfer failed. opId:" + operationId, e);
+            try {
+                callback.onOperationComplete(UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException r) {
+                Log.e(TAG, "enableLimitPowerTransfer failed to call onOperationComplete. opId:"
+                        + operationId, r);
+            }
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Should only be called by {@link UsbPort#resetUsbPort}.
+     * <p>
+     * Disable and then re-enable USB data signaling.
+     *
+     * Reset USB first port..
+     * It will force to stop and restart USB data signaling.
+     * Call UsbPort API if the device has more than one UsbPort.
+     * </p>
+     *
+     * @param port reset the USB Port
+     * @return true enable or disable USB data successfully
+     *         false if something wrong
+     *
+     * Should only be called by {@link UsbPort#resetUsbPort}.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    void resetUsbPort(@NonNull UsbPort port, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(port, "resetUsbPort: port must not be null. opId:" + operationId);
+        try {
+            mService.resetUsbPort(port.getId(), operationId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "resetUsbPort: failed. ", e);
+            try {
+                callback.onOperationComplete(UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException r) {
+                Log.e(TAG, "resetUsbPort: failed to call onOperationComplete. opId:"
+                        + operationId, r);
+            }
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Should only be called by {@link UsbPort#enableUsbData}.
      * <p>
      * Enables or disables USB data on the specific port.
@@ -1319,6 +1406,35 @@ public class UsbManager {
                 callback.onOperationComplete(UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL);
             } catch (RemoteException r) {
                 Log.e(TAG, "enableUsbData: failed to call onOperationComplete. opId:"
+                        + operationId, r);
+            }
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Should only be called by {@link UsbPort#enableUsbDataWhileDocked}.
+     * <p>
+     * Enables or disables USB data when disabled due to docking event.
+     *
+     * @param port USB port for which USB data needs to be enabled.
+     * @param operationId operationId for the request.
+     * @param callback callback object to be invoked when the operation is complete.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    void enableUsbDataWhileDocked(@NonNull UsbPort port, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(port, "enableUsbDataWhileDocked: port must not be null. opId:"
+                + operationId);
+        try {
+            mService.enableUsbDataWhileDocked(port.getId(), operationId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "enableUsbDataWhileDocked: failed. opId:" + operationId, e);
+            try {
+                callback.onOperationComplete(UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException r) {
+                Log.e(TAG, "enableUsbDataWhileDocked: failed to call onOperationComplete. opId:"
                         + operationId, r);
             }
             throw e.rethrowFromSystemServer();

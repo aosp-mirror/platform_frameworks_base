@@ -25,21 +25,17 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 
-/**
- * Emits animation progress with fixed timing after unfolding
- */
+/** Emits animation progress with fixed timing after unfolding */
 internal class FixedTimingTransitionProgressProvider(
     private val foldStateProvider: FoldStateProvider
 ) : UnfoldTransitionProgressProvider, FoldStateProvider.FoldUpdatesListener {
 
     private val animatorListener = AnimatorListener()
     private val animator =
-        ObjectAnimator.ofFloat(this, AnimationProgressProperty, 0f, 1f)
-            .apply {
-                duration = TRANSITION_TIME_MILLIS
-                addListener(animatorListener)
-            }
-
+        ObjectAnimator.ofFloat(this, AnimationProgressProperty, 0f, 1f).apply {
+            duration = TRANSITION_TIME_MILLIS
+            addListener(animatorListener)
+        }
 
     private var transitionProgress: Float = 0.0f
         set(value) {
@@ -62,10 +58,8 @@ internal class FixedTimingTransitionProgressProvider(
 
     override fun onFoldUpdate(@FoldUpdate update: Int) {
         when (update) {
-            FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE ->
-                animator.start()
-            FOLD_UPDATE_FINISH_CLOSED ->
-                animator.cancel()
+            FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE -> animator.start()
+            FOLD_UPDATE_FINISH_CLOSED -> animator.cancel()
         }
     }
 
@@ -77,16 +71,12 @@ internal class FixedTimingTransitionProgressProvider(
         listeners.remove(listener)
     }
 
-    override fun onHingeAngleUpdate(angle: Float) {
-    }
+    override fun onHingeAngleUpdate(angle: Float) {}
 
     private object AnimationProgressProperty :
         FloatProperty<FixedTimingTransitionProgressProvider>("animation_progress") {
 
-        override fun setValue(
-            provider: FixedTimingTransitionProgressProvider,
-            value: Float
-        ) {
+        override fun setValue(provider: FixedTimingTransitionProgressProvider, value: Float) {
             provider.transitionProgress = value
         }
 
@@ -104,11 +94,9 @@ internal class FixedTimingTransitionProgressProvider(
             listeners.forEach { it.onTransitionFinished() }
         }
 
-        override fun onAnimationRepeat(animator: Animator) {
-        }
+        override fun onAnimationRepeat(animator: Animator) {}
 
-        override fun onAnimationCancel(animator: Animator) {
-        }
+        override fun onAnimationCancel(animator: Animator) {}
     }
 
     private companion object {

@@ -21,26 +21,28 @@ import static android.Manifest.permission.RECORD_AUDIO;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.PermissionChecker;
 import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
 import android.media.permission.PermissionUtil;
+import android.media.soundtrigger.ModelParameterRange;
+import android.media.soundtrigger.PhraseRecognitionEvent;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionEvent;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
-import android.media.soundtrigger_middleware.ModelParameterRange;
-import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionEvent;
-import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
-import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+
+import com.android.server.LocalServices;
+import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -90,22 +92,10 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         return wrapper.attach(mDelegate.attach(handle, wrapper.getCallbackWrapper()));
     }
 
-    @Override
-    public void setCaptureState(boolean active) throws RemoteException {
-        // This is an internal call. No permissions needed.
-        mDelegate.setCaptureState(active);
-    }
-
     // Override toString() in order to have the delegate's ID in it.
     @Override
     public String toString() {
         return Objects.toString(mDelegate);
-    }
-
-    @Override
-    public IBinder asBinder() {
-        throw new UnsupportedOperationException(
-                "This implementation is not inteded to be used directly with Binder.");
     }
 
     /**
@@ -125,27 +115,15 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
      * originator temporarily doesn't have the right permissions to use this service.
      */
     private void enforcePermissionsForPreflight(@NonNull Identity identity) {
-        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO,
-                /* allowSoftDenial= */ true);
-        enforcePermissionForPreflight(mContext, identity, CAPTURE_AUDIO_HOTWORD,
-                /* allowSoftDenial= */ true);
+        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO);
+        enforcePermissionForPreflight(mContext, identity, CAPTURE_AUDIO_HOTWORD);
     }
 
     /**
      * Throws a {@link SecurityException} iff the originator has permission to receive data.
      */
     void enforcePermissionsForDataDelivery(@NonNull Identity identity, @NonNull String reason) {
-        // SoundTrigger data is treated the same as Hotword-source audio. This should incur the
-        // HOTWORD op instead of the RECORD_AUDIO op. The RECORD_AUDIO permission is still required,
-        // and since this is a data delivery check, soft denials aren't accepted.
-        // TODO(b/212458940): Find a better approach for checking the permission that doesn't
-        // require the client to know such details about the permissions logic.
-        enforcePermissionForPreflight(mContext, identity, RECORD_AUDIO,
-                /* allowSoftDenial= */ false);
-        int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
-        mContext.getSystemService(AppOpsManager.class).noteOpNoThrow(hotwordOp, identity.uid,
-                identity.packageName, identity.attributionTag, reason);
-
+        enforceSoundTriggerRecordAudioPermissionForDataDelivery(identity, reason);
         enforcePermissionForDataDelivery(mContext, identity, CAPTURE_AUDIO_HOTWORD,
                 reason);
     }
@@ -167,36 +145,44 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         if (status != PermissionChecker.PERMISSION_GRANTED) {
             throw new SecurityException(
                     String.format("Failed to obtain permission %s for identity %s", permission,
-                            ObjectPrinter.print(identity, true, 16)));
+                            ObjectPrinter.print(identity, 16)));
+        }
+    }
+
+    private static void enforceSoundTriggerRecordAudioPermissionForDataDelivery(
+            @NonNull Identity identity, @NonNull String reason) {
+        LegacyPermissionManagerInternal lpmi =
+                LocalServices.getService(LegacyPermissionManagerInternal.class);
+        final int status = lpmi.checkSoundTriggerRecordAudioPermissionForDataDelivery(identity.uid,
+                identity.packageName, identity.attributionTag, reason);
+        if (status != PermissionChecker.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    String.format("Failed to obtain permission RECORD_AUDIO for identity %s",
+                            ObjectPrinter.print(identity, 16)));
         }
     }
 
     /**
      * Throws a {@link SecurityException} if originator permanently doesn't have the given
      * permission.
+     * Soft (temporary) denials are considered OK for preflight purposes.
      *
-     * @param context         A {@link Context}, used for permission checks.
-     * @param identity        The identity to check.
-     * @param permission      The identifier of the permission we want to check.
-     * @param allowSoftDenial If true, the operation succeeds even for soft (temporary) denials.
+     * @param context    A {@link Context}, used for permission checks.
+     * @param identity   The identity to check.
+     * @param permission The identifier of the permission we want to check.
      */
-    // TODO: Consider splitting up this method instead of using `allowSoftDenial`, to make it
-    // clearer when soft denials are not allowed.
     private static void enforcePermissionForPreflight(@NonNull Context context,
-            @NonNull Identity identity, @NonNull String permission, boolean allowSoftDenial) {
+            @NonNull Identity identity, @NonNull String permission) {
         final int status = PermissionUtil.checkPermissionForPreflight(context, identity,
                 permission);
         switch (status) {
             case PermissionChecker.PERMISSION_GRANTED:
-                return;
             case PermissionChecker.PERMISSION_SOFT_DENIED:
-                if (allowSoftDenial) {
-                    return;
-                } // else fall through
+                return;
             case PermissionChecker.PERMISSION_HARD_DENIED:
                 throw new SecurityException(
                         String.format("Failed to obtain permission %s for identity %s", permission,
-                                ObjectPrinter.print(identity, true, 16)));
+                                ObjectPrinter.print(identity, 16)));
             default:
                 throw new RuntimeException("Unexpected perimission check result.");
         }
@@ -321,22 +307,28 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onRecognition(int modelHandle, RecognitionEvent event)
+            public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
                     throws RemoteException {
                 enforcePermissions("Sound trigger recognition.");
-                mDelegate.onRecognition(modelHandle, event);
+                mDelegate.onRecognition(modelHandle, event, captureSession);
             }
 
             @Override
-            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event)
+            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
+                    int captureSession)
                     throws RemoteException {
                 enforcePermissions("Sound trigger phrase recognition.");
-                mDelegate.onPhraseRecognition(modelHandle, event);
+                mDelegate.onPhraseRecognition(modelHandle, event, captureSession);
             }
 
             @Override
-            public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
-                mDelegate.onRecognitionAvailabilityChange(available);
+            public void onResourcesAvailable() throws RemoteException {
+                mDelegate.onResourcesAvailable();
+            }
+
+            @Override
+            public void onModelUnloaded(int modelHandle) throws RemoteException {
+                mDelegate.onModelUnloaded(modelHandle);
             }
 
             @Override

@@ -27,6 +27,7 @@ import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProcessInfo;
 import android.content.pm.VersionedPackage;
 import android.content.res.CompatibilityInfo;
@@ -79,10 +80,14 @@ class ProcessRecord implements WindowProcessListener {
     volatile ApplicationInfo info; // all about the first app in the process
     final ProcessInfo processInfo; // if non-null, process-specific manifest info
     final boolean isolated;     // true if this is a special isolated process
+    public final boolean isSdkSandbox; // true if this is an SDK sandbox process
     final boolean appZygote;    // true if this is forked from the app zygote
     final int uid;              // uid of process; may be different from 'info' if isolated
     final int userId;           // user of process.
     final String processName;   // name of the process
+    final String sdkSandboxClientAppPackage; // if this is an sdk sandbox process, name of the
+                                             // app package for which it is running
+    final String sdkSandboxClientAppVolumeUuid; // uuid of the app for which the sandbox is running
 
     /**
      * Overall state of process's uid.
@@ -178,9 +183,14 @@ class ProcessRecord implements WindowProcessListener {
     private volatile String mSeInfo;
 
     /**
-     * When the process is started.
+     * When the process is started. (before zygote fork)
      */
-    private volatile long mStartTime;
+    private volatile long mStartUptime;
+
+    /**
+     * When the process is started. (before zygote fork)
+     */
+    private volatile long mStartElapsedTime;
 
     /**
      * This will be same as {@link #uid} usually except for some apps used during factory testing.
@@ -364,17 +374,26 @@ class ProcessRecord implements WindowProcessListener {
      */
     volatile ProcessRecord mSuccessor;
 
+    /**
+     * The routine to start its successor process.
+     *
+     * <p>Note: It should be accessed from process start thread only.</p>
+     */
+    Runnable mSuccessorStartRunnable;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
-            long startTime) {
+            long startUptime, long startElapsedTime) {
         this.mStartUid = startUid;
         this.mHostingRecord = hostingRecord;
         this.mSeInfo = seInfo;
-        this.mStartTime = startTime;
+        this.mStartUptime = startUptime;
+        this.mStartElapsedTime = startElapsedTime;
     }
 
     @GuardedBy({"mService", "mProcLock"})
     void dump(PrintWriter pw, String prefix) {
         final long nowUptime = SystemClock.uptimeMillis();
+        final long nowElapsedTime = SystemClock.elapsedRealtime();
 
         pw.print(prefix); pw.print("user #"); pw.print(userId);
                 pw.print(" uid="); pw.print(info.uid);
@@ -435,6 +454,10 @@ class ProcessRecord implements WindowProcessListener {
         pw.print(prefix); pw.print("pid="); pw.println(mPid);
         pw.print(prefix); pw.print("lastActivityTime=");
         TimeUtils.formatDuration(mLastActivityTime, nowUptime, pw);
+        pw.print(prefix); pw.print("startUptimeTime=");
+        TimeUtils.formatDuration(mStartElapsedTime, nowUptime, pw);
+        pw.print(prefix); pw.print("startElapsedTime=");
+        TimeUtils.formatDuration(mStartElapsedTime, nowElapsedTime, pw);
         pw.println();
         if (mPersistent || mRemoved) {
             pw.print(prefix); pw.print("persistent="); pw.print(mPersistent);
@@ -474,33 +497,50 @@ class ProcessRecord implements WindowProcessListener {
 
     ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
             int _uid) {
+        this(_service, _info, _processName, _uid, null, -1, null);
+    }
+
+    ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
+            int _uid, String _sdkSandboxClientAppPackage, int _definingUid,
+            String _definingProcessName) {
         mService = _service;
         mProcLock = _service.mProcLock;
         info = _info;
         ProcessInfo procInfo = null;
         if (_service.mPackageManagerInt != null) {
-            ArrayMap<String, ProcessInfo> processes =
-                    _service.mPackageManagerInt.getProcessesForUid(_uid);
-            if (processes != null) {
-                procInfo = processes.get(_processName);
-                if (procInfo != null && procInfo.deniedPermissions == null
-                        && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT
-                        && procInfo.memtagMode == ApplicationInfo.MEMTAG_DEFAULT
-                        && procInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_DEFAULT) {
-                    // If this process hasn't asked for permissions to be denied, or for a
-                    // non-default GwpAsan mode, or any other non-default setting, then we don't
-                    // care about it.
-                    procInfo = null;
-                }
+            if (_definingUid > 0) {
+                ArrayMap<String, ProcessInfo> processes =
+                        _service.mPackageManagerInt.getProcessesForUid(_definingUid);
+                if (processes != null) procInfo = processes.get(_definingProcessName);
+            } else {
+                ArrayMap<String, ProcessInfo> processes =
+                        _service.mPackageManagerInt.getProcessesForUid(_uid);
+                if (processes != null) procInfo = processes.get(_processName);
+            }
+            if (procInfo != null && procInfo.deniedPermissions == null
+                    && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT
+                    && procInfo.memtagMode == ApplicationInfo.MEMTAG_DEFAULT
+                    && procInfo.nativeHeapZeroInitialized == ApplicationInfo.ZEROINIT_DEFAULT) {
+                // If this process hasn't asked for permissions to be denied, or for a
+                // non-default GwpAsan mode, or any other non-default setting, then we don't
+                // care about it.
+                procInfo = null;
             }
         }
         processInfo = procInfo;
-        isolated = _info.uid != _uid;
+        isolated = Process.isIsolated(_uid);
+        isSdkSandbox = Process.isSdkSandboxUid(_uid);
         appZygote = (UserHandle.getAppId(_uid) >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
                 && UserHandle.getAppId(_uid) <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);
         uid = _uid;
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
+        sdkSandboxClientAppPackage = _sdkSandboxClientAppPackage;
+        if (isSdkSandbox) {
+            sdkSandboxClientAppVolumeUuid = getClientInfoForSdkSandbox().volumeUuid;
+        } else {
+            sdkSandboxClientAppVolumeUuid = null;
+        }
         mPersistent = false;
         mRemoved = false;
         mProfile = new ProcessProfileRecord(this);
@@ -664,12 +704,21 @@ class ProcessRecord implements WindowProcessListener {
         mSeInfo = seInfo;
     }
 
-    long getStartTime() {
-        return mStartTime;
+    long getStartUptime() {
+        return mStartUptime;
     }
 
-    void setStartTime(long startTime) {
-        mStartTime = startTime;
+    /**
+     * Same as {@link #getStartUptime()}.
+     * @deprecated use {@link #getStartUptime()} instead for clarity.
+     */
+    @Deprecated
+    long getStartTime() {
+        return mStartUptime;
+    }
+
+    long getStartElapsedTime() {
+        return mStartElapsedTime;
     }
 
     int getStartUid() {
@@ -821,6 +870,29 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy("mService")
     boolean isDebugging() {
         return mDebugging;
+    }
+
+    @Nullable
+    public ApplicationInfo getClientInfoForSdkSandbox() {
+        if (!isSdkSandbox || sdkSandboxClientAppPackage == null) {
+            throw new IllegalStateException(
+                    "getClientInfoForSdkSandbox called for non-sandbox process"
+            );
+        }
+        PackageManagerInternal pm = mService.getPackageManagerInternal();
+        return pm.getApplicationInfo(
+                sdkSandboxClientAppPackage, /* flags */0, Process.SYSTEM_UID, userId);
+    }
+
+    public boolean isDebuggable() {
+        if ((info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            return true;
+        }
+        if (isSdkSandbox) {
+            ApplicationInfo clientInfo = getClientInfoForSdkSandbox();
+            return clientInfo != null && (clientInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        }
+        return false;
     }
 
     @GuardedBy("mService")
@@ -991,15 +1063,25 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy("mService")
     void killLocked(String reason, @Reason int reasonCode, @SubReason int subReason,
             boolean noisy) {
+        killLocked(reason, reason, reasonCode, subReason, noisy);
+    }
+
+    @GuardedBy("mService")
+    void killLocked(String reason, String description, @Reason int reasonCode,
+            @SubReason int subReason, boolean noisy) {
         if (!mKilledByAm) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
+            if (reasonCode == ApplicationExitInfo.REASON_ANR
+                    && mErrorState.getAnrAnnotation() != null) {
+                description = description + ": " + mErrorState.getAnrAnnotation();
+            }
             if (mService != null && (noisy || info.uid == mService.mCurOomAdjUid)) {
                 mService.reportUidInfoMessageLocked(TAG,
                         "Killing " + toShortString() + " (adj " + mState.getSetAdj()
                         + "): " + reason, info.uid);
             }
             if (mPid > 0) {
-                mService.mProcessList.noteAppKill(this, reasonCode, subReason, reason);
+                mService.mProcessList.noteAppKill(this, reasonCode, subReason, description);
                 EventLog.writeEvent(EventLogTags.AM_KILL,
                         userId, mPid, processName, mState.getSetAdj(), reason);
                 Process.killProcessQuiet(mPid);

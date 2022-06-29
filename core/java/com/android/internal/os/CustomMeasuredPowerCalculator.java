@@ -37,6 +37,11 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
     }
 
     @Override
+    public boolean isPowerComponentSupported(int powerComponent) {
+        return false;
+    }
+
+    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         double[] totalAppPowerMah = null;
@@ -91,20 +96,12 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
                 app.setConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
                         customMeasuredPowerMah[i]);
-                newTotalPowerMah[i] += customMeasuredPowerMah[i];
+                if (!app.isVirtualUid()) {
+                    newTotalPowerMah[i] += customMeasuredPowerMah[i];
+                }
             }
         }
         return newTotalPowerMah;
-    }
-
-    @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        updateCustomMeasuredPowerMah(app, u.getCustomConsumerMeasuredBatteryConsumptionUC());
-    }
-
-    private void updateCustomMeasuredPowerMah(BatterySipper sipper, long[] measuredChargeUC) {
-        sipper.customMeasuredPowerMah = calculateMeasuredEnergiesMah(measuredChargeUC);
     }
 
     private double[] calculateMeasuredEnergiesMah(long[] measuredChargeUC) {

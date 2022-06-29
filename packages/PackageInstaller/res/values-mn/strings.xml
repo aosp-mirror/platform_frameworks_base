@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Та энэ аппыг устгахыг хүсэж байна уу?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Та энэ аппыг "<b>"бүх"</b>" хэрэглэгчээс устгахыг хүсэж байна уу? Апп болон доторх өгөгдлийг төхөөрөмж дээрх "<b>"бүх"</b>" хэрэглэгчээс устгана."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Та энэ аппыг <xliff:g id="USERNAME">%1$s</xliff:g> хэрэглэгчийн өмнөөс устгахыг хүсэж байна уу?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Та энэ аппыг ажлын профайлаасаа устгахыг хүсэж байна уу?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Энэ аппыг үйлдвэрээс ирсэн хувилбараар солих уу? Бүх өгөгдөл устах болно."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Энэ аппыг үйлдвэрээс ирсэн хувилбараар солих уу? Бүх өгөгдөл устах болно. Энэ нь эдгээр ажлын профайлтай бүхий энэ төхөөрөмжийн бүх хэрэглэгчид нөлөөлнө."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Аппын өгөгдлийн <xliff:g id="SIZE">%1$s</xliff:g>-г үлдээнэ үү."</string>

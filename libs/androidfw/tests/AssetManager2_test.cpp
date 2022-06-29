@@ -766,7 +766,9 @@ TEST_F(AssetManager2Test, GetLastPathWithSingleApkAssets) {
   auto result = assetmanager.GetLastResourceResolution();
   EXPECT_EQ("Resolution for 0x7f030000 com.android.basic:string/test1\n"
             "\tFor config - de\n"
-            "\tFound initial: basic/basic.apk", result);
+            "\tFound initial: basic/basic.apk\n"
+            "Best matching is from default configuration of com.android.basic",
+            result);
 }
 
 TEST_F(AssetManager2Test, GetLastPathWithMultipleApkAssets) {
@@ -787,7 +789,9 @@ TEST_F(AssetManager2Test, GetLastPathWithMultipleApkAssets) {
   EXPECT_EQ("Resolution for 0x7f030000 com.android.basic:string/test1\n"
             "\tFor config - de\n"
             "\tFound initial: basic/basic.apk\n"
-            "\tFound better: basic/basic_de_fr.apk - de", result);
+            "\tFound better: basic/basic_de_fr.apk - de\n"
+            "Best matching is from de configuration of com.android.basic",
+            result);
 }
 
 TEST_F(AssetManager2Test, GetLastPathAfterDisablingReturnsEmpty) {

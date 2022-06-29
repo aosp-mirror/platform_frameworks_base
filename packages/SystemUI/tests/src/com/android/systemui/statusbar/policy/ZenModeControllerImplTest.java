@@ -36,6 +36,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.ZenModeController.Callback;
+import com.android.systemui.util.settings.FakeSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +71,8 @@ public class ZenModeControllerImplTest extends SysuiTestCase {
                 mContext,
                 Handler.createAsync(Looper.myLooper()),
                 mBroadcastDispatcher,
-                mDumpManager);
+                mDumpManager,
+                new FakeSettings());
     }
 
     @Test

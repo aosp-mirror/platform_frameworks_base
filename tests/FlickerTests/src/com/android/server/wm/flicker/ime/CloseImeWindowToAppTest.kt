@@ -35,7 +35,8 @@ import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
-import org.junit.Assume
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -119,18 +120,18 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     @Presubmit
     @Test
     fun navBarLayerRotatesAndScales() {
-        Assume.assumeFalse(testSpec.isRotated)
+        assumeFalse(testSpec.isLandscapeOrSeascapeAtStart)
         testSpec.navBarLayerRotatesAndScales()
     }
 
     @FlakyTest
     @Test
     fun navBarLayerRotatesAndScales_Flaky() {
-        Assume.assumeTrue(testSpec.isRotated)
+        assumeTrue(testSpec.isLandscapeOrSeascapeAtStart)
         testSpec.navBarLayerRotatesAndScales()
     }
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
@@ -159,7 +160,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 5)
+                .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }

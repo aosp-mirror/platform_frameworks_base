@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.icu.text.NumberFormat;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
@@ -34,6 +35,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
+import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -43,6 +45,7 @@ import java.util.TimeZone;
  * {@link KeyguardClockSwitchController}.
  */
 public class AnimatableClockController extends ViewController<AnimatableClockView> {
+    private static final String TAG = "AnimatableClockCtrl";
     private static final int FORMAT_NUMBER = 1234567890;
 
     private final StatusBarStateController mStatusBarStateController;
@@ -163,9 +166,27 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
     }
 
+    /**
+     * @return the number of pixels below the baseline. For fonts that support languages such as
+     * Burmese, this space can be significant.
+     */
+    public float getBottom() {
+        if (mView.getPaint() != null && mView.getPaint().getFontMetrics() != null) {
+            return mView.getPaint().getFontMetrics().bottom;
+        }
+
+        return 0f;
+    }
+
     /** Animate the clock appearance */
     public void animateAppear() {
         if (!mIsDozing) mView.animateAppearOnLockscreen();
+    }
+
+    /** Animate the clock appearance when a foldable device goes from fully-open/half-open state to
+     * fully folded state and it goes to sleep (always on display screen) */
+    public void animateFoldAppear() {
+        mView.animateFoldAppear();
     }
 
     /**
@@ -216,5 +237,13 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 com.android.systemui.R.attr.wallpaperTextColorAccent);
         mView.setColors(mDozingColor, mLockScreenColor);
         mView.animateDoze(mIsDozing, false);
+    }
+
+    /**
+     * Dump information for debugging
+     */
+    public void dump(@NonNull PrintWriter pw) {
+        pw.println(this);
+        mView.dump(pw);
     }
 }

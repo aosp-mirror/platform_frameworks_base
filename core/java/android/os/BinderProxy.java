@@ -53,6 +53,12 @@ public final class BinderProxy implements IBinder {
 
     private static volatile Binder.ProxyTransactListener sTransactListener = null;
 
+    private static class BinderProxyMapSizeException extends AssertionError {
+        BinderProxyMapSizeException(String s) {
+            super(s);
+        }
+    };
+
     /**
      * @see {@link Binder#setProxyTransactListener(listener)}.
      */
@@ -73,7 +79,10 @@ public final class BinderProxy implements IBinder {
         private static final int LOG_MAIN_INDEX_SIZE = 8;
         private static final int MAIN_INDEX_SIZE = 1 <<  LOG_MAIN_INDEX_SIZE;
         private static final int MAIN_INDEX_MASK = MAIN_INDEX_SIZE - 1;
-        // Debuggable builds will throw an AssertionError if the number of map entries exceeds:
+        /**
+         * Debuggable builds will throw an BinderProxyMapSizeException if the number of
+         * map entries exceeds:
+         */
         private static final int CRASH_AT_SIZE = 25_000;
 
         /**
@@ -228,7 +237,8 @@ public final class BinderProxy implements IBinder {
                         dumpProxyInterfaceCounts();
                         dumpPerUidProxyCounts();
                         Runtime.getRuntime().gc();
-                        throw new AssertionError("Binder ProxyMap has too many entries: "
+                        throw new BinderProxyMapSizeException(
+                                "Binder ProxyMap has too many entries: "
                                 + totalSize + " (total), " + totalUnclearedSize + " (uncleared), "
                                 + unclearedSize() + " (uncleared after GC). BinderProxy leak?");
                     } else if (totalSize > 3 * totalUnclearedSize / 2) {
@@ -538,7 +548,7 @@ public final class BinderProxy implements IBinder {
             }
         }
 
-        final boolean tracingEnabled = Binder.isTracingEnabled();
+        final boolean tracingEnabled = Binder.isStackTrackingEnabled();
         if (tracingEnabled) {
             final Throwable tr = new Throwable();
             Binder.getTransactionTracker().addTrace(tr);

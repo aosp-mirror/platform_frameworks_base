@@ -17,6 +17,8 @@
 package android.app.usage;
 
 import android.app.PendingIntent;
+import android.app.usage.BroadcastResponseStats;
+import android.app.usage.BroadcastResponseStatsList;
 import android.app.usage.UsageEvents;
 import android.content.pm.ParceledListSlice;
 
@@ -51,6 +53,9 @@ interface IUsageStatsManager {
     void setAppStandbyBucket(String packageName, int bucket, int userId);
     ParceledListSlice getAppStandbyBuckets(String callingPackage, int userId);
     void setAppStandbyBuckets(in ParceledListSlice appBuckets, int userId);
+    int getAppMinStandbyBucket(String packageName, String callingPackage, int userId);
+    void setEstimatedLaunchTime(String packageName, long estimatedLaunchTime, int userId);
+    void setEstimatedLaunchTimes(in ParceledListSlice appLaunchTimes, int userId);
     void registerAppUsageObserver(int observerId, in String[] packages, long timeLimitMs,
             in PendingIntent callback, String callingPackage);
     void unregisterAppUsageObserver(int observerId, String callingPackage);
@@ -69,4 +74,14 @@ interface IUsageStatsManager {
     int getUsageSource();
     void forceUsageSourceSettingRead();
     long getLastTimeAnyComponentUsed(String packageName, String callingPackage);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)")
+    BroadcastResponseStatsList queryBroadcastResponseStats(
+            String packageName, long id, String callingPackage, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)")
+    void clearBroadcastResponseStats(String packageName, long id, String callingPackage,
+            int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS)")
+    void clearBroadcastEvents(String callingPackage, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG)")
+    String getAppStandbyConstant(String key);
 }

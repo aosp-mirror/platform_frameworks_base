@@ -25,6 +25,7 @@ import android.content.res.Configuration
 import android.content.res.Resources.ID_NULL
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.RippleDrawable
+import android.os.Trace
 import android.service.quicksettings.Tile
 import android.text.TextUtils
 import android.util.Log
@@ -68,6 +69,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
         internal const val TILE_STATE_RES_PREFIX = "tile_states_"
     }
 
+    private var _position: Int = INVALID
+
+    override fun setPosition(position: Int) {
+        _position = position
+    }
+
     override var heightOverride: Int = HeightOverrideable.NO_OVERRIDE
         set(value) {
             if (field == value) return
@@ -88,7 +95,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val colorUnavailable = Utils.applyAlpha(UNAVAILABLE_ALPHA, colorInactive)
 
     private val colorLabelActive =
-            Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimaryInverse)
+            Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.textColorOnAccent)
     private val colorLabelInactive =
             Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
     private val colorLabelUnavailable = Utils.applyAlpha(UNAVAILABLE_ALPHA, colorLabelInactive)
@@ -161,6 +168,12 @@ open class QSTileViewImpl @JvmOverloads constructor(
     override fun onConfigurationChanged(newConfig: Configuration?) {
         super.onConfigurationChanged(newConfig)
         updateResources()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        Trace.traceBegin(Trace.TRACE_TAG_APP, "QSTileViewImpl#onMeasure")
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        Trace.endSection()
     }
 
     override fun resetOverride() {
@@ -249,7 +262,7 @@ open class QSTileViewImpl @JvmOverloads constructor(
         }
         // Limit how much we affect the height, so we don't have rounding artifacts when the tile
         // is too short.
-        val constrainedSquishiness = 0.1f + squishinessFraction * 0.9f
+        val constrainedSquishiness = constrainSquishiness(squishinessFraction)
         bottom = top + (actualHeight * constrainedSquishiness).toInt()
         scrollY = (actualHeight - height) / 2
     }
@@ -315,6 +328,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun getLabelContainer(): View {
         return labelContainer
+    }
+
+    override fun getLabel(): View {
+        return label
     }
 
     override fun getSecondaryLabel(): View {
@@ -392,6 +409,10 @@ open class QSTileViewImpl @JvmOverloads constructor(
                                             R.string.accessibility_long_click_tile)))
                 }
             }
+        }
+        if (_position != INVALID) {
+            info.collectionItemInfo =
+                AccessibilityNodeInfo.CollectionItemInfo(_position, 1, 0, 1, false)
         }
     }
 
@@ -646,12 +667,19 @@ internal object SubtitleArrayMapping {
         "mictoggle" to R.array.tile_states_mictoggle,
         "controls" to R.array.tile_states_controls,
         "wallet" to R.array.tile_states_wallet,
-        "alarm" to R.array.tile_states_alarm
+        "qr_code_scanner" to R.array.tile_states_qr_code_scanner,
+        "alarm" to R.array.tile_states_alarm,
+        "onehanded" to R.array.tile_states_onehanded,
+        "color_correction" to R.array.tile_states_color_correction
     )
 
     fun getSubtitleId(spec: String?): Int {
         return subtitleIdsMap.getOrDefault(spec, R.array.tile_states_default)
     }
+}
+
+fun constrainSquishiness(squish: Float): Float {
+    return 0.1f + squish * 0.9f
 }
 
 private fun colorValuesHolder(name: String, vararg values: Int): PropertyValuesHolder {

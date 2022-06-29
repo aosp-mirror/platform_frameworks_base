@@ -86,11 +86,13 @@ public class WindowContextControllerTest {
         mController.attachToDisplayArea(TYPE_APPLICATION_OVERLAY, DEFAULT_DISPLAY,
                 null /* options */);
 
-        assertThat(mController.mAttachedToDisplayArea).isTrue();
+        assertThat(mController.mAttachedToDisplayArea).isEqualTo(
+                WindowContextController.AttachStatus.STATUS_ATTACHED);
 
         mController.detachIfNeeded();
 
-        assertThat(mController.mAttachedToDisplayArea).isFalse();
+        assertThat(mController.mAttachedToDisplayArea).isEqualTo(
+                WindowContextController.AttachStatus.STATUS_DETACHED);
     }
 
     @Test(expected = IllegalStateException.class)

@@ -387,7 +387,7 @@ class StreamManager : public StreamMap {
 public:
     // Note: the SoundPool pointer is only used for stream initialization.
     // It is not stored in StreamManager.
-    StreamManager(int32_t streams, size_t threads, const audio_attributes_t* attributes,
+    StreamManager(int32_t streams, size_t threads, const audio_attributes_t& attributes,
             std::string opPackageName);
     ~StreamManager();
 

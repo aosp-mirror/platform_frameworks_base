@@ -47,7 +47,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
@@ -72,7 +71,7 @@ public class Bubble implements BubbleViewProvider {
     private long mLastAccessed;
 
     @Nullable
-    private Bubbles.SuppressionChangedListener mSuppressionListener;
+    private Bubbles.BubbleMetadataFlagListener mBubbleMetadataFlagListener;
 
     /** Whether the bubble should show a dot for the notification indicating updated content. */
     private boolean mShowBubbleUpdateDot = true;
@@ -108,6 +107,8 @@ public class Bubble implements BubbleViewProvider {
     private Bitmap mBubbleBitmap;
     // The app badge for the bubble
     private Bitmap mBadgeBitmap;
+    // App badge without any markings for important conversations
+    private Bitmap mRawBadgeBitmap;
     private int mDotColor;
     private Path mDotPath;
     private int mFlags;
@@ -191,13 +192,13 @@ public class Bubble implements BubbleViewProvider {
 
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble(@NonNull final BubbleEntry entry,
-            @Nullable final Bubbles.SuppressionChangedListener listener,
+            @Nullable final Bubbles.BubbleMetadataFlagListener listener,
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             Executor mainExecutor) {
         mKey = entry.getKey();
         mGroupKey = entry.getGroupKey();
         mLocusId = entry.getLocusId();
-        mSuppressionListener = listener;
+        mBubbleMetadataFlagListener = listener;
         mIntentCancelListener = intent -> {
             if (mIntent != null) {
                 mIntent.unregisterCancelListener(mIntentCancelListener);
@@ -245,6 +246,11 @@ public class Bubble implements BubbleViewProvider {
     @Override
     public Bitmap getAppBadge() {
         return mBadgeBitmap;
+    }
+
+    @Override
+    public Bitmap getRawAppBadge() {
+        return mRawBadgeBitmap;
     }
 
     @Override
@@ -357,13 +363,15 @@ public class Bubble implements BubbleViewProvider {
      * @param context the context for the bubble.
      * @param controller the bubble controller.
      * @param stackView the stackView the bubble is eventually added to.
-     * @param iconFactory the iconfactory use to create badged images for the bubble.
+     * @param iconFactory the icon factory use to create images for the bubble.
+     * @param badgeIconFactory the icon factory to create app badges for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
             BubbleController controller,
             BubbleStackView stackView,
             BubbleIconFactory iconFactory,
+            BubbleBadgeIconFactory badgeIconFactory,
             boolean skipInflation) {
         if (isBubbleLoading()) {
             mInflationTask.cancel(true /* mayInterruptIfRunning */);
@@ -373,6 +381,7 @@ public class Bubble implements BubbleViewProvider {
                 controller,
                 stackView,
                 iconFactory,
+                badgeIconFactory,
                 skipInflation,
                 callback,
                 mMainExecutor);
@@ -409,6 +418,7 @@ public class Bubble implements BubbleViewProvider {
         mFlyoutMessage = info.flyoutMessage;
 
         mBadgeBitmap = info.badgeBitmap;
+        mRawBadgeBitmap = info.mRawBadgeBitmap;
         mBubbleBitmap = info.bubbleBitmap;
 
         mDotColor = info.dotColor;
@@ -596,8 +606,8 @@ public class Bubble implements BubbleViewProvider {
             mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
         }
 
-        if (showInShade() != prevShowInShade && mSuppressionListener != null) {
-            mSuppressionListener.onBubbleNotificationSuppressionChange(this);
+        if (showInShade() != prevShowInShade && mBubbleMetadataFlagListener != null) {
+            mBubbleMetadataFlagListener.onBubbleMetadataFlagChanged(this);
         }
     }
 
@@ -616,8 +626,8 @@ public class Bubble implements BubbleViewProvider {
         } else {
             mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_BUBBLE;
         }
-        if (prevSuppressed != suppressBubble && mSuppressionListener != null) {
-            mSuppressionListener.onBubbleNotificationSuppressionChange(this);
+        if (prevSuppressed != suppressBubble && mBubbleMetadataFlagListener != null) {
+            mBubbleMetadataFlagListener.onBubbleMetadataFlagChanged(this);
         }
     }
 
@@ -761,11 +771,16 @@ public class Bubble implements BubbleViewProvider {
         return isEnabled(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
     }
 
-    void setShouldAutoExpand(boolean shouldAutoExpand) {
+    @VisibleForTesting
+    public void setShouldAutoExpand(boolean shouldAutoExpand) {
+        boolean prevAutoExpand = shouldAutoExpand();
         if (shouldAutoExpand) {
             enable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
         } else {
             disable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
+        }
+        if (prevAutoExpand != shouldAutoExpand && mBubbleMetadataFlagListener != null) {
+            mBubbleMetadataFlagListener.onBubbleMetadataFlagChanged(this);
         }
     }
 
@@ -789,6 +804,10 @@ public class Bubble implements BubbleViewProvider {
         return (mFlags & option) != 0;
     }
 
+    public int getFlags() {
+        return mFlags;
+    }
+
     @Override
     public String toString() {
         return "Bubble{" + mKey + '}';
@@ -797,8 +816,7 @@ public class Bubble implements BubbleViewProvider {
     /**
      * Description of current bubble state.
      */
-    public void dump(
-            @NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("key: "); pw.println(mKey);
         pw.print("  showInShade:   "); pw.println(showInShade());
         pw.print("  showDot:       "); pw.println(showDot());
@@ -808,7 +826,7 @@ public class Bubble implements BubbleViewProvider {
         pw.print("  suppressNotif: "); pw.println(shouldSuppressNotification());
         pw.print("  autoExpand:    "); pw.println(shouldAutoExpand());
         if (mExpandedView != null) {
-            mExpandedView.dump(fd, pw, args);
+            mExpandedView.dump(pw, args);
         }
     }
 

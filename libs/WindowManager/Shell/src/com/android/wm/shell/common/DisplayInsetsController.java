@@ -23,6 +23,7 @@ import android.view.IDisplayWindowInsetsController;
 import android.view.IWindowManager;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 
 import androidx.annotation.BinderThread;
 
@@ -170,13 +171,14 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
             }
         }
 
-        private void topFocusedWindowChanged(String packageName) {
+        private void topFocusedWindowChanged(String packageName,
+                InsetsVisibilities requestedVisibilities) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
                 return;
             }
             for (OnInsetsChangedListener listener : listeners) {
-                listener.topFocusedWindowChanged(packageName);
+                listener.topFocusedWindowChanged(packageName, requestedVisibilities);
             }
         }
 
@@ -184,9 +186,10 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
         private class DisplayWindowInsetsControllerImpl
                 extends IDisplayWindowInsetsController.Stub {
             @Override
-            public void topFocusedWindowChanged(String packageName) throws RemoteException {
+            public void topFocusedWindowChanged(String packageName,
+                    InsetsVisibilities requestedVisibilities) throws RemoteException {
                 mMainExecutor.execute(() -> {
-                    PerDisplay.this.topFocusedWindowChanged(packageName);
+                    PerDisplay.this.topFocusedWindowChanged(packageName, requestedVisibilities);
                 });
             }
 
@@ -231,9 +234,11 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
         /**
          * Called when top focused window changes to determine whether or not to take over insets
          * control. Won't be called if config_remoteInsetsControllerControlsSystemBars is false.
-         * @param packageName: Passes the top package name
+         * @param packageName The name of the package that is open in the top focussed window.
+         * @param requestedVisibilities The insets visibilities requested by the focussed window.
          */
-        default void topFocusedWindowChanged(String packageName) {}
+        default void topFocusedWindowChanged(String packageName,
+                InsetsVisibilities requestedVisibilities) {}
 
         /**
          * Called when the window insets configuration has changed.

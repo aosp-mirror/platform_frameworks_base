@@ -104,7 +104,7 @@ final class DreamController {
             pw.println("  mCurrentDream:");
             pw.println("    mToken=" + mCurrentDream.mToken);
             pw.println("    mName=" + mCurrentDream.mName);
-            pw.println("    mIsTest=" + mCurrentDream.mIsTest);
+            pw.println("    mIsPreviewMode=" + mCurrentDream.mIsPreviewMode);
             pw.println("    mCanDoze=" + mCurrentDream.mCanDoze);
             pw.println("    mUserId=" + mCurrentDream.mUserId);
             pw.println("    mBound=" + mCurrentDream.mBound);
@@ -117,7 +117,8 @@ final class DreamController {
     }
 
     public void startDream(Binder token, ComponentName name,
-            boolean isTest, boolean canDoze, int userId, PowerManager.WakeLock wakeLock) {
+            boolean isPreviewMode, boolean canDoze, int userId, PowerManager.WakeLock wakeLock,
+            ComponentName overlayComponentName) {
         stopDream(true /*immediate*/, "starting new dream");
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "startDream");
@@ -126,10 +127,10 @@ final class DreamController {
             mContext.sendBroadcastAsUser(mCloseNotificationShadeIntent, UserHandle.ALL);
 
             Slog.i(TAG, "Starting dream: name=" + name
-                    + ", isTest=" + isTest + ", canDoze=" + canDoze
+                    + ", isPreviewMode=" + isPreviewMode + ", canDoze=" + canDoze
                     + ", userId=" + userId);
 
-            mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId, wakeLock);
+            mCurrentDream = new DreamRecord(token, name, isPreviewMode, canDoze, userId, wakeLock);
 
             mDreamStartTime = SystemClock.elapsedRealtime();
             MetricsLogger.visible(mContext,
@@ -138,6 +139,7 @@ final class DreamController {
             Intent intent = new Intent(DreamService.SERVICE_INTERFACE);
             intent.setComponent(name);
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            intent.putExtra(DreamService.EXTRA_DREAM_OVERLAY_COMPONENT, overlayComponentName);
             try {
                 if (!mContext.bindServiceAsUser(intent, mCurrentDream,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
@@ -188,7 +190,8 @@ final class DreamController {
             final DreamRecord oldDream = mCurrentDream;
             mCurrentDream = null;
             Slog.i(TAG, "Stopping dream: name=" + oldDream.mName
-                    + ", isTest=" + oldDream.mIsTest + ", canDoze=" + oldDream.mCanDoze
+                    + ", isPreviewMode=" + oldDream.mIsPreviewMode
+                    + ", canDoze=" + oldDream.mCanDoze
                     + ", userId=" + oldDream.mUserId
                     + ", reason='" + reason + "'"
                     + (mSavedStopReason == null ? "" : "(from '" + mSavedStopReason + "')"));
@@ -245,7 +248,7 @@ final class DreamController {
 
         mCurrentDream.mService = service;
 
-        if (!mCurrentDream.mIsTest) {
+        if (!mCurrentDream.mIsPreviewMode) {
             mContext.sendBroadcastAsUser(mDreamingStartedIntent, UserHandle.ALL);
             mCurrentDream.mSentStartBroadcast = true;
         }
@@ -261,7 +264,7 @@ final class DreamController {
     private final class DreamRecord implements DeathRecipient, ServiceConnection {
         public final Binder mToken;
         public final ComponentName mName;
-        public final boolean mIsTest;
+        public final boolean mIsPreviewMode;
         public final boolean mCanDoze;
         public final int mUserId;
 
@@ -273,11 +276,11 @@ final class DreamController {
 
         public boolean mWakingGently;
 
-        public DreamRecord(Binder token, ComponentName name,
-                boolean isTest, boolean canDoze, int userId, PowerManager.WakeLock wakeLock) {
+        DreamRecord(Binder token, ComponentName name, boolean isPreviewMode,
+                boolean canDoze, int userId, PowerManager.WakeLock wakeLock) {
             mToken = token;
             mName = name;
-            mIsTest = isTest;
+            mIsPreviewMode = isPreviewMode;
             mCanDoze = canDoze;
             mUserId  = userId;
             mWakeLock = wakeLock;

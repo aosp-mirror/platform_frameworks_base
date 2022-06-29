@@ -148,7 +148,7 @@ public final class CacheQuotaHint implements Parcelable {
                     return builder.setVolumeUuid(in.readString())
                             .setUid(in.readInt())
                             .setQuota(in.readLong())
-                            .setUsageStats(in.readParcelable(UsageStats.class.getClassLoader()))
+                            .setUsageStats(in.readParcelable(UsageStats.class.getClassLoader(), android.app.usage.UsageStats.class))
                             .build();
                 }
 

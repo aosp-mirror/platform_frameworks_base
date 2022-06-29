@@ -31,7 +31,8 @@ android_test {
     test_config: "RollbackTest.xml",
     java_resources: [
         ":com.android.apex.apkrollback.test_v2",
-        ":com.android.apex.apkrollback.test_v2Crashing"
+        ":com.android.apex.apkrollback.test_v2Crashing",
+        ":test.rebootless_apex_v2",
     ],
 }
 
@@ -47,7 +48,10 @@ java_test_host {
     ],
     test_suites: ["general-tests"],
     test_config: "StagedRollbackTest.xml",
-    data: [":com.android.apex.apkrollback.test_v1"],
+    data: [
+        ":com.android.apex.apkrollback.test_v1",
+        ":test.rebootless_apex_v1",
+    ],
 }
 
 java_test_host {

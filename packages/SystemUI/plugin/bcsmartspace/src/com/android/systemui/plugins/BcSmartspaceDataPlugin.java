@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.app.smartspace.SmartspaceTargetEvent;
+import android.app.smartspace.uitemplatedata.TapAction;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -93,6 +94,12 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setPrimaryTextColor(int color);
 
         /**
+         * When the view is displayed on Dream, set the flag to true, immediately after the view is
+         * created.
+         */
+        void setIsDreaming(boolean isDreaming);
+
+        /**
          * Range [0.0 - 1.0] when transitioning from Lockscreen to/from AOD
          */
         void setDozeAmount(float amount);
@@ -122,11 +129,34 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * Set or clear device media playing
          */
         void setMediaTarget(@Nullable SmartspaceTarget target);
+
+        /**
+         * Get the index of the currently selected page.
+         */
+        int getSelectedPage();
+
+        /**
+         * Return the top padding value from the currently visible card, or 0 if there is no current
+         * card.
+         */
+        int getCurrentCardTopPadding();
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */
     interface IntentStarter {
         default void startFromAction(SmartspaceAction action, View v, boolean showOnLockscreen) {
+            try {
+                if (action.getIntent() != null) {
+                    startIntent(v, action.getIntent(), showOnLockscreen);
+                } else if (action.getPendingIntent() != null) {
+                    startPendingIntent(action.getPendingIntent(), showOnLockscreen);
+                }
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "Could not launch intent for action: " + action, e);
+            }
+        }
+
+        default void startFromAction(TapAction action, View v, boolean showOnLockscreen) {
             try {
                 if (action.getIntent() != null) {
                     startIntent(v, action.getIntent(), showOnLockscreen);

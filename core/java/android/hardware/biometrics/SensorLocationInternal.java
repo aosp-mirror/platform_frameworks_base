@@ -18,6 +18,7 @@ package android.hardware.biometrics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -108,5 +109,13 @@ public class SensorLocationInternal implements Parcelable {
                 + ", x: " + sensorLocationX
                 + ", y: " + sensorLocationY
                 + ", r: " + sensorRadius + "]";
+    }
+
+    /** Returns coordinates of a bounding box around the sensor. */
+    public Rect getRect() {
+        return new Rect(sensorLocationX - sensorRadius,
+                sensorLocationY - sensorRadius,
+                sensorLocationX + sensorRadius,
+                sensorLocationY + sensorRadius);
     }
 }

@@ -14,7 +14,7 @@
 java_defaults {
     name: "FrameworkMockingServicesTests-jni-defaults",
     jni_libs: [
-        "libactivitymanagermockingservicestestjni",
+        "libmockingservicestestjni",
     ],
 }
 
@@ -29,47 +29,57 @@ package {
 
 android_test {
     name: "FrameworksMockingServicesTests",
-    defaults: ["FrameworkMockingServicesTests-jni-defaults"],
+    defaults: [
+        "FrameworkMockingServicesTests-jni-defaults",
+        "modules-utils-testable-device-config-defaults",
+    ],
 
     srcs: [
         "src/**/*.java",
         "src/**/*.kt",
+        ":framework-internal-display-sources",
     ],
 
     static_libs: [
+        "androidx.test.core",
+        "androidx.test.runner",
+        "androidx.test.espresso.core",
+        "androidx.test.espresso.contrib",
+        "androidx.test.ext.truth",
+        "frameworks-base-testutils",
+        "hamcrest-library",
+        "kotlin-test",
+        "mockingservicestests-utils-mockito",
+        "mockito-target-extended-minus-junit4",
+        "platform-test-annotations",
+        "service-blobstore",
+        "service-jobscheduler",
+        "service-permission.impl",
+        "service-sdksandbox.impl",
+        "services.companion",
         "services.core",
         "services.devicepolicy",
         "services.net",
         "services.usage",
-        "service-jobscheduler",
-        "service-permission.impl",
-        "service-blobstore",
-        "service-appsearch",
-        "androidx.test.core",
-        "androidx.test.runner",
-        "androidx.test.ext.truth",
-        "mockito-target-extended-minus-junit4",
-        "platform-test-annotations",
-        "truth-prebuilt",
-        "hamcrest-library",
-        "servicestests-utils-mockito-extended",
-        "mockingservicestests-utils-mockito",
+        "services.wallpapereffectsgeneration",
         "servicestests-core-utils",
+        "servicestests-utils-mockito-extended",
         "testables",
+        "truth-prebuilt",
         // TODO: remove once Android migrates to JUnit 4.12, which provides assertThrows
         "testng",
+        "compatibility-device-util-axt",
     ],
 
     libs: [
         "android.test.mock",
         "android.test.base",
         "android.test.runner",
+        "servicestests-core-utils",
     ],
 
     jni_libs: [
-        "libdexmakerjvmtiagent",
         "libpsi",
-        "libstaticjvmtiagent",
     ],
 
     certificate: "platform",

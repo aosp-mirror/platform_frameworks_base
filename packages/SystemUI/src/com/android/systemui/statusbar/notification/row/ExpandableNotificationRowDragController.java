@@ -17,6 +17,11 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.widget.Toast.LENGTH_SHORT;
+
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -33,13 +38,15 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.HapticFeedbackConstants;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -55,12 +62,15 @@ public class ExpandableNotificationRowDragController {
 
     private final Context mContext;
     private final HeadsUpManager mHeadsUpManager;
+    private final ShadeController mShadeController;
 
     @Inject
     public ExpandableNotificationRowDragController(Context context,
-            HeadsUpManager headsUpManager) {
+            HeadsUpManager headsUpManager,
+            ShadeController shadeController) {
         mContext = context;
         mHeadsUpManager = headsUpManager;
+        mShadeController = shadeController;
 
         init();
     }
@@ -87,6 +97,16 @@ public class ExpandableNotificationRowDragController {
         final PendingIntent contentIntent = notification.contentIntent != null
                 ? notification.contentIntent
                 : notification.fullScreenIntent;
+        if (contentIntent == null) {
+            if (!enr.isPinned()) {
+                // We dismiss the shade for consistency, but also because toasts currently don't
+                // show above the shade
+                dismissShade();
+            }
+            Toast.makeText(mContext, R.string.drag_split_not_supported, LENGTH_SHORT)
+                 .show();
+            return;
+        }
         Bitmap iconBitmap = getBitmapFromDrawable(
                 getPkgIcon(enr.getEntry().getSbn().getPackageName()));
 
@@ -97,15 +117,30 @@ public class ExpandableNotificationRowDragController {
         ClipDescription clipDescription = new ClipDescription("Drag And Drop",
                 new String[]{ClipDescription.MIMETYPE_APPLICATION_ACTIVITY});
         Intent dragIntent = new Intent();
-        dragIntent.putExtra("android.intent.extra.PENDING_INTENT", contentIntent);
+        dragIntent.putExtra(ClipDescription.EXTRA_PENDING_INTENT, contentIntent);
         dragIntent.putExtra(Intent.EXTRA_USER, android.os.Process.myUserHandle());
         ClipData.Item item = new ClipData.Item(dragIntent);
         ClipData dragData = new ClipData(clipDescription, item);
         View.DragShadowBuilder myShadow = new View.DragShadowBuilder(snapshot);
         view.setOnDragListener(getDraggedViewDragListener());
-        view.startDragAndDrop(dragData, myShadow, null, View.DRAG_FLAG_GLOBAL);
+        boolean result = view.startDragAndDrop(dragData, myShadow, null, View.DRAG_FLAG_GLOBAL
+                | View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION);
+        if (result) {
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            if (enr.isPinned()) {
+                mHeadsUpManager.releaseAllImmediately();
+            } else {
+                dismissShade();
+            }
+        }
     }
 
+    private void dismissShade() {
+        // Speed up dismissing the shade since the drag needs to be handled by
+        // the shell layer underneath
+        mShadeController.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */,
+                false /* delayed */, 1.1f /* speedUpFactor */);
+    }
 
     private Drawable getPkgIcon(String pkgName) {
         Drawable pkgicon = null;
@@ -145,16 +180,6 @@ public class ExpandableNotificationRowDragController {
         return (view, dragEvent) -> {
             switch (dragEvent.getAction()) {
                 case DragEvent.ACTION_DRAG_STARTED:
-                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                    if (view instanceof ExpandableNotificationRow) {
-                        ExpandableNotificationRow enr = (ExpandableNotificationRow) view;
-                        if (enr.isPinned()) {
-                            mHeadsUpManager.releaseAllImmediately();
-                        } else {
-                            Dependency.get(ShadeController.class).animateCollapsePanels(
-                                    CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
-                        }
-                    }
                     return true;
                 case DragEvent.ACTION_DRAG_ENDED:
                     if (dragEvent.getResult()) {
@@ -162,10 +187,55 @@ public class ExpandableNotificationRowDragController {
                             ExpandableNotificationRow enr = (ExpandableNotificationRow) view;
                             enr.dragAndDropSuccess();
                         }
+                    } else {
+                        // Fade out the drag surface in place instead of animating back to the
+                        // start position now that the shade is closed
+                        fadeOutAndRemoveDragSurface(dragEvent);
                     }
+                    // Clear the drag listener set above
+                    view.setOnDragListener(null);
                     return true;
             }
             return false;
         };
+    }
+
+    private void fadeOutAndRemoveDragSurface(DragEvent dragEvent) {
+        SurfaceControl dragSurface = dragEvent.getDragSurface();
+        SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+        ValueAnimator returnAnimator = ValueAnimator.ofFloat(0f, 1f);
+        returnAnimator.setDuration(200);
+        returnAnimator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        returnAnimator.addUpdateListener(animation -> {
+            float t = animation.getAnimatedFraction();
+            float alpha = 1f - t;
+            tx.setAlpha(dragSurface, alpha);
+            tx.apply();
+        });
+        returnAnimator.addListener(new AnimatorListenerAdapter() {
+            private boolean mCanceled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                cleanUpSurface();
+                mCanceled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mCanceled) {
+                    // Already handled above
+                    return;
+                }
+                cleanUpSurface();
+            }
+
+            private void cleanUpSurface() {
+                tx.remove(dragSurface);
+                tx.apply();
+                tx.close();
+            }
+        });
+        returnAnimator.start();
     }
 }

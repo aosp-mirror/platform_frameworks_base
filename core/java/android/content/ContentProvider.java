@@ -18,6 +18,7 @@ package android.content;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.os.Process.myUserHandle;
 import static android.os.Trace.TRACE_TAG_DATABASE;
 
 import android.annotation.NonNull;
@@ -48,10 +49,13 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.permission.PermissionCheckerManager;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -134,8 +138,17 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     private boolean mExported;
     private boolean mNoPerms;
     private boolean mSingleUser;
+    private SparseBooleanArray mUsersRedirectedToOwner = new SparseBooleanArray();
 
     private ThreadLocal<AttributionSource> mCallingAttributionSource;
+
+    /**
+     * @hide
+     */
+    public static boolean isAuthorityRedirectedForCloneProfile(String authority) {
+        // For now, only MediaProvider gets redirected.
+        return MediaStore.AUTHORITY.equals(authority);
+    }
 
     private Transport mTransport = new Transport();
 
@@ -726,13 +739,47 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     boolean checkUser(int pid, int uid, Context context) {
-        if (UserHandle.getUserId(uid) == context.getUserId() || mSingleUser) {
+        final int callingUserId = UserHandle.getUserId(uid);
+
+        if (callingUserId == context.getUserId() || mSingleUser) {
             return true;
         }
-        return context.checkPermission(INTERACT_ACROSS_USERS, pid, uid)
-                    == PackageManager.PERMISSION_GRANTED
+        if (context.checkPermission(INTERACT_ACROSS_USERS, pid, uid)
+                == PackageManager.PERMISSION_GRANTED
                 || context.checkPermission(INTERACT_ACROSS_USERS_FULL, pid, uid)
-                    == PackageManager.PERMISSION_GRANTED;
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+        if (isAuthorityRedirectedForCloneProfile(mAuthority)) {
+            if (mUsersRedirectedToOwner.indexOfKey(callingUserId) >= 0) {
+                return mUsersRedirectedToOwner.get(callingUserId);
+            }
+
+            // Haven't seen this user yet, look it up
+            try {
+                UserHandle callingUser = UserHandle.getUserHandleForUid(uid);
+                Context callingUserContext = mContext.createPackageContextAsUser("system",
+                        0, callingUser);
+                UserManager um = callingUserContext.getSystemService(UserManager.class);
+
+                if (um != null && um.isCloneProfile()) {
+                    UserHandle parent = um.getProfileParent(callingUser);
+
+                    if (parent != null && parent.equals(myUserHandle())) {
+                        mUsersRedirectedToOwner.put(callingUserId, true);
+                        return true;
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // ignore
+            }
+
+            mUsersRedirectedToOwner.put(callingUserId, false);
+            return false;
+        }
+
+        return false;
     }
 
     /**

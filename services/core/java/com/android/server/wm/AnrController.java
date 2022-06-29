@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static com.android.server.wm.ActivityRecord.INVALID_PID;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.NonNull;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Process;
@@ -31,9 +32,11 @@ import android.util.SparseArray;
 import android.view.InputApplicationHandle;
 
 import com.android.server.am.ActivityManagerService;
+import com.android.server.criticalevents.CriticalEventLog;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.OptionalInt;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -74,7 +77,33 @@ class AnrController {
         activity.inputDispatchingTimedOut(reason, INVALID_PID);
     }
 
-    void notifyWindowUnresponsive(IBinder inputToken, String reason) {
+
+    /**
+     * Notify a window was unresponsive.
+     *
+     * @param token - the input token of the window
+     * @param pid - the pid of the window, if known
+     * @param reason - the reason for the window being unresponsive
+     */
+    void notifyWindowUnresponsive(@NonNull IBinder token, @NonNull OptionalInt pid,
+            @NonNull String reason) {
+        if (notifyWindowUnresponsive(token, reason)) {
+            return;
+        }
+        if (!pid.isPresent()) {
+            Slog.w(TAG_WM, "Failed to notify that window token=" + token + " was unresponsive.");
+            return;
+        }
+        notifyWindowUnresponsive(pid.getAsInt(), reason);
+    }
+
+    /**
+     * Notify a window identified by its input token was unresponsive.
+     *
+     * @return true if the window was identified by the given input token and the request was
+     *         handled, false otherwise.
+     */
+    private boolean notifyWindowUnresponsive(@NonNull IBinder inputToken, String reason) {
         preDumpIfLockTooSlow();
         final int pid;
         final boolean aboveSystem;
@@ -82,10 +111,8 @@ class AnrController {
         synchronized (mService.mGlobalLock) {
             InputTarget target = mService.getInputTargetFromToken(inputToken);
             if (target == null) {
-                Slog.e(TAG_WM, "Unknown token, dropping notifyConnectionUnresponsive request");
-                return;
+                return false;
             }
-
             WindowState windowState = target.getWindowState();
             pid = target.getPid();
             // Blame the activity if the input token belongs to the window. If the target is
@@ -101,34 +128,63 @@ class AnrController {
         } else {
             mService.mAmInternal.inputDispatchingTimedOut(pid, aboveSystem, reason);
         }
+        return true;
     }
 
-    void notifyWindowResponsive(IBinder inputToken) {
+    /**
+     * Notify a window owned by the provided pid was unresponsive.
+     */
+    private void notifyWindowUnresponsive(int pid, String reason) {
+        Slog.i(TAG_WM, "ANR in input window owned by pid=" + pid + ". Reason: " + reason);
+        dumpAnrStateLocked(null /* activity */, null /* windowState */, reason);
+
+        // We cannot determine the z-order of the window, so place the anr dialog as high
+        // as possible.
+        mService.mAmInternal.inputDispatchingTimedOut(pid, true /*aboveSystem*/, reason);
+    }
+
+    /**
+     * Notify a window was responsive after previously being unresponsive.
+     *
+     * @param token - the input token of the window
+     * @param pid - the pid of the window, if known
+     */
+    void notifyWindowResponsive(@NonNull IBinder token, @NonNull OptionalInt pid) {
+        if (notifyWindowResponsive(token)) {
+            return;
+        }
+        if (!pid.isPresent()) {
+            Slog.w(TAG_WM, "Failed to notify that window token=" + token + " was responsive.");
+            return;
+        }
+        notifyWindowResponsive(pid.getAsInt());
+    }
+
+    /**
+     * Notify a window identified by its input token was responsive after previously being
+     * unresponsive.
+     *
+     * @return true if the window was identified by the given input token and the request was
+     *         handled, false otherwise.
+     */
+    private boolean notifyWindowResponsive(@NonNull IBinder inputToken) {
         final int pid;
         synchronized (mService.mGlobalLock) {
             InputTarget target = mService.getInputTargetFromToken(inputToken);
             if (target == null) {
-                Slog.e(TAG_WM, "Unknown token, dropping notifyWindowConnectionResponsive request");
-                return;
+                return false;
             }
             pid = target.getPid();
         }
         mService.mAmInternal.inputDispatchingResumed(pid);
+        return true;
     }
 
-    void notifyGestureMonitorUnresponsive(int gestureMonitorPid, String reason) {
-        preDumpIfLockTooSlow();
-        synchronized (mService.mGlobalLock) {
-            Slog.i(TAG_WM, "ANR in gesture monitor owned by pid:" + gestureMonitorPid
-                    + ".  Reason: " + reason);
-            dumpAnrStateLocked(null /* activity */, null /* windowState */, reason);
-        }
-        mService.mAmInternal.inputDispatchingTimedOut(gestureMonitorPid, /* aboveSystem */ true,
-                reason);
-    }
-
-    void notifyGestureMonitorResponsive(int gestureMonitorPid) {
-        mService.mAmInternal.inputDispatchingResumed(gestureMonitorPid);
+    /**
+     * Notify a window owned by the provided pid was responsive after previously being unresponsive.
+     */
+    private void notifyWindowResponsive(int pid) {
+        mService.mAmInternal.inputDispatchingResumed(pid);
     }
 
     /**
@@ -212,9 +268,10 @@ class AnrController {
             }
         }
 
+        String criticalEvents = CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
         final File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
                 null /* processCpuTracker */, null /* lastPids */, nativePids,
-                null /* logExceptionCreatingFile */);
+                null /* logExceptionCreatingFile */, "Pre-dump", criticalEvents);
         if (tracesFile != null) {
             tracesFile.renameTo(new File(tracesFile.getParent(), tracesFile.getName() + "_pre"));
         }
@@ -223,15 +280,10 @@ class AnrController {
     private void dumpAnrStateLocked(ActivityRecord activity, WindowState windowState,
                                     String reason) {
         mService.saveANRStateLocked(activity, windowState, reason);
-        mService.mAtmInternal.saveANRState(reason);
+        mService.mAtmService.saveANRState(reason);
     }
 
-    private boolean isWindowAboveSystem(WindowState windowState) {
-        if (windowState == null) {
-            // If the window state is not available we cannot easily determine its z order. Try to
-            // place the anr dialog as high as possible.
-            return true;
-        }
+    private boolean isWindowAboveSystem(@NonNull WindowState windowState) {
         int systemAlertLayer = mService.mPolicy.getWindowLayerFromTypeLw(
                 TYPE_APPLICATION_OVERLAY, windowState.mOwnerCanAddInternalSystemWindow);
         return windowState.mBaseLayer > systemAlertLayer;

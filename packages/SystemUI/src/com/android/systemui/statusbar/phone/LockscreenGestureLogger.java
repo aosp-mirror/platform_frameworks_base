@@ -72,7 +72,10 @@ public class LockscreenGestureLogger {
         LOCKSCREEN_NOTIFICATION_FALSE_TOUCH(548),
 
         @UiEvent(doc = "Expand the notification panel while unlocked")
-        LOCKSCREEN_UNLOCKED_NOTIFICATION_PANEL_EXPAND(549);
+        LOCKSCREEN_UNLOCKED_NOTIFICATION_PANEL_EXPAND(549),
+
+        @UiEvent(doc = "Lockscreen > Tap on switch user icon")
+        LOCKSCREEN_SWITCH_USER_TAP(934);
 
         private final int mId;
 

@@ -45,6 +45,7 @@ import android.content.Intent;
 import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -58,6 +59,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
+import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
@@ -101,6 +103,7 @@ public class QSTileImplTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private ActivityStarter mActivityStarter;
+
     private UiEventLoggerFake mUiEventLoggerFake;
     private InstanceId mInstanceId = InstanceId.fakeInstanceId(5);
 
@@ -113,7 +116,7 @@ public class QSTileImplTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         mUiEventLoggerFake = new UiEventLoggerFake();
         when(mHost.indexOf(SPEC)).thenReturn(POSITION);
-        when(mHost.getContext()).thenReturn(mContext.getBaseContext());
+        when(mHost.getContext()).thenReturn(mContext);
         when(mHost.getUiEventLogger()).thenReturn(mUiEventLoggerFake);
         when(mHost.getNewInstanceId()).thenReturn(mInstanceId);
 
@@ -342,6 +345,68 @@ public class QSTileImplTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
+    @Test
+    public void testClickOnDisabledByPolicyDoesntClickLaunchesIntent() {
+        String restriction = "RESTRICTION";
+        mTile.getState().disabledByPolicy = true;
+        EnforcedAdmin admin = EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(restriction);
+        mTile.setEnforcedAdmin(admin);
+
+        mTile.click(null);
+        mTestableLooper.processAllMessages();
+        assertFalse(mTile.mClicked);
+
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mActivityStarter).postStartActivityDismissingKeyguard(captor.capture(), anyInt());
+        assertEquals(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS, captor.getValue().getAction());
+    }
+
+    @Test
+    public void testIsListening() {
+        Object o = new Object();
+
+        mTile.setListening(o, true);
+        mTestableLooper.processAllMessages();
+        assertTrue(mTile.isListening());
+
+        mTile.setListening(o, false);
+        mTestableLooper.processAllMessages();
+        assertFalse(mTile.isListening());
+
+        mTile.setListening(o, true);
+        mTile.destroy();
+        mTestableLooper.processAllMessages();
+        assertFalse(mTile.isListening());
+    }
+
+    @Test
+    public void testStaleTriggeredWhileListening() throws Exception {
+        Object o = new Object();
+        mTile.clearRefreshes();
+
+        mTile.setListening(o, true); // +1 refresh
+        mTestableLooper.processAllMessages();
+
+        mTestableLooper.runWithLooper(() -> mTile.handleStale()); // +1 refresh
+        mTestableLooper.processAllMessages();
+
+        mTile.setListening(o, false);
+        mTestableLooper.processAllMessages();
+        assertFalse(mTile.isListening());
+        assertThat(mTile.mRefreshes).isEqualTo(2);
+    }
+
+    @Test
+    public void testStaleTriggeredWhileNotListening() throws Exception {
+        mTile.clearRefreshes();
+
+        mTestableLooper.runWithLooper(() -> mTile.handleStale()); // +1 refresh
+        mTestableLooper.processAllMessages();
+
+        assertFalse(mTile.isListening());
+        assertThat(mTile.mRefreshes).isEqualTo(1);
+    }
+
     private void assertEvent(UiEventLogger.UiEventEnum eventType,
             UiEventLoggerFake.FakeUiEvent fakeEvent) {
         assertEquals(eventType.getId(), fakeEvent.eventId);
@@ -381,9 +446,9 @@ public class QSTileImplTest extends SysuiTestCase {
             return mInvalid;
         }
     }
-
     private static class TileImpl extends QSTileImpl<QSTile.BooleanState> {
         boolean mClicked;
+        int mRefreshes = 0;
 
         protected TileImpl(
                 QSHost host,
@@ -400,6 +465,10 @@ public class QSTileImplTest extends SysuiTestCase {
             getState().state = Tile.STATE_ACTIVE;
         }
 
+        public void setEnforcedAdmin(EnforcedAdmin admin) {
+            mEnforcedAdmin = admin;
+        }
+
         @Override
         public BooleanState newTileState() {
             return new BooleanState();
@@ -412,7 +481,11 @@ public class QSTileImplTest extends SysuiTestCase {
 
         @Override
         protected void handleUpdateState(BooleanState state, Object arg) {
+            mRefreshes++;
+        }
 
+        void clearRefreshes() {
+            mRefreshes = 0;
         }
 
         @Override

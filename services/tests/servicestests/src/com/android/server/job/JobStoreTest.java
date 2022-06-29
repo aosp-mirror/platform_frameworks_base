@@ -313,10 +313,10 @@ public class JobStoreTest {
     }
 
     @Test
-    public void testPriorityPersisted() throws Exception {
+    public void testBiasPersisted() throws Exception {
         JobInfo.Builder b = new Builder(92, mComponent)
                 .setOverrideDeadline(5000)
-                .setPriority(42)
+                .setBias(42)
                 .setPersisted(true);
         final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(js);
@@ -325,7 +325,25 @@ public class JobStoreTest {
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
-        assertEquals("Priority not correctly persisted.", 42, loaded.getPriority());
+        assertEquals("Bias not correctly persisted.", 42, loaded.getBias());
+    }
+
+    @Test
+    public void testPriorityPersisted() throws Exception {
+        final JobInfo job = new Builder(92, mComponent)
+                .setOverrideDeadline(5000)
+                .setPriority(JobInfo.PRIORITY_MIN)
+                .setPersisted(true)
+                .build();
+        final JobStatus js = JobStatus.createFromJobInfo(job, SOME_UID, null, -1, null);
+        mTaskStoreUnderTest.add(js);
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        final JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
+        assertEquals("Priority not correctly persisted.",
+                JobInfo.PRIORITY_MIN, job.getPriority());
     }
 
     /**

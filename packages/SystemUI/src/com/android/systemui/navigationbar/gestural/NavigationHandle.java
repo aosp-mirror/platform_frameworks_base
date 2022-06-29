@@ -36,8 +36,8 @@ public class NavigationHandle extends View implements ButtonInterface {
     protected final Paint mPaint = new Paint();
     private @ColorInt final int mLightColor;
     private @ColorInt final int mDarkColor;
-    protected final int mRadius;
-    protected final int mBottom;
+    protected final float mRadius;
+    protected final float mBottom;
     private boolean mRequiresInvalidate;
 
     public NavigationHandle(Context context) {
@@ -47,8 +47,8 @@ public class NavigationHandle extends View implements ButtonInterface {
     public NavigationHandle(Context context, AttributeSet attr) {
         super(context, attr);
         final Resources res = context.getResources();
-        mRadius = res.getDimensionPixelSize(R.dimen.navigation_handle_radius);
-        mBottom = res.getDimensionPixelSize(R.dimen.navigation_handle_bottom);
+        mRadius = res.getDimension(R.dimen.navigation_handle_radius);
+        mBottom = res.getDimension(R.dimen.navigation_handle_bottom);
 
         final int dualToneDarkTheme = Utils.getThemeAttr(context, R.attr.darkIconTheme);
         final int dualToneLightTheme = Utils.getThemeAttr(context, R.attr.lightIconTheme);
@@ -75,9 +75,9 @@ public class NavigationHandle extends View implements ButtonInterface {
 
         // Draw that bar
         int navHeight = getHeight();
-        int height = mRadius * 2;
+        float height = mRadius * 2;
         int width = getWidth();
-        int y = (navHeight - mBottom - height);
+        float y = (navHeight - mBottom - height);
         canvas.drawRoundRect(0, y, width, y + height, mRadius, mRadius, mPaint);
     }
 

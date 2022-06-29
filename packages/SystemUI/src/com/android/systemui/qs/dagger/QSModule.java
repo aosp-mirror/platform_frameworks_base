@@ -28,12 +28,14 @@ import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
+import com.android.systemui.qs.external.QSExternalModule;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.SafetyController;
 import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -47,7 +49,7 @@ import dagger.Provides;
  * Module for QS dependencies
  */
 @Module(subcomponents = {QSFragmentComponent.class},
-        includes = {MediaModule.class, QSFlagsModule.class})
+        includes = {MediaModule.class, QSExternalModule.class, QSFlagsModule.class})
 public interface QSModule {
 
     @Provides
@@ -65,6 +67,7 @@ public interface QSModule {
             ReduceBrightColorsController reduceBrightColorsController,
             DeviceControlsController deviceControlsController,
             WalletController walletController,
+            SafetyController safetyController,
             @Named(RBC_AVAILABLE) boolean isReduceBrightColorsAvailable) {
         AutoTileManager manager = new AutoTileManager(
                 context,
@@ -80,6 +83,7 @@ public interface QSModule {
                 reduceBrightColorsController,
                 deviceControlsController,
                 walletController,
+                safetyController,
                 isReduceBrightColorsAvailable
         );
         manager.init();

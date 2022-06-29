@@ -53,9 +53,9 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
-import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -96,7 +96,7 @@ public class AccessibilityInputFilterTest {
 
     @Mock private WindowManagerInternal.AccessibilityControllerInternal mMockA11yController;
     @Mock private WindowManagerInternal mMockWindowManagerService;
-    @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
+    @Mock private MagnificationProcessor mMockMagnificationProcessor;
     private AccessibilityManagerService mAms;
     private AccessibilityInputFilter mA11yInputFilter;
     private EventCaptor mCaptor1;
@@ -152,8 +152,7 @@ public class AccessibilityInputFilterTest {
         mA11yInputFilter.onInstalled();
 
         doReturn(mDisplayList).when(mAms).getValidDisplayList();
-        doReturn(mMockFullScreenMagnificationController).when(mAms)
-                .getFullScreenMagnificationController();
+        doReturn(mMockMagnificationProcessor).when(mAms).getMagnificationProcessor();
     }
 
     @After

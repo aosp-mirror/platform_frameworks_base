@@ -21,12 +21,14 @@ import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.media.RoutingSessionInfo;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
@@ -36,16 +38,14 @@ import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.HearingAidProfile;
+import com.android.settingslib.bluetooth.LeAudioProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfile;
-import com.android.settingslib.bluetooth.LeAudioProfile;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -54,7 +54,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @RequiresApi(Build.VERSION_CODES.R)
 public class LocalMediaManager implements BluetoothCallback {
-    private static final Comparator<MediaDevice> COMPARATOR = Comparator.naturalOrder();
     private static final String TAG = "LocalMediaManager";
     private static final int MAX_DISCONNECTED_DEVICE_NUM = 5;
 
@@ -62,12 +61,16 @@ public class LocalMediaManager implements BluetoothCallback {
     @IntDef({MediaDeviceState.STATE_CONNECTED,
             MediaDeviceState.STATE_CONNECTING,
             MediaDeviceState.STATE_DISCONNECTED,
-            MediaDeviceState.STATE_CONNECTING_FAILED})
+            MediaDeviceState.STATE_CONNECTING_FAILED,
+            MediaDeviceState.STATE_SELECTED,
+            MediaDeviceState.STATE_GROUPING})
     public @interface MediaDeviceState {
         int STATE_CONNECTED = 0;
         int STATE_CONNECTING = 1;
         int STATE_DISCONNECTED = 2;
         int STATE_CONNECTING_FAILED = 3;
+        int STATE_SELECTED = 4;
+        int STATE_GROUPING = 5;
     }
 
     private final Collection<DeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
@@ -235,6 +238,29 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Dispatch a change in the about-to-connect device. See
+     * {@link DeviceCallback#onAboutToConnectDeviceAdded} for more information.
+     */
+    public void dispatchAboutToConnectDeviceAdded(
+            @NonNull String deviceAddress,
+            @NonNull String deviceName,
+            @Nullable Drawable deviceIcon) {
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onAboutToConnectDeviceAdded(deviceAddress, deviceName, deviceIcon);
+        }
+    }
+
+    /**
+     * Dispatch a change in the about-to-connect device. See
+     * {@link DeviceCallback#onAboutToConnectDeviceRemoved} for more information.
+     */
+    public void dispatchAboutToConnectDeviceRemoved() {
+        for (DeviceCallback callback : getCallbacks()) {
+            callback.onAboutToConnectDeviceRemoved();
+        }
+    }
+
+    /**
      * Stop scan MediaDevice
      */
     public void stopScan() {
@@ -295,6 +321,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return If add device successful return {@code true}, otherwise return {@code false}
      */
     public boolean addDeviceToPlayMedia(MediaDevice device) {
+        device.setState(MediaDeviceState.STATE_GROUPING);
         return mInfoMediaManager.addDeviceToPlayMedia(device);
     }
 
@@ -305,6 +332,7 @@ public class LocalMediaManager implements BluetoothCallback {
      * @return If device stop successful return {@code true}, otherwise return {@code false}
      */
     public boolean removeDeviceFromPlayMedia(MediaDevice device) {
+        device.setState(MediaDeviceState.STATE_GROUPING);
         return mInfoMediaManager.removeDeviceFromPlayMedia(device);
     }
 
@@ -497,7 +525,6 @@ public class LocalMediaManager implements BluetoothCallback {
         @Override
         public void onDeviceListAdded(List<MediaDevice> devices) {
             synchronized (mMediaDevicesLock) {
-                Collections.sort(devices, COMPARATOR);
                 mMediaDevices.clear();
                 mMediaDevices.addAll(devices);
                 // Add disconnected bluetooth devices only when phone output device is available.
@@ -682,6 +709,35 @@ public class LocalMediaManager implements BluetoothCallback {
          * {@link android.media.MediaRoute2ProviderService#REASON_INVALID_COMMAND},
          */
         default void onRequestFailed(int reason){};
+
+        /**
+         * Callback for notifying that we have a new about-to-connect device.
+         *
+         * An about-to-connect device is a device that is not yet connected but is expected to
+         * connect imminently and should be displayed as the current device in the media player.
+         * See [AudioManager.muteAwaitConnection] for more details.
+         *
+         * The information in the most recent callback should override information from any previous
+         * callbacks.
+         *
+         * @param deviceAddress the address of the device. {@see AudioDeviceAttributes.address}.
+         *                      If present, we'll use this address to fetch the full information
+         *                      about the device (if we can find that information).
+         * @param deviceName the name of the device (displayed to the user). Used as a backup in
+         *                   case using deviceAddress doesn't work.
+         * @param deviceIcon the icon that should be used with the device. Used as a backup in case
+         *                   using deviceAddress doesn't work.
+         */
+        default void onAboutToConnectDeviceAdded(
+                @NonNull String deviceAddress,
+                @NonNull String deviceName,
+                @Nullable Drawable deviceIcon
+        ) {}
+
+        /**
+         * Callback for notifying that we no longer have an about-to-connect device.
+         */
+        default void onAboutToConnectDeviceRemoved() {}
     }
 
     /**

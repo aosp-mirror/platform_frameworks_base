@@ -38,6 +38,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
@@ -155,14 +156,6 @@ public class ResolverListAdapter extends BaseAdapter {
         return mResolverListController.getScore(componentName);
     }
 
-    /**
-     * Returns the list of top K component names which have highest
-     * {@link #getScore(DisplayResolveInfo)}
-     */
-    public List<ComponentName> getTopComponentNames(int topK) {
-        return mResolverListController.getTopComponentNames(topK);
-    }
-
     public void updateModel(ComponentName componentName) {
         mResolverListController.updateModel(componentName);
     }
@@ -177,107 +170,215 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     /**
-     * Rebuild the list of resolvers. In some cases some parts will need some asynchronous work
-     * to complete.
+     * Rebuild the list of resolvers. When rebuilding is complete, queue the {@code onPostListReady}
+     * callback on the main handler with {@code rebuildCompleted} true.
      *
-     * The {@code doPostProcessing } parameter is used to specify whether to update the UI and
-     * load additional targets (e.g. direct share) after the list has been rebuilt. This is used
-     * in the case where we want to load the inactive profile's resolved apps to know the
+     * In some cases some parts will need some asynchronous work to complete. Then this will first
+     * immediately queue {@code onPostListReady} (on the main handler) with {@code rebuildCompleted}
+     * false; only when the asynchronous work completes will this then go on to queue another
+     * {@code onPostListReady} callback with {@code rebuildCompleted} true.
+     *
+     * The {@code doPostProcessing} parameter is used to specify whether to update the UI and
+     * load additional targets (e.g. direct share) after the list has been rebuilt. We may choose
+     * to skip that step if we're only loading the inactive profile's resolved apps to know the
      * number of targets.
      *
-     * @return Whether or not the list building is completed.
+     * @return Whether the list building was completed synchronously. If not, we'll queue the
+     * {@code onPostListReady} callback first with {@code rebuildCompleted} false, and then again
+     * with {@code rebuildCompleted} true at the end of some newly-launched asynchronous work.
+     * Otherwise the callback is only queued once, with {@code rebuildCompleted} true.
      */
     protected boolean rebuildList(boolean doPostProcessing) {
-        List<ResolvedComponentInfo> currentResolveList = null;
-        // Clear the value of mOtherProfile from previous call.
-        mOtherProfile = null;
-        mLastChosen = null;
-        mLastChosenPosition = -1;
+        Trace.beginSection("ResolverListAdapter#rebuildList");
         mDisplayList.clear();
         mIsTabLoaded = false;
+        mLastChosenPosition = -1;
 
-        if (mBaseResolveList != null) {
-            currentResolveList = mUnfilteredResolveList = new ArrayList<>();
-            mResolverListController.addResolveListDedupe(currentResolveList,
-                    mResolverListCommunicator.getTargetIntent(),
-                    mBaseResolveList);
-        } else {
-            currentResolveList = mUnfilteredResolveList =
-                    mResolverListController.getResolversForIntent(
-                            /* shouldGetResolvedFilter= */ true,
-                            mResolverListCommunicator.shouldGetActivityMetadata(),
-                            mIntents);
-            if (currentResolveList == null) {
-                processSortedList(currentResolveList, doPostProcessing);
-                return true;
-            }
-            List<ResolvedComponentInfo> originalList =
-                    mResolverListController.filterIneligibleActivities(currentResolveList,
-                            true);
-            if (originalList != null) {
-                mUnfilteredResolveList = originalList;
-            }
-        }
+        List<ResolvedComponentInfo> currentResolveList = getInitialRebuiltResolveList();
+
+        /* TODO: this seems like unnecessary extra complexity; why do we need to do this "primary"
+         * (i.e. "eligibility") filtering before evaluating the "other profile" special-treatment,
+         * but the "secondary" (i.e. "priority") filtering after? Are there in fact cases where the
+         * eligibility conditions will filter out a result that would've otherwise gotten the "other
+         * profile" treatment? Or, are there cases where the priority conditions *would* filter out
+         * a result, but we *want* that result to get the "other profile" treatment, so we only
+         * filter *after* evaluating the special-treatment conditions? If the answer to either is
+         * "no," then the filtering steps can be consolidated. (And that also makes the "unfiltered
+         * list" bookkeeping a little cleaner.)
+         */
+        mUnfilteredResolveList = performPrimaryResolveListFiltering(currentResolveList);
 
         // So far we only support a single other profile at a time.
         // The first one we see gets special treatment.
-        for (ResolvedComponentInfo info : currentResolveList) {
-            ResolveInfo resolveInfo = info.getResolveInfoAt(0);
-            if (resolveInfo.targetUserId != UserHandle.USER_CURRENT) {
-                Intent pOrigIntent = mResolverListCommunicator.getReplacementIntent(
-                        resolveInfo.activityInfo,
-                        info.getIntentAt(0));
-                Intent replacementIntent = mResolverListCommunicator.getReplacementIntent(
-                        resolveInfo.activityInfo,
-                        mResolverListCommunicator.getTargetIntent());
-                mOtherProfile = new DisplayResolveInfo(info.getIntentAt(0),
-                        resolveInfo,
-                        resolveInfo.loadLabel(mPm),
-                        resolveInfo.loadLabel(mPm),
-                        pOrigIntent != null ? pOrigIntent : replacementIntent,
-                        makePresentationGetter(resolveInfo));
-                currentResolveList.remove(info);
-                break;
-            }
+        ResolvedComponentInfo otherProfileInfo =
+                getFirstNonCurrentUserResolvedComponentInfo(currentResolveList);
+        updateOtherProfileTreatment(otherProfileInfo);
+        if (otherProfileInfo != null) {
+            currentResolveList.remove(otherProfileInfo);
+            /* TODO: the previous line removed the "other profile info" item from
+             * mUnfilteredResolveList *ONLY IF* that variable is an alias for the same List instance
+             * as currentResolveList (i.e., if no items were filtered out as the result of the
+             * earlier "primary" filtering). It seems wrong for our behavior to depend on that.
+             * Should we:
+             *  A. replicate the above removal to mUnfilteredResolveList (which is idempotent, so we
+             *     don't even have to check whether they're aliases); or
+             *  B. break the alias relationship by copying currentResolveList to a new
+             *  mUnfilteredResolveList instance if necessary before removing otherProfileInfo?
+             * In other words: do we *want* otherProfileInfo in the "unfiltered" results? Either
+             * way, we'll need one of the changes suggested above.
+             */
         }
 
-        if (mOtherProfile == null) {
+        // If no results have yet been filtered, mUnfilteredResolveList is an alias for the same
+        // List instance as currentResolveList. Then we need to make a copy to store as the
+        // mUnfilteredResolveList if we go on to filter any more items. Otherwise we've already
+        // copied the original unfiltered items to a separate List instance and can now filter
+        // the remainder in-place without any further bookkeeping.
+        boolean needsCopyOfUnfiltered = (mUnfilteredResolveList == currentResolveList);
+        List<ResolvedComponentInfo> originalList = performSecondaryResolveListFiltering(
+                currentResolveList, needsCopyOfUnfiltered);
+        if (originalList != null) {
+            // Only need the originalList value if there was a modification (otherwise it's null
+            // and shouldn't overwrite mUnfilteredResolveList).
+            mUnfilteredResolveList = originalList;
+        }
+
+        boolean result =
+                finishRebuildingListWithFilteredResults(currentResolveList, doPostProcessing);
+        Trace.endSection();
+        return result;
+    }
+
+    /**
+     * Get the full (unfiltered) set of {@code ResolvedComponentInfo} records for all resolvers
+     * to be considered in a newly-rebuilt list. This list will be filtered and ranked before the
+     * rebuild is complete.
+     */
+    List<ResolvedComponentInfo> getInitialRebuiltResolveList() {
+        if (mBaseResolveList != null) {
+            List<ResolvedComponentInfo> currentResolveList = new ArrayList<>();
+            mResolverListController.addResolveListDedupe(currentResolveList,
+                    mResolverListCommunicator.getTargetIntent(),
+                    mBaseResolveList);
+            return currentResolveList;
+        } else {
+            return mResolverListController.getResolversForIntent(
+                            /* shouldGetResolvedFilter= */ true,
+                            mResolverListCommunicator.shouldGetActivityMetadata(),
+                            mIntents);
+        }
+    }
+
+    /**
+     * Remove ineligible activities from {@code currentResolveList} (if non-null), in-place. More
+     * broadly, filtering logic should apply in the "primary" stage if it should preclude items from
+     * receiving the "other profile" special-treatment described in {@code rebuildList()}.
+     *
+     * @return A copy of the original {@code currentResolveList}, if any items were removed, or a
+     * (possibly null) reference to the original list otherwise. (That is, this always returns a
+     * list of all the unfiltered items, but if no items were filtered, it's just an alias for the
+     * same list that was passed in).
+     */
+    @Nullable
+    List<ResolvedComponentInfo> performPrimaryResolveListFiltering(
+            @Nullable List<ResolvedComponentInfo> currentResolveList) {
+        /* TODO: mBaseResolveList appears to be(?) some kind of configured mode. Why is it not
+         * subject to filterIneligibleActivities, even though all the other logic still applies
+         * (including "secondary" filtering)? (This also relates to the earlier question; do we
+         * believe there's an item that would be eligible for "other profile" special treatment,
+         * except we want to filter it out as ineligible... but only if we're not in
+         * "mBaseResolveList mode"? */
+        if ((mBaseResolveList != null) || (currentResolveList == null)) {
+            return currentResolveList;
+        }
+
+        List<ResolvedComponentInfo> originalList =
+                mResolverListController.filterIneligibleActivities(currentResolveList, true);
+        return (originalList == null) ? currentResolveList : originalList;
+    }
+
+    /**
+     * Remove low-priority activities from {@code currentResolveList} (if non-null), in place. More
+     * broadly, filtering logic should apply in the "secondary" stage to prevent items from
+     * appearing in the rebuilt-list results, while still considering those items for the "other
+     * profile" special-treatment described in {@code rebuildList()}.
+     *
+     * @return the same (possibly null) List reference as {@code currentResolveList} if the list is
+     * unmodified as a result of filtering; or, if some item(s) were removed, then either a copy of
+     * the original {@code currentResolveList} (if {@code returnCopyOfOriginalListIfModified} is
+     * true), or null (otherwise).
+     */
+    @Nullable
+    List<ResolvedComponentInfo> performSecondaryResolveListFiltering(
+            @Nullable List<ResolvedComponentInfo> currentResolveList,
+            boolean returnCopyOfOriginalListIfModified) {
+        if ((currentResolveList == null) || currentResolveList.isEmpty()) {
+            return currentResolveList;
+        }
+        return mResolverListController.filterLowPriority(
+                currentResolveList, returnCopyOfOriginalListIfModified);
+    }
+
+    /**
+     * Update the special "other profile" UI treatment based on the components resolved for a
+     * newly-built list.
+     *
+     * @param otherProfileInfo the first {@code ResolvedComponentInfo} specifying a
+     * {@code targetUserId} other than {@code USER_CURRENT}, or null if no such component info was
+     * found in the process of rebuilding the list (or if any such candidates were already removed
+     * due to "primary filtering").
+     */
+    void updateOtherProfileTreatment(@Nullable ResolvedComponentInfo otherProfileInfo) {
+        mLastChosen = null;
+
+        if (otherProfileInfo != null) {
+            mOtherProfile = makeOtherProfileDisplayResolveInfo(
+                    mContext, otherProfileInfo, mPm, mResolverListCommunicator, mIconDpi);
+        } else {
+            mOtherProfile = null;
             try {
                 mLastChosen = mResolverListController.getLastChosen();
+                // TODO: does this also somehow need to update mLastChosenPosition? If so, maybe
+                // the current method should also take responsibility for re-initializing
+                // mLastChosenPosition, where it's currently done at the start of rebuildList()?
+                // (Why is this related to the presence of mOtherProfile in fhe first place?)
             } catch (RemoteException re) {
                 Log.d(TAG, "Error calling getLastChosenActivity\n" + re);
             }
         }
+    }
 
-        setPlaceholderCount(0);
-        int n;
-        if ((currentResolveList != null) && ((n = currentResolveList.size()) > 0)) {
-            // We only care about fixing the unfilteredList if the current resolve list and
-            // current resolve list are currently the same.
-            List<ResolvedComponentInfo> originalList =
-                    mResolverListController.filterLowPriority(currentResolveList,
-                            mUnfilteredResolveList == currentResolveList);
-            if (originalList != null) {
-                mUnfilteredResolveList = originalList;
-            }
-
-            if (currentResolveList.size() > 1) {
-                int placeholderCount = currentResolveList.size();
-                if (mResolverListCommunicator.useLayoutWithDefault()) {
-                    --placeholderCount;
-                }
-                setPlaceholderCount(placeholderCount);
-                createSortingTask(doPostProcessing).execute(currentResolveList);
-                postListReadyRunnable(doPostProcessing, /* rebuildCompleted */ false);
-                return false;
-            } else {
-                processSortedList(currentResolveList, doPostProcessing);
-                return true;
-            }
-        } else {
-            processSortedList(currentResolveList, doPostProcessing);
+    /**
+     * Prepare the appropriate placeholders to eventually display the final set of resolved
+     * components in a newly-rebuilt list, and spawn an asynchronous sorting task if necessary.
+     * This eventually results in a {@code onPostListReady} callback with {@code rebuildCompleted}
+     * true; if any asynchronous work is required, that will first be preceded by a separate
+     * occurrence of the callback with {@code rebuildCompleted} false (once there are placeholders
+     * set up to represent the pending asynchronous results).
+     * @return Whether we were able to do all the work to prepare the list for display
+     * synchronously; if false, there will eventually be two separate {@code onPostListReady}
+     * callbacks, first with placeholders to represent pending asynchronous results, then later when
+     * the results are ready for presentation.
+     */
+    boolean finishRebuildingListWithFilteredResults(
+            @Nullable List<ResolvedComponentInfo> filteredResolveList, boolean doPostProcessing) {
+        if (filteredResolveList == null || filteredResolveList.size() < 2) {
+            // No asynchronous work to do.
+            setPlaceholderCount(0);
+            processSortedList(filteredResolveList, doPostProcessing);
             return true;
         }
+
+        int placeholderCount = filteredResolveList.size();
+        if (mResolverListCommunicator.useLayoutWithDefault()) {
+            --placeholderCount;
+        }
+        setPlaceholderCount(placeholderCount);
+
+        // Send an "incomplete" list-ready while the async task is running.
+        postListReadyRunnable(doPostProcessing, /* rebuildCompleted */ false);
+        createSortingTask(doPostProcessing).execute(filteredResolveList);
+        return false;
     }
 
     AsyncTask<List<ResolvedComponentInfo>,
@@ -305,8 +406,9 @@ public class ResolverListAdapter extends BaseAdapter {
 
     protected void processSortedList(List<ResolvedComponentInfo> sortedComponents,
             boolean doPostProcessing) {
-        int n;
-        if (sortedComponents != null && (n = sortedComponents.size()) != 0) {
+        final int n = sortedComponents != null ? sortedComponents.size() : 0;
+        Trace.beginSection("ResolverListAdapter#processSortedList:" + n);
+        if (n != 0) {
             // First put the initial items at the top.
             if (mInitialIntents != null) {
                 for (int i = 0; i < mInitialIntents.length; i++) {
@@ -354,6 +456,7 @@ public class ResolverListAdapter extends BaseAdapter {
         mResolverListCommunicator.sendVoiceChoicesIfNeeded();
         postListReadyRunnable(doPostProcessing, /* rebuildCompleted */ true);
         mIsTabLoaded = true;
+        Trace.endSection();
     }
 
     /**
@@ -644,6 +747,59 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     /**
+     * Find the first element in a list of {@code ResolvedComponentInfo} objects whose
+     * {@code ResolveInfo} specifies a {@code targetUserId} other than the current user.
+     * @return the first ResolvedComponentInfo targeting a non-current user, or null if there are
+     * none (or if the list itself is null).
+     */
+    private static ResolvedComponentInfo getFirstNonCurrentUserResolvedComponentInfo(
+            @Nullable List<ResolvedComponentInfo> resolveList) {
+        if (resolveList == null) {
+            return null;
+        }
+
+        for (ResolvedComponentInfo info : resolveList) {
+            ResolveInfo resolveInfo = info.getResolveInfoAt(0);
+            if (resolveInfo.targetUserId != UserHandle.USER_CURRENT) {
+                return info;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Set up a {@code DisplayResolveInfo} to provide "special treatment" for the first "other"
+     * profile in the resolve list (i.e., the first non-current profile to appear as the target user
+     * of an element in the resolve list).
+     */
+    private static DisplayResolveInfo makeOtherProfileDisplayResolveInfo(
+            Context context,
+            ResolvedComponentInfo resolvedComponentInfo,
+            PackageManager pm,
+            ResolverListCommunicator resolverListCommunicator,
+            int iconDpi) {
+        ResolveInfo resolveInfo = resolvedComponentInfo.getResolveInfoAt(0);
+
+        Intent pOrigIntent = resolverListCommunicator.getReplacementIntent(
+                resolveInfo.activityInfo,
+                resolvedComponentInfo.getIntentAt(0));
+        Intent replacementIntent = resolverListCommunicator.getReplacementIntent(
+                resolveInfo.activityInfo,
+                resolverListCommunicator.getTargetIntent());
+
+        ResolveInfoPresentationGetter presentationGetter =
+                new ResolveInfoPresentationGetter(context, iconDpi, resolveInfo);
+
+        return new DisplayResolveInfo(
+                resolvedComponentInfo.getIntentAt(0),
+                resolveInfo,
+                resolveInfo.loadLabel(pm),
+                resolveInfo.loadLabel(pm),
+                pOrigIntent != null ? pOrigIntent : replacementIntent,
+                presentationGetter);
+    }
+
+    /**
      * Necessary methods to communicate between {@link ResolverListAdapter}
      * and {@link ResolverActivity}.
      */
@@ -789,6 +945,9 @@ public class ResolverListAdapter extends BaseAdapter {
             } else {
                 mDisplayResolveInfo.setDisplayIcon(d);
                 mHolder.bindIcon(mDisplayResolveInfo);
+                // Notify in case view is already bound to resolve the race conditions on
+                // low end devices
+                notifyDataSetChanged();
             }
         }
 
@@ -835,6 +994,12 @@ public class ResolverListAdapter extends BaseAdapter {
             // check if subLabel matches label before final display
             return mRi.loadLabel(mPm).toString();
         }
+
+        @Override
+        String getAppLabelForSubstitutePermission() {
+            // Will default to app name if no activity label set
+            return mRi.getComponentInfo().loadLabel(mPm).toString();
+        }
     }
 
     /**
@@ -874,6 +1039,11 @@ public class ResolverListAdapter extends BaseAdapter {
             // matches label before final display
             return (String) mActivityInfo.loadLabel(mPm);
         }
+
+        @Override
+        String getAppLabelForSubstitutePermission() {
+            return getAppSubLabelInternal();
+        }
     }
 
     /**
@@ -886,6 +1056,7 @@ public class ResolverListAdapter extends BaseAdapter {
     private abstract static class TargetPresentationGetter {
         @Nullable abstract Drawable getIconSubstituteInternal();
         @Nullable abstract String getAppSubLabelInternal();
+        @Nullable abstract String getAppLabelForSubstitutePermission();
 
         private Context mCtx;
         private final int mIconDpi;
@@ -908,7 +1079,7 @@ public class ResolverListAdapter extends BaseAdapter {
             return new BitmapDrawable(mCtx.getResources(), getIconBitmap(userHandle));
         }
 
-        public Bitmap getIconBitmap(UserHandle userHandle) {
+        public Bitmap getIconBitmap(@Nullable UserHandle userHandle) {
             Drawable dr = null;
             if (mHasSubstitutePermission) {
                 dr = getIconSubstituteInternal();
@@ -937,9 +1108,10 @@ public class ResolverListAdapter extends BaseAdapter {
 
         public String getLabel() {
             String label = null;
-            // Apps with the substitute permission will always show the sublabel as their label
+            // Apps with the substitute permission will always show the activity label as the
+            // app label if provided
             if (mHasSubstitutePermission) {
-                label = getAppSubLabelInternal();
+                label = getAppLabelForSubstitutePermission();
             }
 
             if (label == null) {
@@ -950,8 +1122,17 @@ public class ResolverListAdapter extends BaseAdapter {
         }
 
         public String getSubLabel() {
-            // Apps with the substitute permission will never have a sublabel
-            if (mHasSubstitutePermission) return null;
+            // Apps with the substitute permission will always show the resolve info label as the
+            // sublabel if provided
+            if (mHasSubstitutePermission){
+                String appSubLabel = getAppSubLabelInternal();
+                // Use the resolve info label as sublabel if it is set
+                if(!TextUtils.isEmpty(appSubLabel)
+                    && !TextUtils.equals(appSubLabel, getLabel())){
+                    return appSubLabel;
+                }
+                return null;
+            }
             return getAppSubLabelInternal();
         }
 

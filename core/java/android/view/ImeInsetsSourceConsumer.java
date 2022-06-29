@@ -18,12 +18,13 @@ package android.view;
 
 import static android.os.Trace.TRACE_TAG_VIEW;
 import static android.view.ImeInsetsSourceConsumerProto.INSETS_SOURCE_CONSUMER;
+import static android.view.ImeInsetsSourceConsumerProto.IS_HIDE_ANIMATION_RUNNING;
 import static android.view.ImeInsetsSourceConsumerProto.IS_REQUESTED_VISIBLE_AWAITING_CONTROL;
+import static android.view.ImeInsetsSourceConsumerProto.IS_SHOW_REQUESTED_DURING_HIDE_ANIMATION;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.ITYPE_IME;
 
 import android.annotation.Nullable;
-import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
@@ -44,6 +45,16 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      */
     private boolean mIsRequestedVisibleAwaitingControl;
 
+    private boolean mIsHideAnimationRunning;
+
+    /**
+     * Tracks whether {@link WindowInsetsController#show(int)} or
+     * {@link InputMethodManager#showSoftInput(View, int)} is called during IME hide animation.
+     * If it was called, we should not call {@link InputMethodManager#notifyImeHidden(IBinder)},
+     * because the IME is being shown.
+     */
+    private boolean mIsShowRequestedDuringHideAnimation;
+
     public ImeInsetsSourceConsumer(
             InsetsState state, Supplier<Transaction> transactionSupplier,
             InsetsController controller) {
@@ -54,6 +65,9 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     public void onWindowFocusGained(boolean hasViewFocus) {
         super.onWindowFocusGained(hasViewFocus);
         getImm().registerImeConsumer(this);
+        if (isRequestedVisible() && getControl() == null) {
+            mIsRequestedVisibleAwaitingControl = true;
+        }
     }
 
     @Override
@@ -61,6 +75,12 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         super.onWindowFocusLost();
         getImm().unregisterImeConsumer(this);
         mIsRequestedVisibleAwaitingControl = false;
+    }
+
+    @Override
+    public void show(boolean fromIme) {
+        super.show(fromIme);
+        onShowRequested();
     }
 
     @Override
@@ -74,10 +94,20 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         hide();
 
         if (animationFinished) {
-            // remove IME surface as IME has finished hide animation.
-            notifyHidden();
-            removeSurface();
+            // Remove IME surface as IME has finished hide animation, if there is no pending
+            // show request.
+            if (!mIsShowRequestedDuringHideAnimation) {
+                notifyHidden();
+                removeSurface();
+            }
         }
+        // This method is called
+        // (1) before the hide animation starts.
+        // (2) after the hide animation ends.
+        // (3) if the IME is not controllable (animationFinished == true in this case).
+        // We should reset mIsShowRequestedDuringHideAnimation in all cases.
+        mIsHideAnimationRunning = !animationFinished;
+        mIsShowRequestedDuringHideAnimation = false;
     }
 
     /**
@@ -104,7 +134,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     /**
-     * Notify {@link InputMethodService} that IME window is hidden.
+     * Notify {@link com.android.server.inputmethod.InputMethodManagerService} that
+     * IME insets are hidden.
      */
     @Override
     void notifyHidden() {
@@ -121,14 +152,11 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     }
 
     @Override
-    public void setControl(@Nullable InsetsSourceControl control, int[] showTypes,
+    public boolean setControl(@Nullable InsetsSourceControl control, int[] showTypes,
             int[] hideTypes) {
-        super.setControl(control, showTypes, hideTypes);
-        // TODO(b/204524304): clean-up how to deal with the timing issues of hiding IME:
-        //  1) Already requested show IME, in the meantime of WM callback the control but got null
-        //  control when relayout comes first
-        //  2) Make sure no regression on some implicit request IME visibility calls (e.g.
-        //  toggleSoftInput)
+        if (!super.setControl(control, showTypes, hideTypes)) {
+            return false;
+        }
         if (control == null && !mIsRequestedVisibleAwaitingControl) {
             hide();
             removeSurface();
@@ -136,6 +164,7 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         if (control != null) {
             mIsRequestedVisibleAwaitingControl = false;
         }
+        return true;
     }
 
     @Override
@@ -157,7 +186,18 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, INSETS_SOURCE_CONSUMER);
         proto.write(IS_REQUESTED_VISIBLE_AWAITING_CONTROL, mIsRequestedVisibleAwaitingControl);
+        proto.write(IS_HIDE_ANIMATION_RUNNING, mIsHideAnimationRunning);
+        proto.write(IS_SHOW_REQUESTED_DURING_HIDE_ANIMATION, mIsShowRequestedDuringHideAnimation);
         proto.end(token);
+    }
+
+    /**
+     * Called when {@link #show} or {@link InputMethodManager#showSoftInput(View, int)} is called.
+     */
+    public void onShowRequested() {
+        if (mIsHideAnimationRunning) {
+            mIsShowRequestedDuringHideAnimation = true;
+        }
     }
 
     private InputMethodManager getImm() {

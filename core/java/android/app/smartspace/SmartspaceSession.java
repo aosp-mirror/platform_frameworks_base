@@ -107,7 +107,7 @@ public final class SmartspaceSession implements AutoCloseable {
             e.rethrowFromSystemServer();
         }
 
-        mCloseGuard.open("close");
+        mCloseGuard.open("SmartspaceSession.close");
     }
 
     /**

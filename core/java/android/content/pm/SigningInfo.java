@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,25 +26,25 @@ import android.os.Parcelable;
 public final class SigningInfo implements Parcelable {
 
     @NonNull
-    private final PackageParser.SigningDetails mSigningDetails;
+    private final SigningDetails mSigningDetails;
 
     public SigningInfo() {
-        mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
+        mSigningDetails = SigningDetails.UNKNOWN;
     }
 
     /**
      * @hide only packagemanager should be populating this
      */
-    public SigningInfo(PackageParser.SigningDetails signingDetails) {
-        mSigningDetails = new PackageParser.SigningDetails(signingDetails);
+    public SigningInfo(SigningDetails signingDetails) {
+        mSigningDetails = new SigningDetails(signingDetails);
     }
 
     public SigningInfo(SigningInfo orig) {
-        mSigningDetails = new PackageParser.SigningDetails(orig.mSigningDetails);
+        mSigningDetails = new SigningDetails(orig.mSigningDetails);
     }
 
     private SigningInfo(Parcel source) {
-        mSigningDetails = PackageParser.SigningDetails.CREATOR.createFromParcel(source);
+        mSigningDetails = SigningDetails.CREATOR.createFromParcel(source);
     }
 
     /**
@@ -53,7 +52,8 @@ public final class SigningInfo implements Parcelable {
      * their identity is viewed as being the set of all signers, not just any one.
      */
     public boolean hasMultipleSigners() {
-        return mSigningDetails.signatures != null && mSigningDetails.signatures.length > 1;
+        return mSigningDetails.getSignatures() != null
+                && mSigningDetails.getSignatures().length > 1;
     }
 
     /**
@@ -65,16 +65,18 @@ public final class SigningInfo implements Parcelable {
      * signing history, since it could change to a new signing certificate at any time.
      */
     public boolean hasPastSigningCertificates() {
-        return mSigningDetails.signatures != null
-                && mSigningDetails.pastSigningCertificates != null;
+        return mSigningDetails.getPastSigningCertificates() != null
+                && mSigningDetails.getPastSigningCertificates().length > 0;
     }
 
     /**
      * Returns the signing certificates this package has proven it is authorized to use. This
      * includes both the signing certificate associated with the signer of the package and the past
-     * signing certificates it included as its proof of signing certificate rotation.  This method
-     * is the preferred replacement for the {@code GET_SIGNATURES} flag used with {@link
-     * PackageManager#getPackageInfo(String, int)}.  When determining if a package is signed by a
+     * signing certificates it included as its proof of signing certificate rotation.  Signing
+     * certificates are returned in the order of rotation with the original signing certificate at
+     * index 0, and the current signing certificate at the last index. This method is the preferred
+     * replacement for the {@code GET_SIGNATURES} flag used with {@link
+     * PackageManager#getPackageInfo(String, int)}. When determining if a package is signed by a
      * desired certificate, the returned array should be checked to determine if it is one of the
      * entries.
      *
@@ -93,11 +95,11 @@ public final class SigningInfo implements Parcelable {
         } else if (!hasPastSigningCertificates()) {
 
             // this package is only signed by one signer with no history, return it
-            return mSigningDetails.signatures;
+            return mSigningDetails.getSignatures();
         } else {
 
             // this package has provided proof of past signing certificates, include them
-            return mSigningDetails.pastSigningCertificates;
+            return mSigningDetails.getPastSigningCertificates();
         }
     }
 
@@ -111,7 +113,7 @@ public final class SigningInfo implements Parcelable {
      * </note>
      */
     public Signature[] getApkContentsSigners() {
-        return mSigningDetails.signatures;
+        return mSigningDetails.getSignatures();
     }
 
     @Override

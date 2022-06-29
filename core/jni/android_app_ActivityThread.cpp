@@ -21,19 +21,12 @@
 #include <unistd.h>
 
 #include <bionic/malloc.h>
-#include <android/graphics/renderthread.h>
 
 namespace android {
 
 static void android_app_ActivityThread_purgePendingResources(JNIEnv* env, jobject clazz) {
     // Don't care about return values.
     mallopt(M_PURGE, 0);
-}
-
-static void
-android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
-    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    ARenderThread_dumpGraphicsMemory(fd);
 }
 
 static void android_app_ActivityThread_initZygoteChildHeapProfiling(JNIEnv* env, jobject clazz) {
@@ -44,8 +37,6 @@ static JNINativeMethod gActivityThreadMethods[] = {
     // ------------ Regular JNI ------------------
     { "nPurgePendingResources",        "()V",
       (void*) android_app_ActivityThread_purgePendingResources },
-    { "nDumpGraphicsInfo",        "(Ljava/io/FileDescriptor;)V",
-      (void*) android_app_ActivityThread_dumpGraphics },
     { "nInitZygoteChildHeapProfiling",        "()V",
       (void*) android_app_ActivityThread_initZygoteChildHeapProfiling }
 };

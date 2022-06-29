@@ -127,11 +127,8 @@ public final class NotificationEntry extends ListEntry {
     public int targetSdk;
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
-    // Mimetype and Uri used to display the image in the notification *after* it has been sent.
     public String remoteInputMimeType;
     public Uri remoteInputUri;
-    // ContentInfo used to keep the attachment permission alive until RemoteInput is sent or
-    // cancelled.
     public ContentInfo remoteInputAttachment;
     private Notification.BubbleMetadata mBubbleMetadata;
     private ShortcutInfo mShortcutInfo;
@@ -161,13 +158,6 @@ public final class NotificationEntry extends ListEntry {
     private long initializationTime = -1;
 
     /**
-     * Whether or not this row represents a system notification. Note that if this is
-     * {@code null}, that means we were either unable to retrieve the info or have yet to
-     * retrieve the info.
-     */
-    public Boolean mIsSystemNotification;
-
-    /**
      * Has the user sent a reply through this Notification.
      */
     private boolean hasSentReply;
@@ -177,7 +167,6 @@ public final class NotificationEntry extends ListEntry {
 
     private boolean mAutoHeadsUp;
     private boolean mPulseSupressed;
-    private boolean mAllowFgsDismissal;
     private int mBucket = BUCKET_ALERTING;
     @Nullable private Long mPendingAnimationDuration;
     private boolean mIsMarkedForUserTriggeredMovement;
@@ -195,14 +184,6 @@ public final class NotificationEntry extends ListEntry {
     public NotificationEntry(
             @NonNull StatusBarNotification sbn,
             @NonNull Ranking ranking,
-            long creationTime) {
-        this(sbn, ranking, false, creationTime);
-    }
-
-    public NotificationEntry(
-            @NonNull StatusBarNotification sbn,
-            @NonNull Ranking ranking,
-            boolean allowFgsDismissal,
             long creationTime
     ) {
         super(requireNonNull(requireNonNull(sbn).getKey()), creationTime);
@@ -212,8 +193,6 @@ public final class NotificationEntry extends ListEntry {
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
-
-        mAllowFgsDismissal = allowFgsDismissal;
     }
 
     @Override
@@ -556,7 +535,8 @@ public final class NotificationEntry extends ListEntry {
                 if (senderPerson == null) {
                     return true;
                 }
-                Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+                Person user = extras.getParcelable(
+                        Notification.EXTRA_MESSAGING_PERSON, Person.class);
                 return Objects.equals(user, senderPerson);
             }
         }
@@ -652,22 +632,6 @@ public final class NotificationEntry extends ListEntry {
         if (row != null) row.setHeadsUpAnimatingAway(animatingAway);
     }
 
-    /**
-     * Set that this notification was automatically heads upped. This happens for example when
-     * the user bypasses the lockscreen and media is playing.
-     */
-    public void setAutoHeadsUp(boolean autoHeadsUp) {
-        mAutoHeadsUp = autoHeadsUp;
-    }
-
-    /**
-     * @return if this notification was automatically heads upped. This happens for example when
-     *      * the user bypasses the lockscreen and media is playing.
-     */
-    public boolean isAutoHeadsUp() {
-        return mAutoHeadsUp;
-    }
-
     public boolean mustStayOnScreen() {
         return row != null && row.mustStayOnScreen();
     }
@@ -746,13 +710,11 @@ public final class NotificationEntry extends ListEntry {
     /**
      * @return Can the underlying notification be cleared? This can be different from whether the
      *         notification can be dismissed in case notifications are sensitive on the lockscreen.
-     * @see #canViewBeDismissed()
      */
-    // TOOD: This logic doesn't belong on NotificationEntry. It should be moved to the
-    // ForegroundsServiceDismissalFeatureController or some other controller that can be added
-    // as a dependency to any class that needs to answer this question.
+    // TODO: This logic doesn't belong on NotificationEntry. It should be moved to a controller
+    // that can be added as a dependency to any class that needs to answer this question.
     public boolean isClearable() {
-        if (!isDismissable()) {
+        if (!mSbn.isClearable()) {
             return false;
         }
 
@@ -760,7 +722,7 @@ public final class NotificationEntry extends ListEntry {
         if (children != null && children.size() > 0) {
             for (int i = 0; i < children.size(); i++) {
                 NotificationEntry child =  children.get(i);
-                if (!child.isDismissable()) {
+                if (!child.getSbn().isClearable()) {
                     return false;
                 }
             }
@@ -769,28 +731,25 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /**
-     * Notifications might have any combination of flags:
-     * - FLAG_ONGOING_EVENT
-     * - FLAG_NO_CLEAR
-     * - FLAG_FOREGROUND_SERVICE
-     *
-     * We want to allow dismissal of notifications that represent foreground services, which may
-     * have all 3 flags set. If we only find NO_CLEAR though, we don't want to allow dismissal
+     * @return Can the underlying notification be individually dismissed?
+     * @see #canViewBeDismissed()
      */
-    private boolean isDismissable() {
-        boolean ongoing = ((mSbn.getNotification().flags & Notification.FLAG_ONGOING_EVENT) != 0);
-        boolean noclear = ((mSbn.getNotification().flags & Notification.FLAG_NO_CLEAR) != 0);
-        boolean fgs = ((mSbn.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0);
-
-        if (mAllowFgsDismissal) {
-            if (noclear && !ongoing && !fgs) {
-                return false;
-            }
-            return true;
-        } else {
-            return mSbn.isClearable();
+    // TODO: This logic doesn't belong on NotificationEntry. It should be moved to a controller
+    // that can be added as a dependency to any class that needs to answer this question.
+    public boolean isDismissable() {
+        if  (mSbn.isOngoing()) {
+            return false;
         }
-
+        List<NotificationEntry> children = getAttachedNotifChildren();
+        if (children != null && children.size() > 0) {
+            for (int i = 0; i < children.size(); i++) {
+                NotificationEntry child =  children.get(i);
+                if (child.getSbn().isOngoing()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public boolean canViewBeDismissed() {
@@ -811,10 +770,26 @@ public final class NotificationEntry extends ListEntry {
         if (mSbn.getNotification().isMediaNotification()) {
             return true;
         }
-        if (mIsSystemNotification != null && mIsSystemNotification) {
+        if (!isBlockable()) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns whether this row is considered blockable (i.e. it's not a system notif
+     * or is not in an allowList).
+     */
+    public boolean isBlockable() {
+        if (getChannel() == null) {
+            return false;
+        }
+        if (getChannel().isImportanceLockedByCriticalDeviceFunction()
+                && !getChannel().isBlockable()) {
+            return false;
+        }
+
+        return true;
     }
 
     private boolean shouldSuppressVisualEffect(int effect) {
@@ -889,15 +864,6 @@ public final class NotificationEntry extends ListEntry {
 
     private static boolean isCategory(String category, Notification n) {
         return Objects.equals(n.category, category);
-    }
-
-    /**
-     * Whether or not this row represents a system notification. Note that if this is
-     * {@code null}, that means we were either unable to retrieve the info or have yet to
-     * retrieve the info.
-     */
-    public Boolean isSystemNotification() {
-        return mIsSystemNotification;
     }
 
     /**

@@ -73,7 +73,7 @@ public final class SystemBarUtils {
             }
         }
         final int defaultSize =
-                context.getResources().getDimensionPixelSize(R.dimen.status_bar_height);
+                context.getResources().getDimensionPixelSize(R.dimen.status_bar_height_default);
         // The status bar height should be:
         // Max(top cutout size, (status bar default height + waterfall top size))
         return Math.max(insets.top, defaultSize + waterfallInsets.top);

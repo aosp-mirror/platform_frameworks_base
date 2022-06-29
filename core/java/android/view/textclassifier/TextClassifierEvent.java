@@ -189,7 +189,7 @@ public abstract class TextClassifierEvent implements Parcelable {
         mEventCategory = in.readInt();
         mEventType = in.readInt();
         mEntityTypes = in.readStringArray();
-        mEventContext = in.readParcelable(null);
+        mEventContext = in.readParcelable(null, android.view.textclassifier.TextClassificationContext.class);
         mResultId = in.readString();
         mEventIndex = in.readInt();
         int scoresLength = in.readInt();

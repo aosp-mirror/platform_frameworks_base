@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -31,6 +33,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class Duration64Test {
 

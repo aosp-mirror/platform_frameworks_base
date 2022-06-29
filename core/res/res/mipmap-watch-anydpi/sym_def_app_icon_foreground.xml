@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <inset
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetLeft="24dp"
-    android:insetRight="24dp"
-    android:insetTop="24dp"
-    android:insetBottom="24dp">
+    android:insetLeft="22.22%"
+    android:insetRight="22.22%"
+    android:insetTop="22.22%"
+    android:insetBottom="22.22%">
     <vector
         android:width="60dp"
         android:height="60dp"

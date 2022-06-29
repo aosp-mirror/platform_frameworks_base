@@ -119,8 +119,7 @@ final class RemoteContentCaptureService
         // Metrics logging.
         writeSessionEvent(sessionId,
                 FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__ON_SESSION_STARTED,
-                initialState, getComponentName(), context.getActivityComponent(),
-                /* is_child_session= */ false);
+                initialState, getComponentName(), /* is_child_session= */ false);
     }
 
     /**
@@ -132,8 +131,7 @@ final class RemoteContentCaptureService
         // Metrics logging.
         writeSessionEvent(sessionId,
                 FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__ON_SESSION_FINISHED,
-                /* flags= */ 0, getComponentName(), /* app= */ null,
-                /* is_child_session= */ false);
+                /* flags= */ 0, getComponentName(), /* is_child_session= */ false);
     }
 
     /**
@@ -158,7 +156,7 @@ final class RemoteContentCaptureService
         scheduleAsyncRequest((s) -> s.onDataShared(request, dataShareCallback));
         writeServiceEvent(
                 FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_DATA_SHARE_REQUEST,
-                mComponentName, request.getPackageName());
+                mComponentName);
     }
 
     /**

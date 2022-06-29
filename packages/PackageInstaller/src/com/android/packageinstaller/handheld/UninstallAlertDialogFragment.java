@@ -31,6 +31,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -125,6 +126,7 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
 
         final boolean isUpdate =
                 ((dialogInfo.appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+        final UserHandle myUserHandle = Process.myUserHandle();
         UserManager userManager = UserManager.get(getActivity());
         if (isUpdate) {
             if (isSingleUser(userManager)) {
@@ -135,10 +137,17 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
         } else {
             if (dialogInfo.allUsers && !isSingleUser(userManager)) {
                 messageBuilder.append(getString(R.string.uninstall_application_text_all_users));
-            } else if (!dialogInfo.user.equals(android.os.Process.myUserHandle())) {
+            } else if (!dialogInfo.user.equals(myUserHandle)) {
                 UserInfo userInfo = userManager.getUserInfo(dialogInfo.user.getIdentifier());
-                messageBuilder.append(
-                        getString(R.string.uninstall_application_text_user, userInfo.name));
+                if (userInfo.isManagedProfile()
+                        && userInfo.profileGroupId == myUserHandle.getIdentifier()) {
+                    messageBuilder.append(
+                            getString(R.string.uninstall_application_text_current_user_work_profile,
+                                    userInfo.name));
+                } else {
+                    messageBuilder.append(
+                            getString(R.string.uninstall_application_text_user, userInfo.name));
+                }
             } else {
                 messageBuilder.append(getString(R.string.uninstall_application_text));
             }

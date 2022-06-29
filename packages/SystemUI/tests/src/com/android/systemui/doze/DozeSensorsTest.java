@@ -175,6 +175,7 @@ public class DozeSensorsTest extends SysuiTestCase {
     public void testDestroy() {
         mDozeSensors.destroy();
 
+        verify(mProximitySensor).destroy();
         verify(mTriggerSensor).setListening(false);
     }
 

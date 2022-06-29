@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.bugpatterns.android.UidChecker.getFlavor;
 import static com.google.errorprone.matchers.Matchers.anyOf;
@@ -54,6 +55,7 @@ import java.util.List;
 @BugPattern(
     name = "AndroidFrameworkContextUserId",
     summary = "Verifies that system_server calls use Context.getUserId()",
+    linkType = NONE,
     severity = WARNING)
 public final class ContextUserIdChecker extends BugChecker implements MethodInvocationTreeMatcher {
     private static final Matcher<Tree> INSIDE_MANAGER =

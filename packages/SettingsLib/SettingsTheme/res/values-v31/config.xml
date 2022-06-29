@@ -17,4 +17,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <bool name="settingslib_config_icon_space_reserved">false</bool>
     <bool name="settingslib_config_allow_divider">false</bool>
+    <!-- Name of a font family to use for headlines in SettingsLib. -->
+    <string name="settingslib_config_headlineFontFamily" translatable="false"></string>
 </resources>

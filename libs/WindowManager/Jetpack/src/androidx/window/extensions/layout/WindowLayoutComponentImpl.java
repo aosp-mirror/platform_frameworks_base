@@ -25,23 +25,25 @@ import static androidx.window.util.ExtensionHelper.transformToWindowSpaceRect;
 
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.AppTask;
 import android.app.Application;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.common.SettingsDisplayFeatureProducer;
+import androidx.window.common.RawFoldingFeatureProducer;
 import androidx.window.util.DataProducer;
-import androidx.window.util.PriorityDataProducer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -60,19 +62,16 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     private static final String TAG = "SampleExtension";
 
     private final Map<Activity, Consumer<WindowLayoutInfo>> mWindowLayoutChangeListeners =
-            new HashMap<>();
+            new ArrayMap<>();
 
-    private final SettingsDisplayFeatureProducer mSettingsDisplayFeatureProducer;
     private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
     public WindowLayoutComponentImpl(Context context) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
-        mSettingsDisplayFeatureProducer = new SettingsDisplayFeatureProducer(context);
-        mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsDisplayFeatureProducer,
-                new DeviceStateManagerFoldingFeatureProducer(context)
-        ));
+        RawFoldingFeatureProducer foldingFeatureProducer = new RawFoldingFeatureProducer(context);
+        mFoldingFeatureProducer = new DeviceStateManagerFoldingFeatureProducer(context,
+                foldingFeatureProducer);
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
 
@@ -85,7 +84,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     public void addWindowLayoutInfoListener(@NonNull Activity activity,
             @NonNull Consumer<WindowLayoutInfo> consumer) {
         mWindowLayoutChangeListeners.put(activity, consumer);
-        updateRegistrations();
+        onDisplayFeaturesChanged();
     }
 
     /**
@@ -96,7 +95,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     public void removeWindowLayoutInfoListener(
             @NonNull Consumer<WindowLayoutInfo> consumer) {
         mWindowLayoutChangeListeners.values().remove(consumer);
-        updateRegistrations();
+        onDisplayFeaturesChanged();
     }
 
     void updateWindowLayout(@NonNull Activity activity,
@@ -113,7 +112,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
     }
 
     @NonNull
-    private Boolean isListeningForLayoutChanges(IBinder token) {
+    private boolean isListeningForLayoutChanges(IBinder token) {
         for (Activity activity: getActivitiesListeningForLayoutChanges()) {
             if (token.equals(activity.getWindow().getAttributes().token)) {
                 return true;
@@ -170,8 +169,8 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
      * coordinate space and the state is calculated from {@link CommonFoldingFeature#getState()}.
      * The state from {@link #mFoldingFeatureProducer} may not be valid since
      * {@link #mFoldingFeatureProducer} is a general state controller. If the state is not valid,
-     * the {@link FoldingFeature} is omitted from the {@link List} of {@link DisplayFeature}. If
-     * the bounds are not valid, constructing a {@link FoldingFeature} will throw an
+     * the {@link FoldingFeature} is omitted from the {@link List} of {@link DisplayFeature}. If the
+     * bounds are not valid, constructing a {@link FoldingFeature} will throw an
      * {@link IllegalArgumentException} since this can cause negative UI effects down stream.
      *
      * @param activity a proxy for the {@link android.view.Window} that contains the
@@ -187,7 +186,7 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
             return features;
         }
 
-        if (activity.isInMultiWindowMode()) {
+        if (isTaskInMultiWindowMode(activity)) {
             // It is recommended not to report any display features in multi-window mode, since it
             // won't be possible to synchronize the display feature positions with window movement.
             return features;
@@ -204,19 +203,47 @@ public class WindowLayoutComponentImpl implements WindowLayoutComponent {
                 rotateRectToDisplayRotation(displayId, featureRect);
                 transformToWindowSpaceRect(activity, featureRect);
 
-                features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+                if (!isRectZero(featureRect)) {
+                    // TODO(b/228641877) Remove guarding if when fixed.
+                    features.add(new FoldingFeature(featureRect, baseFeature.getType(), state));
+                }
             }
         }
         return features;
     }
 
-    private void updateRegistrations() {
-        if (hasListeners()) {
-            mSettingsDisplayFeatureProducer.registerObserversIfNeeded();
-        } else {
-            mSettingsDisplayFeatureProducer.unregisterObserversIfNeeded();
+    /**
+     * Checks whether the task associated with the activity is in multi-window. If task info is not
+     * available it defaults to {@code true}.
+     */
+    private boolean isTaskInMultiWindowMode(@NonNull Activity activity) {
+        final ActivityManager am = activity.getSystemService(ActivityManager.class);
+        if (am == null) {
+            return true;
         }
-        onDisplayFeaturesChanged();
+
+        final List<AppTask> appTasks = am.getAppTasks();
+        final int taskId = activity.getTaskId();
+        AppTask task = null;
+        for (AppTask t : appTasks) {
+            if (t.getTaskInfo().taskId == taskId) {
+                task = t;
+                break;
+            }
+        }
+        if (task == null) {
+            // The task might be removed on the server already.
+            return true;
+        }
+        return WindowConfiguration.inMultiWindowMode(task.getTaskInfo().getWindowingMode());
+    }
+
+    /**
+     * Returns {@link true} if a {@link Rect} has zero width and zero height,
+     * {@code false} otherwise.
+     */
+    private boolean isRectZero(Rect rect) {
+        return rect.width() == 0 && rect.height() == 0;
     }
 
     private final class NotifyOnConfigurationChanged extends EmptyLifecycleCallbacksAdapter {

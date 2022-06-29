@@ -30,11 +30,13 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.SparseArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -93,7 +95,7 @@ import java.util.Set;
  * </code></pre>
  */
 class UserSystemPackageInstaller {
-    private static final String TAG = "UserManagerService";
+    private static final String TAG = UserSystemPackageInstaller.class.getSimpleName();
 
     private static final boolean DEBUG = false;
 
@@ -211,31 +213,66 @@ class UserSystemPackageInstaller {
         Slog.i(TAG, "Reviewing whitelisted packages due to "
                 + (isFirstBoot ? "[firstBoot]" : "") + (isConsideredUpgrade ? "[upgrade]" : ""));
         final PackageManagerInternal pmInt = LocalServices.getService(PackageManagerInternal.class);
+
+        // User ID -> package name -> installed
+        SparseArrayMap<String, Boolean> changesToCommit = new SparseArrayMap<>();
+
         // Install/uninstall system packages per user.
         for (int userId : mUm.getUserIds()) {
             final Set<String> userWhitelist = getInstallablePackagesForUserId(userId);
-            pmInt.forEachPackageSetting(pkgSetting -> {
-                AndroidPackage pkg = pkgSetting.pkg;
-                if (pkg == null || !pkg.isSystem()) {
-                    return;
+
+            // If null, run for all packages
+            if (userWhitelist == null) {
+                pmInt.forEachPackageState(packageState -> {
+                    if (packageState.getPkg() == null) {
+                        return;
+                    }
+                    final boolean install = !packageState.getTransientState()
+                            .isHiddenUntilInstalled();
+                    if (packageState.getUserStateOrDefault(userId).isInstalled() != install
+                            && shouldChangeInstallationState(packageState, install, userId,
+                            isFirstBoot, isConsideredUpgrade, preExistingPackages)) {
+                        changesToCommit.add(userId, packageState.getPackageName(), install);
+                    }
+                });
+            } else {
+                for (String packageName : userWhitelist) {
+                    PackageStateInternal packageState = pmInt.getPackageStateInternal(packageName);
+                    if (packageState.getPkg() == null) {
+                        continue;
+                    }
+
+                    final boolean install = !packageState.getTransientState()
+                            .isHiddenUntilInstalled();
+                    if (packageState.getUserStateOrDefault(userId).isInstalled() != install
+                            && shouldChangeInstallationState(packageState, install, userId,
+                            isFirstBoot, isConsideredUpgrade, preExistingPackages)) {
+                        changesToCommit.add(userId, packageState.getPackageName(), install);
+                    }
                 }
-                final boolean install =
-                        (userWhitelist == null || userWhitelist.contains(pkg.getPackageName()))
-                                && !pkgSetting.getPkgState().isHiddenUntilInstalled();
-                if (pkgSetting.getInstalled(userId) == install
-                        || !shouldChangeInstallationState(pkgSetting, install, userId, isFirstBoot,
-                                isConsideredUpgrade, preExistingPackages)) {
-                    return;
-                }
-                pkgSetting.setInstalled(install, userId);
-                pkgSetting.setUninstallReason(
-                        install ? PackageManager.UNINSTALL_REASON_UNKNOWN :
-                                PackageManager.UNINSTALL_REASON_USER_TYPE,
-                        userId);
-                Slog.i(TAG, (install ? "Installed " : "Uninstalled ")
-                        + pkg.getPackageName() + " for user " + userId);
-            });
+            }
         }
+
+        pmInt.commitPackageStateMutation(null, packageStateMutator -> {
+            for (int userIndex = 0; userIndex < changesToCommit.numMaps(); userIndex++) {
+                int userId = changesToCommit.keyAt(userIndex);
+                int packagesSize = changesToCommit.numElementsForKey(userId);
+                for (int packageIndex = 0; packageIndex < packagesSize; ++packageIndex) {
+                    String packageName = changesToCommit.keyAt(userIndex, packageIndex);
+                    boolean installed = changesToCommit.valueAt(userIndex, packageIndex);
+                    packageStateMutator.forPackage(packageName)
+                            .userState(userId)
+                            .setInstalled(installed)
+                            .setUninstallReason(installed
+                                    ? PackageManager.UNINSTALL_REASON_UNKNOWN
+                                    : PackageManager.UNINSTALL_REASON_USER_TYPE);
+
+                    Slog.i(TAG + "CommitDebug", (installed ? "Installed " : "Uninstalled ")
+                            + packageName + " for user " + userId);
+                }
+            }
+        });
+
         return true;
     }
 
@@ -250,7 +287,7 @@ class UserSystemPackageInstaller {
      * @param preOtaPkgs list of packages on the device prior to the upgrade.
      *                   Cannot be null if isUpgrade is true.
      */
-    private static boolean shouldChangeInstallationState(PackageSetting pkgSetting,
+    private static boolean shouldChangeInstallationState(PackageStateInternal packageState,
                                                          boolean install,
                                                          @UserIdInt int userId,
                                                          boolean isFirstBoot,
@@ -258,11 +295,12 @@ class UserSystemPackageInstaller {
                                                          @Nullable ArraySet<String> preOtaPkgs) {
         if (install) {
             // Only proceed with install if we are the only reason why it had been uninstalled.
-            return pkgSetting.getUninstallReason(userId)
+            return packageState.getUserStateOrDefault(userId).getUninstallReason()
                     == PackageManager.UNINSTALL_REASON_USER_TYPE;
         } else {
             // Only proceed with uninstall if the package is new to the device.
-            return isFirstBoot || (isUpgrade && !preOtaPkgs.contains(pkgSetting.name));
+            return isFirstBoot
+                    || (isUpgrade && !preOtaPkgs.contains(packageState.getPackageName()));
         }
     }
 
@@ -487,7 +525,7 @@ class UserSystemPackageInstaller {
     /**
      * Gets the system package names that should be installed on users of the given user type, as
      * determined by SystemConfig, the allowlist mode, and the apps actually on the device.
-     * Names are the {@link PackageParser.Package#packageName}, not necessarily the manifest names.
+     * Names are the {@link AndroidPackage#getPackageName()}, not necessarily the manifest names.
      *
      * Returns null if all system packages should be installed (due to enforce-mode being off).
      */

@@ -17,6 +17,11 @@
 package com.android.server.devicestate;
 
 import android.annotation.NonNull;
+import android.content.Context;
+import android.content.res.Resources;
+import android.text.TextUtils;
+
+import com.android.server.policy.DeviceStatePolicyImpl;
 
 /**
  * Interface for the component responsible for supplying the current device state as well as
@@ -24,9 +29,15 @@ import android.annotation.NonNull;
  *
  * @see DeviceStateManagerService
  */
-public interface DeviceStatePolicy {
+public abstract class DeviceStatePolicy {
+    protected final Context mContext;
+
+    protected DeviceStatePolicy(@NonNull Context context) {
+        mContext = context;
+    }
+
     /** Returns the provider of device states. */
-    DeviceStateProvider getDeviceStateProvider();
+    public abstract DeviceStateProvider getDeviceStateProvider();
 
     /**
      * Configures the system into the provided state. Guaranteed not to be called again until the
@@ -36,5 +47,58 @@ public interface DeviceStatePolicy {
      * @param onComplete a callback that must be triggered once the system has been properly
      *                   configured to match the supplied state.
      */
-    void configureDeviceForState(int state, @NonNull Runnable onComplete);
+    public abstract void configureDeviceForState(int state, @NonNull Runnable onComplete);
+
+    /** Provider for platform-default device state policy. */
+    static final class DefaultProvider implements DeviceStatePolicy.Provider {
+        @Override
+        public DeviceStatePolicy instantiate(@NonNull Context context) {
+            return new DeviceStatePolicyImpl(context);
+        }
+    }
+
+    /**
+     * Provider for {@link DeviceStatePolicy} instances.
+     *
+     * <p>By implementing this interface and overriding the
+     * {@code config_deviceSpecificDeviceStatePolicyProvider}, a device-specific implementations
+     * of {@link DeviceStatePolicy} can be supplied.
+     */
+    public interface Provider {
+        /**
+         * Instantiates a new {@link DeviceStatePolicy}.
+         *
+         * @see DeviceStatePolicy#DeviceStatePolicy
+         */
+        DeviceStatePolicy instantiate(@NonNull Context context);
+
+        /**
+         * Instantiates the device-specific {@link DeviceStatePolicy.Provider}.
+         *
+         * Checks the {@code config_deviceSpecificDeviceStatePolicyProvider} resource to see if
+         * a device specific policy provider has been supplied. If so, returns an instance of that
+         * provider. If there is no value provided then the method returns the
+         * {@link DeviceStatePolicy.DefaultProvider}.
+         *
+         * An {@link IllegalStateException} is thrown if there is a value provided for that
+         * resource, but it doesn't correspond to a class that is found.
+         */
+        static Provider fromResources(@NonNull Resources res) {
+            final String name = res.getString(
+                    com.android.internal.R.string.config_deviceSpecificDeviceStatePolicyProvider);
+            if (TextUtils.isEmpty(name)) {
+                return new DeviceStatePolicy.DefaultProvider();
+            }
+
+            try {
+                return (DeviceStatePolicy.Provider) Class.forName(name).newInstance();
+            } catch (ReflectiveOperationException | ClassCastException e) {
+                throw new IllegalStateException("Couldn't instantiate class " + name
+                        + " for config_deviceSpecificDeviceStatePolicyProvider:"
+                        + " make sure it has a public zero-argument constructor"
+                        + " and implements DeviceStatePolicy.Provider", e);
+            }
+        }
+    }
+
 }

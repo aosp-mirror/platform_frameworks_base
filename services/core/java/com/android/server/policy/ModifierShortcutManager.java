@@ -48,7 +48,7 @@ import java.io.IOException;
  * <li> Returning particular kind of application intent by special key.
  */
 class ModifierShortcutManager {
-    private static final String TAG = "ShortcutManager";
+    private static final String TAG = "WindowManager";
 
     private static final String TAG_BOOKMARKS = "bookmarks";
     private static final String TAG_BOOKMARK = "bookmark";
@@ -112,10 +112,15 @@ class ModifierShortcutManager {
      * @return The intent that matches the shortcut, or null if not found.
      */
     private Intent getIntent(KeyCharacterMap kcm, int keyCode, int metaState) {
+        // If a modifier key other than shift is also pressed, skip it.
+        final boolean isShiftOn = KeyEvent.metaStateHasModifiers(metaState, KeyEvent.META_SHIFT_ON);
+        if (!isShiftOn && !KeyEvent.metaStateHasNoModifiers(metaState)) {
+            return null;
+        }
+
         ShortcutInfo shortcut = null;
 
         // If the Shift key is pressed, then search for the shift shortcuts.
-        boolean isShiftOn = (metaState & KeyEvent.META_SHIFT_ON) == KeyEvent.META_SHIFT_ON;
         SparseArray<ShortcutInfo> shortcutMap = isShiftOn ? mShiftShortcuts : mIntentShortcuts;
 
         // First try the exact keycode (with modifiers).
@@ -188,7 +193,7 @@ class ModifierShortcutManager {
                                             | PackageManager.MATCH_UNINSTALLED_PACKAGES);
                         } catch (PackageManager.NameNotFoundException e1) {
                             Log.w(TAG, "Unable to add bookmark: " + packageName
-                                    + "/" + className, e);
+                                    + "/" + className + " not found.");
                             continue;
                         }
                     }
@@ -213,10 +218,8 @@ class ModifierShortcutManager {
                     mIntentShortcuts.put(shortcutChar, shortcut);
                 }
             }
-        } catch (XmlPullParserException e) {
-            Log.w(TAG, "Got exception parsing bookmarks.", e);
-        } catch (IOException e) {
-            Log.w(TAG, "Got exception parsing bookmarks.", e);
+        } catch (XmlPullParserException | IOException e) {
+            Log.e(TAG, "Got exception parsing bookmarks.", e);
         }
     }
 
@@ -302,7 +305,7 @@ class ModifierShortcutManager {
                     Slog.w(TAG, "Dropping application launch key because "
                             + "the activity to which it is registered was not found: "
                             + "keyCode=" + KeyEvent.keyCodeToString(keyCode) + ","
-                            + " category=" + category, ex);
+                            + " category=" + category);
                 }
                 return true;
             } else {
@@ -318,7 +321,7 @@ class ModifierShortcutManager {
             } catch (ActivityNotFoundException ex) {
                 Slog.w(TAG, "Dropping shortcut key combination because "
                         + "the activity to which it is registered was not found: "
-                        + "META+ or SEARCH" + KeyEvent.keyCodeToString(keyCode), ex);
+                        + "META+ or SEARCH" + KeyEvent.keyCodeToString(keyCode));
             }
             return true;
         }

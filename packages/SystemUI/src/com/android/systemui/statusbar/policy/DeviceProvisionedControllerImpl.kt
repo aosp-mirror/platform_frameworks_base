@@ -36,7 +36,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.settings.SecureSettings
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
@@ -220,7 +219,7 @@ open class DeviceProvisionedControllerImpl @Inject constructor(
         }
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Device provisioned: ${deviceProvisioned.get()}")
         synchronized(lock) {
             pw.println("User setup complete: $userSetupComplete")

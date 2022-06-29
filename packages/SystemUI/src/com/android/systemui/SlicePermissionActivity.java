@@ -50,10 +50,13 @@ public class SlicePermissionActivity extends Activity implements OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Verify intent is valid
         mUri = getIntent().getParcelableExtra(SliceProvider.EXTRA_BIND_URI);
         mCallingPkg = getIntent().getStringExtra(SliceProvider.EXTRA_PKG);
-        if (mUri == null) {
-            Log.e(TAG, SliceProvider.EXTRA_BIND_URI + " wasn't provided");
+        if (mUri == null
+                || !SliceProvider.SLICE_TYPE.equals(getContentResolver().getType(mUri))
+                || !SliceManager.ACTION_REQUEST_SLICE_PERMISSION.equals(getIntent().getAction())) {
+            Log.e(TAG, "Intent is not valid");
             finish();
             return;
         }

@@ -48,8 +48,10 @@ import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCal
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.wm.shell.bubbles.Bubbles;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -76,6 +78,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private RowContentBindStage mBindStage;
     @Mock PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    @Mock StatusBarStateController mStatusBarStateController;
     @Captor private ArgumentCaptor<NotificationEntryListener> mListenerCaptor;
     private NotificationEntryListener mNotificationEntryListener;
     private final HashMap<String, NotificationEntry> mPendingEntries = new HashMap<>();
@@ -86,13 +89,13 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mHeadsUpManager = new HeadsUpManager(mContext) {};
+        mHeadsUpManager = new HeadsUpManager(mContext, mock(HeadsUpManagerLogger.class)) {};
 
         when(mNotificationEntryManager.getPendingNotificationsIterator())
                 .thenReturn(mPendingEntries.values());
 
         mGroupManager = new NotificationGroupManagerLegacy(
-                mock(StatusBarStateController.class),
+                mStatusBarStateController,
                 () -> mPeopleNotificationIdentifier,
                 Optional.of(mock(Bubbles.class)),
                 mock(DumpManager.class));
@@ -101,13 +104,19 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         when(mBindStage.getStageParams(any())).thenReturn(new RowContentBindParams());
 
-        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper(mBindStage);
+        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper(
+                mBindStage, mStatusBarStateController, mGroupManager);
         mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
 
         mGroupAlertTransferHelper.bind(mNotificationEntryManager, mGroupManager);
         verify(mNotificationEntryManager).addNotificationEntryListener(mListenerCaptor.capture());
         mNotificationEntryListener = mListenerCaptor.getValue();
         mHeadsUpManager.addListener(mGroupAlertTransferHelper);
+    }
+
+    @After
+    public void tearDown() {
+        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
     }
 
     private void mockHasHeadsUpContentView(NotificationEntry entry,
@@ -305,10 +314,11 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
     @Test
     public void testUpdateChildToSummaryDoesNotTransfer() {
+        final String tag = "fooTag";
         NotificationEntry summaryEntry =
                 mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
         NotificationEntry childEntry =
-                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47);
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY, 47, tag);
         mockHasHeadsUpContentView(childEntry, false);
 
         mHeadsUpManager.showNotification(summaryEntry);
@@ -320,7 +330,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         StatusBarNotification oldNotification = childEntry.getSbn();
         childEntry.setSbn(
                 mGroupTestHelper.createSummaryNotification(
-                        Notification.GROUP_ALERT_SUMMARY, 47).getSbn());
+                        Notification.GROUP_ALERT_SUMMARY, 47, tag).getSbn());
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));

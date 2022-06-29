@@ -18,21 +18,16 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.app.Instrumentation
 import android.content.Context
-import android.platform.test.annotations.Presubmit
 import android.system.helpers.ActivityHelper
-import androidx.test.filters.FlakyTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.repetitions
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
@@ -45,12 +40,12 @@ import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import com.android.wm.shell.flicker.testapp.Components
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     protected val context: Context = instrumentation.context
-    protected val isRotated = testSpec.config.startRotation.isRotated()
     protected val activityHelper = ActivityHelper.getInstance()
     protected val appPairsHelper = AppPairsHelper(instrumentation,
         Components.SplitScreenActivity.LABEL,
@@ -82,20 +77,18 @@ abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
-            transition(this, testSpec.config)
+            transition(this)
         }
     }
 
-    internal open val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
+    internal open val transition: FlickerBuilder.() -> Unit
+        get() = {
             setup {
                 test {
                     device.wakeUpAndGoToHomeScreen()
                 }
                 eachRun {
-                    this.setRotation(configuration.startRotation)
+                    this.setRotation(testSpec.startRotation)
                     primaryApp.launchViaIntent(wmHelper)
                     secondaryApp.launchViaIntent(wmHelper)
                     nonResizeableApp?.launchViaIntent(wmHelper)
@@ -151,35 +144,35 @@ abstract class AppPairsTransition(protected val testSpec: FlickerTestParameter) 
         append("$primaryApp $secondaryApp")
     }
 
-    @FlakyTest(bugId = 186510496)
+    @Ignore
     @Test
     open fun navBarLayerIsVisible() {
         testSpec.navBarLayerIsVisible()
     }
 
-    @Presubmit
+    @Ignore
     @Test
     open fun statusBarLayerIsVisible() {
         testSpec.statusBarLayerIsVisible()
     }
 
-    @Presubmit
+    @Ignore
     @Test
     open fun navBarWindowIsVisible() {
         testSpec.navBarWindowIsVisible()
     }
 
-    @Presubmit
+    @Ignore
     @Test
     open fun statusBarWindowIsVisible() {
         testSpec.statusBarWindowIsVisible()
     }
 
-    @Presubmit
+    @Ignore
     @Test
     open fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @Ignore
     @Test
     open fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 }

@@ -28,9 +28,6 @@ import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.view.DisplayInfo;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -104,18 +101,29 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
-    void updateWallpaperWindows(boolean visible) {
-        if (isVisible() != visible) {
+    /** Returns {@code true} if visibility is changed. */
+    boolean updateWallpaperWindows(boolean visible) {
+        boolean changed = false;
+        if (mVisibleRequested != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
                     token, visible);
             setVisibility(visible);
+            changed = true;
         }
-        final WallpaperController wallpaperController = mDisplayContent.mWallpaperController;
         if (mTransitionController.isShellTransitionsEnabled()) {
-            return;
+            // Apply legacy fixed rotation to wallpaper if it is becoming visible
+            if (!mTransitionController.useShellTransitionsRotation() && changed && visible) {
+                final WindowState wallpaperTarget =
+                        mDisplayContent.mWallpaperController.getWallpaperTarget();
+                if (wallpaperTarget != null && wallpaperTarget.mToken.hasFixedRotationTransform()) {
+                    linkFixedRotationTransform(wallpaperTarget.mToken);
+                }
+            }
+            return changed;
         }
 
-        final WindowState wallpaperTarget = wallpaperController.getWallpaperTarget();
+        final WindowState wallpaperTarget =
+                mDisplayContent.mWallpaperController.getWallpaperTarget();
 
         if (visible && wallpaperTarget != null) {
             final RecentsAnimationController recentsAnimationController =
@@ -137,6 +145,7 @@ class WallpaperWindowToken extends WindowToken {
         }
 
         setVisible(visible);
+        return changed;
     }
 
     private void setVisible(boolean visible) {
@@ -155,10 +164,12 @@ class WallpaperWindowToken extends WindowToken {
      * transition. In that situation, make sure to call {@link #commitVisibility} when done.
      */
     void setVisibility(boolean visible) {
-        // Before setting mVisibleRequested so we can track changes.
-        mTransitionController.collect(this);
+        if (mVisibleRequested != visible) {
+            // Before setting mVisibleRequested so we can track changes.
+            mTransitionController.collect(this);
 
-        setVisibleRequested(visible);
+            setVisibleRequested(visible);
+        }
 
         // If in a transition, defer commits for activities that are going invisible
         if (!visible && (mTransitionController.inTransition()
@@ -182,23 +193,6 @@ class WallpaperWindowToken extends WindowToken {
 
         setVisibleRequested(visible);
         setVisible(visible);
-    }
-
-    @Override
-    void adjustWindowParams(WindowState win, WindowManager.LayoutParams attrs) {
-        if (attrs.height == ViewGroup.LayoutParams.MATCH_PARENT
-                || attrs.width == ViewGroup.LayoutParams.MATCH_PARENT) {
-            return;
-        }
-
-        final DisplayInfo displayInfo = win.getDisplayInfo();
-
-        final float layoutScale = Math.max(
-                (float) displayInfo.logicalHeight / (float) attrs.height,
-                (float) displayInfo.logicalWidth / (float) attrs.width);
-        attrs.height = (int) (attrs.height * layoutScale);
-        attrs.width = (int) (attrs.width * layoutScale);
-        attrs.flags |= WindowManager.LayoutParams.FLAG_SCALED;
     }
 
     boolean hasVisibleNotDrawnWallpaper() {

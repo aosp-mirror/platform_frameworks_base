@@ -49,6 +49,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.protolog.common.ProtoLog;
@@ -59,6 +61,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -76,9 +79,18 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     private SplitScreenController mSplitScreen;
     private ShellExecutor mMainExecutor;
     private DragAndDropImpl mImpl;
+    private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+
+    /**
+     * Listener called during drag events, currently just onDragStarted.
+     */
+    public interface DragAndDropListener {
+        /** Called when a drag has started. */
+        void onDragStarted();
+    }
 
     public DragAndDropController(Context context, DisplayController displayController,
             UiEventLogger uiEventLogger, IconProvider iconProvider, ShellExecutor mainExecutor) {
@@ -97,6 +109,22 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
     public void initialize(Optional<SplitScreenController> splitscreen) {
         mSplitScreen = splitscreen.orElse(null);
         mDisplayController.addDisplayWindowListener(this);
+    }
+
+    /** Adds a listener to be notified of drag and drop events. */
+    public void addListener(DragAndDropListener listener) {
+        mListeners.add(listener);
+    }
+
+    /** Removes a drag and drop listener. */
+    public void removeListener(DragAndDropListener listener) {
+        mListeners.remove(listener);
+    }
+
+    private void notifyListeners() {
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onDragStarted();
+        }
     }
 
     @Override
@@ -133,11 +161,17 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         try {
             wm.addView(rootView, layoutParams);
-            mDisplayDropTargets.put(displayId,
-                    new PerDisplay(displayId, context, wm, rootView, dragLayout));
+            addDisplayDropTarget(displayId, context, wm, rootView, dragLayout);
         } catch (WindowManager.InvalidDisplayException e) {
             Slog.w(TAG, "Unable to add view for display id: " + displayId);
         }
+    }
+
+    @VisibleForTesting
+    void addDisplayDropTarget(int displayId, Context context, WindowManager wm,
+            FrameLayout rootView, DragLayout dragLayout) {
+        mDisplayDropTargets.put(displayId,
+                new PerDisplay(displayId, context, wm, rootView, dragLayout));
     }
 
     @Override
@@ -202,9 +236,11 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 pd.dragLayout.prepare(mDisplayController.getDisplayLayout(displayId),
                         event.getClipData(), loggerSessionId);
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
+                notifyListeners();
                 break;
             case ACTION_DRAG_ENTERED:
                 pd.dragLayout.show();
+                pd.dragLayout.update(event);
                 break;
             case ACTION_DRAG_LOCATION:
                 pd.dragLayout.update(event);
@@ -250,10 +286,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 // Hide the window if another drag hasn't been started while animating the drop
                 setDropTargetWindowVisibility(pd, View.INVISIBLE);
             }
-
-            // Clean up the drag surface
-            mTransaction.reparent(dragSurface, null);
-            mTransaction.apply();
         });
     }
 

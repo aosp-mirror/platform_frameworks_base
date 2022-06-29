@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,12 @@
 #ifndef _ANDROID_MEDIA_TV_DVR_CLIENT_CALLBACK_H_
 #define _ANDROID_MEDIA_TV_DVR_CLIENT_CALLBACK_H_
 
-using ::android::hardware::tv::tuner::V1_0::PlaybackStatus;
-using ::android::hardware::tv::tuner::V1_0::RecordStatus;
+#include <aidl/android/hardware/tv/tuner/PlaybackStatus.h>
+#include <aidl/android/hardware/tv/tuner/RecordStatus.h>
+#include <utils/RefBase.h>
+
+using ::aidl::android::hardware::tv::tuner::PlaybackStatus;
+using ::aidl::android::hardware::tv::tuner::RecordStatus;
 
 using namespace std;
 
@@ -30,4 +34,4 @@ struct DvrClientCallback : public RefBase {
 };
 }  // namespace android
 
-#endif  // _ANDROID_MEDIA_TV_DVR_CLIENT_CALLBACK_H_
+#endif // _ANDROID_MEDIA_TV_DVR_CLIENT_CALLBACK_H_

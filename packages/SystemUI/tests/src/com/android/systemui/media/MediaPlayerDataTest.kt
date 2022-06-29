@@ -177,8 +177,12 @@ public class MediaPlayerDataTest : SysuiTestCase() {
         isPlaying: Boolean?,
         location: Int,
         resumption: Boolean
-    ) =
-        MediaData(0, false, 0, app, null, null, null, null, emptyList(), emptyList<Int>(),
-            "package:" + app, null, null, null, true, null, location, resumption, "key:" + app,
-            false, isPlaying)
+    ) = MediaTestUtils.emptyMediaData.copy(
+        app = app,
+        packageName = "package: $app",
+        playbackLocation = location,
+        resumption = resumption,
+        notificationKey = "key: $app",
+        isPlaying = isPlaying
+    )
 }

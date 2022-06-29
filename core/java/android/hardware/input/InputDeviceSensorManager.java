@@ -98,7 +98,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
      */
     private void updateInputDeviceSensorInfoLocked(int deviceId) {
         final InputDevice inputDevice = InputDevice.getDevice(deviceId);
-        if (inputDevice.hasSensor()) {
+        if (inputDevice != null && inputDevice.hasSensor()) {
             final InputSensorInfo[] sensorInfos =
                     mInputManager.getSensorList(deviceId);
             populateSensorsForInputDeviceLocked(deviceId, sensorInfos);

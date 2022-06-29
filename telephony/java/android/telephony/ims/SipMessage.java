@@ -57,7 +57,7 @@ public final class SipMessage implements Parcelable {
      * @param startLine The start line of the message, containing either the request-line or
      *                  status-line.
      * @param headerSection A String containing the full unencoded SIP message header.
-     * @param content UTF-8 encoded SIP message body.
+     * @param content SIP message body.
      */
     public SipMessage(@NonNull String startLine, @NonNull String headerSection,
             @NonNull byte[] content) {
@@ -105,7 +105,7 @@ public final class SipMessage implements Parcelable {
     }
 
     /**
-     * @return only the UTF-8 encoded SIP message body.
+     * @return the SIP message body.
      */
     public @NonNull byte[] getContent() {
         return mContent;

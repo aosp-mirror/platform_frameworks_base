@@ -438,7 +438,7 @@ static pb::Reference_Type SerializeReferenceTypeToPb(Reference::Type type) {
 }
 
 static void SerializeReferenceToPb(const Reference& ref, pb::Reference* pb_ref) {
-  pb_ref->set_id(ref.id.value_or_default(ResourceId(0x0)).id);
+  pb_ref->set_id(ref.id.value_or(ResourceId(0x0)).id);
 
   if (ref.name) {
     pb_ref->set_name(ref.name.value().to_string());
@@ -759,13 +759,13 @@ void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node,
     pb_attr->set_namespace_uri(attr.namespace_uri);
     pb_attr->set_value(attr.value);
     if (attr.compiled_attribute) {
-      const ResourceId attr_id = attr.compiled_attribute.value().id.value_or_default({});
+      const ResourceId attr_id = attr.compiled_attribute.value().id.value_or(ResourceId{});
       pb_attr->set_resource_id(attr_id.id);
     }
     if (attr.compiled_value != nullptr) {
       SerializeItemToPb(*attr.compiled_value, pb_attr->mutable_compiled_item());
       pb::SourcePosition* pb_src = pb_attr->mutable_source();
-      pb_src->set_line_number(attr.compiled_value->GetSource().line.value_or_default(0));
+      pb_src->set_line_number(attr.compiled_value->GetSource().line.value_or(0));
     }
   }
 

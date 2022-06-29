@@ -278,7 +278,7 @@ public class KeyValueBackupTaskTest  {
 
         assertThat(mBackupManagerService.getPendingInits()).isEmpty();
         assertThat(mBackupManagerService.isBackupRunning()).isFalse();
-        assertThat(mBackupManagerService.getCurrentOperations().size()).isEqualTo(0);
+        assertThat(mBackupManagerService.getOperationStorage().numOperations()).isEqualTo(0);
         verify(mOldJournal).delete();
     }
 
@@ -449,7 +449,7 @@ public class KeyValueBackupTaskTest  {
 
         assertThat(mBackupManagerService.getPendingInits()).isEmpty();
         assertThat(mBackupManagerService.isBackupRunning()).isFalse();
-        assertThat(mBackupManagerService.getCurrentOperations().size()).isEqualTo(0);
+        assertThat(mBackupManagerService.getOperationStorage().numOperations()).isEqualTo(0);
         assertThat(mBackupManagerService.getCurrentToken()).isEqualTo(1234L);
         verify(mBackupManagerService).writeRestoreTokens();
         verify(mOldJournal).delete();
@@ -2665,7 +2665,8 @@ public class KeyValueBackupTaskTest  {
         KeyValueBackupTask task =
                 new KeyValueBackupTask(
                         mBackupManagerService,
-                        transportMock.transportClient,
+                        mBackupManagerService.getOperationStorage(),
+                        transportMock.mTransportConnection,
                         transportMock.transportData.transportDirName,
                         queue,
                         mOldJournal,
@@ -2726,7 +2727,7 @@ public class KeyValueBackupTaskTest  {
         // The second line will throw NPE because it will call lambda 1 with null, since argThat()
         // returns null. So we guard against that by checking for null.
         return packageInfo ->
-                packageInfo != null && packageInfo.packageName.equals(packageInfo.packageName);
+                packageInfo != null && packageInfo.packageName.equals(packageData.packageName);
     }
 
     /** Matches {@link ApplicationInfo} whose package name is {@code packageData.packageName}. */

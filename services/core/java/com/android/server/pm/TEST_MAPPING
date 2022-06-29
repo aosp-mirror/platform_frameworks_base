@@ -1,6 +1,14 @@
 {
   "presubmit": [
     {
+      "name": "CtsPackageInstallTestCases",
+      "file_patterns": [
+        "core/java/.*Install.*",
+        "services/core/.*Install.*",
+        "services/core/java/com/android/server/pm/.*"
+      ]
+    },
+    {
       "name": "CtsUsesLibraryHostTestCases"
     },
     {
@@ -13,24 +21,7 @@
       "name": "CtsAppEnumerationTestCases"
     },
     {
-      "name": "AppEnumerationInternalTests"
-    },
-    {
       "name": "CtsMatchFlagTestCases"
-    },
-    {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.pm."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
     },
     {
       "name": "FrameworksMockingServicesTests",
@@ -39,6 +30,14 @@
           "include-filter": "com.android.server.pm."
         }
       ]
+    },
+    {
+      "name": "CtsShortcutHostTestCases",
+      "file_patterns": ["(/|^)ShortcutService\\.java"]
+    },
+    {
+      "name": "CtsShortcutManagerTestCases",
+      "file_patterns": ["(/|^)ShortcutService\\.java"]
     },
     {
       "name": "GtsContentTestCases",
@@ -57,25 +56,6 @@
       ]
     },
     {
-      "name": "CtsAppSecurityHostTestCases",
-      "options": [
-        {
-          "include-filter": "android.appsecurity.cts.PrivilegedUpdateTests"
-        }
-      ]
-    },
-    {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.content.pm.PackageManagerTests"
-        },
-        {
-            "exclude-annotation": "androidx.test.filters.Suppress"
-        }
-      ]
-    },
-    {
       "name": "PackageManagerServiceHostTests",
       "options": [
         {
@@ -89,6 +69,14 @@
       "options": [
         {
           "include-filter": "com.android.server.pm.test.OverlayActorVisibilityTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsSharedUserMigrationTestCases",
+      "options": [
+        {
+          "include-filter": "android.uidmigration.cts"
         }
       ]
     }
@@ -123,47 +111,6 @@
     },
     {
       "name": "PackageManagerServiceHostTests"
-    },
-    {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "install-arg": "-t"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserDataPreparerTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserLifecycleStressTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceCreateProfileTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceIdRecyclingTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceUserInfoTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerServiceUserTypeTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserManagerTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserRestrictionsUtilsTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.UserSystemPackageInstallerTest"
-        },
-        {
-          "include-filter": "com.android.server.pm.parsing.SystemPartitionParseTest"
-        }
-      ]
     }
   ],
   "imports": [

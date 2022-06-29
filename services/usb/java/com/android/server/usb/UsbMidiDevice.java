@@ -48,8 +48,10 @@ public final class UsbMidiDevice implements Closeable {
 
     private final int mAlsaCard;
     private final int mAlsaDevice;
-    private final int mSubdeviceCount;
-    private final InputReceiverProxy[] mInputPortReceivers;
+    // USB outputs are MIDI inputs
+    private final InputReceiverProxy[] mMidiInputPortReceivers;
+    private final int mNumInputs;
+    private final int mNumOutputs;
 
     private MidiDeviceServer mServer;
 
@@ -69,40 +71,38 @@ public final class UsbMidiDevice implements Closeable {
 
     private final Object mLock = new Object();
     private boolean mIsOpen;
+    private boolean mServerAvailable;
 
     // pipe file descriptor for signalling input thread to exit
     // only accessed from JNI code
     private int mPipeFD = -1;
 
     private final MidiDeviceServer.Callback mCallback = new MidiDeviceServer.Callback() {
-
         @Override
         public void onDeviceStatusChanged(MidiDeviceServer server, MidiDeviceStatus status) {
             MidiDeviceInfo deviceInfo = status.getDeviceInfo();
-            int inputPorts = deviceInfo.getInputPortCount();
-            int outputPorts = deviceInfo.getOutputPortCount();
-            boolean hasOpenPorts = false;
+            int numInputPorts = deviceInfo.getInputPortCount();
+            int numOutputPorts = deviceInfo.getOutputPortCount();
+            int numOpenPorts = 0;
 
-            for (int i = 0; i < inputPorts; i++) {
+            for (int i = 0; i < numInputPorts; i++) {
                 if (status.isInputPortOpen(i)) {
-                    hasOpenPorts = true;
-                    break;
+                    numOpenPorts++;
                 }
             }
 
-            if (!hasOpenPorts) {
-                for (int i = 0; i < outputPorts; i++) {
-                    if (status.getOutputPortOpenCount(i) > 0) {
-                        hasOpenPorts = true;
-                        break;
-                    }
+            for (int i = 0; i < numOutputPorts; i++) {
+                if (status.getOutputPortOpenCount(i) > 0) {
+                    numOpenPorts += status.getOutputPortOpenCount(i);
                 }
             }
 
             synchronized (mLock) {
-                if (hasOpenPorts && !mIsOpen) {
+                Log.d(TAG, "numOpenPorts: " + numOpenPorts + " isOpen: " + mIsOpen
+                        + " mServerAvailable: " + mServerAvailable);
+                if ((numOpenPorts > 0) && !mIsOpen && mServerAvailable) {
                     openLocked();
-                } else if (!hasOpenPorts && mIsOpen) {
+                } else if ((numOpenPorts == 0) && mIsOpen) {
                     closeLocked();
                 }
             }
@@ -139,15 +139,14 @@ public final class UsbMidiDevice implements Closeable {
         }
     }
 
-    public static UsbMidiDevice create(Context context, Bundle properties, int card, int device) {
-        // FIXME - support devices with different number of input and output ports
-        int subDeviceCount = nativeGetSubdeviceCount(card, device);
-        if (subDeviceCount <= 0) {
-            Log.e(TAG, "nativeGetSubdeviceCount failed");
-            return null;
-        }
-
-        UsbMidiDevice midiDevice = new UsbMidiDevice(card, device, subDeviceCount);
+    /**
+     * Creates an UsbMidiDevice based on the input parameters. Read/Write streams
+     * will be created individually as some devices don't have the same number of
+     * inputs and outputs.
+     */
+    public static UsbMidiDevice create(Context context, Bundle properties, int card,
+            int device, int numInputs, int numOutputs) {
+        UsbMidiDevice midiDevice = new UsbMidiDevice(card, device, numInputs, numOutputs);
         if (!midiDevice.register(context, properties)) {
             IoUtils.closeQuietly(midiDevice);
             Log.e(TAG, "createDeviceServer failed");
@@ -156,100 +155,107 @@ public final class UsbMidiDevice implements Closeable {
         return midiDevice;
     }
 
-    private UsbMidiDevice(int card, int device, int subdeviceCount) {
+    private UsbMidiDevice(int card, int device, int numInputs, int numOutputs) {
         mAlsaCard = card;
         mAlsaDevice = device;
-        mSubdeviceCount = subdeviceCount;
+        mNumInputs = numInputs;
+        mNumOutputs = numOutputs;
 
-        // FIXME - support devices with different number of input and output ports
-        int inputPortCount = subdeviceCount;
-        mInputPortReceivers = new InputReceiverProxy[inputPortCount];
-        for (int port = 0; port < inputPortCount; port++) {
-            mInputPortReceivers[port] = new InputReceiverProxy();
+        // Create MIDI port receivers based on the number of output ports. The
+        // output of USB is the input of MIDI.
+        mMidiInputPortReceivers = new InputReceiverProxy[numOutputs];
+        for (int port = 0; port < numOutputs; port++) {
+            mMidiInputPortReceivers[port] = new InputReceiverProxy();
         }
     }
 
     private boolean openLocked() {
-        // FIXME - support devices with different number of input and output ports
-        FileDescriptor[] fileDescriptors = nativeOpen(mAlsaCard, mAlsaDevice, mSubdeviceCount);
+        int inputStreamCount = mNumInputs;
+        // Create an extra stream for unblocking Os.poll()
+        if (inputStreamCount > 0) {
+            inputStreamCount++;
+        }
+        int outputStreamCount = mNumOutputs;
+
+        // The resulting file descriptors will be O_RDONLY following by O_WRONLY
+        FileDescriptor[] fileDescriptors = nativeOpen(mAlsaCard, mAlsaDevice,
+                inputStreamCount, outputStreamCount);
         if (fileDescriptors == null) {
             Log.e(TAG, "nativeOpen failed");
             return false;
         }
-
         mFileDescriptors = fileDescriptors;
-        int inputStreamCount = fileDescriptors.length;
-        // last file descriptor returned from nativeOpen() is only used for unblocking Os.poll()
-        // in our input thread
-        int outputStreamCount = fileDescriptors.length - 1;
 
         mPollFDs = new StructPollfd[inputStreamCount];
         mInputStreams = new FileInputStream[inputStreamCount];
+
         for (int i = 0; i < inputStreamCount; i++) {
             FileDescriptor fd = fileDescriptors[i];
             StructPollfd pollfd = new StructPollfd();
             pollfd.fd = fd;
-            pollfd.events = (short)OsConstants.POLLIN;
+            pollfd.events = (short) OsConstants.POLLIN;
             mPollFDs[i] = pollfd;
             mInputStreams[i] = new FileInputStream(fd);
         }
 
         mOutputStreams = new FileOutputStream[outputStreamCount];
         mEventSchedulers = new MidiEventScheduler[outputStreamCount];
-        for (int i = 0; i < outputStreamCount; i++) {
-            mOutputStreams[i] = new FileOutputStream(fileDescriptors[i]);
 
+        int curOutputStream = 0;
+        for (int i = 0; i < outputStreamCount; i++) {
+            mOutputStreams[i] = new FileOutputStream(fileDescriptors[inputStreamCount + i]);
             MidiEventScheduler scheduler = new MidiEventScheduler();
             mEventSchedulers[i] = scheduler;
-            mInputPortReceivers[i].setReceiver(scheduler.getReceiver());
+            mMidiInputPortReceivers[i].setReceiver(scheduler.getReceiver());
         }
 
         final MidiReceiver[] outputReceivers = mServer.getOutputPortReceivers();
 
-        // Create input thread which will read from all output ports of the physical device
-        new Thread("UsbMidiDevice input thread") {
-            @Override
-            public void run() {
-                byte[] buffer = new byte[BUFFER_SIZE];
-                try {
-                    while (true) {
-                        // Record time of event immediately after waking.
-                        long timestamp = System.nanoTime();
-                        synchronized (mLock) {
-                            if (!mIsOpen) break;
+        if (inputStreamCount > 0) {
+            // Create input thread which will read from all output ports of the physical device
+            new Thread("UsbMidiDevice input thread") {
+                @Override
+                public void run() {
+                    byte[] buffer = new byte[BUFFER_SIZE];
+                    try {
+                        while (true) {
+                            // Record time of event immediately after waking.
+                            long timestamp = System.nanoTime();
+                            synchronized (mLock) {
+                                if (!mIsOpen) break;
 
-                            // look for a readable FileDescriptor
-                            for (int index = 0; index < mPollFDs.length; index++) {
-                                StructPollfd pfd = mPollFDs[index];
-                                if ((pfd.revents & (OsConstants.POLLERR
-                                                            | OsConstants.POLLHUP)) != 0) {
-                                    break;
-                                } else if ((pfd.revents & OsConstants.POLLIN) != 0) {
-                                    // clear readable flag
-                                    pfd.revents = 0;
-
-                                    if (index == mInputStreams.length - 1) {
-                                        // last file descriptor is used only for unblocking Os.poll()
+                                // look for a readable FileDescriptor
+                                for (int index = 0; index < mPollFDs.length; index++) {
+                                    StructPollfd pfd = mPollFDs[index];
+                                    if ((pfd.revents & (OsConstants.POLLERR
+                                                                | OsConstants.POLLHUP)) != 0) {
                                         break;
-                                    }
+                                    } else if ((pfd.revents & OsConstants.POLLIN) != 0) {
+                                        // clear readable flag
+                                        pfd.revents = 0;
+                                        if (index == mInputStreams.length - 1) {
+                                            // last fd is used only for unblocking Os.poll()
+                                            break;
+                                        }
 
-                                    int count = mInputStreams[index].read(buffer);
-                                    outputReceivers[index].send(buffer, 0, count, timestamp);
+                                        int count = mInputStreams[index].read(buffer);
+                                        outputReceivers[index].send(buffer, 0, count, timestamp);
+                                    }
                                 }
                             }
-                        }
 
-                        // wait until we have a readable port or we are signalled to close
-                        Os.poll(mPollFDs, -1 /* infinite timeout */);
-                     }
-                } catch (IOException e) {
-                    Log.d(TAG, "reader thread exiting");
-                } catch (ErrnoException e) {
-                    Log.d(TAG, "reader thread exiting");
+                            // wait until we have a readable port or we are signalled to close
+                            Os.poll(mPollFDs, -1 /* infinite timeout */);
+                        }
+                    } catch (IOException e) {
+                        Log.d(TAG, "reader thread exiting");
+                    } catch (ErrnoException e) {
+                        Log.d(TAG, "reader thread exiting");
+                    }
+                    Log.d(TAG, "input thread exit");
                 }
-                Log.d(TAG, "input thread exit");
-            }
-        }.start();
+            }.start();
+        }
 
         // Create output thread for each input port of the physical device
         for (int port = 0; port < outputStreamCount; port++) {
@@ -290,12 +296,14 @@ public final class UsbMidiDevice implements Closeable {
     private boolean register(Context context, Bundle properties) {
         MidiManager midiManager = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
         if (midiManager == null) {
-            Log.e(TAG, "No MidiManager in UsbMidiDevice.create()");
+            Log.e(TAG, "No MidiManager in UsbMidiDevice.register()");
             return false;
         }
 
-        mServer = midiManager.createDeviceServer(mInputPortReceivers, mSubdeviceCount,
-                null, null, properties, MidiDeviceInfo.TYPE_USB, mCallback);
+        mServerAvailable = true;
+        mServer = midiManager.createDeviceServer(mMidiInputPortReceivers, mNumInputs,
+                null, null, properties, MidiDeviceInfo.TYPE_USB,
+                MidiDeviceInfo.PROTOCOL_UNKNOWN, mCallback);
         if (mServer == null) {
             return false;
         }
@@ -309,6 +317,7 @@ public final class UsbMidiDevice implements Closeable {
             if (mIsOpen) {
                 closeLocked();
             }
+            mServerAvailable = false;
         }
 
         if (mServer != null) {
@@ -318,7 +327,7 @@ public final class UsbMidiDevice implements Closeable {
 
     private void closeLocked() {
         for (int i = 0; i < mEventSchedulers.length; i++) {
-            mInputPortReceivers[i].setReceiver(null);
+            mMidiInputPortReceivers[i].setReceiver(null);
             mEventSchedulers[i].close();
         }
         mEventSchedulers = null;
@@ -354,7 +363,7 @@ public final class UsbMidiDevice implements Closeable {
         dump.end(token);
     }
 
-    private static native int nativeGetSubdeviceCount(int card, int device);
-    private native FileDescriptor[] nativeOpen(int card, int device, int subdeviceCount);
+    private native FileDescriptor[] nativeOpen(int card, int device, int numInputs,
+            int numOutputs);
     private native void nativeClose(FileDescriptor[] fileDescriptors);
 }

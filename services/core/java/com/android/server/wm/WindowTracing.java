@@ -48,12 +48,12 @@ import java.io.PrintWriter;
 class WindowTracing {
 
     /**
-     * Maximum buffer size, currently defined as 512 KB
+     * Maximum buffer size, currently defined as 5 MB
      * Size was experimentally defined to fit between 100 to 150 elements.
      */
-    private static final int BUFFER_CAPACITY_CRITICAL = 512 * 1024;
-    private static final int BUFFER_CAPACITY_TRIM = 2048 * 1024;
-    private static final int BUFFER_CAPACITY_ALL = 4096 * 1024;
+    private static final int BUFFER_CAPACITY_CRITICAL = 5120 * 1024; // 5 MB
+    private static final int BUFFER_CAPACITY_TRIM = 10240 * 1024; // 10 MB
+    private static final int BUFFER_CAPACITY_ALL = 20480 * 1024; // 20 MB
     static final String WINSCOPE_EXT = ".winscope";
     private static final String TRACE_FILENAME = "/data/misc/wmtrace/wm_trace" + WINSCOPE_EXT;
     private static final String TAG = "WindowTracing";

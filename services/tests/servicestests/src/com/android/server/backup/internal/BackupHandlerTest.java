@@ -18,7 +18,6 @@ package com.android.server.backup.internal;
 
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.assertTrue;
 
 import android.os.HandlerThread;
@@ -28,6 +27,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.OperationStorage;
 import com.android.server.backup.UserBackupManagerService;
 
 import org.junit.After;
@@ -46,6 +46,7 @@ public class BackupHandlerTest {
     private static final int MESSAGE_TIMEOUT_MINUTES = 1;
 
     @Mock private UserBackupManagerService mUserBackupManagerService;
+    @Mock private OperationStorage mOperationStorage;
     @Mock private BackupAgentTimeoutParameters mTimeoutParameters;
 
     private HandlerThread mHandlerThread;
@@ -114,7 +115,7 @@ public class BackupHandlerTest {
         private final boolean mShouldStop;
 
         TestBackupHandler(boolean shouldStop) {
-            super(mUserBackupManagerService, mHandlerThread);
+            super(mUserBackupManagerService, mOperationStorage, mHandlerThread);
 
             mShouldStop = shouldStop;
         }

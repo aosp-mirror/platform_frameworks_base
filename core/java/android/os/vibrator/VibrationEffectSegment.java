@@ -57,10 +57,26 @@ public abstract class VibrationEffectSegment implements Parcelable {
      */
     public abstract long getDuration();
 
-    /** Returns true if this segment plays at a non-zero amplitude at some point. */
+    /**
+     * Returns true if this segment could be a haptic feedback effect candidate.
+     *
+     * @see VibrationEffect#isHapticFeedbackCandidate()
+     * @hide
+     */
+    public abstract boolean isHapticFeedbackCandidate();
+
+    /**
+     * Returns true if this segment plays at a non-zero amplitude at some point.
+     *
+     * @hide
+     */
     public abstract boolean hasNonZeroAmplitude();
 
-    /** Validates the segment, throwing exceptions if any parameter is invalid. */
+    /**
+     * Validates the segment, throwing exceptions if any parameter is invalid.
+     *
+     * @hide
+     */
     public abstract void validate();
 
     /**
@@ -68,6 +84,8 @@ public abstract class VibrationEffectSegment implements Parcelable {
      *
      * <p>This might fail with {@link IllegalArgumentException} if value is non-positive or larger
      * than {@link VibrationEffect#MAX_AMPLITUDE}.
+     *
+     * @hide
      */
     @NonNull
     public abstract <T extends VibrationEffectSegment> T resolve(int defaultAmplitude);
@@ -77,6 +95,8 @@ public abstract class VibrationEffectSegment implements Parcelable {
      *
      * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
      *                    scale down the intensity, values larger than 1 will scale up
+     *
+     * @hide
      */
     @NonNull
     public abstract <T extends VibrationEffectSegment> T scale(float scaleFactor);
@@ -86,9 +106,48 @@ public abstract class VibrationEffectSegment implements Parcelable {
      *
      * @param effectStrength new effect strength to be applied, one of
      *                       VibrationEffect.EFFECT_STRENGTH_*.
+     *
+     * @hide
      */
     @NonNull
     public abstract <T extends VibrationEffectSegment> T applyEffectStrength(int effectStrength);
+
+    /**
+     * Checks the given frequency argument is valid to represent a vibration effect frequency in
+     * hertz, i.e. a finite non-negative value.
+     *
+     * @param value the frequency argument value to be checked
+     * @param name the argument name for the error message.
+     *
+     * @hide
+     */
+    public static void checkFrequencyArgument(float value, @NonNull String name) {
+        // Similar to combining Preconditions checkArgumentFinite + checkArgumentNonnegative,
+        // but this implementation doesn't create the error message unless a check fail.
+        if (Float.isNaN(value)) {
+            throw new IllegalArgumentException(name + " must not be NaN");
+        }
+        if (Float.isInfinite(value)) {
+            throw new IllegalArgumentException(name + " must not be infinite");
+        }
+        if (value < 0) {
+            throw new IllegalArgumentException(name + " must be >= 0, got " + value);
+        }
+    }
+
+    /**
+     * Checks the given duration argument is valid, i.e. a non-negative value.
+     *
+     * @param value the duration value to be checked
+     * @param name the argument name for the error message.
+     *
+     * @hide
+     */
+    public static void checkDurationArgument(long value, @NonNull String name) {
+        if (value < 0) {
+            throw new IllegalArgumentException(name + " must be >= 0, got " + value);
+        }
+    }
 
     @NonNull
     public static final Creator<VibrationEffectSegment> CREATOR =

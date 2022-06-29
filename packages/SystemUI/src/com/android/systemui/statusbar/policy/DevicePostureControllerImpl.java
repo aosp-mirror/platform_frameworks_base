@@ -25,6 +25,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +71,7 @@ public class DevicePostureControllerImpl implements DevicePostureController {
         }
 
         deviceStateManager.registerCallback(executor, state -> {
+            Assert.isMainThread();
             mCurrentDevicePosture =
                     mDeviceStateToPostureMap.get(state, DEVICE_POSTURE_UNKNOWN);
 
@@ -79,11 +81,13 @@ public class DevicePostureControllerImpl implements DevicePostureController {
 
     @Override
     public void addCallback(@NonNull Callback listener) {
+        Assert.isMainThread();
         mListeners.add(listener);
     }
 
     @Override
     public void removeCallback(@NonNull Callback listener) {
+        Assert.isMainThread();
         mListeners.remove(listener);
     }
 

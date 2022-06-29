@@ -24,8 +24,10 @@ import static android.view.Surface.ROTATION_90;
 import android.annotation.Dimension;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.Surface.Rotation;
+import android.view.SurfaceControl;
 
 /**
  * A class containing utility methods related to rotation.
@@ -86,6 +88,40 @@ public class RotationUtils {
     }
 
     /**
+     * Rotates inOutBounds together with the parent for a given rotation delta. This assumes that
+     * the parent starts at 0,0 and remains at 0,0 after the rotation. The inOutBounds will remain
+     * at the same physical position within the parent.
+     *
+     * Only 'inOutBounds' is mutated.
+     */
+    public static void rotateBounds(Rect inOutBounds, int parentWidth, int parentHeight,
+            @Rotation int rotation) {
+        final int origLeft = inOutBounds.left;
+        final int origTop = inOutBounds.top;
+        switch (rotation) {
+            case ROTATION_0:
+                return;
+            case ROTATION_90:
+                inOutBounds.left = inOutBounds.top;
+                inOutBounds.top = parentWidth - inOutBounds.right;
+                inOutBounds.right = inOutBounds.bottom;
+                inOutBounds.bottom = parentWidth - origLeft;
+                return;
+            case ROTATION_180:
+                inOutBounds.left = parentWidth - inOutBounds.right;
+                inOutBounds.right = parentWidth - origLeft;
+                inOutBounds.top = parentHeight - inOutBounds.bottom;
+                inOutBounds.bottom = parentHeight - origTop;
+                return;
+            case ROTATION_270:
+                inOutBounds.left = parentHeight - inOutBounds.bottom;
+                inOutBounds.bottom = inOutBounds.right;
+                inOutBounds.right = parentHeight - inOutBounds.top;
+                inOutBounds.top = origLeft;
+        }
+    }
+
+    /**
      * Rotates bounds as if parentBounds and bounds are a group. The group is rotated by `delta`
      * 90-degree counter-clockwise increments. This assumes that parentBounds is at 0,0 and
      * remains at 0,0 after rotation. The bounds will be at the same physical position in
@@ -94,37 +130,66 @@ public class RotationUtils {
      * Only 'inOutBounds' is mutated.
      */
     public static void rotateBounds(Rect inOutBounds, Rect parentBounds, @Rotation int rotation) {
-        final int origLeft = inOutBounds.left;
-        final int origTop = inOutBounds.top;
-        switch (rotation) {
-            case ROTATION_0:
-                return;
-            case ROTATION_90:
-                inOutBounds.left = inOutBounds.top;
-                inOutBounds.top = parentBounds.right - inOutBounds.right;
-                inOutBounds.right = inOutBounds.bottom;
-                inOutBounds.bottom = parentBounds.right - origLeft;
-                return;
-            case ROTATION_180:
-                inOutBounds.left = parentBounds.right - inOutBounds.right;
-                inOutBounds.right = parentBounds.right - origLeft;
-                inOutBounds.top = parentBounds.bottom - inOutBounds.bottom;
-                inOutBounds.bottom = parentBounds.bottom - origTop;
-                return;
-            case ROTATION_270:
-                inOutBounds.left = parentBounds.bottom - inOutBounds.bottom;
-                inOutBounds.bottom = inOutBounds.right;
-                inOutBounds.right = parentBounds.bottom - inOutBounds.top;
-                inOutBounds.top = origLeft;
-        }
+        rotateBounds(inOutBounds, parentBounds.right, parentBounds.bottom, rotation);
     }
 
     /** @return the rotation needed to rotate from oldRotation to newRotation. */
     @Rotation
-    public static int deltaRotation(int oldRotation, int newRotation) {
+    public static int deltaRotation(@Rotation int oldRotation, @Rotation int newRotation) {
         int delta = newRotation - oldRotation;
         if (delta < 0) delta += 4;
         return delta;
+    }
+
+    /**
+     * Rotates a surface CCW around the origin (eg. a 90-degree rotation will result in the
+     * bottom-left being at the origin). Use {@link #rotatePoint} to transform the top-left
+     * corner appropriately.
+     */
+    public static void rotateSurface(SurfaceControl.Transaction t, SurfaceControl sc,
+            @Rotation int rotation) {
+        // Note: the matrix values look inverted, but they aren't because our coordinate-space
+        // is actually left-handed.
+        // Note: setMatrix expects values in column-major order.
+        switch (rotation) {
+            case ROTATION_0:
+                t.setMatrix(sc, 1.f, 0.f, 0.f, 1.f);
+                break;
+            case ROTATION_90:
+                t.setMatrix(sc, 0.f, -1.f, 1.f, 0.f);
+                break;
+            case ROTATION_180:
+                t.setMatrix(sc, -1.f, 0.f, 0.f, -1.f);
+                break;
+            case ROTATION_270:
+                t.setMatrix(sc, 0.f, 1.f, -1.f, 0.f);
+                break;
+        }
+    }
+
+    /**
+     * Rotates a point CCW within a rectangle of size parentW x parentH with top/left at the
+     * origin as if the point is stuck to the rectangle. The rectangle is transformed such that
+     * it's top/left remains at the origin after the rotation.
+     */
+    public static void rotatePoint(Point inOutPoint, @Rotation int rotation,
+            int parentW, int parentH) {
+        int origX = inOutPoint.x;
+        switch (rotation) {
+            case ROTATION_0:
+                return;
+            case ROTATION_90:
+                inOutPoint.x = inOutPoint.y;
+                inOutPoint.y = parentW - origX;
+                return;
+            case ROTATION_180:
+                inOutPoint.x = parentW - inOutPoint.x;
+                inOutPoint.y = parentH - inOutPoint.y;
+                return;
+            case ROTATION_270:
+                inOutPoint.x = parentH - inOutPoint.y;
+                inOutPoint.y = origX;
+        }
     }
 
     /**

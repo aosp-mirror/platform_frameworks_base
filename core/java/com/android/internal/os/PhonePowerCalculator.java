@@ -20,10 +20,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.UserHandle;
-import android.util.SparseArray;
-
-import java.util.List;
 
 /**
  * Estimates power consumed by telephony.
@@ -37,6 +33,11 @@ public class PhonePowerCalculator extends PowerCalculator {
     }
 
     @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_PHONE;
+    }
+
+    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final long phoneOnTimeMs = batteryStats.getPhoneOnTime(rawRealtimeUs,
@@ -47,20 +48,6 @@ public class PhonePowerCalculator extends PowerCalculator {
                     BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnPower)
                     .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_PHONE, phoneOnTimeMs);
-        }
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final long phoneOnTimeMs = batteryStats.getPhoneOnTime(rawRealtimeUs, statsType) / 1000;
-        final double phoneOnPower = mPowerEstimator.calculatePower(phoneOnTimeMs);
-        if (phoneOnPower != 0) {
-            BatterySipper bs = new BatterySipper(BatterySipper.DrainType.PHONE, null, 0);
-            bs.usagePowerMah = phoneOnPower;
-            bs.usageTimeMs = phoneOnTimeMs;
-            bs.sumPower();
-            sippers.add(bs);
         }
     }
 }

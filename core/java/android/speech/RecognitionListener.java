@@ -15,6 +15,7 @@
  */
 package android.speech;
 
+import android.annotation.NonNull;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -69,7 +70,13 @@ public interface RecognitionListener {
 
     /**
      * Called when recognition results are ready.
-     * 
+     *
+     * <p>
+     *     Called with the results for the full speech since {@link #onReadyForSpeech(Bundle)}.
+     *     To get recognition results in segments rather than for the full session see
+     *     {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}.
+     * </p>
+     *
      * @param results the recognition results. To retrieve the results in {@code
      *        ArrayList<String>} format use {@link Bundle#getStringArrayList(String)} with
      *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter. A float array of
@@ -90,6 +97,24 @@ public interface RecognitionListener {
      *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
      */
     void onPartialResults(Bundle partialResults);
+
+    /**
+     * Called for each ready segment of a recognition request. To request segmented speech results
+     * use {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}. The callback might be called
+     * any number of times between {@link #onReadyForSpeech(Bundle)} and
+     * {@link #onEndOfSegmentedSession()}.
+     *
+     * @param segmentResults the returned results. To retrieve the results in
+     *        ArrayList&lt;String&gt; format use {@link Bundle#getStringArrayList(String)} with
+     *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
+     */
+    default void onSegmentResults(@NonNull Bundle segmentResults) {}
+
+    /**
+     * Called at the end of a segmented recognition request. To request segmented speech results
+     * use {@link RecognizerIntent#EXTRA_SEGMENTED_SESSION}.
+     */
+    default void onEndOfSegmentedSession() {}
 
     /**
      * Reserved for adding future events.

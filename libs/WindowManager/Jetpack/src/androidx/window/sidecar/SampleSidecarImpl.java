@@ -34,9 +34,8 @@ import androidx.annotation.NonNull;
 import androidx.window.common.CommonFoldingFeature;
 import androidx.window.common.DeviceStateManagerFoldingFeatureProducer;
 import androidx.window.common.EmptyLifecycleCallbacksAdapter;
-import androidx.window.common.SettingsDisplayFeatureProducer;
+import androidx.window.common.RawFoldingFeatureProducer;
 import androidx.window.util.DataProducer;
-import androidx.window.util.PriorityDataProducer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,16 +51,13 @@ class SampleSidecarImpl extends StubSidecar {
 
     private final DataProducer<List<CommonFoldingFeature>> mFoldingFeatureProducer;
 
-    private final SettingsDisplayFeatureProducer mSettingsFoldingFeatureProducer;
 
     SampleSidecarImpl(Context context) {
         ((Application) context.getApplicationContext())
                 .registerActivityLifecycleCallbacks(new NotifyOnConfigurationChanged());
-        mSettingsFoldingFeatureProducer = new SettingsDisplayFeatureProducer(context);
-        mFoldingFeatureProducer = new PriorityDataProducer<>(List.of(
-                mSettingsFoldingFeatureProducer,
-                new DeviceStateManagerFoldingFeatureProducer(context)
-        ));
+        DataProducer<String> settingsFeatureProducer = new RawFoldingFeatureProducer(context);
+        mFoldingFeatureProducer = new DeviceStateManagerFoldingFeatureProducer(context,
+                settingsFeatureProducer);
 
         mFoldingFeatureProducer.addDataChangedCallback(this::onDisplayFeaturesChanged);
     }
@@ -142,10 +138,7 @@ class SampleSidecarImpl extends StubSidecar {
     @Override
     protected void onListenersChanged() {
         if (hasListeners()) {
-            mSettingsFoldingFeatureProducer.registerObserversIfNeeded();
             onDisplayFeaturesChanged();
-        } else {
-            mSettingsFoldingFeatureProducer.unregisterObserversIfNeeded();
         }
     }
 

@@ -1073,6 +1073,7 @@ message JobStatusDumpProto {
         RARE = 3;
         NEVER = 4;
         RESTRICTED = 5;
+        EXEMPTED = 6;
     }
     optional Bucket standby_bucket = 17;
     optional bool is_exempted_from_app_standby = 27;

@@ -31,6 +31,7 @@ import android.telephony.ims.SipMessage;
 import android.telephony.ims.stub.SipDelegate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -153,6 +154,7 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
     public void onCreated(@NonNull SipDelegate delegate,
             @Nullable Set<FeatureTagState> deniedTags) {
         mDelegate = delegate;
+        deniedTags = (deniedTags == null) ? Collections.emptySet() : deniedTags;
         try {
             mStateBinder.onCreated(mDelegateBinder, new ArrayList<>(deniedTags));
         } catch (RemoteException e) {

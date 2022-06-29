@@ -43,7 +43,7 @@ public class VibratorHelperTest extends UiServiceTestCase {
     // OFF/ON vibration pattern
     private static final long[] CUSTOM_PATTERN = new long[] { 100, 200, 300, 400 };
     // (amplitude, frequency, duration) triples list
-    private static final float[] PWLE_PATTERN = new float[] { 1, 0, 100 };
+    private static final float[] PWLE_PATTERN = new float[] { 1, 120, 100 };
 
     @Mock private Vibrator mVibrator;
 

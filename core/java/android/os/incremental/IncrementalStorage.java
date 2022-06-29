@@ -505,8 +505,8 @@ public final class IncrementalStorage {
 
         final V4Signature.HashingInfo hashingInfo = V4Signature.HashingInfo.fromByteArray(
                 signature.hashingInfo);
-        final V4Signature.SigningInfo signingInfo = V4Signature.SigningInfo.fromByteArray(
-                signature.signingInfo);
+        final V4Signature.SigningInfos signingInfos = V4Signature.SigningInfos.fromByteArray(
+                signature.signingInfos);
 
         if (hashingInfo.hashAlgorithm != V4Signature.HASHING_ALGORITHM_SHA256) {
             throw new IOException("Unsupported hashAlgorithm: " + hashingInfo.hashAlgorithm);
@@ -520,7 +520,7 @@ public final class IncrementalStorage {
         if (hashingInfo.rawRootHash.length != INCFS_MAX_HASH_SIZE) {
             throw new IOException("rawRootHash has to be " + INCFS_MAX_HASH_SIZE + " bytes");
         }
-        if (signingInfo.additionalData.length > INCFS_MAX_ADD_DATA_SIZE) {
+        if (signingInfos.signingInfo.additionalData.length > INCFS_MAX_ADD_DATA_SIZE) {
             throw new IOException(
                     "additionalData has to be at most " + INCFS_MAX_ADD_DATA_SIZE + " bytes");
         }

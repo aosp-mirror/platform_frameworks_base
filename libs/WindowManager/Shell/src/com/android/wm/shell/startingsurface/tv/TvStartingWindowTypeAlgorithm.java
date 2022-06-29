@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.startingsurface.tv;
 
-import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
+import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
 
 import android.window.StartingWindowInfo;
 
@@ -30,6 +30,6 @@ public class TvStartingWindowTypeAlgorithm implements StartingWindowTypeAlgorith
     @Override
     public int getSuggestedWindowType(StartingWindowInfo windowInfo) {
         // For now we want to always show empty splash screens on TV.
-        return STARTING_WINDOW_TYPE_EMPTY_SPLASH_SCREEN;
+        return STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
     }
 }

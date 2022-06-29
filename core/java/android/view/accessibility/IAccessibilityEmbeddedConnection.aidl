@@ -28,5 +28,5 @@ interface IAccessibilityEmbeddedConnection {
 
     void disassociateEmbeddedHierarchy();
 
-    oneway void setScreenMatrix(in float[] matrixValues);
+    oneway void setWindowMatrix(in float[] matrixValues);
 }

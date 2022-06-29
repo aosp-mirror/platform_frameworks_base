@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationLog
 import javax.inject.Inject
 
@@ -93,6 +94,15 @@ class NotificationEntryManagerLogger @Inject constructor(
             str1 = reason
         }, {
             "FILTER AND SORT reason=$str1"
+        })
+    }
+
+    fun logUseWhileNewPipelineActive(method: String, reason: String) {
+        buffer.log(TAG, WARNING, {
+            str1 = method
+            str2 = reason
+        }, {
+            "While running New Pipeline: $str1(reason=$str2)"
         })
     }
 }

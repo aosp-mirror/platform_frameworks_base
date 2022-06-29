@@ -27,7 +27,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -123,10 +122,10 @@ public class FragmentService implements Dumpable {
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("Dumping fragments:");
         for (FragmentHostState state : mHosts.values()) {
-            state.mFragmentHostManager.getFragmentManager().dump("  ", fd, pw, args);
+            state.mFragmentHostManager.getFragmentManager().dump("  ", null, pw, args);
         }
     }
 

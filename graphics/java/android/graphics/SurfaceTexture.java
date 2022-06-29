@@ -17,7 +17,9 @@
 package android.graphics;
 
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.hardware.DataSpace.NamedDataSpace;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -348,6 +350,14 @@ public class SurfaceTexture {
     }
 
     /**
+     * Retrieve the dataspace associated with the texture image.
+     */
+    @SuppressLint("MethodNameUnits")
+    public @NamedDataSpace int getDataSpace() {
+        return nativeGetDataSpace();
+    }
+
+    /**
      * {@code release()} frees all the buffers and puts the SurfaceTexture into the
      * 'abandoned' state. Once put in this state the SurfaceTexture can never
      * leave it. When in the 'abandoned' state, all methods of the
@@ -416,6 +426,7 @@ public class SurfaceTexture {
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();
+    private native int nativeGetDataSpace();
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
     private native void nativeReleaseTexImage();

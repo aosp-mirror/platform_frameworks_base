@@ -16,22 +16,33 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.IntDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.SparseArray;
 
 /**
- * A helper class to validates {@link HdmiCecMessage}.
+ * A helper class to validate {@link HdmiCecMessage}.
+ *
+ * If a message type has its own specific subclass of {@link HdmiCecMessage},
+ * validation is performed in that subclass instead.
  */
 public class HdmiCecMessageValidator {
     private static final String TAG = "HdmiCecMessageValidator";
+
+    @IntDef({
+            OK,
+            ERROR_SOURCE,
+            ERROR_DESTINATION,
+            ERROR_PARAMETER,
+            ERROR_PARAMETER_SHORT,
+    })
+    public @interface ValidationResult {};
 
     static final int OK = 0;
     static final int ERROR_SOURCE = 1;
     static final int ERROR_DESTINATION = 2;
     static final int ERROR_PARAMETER = 3;
     static final int ERROR_PARAMETER_SHORT = 4;
-
-    private final HdmiControlService mService;
 
     interface ParameterValidator {
         /**
@@ -42,13 +53,13 @@ public class HdmiCecMessageValidator {
     }
 
     // Only the direct addressing is allowed.
-    private static final int DEST_DIRECT = 1 << 0;
+    public static final int DEST_DIRECT = 1 << 0;
     // Only the broadcast addressing is allowed.
-    private static final int DEST_BROADCAST = 1 << 1;
+    public static final int DEST_BROADCAST = 1 << 1;
     // Both the direct and the broadcast addressing are allowed.
-    private static final int DEST_ALL = DEST_DIRECT | DEST_BROADCAST;
+    public static final int DEST_ALL = DEST_DIRECT | DEST_BROADCAST;
     // True if the messages from address 15 (unregistered) are allowed.
-    private static final int SRC_UNREGISTERED = 1 << 2;
+    public static final int SRC_UNREGISTERED = 1 << 2;
 
     private static class ValidationInfo {
         public final ParameterValidator parameterValidator;
@@ -60,11 +71,11 @@ public class HdmiCecMessageValidator {
         }
     }
 
-    final SparseArray<ValidationInfo> mValidationInfo = new SparseArray<>();
+    private HdmiCecMessageValidator() {}
 
-    public HdmiCecMessageValidator(HdmiControlService service) {
-        mService = service;
+    private static final SparseArray<ValidationInfo> sValidationInfo = new SparseArray<>();
 
+    static {
         // Messages related to the physical address.
         PhysicalAddressValidator physicalAddressValidator = new PhysicalAddressValidator();
         addValidationInfo(Constants.MESSAGE_ACTIVE_SOURCE,
@@ -234,8 +245,6 @@ public class HdmiCecMessageValidator {
         // Messages for Feature Discovery.
         addValidationInfo(Constants.MESSAGE_GIVE_FEATURES, noneValidator,
                 DEST_DIRECT | SRC_UNREGISTERED);
-        addValidationInfo(Constants.MESSAGE_REPORT_FEATURES, new VariableLengthValidator(4, 14),
-                DEST_BROADCAST);
 
         // Messages for Dynamic Auto Lipsync
         addValidationInfo(Constants.MESSAGE_REQUEST_CURRENT_LATENCY, physicalAddressValidator,
@@ -250,58 +259,61 @@ public class HdmiCecMessageValidator {
                 DEST_BROADCAST | SRC_UNREGISTERED);
     }
 
-    private void addValidationInfo(int opcode, ParameterValidator validator, int addrType) {
-        mValidationInfo.append(opcode, new ValidationInfo(validator, addrType));
+    private static void addValidationInfo(int opcode, ParameterValidator validator, int addrType) {
+        sValidationInfo.append(opcode, new ValidationInfo(validator, addrType));
     }
 
-    int isValid(HdmiCecMessage message, boolean isMessageReceived) {
-        int opcode = message.getOpcode();
-        ValidationInfo info = mValidationInfo.get(opcode);
+    /**
+     * Validates all parameters of a HDMI-CEC message using static information stored in this class.
+     */
+    @ValidationResult
+    static int validate(int source, int destination, int opcode, byte[] params) {
+        ValidationInfo info = sValidationInfo.get(opcode);
+
         if (info == null) {
-            HdmiLogger.warning("No validation information for the message: " + message);
+            HdmiLogger.warning("No validation information for the opcode: " + opcode);
             return OK;
         }
 
+        int addressValidationResult = validateAddress(source, destination, info.addressType);
+        if (addressValidationResult != OK) {
+            return addressValidationResult;
+        }
+
+        // Validate parameters
+        int errorCode = info.parameterValidator.isValid(params);
+        if (errorCode != OK) {
+            return errorCode;
+        }
+
+        return OK;
+    }
+
+    /**
+     * Validates the source and destination addresses of a HDMI-CEC message according to input
+     * address type. Allows address validation logic to be expressed concisely without depending
+     * on static information in this class.
+     * @param source Source address to validate
+     * @param destination Destination address to validate
+     * @param addressType Rules for validating the addresses - e.g. {@link #DEST_BROADCAST}
+     */
+    @ValidationResult
+    static int validateAddress(int source, int destination, int addressType) {
         // Check the source field.
-        if (message.getSource() == Constants.ADDR_UNREGISTERED &&
-                (info.addressType & SRC_UNREGISTERED) == 0) {
-            HdmiLogger.warning("Unexpected source: " + message);
+        if (source == Constants.ADDR_UNREGISTERED
+                && (addressType & SRC_UNREGISTERED) == 0) {
             return ERROR_SOURCE;
         }
 
-        if (isMessageReceived) {
-            // Check if the source's logical address and local device's logical
-            // address are the same.
-            for (HdmiCecLocalDevice device : mService.getAllLocalDevices()) {
-                synchronized (device.mLock) {
-                    if (message.getSource() == device.getDeviceInfo().getLogicalAddress()
-                            && message.getSource() != Constants.ADDR_UNREGISTERED) {
-                        HdmiLogger.warning(
-                                "Unexpected source: message sent from device itself, " + message);
-                        return ERROR_SOURCE;
-                    }
-                }
-            }
-        }
-
         // Check the destination field.
-        if (message.getDestination() == Constants.ADDR_BROADCAST) {
-            if ((info.addressType & DEST_BROADCAST) == 0) {
-                HdmiLogger.warning("Unexpected broadcast message: " + message);
+        if (destination == Constants.ADDR_BROADCAST) {
+            if ((addressType & DEST_BROADCAST) == 0) {
                 return ERROR_DESTINATION;
             }
         } else {  // Direct addressing.
-            if ((info.addressType & DEST_DIRECT) == 0) {
-                HdmiLogger.warning("Unexpected direct message: " + message);
+            if ((addressType & DEST_DIRECT) == 0) {
                 return ERROR_DESTINATION;
             }
-        }
-
-        // Check the parameter type.
-        int errorCode = info.parameterValidator.isValid(message.getParams());
-        if (errorCode != OK) {
-            HdmiLogger.warning("Unexpected parameters: " + message);
-            return errorCode;
         }
         return OK;
     }
@@ -336,7 +348,7 @@ public class HdmiCecMessageValidator {
         }
     }
 
-    private boolean isValidPhysicalAddress(byte[] params, int offset) {
+    private static boolean isValidPhysicalAddress(byte[] params, int offset) {
         int physicalAddress = HdmiUtils.twoBytesToInt(params, offset);
         while (physicalAddress != 0) {
             int maskedAddress = physicalAddress & 0xF000;
@@ -344,19 +356,6 @@ public class HdmiCecMessageValidator {
             if (maskedAddress == 0 && physicalAddress != 0) {
                 return false;
             }
-        }
-
-        if (!mService.isTvDevice()) {
-            // If the device is not TV, we can't convert path to port-id, so stop here.
-            return true;
-        }
-        int path = HdmiUtils.twoBytesToInt(params, offset);
-        if (path != Constants.INVALID_PHYSICAL_ADDRESS && path == mService.getPhysicalAddress()) {
-            return true;
-        }
-        int portId = mService.pathToPortId(path);
-        if (portId == Constants.INVALID_PORT_ID) {
-            return false;
         }
         return true;
     }
@@ -380,7 +379,7 @@ public class HdmiCecMessageValidator {
         return success ? OK : ERROR_PARAMETER;
     }
 
-    private boolean isWithinRange(int value, int min, int max) {
+    private static boolean isWithinRange(int value, int min, int max) {
         value = value & 0xFF;
         return (value >= min && value <= max);
     }
@@ -392,7 +391,7 @@ public class HdmiCecMessageValidator {
      * @param value Display Control
      * @return true if the Display Control is valid
      */
-    private boolean isValidDisplayControl(int value) {
+    private static boolean isValidDisplayControl(int value) {
         value = value & 0xFF;
         return (value == 0x00 || value == 0x40 || value == 0x80 || value == 0xC0);
     }
@@ -407,7 +406,7 @@ public class HdmiCecMessageValidator {
      * @param maxLength Maximum length of string to be evaluated
      * @return true if the given type is valid
      */
-    private boolean isValidAsciiString(byte[] params, int offset, int maxLength) {
+    private static boolean isValidAsciiString(byte[] params, int offset, int maxLength) {
         for (int i = offset; i < params.length && i < maxLength; i++) {
             if (!isWithinRange(params[i], 0x20, 0x7E)) {
                 return false;
@@ -423,7 +422,7 @@ public class HdmiCecMessageValidator {
      * @param value day of month
      * @return true if the day of month is valid
      */
-    private boolean isValidDayOfMonth(int value) {
+    private static boolean isValidDayOfMonth(int value) {
         return isWithinRange(value, 1, 31);
     }
 
@@ -434,7 +433,7 @@ public class HdmiCecMessageValidator {
      * @param value month of year
      * @return true if the month of year is valid
      */
-    private boolean isValidMonthOfYear(int value) {
+    private static boolean isValidMonthOfYear(int value) {
         return isWithinRange(value, 1, 12);
     }
 
@@ -445,7 +444,7 @@ public class HdmiCecMessageValidator {
      * @param value hour
      * @return true if the hour is valid
      */
-    private boolean isValidHour(int value) {
+    private static boolean isValidHour(int value) {
         return isWithinRange(value, 0, 23);
     }
 
@@ -456,7 +455,7 @@ public class HdmiCecMessageValidator {
      * @param value minute
      * @return true if the minute is valid
      */
-    private boolean isValidMinute(int value) {
+    private static boolean isValidMinute(int value) {
         return isWithinRange(value, 0, 59);
     }
 
@@ -467,7 +466,7 @@ public class HdmiCecMessageValidator {
      * @param value duration hours
      * @return true if the duration hours is valid
      */
-    private boolean isValidDurationHours(int value) {
+    private static boolean isValidDurationHours(int value) {
         return isWithinRange(value, 0, 99);
     }
 
@@ -478,7 +477,7 @@ public class HdmiCecMessageValidator {
      * @param value recording sequence
      * @return true if the given recording sequence is valid
      */
-    private boolean isValidRecordingSequence(int value) {
+    private static boolean isValidRecordingSequence(int value) {
         value = value & 0xFF;
         // Validate bit 7 is set to zero
         if ((value & 0x80) != 0x00) {
@@ -496,7 +495,7 @@ public class HdmiCecMessageValidator {
      * @param value analogue broadcast type
      * @return true if the analogue broadcast type is valid
      */
-    private boolean isValidAnalogueBroadcastType(int value) {
+    private static boolean isValidAnalogueBroadcastType(int value) {
         return isWithinRange(value, 0x00, 0x02);
     }
 
@@ -508,7 +507,7 @@ public class HdmiCecMessageValidator {
      * @param value analogue frequency
      * @return true if the analogue frequency is valid
      */
-    private boolean isValidAnalogueFrequency(int value) {
+    private static boolean isValidAnalogueFrequency(int value) {
         value = value & 0xFFFF;
         return (value != 0x000 && value != 0xFFFF);
     }
@@ -520,7 +519,7 @@ public class HdmiCecMessageValidator {
      * @param value broadcast system
      * @return true if the broadcast system is valid
      */
-    private boolean isValidBroadcastSystem(int value) {
+    private static boolean isValidBroadcastSystem(int value) {
         return isWithinRange(value, 0, 31);
     }
 
@@ -531,7 +530,7 @@ public class HdmiCecMessageValidator {
      * @param value Digital Broadcast System
      * @return true if the Digital Broadcast System is ARIB type
      */
-    private boolean isAribDbs(int value) {
+    private static boolean isAribDbs(int value) {
         return (value == 0x00 || isWithinRange(value, 0x08, 0x0A));
     }
 
@@ -542,7 +541,7 @@ public class HdmiCecMessageValidator {
      * @param value Digital Broadcast System
      * @return true if the Digital Broadcast System is ATSC type
      */
-    private boolean isAtscDbs(int value) {
+    private static boolean isAtscDbs(int value) {
         return (value == 0x01 || isWithinRange(value, 0x10, 0x12));
     }
 
@@ -553,7 +552,7 @@ public class HdmiCecMessageValidator {
      * @param value Digital Broadcast System
      * @return true if the Digital Broadcast System is DVB type
      */
-    private boolean isDvbDbs(int value) {
+    private static boolean isDvbDbs(int value) {
         return (value == 0x02 || isWithinRange(value, 0x18, 0x1B));
     }
 
@@ -565,7 +564,7 @@ public class HdmiCecMessageValidator {
      * @param value Digital Broadcast System
      * @return true if the Digital Broadcast System is valid
      */
-    private boolean isValidDigitalBroadcastSystem(int value) {
+    private static boolean isValidDigitalBroadcastSystem(int value) {
         return (isAribDbs(value) || isAtscDbs(value) || isDvbDbs(value));
     }
 
@@ -578,7 +577,7 @@ public class HdmiCecMessageValidator {
      * @param offset start offset of Channel Identifier
      * @return true if the Channel Identifier is valid
      */
-    private boolean isValidChannelIdentifier(byte[] params, int offset) {
+    private static boolean isValidChannelIdentifier(byte[] params, int offset) {
         // First 6 bits contain Channel Number Format
         int channelNumberFormat = params[offset] & 0xFC;
         if (channelNumberFormat == 0x04) {
@@ -600,7 +599,7 @@ public class HdmiCecMessageValidator {
      * @param offset start offset of Digital Service Identification
      * @return true if the Digital Service Identification is valid
      */
-    private boolean isValidDigitalServiceIdentification(byte[] params, int offset) {
+    private static boolean isValidDigitalServiceIdentification(byte[] params, int offset) {
         // MSB contains Service Identification Method
         int serviceIdentificationMethod = params[offset] & 0x80;
         // Last 7 bits contains Digital Broadcast System
@@ -634,7 +633,7 @@ public class HdmiCecMessageValidator {
      * @param value External Plug
      * @return true if the External Plug is valid
      */
-    private boolean isValidExternalPlug(int value) {
+    private static boolean isValidExternalPlug(int value) {
         return isWithinRange(value, 1, 255);
     }
 
@@ -645,7 +644,7 @@ public class HdmiCecMessageValidator {
      * @param value External Source Specifier
      * @return true if the External Source is valid
      */
-    private boolean isValidExternalSource(byte[] params, int offset) {
+    private static boolean isValidExternalSource(byte[] params, int offset) {
         int externalSourceSpecifier = params[offset];
         offset = offset + 1;
         if (externalSourceSpecifier == 0x04) {
@@ -661,15 +660,15 @@ public class HdmiCecMessageValidator {
         return false;
     }
 
-    private boolean isValidProgrammedInfo(int programedInfo) {
+    private static boolean isValidProgrammedInfo(int programedInfo) {
         return (isWithinRange(programedInfo, 0x00, 0x0B));
     }
 
-    private boolean isValidNotProgrammedErrorInfo(int nonProgramedErrorInfo) {
+    private static boolean isValidNotProgrammedErrorInfo(int nonProgramedErrorInfo) {
         return (isWithinRange(nonProgramedErrorInfo, 0x00, 0x0E));
     }
 
-    private boolean isValidTimerStatusData(byte[] params, int offset) {
+    private static boolean isValidTimerStatusData(byte[] params, int offset) {
         int programedIndicator = params[offset] & 0x10;
         boolean durationAvailable = false;
         if (programedIndicator == 0x10) {
@@ -708,7 +707,7 @@ public class HdmiCecMessageValidator {
      * @param value Play mode
      * @return true if the Play mode is valid
      */
-    private boolean isValidPlayMode(int value) {
+    private static boolean isValidPlayMode(int value) {
         return (isWithinRange(value, 0x05, 0x07)
                 || isWithinRange(value, 0x09, 0x0B)
                 || isWithinRange(value, 0x15, 0x17)
@@ -725,7 +724,7 @@ public class HdmiCecMessageValidator {
      * @param value UI Broadcast type
      * @return true if the UI Broadcast type is valid
      */
-    private boolean isValidUiBroadcastType(int value) {
+    private static boolean isValidUiBroadcastType(int value) {
         return ((value == 0x00)
                 || (value == 0x01)
                 || (value == 0x10)
@@ -749,7 +748,7 @@ public class HdmiCecMessageValidator {
      * @param value UI Sound Presenation Control
      * @return true if the UI Sound Presenation Control is valid
      */
-    private boolean isValidUiSoundPresenationControl(int value) {
+    private static boolean isValidUiSoundPresenationControl(int value) {
         value = value & 0xFF;
         return ((value == 0x20)
                 || (value == 0x30)
@@ -768,7 +767,7 @@ public class HdmiCecMessageValidator {
      * @param params Tuner device info
      * @return true if the Tuner device info is valid
      */
-    private boolean isValidTunerDeviceInfo(byte[] params) {
+    private static boolean isValidTunerDeviceInfo(byte[] params) {
         int tunerDisplayInfo = params[0] & 0x7F;
         if (tunerDisplayInfo == 0x00) {
             // Displaying digital tuner
@@ -789,7 +788,7 @@ public class HdmiCecMessageValidator {
         return false;
     }
 
-    private class PhysicalAddressValidator implements ParameterValidator {
+    private static class PhysicalAddressValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 2) {
@@ -799,7 +798,7 @@ public class HdmiCecMessageValidator {
         }
     }
 
-    private class SystemAudioModeRequestValidator extends PhysicalAddressValidator {
+    private static class SystemAudioModeRequestValidator extends PhysicalAddressValidator {
         @Override
         public int isValid(byte[] params) {
             // TV can send <System Audio Mode Request> with no parameters to terminate system audio.
@@ -810,7 +809,7 @@ public class HdmiCecMessageValidator {
         }
     }
 
-    private class ReportPhysicalAddressValidator implements ParameterValidator {
+    private static class ReportPhysicalAddressValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 3) {
@@ -820,7 +819,7 @@ public class HdmiCecMessageValidator {
         }
     }
 
-    private class RoutingChangeValidator implements ParameterValidator {
+    private static class RoutingChangeValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 4) {
@@ -836,7 +835,7 @@ public class HdmiCecMessageValidator {
      * A valid parameter should lie within the range description of Record Status Info defined in
      * CEC 1.4 Specification : Operand Descriptions (Section 17)
      */
-    private class RecordStatusInfoValidator implements ParameterValidator {
+    private static class RecordStatusInfoValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 1) {
@@ -855,7 +854,7 @@ public class HdmiCecMessageValidator {
      * A valid parameter should lie within the range description of ASCII defined in CEC 1.4
      * Specification : Operand Descriptions (Section 17)
      */
-    private class AsciiValidator implements ParameterValidator {
+    private static class AsciiValidator implements ParameterValidator {
         private final int mMinLength;
         private final int mMaxLength;
 
@@ -885,7 +884,7 @@ public class HdmiCecMessageValidator {
      * A valid parameter should lie within the range description of ASCII defined in CEC 1.4
      * Specification : Operand Descriptions (Section 17)
      */
-    private class OsdStringValidator implements ParameterValidator {
+    private static class OsdStringValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             // If the length is longer than expected, we assume it's OK since the parameter can be
@@ -902,7 +901,7 @@ public class HdmiCecMessageValidator {
     }
 
     /** Check if the given parameters are one byte parameters and within range. */
-    private class OneByteRangeValidator implements ParameterValidator {
+    private static class OneByteRangeValidator implements ParameterValidator {
         private final int mMinValue, mMaxValue;
 
         OneByteRangeValidator(int minValue, int maxValue) {
@@ -924,7 +923,7 @@ public class HdmiCecMessageValidator {
      * adhere to message description of Analogue Timer defined in CEC 1.4 Specification : Message
      * Descriptions for Timer Programming Feature (CEC Table 12)
      */
-    private class AnalogueTimerValidator implements ParameterValidator {
+    private static class AnalogueTimerValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 11) {
@@ -950,7 +949,7 @@ public class HdmiCecMessageValidator {
      * to message description of Digital Timer defined in CEC 1.4 Specification : Message
      * Descriptions for Timer Programming Feature (CEC Table 12)
      */
-    private class DigitalTimerValidator implements ParameterValidator {
+    private static class DigitalTimerValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 11) {
@@ -974,7 +973,7 @@ public class HdmiCecMessageValidator {
      * adhere to message description of External Timer defined in CEC 1.4 Specification : Message
      * Descriptions for Timer Programming Feature (CEC Table 12)
      */
-    private class ExternalTimerValidator implements ParameterValidator {
+    private static class ExternalTimerValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 9) {
@@ -997,7 +996,7 @@ public class HdmiCecMessageValidator {
      * within the range description defined in CEC 1.4 Specification : Operand Descriptions
      * (Section 17)
      */
-    private class TimerClearedStatusValidator implements ParameterValidator {
+    private static class TimerClearedStatusValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 1) {
@@ -1011,7 +1010,7 @@ public class HdmiCecMessageValidator {
      * Check if the given timer status data parameter is valid. A valid parameter should lie within
      * the range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
      */
-    private class TimerStatusValidator implements ParameterValidator {
+    private static class TimerStatusValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 1) {
@@ -1025,7 +1024,7 @@ public class HdmiCecMessageValidator {
      * Check if the given play mode parameter is valid. A valid parameter should lie within the
      * range description defined in CEC 1.4 Specification : Operand Descriptions (Section 17)
      */
-    private class PlayModeValidator implements ParameterValidator {
+    private static class PlayModeValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 1) {
@@ -1040,7 +1039,7 @@ public class HdmiCecMessageValidator {
      * within the range description defined in CEC 1.4 Specification : Operand Descriptions
      * (Section 17)
      */
-    private class SelectAnalogueServiceValidator implements ParameterValidator {
+    private static class SelectAnalogueServiceValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 4) {
@@ -1057,7 +1056,7 @@ public class HdmiCecMessageValidator {
      * within the range description defined in CEC 1.4 Specification : Operand Descriptions
      * (Section 17)
      */
-    private class SelectDigitalServiceValidator implements ParameterValidator {
+    private static class SelectDigitalServiceValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 4) {
@@ -1072,7 +1071,7 @@ public class HdmiCecMessageValidator {
      * within the range description defined in CEC 1.4 Specification : Operand Descriptions (Section
      * 17)
      */
-    private class TunerDeviceStatusValidator implements ParameterValidator {
+    private static class TunerDeviceStatusValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 1) {
@@ -1083,7 +1082,7 @@ public class HdmiCecMessageValidator {
     }
 
     /** Check if the given user control press parameter is valid. */
-    private class UserControlPressedValidator implements ParameterValidator {
+    private static class UserControlPressedValidator implements ParameterValidator {
         @Override
         public int isValid(byte[] params) {
             if (params.length < 1) {

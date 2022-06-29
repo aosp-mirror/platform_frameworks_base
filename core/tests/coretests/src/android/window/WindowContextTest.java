@@ -21,16 +21,25 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.Activity;
 import android.app.EmptyActivity;
 import android.app.Instrumentation;
+import android.app.WindowConfiguration;
+import android.content.ComponentCallbacks;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.IBinder;
@@ -43,6 +52,7 @@ import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerImpl;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -78,6 +88,8 @@ public class WindowContextTest {
     private final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
     private final WindowContext mWindowContext = createWindowContext();
     private final IWindowManager mWms = WindowManagerGlobal.getWindowManagerService();
+
+    private static final int TIMEOUT_IN_SECONDS = 4;
 
     @Test
     public void testCreateWindowContextWindowManagerAttachClientToken() {
@@ -131,7 +143,7 @@ public class WindowContextTest {
         });
 
 
-        assertTrue(latch.await(4, TimeUnit.SECONDS));
+        assertTrue(latch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS));
 
 
         // Verify that the window token of the window context is created after first addView().
@@ -234,7 +246,7 @@ public class WindowContextTest {
         // Add the parent window
         mInstrumentation.runOnMainSync(() -> wm.addView(parentWindow, params));
 
-        assertTrue(listener.mLatch.await(4, TimeUnit.SECONDS));
+        assertTrue(listener.mLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS));
 
         final WindowManager.LayoutParams subWindowAttrs =
                 new WindowManager.LayoutParams(TYPE_APPLICATION_ATTACHED_DIALOG);
@@ -251,6 +263,63 @@ public class WindowContextTest {
                 null /* theme */));
     }
 
+    @Test
+    public void testRegisterComponentCallbacks() {
+        final WindowContext windowContext = createWindowContext();
+        final ConfigurationListener listener = new ConfigurationListener();
+
+        windowContext.registerComponentCallbacks(listener);
+
+        try {
+            final Configuration config = new Configuration();
+            config.windowConfiguration.setWindowingMode(
+                    WindowConfiguration.WINDOWING_MODE_FREEFORM);
+            config.windowConfiguration.setBounds(new Rect(0, 0, 100, 100));
+
+            windowContext.dispatchConfigurationChanged(config);
+
+            try {
+                assertWithMessage("Waiting for onConfigurationChanged timeout.")
+                        .that(listener.mLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)).isTrue();
+            } catch (InterruptedException e) {
+                fail("Waiting for configuration changed failed because of " + e);
+            }
+
+            assertThat(listener.mConfiguration).isEqualTo(config);
+        } finally {
+            windowContext.unregisterComponentCallbacks(listener);
+        }
+    }
+
+    @Test
+    public void testRegisterComponentCallbacksOnWindowContextWrapper() {
+        final WindowContext windowContext = createWindowContext();
+        final Context wrapper = new ContextWrapper(windowContext);
+        final ConfigurationListener listener = new ConfigurationListener();
+
+        wrapper.registerComponentCallbacks(listener);
+
+        try {
+            final Configuration config = new Configuration();
+            config.windowConfiguration.setWindowingMode(
+                    WindowConfiguration.WINDOWING_MODE_FREEFORM);
+            config.windowConfiguration.setBounds(new Rect(0, 0, 100, 100));
+
+            windowContext.dispatchConfigurationChanged(config);
+
+            try {
+                assertWithMessage("Waiting for onConfigurationChanged timeout.")
+                        .that(listener.mLatch.await(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS)).isTrue();
+            } catch (InterruptedException e) {
+                fail("Waiting for configuration changed failed because of " + e);
+            }
+
+            assertThat(listener.mConfiguration).isEqualTo(config);
+        } finally {
+            wrapper.unregisterComponentCallbacks(listener);
+        }
+    }
+
     private WindowContext createWindowContext() {
         return createWindowContext(TYPE_APPLICATION_OVERLAY);
     }
@@ -260,6 +329,20 @@ public class WindowContextTest {
         final Display display = instContext.getSystemService(DisplayManager.class)
                 .getDisplay(DEFAULT_DISPLAY);
         return (WindowContext) instContext.createWindowContext(display, type,  null /* options */);
+    }
+
+    private static class ConfigurationListener implements ComponentCallbacks {
+        private Configuration mConfiguration;
+        private CountDownLatch mLatch = new CountDownLatch(1);
+
+        @Override
+        public void onConfigurationChanged(@NonNull Configuration newConfig) {
+            mConfiguration = newConfig;
+            mLatch.countDown();
+        }
+
+        @Override
+        public void onLowMemory() {}
     }
 
     private static class AttachStateListener implements View.OnAttachStateChangeListener {

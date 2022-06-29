@@ -68,6 +68,9 @@ struct VkFunctorDrawParams {
   int clip_top;
   int clip_right;
   int clip_bottom;
+
+  // Input: Whether destination surface is offscreen surface.
+  bool is_layer;
 };
 
 }  // namespace uirenderer

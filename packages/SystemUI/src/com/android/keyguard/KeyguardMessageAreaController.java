@@ -39,18 +39,12 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
         public void onStartedWakingUp() {
             mView.setSelected(true);
         }
-
-        @Override
-        public void onKeyguardBouncerChanged(boolean bouncer) {
-            mView.setBouncerVisible(bouncer);
-            mView.update();
-        }
     };
 
     private ConfigurationListener mConfigurationListener = new ConfigurationListener() {
         @Override
         public void onConfigChanged(Configuration newConfig) {
-            mView.onConfigChanged(newConfig);
+            mView.onConfigChanged();
         }
 
         @Override
@@ -92,6 +86,13 @@ public class KeyguardMessageAreaController extends ViewController<KeyguardMessag
      */
     public void setAltBouncerShowing(boolean showing) {
         mView.setAltBouncerShowing(showing);
+    }
+
+    /**
+     * Set bouncer is fully showing
+     */
+    public void setBouncerShowing(boolean showing) {
+        mView.setBouncerShowing(showing);
     }
 
     public void setMessage(CharSequence s) {

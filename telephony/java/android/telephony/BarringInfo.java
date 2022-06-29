@@ -294,8 +294,8 @@ public final class BarringInfo implements Parcelable {
 
     /** @hide */
     public BarringInfo(Parcel p) {
-        mCellIdentity = p.readParcelable(CellIdentity.class.getClassLoader());
-        mBarringServiceInfos = p.readSparseArray(BarringServiceInfo.class.getClassLoader());
+        mCellIdentity = p.readParcelable(CellIdentity.class.getClassLoader(), android.telephony.CellIdentity.class);
+        mBarringServiceInfos = p.readSparseArray(BarringServiceInfo.class.getClassLoader(), android.telephony.BarringInfo.BarringServiceInfo.class);
     }
 
     @Override

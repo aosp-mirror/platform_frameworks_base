@@ -160,7 +160,7 @@ public class WindowMagnificationPromptController {
         intentFilter.addAction(ACTION_DISMISS);
         intentFilter.addAction(ACTION_TURN_ON_IN_SETTINGS);
         mContext.registerReceiver(mNotificationActionReceiver, intentFilter,
-                Manifest.permission.MANAGE_ACCESSIBILITY, null);
+                Manifest.permission.MANAGE_ACCESSIBILITY, null, Context.RECEIVER_EXPORTED);
     }
 
     private void launchMagnificationSettings() {

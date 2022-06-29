@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -42,11 +44,8 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Printer;
-
 import com.android.internal.util.Preconditions;
-
 import dalvik.system.CloseGuard;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -290,15 +289,182 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public static final int MAX_SQL_CACHE_SIZE = 100;
 
-    private SQLiteDatabase(final String path, final int openFlags,
-            CursorFactory cursorFactory, DatabaseErrorHandler errorHandler,
+    /**
+     * @hide
+     */
+    @StringDef(prefix = {"JOURNAL_MODE_"},
+            value =
+                    {
+                            JOURNAL_MODE_WAL,
+                            JOURNAL_MODE_PERSIST,
+                            JOURNAL_MODE_TRUNCATE,
+                            JOURNAL_MODE_MEMORY,
+                            JOURNAL_MODE_DELETE,
+                            JOURNAL_MODE_OFF,
+                    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface JournalMode {}
+
+    /**
+     * The {@code WAL} journaling mode uses a write-ahead log instead of a rollback journal to
+     * implement transactions. The WAL journaling mode is persistent; after being set it stays
+     * in effect across multiple database connections and after closing and reopening the database.
+     *
+     * Performance Considerations:
+     * This mode is recommended when the goal is to improve write performance or parallel read/write
+     * performance. However, it is important to note that WAL introduces checkpoints which commit
+     * all transactions that have not been synced to the database thus to maximize read performance
+     * and lower checkpointing cost a small journal size is recommended. However, other modes such
+     * as {@code DELETE} will not perform checkpoints, so it is a trade off that needs to be
+     * considered as part of the decision of which journal mode to use.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_journal_mode>here</a> for more
+     * details.</p>
+     */
+    public static final String JOURNAL_MODE_WAL = "WAL";
+
+    /**
+     * The {@code PERSIST} journaling mode prevents the rollback journal from being deleted at the
+     * end of each transaction. Instead, the header of the journal is overwritten with zeros.
+     * This will prevent other database connections from rolling the journal back.
+     *
+     * This mode is useful as an optimization on platforms where deleting or truncating a file is
+     * much more expensive than overwriting the first block of a file with zeros.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_journal_mode>here</a> for more
+     * details.</p>
+     */
+    public static final String JOURNAL_MODE_PERSIST = "PERSIST";
+
+    /**
+     * The {@code TRUNCATE} journaling mode commits transactions by truncating the rollback journal
+     * to zero-length instead of deleting it. On many systems, truncating a file is much faster than
+     * deleting the file since the containing directory does not need to be changed.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_journal_mode>here</a> for more
+     * details.</p>
+     */
+    public static final String JOURNAL_MODE_TRUNCATE = "TRUNCATE";
+
+    /**
+     * The {@code MEMORY} journaling mode stores the rollback journal in volatile RAM.
+     * This saves disk I/O but at the expense of database safety and integrity. If the application
+     * using SQLite crashes in the middle of a transaction when the MEMORY journaling mode is set,
+     * then the database file will very likely go corrupt.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_journal_mode>here</a> for more
+     * details.</p>
+     */
+    public static final String JOURNAL_MODE_MEMORY = "MEMORY";
+
+    /**
+     * The {@code DELETE} journaling mode is the normal behavior. In the DELETE mode, the rollback
+     * journal is deleted at the conclusion of each transaction.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_journal_mode>here</a> for more
+     * details.</p>
+     */
+    public static final String JOURNAL_MODE_DELETE = "DELETE";
+
+    /**
+     * The {@code OFF} journaling mode disables the rollback journal completely. No rollback journal
+     * is ever created and hence there is never a rollback journal to delete. The OFF journaling
+     * mode disables the atomic commit and rollback capabilities of SQLite. The ROLLBACK command
+     * behaves in an undefined way thus applications must avoid using the ROLLBACK command.
+     * If the application crashes in the middle of a transaction, then the database file will very
+     * likely go corrupt.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_journal_mode>here</a> for more
+     * details.</p>
+     */
+    public static final String JOURNAL_MODE_OFF = "OFF";
+
+    /**
+     * @hide
+     */
+    @StringDef(prefix = {"SYNC_MODE_"},
+            value =
+                    {
+                            SYNC_MODE_EXTRA,
+                            SYNC_MODE_FULL,
+                            SYNC_MODE_NORMAL,
+                            SYNC_MODE_OFF,
+                    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SyncMode {}
+
+    /**
+     * The {@code EXTRA} sync mode is like {@code FULL} sync mode with the addition that the
+     * directory containing a rollback journal is synced after that journal is unlinked to commit a
+     * transaction in {@code DELETE} journal mode.
+     *
+     * {@code EXTRA} provides additional durability if the commit is followed closely by a
+     * power loss.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_synchronous>here</a> for more
+     * details.</p>
+     */
+    @SuppressLint("IntentName") public static final String SYNC_MODE_EXTRA = "EXTRA";
+
+    /**
+     * In {@code FULL} sync mode the SQLite database engine will use the xSync method of the VFS
+     * to ensure that all content is safely written to the disk surface prior to continuing.
+     * This ensures that an operating system crash or power failure will not corrupt the database.
+     * {@code FULL} is very safe, but it is also slower.
+     *
+     * {@code FULL} is the most commonly used synchronous setting when not in WAL mode.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_synchronous>here</a> for more
+     * details.</p>
+     */
+    public static final String SYNC_MODE_FULL = "FULL";
+
+    /**
+     * The {@code NORMAL} sync mode, the SQLite database engine will still sync at the most critical
+     * moments, but less often than in {@code FULL} mode. There is a very small chance that a
+     * power failure at the wrong time could corrupt the database in {@code DELETE} journal mode on
+     * an older filesystem.
+     *
+     * {@code WAL} journal mode is safe from corruption with {@code NORMAL} sync mode, and probably
+     * {@code DELETE} sync mode is safe too on modern filesystems. WAL mode is always consistent
+     * with {@code NORMAL} sync mode, but WAL mode does lose durability. A transaction committed in
+     * WAL mode with {@code NORMAL} might roll back following a power loss or system crash.
+     * Transactions are durable across application crashes regardless of the synchronous setting
+     * or journal mode.
+     *
+     * The {@code NORMAL} sync mode is a good choice for most applications running in WAL mode.
+     *
+     * <p>Caveat: Even though this sync mode is safe Be careful when using {@code NORMAL} sync mode
+     * when dealing with data dependencies between multiple databases, unless those databases use
+     * the same durability or are somehow synced, there could be corruption.</p>
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_synchronous>here</a> for more
+     * details.</p>
+     */
+    public static final String SYNC_MODE_NORMAL = "NORMAL";
+
+    /**
+     * In {@code OFF} sync mode SQLite continues without syncing as soon as it has handed data off
+     * to the operating system. If the application running SQLite crashes, the data will be safe,
+     * but the database might become corrupted if the operating system crashes or the computer loses
+     * power before that data has been written to the disk surface. On the other hand, commits can
+     * be orders of magnitude faster with synchronous {@code OFF}.
+     *
+     * <p> See <a href=https://www.sqlite.org/pragma.html#pragma_synchronous>here</a> for more
+     * details.</p>
+     */
+    public static final String SYNC_MODE_OFF = "OFF";
+
+    private SQLiteDatabase(@Nullable final String path, @Nullable final int openFlags,
+            @Nullable CursorFactory cursorFactory, @Nullable DatabaseErrorHandler errorHandler,
             int lookasideSlotSize, int lookasideSlotCount, long idleConnectionTimeoutMs,
-            String journalMode, String syncMode) {
+            @Nullable String journalMode, @Nullable String syncMode) {
         mCursorFactory = cursorFactory;
         mErrorHandler = errorHandler != null ? errorHandler : new DefaultDatabaseErrorHandler();
         mConfigurationLocked = new SQLiteDatabaseConfiguration(path, openFlags);
         mConfigurationLocked.lookasideSlotSize = lookasideSlotSize;
         mConfigurationLocked.lookasideSlotCount = lookasideSlotCount;
+
         // Disable lookaside allocator on low-RAM devices
         if (ActivityManager.isLowRamDeviceStatic()) {
             mConfigurationLocked.lookasideSlotCount = 0;
@@ -316,11 +482,11 @@ public final class SQLiteDatabase extends SQLiteClosable {
             }
         }
         mConfigurationLocked.idleConnectionTimeoutMs = effectiveTimeoutMs;
-        mConfigurationLocked.journalMode = journalMode;
-        mConfigurationLocked.syncMode = syncMode;
         if (SQLiteCompatibilityWalFlags.isLegacyCompatibilityWalEnabled()) {
             mConfigurationLocked.openFlags |= ENABLE_LEGACY_COMPATIBILITY_WAL;
         }
+        mConfigurationLocked.journalMode = journalMode;
+        mConfigurationLocked.syncMode = syncMode;
     }
 
     @Override
@@ -2191,7 +2357,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
         synchronized (mLock) {
             throwIfNotOpenLocked();
 
-            if ((mConfigurationLocked.openFlags & ENABLE_WRITE_AHEAD_LOGGING) != 0) {
+            if (mConfigurationLocked.resolveJournalMode().equalsIgnoreCase(
+                        SQLiteDatabase.JOURNAL_MODE_WAL)) {
                 return true;
             }
 
@@ -2241,11 +2408,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
             throwIfNotOpenLocked();
 
             final int oldFlags = mConfigurationLocked.openFlags;
-            final boolean walEnabled = (oldFlags & ENABLE_WRITE_AHEAD_LOGGING) != 0;
-            final boolean compatibilityWalEnabled =
-                    (oldFlags & ENABLE_LEGACY_COMPATIBILITY_WAL) != 0;
             // WAL was never enabled for this database, so there's nothing left to do.
-            if (!walEnabled && !compatibilityWalEnabled) {
+            if (!mConfigurationLocked.resolveJournalMode().equalsIgnoreCase(
+                        SQLiteDatabase.JOURNAL_MODE_WAL)) {
                 return;
             }
 
@@ -2275,7 +2440,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
         synchronized (mLock) {
             throwIfNotOpenLocked();
 
-            return (mConfigurationLocked.openFlags & ENABLE_WRITE_AHEAD_LOGGING) != 0;
+            return mConfigurationLocked.resolveJournalMode().equalsIgnoreCase(
+                    SQLiteDatabase.JOURNAL_MODE_WAL);
         }
     }
 
@@ -2309,6 +2475,20 @@ public final class SQLiteDatabase extends SQLiteClosable {
         return databases;
     }
 
+    private static ArrayList<SQLiteConnectionPool> getActiveDatabasePools() {
+        ArrayList<SQLiteConnectionPool> connectionPools = new ArrayList<SQLiteConnectionPool>();
+        synchronized (sActiveDatabases) {
+            for (SQLiteDatabase db : sActiveDatabases.keySet()) {
+                synchronized (db.mLock) {
+                    if (db.mConnectionPoolLocked != null) {
+                        connectionPools.add(db.mConnectionPoolLocked);
+                    }
+                }
+            }
+        }
+        return connectionPools;
+    }
+
     /**
      * Dump detailed information about all open databases in the current process.
      * Used by bug report.
@@ -2317,8 +2497,45 @@ public final class SQLiteDatabase extends SQLiteClosable {
         // Use this ArraySet to collect file paths.
         final ArraySet<String> directories = new ArraySet<>();
 
-        for (SQLiteDatabase db : getActiveDatabases()) {
-            db.dump(printer, verbose, isSystem, directories);
+        // Accounting across all databases
+        long totalStatementsTimeInMs = 0;
+        long totalStatementsCount = 0;
+
+        ArrayList<SQLiteConnectionPool> activeConnectionPools = getActiveDatabasePools();
+
+        activeConnectionPools.sort(
+                (a, b) -> Long.compare(b.getTotalStatementsCount(), a.getTotalStatementsCount()));
+        for (SQLiteConnectionPool dbPool : activeConnectionPools) {
+            dbPool.dump(printer, verbose, directories);
+            totalStatementsTimeInMs += dbPool.getTotalStatementsTime();
+            totalStatementsCount += dbPool.getTotalStatementsCount();
+        }
+
+        if (totalStatementsCount > 0) {
+            // Only print when there is information available
+
+            // Sorted statements per database
+            printer.println("Statements Executed per Database");
+            for (SQLiteConnectionPool dbPool : activeConnectionPools) {
+                printer.println(
+                        "  " + dbPool.getPath() + " :    " + dbPool.getTotalStatementsCount());
+            }
+            printer.println("");
+            printer.println(
+                    "Total Statements Executed for all Active Databases: " + totalStatementsCount);
+
+            // Sorted execution time per database
+            activeConnectionPools.sort(
+                    (a, b) -> Long.compare(b.getTotalStatementsTime(), a.getTotalStatementsTime()));
+            printer.println("");
+            printer.println("");
+            printer.println("Statement Time per Database (ms)");
+            for (SQLiteConnectionPool dbPool : activeConnectionPools) {
+                printer.println(
+                        "  " + dbPool.getPath() + " :    " + dbPool.getTotalStatementsTime());
+            }
+            printer.println("Total Statements Time for all Active Databases (ms): "
+                    + totalStatementsTimeInMs);
         }
 
         // Dump DB files in the directories.
@@ -2327,15 +2544,6 @@ public final class SQLiteDatabase extends SQLiteClosable {
             Arrays.sort(dirs);
             for (String dir : dirs) {
                 dumpDatabaseDirectory(printer, new File(dir), isSystem);
-            }
-        }
-    }
-
-    private void dump(Printer printer, boolean verbose, boolean isSystem, ArraySet directories) {
-        synchronized (mLock) {
-            if (mConnectionPoolLocked != null) {
-                printer.println("");
-                mConnectionPoolLocked.dump(printer, verbose, directories);
             }
         }
     }
@@ -2598,9 +2806,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
         /**
          * Returns <a href="https://sqlite.org/pragma.html#pragma_journal_mode">journal mode</a>.
-         * This journal mode will only be used if {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING}
-         * flag is not set, otherwise a platform will use "WAL" journal mode.
-         * @see Builder#setJournalMode(String)
+         * set via {@link Builder#setJournalMode(String)}.
          */
         @Nullable
         public String getJournalMode() {
@@ -2799,25 +3005,28 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 return this;
             }
 
-
             /**
              * Sets <a href="https://sqlite.org/pragma.html#pragma_journal_mode">journal mode</a>
-             * to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} flag is not set.
+             * to use.
+             *
+             * <p>Note: If journal mode is not set, the platform will use a manufactured-specified
+             * default which can vary across devices.
              */
             @NonNull
-            public Builder setJournalMode(@NonNull  String journalMode) {
+            public Builder setJournalMode(@JournalMode @NonNull String journalMode) {
                 Objects.requireNonNull(journalMode);
                 mJournalMode = journalMode;
                 return this;
             }
 
-            /**w
+            /**
              * Sets <a href="https://sqlite.org/pragma.html#pragma_synchronous">synchronous mode</a>
-             * .
-             * @return
+             *
+             * <p>Note: If sync mode is not set, the platform will use a manufactured-specified
+             * default which can vary across devices.
              */
             @NonNull
-            public Builder setSynchronousMode(@NonNull String syncMode) {
+            public Builder setSynchronousMode(@SyncMode @NonNull String syncMode) {
                 Objects.requireNonNull(syncMode);
                 mSyncMode = syncMode;
                 return this;

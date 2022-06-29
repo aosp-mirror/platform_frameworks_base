@@ -57,6 +57,7 @@
     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES"/>
     <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.STATUS_BAR"/>
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE"/>
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER"/>
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER"/>
@@ -97,6 +98,15 @@
     <uses-permission android:name="android.permission.MAINLINE_NETWORK_STACK"/>
     <uses-permission
         android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
+    <uses-permission android:name="android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY" />
+    <uses-permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
+    <uses-permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT" />
+    <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
+
+    <queries>
+        <package android:name="com.android.servicestests.apps.suspendtestapp" />
+    </queries>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
@@ -121,6 +131,19 @@
           </intent-filter>
           <meta-data android:name="android.accounts.AccountAuthenticator"
                android:resource="@xml/test_account_type2_authenticator"/>
+        </service>
+
+        <service
+            android:name="com.android.server.dreams.TestDreamService"
+            android:exported="false"
+            android:label="Test Dream" >
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.dream"
+                android:resource="@xml/test_dream_metadata" />
         </service>
 
         <receiver android:name="com.android.server.devicepolicy.ApplicationRestrictionsTest$AdminReceiver"
@@ -172,7 +195,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.android.server.job.MockPriorityJobService"
+        <service android:name="com.android.server.job.MockBiasJobService"
              android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity"/>
@@ -264,4 +287,11 @@
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
          android:targetPackage="com.android.frameworks.servicestests"
          android:label="Frameworks Services Tests"/>
+    <key-sets>
+        <key-set android:name="A" >
+            <public-key android:name="keyA"
+                android:value="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsMpNthdOxud7roPDZMMomOqXgJJdRfIWpkKEqmC61Mv+Nf6QY3TorEwJeghjSmqj7IbBKrtvfQq4E2XJO1HuspmQO4Ng2gvn+r+6EwNfKc9k55d6s+27SR867jKurBbHNtZMG+tjL1yH4r+tNzcuJCsgyAFqLmxFdcxEwzNvREyRpoYc5RDR0mmTwkMCUhJ6CId1EYEKiCEdNzxv+fWPEb21u+/MWpleGCILs8kglRVb2q/WOzAAvGr4FY5plfaE6N+lr7+UschQ+aMi1+uqewo2o0qPFVmZP5hnwj55K4UMzu/NhhDqQQsX4cSGES1KgHo5MTqRqZjN/I7emw5pFQIDAQAB"/>
+        </key-set>
+        <upgrade-key-set android:name="A"/>
+    </key-sets>
 </manifest>

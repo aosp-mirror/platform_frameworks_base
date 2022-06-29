@@ -30,35 +30,52 @@
 
 namespace android {
 
-struct {
-    jmethodID onTransactionComplete;
-} gTransactionCompleteCallback;
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gTransactionClassInfo;
 
-class TransactionCompleteCallbackWrapper : public LightRefBase<TransactionCompleteCallbackWrapper> {
+struct {
+    jmethodID accept;
+} gTransactionConsumer;
+
+static JNIEnv* getenv(JavaVM* vm) {
+    JNIEnv* env;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", vm);
+    }
+    return env;
+}
+
+  struct {
+    jmethodID onTransactionHang;
+} gTransactionHangCallback;
+
+class TransactionHangCallbackWrapper : public LightRefBase<TransactionHangCallbackWrapper> {
 public:
-    explicit TransactionCompleteCallbackWrapper(JNIEnv* env, jobject jobject) {
+    explicit TransactionHangCallbackWrapper(JNIEnv* env, jobject jobject) {
         env->GetJavaVM(&mVm);
-        mTransactionCompleteObject = env->NewGlobalRef(jobject);
-        LOG_ALWAYS_FATAL_IF(!mTransactionCompleteObject, "Failed to make global ref");
+        mTransactionHangObject = env->NewGlobalRef(jobject);
+        LOG_ALWAYS_FATAL_IF(!mTransactionHangObject, "Failed to make global ref");
     }
 
-    ~TransactionCompleteCallbackWrapper() {
-        if (mTransactionCompleteObject) {
-            getenv()->DeleteGlobalRef(mTransactionCompleteObject);
-            mTransactionCompleteObject = nullptr;
+    ~TransactionHangCallbackWrapper() {
+        if (mTransactionHangObject) {
+            getenv()->DeleteGlobalRef(mTransactionHangObject);
+            mTransactionHangObject = nullptr;
         }
     }
 
-    void onTransactionComplete(int64_t frameNr) {
-        if (mTransactionCompleteObject) {
-            getenv()->CallVoidMethod(mTransactionCompleteObject,
-                                     gTransactionCompleteCallback.onTransactionComplete, frameNr);
+    void onTransactionHang(bool isGpuHang) {
+        if (mTransactionHangObject) {
+            getenv()->CallVoidMethod(mTransactionHangObject,
+                                     gTransactionHangCallback.onTransactionHang, isGpuHang);
         }
     }
 
 private:
     JavaVM* mVm;
-    jobject mTransactionCompleteObject;
+    jobject mTransactionHangObject;
 
     JNIEnv* getenv() {
         JNIEnv* env;
@@ -67,19 +84,10 @@ private:
     }
 };
 
-static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName) {
+static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName,
+                          jboolean updateDestinationFrame) {
     ScopedUtfChars name(env, jName);
-    sp<BLASTBufferQueue> queue = new BLASTBufferQueue(name.c_str());
-    queue->incStrong((void*)nativeCreate);
-    return reinterpret_cast<jlong>(queue.get());
-}
-
-static jlong nativeCreateAndUpdate(JNIEnv* env, jclass clazz, jstring jName, jlong surfaceControl,
-                                   jlong width, jlong height, jint format) {
-    ScopedUtfChars name(env, jName);
-    sp<BLASTBufferQueue> queue =
-            new BLASTBufferQueue(name.c_str(), reinterpret_cast<SurfaceControl*>(surfaceControl),
-                                 width, height, format);
+    sp<BLASTBufferQueue> queue = new BLASTBufferQueue(name.c_str(), updateDestinationFrame);
     queue->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(queue.get());
 }
@@ -96,40 +104,64 @@ static jobject nativeGetSurface(JNIEnv* env, jclass clazz, jlong ptr,
                                                   queue->getSurface(includeSurfaceControlHandle));
 }
 
-static void nativeSetNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jlong transactionPtr) {
+class JGlobalRefHolder {
+public:
+    JGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm), mObject(object) {}
+
+    virtual ~JGlobalRefHolder() {
+        getenv(mVm)->DeleteGlobalRef(mObject);
+        mObject = nullptr;
+    }
+
+    jobject object() { return mObject; }
+    JavaVM* vm() { return mVm; }
+
+private:
+    JGlobalRefHolder(const JGlobalRefHolder&) = delete;
+    void operator=(const JGlobalRefHolder&) = delete;
+
+    JavaVM* mVm;
+    jobject mObject;
+};
+
+static void nativeSyncNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jobject callback,
+                                      jboolean acquireSingleBuffer) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionPtr);
-    queue->setNextTransaction(transaction);
+    JavaVM* vm = nullptr;
+    LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+    if (!callback) {
+        queue->syncNextTransaction(nullptr, acquireSingleBuffer);
+    } else {
+        auto globalCallbackRef =
+                std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(callback));
+        queue->syncNextTransaction(
+                [globalCallbackRef](SurfaceComposerClient::Transaction* t) {
+                    JNIEnv* env = getenv(globalCallbackRef->vm());
+                    env->CallVoidMethod(globalCallbackRef->object(), gTransactionConsumer.accept,
+                                        env->NewObject(gTransactionClassInfo.clazz,
+                                                       gTransactionClassInfo.ctor,
+                                                       reinterpret_cast<jlong>(t)));
+                },
+                acquireSingleBuffer);
+    }
+}
+
+static void nativeStopContinuousSyncTransaction(JNIEnv* env, jclass clazz, jlong ptr) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    queue->stopContinuousSyncTransaction();
 }
 
 static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl, jlong width,
-                         jlong height, jint format, jlong transactionPtr) {
+                         jlong height, jint format) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionPtr);
-    queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, format,
-                  transaction);
+    queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, format);
 }
 
 static void nativeMergeWithNextTransaction(JNIEnv*, jclass clazz, jlong ptr, jlong transactionPtr,
                                            jlong framenumber) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionPtr);
-    queue->mergeWithNextTransaction(transaction, framenumber);
-}
-
-static void nativeSetTransactionCompleteCallback(JNIEnv* env, jclass clazz, jlong ptr,
-                                                 jlong frameNumber,
-                                                 jobject transactionCompleteCallback) {
-    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    if (transactionCompleteCallback == nullptr) {
-        queue->setTransactionCompleteCallback(frameNumber, nullptr);
-    } else {
-        sp<TransactionCompleteCallbackWrapper> wrapper =
-                new TransactionCompleteCallbackWrapper{env, transactionCompleteCallback};
-        queue->setTransactionCompleteCallback(frameNumber, [wrapper](int64_t frameNr) {
-            wrapper->onTransactionComplete(frameNr);
-        });
-    }
+    queue->mergeWithNextTransaction(transaction, CC_UNLIKELY(framenumber < 0) ? 0 : framenumber);
 }
 
 static jlong nativeGetLastAcquiredFrameNum(JNIEnv* env, jclass clazz, jlong ptr) {
@@ -137,20 +169,55 @@ static jlong nativeGetLastAcquiredFrameNum(JNIEnv* env, jclass clazz, jlong ptr)
     return queue->getLastAcquiredFrameNum();
 }
 
+static void nativeApplyPendingTransactions(JNIEnv* env, jclass clazz, jlong ptr, jlong frameNum) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    queue->applyPendingTransactions(frameNum);
+}
+
+static bool nativeIsSameSurfaceControl(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    return queue->isSameSurfaceControl(reinterpret_cast<SurfaceControl*>(surfaceControl));
+}
+  
+static void nativeSetTransactionHangCallback(JNIEnv* env, jclass clazz, jlong ptr,
+                                             jobject transactionHangCallback) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    if (transactionHangCallback == nullptr) {
+        queue->setTransactionHangCallback(nullptr);
+    } else {
+        sp<TransactionHangCallbackWrapper> wrapper =
+                new TransactionHangCallbackWrapper{env, transactionHangCallback};
+        queue->setTransactionHangCallback([wrapper](bool isGpuHang) {
+            wrapper->onTransactionHang(isGpuHang);
+        });
+    }
+}
+
+static jobject nativeGatherPendingTransactions(JNIEnv* env, jclass clazz, jlong ptr,
+                                               jlong frameNum) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    SurfaceComposerClient::Transaction* transaction = queue->gatherPendingTransactions(frameNum);
+    return env->NewObject(gTransactionClassInfo.clazz, gTransactionClassInfo.ctor,
+                          reinterpret_cast<jlong>(transaction));
+}
+
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
-        {"nativeCreate", "(Ljava/lang/String;)J", (void*)nativeCreate},
-        {"nativeCreateAndUpdate", "(Ljava/lang/String;JJJI)J", (void*)nativeCreateAndUpdate},
+        {"nativeCreate", "(Ljava/lang/String;Z)J", (void*)nativeCreate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
-        {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
-        {"nativeUpdate", "(JJJJIJ)V", (void*)nativeUpdate},
+        {"nativeSyncNextTransaction", "(JLjava/util/function/Consumer;Z)V", (void*)nativeSyncNextTransaction},
+        {"nativeStopContinuousSyncTransaction", "(J)V", (void*)nativeStopContinuousSyncTransaction},
+        {"nativeUpdate", "(JJJJI)V", (void*)nativeUpdate},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
-        {"nativeSetTransactionCompleteCallback",
-                "(JJLandroid/graphics/BLASTBufferQueue$TransactionCompleteCallback;)V",
-                (void*)nativeSetTransactionCompleteCallback},
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
+        {"nativeApplyPendingTransactions", "(JJ)V", (void*)nativeApplyPendingTransactions},
+        {"nativeIsSameSurfaceControl", "(JJ)Z", (void*)nativeIsSameSurfaceControl},
+        {"nativeGatherPendingTransactions", "(JJ)Landroid/view/SurfaceControl$Transaction;", (void*)nativeGatherPendingTransactions},
+        {"nativeSetTransactionHangCallback",
+         "(JLandroid/graphics/BLASTBufferQueue$TransactionHangCallback;)V",
+         (void*)nativeSetTransactionHangCallback},
         // clang-format on
 };
 
@@ -159,10 +226,19 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
             gMethods, NELEM(gMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 
-    jclass transactionCompleteClass =
-            FindClassOrDie(env, "android/graphics/BLASTBufferQueue$TransactionCompleteCallback");
-    gTransactionCompleteCallback.onTransactionComplete =
-            GetMethodIDOrDie(env, transactionCompleteClass, "onTransactionComplete", "(J)V");
+    jclass transactionClazz = FindClassOrDie(env, "android/view/SurfaceControl$Transaction");
+    gTransactionClassInfo.clazz = MakeGlobalRefOrDie(env, transactionClazz);
+    gTransactionClassInfo.ctor =
+            GetMethodIDOrDie(env, gTransactionClassInfo.clazz, "<init>", "(J)V");
+
+    jclass consumer = FindClassOrDie(env, "java/util/function/Consumer");
+    gTransactionConsumer.accept =
+            GetMethodIDOrDie(env, consumer, "accept", "(Ljava/lang/Object;)V");
+    jclass transactionHangClass =
+            FindClassOrDie(env, "android/graphics/BLASTBufferQueue$TransactionHangCallback");
+    gTransactionHangCallback.onTransactionHang =
+            GetMethodIDOrDie(env, transactionHangClass, "onTransactionHang", "(Z)V");
+
     return 0;
 }
 

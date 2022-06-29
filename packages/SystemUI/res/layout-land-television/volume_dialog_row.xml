@@ -35,7 +35,7 @@
             android:id="@+id/volume_number"
             android:layout_width="@dimen/tv_volume_dialog_bubble_size"
             android:layout_height="@dimen/tv_volume_dialog_bubble_size"
-            android:maxLength="2"
+            android:maxLength="3"
             android:gravity="center"
             android:fontFeatureSettings="tnum"
             android:background="@drawable/tv_volume_dialog_circle"

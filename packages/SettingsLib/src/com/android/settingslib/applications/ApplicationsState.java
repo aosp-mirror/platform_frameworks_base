@@ -95,6 +95,7 @@ public class ApplicationsState {
     private static final Object sLock = new Object();
     private static final Pattern REMOVE_DIACRITICALS_PATTERN
             = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+    private static final String SETTING_PKG = "com.android.settings";
 
     @VisibleForTesting
     static ApplicationsState sInstance;
@@ -492,6 +493,9 @@ public class ApplicationsState {
         return null;
     }
 
+    /**
+     * Starting Android T, this method will not be used if {@link AppIconCacheManager} is applied.
+     */
     public void ensureIcon(AppEntry entry) {
         if (entry.icon != null) {
             return;
@@ -758,6 +762,10 @@ public class ApplicationsState {
         return null;
     }
 
+    private static boolean isAppIconCacheEnabled(Context context) {
+        return SETTING_PKG.equals(context.getPackageName());
+    }
+
     void rebuildActiveSessions() {
         synchronized (mEntriesMap) {
             if (!mSessionsChanged) {
@@ -806,6 +814,11 @@ public class ApplicationsState {
             } else {
                 mHasLifecycle = false;
             }
+
+            if (isAppIconCacheEnabled(mContext)) {
+                // Skip the preloading all icons step to save memory usage.
+                mFlags = mFlags & ~FLAG_SESSION_REQUEST_ICONS;
+            }
         }
 
         @SessionFlags
@@ -814,7 +827,12 @@ public class ApplicationsState {
         }
 
         public void setSessionFlags(@SessionFlags int flags) {
-            mFlags = flags;
+            if (isAppIconCacheEnabled(mContext)) {
+                // Skip the preloading all icons step to save memory usage.
+                mFlags = flags & ~FLAG_SESSION_REQUEST_ICONS;
+            } else {
+                mFlags = flags;
+            }
         }
 
         @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -842,6 +860,30 @@ public class ApplicationsState {
                     doPauseIfNeededLocked();
                 }
                 if (DEBUG_LOCKING) Log.v(TAG, "...pause releasing lock");
+            }
+        }
+
+        /**
+         *  Activate session to enable a class that implements Callbacks to receive the callback.
+         */
+        public void activateSession() {
+            synchronized (mEntriesMap) {
+                if (!mResumed) {
+                    mResumed = true;
+                    mSessionsChanged = true;
+                }
+            }
+        }
+
+        /**
+         *  Deactivate session to disable a class that implements Callbacks to get the callback.
+         */
+        public void deactivateSession() {
+            synchronized (mEntriesMap) {
+                if (mResumed) {
+                    mResumed = false;
+                    mSessionsChanged = true;
+                }
             }
         }
 
@@ -1576,6 +1618,10 @@ public class ApplicationsState {
 
         // Need to synchronize on 'this' for the following.
         public ApplicationInfo info;
+        /**
+         * Starting Android T, this field will not be used if {@link AppIconCacheManager} is
+         * applied.
+         */
         public Drawable icon;
         public String sizeStr;
         public String internalSizeStr;
@@ -1596,15 +1642,11 @@ public class ApplicationsState {
             this.size = SIZE_UNKNOWN;
             this.sizeStale = true;
             ensureLabel(context);
-            // Speed up the cache of the icon and label description if they haven't been created.
-            ThreadUtils.postOnBackgroundThread(() -> {
-                if (this.icon == null) {
-                    this.ensureIconLocked(context);
-                }
-                if (this.labelDescription == null) {
-                    this.ensureLabelDescriptionLocked(context);
-                }
-            });
+            // Speed up the cache of the label description if they haven't been created.
+            if (this.labelDescription == null) {
+                ThreadUtils.postOnBackgroundThread(
+                        () -> this.ensureLabelDescriptionLocked(context));
+            }
         }
 
         public void ensureLabel(Context context) {
@@ -1620,7 +1662,15 @@ public class ApplicationsState {
             }
         }
 
+        /**
+         * Starting Android T, this method will not be used if {@link AppIconCacheManager} is
+         * applied.
+         */
         boolean ensureIconLocked(Context context) {
+            if (isAppIconCacheEnabled(context)) {
+                return false;
+            }
+
             if (this.icon == null) {
                 if (this.apkFile.exists()) {
                     this.icon = Utils.getBadgedIcon(context, info);

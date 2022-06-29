@@ -8,6 +8,9 @@
                 },
                 {
                     "include-filter": "android.media.audio.cts.AudioFocusTest"
+                },
+                {
+                    "include-filter": "android.media.audio.cts.SpatializerTest"
                 }
             ]
         }

@@ -30,6 +30,7 @@ public class BluetoothPacketDecoder extends PacketDecoder {
     private static final String TAG = "BluetoothPacketDecoder";
 
     private final byte[] mBuffer;
+    private int mMaxPacketSize;
     private int mBytesInBuffer;
     private MidiBtleTimeTracker mTimeTracker;
 
@@ -42,6 +43,14 @@ public class BluetoothPacketDecoder extends PacketDecoder {
 
     public BluetoothPacketDecoder(int maxPacketSize) {
         mBuffer = new byte[maxPacketSize];
+        setMaxPacketSize(maxPacketSize);
+    }
+
+    /**
+     * Dynamically sets the maximum packet size
+     */
+    public void setMaxPacketSize(int maxPacketSize) {
+        mMaxPacketSize = Math.min(maxPacketSize, mBuffer.length);
     }
 
     private void flushOutput(MidiReceiver receiver) {
@@ -83,6 +92,7 @@ public class BluetoothPacketDecoder extends PacketDecoder {
         int previousLowTimestamp = 0;
         int currentTimestamp = highTimestamp | mLowTimestamp;
 
+        int curMaxPacketSize = mMaxPacketSize;
         // Iterate through the rest of the packet, separating MIDI data from timestamps.
         for (int i = 1; i < buffer.length; i++) {
             byte b = buffer[i];
@@ -113,7 +123,7 @@ public class BluetoothPacketDecoder extends PacketDecoder {
             } else {
                 lastWasTimestamp = false;
                 // Flush if full before adding more data.
-                if (mBytesInBuffer == mBuffer.length) {
+                if (mBytesInBuffer >= curMaxPacketSize) {
                     flushOutput(receiver);
                 }
                 mBuffer[mBytesInBuffer++] = b;

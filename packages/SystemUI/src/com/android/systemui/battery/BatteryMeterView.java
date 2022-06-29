@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -52,10 +53,10 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
@@ -125,7 +126,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         updateShowPercent();
         mDualToneHandler = new DualToneHandler(context);
         // Init to not dark at all.
-        onDarkChanged(new Rect(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
+        onDarkChanged(new ArrayList<Rect>(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
 
         setClipChildren(false);
         setClipToPadding(false);
@@ -135,6 +136,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         LayoutTransition transition = new LayoutTransition();
         transition.setDuration(200);
 
+        // Animates appearing/disappearing of the battery percentage text using fade-in/fade-out
+        // and disables all other animation types
         ObjectAnimator appearAnimator = ObjectAnimator.ofFloat(null, "alpha", 0f, 1f);
         transition.setAnimator(LayoutTransition.APPEARING, appearAnimator);
         transition.setInterpolator(LayoutTransition.APPEARING, Interpolators.ALPHA_IN);
@@ -142,6 +145,10 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         ObjectAnimator disappearAnimator = ObjectAnimator.ofFloat(null, "alpha", 1f, 0f);
         transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
         transition.setAnimator(LayoutTransition.DISAPPEARING, disappearAnimator);
+
+        transition.setAnimator(LayoutTransition.CHANGE_APPEARING, null);
+        transition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, null);
+        transition.setAnimator(LayoutTransition.CHANGING, null);
 
         setLayoutTransition(transition);
     }
@@ -260,8 +267,15 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         if (mBatteryPercentView == null) {
             return;
         }
-        mBatteryPercentView.setText(
-                NumberFormat.getPercentInstance().format(mLevel / 100f));
+
+        String percentText = NumberFormat.getPercentInstance().format(mLevel / 100f);
+        // Setting text actually triggers a layout pass (because the text view is set to
+        // wrap_content width and TextView always relayouts for this). Avoid needless
+        // relayout if the text didn't actually change.
+        if (!TextUtils.equals(mBatteryPercentView.getText(), percentText)) {
+            mBatteryPercentView.setText(percentText);
+        }
+
         setContentDescription(
                 getContext().getString(mCharging ? R.string.accessibility_battery_level_charging
                         : R.string.accessibility_battery_level, mLevel));
@@ -347,8 +361,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        float intensity = DarkIconDispatcher.isInArea(area, this) ? darkIntensity : 0;
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        float intensity = DarkIconDispatcher.isInAreas(areas, this) ? darkIntensity : 0;
         mNonAdaptedSingleToneColor = mDualToneHandler.getSingleColor(intensity);
         mNonAdaptedForegroundColor = mDualToneHandler.getFillColor(intensity);
         mNonAdaptedBackgroundColor = mDualToneHandler.getBackgroundColor(intensity);
@@ -377,7 +391,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         String powerSave = mDrawable == null ? null : mDrawable.getPowerSaveEnabled() + "";
         CharSequence percent = mBatteryPercentView == null ? null : mBatteryPercentView.getText();
         pw.println("  BatteryMeterView:");

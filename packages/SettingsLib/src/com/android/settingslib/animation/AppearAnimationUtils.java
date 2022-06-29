@@ -180,11 +180,21 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
     @Override
     public void createAnimation(final View view, long delay, long duration, float translationY,
             boolean appearing, Interpolator interpolator, final Runnable endRunnable) {
+        createAnimation(
+                view, delay, duration, translationY, appearing, interpolator, endRunnable, null);
+    }
+
+    @Override
+    public void createAnimation(final View view, long delay,
+            long duration, float translationY, boolean appearing, Interpolator interpolator,
+            final Runnable endRunnable, final AnimatorListenerAdapter animatorListener) {
         if (view != null) {
-            view.setAlpha(appearing ? 0f : 1.0f);
-            view.setTranslationY(appearing ? translationY : 0);
+            float targetAlpha = appearing ? 1f : 0f;
+            float targetTranslationY = appearing ? 0 : translationY;
+            view.setAlpha(1.0f - targetAlpha);
+            view.setTranslationY(translationY - targetTranslationY);
             Animator alphaAnim;
-            float targetAlpha =  appearing ? 1f : 0f;
+
             if (view.isHardwareAccelerated()) {
                 RenderNodeAnimator alphaAnimRt = new RenderNodeAnimator(RenderNodeAnimator.ALPHA,
                         targetAlpha);
@@ -205,17 +215,18 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
                     }
                 });
             }
-            if (endRunnable != null) {
-                alphaAnim.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
+            alphaAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    view.setAlpha(targetAlpha);
+                    if (endRunnable != null) {
                         endRunnable.run();
                     }
-                });
-            }
+                }
+            });
             alphaAnim.start();
-            startTranslationYAnimation(view, delay, duration, appearing ? 0 : translationY,
-                    interpolator);
+            startTranslationYAnimation(view, delay, duration, targetTranslationY,
+                    interpolator, animatorListener);
         }
     }
 
@@ -231,7 +242,7 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
      * A static method to start translation y animation
      */
     public static void startTranslationYAnimation(View view, long delay, long duration,
-            float endTranslationY, Interpolator interpolator, Animator.AnimatorListener listener) {
+            float endTranslationY, Interpolator interpolator, AnimatorListenerAdapter listener) {
         Animator translationAnim;
         if (view.isHardwareAccelerated()) {
             RenderNodeAnimator translationAnimRt = new RenderNodeAnimator(
@@ -248,6 +259,12 @@ public class AppearAnimationUtils implements AppearAnimationCreator<View> {
         if (listener != null) {
             translationAnim.addListener(listener);
         }
+        translationAnim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                view.setTranslationY(endTranslationY);
+            }
+        });
         translationAnim.start();
     }
 

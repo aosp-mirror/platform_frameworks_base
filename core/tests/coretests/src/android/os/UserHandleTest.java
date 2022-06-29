@@ -24,11 +24,14 @@ import static android.os.UserHandle.getUid;
 import static android.os.UserHandle.getUserId;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
 public class UserHandleTest {
@@ -116,5 +119,32 @@ public class UserHandleTest {
 
     private static int multiuser_get_app_id(int uid) {
         return getAppId(uid);
+    }
+
+    @Test
+    public void testExtraCache() {
+        assertEquals(0, UserHandle.sExtraUserHandleCache.size());
+
+        // This shouldn't hit the extra cache.
+        assertEquals(10, UserHandle.of(10).getIdentifier());
+
+        assertEquals(0, UserHandle.sExtraUserHandleCache.size());
+
+        // This should hit the cache
+        assertEquals(20, UserHandle.of(20).getIdentifier());
+
+        assertEquals(1, UserHandle.sExtraUserHandleCache.size());
+
+        // Make sure the cache works.
+        final Random rnd = new Random();
+        for (int i = 0; i < 10000; i++) {
+            final int userId = rnd.nextInt(100);
+            assertEquals(userId, UserHandle.of(userId).getIdentifier());
+            assertSame(UserHandle.of(userId), UserHandle.of(userId));
+        }
+
+        // Make sure the cache size doesn't exceed the max size.
+        assertEquals(UserHandle.MAX_EXTRA_USER_HANDLE_CACHE_SIZE,
+                UserHandle.sExtraUserHandleCache.size());
     }
 }

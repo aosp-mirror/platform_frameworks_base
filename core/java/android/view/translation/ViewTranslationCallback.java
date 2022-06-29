@@ -52,6 +52,15 @@ public interface ViewTranslationCallback {
      * the original text instead of the translated text or use a different approach to display the
      * translated text.
      *
+     * <p> NOTE: In Android version {@link android.os.Build.VERSION_CODES#TIRAMISU} and later,
+     * the implementation must be able to handle a selectable {@link android.widget.TextView}
+     * (i.e., {@link android.widget.TextView#isTextSelectable()} returns {@code true}. The default
+     * callback implementation for TextView uses a {@link android.text.method.TransformationMethod}
+     * to show the translated text, which will cause a crash when the translated text is selected.
+     * Therefore, the default callback temporarily makes the TextView non-selectable while the
+     * translation text is shown. This is one approach for handling selectable TextViews a
+     * TransformationMethod is used.
+     *
      * See {@link View#onViewTranslationResponse} for how to get the translated information.
      *
      * @return {@code true} if the View handles showing the translation.
@@ -60,7 +69,7 @@ public interface ViewTranslationCallback {
     /**
      * Called when user wants to view the original content instead of the translated content. This
      * method will not be called before {@link View#onViewTranslationResponse} or
-     * {@link View#onViewTranslationResponse}.
+     * {@link View#onVirtualViewTranslationResponses}.
      *
      * @return {@code true} if the View handles hiding the translation.
      */

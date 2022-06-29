@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -119,14 +118,13 @@ public class KeyguardIndicationRotateTextViewController extends
             return;
         }
         long minShowDuration = getMinVisibilityMillis(mIndicationMessages.get(mCurrIndicationType));
-        final boolean hasPreviousIndication = mIndicationMessages.get(type) != null
-                && !TextUtils.isEmpty(mIndicationMessages.get(type).getMessage());
-        final boolean hasNewIndication = newIndication != null;
+        final boolean hasNewIndication = newIndication != null
+                && !TextUtils.isEmpty(newIndication.getMessage());
         if (!hasNewIndication) {
             mIndicationMessages.remove(type);
             mIndicationQueue.removeIf(x -> x == type);
         } else {
-            if (!hasPreviousIndication) {
+            if (!mIndicationQueue.contains(type)) {
                 mIndicationQueue.add(type);
             }
 
@@ -230,6 +228,7 @@ public class KeyguardIndicationRotateTextViewController extends
     public void clearMessages() {
         mCurrIndicationType = INDICATION_TYPE_NONE;
         mIndicationQueue.clear();
+        mIndicationMessages.clear();
         mView.clearMessages();
     }
 
@@ -310,7 +309,7 @@ public class KeyguardIndicationRotateTextViewController extends
                     if (mIsDozing) {
                         showIndication(INDICATION_TYPE_NONE);
                     } else if (mIndicationQueue.size() > 0) {
-                        showIndication(mIndicationQueue.remove(0));
+                        showIndication(mIndicationQueue.get(0));
                     }
                 }
             };
@@ -327,7 +326,7 @@ public class KeyguardIndicationRotateTextViewController extends
         ShowNextIndication(long delay) {
             mShowIndicationRunnable = () -> {
                 int type = mIndicationQueue.size() == 0
-                        ? INDICATION_TYPE_NONE : mIndicationQueue.remove(0);
+                        ? INDICATION_TYPE_NONE : mIndicationQueue.get(0);
                 showIndication(type);
             };
             mCancelDelayedRunnable = mExecutor.executeDelayed(mShowIndicationRunnable, delay);
@@ -347,7 +346,7 @@ public class KeyguardIndicationRotateTextViewController extends
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardIndicationRotatingTextViewController:");
         pw.println("    currentMessage=" + mView.getText());
         pw.println("    dozing:" + mIsDozing);

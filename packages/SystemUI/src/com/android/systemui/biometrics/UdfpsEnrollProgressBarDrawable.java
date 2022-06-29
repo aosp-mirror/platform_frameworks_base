@@ -22,6 +22,12 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.os.Process;
+import android.os.VibrationAttributes;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.view.accessibility.AccessibilityManager;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 
@@ -39,17 +45,33 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
     private static final long CHECKMARK_ANIMATION_DELAY_MS = 200L;
     private static final long CHECKMARK_ANIMATION_DURATION_MS = 300L;
-    private static final long FILL_COLOR_ANIMATION_DURATION_MS = 200L;
+    private static final long FILL_COLOR_ANIMATION_DURATION_MS = 350L;
     private static final long PROGRESS_ANIMATION_DURATION_MS = 400L;
     private static final float STROKE_WIDTH_DP = 12f;
+    private static final Interpolator DEACCEL = new DecelerateInterpolator();
+
+    private static final VibrationEffect VIBRATE_EFFECT_ERROR =
+            VibrationEffect.createWaveform(new long[] {0, 5, 55, 60}, -1);
+    private static final VibrationAttributes FINGERPRINT_ENROLLING_SONFICATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_ACCESSIBILITY);
+
+    private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
+
+    private static final VibrationEffect SUCCESS_VIBRATION_EFFECT =
+            VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
 
     private final float mStrokeWidthPx;
     @ColorInt private final int mProgressColor;
     @ColorInt private final int mHelpColor;
+    @ColorInt private final int mOnFirstBucketFailedColor;
     @NonNull private final Drawable mCheckmarkDrawable;
     @NonNull private final Interpolator mCheckmarkInterpolator;
     @NonNull private final Paint mBackgroundPaint;
     @NonNull private final Paint mFillPaint;
+    @NonNull private final Vibrator mVibrator;
+    @NonNull private final boolean mIsAccessibilityEnabled;
+    @NonNull private final Context mContext;
 
     private boolean mAfterFirstTouch;
 
@@ -63,15 +85,27 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     @Nullable private ValueAnimator mFillColorAnimator;
     @NonNull private final ValueAnimator.AnimatorUpdateListener mFillColorUpdateListener;
 
+    @Nullable private ValueAnimator mBackgroundColorAnimator;
+    @NonNull private final ValueAnimator.AnimatorUpdateListener mBackgroundColorUpdateListener;
+
     private boolean mComplete = false;
     private float mCheckmarkScale = 0f;
     @Nullable private ValueAnimator mCheckmarkAnimator;
     @NonNull private final ValueAnimator.AnimatorUpdateListener mCheckmarkUpdateListener;
 
     public UdfpsEnrollProgressBarDrawable(@NonNull Context context) {
+        mContext = context;
         mStrokeWidthPx = Utils.dpToPixels(context, STROKE_WIDTH_DP);
         mProgressColor = context.getColor(R.color.udfps_enroll_progress);
-        mHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        mIsAccessibilityEnabled = am.isTouchExplorationEnabled();
+        if (!mIsAccessibilityEnabled) {
+            mHelpColor = context.getColor(R.color.udfps_enroll_progress_help);
+            mOnFirstBucketFailedColor = context.getColor(R.color.udfps_moving_target_fill_error);
+        } else {
+            mHelpColor = context.getColor(R.color.udfps_enroll_progress_help_with_talkback);
+            mOnFirstBucketFailedColor = mHelpColor;
+        }
         mCheckmarkDrawable = context.getDrawable(R.drawable.udfps_enroll_checkmark);
         mCheckmarkDrawable.mutate();
         mCheckmarkInterpolator = new OvershootInterpolator();
@@ -91,6 +125,8 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         mFillPaint.setStyle(Paint.Style.STROKE);
         mFillPaint.setStrokeCap(Paint.Cap.ROUND);
 
+        mVibrator = mContext.getSystemService(Vibrator.class);
+
         mProgressUpdateListener = animation -> {
             mProgress = (float) animation.getAnimatedValue();
             invalidateSelf();
@@ -103,6 +139,11 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
 
         mCheckmarkUpdateListener = animation -> {
             mCheckmarkScale = (float) animation.getAnimatedValue();
+            invalidateSelf();
+        };
+
+        mBackgroundColorUpdateListener = animation -> {
+            mBackgroundPaint.setColor((int) animation.getAnimatedValue());
             invalidateSelf();
         };
     }
@@ -121,14 +162,41 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
     }
 
     private void updateState(int remainingSteps, int totalSteps, boolean showingHelp) {
-        updateProgress(remainingSteps, totalSteps);
+        updateProgress(remainingSteps, totalSteps, showingHelp);
         updateFillColor(showingHelp);
     }
 
-    private void updateProgress(int remainingSteps, int totalSteps) {
+    private void updateProgress(int remainingSteps, int totalSteps, boolean showingHelp) {
         if (mRemainingSteps == remainingSteps && mTotalSteps == totalSteps) {
             return;
         }
+
+        if (mShowingHelp) {
+            if (mVibrator != null && mIsAccessibilityEnabled) {
+                mVibrator.vibrate(Process.myUid(), mContext.getOpPackageName(),
+                        VIBRATE_EFFECT_ERROR, getClass().getSimpleName() + "::onEnrollmentHelp",
+                        FINGERPRINT_ENROLLING_SONFICATION_ATTRIBUTES);
+            }
+        } else {
+            // If the first touch is an error, remainingSteps will be -1 and the callback
+            // doesn't come from onEnrollmentHelp. If we are in the accessibility flow,
+            // we still would like to vibrate.
+            if (mVibrator != null) {
+                if (remainingSteps == -1 && mIsAccessibilityEnabled) {
+                    mVibrator.vibrate(Process.myUid(), mContext.getOpPackageName(),
+                            VIBRATE_EFFECT_ERROR,
+                            getClass().getSimpleName() + "::onFirstTouchError",
+                            FINGERPRINT_ENROLLING_SONFICATION_ATTRIBUTES);
+                } else if (remainingSteps != -1 && !mIsAccessibilityEnabled) {
+                    mVibrator.vibrate(Process.myUid(),
+                            mContext.getOpPackageName(),
+                            SUCCESS_VIBRATION_EFFECT,
+                            getClass().getSimpleName() + "::OnEnrollmentProgress",
+                            HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES);
+                }
+            }
+        }
+
         mRemainingSteps = remainingSteps;
         mTotalSteps = totalSteps;
 
@@ -156,19 +224,38 @@ public class UdfpsEnrollProgressBarDrawable extends Drawable {
         }
     }
 
+    private void animateBackgroundColor() {
+        if (mBackgroundColorAnimator != null && mBackgroundColorAnimator.isRunning()) {
+            mBackgroundColorAnimator.end();
+        }
+        mBackgroundColorAnimator = ValueAnimator.ofArgb(mBackgroundPaint.getColor(),
+                mOnFirstBucketFailedColor);
+        mBackgroundColorAnimator.setDuration(FILL_COLOR_ANIMATION_DURATION_MS);
+        mBackgroundColorAnimator.setRepeatCount(1);
+        mBackgroundColorAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mBackgroundColorAnimator.setInterpolator(DEACCEL);
+        mBackgroundColorAnimator.addUpdateListener(mBackgroundColorUpdateListener);
+        mBackgroundColorAnimator.start();
+    }
+
     private void updateFillColor(boolean showingHelp) {
-        if (mShowingHelp == showingHelp) {
+        if (!mAfterFirstTouch && showingHelp) {
+            // If we are on the first touch, animate the background color
+            // instead of the progress color.
+            animateBackgroundColor();
             return;
         }
-        mShowingHelp = showingHelp;
 
         if (mFillColorAnimator != null && mFillColorAnimator.isRunning()) {
-            mFillColorAnimator.cancel();
+            mFillColorAnimator.end();
         }
 
         @ColorInt final int targetColor = showingHelp ? mHelpColor : mProgressColor;
         mFillColorAnimator = ValueAnimator.ofArgb(mFillPaint.getColor(), targetColor);
         mFillColorAnimator.setDuration(FILL_COLOR_ANIMATION_DURATION_MS);
+        mFillColorAnimator.setRepeatCount(1);
+        mFillColorAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        mFillColorAnimator.setInterpolator(DEACCEL);
         mFillColorAnimator.addUpdateListener(mFillColorUpdateListener);
         mFillColorAnimator.start();
     }

@@ -28,6 +28,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.BluetoothProfileConnectionInfo;
@@ -186,8 +187,9 @@ public class AudioDeviceBrokerTest {
         doNothing().when(mSpySystemServer).broadcastStickyIntentToCurrentProfileGroup(
                 any(Intent.class));
 
-        mSpyDevInventory.setWiredDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
-                AudioService.CONNECTION_STATE_CONNECTED, address, name, caller);
+        mSpyDevInventory.setWiredDeviceConnectionState(new AudioDeviceAttributes(
+                        AudioSystem.DEVICE_OUT_WIRED_HEADSET, address, name),
+                AudioService.CONNECTION_STATE_CONNECTED, caller);
         Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
 
         // Verify that the sticky intent is broadcasted
@@ -246,11 +248,11 @@ public class AudioDeviceBrokerTest {
      */
     private void checkSingleSystemConnection(BluetoothDevice btDevice) throws Exception {
         final String expectedName = btDevice.getName() == null ? "" : btDevice.getName();
+        AudioDeviceAttributes expected = new AudioDeviceAttributes(
+                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, btDevice.getAddress(), expectedName);
         verify(mSpyAudioSystem, times(1)).setDeviceConnectionState(
-                ArgumentMatchers.eq(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP),
+                ArgumentMatchers.argThat(x -> x.equalTypeAddress(expected)),
                 ArgumentMatchers.eq(AudioSystem.DEVICE_STATE_AVAILABLE),
-                ArgumentMatchers.eq(btDevice.getAddress()),
-                ArgumentMatchers.eq(expectedName),
                 anyInt() /*codec*/);
     }
 }

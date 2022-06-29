@@ -31,6 +31,7 @@ public class CameraStatus implements Parcelable {
     public String cameraId;
     public int status;
     public String[] unavailablePhysicalCameras;
+    public String clientPackage;
 
     @Override
     public int describeContents() {
@@ -42,12 +43,14 @@ public class CameraStatus implements Parcelable {
         out.writeString(cameraId);
         out.writeInt(status);
         out.writeStringArray(unavailablePhysicalCameras);
+        out.writeString(clientPackage);
     }
 
     public void readFromParcel(Parcel in) {
         cameraId = in.readString();
         status = in.readInt();
         unavailablePhysicalCameras = in.readStringArray();
+        clientPackage = in.readString();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<CameraStatus> CREATOR =

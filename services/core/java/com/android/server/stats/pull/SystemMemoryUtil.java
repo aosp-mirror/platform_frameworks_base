@@ -82,6 +82,7 @@ final class SystemMemoryUtil {
         result.vmallocUsedKb = (int) mInfos[Debug.MEMINFO_VM_ALLOC_USED];
         result.pageTablesKb = (int) mInfos[Debug.MEMINFO_PAGE_TABLES];
         result.kernelStackKb = (int) mInfos[Debug.MEMINFO_KERNEL_STACK];
+        result.shmemKb = (int) mInfos[Debug.MEMINFO_SHMEM];
         result.totalIonKb = totalIonKb;
         result.gpuTotalUsageKb = gpuTotalUsageKb;
         result.gpuPrivateAllocationsKb = gpuPrivateAllocationsKb;
@@ -95,6 +96,7 @@ final class SystemMemoryUtil {
         public int vmallocUsedKb;
         public int pageTablesKb;
         public int kernelStackKb;
+        public int shmemKb;
         public int totalIonKb;
         public int gpuTotalUsageKb;
         public int gpuPrivateAllocationsKb;

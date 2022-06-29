@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.WindowFramesProto.COMPAT_FRAME;
-import static com.android.server.wm.WindowFramesProto.CONTAINING_FRAME;
 import static com.android.server.wm.WindowFramesProto.DISPLAY_FRAME;
 import static com.android.server.wm.WindowFramesProto.FRAME;
 import static com.android.server.wm.WindowFramesProto.PARENT_FRAME;
@@ -37,30 +36,14 @@ public class WindowFrames {
     private static final StringBuilder sTmpSB = new StringBuilder();
 
     /**
-     * In most cases, this is the area of the entire screen.
-     *
-     * TODO(b/111611553): The name is unclear and most likely should be swapped with
-     * {@link #mDisplayFrame}
-     * TODO(b/111611553): In some cases, it also includes top insets, like for IME. Determine
-     * whether this is still necessary to do.
+     * The frame to be referenced while applying gravity and MATCH_PARENT.
      */
     public final Rect mParentFrame = new Rect();
 
     /**
-     * The entire screen area of the {@link Task} this window is in. Usually equal to the
-     * screen area of the device.
-     *
-     * TODO(b/111611553): The name is unclear and most likely should be swapped with
-     * {@link #mParentFrame}
+     * The bounds that the window should fit.
      */
     public final Rect mDisplayFrame = new Rect();
-
-    /**
-     * Similar to {@link #mDisplayFrame}
-     *
-     * TODO: Why is this different than mDisplayFrame
-     */
-    final Rect mContainingFrame = new Rect();
 
     /**
      * "Real" frame that the application sees, in display coordinate space.
@@ -89,11 +72,6 @@ public class WindowFrames {
     final Rect mCompatFrame = new Rect();
 
     /**
-     * {@code true} if the window frame is a simulated frame and attached to a decor window.
-     */
-    boolean mIsSimulatingDecorWindow = false;
-
-    /**
      * Whether the parent frame would have been different if there was no display cutout.
      */
     private boolean mParentFrameWasClippedByDisplayCutout;
@@ -102,6 +80,8 @@ public class WindowFrames {
     boolean mForceReportingResized = false;
 
     private boolean mContentChanged;
+
+    private boolean mInsetsChanged;
 
     public void setFrames(Rect parentFrame, Rect displayFrame) {
         mParentFrame.set(parentFrame);
@@ -122,10 +102,6 @@ public class WindowFrames {
      */
     boolean didFrameSizeChange() {
         return (mLastFrame.width() != mFrame.width()) || (mLastFrame.height() != mFrame.height());
-    }
-
-    void offsetFrames(int layoutXDiff, int layoutYDiff) {
-        mFrame.offset(layoutXDiff, layoutYDiff);
     }
 
     /**
@@ -184,23 +160,35 @@ public class WindowFrames {
         return mContentChanged;
     }
 
+    /**
+     * Sets whether we need to report {@link android.view.InsetsState} to the client.
+     */
+    void setInsetsChanged(boolean insetsChanged) {
+        mInsetsChanged = insetsChanged;
+    }
+
+    /**
+     * @see #setInsetsChanged(boolean)
+     */
+    boolean hasInsetsChanged() {
+        return mInsetsChanged;
+    }
+
     public void dumpDebug(@NonNull ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         mParentFrame.dumpDebug(proto, PARENT_FRAME);
         mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
-        mContainingFrame.dumpDebug(proto, CONTAINING_FRAME);
         mFrame.dumpDebug(proto, FRAME);
         mCompatFrame.dumpDebug(proto, COMPAT_FRAME);
         proto.end(token);
     }
 
     public void dump(PrintWriter pw, String prefix) {
-        pw.println(prefix + "Frames: containing="
-                + mContainingFrame.toShortString(sTmpSB)
-                + " parent=" + mParentFrame.toShortString(sTmpSB)
-                + " display=" + mDisplayFrame.toShortString(sTmpSB));
-        pw.println(prefix + "mFrame=" + mFrame.toShortString(sTmpSB)
-                + " last=" + mLastFrame.toShortString(sTmpSB));
+        pw.println(prefix + "Frames: parent=" + mParentFrame.toShortString(sTmpSB)
+                + " display=" + mDisplayFrame.toShortString(sTmpSB)
+                + " frame=" + mFrame.toShortString(sTmpSB)
+                + " last=" + mLastFrame.toShortString(sTmpSB)
+                + " insetsChanged=" + mInsetsChanged);
     }
 
     String getInsetsChangedInfo() {

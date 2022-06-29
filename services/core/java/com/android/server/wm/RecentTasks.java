@@ -27,7 +27,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
@@ -381,8 +380,11 @@ class RecentTasks {
         final ComponentName cn = ComponentName.unflattenFromString(rawRecentsComponent);
         if (cn != null) {
             try {
-                final ApplicationInfo appInfo = AppGlobals.getPackageManager()
-                        .getApplicationInfo(cn.getPackageName(), 0, mService.mContext.getUserId());
+                final ApplicationInfo appInfo = AppGlobals.getPackageManager().getApplicationInfo(
+                        cn.getPackageName(),
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                | PackageManager.MATCH_DISABLED_COMPONENTS,
+                        mService.mContext.getUserId());
                 if (appInfo != null) {
                     mRecentsUid = appInfo.uid;
                     mRecentsComponent = cn;
@@ -527,7 +529,7 @@ class RecentTasks {
      */
     void notifyTaskPersisterLocked(Task task, boolean flush) {
         final Task rootTask = task != null ? task.getRootTask() : null;
-        if (rootTask != null && rootTask.isHomeOrRecentsRootTask()) {
+        if (rootTask != null && rootTask.isActivityTypeHomeOrRecents()) {
             // Never persist the home or recents task.
             return;
         }
@@ -561,7 +563,7 @@ class RecentTasks {
 
     private static boolean shouldPersistTaskLocked(Task task) {
         final Task rootTask = task.getRootTask();
-        return task.isPersistable && (rootTask == null || !rootTask.isHomeOrRecentsRootTask());
+        return task.isPersistable && (rootTask == null || !rootTask.isActivityTypeHomeOrRecents());
     }
 
     void onSystemReadyLocked() {
@@ -992,7 +994,7 @@ class RecentTasks {
             }
             final Task rootTask = task.getRootTask();
             if ((task.isPersistable || task.inRecents)
-                    && (rootTask == null || !rootTask.isHomeOrRecentsRootTask())) {
+                    && (rootTask == null || !rootTask.isActivityTypeHomeOrRecents())) {
                 if (TaskPersister.DEBUG) Slog.d(TAG, "adding to persistentTaskIds task=" + task);
                 persistentTaskIds.add(task.mTaskId);
             } else {
@@ -1370,16 +1372,6 @@ class RecentTasks {
         switch (task.getWindowingMode()) {
             case WINDOWING_MODE_PINNED:
                 return false;
-            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-                if (DEBUG_RECENTS_TRIM_TASKS) {
-                    Slog.d(TAG, "\ttop=" + task.getRootTask().getTopMostTask());
-                }
-                final Task rootTask = task.getRootTask();
-                if (rootTask != null && rootTask.getTopMostTask() == task) {
-                    // Only the non-top task of the primary split screen mode is visible
-                    return false;
-                }
-                break;
             case WINDOWING_MODE_MULTI_WINDOW:
                 // Ignore tasks that are always on top
                 if (task.isAlwaysOnTopWhenVisible()) {
@@ -1398,6 +1390,13 @@ class RecentTasks {
             return false;
         }
 
+        // Ignore the task if it is started on a display which is not allow to show its tasks on
+        // Recents.
+        if (task.getDisplayContent() != null
+                && !task.getDisplayContent().canShowTasksInRecents()) {
+            return false;
+        }
+
         return true;
     }
 
@@ -1407,13 +1406,19 @@ class RecentTasks {
     private boolean isInVisibleRange(Task task, int taskIndex, int numVisibleTasks,
             boolean skipExcludedCheck) {
         if (!skipExcludedCheck) {
-            // Keep the most recent task even if it is excluded from recents
+            // Keep the most recent task of home display even if it is excluded from recents.
             final boolean isExcludeFromRecents =
                     (task.getBaseIntent().getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                             == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
             if (isExcludeFromRecents) {
-                if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
-                return taskIndex == 0;
+                if (DEBUG_RECENTS_TRIM_TASKS) {
+                    Slog.d(TAG,
+                            "\texcludeFromRecents=true, taskIndex = " + taskIndex
+                                    + ", isOnHomeDisplay: " + task.isOnHomeDisplay());
+                }
+                // The Recents is only supported on default display now, we should only keep the
+                // most recent task of home display.
+                return (task.isOnHomeDisplay() && taskIndex == 0);
             }
         }
 

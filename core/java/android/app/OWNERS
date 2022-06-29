@@ -15,6 +15,7 @@ per-file IActivityController.aidl = file:/services/core/java/com/android/server/
 per-file IActivityManager.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IApplicationThread.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IAppTraceRetriever.aidl = file:/services/core/java/com/android/server/am/OWNERS
+per-file IForegroundServiceObserver.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IInstrumentationWatcher.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IntentService.aidl = file:/services/core/java/com/android/server/am/OWNERS
 per-file IServiceConnection.aidl = file:/services/core/java/com/android/server/am/OWNERS
@@ -30,6 +31,7 @@ per-file SystemServiceRegistry.java = file:/services/core/java/com/android/serve
 per-file *UserSwitchObserver* = file:/services/core/java/com/android/server/am/OWNERS
 per-file UiAutomation.java = file:/services/accessibility/OWNERS
 per-file GameManager* = file:/GAME_MANAGER_OWNERS
+per-file GameState* = file:/GAME_MANAGER_OWNERS
 per-file IGameManager* = file:/GAME_MANAGER_OWNERS
 
 # ActivityThread
@@ -41,6 +43,9 @@ per-file *Alarm* = file:/apex/jobscheduler/OWNERS
 
 # AppOps
 per-file *AppOp* = file:/core/java/android/permission/OWNERS
+
+# LocaleManager
+per-file *Locale* = file:/services/core/java/com/android/server/locales/OWNERS
 
 # Multiuser
 per-file *User* = file:/MULTIUSER_OWNERS

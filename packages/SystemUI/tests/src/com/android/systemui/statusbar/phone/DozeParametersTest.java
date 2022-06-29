@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -39,10 +40,13 @@ import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.unfold.FoldAodAnimationController;
+import com.android.systemui.unfold.SysUIUnfoldComponent;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,11 +55,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DozeParametersTest extends SysuiTestCase {
     private DozeParameters mDozeParameters;
 
+    @Mock Handler mHandler;
     @Mock Resources mResources;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
@@ -64,6 +71,9 @@ public class DozeParametersTest extends SysuiTestCase {
     @Mock private BatteryController mBatteryController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private DumpManager mDumpManager;
+    @Mock private ScreenOffAnimationController mScreenOffAnimationController;
+    @Mock private FoldAodAnimationController mFoldAodAnimationController;
+    @Mock private SysUIUnfoldComponent mSysUIUnfoldComponent;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private StatusBarStateController mStatusBarStateController;
@@ -90,7 +100,12 @@ public class DozeParametersTest extends SysuiTestCase {
             return mPowerManagerDozeAfterScreenOff;
         }).when(mPowerManager).setDozeAfterScreenOff(anyBoolean());
 
+        when(mSysUIUnfoldComponent.getFoldAodAnimationController())
+                .thenReturn(mFoldAodAnimationController);
+
         mDozeParameters = new DozeParameters(
+            mContext,
+            mHandler,
             mResources,
             mAmbientDisplayConfiguration,
             mAlwaysOnDisplayPolicy,
@@ -99,17 +114,24 @@ public class DozeParametersTest extends SysuiTestCase {
             mTunerService,
             mDumpManager,
             mFeatureFlags,
+            mScreenOffAnimationController,
+            Optional.of(mSysUIUnfoldComponent),
             mUnlockedScreenOffAnimationController,
             mKeyguardUpdateMonitor,
             mConfigurationController,
             mStatusBarStateController
         );
 
-        when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(true);
-
+        when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)).thenReturn(true);
         setAodEnabledForTest(true);
         setShouldControlUnlockedScreenOffForTest(true);
         setDisplayNeedsBlankingForTest(false);
+
+        // Default to false here (with one test to make sure that when it returns true, we respect
+        // that). We'll test the specific conditions for this to return true/false in the
+        // UnlockedScreenOffAnimationController's tests.
+        when(mUnlockedScreenOffAnimationController.shouldPlayUnlockedScreenOffAnimation())
+                .thenReturn(false);
     }
 
     @Test
@@ -158,9 +180,12 @@ public class DozeParametersTest extends SysuiTestCase {
      */
     @Test
     public void testControlUnlockedScreenOffAnimation_dozeAfterScreenOff_false() {
+        mDozeParameters.mKeyguardVisibilityCallback.onKeyguardVisibilityChanged(true);
+
         // If AOD is disabled, we shouldn't want to control screen off. Also, let's double check
         // that when that value is updated, we called through to PowerManager.
         setAodEnabledForTest(false);
+
         assertFalse(mDozeParameters.shouldControlScreenOff());
         assertTrue(mPowerManagerDozeAfterScreenOff);
 
@@ -172,8 +197,7 @@ public class DozeParametersTest extends SysuiTestCase {
 
     @Test
     public void testControlUnlockedScreenOffAnimationDisabled_dozeAfterScreenOff() {
-        setShouldControlUnlockedScreenOffForTest(true);
-        when(mFeatureFlags.useNewLockscreenAnimations()).thenReturn(false);
+        when(mFeatureFlags.isEnabled(Flags.LOCKSCREEN_ANIMATIONS)).thenReturn(false);
 
         assertFalse(mDozeParameters.shouldControlUnlockedScreenOff());
 

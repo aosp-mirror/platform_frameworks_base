@@ -674,6 +674,24 @@ public final class MediaCodecInfo {
         public static final String FEATURE_EncodingStatistics = "encoding-statistics";
 
         /**
+         * <b>video encoder only</b>: codec supports HDR editing.
+         * <p>
+         * HDR editing support means that the codec accepts 10-bit HDR
+         * input surface, and it is capable of generating any HDR
+         * metadata required from both YUV and RGB input when the
+         * metadata is not present. This feature is only meaningful when
+         * using an HDR capable profile (and 10-bit HDR input).
+         * <p>
+         * This feature implies that the codec is capable of encoding at
+         * least one HDR format, and that it supports RGBA_1010102 as
+         * well as P010, and optionally RGBA_FP16 input formats, and
+         * that the encoder can generate HDR metadata for all supported
+         * HDR input formats.
+         */
+        @SuppressLint("AllUpper")
+        public static final String FEATURE_HdrEditing = "hdr-editing";
+
+        /**
          * Query codec feature capabilities.
          * <p>
          * These features are supported to be used by the codec.  These
@@ -713,6 +731,7 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_DynamicTimestamp, (1 << 2), false),
             new Feature(FEATURE_QpBounds, (1 << 3), false),
             new Feature(FEATURE_EncodingStatistics, (1 << 4), false),
+            new Feature(FEATURE_HdrEditing, (1 << 5), false),
             // feature to exclude codec from REGULAR codec list
             new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
         };

@@ -16,12 +16,15 @@
 package com.android.systemui.unfold.updates
 
 import android.annotation.FloatRange
+import android.app.ActivityManager
+import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.Handler
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.Consumer
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 import com.android.systemui.unfold.updates.hinge.FULLY_CLOSED_DEGREES
@@ -29,37 +32,45 @@ import com.android.systemui.unfold.updates.hinge.FULLY_OPEN_DEGREES
 import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import java.util.concurrent.Executor
+import javax.inject.Inject
 
-class DeviceFoldStateProvider(
+class DeviceFoldStateProvider
+@Inject
+constructor(
     context: Context,
     private val hingeAngleProvider: HingeAngleProvider,
     private val screenStatusProvider: ScreenStatusProvider,
     private val deviceStateManager: DeviceStateManager,
-    private val mainExecutor: Executor,
-    private val handler: Handler
+    private val activityManager: ActivityManager,
+    @Main private val mainExecutor: Executor,
+    @Main private val handler: Handler
 ) : FoldStateProvider {
 
     private val outputListeners: MutableList<FoldUpdatesListener> = mutableListOf()
 
-    @FoldUpdate
-    private var lastFoldUpdate: Int? = null
+    @FoldUpdate private var lastFoldUpdate: Int? = null
 
-    @FloatRange(from = 0.0, to = 180.0)
-    private var lastHingeAngle: Float = 0f
+    @FloatRange(from = 0.0, to = 180.0) private var lastHingeAngle: Float = 0f
 
     private val hingeAngleListener = HingeAngleListener()
     private val screenListener = ScreenStatusListener()
     private val foldStateListener = FoldStateListener(context)
     private val timeoutRunnable = TimeoutRunnable()
 
+    /**
+     * Time after which [FOLD_UPDATE_FINISH_HALF_OPEN] is emitted following a
+     * [FOLD_UPDATE_START_CLOSING] or [FOLD_UPDATE_START_OPENING] event, if an end state is not
+     * reached.
+     */
+    private val halfOpenedTimeoutMillis: Int =
+        context.resources.getInteger(
+            com.android.internal.R.integer.config_unfoldTransitionHalfFoldedTimeout)
+
     private var isFolded = false
     private var isUnfoldHandled = true
 
     override fun start() {
-        deviceStateManager.registerCallback(
-            mainExecutor,
-            foldStateListener
-        )
+        deviceStateManager.registerCallback(mainExecutor, foldStateListener)
         screenStatusProvider.addCallback(screenListener)
         hingeAngleProvider.addCallback(hingeAngleListener)
     }
@@ -79,25 +90,32 @@ class DeviceFoldStateProvider(
         outputListeners.remove(listener)
     }
 
-    override val isFullyOpened: Boolean
-        get() = !isFolded && lastFoldUpdate == FOLD_UPDATE_FINISH_FULL_OPEN
+    override val isFinishedOpening: Boolean
+        get() = !isFolded &&
+            (lastFoldUpdate == FOLD_UPDATE_FINISH_FULL_OPEN ||
+                lastFoldUpdate == FOLD_UPDATE_FINISH_HALF_OPEN)
 
-    private val isTransitionInProgess: Boolean
-        get() = lastFoldUpdate == FOLD_UPDATE_START_OPENING ||
+    private val isTransitionInProgress: Boolean
+        get() =
+            lastFoldUpdate == FOLD_UPDATE_START_OPENING ||
                 lastFoldUpdate == FOLD_UPDATE_START_CLOSING
 
     private fun onHingeAngle(angle: Float) {
-        if (DEBUG) { Log.d(TAG, "Hinge angle: $angle, lastHingeAngle: $lastHingeAngle") }
+        if (DEBUG) {
+            Log.d(TAG, "Hinge angle: $angle, lastHingeAngle: $lastHingeAngle")
+        }
 
         val isClosing = angle < lastHingeAngle
+        val closingThreshold = getClosingThreshold()
+        val closingThresholdMet = closingThreshold == null || angle < closingThreshold
         val isFullyOpened = FULLY_OPEN_DEGREES - angle < FULLY_OPEN_THRESHOLD_DEGREES
         val closingEventDispatched = lastFoldUpdate == FOLD_UPDATE_START_CLOSING
 
-        if (isClosing && !closingEventDispatched && !isFullyOpened) {
+        if (isClosing && closingThresholdMet && !closingEventDispatched && !isFullyOpened) {
             notifyFoldUpdate(FOLD_UPDATE_START_CLOSING)
         }
 
-        if (isTransitionInProgess) {
+        if (isTransitionInProgress) {
             if (isFullyOpened) {
                 notifyFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN)
                 cancelTimeout()
@@ -111,42 +129,67 @@ class DeviceFoldStateProvider(
         outputListeners.forEach { it.onHingeAngleUpdate(angle) }
     }
 
-    private inner class FoldStateListener(context: Context) :
-        DeviceStateManager.FoldStateListener(context, { folded: Boolean ->
-            isFolded = folded
-            lastHingeAngle = FULLY_CLOSED_DEGREES
+    /**
+     * Fold animation should be started only after the threshold returned here.
+     *
+     * This has been introduced because the fold animation might be distracting/unwanted on top of
+     * apps that support table-top/HALF_FOLDED mode. Only for launcher, there is no threshold.
+     */
+    private fun getClosingThreshold(): Int? {
+        val activityType =
+            activityManager.getRunningTasks(/* maxNum= */ 1)?.getOrNull(0)?.topActivityType
+                ?: return null
 
-            if (folded) {
-                hingeAngleProvider.stop()
-                notifyFoldUpdate(FOLD_UPDATE_FINISH_CLOSED)
-                cancelTimeout()
-                isUnfoldHandled = false
-            } else {
-                notifyFoldUpdate(FOLD_UPDATE_START_OPENING)
-                rescheduleAbortAnimationTimeout()
-                hingeAngleProvider.start()
-            }
-        })
+        if (DEBUG) {
+            Log.d(TAG, "activityType=" + activityType)
+        }
+
+        return if (activityType == ACTIVITY_TYPE_HOME) {
+            null
+        } else {
+            START_CLOSING_ON_APPS_THRESHOLD_DEGREES
+        }
+    }
+
+    private inner class FoldStateListener(context: Context) :
+        DeviceStateManager.FoldStateListener(
+            context,
+            { folded: Boolean ->
+                isFolded = folded
+                lastHingeAngle = FULLY_CLOSED_DEGREES
+
+                if (folded) {
+                    hingeAngleProvider.stop()
+                    notifyFoldUpdate(FOLD_UPDATE_FINISH_CLOSED)
+                    cancelTimeout()
+                    isUnfoldHandled = false
+                } else {
+                    notifyFoldUpdate(FOLD_UPDATE_START_OPENING)
+                    rescheduleAbortAnimationTimeout()
+                    hingeAngleProvider.start()
+                }
+            })
 
     private fun notifyFoldUpdate(@FoldUpdate update: Int) {
-        if (DEBUG) { Log.d(TAG, stateToString(update)) }
+        if (DEBUG) {
+            Log.d(TAG, stateToString(update))
+        }
         outputListeners.forEach { it.onFoldUpdate(update) }
         lastFoldUpdate = update
     }
 
     private fun rescheduleAbortAnimationTimeout() {
-        if (isTransitionInProgess) {
+        if (isTransitionInProgress) {
             cancelTimeout()
         }
-        handler.postDelayed(timeoutRunnable, ABORT_CLOSING_MILLIS)
+        handler.postDelayed(timeoutRunnable, halfOpenedTimeoutMillis.toLong())
     }
 
     private fun cancelTimeout() {
         handler.removeCallbacks(timeoutRunnable)
     }
 
-    private inner class ScreenStatusListener :
-        ScreenStatusProvider.ScreenListener {
+    private inner class ScreenStatusListener : ScreenStatusProvider.ScreenListener {
 
         override fun onScreenTurnedOn() {
             // Trigger this event only if we are unfolded and this is the first screen
@@ -163,16 +206,14 @@ class DeviceFoldStateProvider(
     }
 
     private inner class HingeAngleListener : Consumer<Float> {
-
         override fun accept(angle: Float) {
             onHingeAngle(angle)
         }
     }
 
     private inner class TimeoutRunnable : Runnable {
-
         override fun run() {
-            notifyFoldUpdate(FOLD_UPDATE_ABORTED)
+            notifyFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN)
         }
     }
 }
@@ -180,9 +221,7 @@ class DeviceFoldStateProvider(
 private fun stateToString(@FoldUpdate update: Int): String {
     return when (update) {
         FOLD_UPDATE_START_OPENING -> "START_OPENING"
-        FOLD_UPDATE_HALF_OPEN -> "HALF_OPEN"
         FOLD_UPDATE_START_CLOSING -> "START_CLOSING"
-        FOLD_UPDATE_ABORTED -> "ABORTED"
         FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE -> "UNFOLDED_SCREEN_AVAILABLE"
         FOLD_UPDATE_FINISH_HALF_OPEN -> "FINISH_HALF_OPEN"
         FOLD_UPDATE_FINISH_FULL_OPEN -> "FINISH_FULL_OPEN"
@@ -194,13 +233,8 @@ private fun stateToString(@FoldUpdate update: Int): String {
 private const val TAG = "DeviceFoldProvider"
 private const val DEBUG = false
 
-/**
- * Time after which [FOLD_UPDATE_ABORTED] is emitted following a [FOLD_UPDATE_START_CLOSING] or
- * [FOLD_UPDATE_START_OPENING] event, if an end state is not reached.
- */
-@VisibleForTesting
-const val ABORT_CLOSING_MILLIS = 1000L
-
 /** Threshold after which we consider the device fully unfolded. */
-@VisibleForTesting
-const val FULLY_OPEN_THRESHOLD_DEGREES = 15f
+@VisibleForTesting const val FULLY_OPEN_THRESHOLD_DEGREES = 15f
+
+/** Fold animation on top of apps only when the angle exceeds this threshold. */
+@VisibleForTesting const val START_CLOSING_ON_APPS_THRESHOLD_DEGREES = 60

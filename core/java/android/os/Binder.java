@@ -22,9 +22,11 @@ import android.annotation.SystemApi;
 import android.app.AppOpsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ExceptionUtils;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BinderCallHeavyHitterWatcher;
 import com.android.internal.os.BinderCallHeavyHitterWatcher.BinderCallHeavyHitterListener;
 import com.android.internal.os.BinderInternal;
@@ -140,33 +142,55 @@ public class Binder implements IBinder {
     /**
      * Flag indicating whether we should be tracing transact calls.
      */
-    private static volatile boolean sTracingEnabled = false;
+    private static volatile boolean sStackTrackingEnabled = false;
+
+    private static final Object sTracingUidsWriteLock = new Object();
+    private static volatile IntArray sTracingUidsImmutable = new IntArray();
 
     /**
-     * Enable Binder IPC tracing.
+     * Enable Binder IPC stack tracking. If enabled, every binder transaction will be logged to
+     * {@link TransactionTracker}.
      *
      * @hide
      */
-    public static void enableTracing() {
-        sTracingEnabled = true;
+    public static void enableStackTracking() {
+        sStackTrackingEnabled = true;
     }
 
     /**
-     * Disable Binder IPC tracing.
+     * Disable Binder IPC stack tracking.
      *
      * @hide
      */
-    public static void disableTracing() {
-        sTracingEnabled = false;
+    public static void disableStackTracking() {
+        sStackTrackingEnabled = false;
     }
 
     /**
-     * Check if binder transaction tracing is enabled.
+     * @hide
+     */
+    public static void enableTracingForUid(int uid) {
+        synchronized (sTracingUidsWriteLock) {
+            final IntArray copy = sTracingUidsImmutable.clone();
+            copy.add(uid);
+            sTracingUidsImmutable = copy;
+        }
+    }
+
+    /**
+     * Check if binder transaction stack tracking is enabled.
      *
      * @hide
      */
-    public static boolean isTracingEnabled() {
-        return sTracingEnabled;
+    public static boolean isStackTrackingEnabled() {
+        return sStackTrackingEnabled;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isTracingEnabled(int callingUid) {
+        return sTracingUidsImmutable.indexOf(callingUid) != -1;
     }
 
     /**
@@ -287,7 +311,11 @@ public class Binder implements IBinder {
     private final long mObject;
 
     private IInterface mOwner;
+    @Nullable
     private String mDescriptor;
+    private volatile String[] mTransactionTraceNames = null;
+    private volatile String mSimpleDescriptor = null;
+    private static final int TRANSACTION_TRACE_NAME_ID_LIMIT = 1024;
 
     /**
      * Return the ID of the process that sent you the current transaction
@@ -884,6 +912,59 @@ public class Binder implements IBinder {
     }
 
     /**
+     * @hide
+     */
+    @VisibleForTesting
+    public final @NonNull String getTransactionTraceName(int transactionCode) {
+        if (mTransactionTraceNames == null) {
+            final String descriptor = getSimpleDescriptor();
+            final int highestId = Math.min(getMaxTransactionId(), TRANSACTION_TRACE_NAME_ID_LIMIT);
+            final String[] transactionNames = new String[highestId + 1];
+            final StringBuffer buf = new StringBuffer();
+            for (int i = 0; i <= highestId; i++) {
+                String transactionName = getTransactionName(i + FIRST_CALL_TRANSACTION);
+                if (transactionName != null) {
+                    buf.append(descriptor).append(':').append(transactionName);
+                } else {
+                    buf.append(descriptor).append('#').append(i + FIRST_CALL_TRANSACTION);
+                }
+                transactionNames[i] = buf.toString();
+                buf.setLength(0);
+            }
+            mSimpleDescriptor = descriptor;
+            mTransactionTraceNames = transactionNames;
+        }
+        final int index = transactionCode - FIRST_CALL_TRANSACTION;
+        if (index < 0 || index >= mTransactionTraceNames.length) {
+            return mSimpleDescriptor + "#" + transactionCode;
+        }
+        return mTransactionTraceNames[index];
+    }
+
+    private @NonNull String getSimpleDescriptor() {
+        String descriptor = mDescriptor;
+        if (descriptor == null) {
+            // Just "Binder" to avoid null checks in transaction name tracing.
+            return "Binder";
+        }
+
+        final int dot = descriptor.lastIndexOf(".");
+        if (dot > 0) {
+            // Strip the package name
+            return descriptor.substring(dot + 1);
+        }
+        return descriptor;
+    }
+
+    /**
+     * @return The highest user-defined transaction id of all transactions.
+     * @hide
+     */
+    public int getMaxTransactionId() {
+        return 0;
+    }
+
+    /**
      * Implemented to call the more convenient version
      * {@link #dump(FileDescriptor, PrintWriter, String[])}.
      */
@@ -1181,7 +1262,8 @@ public class Binder implements IBinder {
         // Log any exceptions as warnings, don't silently suppress them.
         // If the call was {@link IBinder#FLAG_ONEWAY} then these exceptions
         // disappear into the ether.
-        final boolean tracingEnabled = Binder.isTracingEnabled();
+        final boolean tracingEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_AIDL) &&
+                (Binder.isStackTrackingEnabled() || Binder.isTracingEnabled(callingUid));
         try {
             final BinderCallHeavyHitterWatcher heavyHitterWatcher = sHeavyHitterWatcher;
             if (heavyHitterWatcher != null) {
@@ -1189,9 +1271,7 @@ public class Binder implements IBinder {
                 heavyHitterWatcher.onTransaction(callingUid, getClass(), code);
             }
             if (tracingEnabled) {
-                final String transactionName = getTransactionName(code);
-                Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":"
-                        + (transactionName != null ? transactionName : code));
+                Trace.traceBegin(Trace.TRACE_TAG_AIDL, getTransactionTraceName(code));
             }
 
             if ((flags & FLAG_COLLECT_NOTED_APP_OPS) != 0) {
@@ -1226,7 +1306,7 @@ public class Binder implements IBinder {
             res = true;
         } finally {
             if (tracingEnabled) {
-                Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
+                Trace.traceEnd(Trace.TRACE_TAG_AIDL);
             }
             if (observer != null) {
                 // The parcel RPC headers have been called during onTransact so we can now access

@@ -87,10 +87,4 @@
             android:padding="8dp"
         />
     </LinearLayout>
-    <!-- divider view -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height=".5dp"
-        android:background="@*android:color/background_device_default_light"
-    />
 </com.android.systemui.statusbar.notification.row.ChannelRow>

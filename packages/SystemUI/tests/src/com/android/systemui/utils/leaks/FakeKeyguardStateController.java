@@ -49,6 +49,11 @@ public class FakeKeyguardStateController implements KeyguardStateController {
     }
 
     @Override
+    public boolean isBouncerShowing() {
+        return false;
+    }
+
+    @Override
     public boolean canDismissLockScreen() {
         return false;
     }
@@ -126,11 +131,6 @@ public class FakeKeyguardStateController implements KeyguardStateController {
     @Override
     public void notifyPanelFlingEnd() {
 
-    }
-
-    @Override
-    public boolean canPerformSmartSpaceTransition() {
-        return false;
     }
 
     @Override

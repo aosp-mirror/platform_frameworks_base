@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.rotation;
 
+import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
@@ -51,13 +52,14 @@ import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.view.RotationPolicy;
-import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.recents.utilities.ViewRippler;
+import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
 
+import java.io.PrintWriter;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -200,7 +202,7 @@ public class RotationButtonController {
     }
 
     public void registerListeners() {
-        if (mListenersRegistered) {
+        if (mListenersRegistered || getContext().getPackageManager().hasSystemFeature(FEATURE_PC)) {
             return;
         }
 
@@ -414,6 +416,9 @@ public class RotationButtonController {
     }
 
     public void onTaskbarStateChange(boolean visible, boolean stashed) {
+        if (getRotationButton() == null) {
+            return;
+        }
         getRotationButton().onTaskbarStateChanged(visible, stashed);
     }
 
@@ -444,6 +449,30 @@ public class RotationButtonController {
     @ColorInt
     public int getDarkIconColor() {
         return mDarkIconColor;
+    }
+
+    public void dumpLogs(String prefix, PrintWriter pw) {
+        pw.println(prefix + "RotationButtonController:");
+
+        pw.println(String.format(
+                "%s\tmIsRecentsAnimationRunning=%b", prefix, mIsRecentsAnimationRunning));
+        pw.println(String.format("%s\tmHomeRotationEnabled=%b", prefix, mHomeRotationEnabled));
+        pw.println(String.format(
+                "%s\tmLastRotationSuggestion=%d", prefix, mLastRotationSuggestion));
+        pw.println(String.format(
+                "%s\tmPendingRotationSuggestion=%b", prefix, mPendingRotationSuggestion));
+        pw.println(String.format(
+                "%s\tmHoveringRotationSuggestion=%b", prefix, mHoveringRotationSuggestion));
+        pw.println(String.format("%s\tmListenersRegistered=%b", prefix, mListenersRegistered));
+        pw.println(String.format(
+                "%s\tmIsNavigationBarShowing=%b", prefix, mIsNavigationBarShowing));
+        pw.println(String.format("%s\tmBehavior=%d", prefix, mBehavior));
+        pw.println(String.format(
+                "%s\tmSkipOverrideUserLockPrefsOnce=%b", prefix, mSkipOverrideUserLockPrefsOnce));
+        pw.println(String.format(
+                "%s\tmLightIconColor=0x%s", prefix, Integer.toHexString(mLightIconColor)));
+        pw.println(String.format(
+                "%s\tmDarkIconColor=0x%s", prefix, Integer.toHexString(mDarkIconColor)));
     }
 
     public RotationButton getRotationButton() {
@@ -539,7 +568,7 @@ public class RotationButtonController {
         }
     }
 
-    private class TaskStackListenerImpl extends TaskStackChangeListener {
+    private class TaskStackListenerImpl implements TaskStackChangeListener {
         // Invalidate any rotation suggestion on task change or activity orientation change
         // Note: all callbacks happen on main thread
 

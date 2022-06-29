@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
@@ -30,8 +31,12 @@ import android.util.Spline;
 import android.view.DisplayAddress;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.config.BrightnessThresholds;
+import com.android.server.display.config.BrightnessThrottlingMap;
+import com.android.server.display.config.BrightnessThrottlingPoint;
+import com.android.server.display.config.Density;
 import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;
@@ -39,8 +44,11 @@ import com.android.server.display.config.HighBrightnessMode;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateRange;
+import com.android.server.display.config.SdrHdrRatioMap;
+import com.android.server.display.config.SdrHdrRatioPoint;
 import com.android.server.display.config.SensorDetails;
 import com.android.server.display.config.ThermalStatus;
+import com.android.server.display.config.ThermalThrottling;
 import com.android.server.display.config.Thresholds;
 import com.android.server.display.config.XmlParser;
 
@@ -52,17 +60,138 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
 /**
- * Reads and stores display-specific configurations.
+ *  Reads and stores display-specific configurations.
+ *  File format:
+ *  <pre>
+ *  {@code
+ *    <displayConfiguration>
+ *      <densityMapping>
+ *        <density>
+ *          <height>480</height>
+ *          <width>720</width>
+ *          <density>120</density>
+ *        </density>
+ *        <density>
+ *          <height>720</height>
+ *          <width>1280</width>
+ *          <density>213</density>
+ *        </density>
+ *        <density>
+ *          <height>1080</height>
+ *          <width>1920</width>
+ *          <density>320</density>
+ *        </density>
+ *        <density>
+ *          <height>2160</height>
+ *          <width>3840</width>
+ *          <density>640</density>
+ *        </density>
+ *      </densityMapping>
+ *
+ *      <screenBrightnessMap>
+ *        <point>
+ *          <value>0.0</value>
+ *          <nits>2.0</nits>
+ *        </point>
+ *        <point>
+ *          <value>0.62</value>
+ *          <nits>500.0</nits>
+ *        </point>
+ *        <point>
+ *          <value>1.0</value>
+ *          <nits>800.0</nits>
+ *        </point>
+ *      </screenBrightnessMap>
+ *
+ *      <screenBrightnessDefault>0.65</screenBrightnessDefault>
+ *
+ *      <thermalThrottling>
+ *        <brightnessThrottlingMap>
+ *          <brightnessThrottlingPoint>
+ *            <thermalStatus>severe</thermalStatus>
+ *            <brightness>0.1</brightness>
+ *          </brightnessThrottlingPoint>
+ *          <brightnessThrottlingPoint>
+ *            <thermalStatus>critical</thermalStatus>
+ *            <brightness>0.01</brightness>
+ *          </brightnessThrottlingPoint>
+ *        </brightnessThrottlingMap>
+ *      </thermalThrottling>
+ *
+ *      <highBrightnessMode enabled="true">
+ *        <transitionPoint>0.62</transitionPoint>
+ *        <minimumLux>10000</minimumLux>
+ *        <timing>
+ *          <timeWindowSecs>1800</timeWindowSecs> // Window in which we restrict HBM.
+ *          <timeMaxSecs>300</timeMaxSecs>        // Maximum time of HBM allowed in that window.
+ *          <timeMinSecs>60</timeMinSecs>         // Minimum time remaining required to switch
+ *        </timing>                               //   HBM on for.
+ *        <refreshRate>
+ *          <minimum>120</minimum>
+ *          <maximum>120</maximum>
+ *        </refreshRate>
+ *        <thermalStatusLimit>light</thermalStatusLimit>
+ *        <allowInLowPowerMode>false</allowInLowPowerMode>
+ *      </highBrightnessMode>
+ *
+ *      <quirks>
+ *       <quirk>canSetBrightnessViaHwc</quirk>
+ *      </quirks>
+ *
+ *      <screenBrightnessRampFastDecrease>0.01</screenBrightnessRampFastDecrease>
+ *      <screenBrightnessRampFastIncrease>0.02</screenBrightnessRampFastIncrease>
+ *      <screenBrightnessRampSlowDecrease>0.03</screenBrightnessRampSlowDecrease>
+ *      <screenBrightnessRampSlowIncrease>0.04</screenBrightnessRampSlowIncrease>
+ *
+ *      <screenBrightnessRampIncreaseMaxMillis>2000</screenBrightnessRampIncreaseMaxMillis>
+ *      <screenBrightnessRampDecreaseMaxMillis>3000</screenBrightnessRampDecreaseMaxMillis>
+ *
+ *      <lightSensor>
+ *        <type>android.sensor.light</type>
+ *        <name>1234 Ambient Light Sensor</name>
+ *      </lightSensor>
+ *      <proxSensor>
+ *        <type>android.sensor.proximity</type>
+ *        <name>1234 Proximity Sensor</name>
+ *      </proxSensor>
+ *
+ *      <ambientLightHorizonLong>10001</ambientLightHorizonLong>
+ *      <ambientLightHorizonShort>2001</ambientLightHorizonShort>
+ *
+ *      <displayBrightnessChangeThresholds>
+ *        <brighteningThresholds>
+ *          <minimum>0.001</minimum>  // Minimum change needed in screen brightness to brighten.
+ *        </brighteningThresholds>
+ *        <darkeningThresholds>
+ *          <minimum>0.002</minimum>  // Minimum change needed in screen brightness to darken.
+ *        </darkeningThresholds>
+ *      </displayBrightnessChangeThresholds>
+ *
+ *      <ambientBrightnessChangeThresholds>
+ *        <brighteningThresholds>
+ *          <minimum>0.003</minimum>  // Minimum change needed in ambient brightness to brighten.
+ *        </brighteningThresholds>
+ *        <darkeningThresholds>
+ *          <minimum>0.004</minimum>  // Minimum change needed in ambient brightness to darken.
+ *        </darkeningThresholds>
+ *      </ambientBrightnessChangeThresholds>
+ *
+ *    </displayConfiguration>
+ *  }
+ *  </pre>
  */
 public class DisplayDeviceConfig {
     private static final String TAG = "DisplayDeviceConfig";
+    private static final boolean DEBUG = false;
 
     public static final float HIGH_BRIGHTNESS_MODE_UNSUPPORTED = Float.NaN;
 
@@ -72,16 +201,31 @@ public class DisplayDeviceConfig {
     private static final String ETC_DIR = "etc";
     private static final String DISPLAY_CONFIG_DIR = "displayconfig";
     private static final String CONFIG_FILE_FORMAT = "display_%s.xml";
+    private static final String DEFAULT_CONFIG_FILE = "default.xml";
+    private static final String DEFAULT_CONFIG_FILE_WITH_UIMODE_FORMAT = "default_%s.xml";
     private static final String PORT_SUFFIX_FORMAT = "port_%d";
     private static final String STABLE_ID_SUFFIX_FORMAT = "id_%d";
     private static final String NO_SUFFIX_FORMAT = "%d";
     private static final long STABLE_FLAG = 1L << 62;
+
+    private static final int INTERPOLATION_DEFAULT = 0;
+    private static final int INTERPOLATION_LINEAR = 1;
 
     // Float.NaN (used as invalid for brightness) cannot be stored in config.xml
     // so -2 is used instead
     private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
 
     private static final float NITS_INVALID = -1;
+
+    // Length of the ambient light horizon used to calculate the long term estimate of ambient
+    // light.
+    private static final int AMBIENT_LIGHT_LONG_HORIZON_MILLIS = 10000;
+
+    // Length of the ambient light horizon used to calculate short-term estimate of ambient light.
+    private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 2000;
+
+    @VisibleForTesting
+    static final float HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT = 0.5f;
 
     private final Context mContext;
 
@@ -98,6 +242,7 @@ public class DisplayDeviceConfig {
     // config.xml. These are the raw values and just used for the dumpsys
     private float[] mRawNits;
     private float[] mRawBacklight;
+    private int mInterpolationType;
 
     // These arrays are calculated from the raw arrays, but clamped to contain values equal to and
     // between mBacklightMinimum and mBacklightMaximum. These three arrays should all be the same
@@ -117,6 +262,10 @@ public class DisplayDeviceConfig {
     private float mBrightnessRampFastIncrease = Float.NaN;
     private float mBrightnessRampSlowDecrease = Float.NaN;
     private float mBrightnessRampSlowIncrease = Float.NaN;
+    private long mBrightnessRampDecreaseMaxMillis = 0;
+    private long mBrightnessRampIncreaseMaxMillis = 0;
+    private int mAmbientHorizonLong = AMBIENT_LIGHT_LONG_HORIZON_MILLIS;
+    private int mAmbientHorizonShort = AMBIENT_LIGHT_SHORT_HORIZON_MILLIS;
     private float mScreenBrighteningMinThreshold = 0.0f;     // Retain behaviour as though there is
     private float mScreenDarkeningMinThreshold = 0.0f;       // no minimum threshold for change in
     private float mAmbientLuxBrighteningMinThreshold = 0.0f; // screen brightness or ambient
@@ -124,10 +273,15 @@ public class DisplayDeviceConfig {
     private Spline mBrightnessToBacklightSpline;
     private Spline mBacklightToBrightnessSpline;
     private Spline mBacklightToNitsSpline;
+    private Spline mNitsToBacklightSpline;
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
+    private DensityMapping mDensityMapping;
     private String mLoadedFrom = null;
+
+    private BrightnessThrottlingData mBrightnessThrottlingData;
+    private Spline mSdrToHdrRatioSpline;
 
     private DisplayDeviceConfig(Context context) {
         mContext = context;
@@ -146,7 +300,34 @@ public class DisplayDeviceConfig {
      * @return A configuration instance for the specified display.
      */
     public static DisplayDeviceConfig create(Context context, long physicalDisplayId,
-            boolean isDefaultDisplay) {
+            boolean isFirstDisplay) {
+        final DisplayDeviceConfig config = createWithoutDefaultValues(context, physicalDisplayId,
+                isFirstDisplay);
+
+        config.copyUninitializedValuesFromSecondaryConfig(loadDefaultConfigurationXml(context));
+        return config;
+    }
+
+    /**
+     * Creates an instance using global values since no display device config xml exists.
+     * Uses values from config or PowerManager.
+     *
+     * @param context
+     * @param useConfigXml
+     * @return A configuration instance.
+     */
+    public static DisplayDeviceConfig create(Context context, boolean useConfigXml) {
+        final DisplayDeviceConfig config;
+        if (useConfigXml) {
+            config = getConfigFromGlobalXml(context);
+        } else {
+            config = getConfigFromPmValues(context);
+        }
+        return config;
+    }
+
+    private static DisplayDeviceConfig createWithoutDefaultValues(Context context,
+            long physicalDisplayId, boolean isFirstDisplay) {
         DisplayDeviceConfig config;
 
         config = loadConfigFromDirectory(context, Environment.getProductDirectory(),
@@ -164,25 +345,56 @@ public class DisplayDeviceConfig {
         // If no config can be loaded from any ddc xml at all,
         // prepare a whole config using the global config.xml.
         // Guaranteed not null
-        return create(context, isDefaultDisplay);
+        return create(context, isFirstDisplay);
     }
 
-    /**
-     * Creates an instance using global values since no display device config xml exists.
-     * Uses values from config or PowerManager.
-     *
-     * @param context
-     * @param useConfigXml
-     * @return A configuration instance.
-     */
-    public static DisplayDeviceConfig create(Context context, boolean useConfigXml) {
-        DisplayDeviceConfig config;
-        if (useConfigXml) {
-            config = getConfigFromGlobalXml(context);
-        } else {
-            config = getConfigFromPmValues(context);
+    private static DisplayConfiguration loadDefaultConfigurationXml(Context context) {
+        List<File> defaultXmlLocations = new ArrayList<>();
+        defaultXmlLocations.add(Environment.buildPath(Environment.getProductDirectory(),
+                ETC_DIR, DISPLAY_CONFIG_DIR, DEFAULT_CONFIG_FILE));
+        defaultXmlLocations.add(Environment.buildPath(Environment.getVendorDirectory(),
+                ETC_DIR, DISPLAY_CONFIG_DIR, DEFAULT_CONFIG_FILE));
+
+        // Read config_defaultUiModeType directly because UiModeManager hasn't started yet.
+        final int uiModeType = context.getResources()
+                .getInteger(com.android.internal.R.integer.config_defaultUiModeType);
+        final String uiModeTypeStr = Configuration.getUiModeTypeString(uiModeType);
+        if (uiModeTypeStr != null) {
+            defaultXmlLocations.add(Environment.buildPath(Environment.getRootDirectory(),
+                    ETC_DIR, DISPLAY_CONFIG_DIR,
+                    String.format(DEFAULT_CONFIG_FILE_WITH_UIMODE_FORMAT, uiModeTypeStr)));
         }
-        return config;
+        defaultXmlLocations.add(Environment.buildPath(Environment.getRootDirectory(),
+                ETC_DIR, DISPLAY_CONFIG_DIR, DEFAULT_CONFIG_FILE));
+
+        final File configFile = getFirstExistingFile(defaultXmlLocations);
+        if (configFile == null) {
+            // Display configuration files aren't required to exist.
+            return null;
+        }
+
+        DisplayConfiguration defaultConfig = null;
+
+        try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
+            defaultConfig = XmlParser.read(in);
+            if (defaultConfig == null) {
+                Slog.i(TAG, "Default DisplayDeviceConfig file is null");
+            }
+        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
+            Slog.e(TAG, "Encountered an error while reading/parsing display config file: "
+                    + configFile, e);
+        }
+
+        return defaultConfig;
+    }
+
+    private static File getFirstExistingFile(Collection<File> files) {
+        for (File file : files) {
+            if (file.exists() && file.isFile()) {
+                return file;
+            }
+        }
+        return null;
     }
 
     private static DisplayDeviceConfig loadConfigFromDirectory(Context context,
@@ -254,6 +466,45 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * Calculate the HDR brightness for the specified SDR brightenss.
+     *
+     * @return the HDR brightness or BRIGHTNESS_INVALID when no mapping exists.
+     */
+    public float getHdrBrightnessFromSdr(float brightness) {
+        if (mSdrToHdrRatioSpline == null) {
+            return PowerManager.BRIGHTNESS_INVALID;
+        }
+
+        float backlight = getBacklightFromBrightness(brightness);
+        float nits = getNitsFromBacklight(backlight);
+        if (nits == NITS_INVALID) {
+            return PowerManager.BRIGHTNESS_INVALID;
+        }
+
+        float ratio = mSdrToHdrRatioSpline.interpolate(nits);
+        float hdrNits = nits * ratio;
+        if (mNitsToBacklightSpline == null) {
+            return PowerManager.BRIGHTNESS_INVALID;
+        }
+
+        float hdrBacklight = mNitsToBacklightSpline.interpolate(hdrNits);
+        hdrBacklight = Math.max(mBacklightMinimum, Math.min(mBacklightMaximum, hdrBacklight));
+        float hdrBrightness = mBacklightToBrightnessSpline.interpolate(hdrBacklight);
+
+        if (DEBUG) {
+            Slog.d(TAG, "getHdrBrightnessFromSdr: sdr brightness " + brightness
+                + " backlight " + backlight
+                + " nits " + nits
+                + " ratio " + ratio
+                + " hdrNits " + hdrNits
+                + " hdrBacklight " + hdrBacklight
+                + " hdrBrightness " + hdrBrightness
+                );
+        }
+        return hdrBrightness;
+    }
+
+    /**
      * Return an array of equal length to backlight and nits, that covers the entire system
      * brightness range of 0.0-1.0.
      *
@@ -286,6 +537,22 @@ public class DisplayDeviceConfig {
 
     public float getBrightnessRampSlowIncrease() {
         return mBrightnessRampSlowIncrease;
+    }
+
+    public long getBrightnessRampDecreaseMaxMillis() {
+        return mBrightnessRampDecreaseMaxMillis;
+    }
+
+    public long getBrightnessRampIncreaseMaxMillis() {
+        return mBrightnessRampIncreaseMaxMillis;
+    }
+
+    public int getAmbientHorizonLong() {
+        return mAmbientHorizonLong;
+    }
+
+    public int getAmbientHorizonShort() {
+        return mAmbientHorizonShort;
     }
 
     public float getScreenBrighteningMinThreshold() {
@@ -338,27 +605,46 @@ public class DisplayDeviceConfig {
         return mRefreshRateLimitations;
     }
 
+    public DensityMapping getDensityMapping() {
+        return mDensityMapping;
+    }
+
+    /**
+     * @return brightness throttling data configuration data for the display.
+     */
+    public BrightnessThrottlingData getBrightnessThrottlingData() {
+        return BrightnessThrottlingData.create(mBrightnessThrottlingData);
+    }
+
     @Override
     public String toString() {
-        String str = "DisplayDeviceConfig{"
+        return "DisplayDeviceConfig{"
                 + "mLoadedFrom=" + mLoadedFrom
                 + ", mBacklight=" + Arrays.toString(mBacklight)
                 + ", mNits=" + Arrays.toString(mNits)
                 + ", mRawBacklight=" + Arrays.toString(mRawBacklight)
                 + ", mRawNits=" + Arrays.toString(mRawNits)
+                + ", mInterpolationType=" + mInterpolationType
                 + ", mBrightness=" + Arrays.toString(mBrightness)
                 + ", mBrightnessToBacklightSpline=" + mBrightnessToBacklightSpline
                 + ", mBacklightToBrightnessSpline=" + mBacklightToBrightnessSpline
+                + ", mNitsToBacklightSpline=" + mNitsToBacklightSpline
                 + ", mBacklightMinimum=" + mBacklightMinimum
                 + ", mBacklightMaximum=" + mBacklightMaximum
                 + ", mBrightnessDefault=" + mBrightnessDefault
                 + ", mQuirks=" + mQuirks
                 + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
                 + ", mHbmData=" + mHbmData
+                + ", mSdrToHdrRatioSpline=" + mSdrToHdrRatioSpline
+                + ", mBrightnessThrottlingData=" + mBrightnessThrottlingData
                 + ", mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
                 + ", mBrightnessRampSlowDecrease=" + mBrightnessRampSlowDecrease
                 + ", mBrightnessRampSlowIncrease=" + mBrightnessRampSlowIncrease
+                + ", mBrightnessRampDecreaseMaxMillis=" + mBrightnessRampDecreaseMaxMillis
+                + ", mBrightnessRampIncreaseMaxMillis=" + mBrightnessRampIncreaseMaxMillis
+                + ", mAmbientHorizonLong=" + mAmbientHorizonLong
+                + ", mAmbientHorizonShort=" + mAmbientHorizonShort
                 + ", mScreenDarkeningMinThreshold=" + mScreenDarkeningMinThreshold
                 + ", mScreenBrighteningMinThreshold=" + mScreenBrighteningMinThreshold
                 + ", mAmbientLuxDarkeningMinThreshold=" + mAmbientLuxDarkeningMinThreshold
@@ -366,8 +652,8 @@ public class DisplayDeviceConfig {
                 + ", mAmbientLightSensor=" + mAmbientLightSensor
                 + ", mProximitySensor=" + mProximitySensor
                 + ", mRefreshRateLimitations= " + Arrays.toString(mRefreshRateLimitations.toArray())
+                + ", mDensityMapping= " + mDensityMapping
                 + "}";
-        return str;
     }
 
     private static DisplayDeviceConfig getConfigFromSuffix(Context context, File baseDirectory,
@@ -410,14 +696,17 @@ public class DisplayDeviceConfig {
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
             final DisplayConfiguration config = XmlParser.read(in);
             if (config != null) {
+                loadDensityMapping(config);
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
                 loadBrightnessMap(config);
+                loadBrightnessThrottlingMap(config);
                 loadHighBrightnessModeData(config);
                 loadQuirks(config);
                 loadBrightnessRamps(config);
                 loadAmbientLightSensorFromDdc(config);
                 loadProxSensorFromDdc(config);
+                loadAmbientHorizonFromDdc(config);
                 loadBrightnessChangeThresholds(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
@@ -451,9 +740,40 @@ public class DisplayDeviceConfig {
         mBrightnessRampFastIncrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowDecrease = PowerManager.BRIGHTNESS_MAX;
         mBrightnessRampSlowIncrease = PowerManager.BRIGHTNESS_MAX;
+        mBrightnessRampDecreaseMaxMillis = 0;
+        mBrightnessRampIncreaseMaxMillis = 0;
         setSimpleMappingStrategyValues();
         loadAmbientLightSensorFromConfigXml();
         setProxSensorUnspecified();
+    }
+
+    private void copyUninitializedValuesFromSecondaryConfig(DisplayConfiguration defaultConfig) {
+        if (defaultConfig == null) {
+            return;
+        }
+
+        if (mDensityMapping == null) {
+            loadDensityMapping(defaultConfig);
+        }
+    }
+
+    private void loadDensityMapping(DisplayConfiguration config) {
+        if (config.getDensityMapping() == null) {
+            return;
+        }
+
+        final List<Density> entriesFromXml = config.getDensityMapping().getDensity();
+
+        final DensityMapping.Entry[] entries =
+                new DensityMapping.Entry[entriesFromXml.size()];
+        for (int i = 0; i < entriesFromXml.size(); i++) {
+            final Density density = entriesFromXml.get(i);
+            entries[i] = new DensityMapping.Entry(
+                    density.getWidth().intValue(),
+                    density.getHeight().intValue(),
+                    density.getDensity().intValue());
+        }
+        mDensityMapping = DensityMapping.createByOwning(entries);
     }
 
     private void loadBrightnessDefaultFromDdcXml(DisplayConfiguration config) {
@@ -520,6 +840,7 @@ public class DisplayDeviceConfig {
         float[] nits = new float[size];
         float[] backlight = new float[size];
 
+        mInterpolationType = convertInterpolationType(map.getInterpolation());
         int i = 0;
         for (Point point : points) {
             nits[i] = point.getNits().floatValue();
@@ -543,6 +864,75 @@ public class DisplayDeviceConfig {
         mRawNits = nits;
         mRawBacklight = backlight;
         constrainNitsAndBacklightArrays();
+    }
+
+    private Spline loadSdrHdrRatioMap(HighBrightnessMode hbmConfig) {
+        final SdrHdrRatioMap sdrHdrRatioMap = hbmConfig.getSdrHdrRatioMap_all();
+
+        if (sdrHdrRatioMap == null) {
+            return null;
+        }
+
+        final List<SdrHdrRatioPoint> points = sdrHdrRatioMap.getPoint();
+        final int size = points.size();
+        if (size <= 0) {
+            return null;
+        }
+
+        float[] nits = new float[size];
+        float[] ratios = new float[size];
+
+        int i = 0;
+        for (SdrHdrRatioPoint point : points) {
+            nits[i] = point.getSdrNits().floatValue();
+            if (i > 0) {
+                if (nits[i] < nits[i - 1]) {
+                    Slog.e(TAG, "sdrHdrRatioMap must be non-decreasing, ignoring rest "
+                                + " of configuration. nits: " + nits[i] + " < "
+                                + nits[i - 1]);
+                    return null;
+                }
+            }
+            ratios[i] = point.getHdrRatio().floatValue();
+            ++i;
+        }
+
+        return Spline.createSpline(nits, ratios);
+    }
+
+    private void loadBrightnessThrottlingMap(DisplayConfiguration config) {
+        final ThermalThrottling throttlingConfig = config.getThermalThrottling();
+        if (throttlingConfig == null) {
+            Slog.i(TAG, "no thermal throttling config found");
+            return;
+        }
+
+        final BrightnessThrottlingMap map = throttlingConfig.getBrightnessThrottlingMap();
+        if (map == null) {
+            Slog.i(TAG, "no brightness throttling map found");
+            return;
+        }
+
+        final List<BrightnessThrottlingPoint> points = map.getBrightnessThrottlingPoint();
+        // At least 1 point is guaranteed by the display device config schema
+        List<BrightnessThrottlingData.ThrottlingLevel> throttlingLevels =
+            new ArrayList<>(points.size());
+
+        boolean badConfig = false;
+        for (BrightnessThrottlingPoint point : points) {
+            ThermalStatus status = point.getThermalStatus();
+            if (!thermalStatusIsValid(status)) {
+                badConfig = true;
+                break;
+            }
+
+            throttlingLevels.add(new BrightnessThrottlingData.ThrottlingLevel(
+                convertThermalStatus(status), point.getBrightness().floatValue()));
+        }
+
+        if (!badConfig) {
+            mBrightnessThrottlingData = BrightnessThrottlingData.create(throttlingLevels);
+        }
     }
 
     private void loadBrightnessMapFromConfigXml() {
@@ -655,9 +1045,18 @@ public class DisplayDeviceConfig {
                     mBacklight[mBacklight.length - 1],
                     PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, mBacklight[i]);
         }
-        mBrightnessToBacklightSpline = Spline.createSpline(mBrightness, mBacklight);
-        mBacklightToBrightnessSpline = Spline.createSpline(mBacklight, mBrightness);
-        mBacklightToNitsSpline = Spline.createSpline(mBacklight, mNits);
+        mBrightnessToBacklightSpline = mInterpolationType == INTERPOLATION_LINEAR
+            ? Spline.createLinearSpline(mBrightness, mBacklight)
+            : Spline.createSpline(mBrightness, mBacklight);
+        mBacklightToBrightnessSpline = mInterpolationType == INTERPOLATION_LINEAR
+            ? Spline.createLinearSpline(mBacklight, mBrightness)
+            : Spline.createSpline(mBacklight, mBrightness);
+        mBacklightToNitsSpline = mInterpolationType == INTERPOLATION_LINEAR
+            ? Spline.createLinearSpline(mBacklight, mNits)
+            : Spline.createSpline(mBacklight, mNits);
+        mNitsToBacklightSpline = mInterpolationType == INTERPOLATION_LINEAR
+            ? Spline.createLinearSpline(mNits, mBacklight)
+            : Spline.createSpline(mNits, mBacklight);
     }
 
     private void loadQuirks(DisplayConfiguration config) {
@@ -694,6 +1093,20 @@ public class DisplayDeviceConfig {
                 mRefreshRateLimitations.add(new RefreshRateLimitation(
                         DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE, min, max));
             }
+            BigDecimal minHdrPctOfScreen = hbm.getMinimumHdrPercentOfScreen_all();
+            if (minHdrPctOfScreen != null) {
+                mHbmData.minimumHdrPercentOfScreen = minHdrPctOfScreen.floatValue();
+                if (mHbmData.minimumHdrPercentOfScreen > 1
+                        || mHbmData.minimumHdrPercentOfScreen < 0) {
+                    Slog.w(TAG, "Invalid minimum HDR percent of screen: "
+                                    + String.valueOf(mHbmData.minimumHdrPercentOfScreen));
+                    mHbmData.minimumHdrPercentOfScreen = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
+                }
+            } else {
+                mHbmData.minimumHdrPercentOfScreen = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
+            }
+
+            mSdrToHdrRatioSpline = loadSdrHdrRatioMap(hbm);
         }
     }
 
@@ -718,6 +1131,15 @@ public class DisplayDeviceConfig {
                         + "values are present in display device config");
             }
             loadBrightnessRampsFromConfigXml();
+        }
+
+        final BigInteger increaseMax = config.getScreenBrightnessRampIncreaseMaxMillis();
+        if (increaseMax != null) {
+            mBrightnessRampIncreaseMaxMillis = increaseMax.intValue();
+        }
+        final BigInteger decreaseMax = config.getScreenBrightnessRampDecreaseMaxMillis();
+        if (decreaseMax != null) {
+            mBrightnessRampDecreaseMaxMillis = decreaseMax.intValue();
         }
     }
 
@@ -812,6 +1234,25 @@ public class DisplayDeviceConfig {
         }
     }
 
+    private boolean thermalStatusIsValid(ThermalStatus value) {
+        if (value == null) {
+            return false;
+        }
+
+        switch (value) {
+            case none:
+            case light:
+            case moderate:
+            case severe:
+            case critical:
+            case emergency:
+            case shutdown:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private @PowerManager.ThermalStatus int convertThermalStatus(ThermalStatus value) {
         if (value == null) {
             return PowerManager.THERMAL_STATUS_NONE;
@@ -834,6 +1275,30 @@ public class DisplayDeviceConfig {
             default:
                 Slog.wtf(TAG, "Unexpected Thermal Status: " + value);
                 return PowerManager.THERMAL_STATUS_NONE;
+        }
+    }
+
+    private int convertInterpolationType(String value) {
+        if (TextUtils.isEmpty(value)) {
+            return INTERPOLATION_DEFAULT;
+        }
+
+        if ("linear".equals(value)) {
+            return INTERPOLATION_LINEAR;
+        }
+
+        Slog.wtf(TAG, "Unexpected Interpolation Type: " + value);
+        return INTERPOLATION_DEFAULT;
+    }
+
+    private void loadAmbientHorizonFromDdc(DisplayConfiguration config) {
+        final BigInteger configLongHorizon = config.getAmbientLightHorizonLong();
+        if (configLongHorizon != null) {
+            mAmbientHorizonLong = configLongHorizon.intValue();
+        }
+        final BigInteger configShortHorizon = config.getAmbientLightHorizonShort();
+        if (configShortHorizon != null) {
+            mAmbientHorizonShort = configShortHorizon.intValue();
         }
     }
 
@@ -890,11 +1355,15 @@ public class DisplayDeviceConfig {
         /** Minimum time that HBM can be on before being enabled. */
         public long timeMinMillis;
 
+        /** Minimum HDR video size to enter high brightness mode */
+        public float minimumHdrPercentOfScreen;
+
         HighBrightnessModeData() {}
 
         HighBrightnessModeData(float minimumLux, float transitionPoint, long timeWindowMillis,
                 long timeMaxMillis, long timeMinMillis,
-                @PowerManager.ThermalStatus int thermalStatusLimit, boolean allowInLowPowerMode) {
+                @PowerManager.ThermalStatus int thermalStatusLimit, boolean allowInLowPowerMode,
+                float minimumHdrPercentOfScreen) {
             this.minimumLux = minimumLux;
             this.transitionPoint = transitionPoint;
             this.timeWindowMillis = timeWindowMillis;
@@ -902,6 +1371,7 @@ public class DisplayDeviceConfig {
             this.timeMinMillis = timeMinMillis;
             this.thermalStatusLimit = thermalStatusLimit;
             this.allowInLowPowerMode = allowInLowPowerMode;
+            this.minimumHdrPercentOfScreen = minimumHdrPercentOfScreen;
         }
 
         /**
@@ -916,6 +1386,7 @@ public class DisplayDeviceConfig {
             other.transitionPoint = transitionPoint;
             other.thermalStatusLimit = thermalStatusLimit;
             other.allowInLowPowerMode = allowInLowPowerMode;
+            other.minimumHdrPercentOfScreen = minimumHdrPercentOfScreen;
         }
 
         @Override
@@ -928,7 +1399,95 @@ public class DisplayDeviceConfig {
                     + ", timeMin: " + timeMinMillis + "ms"
                     + ", thermalStatusLimit: " + thermalStatusLimit
                     + ", allowInLowPowerMode: " + allowInLowPowerMode
+                    + ", minimumHdrPercentOfScreen: " + minimumHdrPercentOfScreen
                     + "} ";
         }
+    }
+
+    /**
+     * Container for brightness throttling data.
+     */
+    static class BrightnessThrottlingData {
+        static class ThrottlingLevel {
+            public @PowerManager.ThermalStatus int thermalStatus;
+            public float brightness;
+
+            ThrottlingLevel(@PowerManager.ThermalStatus int thermalStatus, float brightness) {
+                this.thermalStatus = thermalStatus;
+                this.brightness = brightness;
+            }
+
+            @Override
+            public String toString() {
+                return "[" + thermalStatus + "," + brightness + "]";
+            }
+        }
+
+        public List<ThrottlingLevel> throttlingLevels;
+
+        static public BrightnessThrottlingData create(List<ThrottlingLevel> throttlingLevels)
+        {
+            if (throttlingLevels == null || throttlingLevels.size() == 0) {
+                Slog.e(TAG, "BrightnessThrottlingData received null or empty throttling levels");
+                return null;
+            }
+
+            ThrottlingLevel prevLevel = throttlingLevels.get(0);
+            final int numLevels = throttlingLevels.size();
+            for (int i = 1; i < numLevels; i++) {
+                ThrottlingLevel thisLevel = throttlingLevels.get(i);
+
+                if (thisLevel.thermalStatus <= prevLevel.thermalStatus) {
+                    Slog.e(TAG, "brightnessThrottlingMap must be strictly increasing, ignoring "
+                            + "configuration. ThermalStatus " + thisLevel.thermalStatus + " <= "
+                            + prevLevel.thermalStatus);
+                    return null;
+                }
+
+                if (thisLevel.brightness >= prevLevel.brightness) {
+                    Slog.e(TAG, "brightnessThrottlingMap must be strictly decreasing, ignoring "
+                            + "configuration. Brightness " + thisLevel.brightness + " >= "
+                            + thisLevel.brightness);
+                    return null;
+                }
+
+                prevLevel = thisLevel;
+            }
+
+            for (ThrottlingLevel level : throttlingLevels) {
+                // Non-negative brightness values are enforced by device config schema
+                if (level.brightness > PowerManager.BRIGHTNESS_MAX) {
+                    Slog.e(TAG, "brightnessThrottlingMap contains a brightness value exceeding "
+                            + "system max. Brightness " + level.brightness + " > "
+                            + PowerManager.BRIGHTNESS_MAX);
+                    return null;
+                }
+            }
+
+            return new BrightnessThrottlingData(throttlingLevels);
+        }
+
+        static public BrightnessThrottlingData create(BrightnessThrottlingData other) {
+            if (other == null)
+                return null;
+
+            return BrightnessThrottlingData.create(other.throttlingLevels);
+        }
+
+
+        @Override
+        public String toString() {
+            return "BrightnessThrottlingData{"
+                + "throttlingLevels:" + throttlingLevels
+                + "} ";
+        }
+
+        private BrightnessThrottlingData(List<ThrottlingLevel> inLevels) {
+            throttlingLevels = new ArrayList<>(inLevels.size());
+            for (ThrottlingLevel level : inLevels) {
+                throttlingLevels.add(new ThrottlingLevel(level.thermalStatus, level.brightness));
+            }
+        }
+
     }
 }

@@ -288,7 +288,7 @@ public class DozeSensors {
         for (TriggerSensor triggerSensor : mTriggerSensors) {
             triggerSensor.setListening(false);
         }
-        mProximitySensor.pause();
+        mProximitySensor.destroy();
 
         mDevicePostureController.removeCallback(mDevicePostureCallback);
         mAuthController.removeCallback(mAuthControllerCallback);

@@ -32,6 +32,8 @@ android_test_helper_app {
     ],
     static_libs: [
         "androidx.annotation_annotation",
+        "commands-helper",
+        "cts-install-lib",
         "junit",
         "junit-params",
         "androidx.test.ext.junit",

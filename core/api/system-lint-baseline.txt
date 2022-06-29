@@ -1,32 +1,20 @@
 // Baseline format: 1.0
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
-
-ExecutorRegistration: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
-    Registration methods should have overload that accepts delivery Executor: `setOnRtpRxNoticeListener`
+    Method should return Collection<CharSequence> (or subclass) instead of raw array; was `java.lang.CharSequence[]`
 
 
 GenericException: android.app.prediction.AppPredictor#finalize():
-
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
 GenericException: android.hardware.location.ContextHubClient#finalize():
-
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
 GenericException: android.service.autofill.augmented.FillWindow#finalize():
-
-
-
-IntentBuilderName: android.app.search.SearchAction#getIntent():
-
-IntentBuilderName: android.app.smartspace.SmartspaceAction#getIntent():
-    Methods creating an Intent should be named `create<Foo>Intent()`, was `getIntent`
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
 
 
 KotlinKeyword: android.app.Notification#when:
+    Avoid field names that are Kotlin hard keywords ("when"); see https://android.github.io/kotlin-guides/interop.html#no-hard-keywords
 
 
-
-MissingGetterMatchingBuilder: android.security.keystore.KeyGenParameterSpec.Builder#setUid(int):
-    android.security.keystore.KeyGenParameterSpec does not declare a `getUid()` method matching method android.security.keystore.KeyGenParameterSpec.Builder.setUid(int)
-MissingGetterMatchingBuilder: android.service.autofill.Dataset.Builder#setFieldInlinePresentation(android.view.autofill.AutofillId, android.view.autofill.AutofillValue, java.util.regex.Pattern, android.service.autofill.InlinePresentation):
-    android.service.autofill.Dataset does not declare a `getFieldInlinePresentation()` method matching method android.service.autofill.Dataset.Builder.setFieldInlinePresentation(android.view.autofill.AutofillId,android.view.autofill.AutofillValue,java.util.regex.Pattern,android.service.autofill.InlinePresentation)
 MissingGetterMatchingBuilder: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallViaAudioProcessing(boolean):
     android.telecom.CallScreeningService.CallResponse does not declare a `shouldScreenCallViaAudioProcessing()` method matching method android.telecom.CallScreeningService.CallResponse.Builder.setShouldScreenCallViaAudioProcessing(boolean)
 MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
@@ -34,161 +22,135 @@ MissingGetterMatchingBuilder: android.telephony.mbms.DownloadRequest.Builder#set
 
 
 MissingNullability: android.media.soundtrigger.SoundTriggerDetectionService#onUnbind(android.content.Intent) parameter #0:
-
+    Missing nullability on parameter `intent` in method `onUnbind`
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #0:
-
+    Missing nullability on parameter `inputId` in method `onEvent`
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #1:
-
+    Missing nullability on parameter `eventType` in method `onEvent`
 MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #2:
-
+    Missing nullability on parameter `eventArgs` in method `onEvent`
 MissingNullability: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context) parameter #0:
-
+    Missing nullability on parameter `base` in method `attachBaseContext`
 MissingNullability: android.provider.ContactsContract.MetadataSync#CONTENT_URI:
-
+    Missing nullability on field `CONTENT_URI` in class `class android.provider.ContactsContract.MetadataSync`
 MissingNullability: android.provider.ContactsContract.MetadataSync#METADATA_AUTHORITY_URI:
-
+    Missing nullability on field `METADATA_AUTHORITY_URI` in class `class android.provider.ContactsContract.MetadataSync`
 MissingNullability: android.provider.ContactsContract.MetadataSyncState#CONTENT_URI:
-
+    Missing nullability on field `CONTENT_URI` in class `class android.provider.ContactsContract.MetadataSyncState`
 MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #0:
-
+    Missing nullability on parameter `context` in method `attachInfo`
 MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #1:
-
+    Missing nullability on parameter `info` in method `attachInfo`
 MissingNullability: android.service.autofill.augmented.AugmentedAutofillService#onUnbind(android.content.Intent) parameter #0:
-
+    Missing nullability on parameter `intent` in method `onUnbind`
 MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
-
+    Missing nullability on parameter `fd` in method `dump`
 MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #1:
-
+    Missing nullability on parameter `pw` in method `dump`
 MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #2:
-
+    Missing nullability on parameter `args` in method `dump`
 MissingNullability: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context) parameter #0:
-
+    Missing nullability on parameter `base` in method `attachBaseContext`
 MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
-
-MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringDaily(java.time.ZonedDateTime) parameter #0:
-
-MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringMonthly(java.time.ZonedDateTime) parameter #0:
-
-MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringWeekly(java.time.ZonedDateTime) parameter #0:
-
+    Missing nullability on parameter `intent` in method `onUnbind`
 MissingNullability: android.telephony.data.DataService#onUnbind(android.content.Intent) parameter #0:
-
+    Missing nullability on parameter `intent` in method `onUnbind`
 MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
-
+    Missing nullability on method `setServiceId` return
 MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String) parameter #0:
-
-
-
-OnNameExpected: android.service.smartspace.SmartspaceService#notifySmartspaceEvent(android.app.smartspace.SmartspaceSessionId, android.app.smartspace.SmartspaceTargetEvent):
-    Methods implemented by developers should follow the on<Something> style, was `notifySmartspaceEvent`
+    Missing nullability on parameter `serviceId` in method `setServiceId`
 
 
 ProtectedMember: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context):
-
+    Protected methods not allowed; must be public: method android.printservice.recommendation.RecommendationService.attachBaseContext(android.content.Context)}
 ProtectedMember: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]):
-
+    Protected methods not allowed; must be public: method android.service.contentcapture.ContentCaptureService.dump(java.io.FileDescriptor,java.io.PrintWriter,String[])}
 ProtectedMember: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context):
-
+    Protected methods not allowed; must be public: method android.service.notification.NotificationAssistantService.attachBaseContext(android.content.Context)}
 
 
 SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 6, "callback", in android.accounts.AccountManager.addAccount) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.accounts.AccountManager.addOnAccountsUpdatedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean, String[]):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.accounts.AccountManager.addOnAccountsUpdatedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#confirmCredentials(android.accounts.Account, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 4, "callback", in android.accounts.AccountManager.confirmCredentials) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#editProperties(String, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 3, "callback", in android.accounts.AccountManager.editProperties) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#finishSession(android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 3, "callback", in android.accounts.AccountManager.finishSession) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 3, "callback", in android.accounts.AccountManager.getAccountsByTypeAndFeatures) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 5, "callback", in android.accounts.AccountManager.getAuthToken) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, android.os.Bundle, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 5, "callback", in android.accounts.AccountManager.getAuthToken) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 4, "callback", in android.accounts.AccountManager.getAuthToken) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#getAuthTokenByFeatures(String, String, String[], android.app.Activity, android.os.Bundle, android.os.Bundle, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 7, "callback", in android.accounts.AccountManager.getAuthTokenByFeatures) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 3, "callback", in android.accounts.AccountManager.hasFeatures) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#isCredentialsUpdateSuggested(android.accounts.Account, String, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 3, "callback", in android.accounts.AccountManager.isCredentialsUpdateSuggested) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#removeAccount(android.accounts.Account, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 2, "callback", in android.accounts.AccountManager.removeAccount) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#removeAccount(android.accounts.Account, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 3, "callback", in android.accounts.AccountManager.removeAccount) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#renameAccount(android.accounts.Account, String, android.accounts.AccountManagerCallback<android.accounts.Account>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 3, "callback", in android.accounts.AccountManager.renameAccount) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#startAddAccountSession(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 6, "callback", in android.accounts.AccountManager.startAddAccountSession) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#startUpdateCredentialsSession(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 5, "callback", in android.accounts.AccountManager.startUpdateCredentialsSession) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.accounts.AccountManager#updateCredentials(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 5, "callback", in android.accounts.AccountManager.updateCredentials) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.AlarmManager#set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 4, "listener", in android.app.AlarmManager.set) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.AlarmManager#setExact(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 4, "listener", in android.app.AlarmManager.setExact) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.AlarmManager#setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 5, "listener", in android.app.AlarmManager.setWindow) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.WallpaperInfo#dump(android.util.Printer, String):
-
+    SAM-compatible parameters (such as parameter 1, "pw", in android.app.WallpaperInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.app.WallpaperManager#addOnColorsChangedListener(android.app.WallpaperManager.OnColorsChangedListener, android.os.Handler):
-
-SamShouldBeLast: android.app.admin.DevicePolicyManager#installSystemUpdate(android.content.ComponentName, android.net.Uri, java.util.concurrent.Executor, android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.app.WallpaperManager.addOnColorsChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.content.IntentFilter#dump(android.util.Printer, String):
-
+    SAM-compatible parameters (such as parameter 1, "du", in android.content.IntentFilter.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.content.pm.ApplicationInfo#dump(android.util.Printer, String):
-
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ApplicationInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.content.pm.PackageItemInfo#dumpBack(android.util.Printer, String):
-
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpBack) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.content.pm.PackageItemInfo#dumpFront(android.util.Printer, String):
-
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.PackageItemInfo.dumpFront) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.content.pm.ResolveInfo#dump(android.util.Printer, String):
-
+    SAM-compatible parameters (such as parameter 1, "pw", in android.content.pm.ResolveInfo.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.Location#dump(android.util.Printer, String):
-
+    SAM-compatible parameters (such as parameter 1, "pw", in android.location.Location.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
-
-SamShouldBeLast: android.location.LocationManager#registerGnssMeasurementsCallback(java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
-
-SamShouldBeLast: android.location.LocationManager#registerGnssNavigationMessageCallback(java.util.concurrent.Executor, android.location.GnssNavigationMessage.Callback):
-
-SamShouldBeLast: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.location.LocationManager.addNmeaListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
-
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, java.util.concurrent.Executor, android.location.LocationListener):
-
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, java.util.concurrent.Executor, android.location.LocationListener):
-
+    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
-
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, java.util.concurrent.Executor, android.location.LocationListener):
-
+    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
-
+    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
-
+    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioFocusRequest.Builder#setOnAudioFocusChangeListener(android.media.AudioManager.OnAudioFocusChangeListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioFocusRequest.Builder.setOnAudioFocusChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int):
-
+    SAM-compatible parameters (such as parameter 1, "l", in android.media.AudioManager.requestAudioFocus) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioRecord#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
-
-SamShouldBeLast: android.media.AudioRecord#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
-
-SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioRecord.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioRouting.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.MediaCodec#setOnFrameRenderedListener(android.media.MediaCodec.OnFrameRenderedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaCodec.setOnFrameRenderedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaPlayer#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaPlayer.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaPlayer#setOnDrmInfoListener(android.media.MediaPlayer.OnDrmInfoListener, android.os.Handler):
@@ -197,79 +159,65 @@ SamShouldBeLast: android.media.MediaPlayer#setOnDrmPreparedListener(android.medi
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaPlayer.setOnDrmPreparedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaPlayer#setOnMediaTimeDiscontinuityListener(android.media.MediaPlayer.OnMediaTimeDiscontinuityListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaPlayer.setOnMediaTimeDiscontinuityListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.media.MediaPlayer.setOnRtpRxNoticeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaPlayer#setOnSubtitleDataListener(android.media.MediaPlayer.OnSubtitleDataListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaPlayer.setOnSubtitleDataListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaRecorder#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
-
-SamShouldBeLast: android.media.MediaRecorder#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.MediaRecorder.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName):
-
+    SAM-compatible parameters (such as parameter 1, "sessionListener", in android.media.session.MediaSessionManager.addOnActiveSessionsChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 1, "sessionListener", in android.media.session.MediaSessionManager.addOnActiveSessionsChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.session.MediaSessionManager#addOnSession2TokensChangedListener(android.media.session.MediaSessionManager.OnSession2TokensChangedListener, android.os.Handler):
-
-SamShouldBeLast: android.media.session.MediaSessionManager#registerCallback(java.util.concurrent.Executor, android.media.session.MediaSessionManager.Callback):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.addOnSession2TokensChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.nfc.NfcAdapter#enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle):
-
+    SAM-compatible parameters (such as parameter 2, "callback", in android.nfc.NfcAdapter.enableReaderMode) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.nfc.NfcAdapter#ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 3, "tagRemovedListener", in android.nfc.NfcAdapter.ignore) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.nfc.NfcAdapter#setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity):
-
+    SAM-compatible parameters (such as parameter 1, "callback", in android.nfc.NfcAdapter.setBeamPushUrisCallback) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.nfc.NfcAdapter#setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...):
-
+    SAM-compatible parameters (such as parameter 1, "callback", in android.nfc.NfcAdapter.setNdefPushMessageCallback) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.nfc.NfcAdapter#setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...):
-
+    SAM-compatible parameters (such as parameter 1, "callback", in android.nfc.NfcAdapter.setOnNdefPushCompleteCallback) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Binder#attachInterface(android.os.IInterface, String):
-
+    SAM-compatible parameters (such as parameter 1, "owner", in android.os.Binder.attachInterface) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Binder#linkToDeath(android.os.IBinder.DeathRecipient, int):
-
+    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.Binder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Binder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
-
+    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.Binder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Handler#dump(android.util.Printer, String):
-
+    SAM-compatible parameters (such as parameter 1, "pw", in android.os.Handler.dump) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Handler#postAtTime(Runnable, Object, long):
-
+    SAM-compatible parameters (such as parameter 1, "r", in android.os.Handler.postAtTime) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Handler#postAtTime(Runnable, long):
-
+    SAM-compatible parameters (such as parameter 1, "r", in android.os.Handler.postAtTime) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Handler#postDelayed(Runnable, Object, long):
-
+    SAM-compatible parameters (such as parameter 1, "r", in android.os.Handler.postDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Handler#postDelayed(Runnable, long):
-
+    SAM-compatible parameters (such as parameter 1, "r", in android.os.Handler.postDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.Handler#removeCallbacks(Runnable, Object):
-
+    SAM-compatible parameters (such as parameter 1, "r", in android.os.Handler.removeCallbacks) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.IBinder#linkToDeath(android.os.IBinder.DeathRecipient, int):
-
+    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.linkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.IBinder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
-
+    SAM-compatible parameters (such as parameter 1, "recipient", in android.os.IBinder.unlinkToDeath) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.os.RecoverySystem#verifyPackage(java.io.File, android.os.RecoverySystem.ProgressListener, java.io.File):
-
+    SAM-compatible parameters (such as parameter 2, "listener", in android.os.RecoverySystem.verifyPackage) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, String[], java.security.Principal[], String, int, String):
     SAM-compatible parameters (such as parameter 2, "response", in android.security.KeyChain.choosePrivateKeyAlias) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.security.KeyChain#choosePrivateKeyAlias(android.app.Activity, android.security.KeyChainAliasCallback, String[], java.security.Principal[], android.net.Uri, String):
     SAM-compatible parameters (such as parameter 2, "response", in android.security.KeyChain.choosePrivateKeyAlias) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.View#postDelayed(Runnable, long):
-
+    SAM-compatible parameters (such as parameter 1, "action", in android.view.View.postDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.View#postOnAnimationDelayed(Runnable, long):
-
+    SAM-compatible parameters (such as parameter 1, "action", in android.view.View.postOnAnimationDelayed) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.View#scheduleDrawable(android.graphics.drawable.Drawable, Runnable, long):
-
+    SAM-compatible parameters (such as parameter 2, "what", in android.view.View.scheduleDrawable) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.Window#addOnFrameMetricsAvailableListener(android.view.Window.OnFrameMetricsAvailableListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.Window.addOnFrameMetricsAvailableListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.accessibility.AccessibilityManager#addAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addAccessibilityStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, android.os.Handler):
-
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addTouchExplorationStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.webkit.WebChromeClient#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams):
-
-
-
-UserHandleName: android.app.search.SearchAction.Builder#setUserHandle(android.os.UserHandle):
-    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `setUserHandle`
-UserHandleName: android.app.search.SearchTarget.Builder#setUserHandle(android.os.UserHandle):
-
-UserHandleName: android.app.smartspace.SmartspaceAction.Builder#setUserHandle(android.os.UserHandle):
-    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `setUserHandle`
+    SAM-compatible parameters (such as parameter 2, "filePathCallback", in android.webkit.WebChromeClient.onShowFileChooser) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions

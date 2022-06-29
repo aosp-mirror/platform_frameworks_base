@@ -16,10 +16,18 @@
 
 package android.view.accessibility;
 
+import static android.view.accessibility.AccessibilityNodeInfo.FOCUS_ACCESSIBILITY;
+import static android.view.accessibility.AccessibilityNodeInfo.FOCUS_INPUT;
+import static android.view.accessibility.AccessibilityNodeInfo.ROOT_ITEM_ID;
+import static android.view.accessibility.AccessibilityNodeInfo.ROOT_NODE_ID;
+import static android.view.accessibility.AccessibilityWindowInfo.ANY_WINDOW_ID;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
@@ -29,6 +37,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.SystemClock;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.View;
@@ -38,7 +47,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.base.Throwables;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,13 +81,6 @@ public class AccessibilityCacheTest {
         mAccessibilityNodeRefresher = mock(AccessibilityCache.AccessibilityNodeRefresher.class);
         when(mAccessibilityNodeRefresher.refreshNode(anyObject(), anyBoolean())).thenReturn(true);
         mAccessibilityCache = new AccessibilityCache(mAccessibilityNodeRefresher);
-    }
-
-    @After
-    public void tearDown() {
-        // Make sure we're recycling all of our window and node infos.
-        mAccessibilityCache.clear();
-        AccessibilityInteractionClient.getInstance().clearCache();
     }
 
     @Test
@@ -293,7 +294,8 @@ public class AccessibilityCacheTest {
             SparseArray<List<AccessibilityWindowInfo>> allWindows = new SparseArray<>();
             allWindows.put(Display.DEFAULT_DISPLAY, windowsIn1);
             allWindows.put(SECONDARY_DISPLAY_ID, windowsIn2);
-            mAccessibilityCache.setWindowsOnAllDisplays(allWindows);
+            final long populationTimeStamp = SystemClock.uptimeMillis();
+            mAccessibilityCache.setWindowsOnAllDisplays(allWindows, populationTimeStamp);
             // Gets windows at default display.
             windowsOut1 = getWindowsByDisplay(Display.DEFAULT_DISPLAY);
             window1Out = mAccessibilityCache.getWindow(WINDOW_ID_1);
@@ -329,6 +331,46 @@ public class AccessibilityCacheTest {
             for (AccessibilityWindowInfo windowInfo : windowsOut2) {
                 windowInfo.recycle();
             }
+        }
+    }
+
+    @Test
+    public void setInvalidWindowsAfterWindowsChangedEvent_notInCache() {
+        final AccessibilityEvent event = new AccessibilityEvent(
+                AccessibilityEvent.TYPE_WINDOWS_CHANGED);
+        final long eventTime = 1000L;
+        event.setEventTime(eventTime);
+        mAccessibilityCache.onAccessibilityEvent(event);
+
+        final AccessibilityWindowInfo windowInfo1 = obtainAccessibilityWindowInfo(WINDOW_ID_1,
+                SPECIFIC_WINDOW_LAYER);
+        List<AccessibilityWindowInfo> windowsIn = Arrays.asList(windowInfo1);
+        setWindowsByDisplay(Display.DEFAULT_DISPLAY, windowsIn, eventTime - 10);
+
+        try {
+            assertNull(getWindowsByDisplay(Display.DEFAULT_DISPLAY));
+        } finally {
+            windowInfo1.recycle();
+        }
+    }
+
+    @Test
+    public void setInvalidWindowsAfterStateChangedEvent_notInCache() {
+        final AccessibilityEvent event = new AccessibilityEvent(
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        final long eventTime = 1000L;
+        event.setEventTime(eventTime);
+        mAccessibilityCache.onAccessibilityEvent(event);
+
+        final AccessibilityWindowInfo windowInfo1 = obtainAccessibilityWindowInfo(WINDOW_ID_1,
+                SPECIFIC_WINDOW_LAYER);
+        List<AccessibilityWindowInfo> windowsIn = Arrays.asList(windowInfo1);
+        setWindowsByDisplay(Display.DEFAULT_DISPLAY, windowsIn, eventTime - 10);
+
+        try {
+            assertNull(getWindowsByDisplay(Display.DEFAULT_DISPLAY));
+        } finally {
+            windowInfo1.recycle();
         }
     }
 
@@ -597,6 +639,97 @@ public class AccessibilityCacheTest {
     }
 
     @Test
+    public void getFocus_focusedNodeAsInitialNode_returnsNodeWithA11yFocus() {
+        AccessibilityNodeInfo nodeInfo = addFocusedNode(FOCUS_ACCESSIBILITY);
+        assertFocus(nodeInfo, FOCUS_ACCESSIBILITY, nodeInfo.getSourceNodeId(),
+                nodeInfo.getWindowId());
+    }
+
+    @Test
+    public void getFocus_focusedNodeAsInitialNode_returnsNodeWithInputFocus() {
+        AccessibilityNodeInfo nodeInfo = addFocusedNode(FOCUS_INPUT);
+        assertFocus(nodeInfo, FOCUS_INPUT, nodeInfo.getSourceNodeId(), nodeInfo.getWindowId());
+    }
+
+
+    @Test
+    public void getFocus_fromAnyWindow_returnsNodeWithA11yFocus() {
+        AccessibilityNodeInfo parentNodeInfo =
+                getNodeWithA11yAndWindowId(ROOT_ITEM_ID, WINDOW_ID_1);
+        AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
+        nodeInfo.setParent(getMockViewWithA11yAndWindowIds(ROOT_ITEM_ID, WINDOW_ID_1));
+        setFocus(nodeInfo, FOCUS_ACCESSIBILITY);
+        mAccessibilityCache.add(parentNodeInfo);
+        mAccessibilityCache.add(nodeInfo);
+
+        AccessibilityNodeInfo focusedNodeInfo =
+                mAccessibilityCache.getFocus(FOCUS_ACCESSIBILITY, ROOT_NODE_ID, ANY_WINDOW_ID);
+        try {
+            assertEquals(focusedNodeInfo, nodeInfo);
+        } finally {
+            nodeInfo.recycle();
+            parentNodeInfo.recycle();
+        }
+    }
+
+    @Test
+    public void getFocus_fromAnyWindow_returnsNodeWithInputFocus() {
+        AccessibilityNodeInfo parentNodeInfo =
+                getNodeWithA11yAndWindowId(ROOT_ITEM_ID, WINDOW_ID_1);
+        AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
+        nodeInfo.setParent(getMockViewWithA11yAndWindowIds(ROOT_ITEM_ID, WINDOW_ID_1));
+        setFocus(nodeInfo, FOCUS_INPUT);
+        mAccessibilityCache.add(parentNodeInfo);
+        mAccessibilityCache.add(nodeInfo);
+
+        AccessibilityNodeInfo focusedNodeInfo =
+                mAccessibilityCache.getFocus(FOCUS_INPUT, ROOT_NODE_ID, ANY_WINDOW_ID);
+        try {
+            assertEquals(focusedNodeInfo, nodeInfo);
+        } finally {
+            nodeInfo.recycle();
+            parentNodeInfo.recycle();
+        }
+    }
+
+
+    @Test
+    public void getFocus_parentNodeAsInitialNode_returnsNodeWithA11yFocus() {
+        findFocusReturnsFocus_initialNodeIsParent(FOCUS_ACCESSIBILITY);
+    }
+
+    @Test
+    public void getFocus_parentNodeAsInitialNode_returnsNodeWithInputFocus() {
+        findFocusReturnsFocus_initialNodeIsParent(FOCUS_INPUT);
+
+    }
+
+    @Test
+    public void getFocus_nonFocusedChildNodeAsInitialNode_returnsNullA11yFocus() {
+        findFocusReturnNull_initialNodeIsNotFocusOrFocusAncestor(FOCUS_ACCESSIBILITY);
+    }
+
+    @Test
+    public void getFocus_nonFocusedChildNodeAsInitialNode_returnsNullInputFocus() {
+        findFocusReturnNull_initialNodeIsNotFocusOrFocusAncestor(FOCUS_INPUT);
+    }
+
+    @Test
+    public void getFocus_cacheCleared_returnsNullA11yFocus() {
+        AccessibilityNodeInfo nodeInfo = addFocusedNode(FOCUS_ACCESSIBILITY);
+        mAccessibilityCache.clear();
+        assertFocus(null, FOCUS_ACCESSIBILITY, nodeInfo.getSourceNodeId(),
+                nodeInfo.getWindowId());
+    }
+
+    @Test
+    public void getFocus_cacheCleared_returnsNullInputFocus() {
+        AccessibilityNodeInfo nodeInfo = addFocusedNode(FOCUS_INPUT);
+        mAccessibilityCache.clear();
+        assertFocus(null, FOCUS_INPUT, nodeInfo.getSourceNodeId(), nodeInfo.getWindowId());
+    }
+
+    @Test
     public void nodeSourceOfInputFocusEvent_getsRefreshed() {
         AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
         nodeInfo.setFocused(false);
@@ -786,6 +919,140 @@ public class AccessibilityCacheTest {
         }
     }
 
+    private AccessibilityNodeInfo addFocusedNode(int focusType) {
+        AccessibilityNodeInfo nodeInfo = getNodeWithA11yAndWindowId(SINGLE_VIEW_ID, WINDOW_ID_1);
+        setFocus(nodeInfo, focusType);
+        mAccessibilityCache.add(nodeInfo);
+        return nodeInfo;
+    }
+
+    private void assertFocus(AccessibilityNodeInfo focus, int focusType, long nodeId,
+            int windowId) {
+        AccessibilityNodeInfo focusedNodeInfo = mAccessibilityCache.getFocus(
+                focusType, nodeId, windowId);
+        try {
+            assertEquals(focusedNodeInfo, focus);
+        } finally {
+            if (focus != null) {
+                focus.recycle();
+            }
+            if (focusedNodeInfo != null) {
+                focusedNodeInfo.recycle();
+            }
+        }
+    }
+
+
+    private void findFocusReturnNull_initialNodeIsNotFocusOrFocusAncestor(int focusType) {
+        AccessibilityNodeInfo parentNodeInfo =
+                getNodeWithA11yAndWindowId(PARENT_VIEW_ID, WINDOW_ID_1);
+        AccessibilityNodeInfo childNodeInfo =
+                getNodeWithA11yAndWindowId(CHILD_VIEW_ID, WINDOW_ID_1);
+        AccessibilityNodeInfo otherChildNodeInfo =
+                getNodeWithA11yAndWindowId(OTHER_CHILD_VIEW_ID, WINDOW_ID_1);
+        childNodeInfo.setParent(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
+        otherChildNodeInfo.setParent(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
+        setFocus(childNodeInfo, focusType);
+        mAccessibilityCache.add(parentNodeInfo);
+        mAccessibilityCache.add(childNodeInfo);
+        mAccessibilityCache.add(otherChildNodeInfo);
+
+        AccessibilityNodeInfo focusedNodeInfo = mAccessibilityCache.getFocus(
+                focusType, otherChildNodeInfo.getSourceNodeId(), WINDOW_ID_1);
+
+        try {
+            assertNull(focusedNodeInfo);
+
+        } finally {
+            parentNodeInfo.recycle();
+            childNodeInfo.recycle();
+        }
+    }
+
+    private void findFocusReturnsFocus_initialNodeIsParent(int focusType) {
+        AccessibilityNodeInfo parentNodeInfo =
+                getNodeWithA11yAndWindowId(PARENT_VIEW_ID, WINDOW_ID_1);
+        AccessibilityNodeInfo childNodeInfo =
+                getNodeWithA11yAndWindowId(CHILD_VIEW_ID, WINDOW_ID_1);
+        childNodeInfo.setParent(getMockViewWithA11yAndWindowIds(PARENT_VIEW_ID, WINDOW_ID_1));
+        setFocus(childNodeInfo, focusType);
+        mAccessibilityCache.add(parentNodeInfo);
+        mAccessibilityCache.add(childNodeInfo);
+
+        AccessibilityNodeInfo focusedNodeInfo = mAccessibilityCache.getFocus(
+                focusType, parentNodeInfo.getSourceNodeId(), WINDOW_ID_1);
+
+        try {
+            assertEquals(focusedNodeInfo, childNodeInfo);
+
+        } finally {
+            parentNodeInfo.recycle();
+            childNodeInfo.recycle();
+        }
+    }
+
+    private void setFocus(AccessibilityNodeInfo info, int focusType) {
+        if (focusType == FOCUS_ACCESSIBILITY) {
+            info.setAccessibilityFocused(true);
+        } else {
+            info.setFocused(true);
+        }
+    }
+
+    @Test
+    public void enable_cacheEnabled() {
+        mAccessibilityCache.setEnabled(false);
+        assertFalse(mAccessibilityCache.isEnabled());
+
+        mAccessibilityCache.setEnabled(true);
+        assertTrue(mAccessibilityCache.isEnabled());
+    }
+
+    @Test
+    public void disable_cacheDisabled() {
+        mAccessibilityCache.setEnabled(false);
+        assertFalse(mAccessibilityCache.isEnabled());
+    }
+
+    @Test
+    public void queryNode_nodeIsInCache() {
+        AccessibilityNodeInfo info = new AccessibilityNodeInfo();
+        mAccessibilityCache.add(info);
+
+        assertTrue(mAccessibilityCache.isNodeInCache(info));
+    }
+
+    @Test
+    public void clearSubtreeWithNode_nodeInCacheInvalidated() {
+        AccessibilityNodeInfo info = new AccessibilityNodeInfo();
+        info.setSource(getMockViewWithA11yAndWindowIds(1, 1));
+        mAccessibilityCache.add(info);
+
+        mAccessibilityCache.clearSubTree(info);
+        assertFalse(mAccessibilityCache.isNodeInCache(info));
+    }
+
+    @Test
+    public void clearSubtreeWithNode_subtreeInCacheInvalidated() {
+        AccessibilityNodeInfo info = new AccessibilityNodeInfo();
+        View parentView = getMockViewWithA11yAndWindowIds(1, 1);
+        info.setSource(parentView);
+
+        AccessibilityNodeInfo childInfo = new AccessibilityNodeInfo();
+        View childView = getMockViewWithA11yAndWindowIds(2, 1);
+        childInfo.setSource(childView);
+
+        childInfo.setParent(parentView);
+        info.addChild(childView);
+        mAccessibilityCache.add(info);
+        mAccessibilityCache.add(childInfo);
+
+        mAccessibilityCache.clearSubTree(info);
+
+        assertFalse(mAccessibilityCache.isNodeInCache(info));
+        assertFalse(mAccessibilityCache.isNodeInCache(childInfo));
+    }
+
     private AccessibilityWindowInfo obtainAccessibilityWindowInfo(int windowId, int layer) {
         AccessibilityWindowInfo windowInfo = AccessibilityWindowInfo.obtain();
         windowInfo.setId(windowId);
@@ -886,9 +1153,14 @@ public class AccessibilityCacheTest {
     }
 
     private void setWindowsByDisplay(int displayId, List<AccessibilityWindowInfo> windows) {
+        setWindowsByDisplay(displayId, windows, SystemClock.uptimeMillis());
+    }
+
+    private void setWindowsByDisplay(int displayId, List<AccessibilityWindowInfo> windows,
+            long populationTimeStamp) {
         SparseArray<List<AccessibilityWindowInfo>> allWindows = new SparseArray<>();
         allWindows.put(displayId, windows);
-        mAccessibilityCache.setWindowsOnAllDisplays(allWindows);
+        mAccessibilityCache.setWindowsOnAllDisplays(allWindows, populationTimeStamp);
     }
 
     private List<AccessibilityWindowInfo> getWindowsByDisplay(int displayId) {

@@ -94,15 +94,28 @@ enum class QSEditEvent(private val _id: Int) : UiEventLogger.UiEventEnum {
     override fun getId() = _id
 }
 
+/**
+ * Events from the QS DND tile dialog. {@see QSZenModeDialogMetricsLogger}
+ * Other names for DND (Do Not Disturb) include "Zen" and "Priority mode".
+ */
 enum class QSDndEvent(private val _id: Int) : UiEventLogger.UiEventEnum {
-    @UiEvent(doc = "TODO(beverlyt)")
+    @UiEvent(doc = "User selected an option on the DND dialog")
     QS_DND_CONDITION_SELECT(420),
 
-    @UiEvent(doc = "TODO(beverlyt)")
+    @UiEvent(doc = "User increased countdown duration of DND from the DND dialog")
     QS_DND_TIME_UP(422),
 
-    @UiEvent(doc = "TODO(beverlyt)")
-    QS_DND_TIME_DOWN(423);
+    @UiEvent(doc = "User decreased countdown duration of DND from the DND dialog")
+    QS_DND_TIME_DOWN(423),
+
+    @UiEvent(doc = "User enabled DND from the QS DND dialog to last until manually turned off")
+    QS_DND_DIALOG_ENABLE_FOREVER(946),
+
+    @UiEvent(doc = "User enabled DND from the QS DND dialog to last until the next alarm goes off")
+    QS_DND_DIALOG_ENABLE_UNTIL_ALARM(947),
+
+    @UiEvent(doc = "User enabled DND from the QS DND dialog to last until countdown is done")
+    QS_DND_DIALOG_ENABLE_UNTIL_COUNTDOWN(948);
 
     override fun getId() = _id
 }
@@ -111,13 +124,13 @@ enum class QSUserSwitcherEvent(private val _id: Int) : UiEventLogger.UiEventEnum
     @UiEvent(doc = "The current user has been switched in the detail panel")
     QS_USER_SWITCH(424),
 
-    @UiEvent(doc = "User switcher QS detail panel open")
+    @UiEvent(doc = "User switcher QS dialog open")
     QS_USER_DETAIL_OPEN(425),
 
-    @UiEvent(doc = "User switcher QS detail panel closed")
+    @UiEvent(doc = "User switcher QS dialog closed")
     QS_USER_DETAIL_CLOSE(426),
 
-    @UiEvent(doc = "User switcher QS detail panel more settings pressed")
+    @UiEvent(doc = "User switcher QS dialog more settings pressed")
     QS_USER_MORE_SETTINGS(427),
 
     @UiEvent(doc = "The user has added a guest in the detail panel")

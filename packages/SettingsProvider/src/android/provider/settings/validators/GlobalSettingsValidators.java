@@ -21,6 +21,7 @@ import static android.provider.settings.validators.SettingsValidators.ANY_INTEGE
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_FLOAT_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PERCENTAGE_INTEGER_VALIDATOR;
@@ -86,6 +87,8 @@ public class GlobalSettingsValidators {
                 Global.EMERGENCY_TONE, new DiscreteValueValidator(new String[] {"0", "1", "2"}));
         VALIDATORS.put(Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
                 NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
+                NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.CALL_AUTO_RETRY, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.DOCK_AUDIO_MEDIA_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
@@ -117,6 +120,12 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, PERCENTAGE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.BLUETOOTH_ON, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.CLOCKWORK_HOME_READY, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Global.ENABLE_TARE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.ENABLE_TARE_ALARM_MANAGER, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.ENABLE_TARE_JOB_SCHEDULER, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.TARE_ALARM_MANAGER_CONSTANTS, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Global.TARE_JOB_SCHEDULER_CONSTANTS, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.PRIVATE_DNS_MODE, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.PRIVATE_DNS_SPECIFIER, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.SOFT_AP_TIMEOUT_ENABLED, BOOLEAN_VALIDATOR);
@@ -147,6 +156,167 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.AUTOMATIC_POWER_SAVE_MODE, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.ADVANCED_BATTERY_USAGE_AMOUNT, PERCENTAGE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.POWER_BUTTON_LONG_PRESS_DURATION_MS, NONE_NEGATIVE_LONG_VALIDATOR);
+
+        VALIDATORS.put(Global.Wearable.HAS_PAY_TOKENS, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.GMS_CHECKIN_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.HOTWORD_DETECTION_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SMART_REPLIES_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.OBTAIN_PAIRED_DEVICE_LOCATION, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.RETAIL_MODE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.RETAIL_MODE_CONSUMER),
+                            String.valueOf(Global.Wearable.RETAIL_MODE_RETAIL)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.PHONE_PLAY_STORE_AVAILABLE),
+                            String.valueOf(Global.Wearable.PHONE_PLAY_STORE_UNAVAILABLE),
+                            String.valueOf(Global.Wearable.PHONE_PLAY_STORE_AVAILABILITY_UNKNOWN)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.BUG_REPORT,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.BUG_REPORT_ENABLED),
+                            String.valueOf(Global.Wearable.BUG_REPORT_DISABLED)
+                        }));
+        VALIDATORS.put(Global.Wearable.SMART_ILLUMINATE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.CLOCKWORK_AUTO_TIME,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.SYNC_TIME_FROM_PHONE),
+                            String.valueOf(Global.Wearable.SYNC_TIME_FROM_NETWORK),
+                            String.valueOf(Global.Wearable.AUTO_TIME_OFF),
+                            String.valueOf(Global.Wearable.INVALID_AUTO_TIME_STATE)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.CLOCKWORK_AUTO_TIME_ZONE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.SYNC_TIME_ZONE_FROM_PHONE),
+                            String.valueOf(Global.Wearable.SYNC_TIME_ZONE_FROM_NETWORK),
+                            String.valueOf(Global.Wearable.AUTO_TIME_ZONE_OFF),
+                            String.valueOf(Global.Wearable.INVALID_AUTO_TIME_ZONE_STATE)
+                        }));
+        VALIDATORS.put(Global.Wearable.CLOCKWORK_24HR_TIME, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AUTO_WIFI, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WIFI_POWER_SAVE, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.ALT_BYPASS_WIFI_REQUIREMENT_TIME_MILLIS,
+                ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.SETUP_SKIPPED,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.SETUP_SKIPPED_YES),
+                            String.valueOf(Global.Wearable.SETUP_SKIPPED_NO),
+                            String.valueOf(Global.Wearable.SETUP_SKIPPED_UNKNOWN)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.LAST_CALL_FORWARD_ACTION,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.CALL_FORWARD_ACTION_ON),
+                            String.valueOf(Global.Wearable.CALL_FORWARD_ACTION_OFF),
+                            String.valueOf(Global.Wearable.CALL_FORWARD_NO_LAST_ACTION)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.STEM_1_TYPE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.STEM_TYPE_UNKNOWN),
+                            String.valueOf(Global.Wearable.STEM_TYPE_APP_LAUNCH),
+                            String.valueOf(Global.Wearable.STEM_TYPE_CONTACT_LAUNCH)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.STEM_2_TYPE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.STEM_TYPE_UNKNOWN),
+                            String.valueOf(Global.Wearable.STEM_TYPE_APP_LAUNCH),
+                            String.valueOf(Global.Wearable.STEM_TYPE_CONTACT_LAUNCH)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.STEM_3_TYPE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.STEM_TYPE_UNKNOWN),
+                            String.valueOf(Global.Wearable.STEM_TYPE_APP_LAUNCH),
+                            String.valueOf(Global.Wearable.STEM_TYPE_CONTACT_LAUNCH)
+                        }));
+        VALIDATORS.put(Global.Wearable.MUTE_WHEN_OFF_BODY_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.CORNER_ROUNDNESS, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SIDE_BUTTON, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.BUTTON_SET, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.ANDROID_WEAR_VERSION, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SYSTEM_CAPABILITIES, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SYSTEM_EDITION, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WEAR_PLATFORM_MR_NUMBER, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.MOBILE_SIGNAL_DETECTOR, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_TILT_TO_WAKE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_LOW_BIT_ENABLED_DEV, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_TOUCH_TO_WAKE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.DECOMPOSABLE_WATCHFACE, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_FORCE_WHEN_DOCKED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_LOW_BIT_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_PLUGGED_TIMEOUT_MIN, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.AMBIENT_TILT_TO_BRIGHT, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.PAIRED_DEVICE_OS_TYPE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_UNKNOWN),
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_ANDROID),
+                            String.valueOf(Global.Wearable.PAIRED_DEVICE_OS_TYPE_IOS)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.COMPANION_BLE_ROLE,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.BLUETOOTH_ROLE_CENTRAL),
+                            String.valueOf(Global.Wearable.BLUETOOTH_ROLE_PERIPHERAL)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.USER_HFP_CLIENT_SETTING,
+                new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.HFP_CLIENT_UNSET),
+                            String.valueOf(Global.Wearable.HFP_CLIENT_ENABLED),
+                            String.valueOf(Global.Wearable.HFP_CLIENT_DISABLED)
+                        }));
+        VALIDATORS.put(Global.Wearable.COMPANION_OS_VERSION, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.ENABLE_ALL_LANGUAGES, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.OEM_SETUP_VERSION, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.MASTER_GESTURES_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.UNGAZE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.BATTERY_SAVER_MODE,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_NONE),
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_LIGHT),
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_TRADITIONAL_WATCH),
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_TIME_ONLY),
+                                String.valueOf(Global.Wearable.BATTERY_SAVER_MODE_CUSTOM)
+                        }));
+        VALIDATORS.put(
+                Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
+                NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.BURN_IN_PROTECTION_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.COMBINED_LOCATION_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WRIST_ORIENTATION_MODE,
+                       new DiscreteValueValidator(new String[] {"0", "1", "2", "3"}));
+        VALIDATORS.put(Global.USER_PREFERRED_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
+        VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_HEIGHT, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_WIDTH, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.WET_MODE_ON, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.COOLDOWN_MODE_ON, BOOLEAN_VALIDATOR);
     }
 }
 

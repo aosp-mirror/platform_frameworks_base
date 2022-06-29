@@ -37,10 +37,13 @@ import static com.android.server.job.controllers.JobStatus.CONSTRAINT_IDLE;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_STORAGE_NOT_LOW;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_TIMING_DELAY;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_WITHIN_QUOTA;
+import static com.android.server.job.controllers.JobStatus.NO_EARLIEST_RUNTIME;
+import static com.android.server.job.controllers.JobStatus.NO_LATEST_RUNTIME;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
 import android.app.job.JobInfo;
@@ -135,7 +138,7 @@ public class JobStatusTest {
                 .setOverrideDeadline(12)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(triggerContentJob), false);
     }
 
@@ -144,7 +147,7 @@ public class JobStatusTest {
         final JobInfo triggerContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(triggerContentJob), false);
     }
 
@@ -153,7 +156,7 @@ public class JobStatusTest {
         final JobInfo networkJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(networkJob), false);
     }
 
@@ -163,7 +166,8 @@ public class JobStatusTest {
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn("not.test.package");
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0)))
+                .thenReturn("not.test.package");
         assertEffectiveBucketForMediaExemption(createJobStatus(networkContentJob), false);
     }
 
@@ -176,13 +180,25 @@ public class JobStatusTest {
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(nonEligibleUri, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         assertEffectiveBucketForMediaExemption(createJobStatus(networkContentJob), false);
     }
 
     @Test
+    public void testMediaBackupExemption_lowPriorityJobs() {
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
+        final JobInfo.Builder jobBuilder = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
+                .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
+        assertEffectiveBucketForMediaExemption(
+                createJobStatus(jobBuilder.setPriority(JobInfo.PRIORITY_LOW).build()), false);
+        assertEffectiveBucketForMediaExemption(
+                createJobStatus(jobBuilder.setPriority(JobInfo.PRIORITY_MIN).build()), false);
+    }
+
+    @Test
     public void testMediaBackupExemptionGranted() {
-        when(mJobSchedulerInternal.getMediaBackupPackage()).thenReturn(TEST_PACKAGE);
+        when(mJobSchedulerInternal.getCloudMediaProviderPackage(eq(0))).thenReturn(TEST_PACKAGE);
         final JobInfo imageUriJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
@@ -220,6 +236,104 @@ public class JobStatusTest {
         assertEquals(0.5, createJobStatus(now - 1000, now + 1000).getFractionRunTime(), DELTA);
         assertEquals(0.75, createJobStatus(now - 1500, now + 500).getFractionRunTime(), DELTA);
         assertEquals(1, createJobStatus(now - 2000, now).getFractionRunTime(), DELTA);
+    }
+
+    @Test
+    public void testGetEffectivePriority_Expedited() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setExpedited(true)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        // Less than 2 failures, priority shouldn't be affected.
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+        int backoffAttempt = 1;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MAX, job.getEffectivePriority());
+
+        // 2+ failures, priority should be lowered as much as possible.
+        backoffAttempt = 2;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+        backoffAttempt = 5;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+        backoffAttempt = 8;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+    }
+
+    @Test
+    public void testGetEffectivePriority_Regular_High() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setPriority(JobInfo.PRIORITY_HIGH)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        // Less than 2 failures, priority shouldn't be affected.
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+        int backoffAttempt = 1;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_HIGH, job.getEffectivePriority());
+
+        // Failures in [2,4), priority should be lowered slightly.
+        backoffAttempt = 2;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_DEFAULT, job.getEffectivePriority());
+        backoffAttempt = 3;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_DEFAULT, job.getEffectivePriority());
+
+        // Failures in [4,6), priority should be lowered more.
+        backoffAttempt = 4;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
+        backoffAttempt = 5;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
+
+        // 6+ failures, priority should be lowered as much as possible.
+        backoffAttempt = 6;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
+        backoffAttempt = 12;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
+    }
+
+    /**
+     * Test that LOW priority jobs don't have their priority lowered as quickly as higher priority
+     * jobs.
+     */
+    @Test
+    public void testGetEffectivePriority_Regular_Low() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setPriority(JobInfo.PRIORITY_LOW)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        // Less than 6 failures, priority shouldn't be affected.
+        assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
+        int backoffAttempt = 1;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
+        backoffAttempt = 4;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
+        backoffAttempt = 5;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_LOW, job.getEffectivePriority());
+
+        // 6+ failures, priority should be lowered as much as possible.
+        backoffAttempt = 6;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
+        backoffAttempt = 12;
+        job = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME, backoffAttempt, 0, 0);
+        assertEquals(JobInfo.PRIORITY_MIN, job.getEffectivePriority());
     }
 
     /**
@@ -678,6 +792,7 @@ public class JobStatusTest {
 
     private void markImplicitConstraintsSatisfied(JobStatus job, boolean isSatisfied) {
         job.setQuotaConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
+        job.setTareWealthConstraintSatisfied(sElapsedRealtimeClock.millis(), isSatisfied);
         job.setDeviceNotDozingConstraintSatisfied(
                 sElapsedRealtimeClock.millis(), isSatisfied, false);
         job.setBackgroundNotRestrictedConstraintSatisfied(

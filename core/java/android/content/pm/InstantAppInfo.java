@@ -65,7 +65,7 @@ public final class InstantAppInfo implements Parcelable {
         mLabelText = parcel.readCharSequence();
         mRequestedPermissions = parcel.readStringArray();
         mGrantedPermissions = parcel.createStringArray();
-        mApplicationInfo = parcel.readParcelable(null);
+        mApplicationInfo = parcel.readParcelable(null, android.content.pm.ApplicationInfo.class);
     }
 
     /**

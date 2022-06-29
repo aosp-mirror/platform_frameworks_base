@@ -498,11 +498,11 @@ public final class ZenPolicy implements Parcelable {
             mZenPolicy.mPriorityCategories.set(category, STATE_UNSET);
 
             if (category == PRIORITY_CATEGORY_MESSAGES) {
-                mZenPolicy.mPriorityMessages = STATE_UNSET;
+                mZenPolicy.mPriorityMessages = PEOPLE_TYPE_UNSET;
             } else if (category == PRIORITY_CATEGORY_CALLS) {
-                mZenPolicy.mPriorityCalls = STATE_UNSET;
+                mZenPolicy.mPriorityCalls = PEOPLE_TYPE_UNSET;
             } else if (category == PRIORITY_CATEGORY_CONVERSATIONS) {
-                mZenPolicy.mConversationSenders = STATE_UNSET;
+                mZenPolicy.mConversationSenders = CONVERSATION_SENDERS_UNSET;
             }
 
             return this;
@@ -804,8 +804,8 @@ public final class ZenPolicy implements Parcelable {
         @Override
         public ZenPolicy createFromParcel(Parcel source) {
             ZenPolicy policy = new ZenPolicy();
-            policy.mPriorityCategories = source.readArrayList(Integer.class.getClassLoader());
-            policy.mVisualEffects = source.readArrayList(Integer.class.getClassLoader());
+            policy.mPriorityCategories = source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
+            policy.mVisualEffects = source.readArrayList(Integer.class.getClassLoader(), java.lang.Integer.class);
             policy.mPriorityCalls = source.readInt();
             policy.mPriorityMessages = source.readInt();
             policy.mConversationSenders = source.readInt();

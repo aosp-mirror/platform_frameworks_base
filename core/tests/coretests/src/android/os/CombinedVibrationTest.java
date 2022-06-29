@@ -125,6 +125,12 @@ public class CombinedVibrationTest {
                 VibrationEffect.createOneShot(1, 1)).getDuration());
         assertEquals(-1, CombinedVibration.createParallel(
                 VibrationEffect.get(VibrationEffect.EFFECT_CLICK)).getDuration());
+        assertEquals(-1, CombinedVibration.createParallel(
+                        VibrationEffect.startComposition()
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                                .compose())
+                .getDuration());
         assertEquals(Long.MAX_VALUE, CombinedVibration.createParallel(
                 VibrationEffect.createWaveform(
                         new long[]{1, 2, 3}, new int[]{1, 2, 3}, 0)).getDuration());
@@ -172,6 +178,83 @@ public class CombinedVibrationTest {
                         VibrationEffect.createWaveform(new long[]{1, 2, 3}, new int[]{1, 2, 3}, 0))
                 .combine()
                 .getDuration());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidateMono() {
+        assertTrue(CombinedVibration.createParallel(
+                VibrationEffect.createOneShot(1, 1)).isHapticFeedbackCandidate());
+        assertTrue(CombinedVibration.createParallel(
+                VibrationEffect.get(VibrationEffect.EFFECT_CLICK)).isHapticFeedbackCandidate());
+        assertTrue(CombinedVibration.createParallel(
+                        VibrationEffect.startComposition()
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                                .compose())
+                .isHapticFeedbackCandidate());
+        // Too long to be classified as a haptic feedback.
+        assertFalse(CombinedVibration.createParallel(
+                VibrationEffect.createOneShot(10_000, 1)).isHapticFeedbackCandidate());
+        // Repeating vibrations should not be classified as a haptic feedback.
+        assertFalse(CombinedVibration.createParallel(
+                VibrationEffect.createWaveform(new long[]{1}, new int[]{1}, 0))
+                .isHapticFeedbackCandidate());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidateStereo() {
+        assertTrue(CombinedVibration.startParallel()
+                .addVibrator(1, VibrationEffect.createOneShot(1, 1))
+                .addVibrator(2, VibrationEffect.createWaveform(new long[]{6}, new int[]{1}, -1))
+                .combine()
+                .isHapticFeedbackCandidate());
+        assertTrue(CombinedVibration.startParallel()
+                .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(2,
+                        VibrationEffect.startComposition()
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 100)
+                                .compose())
+                .combine()
+                .isHapticFeedbackCandidate());
+        // Repeating vibrations should not be classified as a haptic feedback.
+        assertFalse(CombinedVibration.startParallel()
+                .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(2, VibrationEffect.createWaveform(new long[]{1}, new int[]{1}, 0))
+                .combine()
+                .isHapticFeedbackCandidate());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidateSequential() {
+        assertTrue(CombinedVibration.startSequential()
+                .addNext(1, VibrationEffect.createOneShot(10, 10), 10)
+                .addNext(2, VibrationEffect.createWaveform(new long[]{5}, new int[]{1}, -1))
+                .combine()
+                .isHapticFeedbackCandidate());
+        assertTrue(CombinedVibration.startSequential()
+                .addNext(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addNext(2,
+                        VibrationEffect.startComposition()
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_SLOW_RISE)
+                                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_FALL)
+                                .compose())
+                .combine()
+                .isHapticFeedbackCandidate());
+        // Repeating vibrations should not be classified as a haptic feedback.
+        assertFalse(CombinedVibration.startSequential()
+                .addNext(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addNext(2, VibrationEffect.createWaveform(new long[]{1}, new int[]{1}, 0))
+                .combine()
+                .isHapticFeedbackCandidate());
+        // Too many effects to be classified as a haptic feedback.
+        assertFalse(CombinedVibration.startSequential()
+                .addNext(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addNext(2, VibrationEffect.get(VibrationEffect.EFFECT_TICK))
+                .addNext(3, VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK))
+                .addNext(1, VibrationEffect.get(VibrationEffect.EFFECT_THUD))
+                .combine()
+                .isHapticFeedbackCandidate());
     }
 
     @Test

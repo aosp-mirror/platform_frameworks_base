@@ -62,7 +62,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public final class StageTaskListenerTests extends ShellTestCase {
     private static final boolean ENABLE_SHELL_TRANSITIONS =
-            SystemProperties.getBoolean("persist.debug.shell_transit", false);
+            SystemProperties.getBoolean("persist.wm.debug.shell_transit", false);
 
     @Mock
     private ShellTaskOrganizer mTaskOrganizer;
@@ -132,6 +132,7 @@ public final class StageTaskListenerTests extends ShellTestCase {
 
     @Test
     public void testTaskAppeared_notifiesUnfoldListener() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         final ActivityManager.RunningTaskInfo task =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
 
@@ -142,6 +143,7 @@ public final class StageTaskListenerTests extends ShellTestCase {
 
     @Test
     public void testTaskVanished_notifiesUnfoldListener() {
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         final ActivityManager.RunningTaskInfo task =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
         mStageTaskListener.onTaskAppeared(task, mSurfaceControl);

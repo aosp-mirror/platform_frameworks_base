@@ -27,7 +27,6 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.dockedStackDividerBecomesVisible
@@ -52,9 +51,9 @@ import org.junit.runners.Parameterized
 class EnterSplitScreenLaunchToSide(
     testSpec: FlickerTestParameter
 ) : LegacySplitScreenTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            super.transition(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            super.transition(this)
             transitions {
                 device.launchSplitScreen(wmHelper)
                 device.reopenAppFromOverview(wmHelper)
@@ -69,13 +68,13 @@ class EnterSplitScreenLaunchToSide(
     @Presubmit
     @Test
     fun dockedStackPrimaryBoundsIsVisibleAtEnd() =
-        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+        testSpec.dockedStackPrimaryBoundsIsVisibleAtEnd(testSpec.startRotation,
             splitScreenApp.component)
 
     @Presubmit
     @Test
     fun dockedStackSecondaryBoundsIsVisibleAtEnd() =
-        testSpec.dockedStackSecondaryBoundsIsVisibleAtEnd(testSpec.config.startRotation,
+        testSpec.dockedStackSecondaryBoundsIsVisibleAtEnd(testSpec.startRotation,
             secondaryApp.component)
 
     @Presubmit

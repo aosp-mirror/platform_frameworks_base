@@ -20,7 +20,8 @@
         {
           "include-filter": "com.google.android.media.gts.WidevineH264PlaybackTests"
         }
-      ]
+      ],
+      "file_patterns": ["(?i)drm|crypto"]
     }
   ],
   "imports": [

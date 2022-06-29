@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.filters.SmallTest;
@@ -41,6 +42,7 @@ import java.util.Objects;
  * Run with: atest FrameworksCoreTests:android.os.BundleTest
  */
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BundleTest {
     private Log.TerribleFailureHandler mWtfHandler;

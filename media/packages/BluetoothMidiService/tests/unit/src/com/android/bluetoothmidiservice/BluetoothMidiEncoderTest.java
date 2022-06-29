@@ -42,11 +42,12 @@ public class BluetoothMidiEncoderTest {
     static class AccumulatingPacketReceiver implements PacketEncoder.PacketReceiver {
         ArrayList<byte[]> mBuffers = new ArrayList<byte[]>();
 
-        public void writePacket(byte[] buffer, int count) {
+        public boolean writePacket(byte[] buffer, int count) {
             byte[] actualRow = new byte[count];
             Log.d(TAG, "writePacket() passed " + MidiFramer.formatMidiData(buffer, 0, count));
             System.arraycopy(buffer, 0, actualRow, 0, count);
             mBuffers.add(actualRow);
+            return true;
         }
 
         byte[][] getBuffers() {

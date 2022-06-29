@@ -17,6 +17,7 @@
 package android.os.vibrator;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 
@@ -104,5 +105,50 @@ public class PrebakedSegmentTest {
         PrebakedSegment prebaked = new PrebakedSegment(
                 VibrationEffect.EFFECT_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM);
         assertSame(prebaked, prebaked.scale(0.5f));
+    }
+
+    @Test
+    public void testDuration() {
+        assertEquals(-1, new PrebakedSegment(
+                VibrationEffect.EFFECT_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .getDuration());
+        assertEquals(-1, new PrebakedSegment(
+                VibrationEffect.EFFECT_TICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .getDuration());
+        assertEquals(-1, new PrebakedSegment(
+                VibrationEffect.EFFECT_DOUBLE_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .getDuration());
+        assertEquals(-1, new PrebakedSegment(
+                VibrationEffect.EFFECT_THUD, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .getDuration());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidate_prebakedConstants_areCandidates() {
+        assertTrue(new PrebakedSegment(
+                VibrationEffect.EFFECT_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .isHapticFeedbackCandidate());
+        assertTrue(new PrebakedSegment(
+                VibrationEffect.EFFECT_TICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .isHapticFeedbackCandidate());
+        assertTrue(new PrebakedSegment(
+                VibrationEffect.EFFECT_DOUBLE_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .isHapticFeedbackCandidate());
+        assertTrue(new PrebakedSegment(
+                VibrationEffect.EFFECT_HEAVY_CLICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .isHapticFeedbackCandidate());
+        assertTrue(new PrebakedSegment(
+                VibrationEffect.EFFECT_THUD, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .isHapticFeedbackCandidate());
+        assertTrue(new PrebakedSegment(
+                VibrationEffect.EFFECT_TEXTURE_TICK, true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .isHapticFeedbackCandidate());
+    }
+
+    @Test
+    public void testIsHapticFeedbackCandidate_prebakedRingtones_notCandidates() {
+        assertFalse(new PrebakedSegment(
+                VibrationEffect.RINGTONES[1], true, VibrationEffect.EFFECT_STRENGTH_MEDIUM)
+                .isHapticFeedbackCandidate());
     }
 }

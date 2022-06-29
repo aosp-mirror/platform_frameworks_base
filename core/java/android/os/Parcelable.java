@@ -45,16 +45,13 @@ import java.lang.annotation.RetentionPolicy;
  *         out.writeInt(mData)
  *     }
  *
- *     companion object {
- *         val CREATOR: Parcelable.Creator&lt;MyParcelable?&gt;
- *                 = object : Parcelable.Creator&lt;MyParcelable?&gt; {
- *             override fun createFromParcel(`in`: Parcel): MyParcelable? {
- *                 return MyParcelable(`in`)
- *             }
+ *     companion object CREATOR: Parcelable.Creator&lt;MyParcelable?&gt; {
+ *         override fun createFromParcel(`in`: Parcel): MyParcelable? {
+ *             return MyParcelable(`in`)
+ *         }
  *
- *             override fun newArray(size: Int): Array&lt;MyParcelable?&gt; {
- *                 return arrayOfNulls(size)
- *             }
+ *         override fun newArray(size: Int): Array&lt;MyParcelable?&gt; {
+ *             return arrayOfNulls(size)
  *         }
  *     }
  * }

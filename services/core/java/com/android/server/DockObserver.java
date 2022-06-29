@@ -19,7 +19,6 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -32,24 +31,27 @@ import android.os.SystemClock;
 import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.server.ExtconUEventObserver.ExtconInfo;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * DockObserver monitors for a docking station.
  */
 final class DockObserver extends SystemService {
     private static final String TAG = "DockObserver";
-
-    private static final String DOCK_UEVENT_MATCH = "DEVPATH=/devices/virtual/switch/dock";
-    private static final String DOCK_STATE_PATH = "/sys/class/switch/dock/state";
 
     private static final int MSG_DOCK_STATE_CHANGED = 0;
 
@@ -69,6 +71,92 @@ final class DockObserver extends SystemService {
 
     private final boolean mAllowTheaterModeWakeFromDock;
 
+    private final List<ExtconStateConfig> mExtconStateConfigs;
+
+    static final class ExtconStateProvider {
+        private final Map<String, String> mState;
+
+        ExtconStateProvider(Map<String, String> state) {
+            mState = state;
+        }
+
+        String getValue(String key) {
+            return mState.get(key);
+        }
+
+
+        static ExtconStateProvider fromString(String stateString) {
+            Map<String, String> states = new HashMap<>();
+            String[] lines = stateString.split("\n");
+            for (String line : lines) {
+                String[] fields = line.split("=");
+                if (fields.length == 2) {
+                    states.put(fields[0], fields[1]);
+                } else {
+                    Slog.e(TAG, "Invalid line: " + line);
+                }
+            }
+            return new ExtconStateProvider(states);
+        }
+
+        static ExtconStateProvider fromFile(String stateFilePath) {
+            char[] buffer = new char[1024];
+            try (FileReader file = new FileReader(stateFilePath)) {
+                int len = file.read(buffer, 0, 1024);
+                String stateString = (new String(buffer, 0, len)).trim();
+                return ExtconStateProvider.fromString(stateString);
+            } catch (FileNotFoundException e) {
+                Slog.w(TAG, "No state file found at: " + stateFilePath);
+                return new ExtconStateProvider(new HashMap<>());
+            } catch (Exception e) {
+                Slog.e(TAG, "" , e);
+                return new ExtconStateProvider(new HashMap<>());
+            }
+        }
+    }
+
+    /**
+     * Represents a mapping from extcon state to EXTRA_DOCK_STATE value. Each
+     * instance corresponds to an entry in config_dockExtconStateMapping.
+     */
+    private static final class ExtconStateConfig {
+
+        // The EXTRA_DOCK_STATE that will be used if the extcon key-value pairs match
+        public final int extraStateValue;
+
+        // A list of key-value pairs that must be present in the extcon state for a match
+        // to be considered. An empty list is considered a matching wildcard.
+        public final List<Pair<String, String>> keyValuePairs = new ArrayList<>();
+
+        ExtconStateConfig(int extraStateValue) {
+            this.extraStateValue = extraStateValue;
+        }
+    }
+
+    private static List<ExtconStateConfig> loadExtconStateConfigs(Context context) {
+        String[] rows = context.getResources().getStringArray(
+            com.android.internal.R.array.config_dockExtconStateMapping);
+        try {
+            ArrayList<ExtconStateConfig> configs = new ArrayList<>();
+            for (String row : rows) {
+                String[] rowFields = row.split(",");
+                ExtconStateConfig config = new ExtconStateConfig(Integer.parseInt(rowFields[0]));
+                for (int i = 1; i < rowFields.length; i++) {
+                    String[] keyValueFields = rowFields[i].split("=");
+                    if (keyValueFields.length != 2) {
+                        throw new IllegalArgumentException("Invalid key-value: " + rowFields[i]);
+                    }
+                    config.keyValuePairs.add(Pair.create(keyValueFields[0], keyValueFields[1]));
+                }
+                configs.add(config);
+            }
+            return configs;
+        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
+            Slog.e(TAG, "Could not parse extcon state config", e);
+            return new ArrayList<>();
+        }
+    }
+
     public DockObserver(Context context) {
         super(context);
 
@@ -77,9 +165,25 @@ final class DockObserver extends SystemService {
         mAllowTheaterModeWakeFromDock = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromDock);
 
-        init();  // set initial status
+        mExtconStateConfigs = loadExtconStateConfigs(context);
 
-        mObserver.startObserving(DOCK_UEVENT_MATCH);
+        List<ExtconInfo> infos = ExtconInfo.getExtconInfoForTypes(new String[] {
+                ExtconInfo.EXTCON_DOCK
+        });
+
+        if (!infos.isEmpty()) {
+            ExtconInfo info = infos.get(0);
+            Slog.i(TAG, "Found extcon info devPath: " + info.getDevicePath()
+                        + ", statePath: " + info.getStatePath());
+
+            // set initial status
+            setDockStateFromProviderLocked(ExtconStateProvider.fromFile(info.getStatePath()));
+            mPreviousDockState = mActualDockState;
+
+            mExtconUEventObserver.startObserving(info);
+        } else {
+            Slog.i(TAG, "No extcon dock device found in this kernel.");
+        }
     }
 
     @Override
@@ -97,26 +201,6 @@ final class DockObserver extends SystemService {
                 if (mReportedDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
                     updateLocked();
                 }
-            }
-        }
-    }
-
-    private void init() {
-        synchronized (mLock) {
-            try {
-                char[] buffer = new char[1024];
-                FileReader file = new FileReader(DOCK_STATE_PATH);
-                try {
-                    int len = file.read(buffer, 0, 1024);
-                    setActualDockStateLocked(Integer.parseInt((new String(buffer, 0, len)).trim()));
-                    mPreviousDockState = mActualDockState;
-                } finally {
-                    file.close();
-                }
-            } catch (FileNotFoundException e) {
-                Slog.w(TAG, "This kernel does not have dock station support");
-            } catch (Exception e) {
-                Slog.e(TAG, "" , e);
             }
         }
     }
@@ -234,19 +318,50 @@ final class DockObserver extends SystemService {
         }
     };
 
-    private final UEventObserver mObserver = new UEventObserver() {
-        @Override
-        public void onUEvent(UEventObserver.UEvent event) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Slog.v(TAG, "Dock UEVENT: " + event.toString());
+    private int getDockedStateExtraValue(ExtconStateProvider state) {
+        for (ExtconStateConfig config : mExtconStateConfigs) {
+            boolean match = true;
+            for (Pair<String, String> keyValue : config.keyValuePairs) {
+                String stateValue = state.getValue(keyValue.first);
+                match = match && keyValue.second.equals(stateValue);
+                if (!match) {
+                    break;
+                }
             }
 
-            try {
-                synchronized (mLock) {
-                    setActualDockStateLocked(Integer.parseInt(event.get("SWITCH_STATE")));
+            if (match) {
+                return config.extraStateValue;
+            }
+        }
+
+        return Intent.EXTRA_DOCK_STATE_DESK;
+    }
+
+    @VisibleForTesting
+    void setDockStateFromProviderForTesting(ExtconStateProvider provider) {
+        synchronized (mLock) {
+            setDockStateFromProviderLocked(provider);
+        }
+    }
+
+    private void setDockStateFromProviderLocked(ExtconStateProvider provider) {
+        int state = Intent.EXTRA_DOCK_STATE_UNDOCKED;
+        if ("1".equals(provider.getValue("DOCK"))) {
+            state = getDockedStateExtraValue(provider);
+        }
+        setActualDockStateLocked(state);
+    }
+
+    private final ExtconUEventObserver mExtconUEventObserver = new ExtconUEventObserver() {
+        @Override
+        public void onUEvent(ExtconInfo extconInfo, UEventObserver.UEvent event) {
+            synchronized (mLock) {
+                String stateString = event.get("STATE");
+                if (stateString != null) {
+                    setDockStateFromProviderLocked(ExtconStateProvider.fromString(stateString));
+                } else {
+                    Slog.e(TAG, "Extcon event missing STATE: " + event);
                 }
-            } catch (NumberFormatException e) {
-                Slog.e(TAG, "Could not parse switch state from event " + event);
             }
         }
     };

@@ -39,6 +39,9 @@ import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_RE
 import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_FULL_SCREEN;
 import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_UNKNOWN_MODE;
 import static com.android.internal.util.FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_WINDOW;
+import static com.android.internal.util.FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_CLICKED;
+import static com.android.internal.util.FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_SERVICE_DISABLED;
+import static com.android.internal.util.FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_SHOWN;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -50,6 +53,16 @@ import com.android.internal.util.FrameworkStatsLog;
 
 /** Methods for logging accessibility states. */
 public final class AccessibilityStatsLogUtils {
+    /** The status represents an accessibility privacy warning has been shown. */
+    public static int ACCESSIBILITY_PRIVACY_WARNING_STATUS_SHOWN =
+            NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_SHOWN;
+    /** The status represents an accessibility privacy warning has been clicked to review. */
+    public static int ACCESSIBILITY_PRIVACY_WARNING_STATUS_CLICKED =
+            NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_CLICKED;
+    /** The status represents an accessibility privacy warning service has been disabled. */
+    public static int ACCESSIBILITY_PRIVACY_WARNING_STATUS_SERVICE_DISABLED =
+            NON_A11Y_TOOL_SERVICE_WARNING_REPORTED__STATUS__WARNING_SERVICE_DISABLED;
+
     private static final int UNKNOWN_STATUS =
             ACCESSIBILITY_SHORTCUT_REPORTED__SERVICE_STATUS__UNKNOWN;
 
@@ -152,6 +165,23 @@ public final class AccessibilityStatsLogUtils {
     public static void logMagnificationModeWithImeOn(int mode) {
         FrameworkStatsLog.write(FrameworkStatsLog.MAGNIFICATION_MODE_WITH_IME_ON_REPORTED,
                 convertToLoggingMagnificationMode(mode));
+    }
+
+    /**
+     * Logs the warning status of the non-a11yTool service. Calls this when the warning status is
+     * changed.
+     *
+     * @param packageName    The package name of the non-a11yTool service
+     * @param status         The warning status of the non-a11yTool service, it should be one of
+     *                       {@code ACCESSIBILITY_PRIVACY_WARNING_STATUS_SHOWN},{@code
+     *                       ACCESSIBILITY_PRIVACY_WARNING_STATUS_CLICKED} and {@code
+     *                       ACCESSIBILITY_PRIVACY_WARNING_STATUS_SERVICE_DISABLED}
+     * @param durationMillis The duration in milliseconds between current and previous status
+     */
+    public static void logNonA11yToolServiceWarningReported(String packageName, int status,
+            long durationMillis) {
+        FrameworkStatsLog.write(FrameworkStatsLog.NON_A11Y_TOOL_SERVICE_WARNING_REPORT,
+                packageName, status, durationMillis);
     }
 
     private static boolean isAccessibilityFloatingMenuEnabled(Context context) {

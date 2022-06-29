@@ -86,6 +86,11 @@
     <item msgid="5715725170633593906">"已关闭"</item>
     <item msgid="2075645297847971154">"已开启"</item>
   </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"不可用"</item>
+    <item msgid="1909756493418256167">"关闭"</item>
+    <item msgid="4531508423703413340">"开启"</item>
+  </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"不可用"</item>
     <item msgid="9103697205127645916">"已关闭"</item>
@@ -151,9 +156,19 @@
     <item msgid="7571394439974244289">"已关闭"</item>
     <item msgid="6866424167599381915">"已开启"</item>
   </string-array>
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"不可用"</item>
+    <item msgid="3301403109049256043">"已关闭"</item>
+    <item msgid="8878684975184010135">"已开启"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"不可用"</item>
     <item msgid="2710157085538036590">"已关闭"</item>
     <item msgid="7809470840976856149">"已开启"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"不可用"</item>
+    <item msgid="146088982397753810">"已关闭"</item>
+    <item msgid="460891964396502657">"已开启"</item>
   </string-array>
 </resources>

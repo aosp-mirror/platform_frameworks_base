@@ -40,6 +40,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 /**
@@ -169,21 +170,35 @@ public class PackageConfigPersister {
         }
     }
 
+    /**
+     * Returns true when the app specific configuration is successfully stored or removed based on
+     * the current requested configuration. It will return false when the requested
+     * configuration is same as the pre-existing app-specific configuration.
+     */
     @GuardedBy("mLock")
-    void updateFromImpl(String packageName, int userId,
+    boolean updateFromImpl(String packageName, int userId,
             PackageConfigurationUpdaterImpl impl) {
         synchronized (mLock) {
-            PackageConfigRecord record = findRecordOrCreate(mModified, packageName, userId);
-            if (impl.getNightMode() != null) {
-                record.mNightMode = impl.getNightMode();
+            boolean isRecordPresent = false;
+            PackageConfigRecord record = findRecord(mModified, packageName, userId);
+            if (record != null) {
+                isRecordPresent = true;
+            } else {
+                record = findRecordOrCreate(mModified, packageName, userId);
             }
-            if (impl.getLocales() != null) {
-                record.mLocales = impl.getLocales();
-            }
+            boolean isNightModeChanged = updateNightMode(impl.getNightMode(), record);
+            boolean isLocalesChanged = updateLocales(impl.getLocales(), record);
+
             if ((record.mNightMode == null || record.isResetNightMode())
                     && (record.mLocales == null || record.mLocales.isEmpty())) {
                 // if all values default to system settings, we can remove the package.
                 removePackage(packageName, userId);
+                // if there was a pre-existing record for the package that was deleted,
+                // we return true (since it was successfully deleted), else false (since there was
+                // no change to the previous state).
+                return isRecordPresent;
+            } else if (!isNightModeChanged && !isLocalesChanged) {
+                return false;
             } else {
                 final PackageConfigRecord pendingRecord =
                         findRecord(mPendingWrite, record.mName, record.mUserId);
@@ -195,31 +210,33 @@ public class PackageConfigPersister {
                     writeRecord = pendingRecord;
                 }
 
-                if (!updateNightMode(record, writeRecord) && !updateLocales(record, writeRecord)) {
-                    return;
+                if (!updateNightMode(record.mNightMode, writeRecord)
+                        && !updateLocales(record.mLocales, writeRecord)) {
+                    return false;
                 }
 
                 if (DEBUG) {
                     Slog.d(TAG, "PackageConfigUpdater save config " + writeRecord);
                 }
                 mPersisterQueue.addItem(new WriteProcessItem(writeRecord), false /* flush */);
+                return true;
             }
         }
     }
 
-    private boolean updateNightMode(PackageConfigRecord record, PackageConfigRecord writeRecord) {
-        if (record.mNightMode == null || record.mNightMode.equals(writeRecord.mNightMode)) {
+    private boolean updateNightMode(Integer requestedNightMode, PackageConfigRecord record) {
+        if (requestedNightMode == null || requestedNightMode.equals(record.mNightMode)) {
             return false;
         }
-        writeRecord.mNightMode = record.mNightMode;
+        record.mNightMode = requestedNightMode;
         return true;
     }
 
-    private boolean updateLocales(PackageConfigRecord record, PackageConfigRecord writeRecord) {
-        if (record.mLocales == null || record.mLocales.equals(writeRecord.mLocales)) {
+    private boolean updateLocales(LocaleList requestedLocaleList, PackageConfigRecord record) {
+        if (requestedLocaleList == null || requestedLocaleList.equals(record.mLocales)) {
             return false;
         }
-        writeRecord.mLocales = record.mLocales;
+        record.mLocales = requestedLocaleList;
         return true;
     }
 
@@ -240,12 +257,16 @@ public class PackageConfigPersister {
     }
 
     @GuardedBy("mLock")
-    void onPackageUninstall(String packageName) {
+    void onPackageUninstall(String packageName, int userId) {
         synchronized (mLock) {
-            for (int i = mModified.size() - 1; i >= 0; i--) {
-                final int userId = mModified.keyAt(i);
-                removePackage(packageName, userId);
-            }
+            removePackage(packageName, userId);
+        }
+    }
+
+    @GuardedBy("mLock")
+    void onPackageDataCleared(String packageName, int userId) {
+        synchronized (mLock) {
+            removePackage(packageName, userId);
         }
     }
 
@@ -285,6 +306,27 @@ public class PackageConfigPersister {
             }
             return new ActivityTaskManagerInternal.PackageConfig(
                     packageConfigRecord.mNightMode, packageConfigRecord.mLocales);
+        }
+    }
+
+    /**
+     * Dumps app-specific configurations for all packages for which the records
+     * exist.
+     */
+    void dump(PrintWriter pw, int userId) {
+        pw.println("INSTALLED PACKAGES HAVING APP-SPECIFIC CONFIGURATIONS");
+        pw.println("Current user ID : " + userId);
+        synchronized (mLock) {
+            HashMap<String, PackageConfigRecord> persistedPackageConfigMap = mModified.get(userId);
+            if (persistedPackageConfigMap != null) {
+                for (PackageConfigPersister.PackageConfigRecord packageConfig
+                        : persistedPackageConfigMap.values()) {
+                    pw.println();
+                    pw.println("    PackageName : " + packageConfig.mName);
+                    pw.println("        NightMode : " + packageConfig.mNightMode);
+                    pw.println("        Locales : " + packageConfig.mLocales);
+                }
+            }
         }
     }
 

@@ -55,7 +55,7 @@ template <typename T = Value>
 T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece& res_name,
                                const android::ConfigDescription& config,
                                const android::StringPiece& product) {
-  Maybe<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
+  std::optional<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
   if (result) {
     ResourceConfigValue* config_value = result.value().entry->FindValue(config, product);
     if (config_value) {
@@ -130,7 +130,7 @@ template std::ostream& operator<<<Plural>(std::ostream&, const Plural&);
 
 // Add a print method to Maybe.
 template <typename T>
-void PrintTo(const Maybe<T>& value, std::ostream* out) {
+void PrintTo(const std::optional<T>& value, std::ostream* out) {
   if (value) {
     *out << ::testing::PrintToString(value.value());
   } else {

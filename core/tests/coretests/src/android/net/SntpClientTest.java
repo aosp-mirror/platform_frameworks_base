@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import android.net.sntp.Duration64;
 import android.net.sntp.Timestamp64;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -49,6 +50,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Supplier;
 
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class SntpClientTest {
     private static final String TAG = "SntpClientTest";

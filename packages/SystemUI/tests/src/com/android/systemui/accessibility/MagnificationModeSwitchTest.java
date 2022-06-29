@@ -55,10 +55,9 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.SparseIntArray;
 import android.view.Choreographer;
 import android.view.MotionEvent;
 import android.view.View;
@@ -70,7 +69,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -90,7 +88,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 @SmallTest
-@FlakyTest(bugId = 188890599)
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MagnificationModeSwitchTest extends SysuiTestCase {
@@ -103,6 +100,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
     @Mock
     private SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
+    private SwitchListenerStub mSwitchListener;
     private TestableWindowManager mWindowManager;
     private ViewPropertyAnimator mViewPropertyAnimator;
     private MagnificationModeSwitch mMagnificationModeSwitch;
@@ -113,7 +111,9 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContext = Mockito.spy(getContext());
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
+        mSwitchListener = new SwitchListenerStub();
         mWindowManager = spy(new TestableWindowManager(wm));
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
         mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
@@ -132,7 +132,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         }).when(mSfVsyncFrameProvider).postFrameCallback(
                 any(Choreographer.FrameCallback.class));
         mMagnificationModeSwitch = new MagnificationModeSwitch(mContext, mSpyImageView,
-                mSfVsyncFrameProvider);
+                mSfVsyncFrameProvider, mSwitchListener);
         assertNotNull(mTouchListener);
     }
 
@@ -140,16 +140,18 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     public void tearDown() {
         mFadeOutAnimation = null;
         mMotionEventHelper.recycleEvents();
+        mMagnificationModeSwitch.removeButton();
     }
 
     @Test
-    public void removeButton_buttonIsShowing_removeView() {
+    public void removeButton_buttonIsShowing_removeViewAndUnregisterComponentCallbacks() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
         mMagnificationModeSwitch.removeButton();
 
         verify(mWindowManager).removeView(mSpyImageView);
         verify(mViewPropertyAnimator).cancel();
+        verify(mContext).unregisterComponentCallbacks(mMagnificationModeSwitch);
     }
 
     @Test
@@ -328,8 +330,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     public void performDragging_showMagnificationButton_updateViewLayout() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         resetAndStubMockImageViewAndAnimator();
-        final int previousMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0, UserHandle.USER_CURRENT);
 
         // Perform dragging
         final int offset = ViewConfiguration.get(mContext).getScaledTouchSlop() + 10;
@@ -347,7 +347,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
                 downTime, downTime, ACTION_UP, 100 + offset, 100));
 
-        assertModeUnchanged(previousMode);
+        assertModeUnchanged();
         assertShowFadingAnimation(FADE_OUT_ALPHA);
     }
 
@@ -355,8 +355,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     public void performSingleTapActionCanceled_showButtonAnimation() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         resetAndStubMockImageViewAndAnimator();
-        final int previousMode = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
 
         final long downTime = SystemClock.uptimeMillis();
         mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
@@ -365,7 +363,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
                 downTime, downTime, ACTION_CANCEL, 100, 100));
 
-        assertModeUnchanged(previousMode);
+        assertModeUnchanged();
         assertShowFadingAnimation(FADE_OUT_ALPHA);
     }
 
@@ -373,8 +371,6 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     public void performDraggingActionCanceled_showButtonAnimation() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         resetAndStubMockImageViewAndAnimator();
-        final int previousMode = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
 
         // Perform dragging
         final long downTime = SystemClock.uptimeMillis();
@@ -387,7 +383,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         mTouchListener.onTouch(mSpyImageView, obtainMotionEvent(
                 downTime, downTime, ACTION_CANCEL, 100 + offset, 100));
 
-        assertModeUnchanged(previousMode);
+        assertModeUnchanged();
         assertShowFadingAnimation(FADE_OUT_ALPHA);
     }
 
@@ -471,6 +467,13 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     }
 
     @Test
+    public void showButton_registerComponentCallbacks() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        verify(mContext).registerComponentCallbacks(mMagnificationModeSwitch);
+    }
+
+    @Test
     public void onLocaleChanged_buttonIsShowing_updateA11yWindowTitle() {
         final String newA11yWindowTitle = "new a11y window title";
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
@@ -531,10 +534,9 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertEquals(expectedY, mWindowManager.getLayoutParamsFromAttachedView().y);
     }
 
-    private void assertModeUnchanged(int expectedMode) {
-        final int actualMode = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0);
-        assertEquals(expectedMode, actualMode);
+    private void assertModeUnchanged() {
+        assertEquals(SwitchListenerStub.MODE_INVALID,
+                mSwitchListener.getChangedMode(mContext.getDisplayId()));
     }
 
     private void assertShowFadingAnimation(float alpha) {
@@ -596,9 +598,8 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         verify(mSpyImageView).setImageResource(
                 getIconResId(expectedMode));
         verify(mWindowManager).removeView(mSpyImageView);
-        final int actualMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, 0, UserHandle.USER_CURRENT);
-        assertEquals(expectedMode, actualMode);
+        final int changedMode = mSwitchListener.getChangedMode(mContext.getDisplayId());
+        assertEquals(expectedMode, changedMode);
     }
 
     private MotionEvent obtainMotionEvent(long downTime, long eventTime, int action, float x,
@@ -622,5 +623,21 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertNotNull(layoutParams);
         assertEquals(expectedX, layoutParams.x);
         assertEquals(expectedY, layoutParams.y);
+    }
+
+    private static class SwitchListenerStub implements MagnificationModeSwitch.SwitchListener {
+
+        private static final int MODE_INVALID = -1;
+
+        private final SparseIntArray mModes = new SparseIntArray();
+
+        @Override
+        public void onSwitch(int displayId, int magnificationMode) {
+            mModes.put(displayId, magnificationMode);
+        }
+
+        int getChangedMode(int displayId) {
+            return mModes.get(displayId, MODE_INVALID);
+        }
     }
 }

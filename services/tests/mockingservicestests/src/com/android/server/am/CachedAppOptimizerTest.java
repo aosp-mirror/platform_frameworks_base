@@ -40,10 +40,10 @@ import android.text.TextUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.modules.utils.testing.TestableDeviceConfig;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
-import com.android.server.testables.TestableDeviceConfig;
 import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
@@ -97,7 +97,7 @@ public final class CachedAppOptimizerTest {
 
     @Before
     public void setUp() {
-        System.loadLibrary("activitymanagermockingservicestestjni");
+        System.loadLibrary("mockingservicestestjni");
         mHandlerThread = new HandlerThread("");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
@@ -857,6 +857,7 @@ public final class CachedAppOptimizerTest {
                 .containsExactlyElementsIn(expected);
     }
 
+    @SuppressWarnings("GuardedBy")
     @Test
     public void processWithDeltaRSSTooSmall_notFullCompacted() throws Exception {
         // Initialize CachedAppOptimizer and set flags to (1) enable compaction, (2) set RSS
@@ -892,7 +893,7 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssBefore1);
         mProcessDependencies.setRssAfterCompaction(rssAfter1); //
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
         waitForHandler();
         // THEN process IS compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
@@ -907,7 +908,7 @@ public final class CachedAppOptimizerTest {
         processRecord.mOptRecord.setLastCompactTime(
                 processRecord.mOptRecord.getLastCompactTime() - 10_000);
         // WHEN we try to run compaction.
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
         waitForHandler();
         // THEN process IS NOT compacted - values after compaction for process 1 should remain the
         // same as from the last compaction.
@@ -923,7 +924,7 @@ public final class CachedAppOptimizerTest {
         processRecord.mOptRecord.setLastCompactTime(
                 processRecord.mOptRecord.getLastCompactTime() - 10_000);
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
         waitForHandler();
         // THEN process IS compacted - values after compaction for process 1 should be updated.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
@@ -932,6 +933,7 @@ public final class CachedAppOptimizerTest {
         assertThat(valuesAfter).isEqualTo(rssAfter3);
     }
 
+    @SuppressWarnings("GuardedBy")
     @Test
     public void processWithAnonRSSTooSmall_notFullCompacted() throws Exception {
         // Initialize CachedAppOptimizer and set flags to (1) enable compaction, (2) set RSS
@@ -963,7 +965,7 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssBelowThreshold);
         mProcessDependencies.setRssAfterCompaction(rssBelowThresholdAfter);
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
         waitForHandler();
         // THEN process IS NOT compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
@@ -972,7 +974,7 @@ public final class CachedAppOptimizerTest {
         mProcessDependencies.setRss(rssAboveThreshold);
         mProcessDependencies.setRssAfterCompaction(rssAboveThresholdAfter);
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
         waitForHandler();
         // THEN process IS compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
@@ -981,6 +983,7 @@ public final class CachedAppOptimizerTest {
         assertThat(valuesAfter).isEqualTo(rssAboveThresholdAfter);
     }
 
+    @SuppressWarnings("GuardedBy")
     @Test
     public void processWithOomAdjTooSmall_notFullCompacted() throws Exception {
         // Initialize CachedAppOptimizer and set flags to (1) enable compaction, (2) set Min and
@@ -993,10 +996,11 @@ public final class CachedAppOptimizerTest {
 
         // Simulate RSS memory for which compaction should occur.
         long[] rssBefore =
-            new long[]{/*Total RSS*/ 15000, /*File RSS*/ 15000, /*Anon RSS*/ 15000,
-                /*Swap*/ 10000};
+                new long[]{/*Total RSS*/ 15000, /*File RSS*/ 15000, /*Anon RSS*/ 15000,
+                        /*Swap*/ 10000};
         long[] rssAfter =
-            new long[]{/*Total RSS*/ 8000, /*File RSS*/ 9000, /*Anon RSS*/ 6000, /*Swap*/5000};
+                new long[]{/*Total RSS*/ 8000, /*File RSS*/ 9000, /*Anon RSS*/ 6000, /*Swap*/
+                        5000};
         // Process that passes properties.
         int pid = 1;
         ProcessRecord processRecord =
@@ -1010,7 +1014,7 @@ public final class CachedAppOptimizerTest {
         processRecord.mState.setSetAdj(899);
         processRecord.mState.setCurAdj(970);
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
         waitForHandler();
         // THEN process IS NOT compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
@@ -1019,16 +1023,71 @@ public final class CachedAppOptimizerTest {
         processRecord.mState.setSetAdj(910);
         processRecord.mState.setCurAdj(930);
         // WHEN we try to run compaction
-        mCachedAppOptimizerUnderTest.compactAppFull(processRecord);
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
         waitForHandler();
         // THEN process IS compacted.
         assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
         long[] valuesAfter = mCachedAppOptimizerUnderTest.mLastCompactionStats
-            .get(pid)
-            .getRssAfterCompaction();
+                .get(pid)
+                .getRssAfterCompaction();
         assertThat(valuesAfter).isEqualTo(rssAfter);
     }
 
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void process_forceCompacted() throws Exception {
+        mCachedAppOptimizerUnderTest.init();
+        setFlag(CachedAppOptimizer.KEY_USE_COMPACTION, "true", true);
+        setFlag(CachedAppOptimizer.KEY_COMPACT_THROTTLE_MIN_OOM_ADJ, Long.toString(920), true);
+        setFlag(CachedAppOptimizer.KEY_COMPACT_THROTTLE_MAX_OOM_ADJ, Long.toString(950), true);
+        initActivityManagerService();
+
+        long[] rssBefore = new long[] {/*Total RSS*/ 15000, /*File RSS*/ 15000, /*Anon RSS*/ 15000,
+                /*Swap*/ 10000};
+        long[] rssAfter = new long[] {
+                /*Total RSS*/ 8000, /*File RSS*/ 9000, /*Anon RSS*/ 6000, /*Swap*/ 5000};
+        // Process that passes properties.
+        int pid = 1;
+        ProcessRecord processRecord = makeProcessRecord(pid, 2, 3, "p1", "app1");
+        mProcessDependencies.setRss(rssBefore);
+        mProcessDependencies.setRssAfterCompaction(rssAfter);
+
+        // Use an OOM Adjust value that usually avoids compaction
+        processRecord.mState.setSetAdj(100);
+        processRecord.mState.setCurAdj(100);
+
+        // Compact process full
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, false);
+        waitForHandler();
+        // the process is not compacted
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
+
+        // Compact process some
+        mCachedAppOptimizerUnderTest.compactAppSome(processRecord, false);
+        waitForHandler();
+        // the process is not compacted
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNull();
+
+        processRecord.mState.setSetAdj(100);
+        processRecord.mState.setCurAdj(100);
+
+        // We force a full compaction
+        mCachedAppOptimizerUnderTest.compactAppFull(processRecord, true);
+        waitForHandler();
+        // then process is compacted.
+        assertThat(mCachedAppOptimizerUnderTest.mLastCompactionStats.get(pid)).isNotNull();
+
+        mCachedAppOptimizerUnderTest.mLastCompactionStats.clear();
+
+        // We force a some compaction
+        mCachedAppOptimizerUnderTest.compactAppSome(processRecord, true);
+        waitForHandler();
+        // then process is compacted.
+        String executedCompactAction =
+                compactActionIntToString(processRecord.mOptRecord.getLastCompactAction());
+        assertThat(executedCompactAction)
+                .isEqualTo(mCachedAppOptimizerUnderTest.mCompactActionSome);
+    }
 
     private void setFlag(String key, String value, boolean defaultValue) throws Exception {
         mCountDown = new CountDownLatch(1);

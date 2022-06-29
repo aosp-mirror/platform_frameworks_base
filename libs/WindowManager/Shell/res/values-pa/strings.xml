@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"ਬਬਲ ਨੂੰ ਖਾਰਜ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="restart_button_description" msgid="5887656107651190519">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ ਅਤੇ ਪੂਰੀ ਸਕ੍ਰੀਨ ਮੋਡ \'ਤੇ ਜਾਓ।"</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਸਮੱਸਿਆਵਾਂ ਹਨ?\nਮੁੜ-ਫਿੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"ਕੀ ਇਹ ਠੀਕ ਨਹੀਂ ਹੋਈ?\nਵਾਪਸ ਉਹੀ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ਕੀ ਕੈਮਰੇ ਸੰਬੰਧੀ ਕੋਈ ਸਮੱਸਿਆ ਨਹੀਂ ਹੈ? ਖਾਰਜ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"ਕੁਝ ਐਪਾਂ ਪੋਰਟਰੇਟ ਵਿੱਚ ਬਿਹਤਰ ਕੰਮ ਕਰਦੀਆਂ ਹਨ"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"ਆਪਣੀ ਜਗ੍ਹਾ ਦਾ ਵੱਧ ਤੋਂ ਵੱਧ ਲਾਹਾ ਲੈਣ ਲਈ ਇਨ੍ਹਾਂ ਵਿਕਲਪਾਂ ਵਿੱਚੋਂ ਕੋਈ ਇੱਕ ਵਰਤ ਕੇ ਦੇਖੋ"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"ਪੂਰੀ-ਸਕ੍ਰੀਨ ਮੋਡ \'ਤੇ ਜਾਣ ਲਈ ਆਪਣੇ ਡੀਵਾਈਸ ਨੂੰ ਘੁਮਾਓ"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"ਕਿਸੇ ਐਪ ਦੀ ਜਗ੍ਹਾ ਬਦਲਣ ਲਈ ਉਸ ਦੇ ਅੱਗੇ ਡਬਲ ਟੈਪ ਕਰੋ"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"ਸਮਝ ਲਿਆ"</string>
 </resources>

@@ -16,8 +16,9 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import android.service.notification.NotificationListenerService;
+import androidx.annotation.NonNull;
 
+import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
@@ -26,29 +27,23 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 public interface OnUserInteractionCallback {
 
     /**
-     * Handle a user interaction that triggers a notification dismissal. Called when a user clicks
-     * on an auto-cancelled notification or manually swipes to dismiss the notification.
-     *
-     * @param entry notification being dismissed
-     * @param cancellationReason reason for the cancellation
-     * @param groupSummaryToDismiss group summary to dismiss with `entry`.
-     */
-    void onDismiss(
-            NotificationEntry entry,
-            @NotificationListenerService.NotificationCancelReason int cancellationReason,
-            NotificationEntry groupSummaryToDismiss);
-
-    /**
      * Triggered after a user has changed the importance of the notification via its
      * {@link NotificationGuts}.
      */
     void onImportanceChanged(NotificationEntry entry);
 
-
     /**
-     * @param entry being dismissed by the user
-     * @return group summary that should be dismissed along with `entry`. Can be null if no
-     * relevant group summary exists or the group summary should not be dismissed with `entry`.
+     * Called once it is known that a dismissal will take place for the given reason.
+     * This returns a Runnable which MUST be invoked when the dismissal is ready to be completed.
+     *
+     * Registering for future dismissal is typically done before notifying the NMS that a
+     * notification was clicked or dismissed, but the local dismissal may happen later.
+     *
+     * @param entry              the entry being cancelled
+     * @param cancellationReason the reason for the cancellation
+     * @return the runnable to call when the dismissal can happen
      */
-    NotificationEntry getGroupSummaryToDismiss(NotificationEntry entry);
+    @NonNull
+    Runnable registerFutureDismissal(@NonNull NotificationEntry entry,
+            @CancellationReason int cancellationReason);
 }

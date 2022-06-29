@@ -777,37 +777,6 @@ public final class SmsManager {
     }
 
     /**
-     * Send a text based SMS without writing it into the SMS Provider.
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
-     * privileges.
-     * </p>
-     *
-     * <p class="note"><strong>Note:</strong> This method is intended for internal use by carrier
-     * applications or the Telephony framework and will never trigger an SMS disambiguation
-     * dialog. If this method is called on a device that has multiple active subscriptions, this
-     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
-     * default subscription is defined, the subscription ID associated with this message will be
-     * INVALID, which will result in the SMS being sent on the subscription associated with logical
-     * slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the SMS is sent on the
-     * correct subscription.
-     * </p>
-     *
-     * @see #sendTextMessage(String, String, String, PendingIntent,
-     * PendingIntent, int, boolean, int)
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void sendTextMessageWithoutPersisting(
-            String destinationAddress, String scAddress, String text,
-            PendingIntent sentIntent, PendingIntent deliveryIntent, int priority,
-            boolean expectMore, int validityPeriod) {
-        sendTextMessageInternal(destinationAddress, scAddress, text, sentIntent, deliveryIntent,
-                false /* persistMessage */, priority, expectMore, validityPeriod);
-    }
-
-    /**
      *
      * Inject an SMS PDU into the android application framework.
      *
@@ -2579,6 +2548,11 @@ public final class SmsManager {
      */
     public static final int RESULT_RIL_BLOCKED_DUE_TO_CALL = 123;
 
+    /**
+     * A RIL error occurred during the SMS send.
+     */
+    public static final int RESULT_RIL_GENERIC_ERROR = 124;
+
     // SMS receiving results sent as a "result" extra in {@link Intents.SMS_REJECTED_ACTION}
 
     /**
@@ -2695,7 +2669,8 @@ public final class SmsManager {
      * @throws IllegalArgumentException if contentUri is empty
      */
     public void sendMultimediaMessage(@NonNull Context context, @NonNull Uri contentUri,
-            @Nullable String locationUrl, @Nullable Bundle configOverrides,
+            @Nullable String locationUrl,
+            @SuppressWarnings("NullableCollection") @Nullable Bundle configOverrides,
             @Nullable PendingIntent sentIntent, long messageId) {
         if (contentUri == null) {
             throw new IllegalArgumentException("Uri contentUri null");
@@ -2797,7 +2772,8 @@ public final class SmsManager {
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
     public void downloadMultimediaMessage(@NonNull Context context, @NonNull String locationUrl,
-            @NonNull Uri contentUri, @Nullable Bundle configOverrides,
+            @NonNull Uri contentUri,
+            @SuppressWarnings("NullableCollection") @Nullable Bundle configOverrides,
             @Nullable PendingIntent downloadedIntent, long messageId) {
         if (TextUtils.isEmpty(locationUrl)) {
             throw new IllegalArgumentException("Empty MMS location URL");

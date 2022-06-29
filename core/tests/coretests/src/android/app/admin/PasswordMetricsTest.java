@@ -38,8 +38,8 @@ import static org.junit.Assert.assertTrue;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.PasswordValidationError;
 
@@ -324,9 +324,59 @@ public class PasswordMetricsTest {
                 PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
     }
 
+    @Test
+    public void testValidatePasswordMetrics_pinAndComplexityHigh() {
+        PasswordMetrics adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PIN);
+        PasswordMetrics actualMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PIN);
+        actualMetrics.length = 6;
+        actualMetrics.seqLength = 1;
+
+        assertValidationErrors(
+                validatePasswordMetrics(adminMetrics, PASSWORD_COMPLEXITY_HIGH, actualMetrics),
+                PasswordValidationError.TOO_SHORT, 8);
+    }
+
+    @Test
+    public void testValidatePasswordMetrics_nonAllNumberPasswordAndComplexityHigh() {
+        PasswordMetrics adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        PasswordMetrics actualMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        actualMetrics.length = 5;
+        actualMetrics.nonNumeric = 1;
+        actualMetrics.seqLength = 1;
+
+        assertValidationErrors(
+                validatePasswordMetrics(adminMetrics, PASSWORD_COMPLEXITY_HIGH, actualMetrics),
+                PasswordValidationError.TOO_SHORT, 6);
+    }
+
+    @Test
+    public void testValidatePasswordMetrics_allNumberPasswordAndComplexityHigh() {
+        PasswordMetrics adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        PasswordMetrics actualMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        actualMetrics.length = 6;
+        actualMetrics.seqLength = 1;
+
+        assertValidationErrors(
+                validatePasswordMetrics(adminMetrics, PASSWORD_COMPLEXITY_HIGH, actualMetrics),
+                PasswordValidationError.TOO_SHORT_WHEN_ALL_NUMERIC, 8);
+    }
+
+    @Test
+    public void testValidatePasswordMetrics_allNumberPasswordAndRequireNonNumeric() {
+        PasswordMetrics adminMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        adminMetrics.nonNumeric = 1;
+        PasswordMetrics actualMetrics = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        actualMetrics.length = 6;
+        actualMetrics.seqLength = 1;
+
+        assertValidationErrors(
+                validatePasswordMetrics(adminMetrics, PASSWORD_COMPLEXITY_HIGH, actualMetrics),
+                PasswordValidationError.NOT_ENOUGH_NON_DIGITS, 1);
+    }
+
     /**
      * @param expected sequense of validation error codes followed by requirement values, must have
-     *                even number of elements. Empty means no errors.
+     *                 even number of elements. Empty means no errors.
      */
     private void assertValidationErrors(
             List<PasswordValidationError> actualErrors, int... expected) {

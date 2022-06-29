@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.connectivity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.SimpleClock;
@@ -118,6 +117,7 @@ public class AccessPointControllerImpl implements AccessPointController,
     }
 
     public boolean canConfigWifi() {
+        if (!mWifiPickerTrackerFactory.isSupported()) return false;
         return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_WIFI,
                 new UserHandle(mCurrentUser));
     }
@@ -289,7 +289,6 @@ public class AccessPointControllerImpl implements AccessPointController,
         private final Context mContext;
         private final @Nullable WifiManager mWifiManager;
         private final ConnectivityManager mConnectivityManager;
-        private final NetworkScoreManager mNetworkScoreManager;
         private final Handler mMainHandler;
         private final Handler mWorkerHandler;
         private final Clock mClock = new SimpleClock(ZoneOffset.UTC) {
@@ -304,16 +303,18 @@ public class AccessPointControllerImpl implements AccessPointController,
                 Context context,
                 @Nullable WifiManager wifiManager,
                 ConnectivityManager connectivityManager,
-                NetworkScoreManager networkScoreManager,
                 @Main Handler mainHandler,
                 @Background Handler workerHandler
         ) {
             mContext = context;
             mWifiManager = wifiManager;
             mConnectivityManager = connectivityManager;
-            mNetworkScoreManager = networkScoreManager;
             mMainHandler = mainHandler;
             mWorkerHandler = workerHandler;
+        }
+
+        private boolean isSupported() {
+            return mWifiManager != null;
         }
 
         /**
@@ -335,7 +336,6 @@ public class AccessPointControllerImpl implements AccessPointController,
                     mContext,
                     mWifiManager,
                     mConnectivityManager,
-                    mNetworkScoreManager,
                     mMainHandler,
                     mWorkerHandler,
                     mClock,

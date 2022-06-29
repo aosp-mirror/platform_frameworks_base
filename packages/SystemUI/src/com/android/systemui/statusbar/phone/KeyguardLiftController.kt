@@ -16,34 +16,52 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.TriggerEvent
 import android.hardware.TriggerEventListener
+import com.android.keyguard.ActiveUnlockConfig
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.Assert
 import com.android.systemui.util.sensors.AsyncSensorManager
-import java.io.FileDescriptor
 import java.io.PrintWriter
+import javax.inject.Inject
 
-class KeyguardLiftController constructor(
+/**
+ * Triggers face auth on lift when the device is showing the lock screen. Only initialized
+ * if face auth is supported on the device. Not to be confused with the lift to wake gesture
+ * which is handled by {@link com.android.server.policy.PhoneWindowManager}.
+ */
+@SysUISingleton
+class KeyguardLiftController @Inject constructor(
+    private val context: Context,
     private val statusBarStateController: StatusBarStateController,
     private val asyncSensorManager: AsyncSensorManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-    dumpManager: DumpManager
-) : StatusBarStateController.StateListener, Dumpable, KeyguardUpdateMonitorCallback() {
+    private val dumpManager: DumpManager
+) : Dumpable, CoreStartable(context) {
 
     private val pickupSensor = asyncSensorManager.getDefaultSensor(Sensor.TYPE_PICK_UP_GESTURE)
     private var isListening = false
     private var bouncerVisible = false
 
-    init {
+    override fun start() {
+        if (context.packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+            init()
+        }
+    }
+
+    private fun init() {
         dumpManager.registerDumpable(javaClass.name, this)
-        statusBarStateController.addCallback(this)
-        keyguardUpdateMonitor.registerCallback(this)
+        statusBarStateController.addCallback(statusBarStateListener)
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         updateListeningState()
     }
 
@@ -54,23 +72,30 @@ class KeyguardLiftController constructor(
             isListening = false
             updateListeningState()
             keyguardUpdateMonitor.requestFaceAuth(true)
+            keyguardUpdateMonitor.requestActiveUnlock(
+                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.WAKE,
+                "KeyguardLiftController")
         }
     }
 
-    override fun onDozingChanged(isDozing: Boolean) {
-        updateListeningState()
+    private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
+        override fun onKeyguardBouncerFullyShowingChanged(bouncer: Boolean) {
+            bouncerVisible = bouncer
+            updateListeningState()
+        }
+
+        override fun onKeyguardVisibilityChanged(showing: Boolean) {
+            updateListeningState()
+        }
     }
 
-    override fun onKeyguardBouncerChanged(bouncer: Boolean) {
-        bouncerVisible = bouncer
-        updateListeningState()
+    private val statusBarStateListener = object : StatusBarStateController.StateListener {
+        override fun onDozingChanged(isDozing: Boolean) {
+            updateListeningState()
+        }
     }
 
-    override fun onKeyguardVisibilityChanged(showing: Boolean) {
-        updateListeningState()
-    }
-
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("KeyguardLiftController:")
         pw.println("  pickupSensor: $pickupSensor")
         pw.println("  isListening: $isListening")

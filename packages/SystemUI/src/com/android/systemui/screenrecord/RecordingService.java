@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -61,6 +62,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
     private static final String EXTRA_RESULT_CODE = "extra_resultCode";
     private static final String EXTRA_PATH = "extra_path";
     private static final String EXTRA_AUDIO_SOURCE = "extra_useAudio";
+    private static final String EXTRA_SHOW_TAPS = "extra_showTaps";
 
     private static final String ACTION_START = "com.android.systemui.screenrecord.START";
     private static final String ACTION_STOP = "com.android.systemui.screenrecord.STOP";
@@ -72,6 +74,8 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
     private final RecordingController mController;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
     private ScreenRecordingAudioSource mAudioSource;
+    private boolean mShowTaps;
+    private boolean mOriginalShowTaps;
     private ScreenMediaRecorder mRecorder;
     private final Executor mLongExecutor;
     private final UiEventLogger mUiEventLogger;
@@ -98,12 +102,15 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
      *                   android.content.Intent)}
      * @param audioSource   The ordinal value of the audio source
      *                      {@link com.android.systemui.screenrecord.ScreenRecordingAudioSource}
+     * @param showTaps   True to make touches visible while recording
      */
-    public static Intent getStartIntent(Context context, int resultCode, int audioSource) {
+    public static Intent getStartIntent(Context context, int resultCode,
+            int audioSource, boolean showTaps) {
         return new Intent(context, RecordingService.class)
                 .setAction(ACTION_START)
                 .putExtra(EXTRA_RESULT_CODE, resultCode)
-                .putExtra(EXTRA_AUDIO_SOURCE, audioSource);
+                .putExtra(EXTRA_AUDIO_SOURCE, audioSource)
+                .putExtra(EXTRA_SHOW_TAPS, showTaps);
     }
 
     @Override
@@ -121,6 +128,13 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 mAudioSource = ScreenRecordingAudioSource
                         .values()[intent.getIntExtra(EXTRA_AUDIO_SOURCE, 0)];
                 Log.d(TAG, "recording with audio source" + mAudioSource);
+                mShowTaps = intent.getBooleanExtra(EXTRA_SHOW_TAPS, false);
+
+                mOriginalShowTaps = Settings.System.getInt(
+                        getApplicationContext().getContentResolver(),
+                        Settings.System.SHOW_TOUCHES, 0) != 0;
+
+                setTapsVisible(mShowTaps);
 
                 mRecorder = new ScreenMediaRecorder(
                         mUserContextTracker.getUserContext(),
@@ -365,6 +379,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
     }
 
     private void stopRecording(int userId) {
+        setTapsVisible(mOriginalShowTaps);
         if (getRecorder() != null) {
             getRecorder().end();
             saveRecording(userId);
@@ -394,6 +409,11 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 mNotificationManager.cancelAsUser(null, NOTIFICATION_PROCESSING_ID, currentUser);
             }
         });
+    }
+
+    private void setTapsVisible(boolean turnOn) {
+        int value = turnOn ? 1 : 0;
+        Settings.System.putInt(getContentResolver(), Settings.System.SHOW_TOUCHES, value);
     }
 
     /**

@@ -17,11 +17,14 @@
 package com.android.bluetoothmidiservice;
 
 import android.media.midi.MidiReceiver;
+import android.util.Log;
 
 import com.android.internal.midi.MidiConstants;
 import com.android.internal.midi.MidiFramer;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * This class accumulates MIDI messages to form a MIDI packet.
@@ -45,10 +48,14 @@ public class BluetoothPacketEncoder extends PacketEncoder {
     private int mPacketTimestamp;
     // current running status, or zero if none
     private byte mRunningStatus;
+    // max size of a packet
+    private int mMaxPacketSize;
 
     private boolean mWritePending;
 
     private final Object mLock = new Object();
+
+    private Queue<byte[]> mFailedToSendQueue = new ArrayDeque<byte[]>();
 
     // This receives normalized data from mMidiFramer and accumulates it into a packet buffer
     private final MidiReceiver mFramedDataReceiver = new MidiReceiver() {
@@ -57,6 +64,8 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                 throws IOException {
 
             synchronized (mLock) {
+                flushFailedToSendQueueLocked();
+
                 int milliTimestamp = (int)(timestamp / MILLISECOND_NANOS) & MILLISECOND_MASK;
                 byte status = msg[offset];
                 boolean isSysExStart = (status == MidiConstants.STATUS_SYSTEM_EXCLUSIVE);
@@ -86,7 +95,7 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                 if (needsTimestamp) bytesNeeded++;  // add one for timestamp byte
                 if (status == mRunningStatus) bytesNeeded--;    // subtract one for status byte
 
-                if (mAccumulatedBytes + bytesNeeded > mAccumulationBuffer.length) {
+                if (mAccumulatedBytes + bytesNeeded > mMaxPacketSize) {
                     // write out our data if there is no more room
                     // if necessary, block until previous packet is sent
                     flushLocked(true);
@@ -112,14 +121,14 @@ public class BluetoothPacketEncoder extends PacketEncoder {
                     int remaining = (hasSysExEnd ? count - 1 : count);
 
                     while (remaining > 0) {
-                        if (mAccumulatedBytes == mAccumulationBuffer.length) {
+                        if (mAccumulatedBytes == mMaxPacketSize) {
                             // write out our data if there is no more room
                             // if necessary, block until previous packet is sent
                             flushLocked(true);
                             appendHeader(milliTimestamp);
                         }
 
-                        int copy = mAccumulationBuffer.length - mAccumulatedBytes;
+                        int copy = mMaxPacketSize - mAccumulatedBytes;
                         if (copy > remaining) copy = remaining;
                         System.arraycopy(msg, offset, mAccumulationBuffer, mAccumulatedBytes, copy);
                         mAccumulatedBytes += copy;
@@ -129,7 +138,7 @@ public class BluetoothPacketEncoder extends PacketEncoder {
 
                     if (hasSysExEnd) {
                         // SysEx End command must be preceeded by a timestamp byte
-                        if (mAccumulatedBytes + 2 > mAccumulationBuffer.length) {
+                        if (mAccumulatedBytes + 2 > mMaxPacketSize) {
                             // write out our data if there is no more room
                             // if necessary, block until previous packet is sent
                             flushLocked(true);
@@ -182,6 +191,16 @@ public class BluetoothPacketEncoder extends PacketEncoder {
     public BluetoothPacketEncoder(PacketReceiver packetReceiver, int maxPacketSize) {
         mPacketReceiver = packetReceiver;
         mAccumulationBuffer = new byte[maxPacketSize];
+        setMaxPacketSize(maxPacketSize);
+    }
+
+    /**
+     * Dynamically sets the maximum packet size
+     */
+    public void setMaxPacketSize(int maxPacketSize) {
+        synchronized (mLock) {
+            mMaxPacketSize = Math.min(maxPacketSize, mAccumulationBuffer.length);
+        }
     }
 
     @Override
@@ -215,11 +234,44 @@ public class BluetoothPacketEncoder extends PacketEncoder {
         }
 
         if (mAccumulatedBytes > 0) {
-            mPacketReceiver.writePacket(mAccumulationBuffer, mAccumulatedBytes);
+            boolean wasSendSuccessful = mPacketReceiver.writePacket(mAccumulationBuffer,
+                    mAccumulatedBytes);
+
+            if (!wasSendSuccessful) {
+                byte[] failedBuffer = new byte[mAccumulatedBytes];
+                System.arraycopy(mAccumulationBuffer, 0, failedBuffer, 0, mAccumulatedBytes);
+                mFailedToSendQueue.add(failedBuffer);
+                Log.d(TAG, "Enqueued data into failed queue.");
+            }
+
             mAccumulatedBytes = 0;
             mPacketTimestamp = 0;
             mRunningStatus = 0;
-            mWritePending = true;
+            mWritePending = wasSendSuccessful;
+        }
+    }
+
+    private void flushFailedToSendQueueLocked() {
+        while (!mFailedToSendQueue.isEmpty()) {
+            while (mWritePending) {
+                try {
+                    mLock.wait();
+                } catch (InterruptedException e) {
+                    // try again
+                    continue;
+                }
+            }
+            byte[] currentBuffer = mFailedToSendQueue.element();
+
+            boolean wasSendSuccessful = mPacketReceiver.writePacket(currentBuffer,
+                    currentBuffer.length);
+            mWritePending = wasSendSuccessful;
+            if (wasSendSuccessful) {
+                mFailedToSendQueue.remove();
+                Log.d(TAG, "Dequeued data from failed queue.");
+            } else {
+                return;
+            }
         }
     }
 }

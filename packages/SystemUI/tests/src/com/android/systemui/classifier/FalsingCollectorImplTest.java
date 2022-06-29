@@ -199,6 +199,20 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testIgnoreActionOutside() {
+        MotionEvent outside = MotionEvent.obtain(0, 0, MotionEvent.ACTION_OUTSIDE, 0, 0, 0);
+        MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);
+
+        // Nothing passed initially. The outside event will be completely ignored.
+        mFalsingCollector.onTouchEvent(outside);
+        verify(mFalsingDataProvider, never()).onMotionEvent(any(MotionEvent.class));
+
+        // Up event flushes, and the outside event isn't passed through.
+        mFalsingCollector.onTouchEvent(up);
+        verify(mFalsingDataProvider).onMotionEvent(up);
+    }
+
+    @Test
     public void testAvoidUnlocked() {
         MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0);
         MotionEvent up = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0, 0, 0);

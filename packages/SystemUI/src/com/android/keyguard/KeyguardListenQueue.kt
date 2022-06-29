@@ -32,15 +32,17 @@ class KeyguardListenQueue(
 ) {
     private val faceQueue = ArrayDeque<KeyguardFaceListenModel>()
     private val fingerprintQueue = ArrayDeque<KeyguardFingerprintListenModel>()
+    private val activeUnlockQueue = ArrayDeque<KeyguardActiveUnlockModel>()
 
     @get:VisibleForTesting val models: List<KeyguardListenModel>
-        get() = faceQueue + fingerprintQueue
+        get() = faceQueue + fingerprintQueue + activeUnlockQueue
 
     /** Push a [model] to the queue (will be logged until the queue exceeds [sizePerModality]). */
     fun add(model: KeyguardListenModel) {
         val queue = when (model) {
             is KeyguardFaceListenModel -> faceQueue.apply { add(model) }
             is KeyguardFingerprintListenModel -> fingerprintQueue.apply { add(model) }
+            is KeyguardActiveUnlockModel -> activeUnlockQueue.apply { add(model) }
         }
 
         if (queue.size > sizePerModality) {
@@ -61,6 +63,10 @@ class KeyguardListenQueue(
         }
         writer.println("  Fingerprint listen results (last ${fingerprintQueue.size} calls):")
         for (model in fingerprintQueue) {
+            writer.println(stringify(model))
+        }
+        writer.println("  Active unlock triggers (last ${activeUnlockQueue.size} calls):")
+        for (model in activeUnlockQueue) {
             writer.println(stringify(model))
         }
     }

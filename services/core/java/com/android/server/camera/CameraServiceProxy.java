@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -36,6 +37,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.hardware.CameraSessionStats;
 import android.hardware.CameraStreamStats;
 import android.hardware.ICameraService;
@@ -46,6 +48,8 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManager.FoldStateListener;
 import android.hardware.display.DisplayManager;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.nfc.INfcAdapter;
 import android.os.Binder;
@@ -181,6 +185,9 @@ public class CameraServiceProxy extends SystemService
     // Must be equal to number of CameraStreamProto in CameraActionEvent
     private static final int MAX_STREAM_STATISTICS = 5;
 
+    private static final float MIN_PREVIEW_FPS = 30.0f;
+    private static final float MAX_PREVIEW_FPS = 60.0f;
+
     private final Context mContext;
     private final ServiceThread mHandlerThread;
     private final Handler mHandler;
@@ -233,6 +240,9 @@ public class CameraServiceProxy extends SystemService
         public long mResultErrorCount;
         public boolean mDeviceError;
         public List<CameraStreamStats> mStreamStats;
+        public String mUserTag;
+        public int mVideoStabilizationMode;
+
         private long mDurationOrStartTimeMs;  // Either start time, or duration once completed
 
         CameraUsageEvent(String cameraId, int facing, String clientName, int apiLevel,
@@ -251,7 +261,8 @@ public class CameraServiceProxy extends SystemService
 
         public void markCompleted(int internalReconfigure, long requestCount,
                 long resultErrorCount, boolean deviceError,
-                List<CameraStreamStats>  streamStats) {
+                List<CameraStreamStats>  streamStats, String userTag,
+                int videoStabilizationMode) {
             if (mCompleted) {
                 return;
             }
@@ -262,6 +273,8 @@ public class CameraServiceProxy extends SystemService
             mResultErrorCount = resultErrorCount;
             mDeviceError = deviceError;
             mStreamStats = streamStats;
+            mUserTag = userTag;
+            mVideoStabilizationMode = videoStabilizationMode;
             if (CameraServiceProxy.DEBUG) {
                 Slog.v(TAG, "A camera facing " + cameraFacingToString(mCameraFacing) +
                         " was in use by " + mClientName + " for " +
@@ -303,6 +316,10 @@ public class CameraServiceProxy extends SystemService
 
         @Override
         public void onFixedRotationFinished(int displayId) { }
+
+        @Override
+        public void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                List<Rect> unrestricted) { }
     }
 
 
@@ -333,6 +350,16 @@ public class CameraServiceProxy extends SystemService
                         // Return immediately if we haven't seen any users start yet
                         if (mEnabledCameraUsers == null) return;
                         switchUserLocked(mLastUser);
+                    }
+                    break;
+                case UsbManager.ACTION_USB_DEVICE_ATTACHED:
+                case UsbManager.ACTION_USB_DEVICE_DETACHED:
+                    synchronized (mLock) {
+                        UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                        if (device != null) {
+                            notifyUsbDeviceHotplugLocked(device,
+                                    action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED));
+                        }
                     }
                     break;
                 default:
@@ -450,7 +477,8 @@ public class CameraServiceProxy extends SystemService
             ParceledListSlice<ActivityManager.RecentTaskInfo> recentTasks = null;
 
             try {
-                recentTasks = ActivityTaskManager.getService().getRecentTasks(/*maxNum*/1,
+                // Get 2 recent tasks in case we are running in split mode
+                recentTasks = ActivityTaskManager.getService().getRecentTasks(/*maxNum*/2,
                         /*flags*/ 0, userId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to query recent tasks!");
@@ -458,23 +486,27 @@ public class CameraServiceProxy extends SystemService
             }
 
             if ((recentTasks != null) && (!recentTasks.getList().isEmpty())) {
-                ActivityManager.RecentTaskInfo task = recentTasks.getList().get(0);
-                if (packageName.equals(task.topActivityInfo.packageName)) {
-                    taskInfo = new TaskInfo();
-                    taskInfo.frontTaskId = task.taskId;
-                    taskInfo.isResizeable =
-                            (task.topActivityInfo.resizeMode != RESIZE_MODE_UNRESIZEABLE);
-                    taskInfo.displayId = task.displayId;
-                    taskInfo.userId = task.userId;
-                    taskInfo.isFixedOrientationLandscape =
-                            ActivityInfo.isFixedOrientationLandscape(
-                                    task.topActivityInfo.screenOrientation);
-                    taskInfo.isFixedOrientationPortrait =
-                            ActivityInfo.isFixedOrientationPortrait(
-                                    task.topActivityInfo.screenOrientation);
-                } else {
-                    Log.e(TAG, "Recent task package name: " + task.topActivityInfo.packageName
-                            + " doesn't match with camera client package name: " + packageName);
+                for (ActivityManager.RecentTaskInfo task : recentTasks.getList()) {
+                    if (packageName.equals(task.topActivityInfo.packageName)) {
+                        taskInfo = new TaskInfo();
+                        taskInfo.frontTaskId = task.taskId;
+                        taskInfo.isResizeable =
+                                (task.topActivityInfo.resizeMode != RESIZE_MODE_UNRESIZEABLE);
+                        taskInfo.displayId = task.displayId;
+                        taskInfo.userId = task.userId;
+                        taskInfo.isFixedOrientationLandscape =
+                                ActivityInfo.isFixedOrientationLandscape(
+                                        task.topActivityInfo.screenOrientation);
+                        taskInfo.isFixedOrientationPortrait =
+                                ActivityInfo.isFixedOrientationPortrait(
+                                        task.topActivityInfo.screenOrientation);
+                        break;
+                    }
+                }
+
+                if (taskInfo == null) {
+                    Log.e(TAG, "Recent tasks don't include camera client package name: " +
+                            packageName);
                     return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
                 }
             } else {
@@ -547,6 +579,16 @@ public class CameraServiceProxy extends SystemService
             }
 
             updateActivityCount(cameraState);
+        }
+
+        @Override
+        public boolean isCameraDisabled() {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            if (dpm == null) {
+                Slog.e(TAG, "Failed to get the device policy manager service");
+                return false;
+            }
+            return dpm.getCameraDisabled(null);
         }
     };
 
@@ -645,6 +687,8 @@ public class CameraServiceProxy extends SystemService
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         mContext.registerReceiver(mIntentReceiver, filter);
 
         publishBinderService(CAMERA_SERVICE_PROXY_BINDER_NAME, mCameraServiceProxy);
@@ -767,7 +811,9 @@ public class CameraServiceProxy extends SystemService
                         + ", requestCount " + e.mRequestCount
                         + ", resultErrorCount " + e.mResultErrorCount
                         + ", deviceError " + e.mDeviceError
-                        + ", streamCount is " + streamCount);
+                        + ", streamCount is " + streamCount
+                        + ", userTag is " + e.mUserTag
+                        + ", videoStabilizationMode " + e.mVideoStabilizationMode);
             }
             // Convert from CameraStreamStats to CameraStreamProto
             CameraStreamProto[] streamProtos = new CameraStreamProto[MAX_STREAM_STATISTICS];
@@ -788,6 +834,8 @@ public class CameraServiceProxy extends SystemService
                     streamProtos[i].histogramType = streamStats.getHistogramType();
                     streamProtos[i].histogramBins = streamStats.getHistogramBins();
                     streamProtos[i].histogramCounts = streamStats.getHistogramCounts();
+                    streamProtos[i].dynamicRangeProfile = streamStats.getDynamicRangeProfile();
+                    streamProtos[i].streamUseCase = streamStats.getStreamUseCase();
 
                     if (CameraServiceProxy.DEBUG) {
                         String histogramTypeName =
@@ -795,6 +843,7 @@ public class CameraServiceProxy extends SystemService
                         Slog.v(TAG, "Stream " + i + ": width " + streamProtos[i].width
                                 + ", height " + streamProtos[i].height
                                 + ", format " + streamProtos[i].format
+                                + ", maxPreviewFps " + streamStats.getMaxPreviewFps()
                                 + ", dataSpace " + streamProtos[i].dataSpace
                                 + ", usage " + streamProtos[i].usage
                                 + ", requestCount " + streamProtos[i].requestCount
@@ -807,7 +856,9 @@ public class CameraServiceProxy extends SystemService
                                 + ", histogramBins "
                                 + Arrays.toString(streamProtos[i].histogramBins)
                                 + ", histogramCounts "
-                                + Arrays.toString(streamProtos[i].histogramCounts));
+                                + Arrays.toString(streamProtos[i].histogramCounts)
+                                + ", dynamicRangeProfile " + streamProtos[i].dynamicRangeProfile
+                                + ", streamUseCase " + streamProtos[i].streamUseCase);
                     }
                 }
             }
@@ -819,7 +870,8 @@ public class CameraServiceProxy extends SystemService
                     MessageNano.toByteArray(streamProtos[1]),
                     MessageNano.toByteArray(streamProtos[2]),
                     MessageNano.toByteArray(streamProtos[3]),
-                    MessageNano.toByteArray(streamProtos[4]));
+                    MessageNano.toByteArray(streamProtos[4]),
+                    e.mUserTag, e.mVideoStabilizationMode);
         }
     }
 
@@ -961,6 +1013,37 @@ public class CameraServiceProxy extends SystemService
         return true;
     }
 
+    private boolean notifyUsbDeviceHotplugLocked(@NonNull UsbDevice device, boolean attached) {
+        // Only handle external USB camera devices
+        if (device.getHasVideoCapture()) {
+            // Forward the usb hotplug event to the native camera service running in the
+            // cameraserver
+            // process.
+            ICameraService cameraService = getCameraServiceRawLocked();
+            if (cameraService == null) {
+                Slog.w(TAG, "Could not notify cameraserver, camera service not available.");
+                return false;
+            }
+
+            try {
+                int eventType = attached ? ICameraService.EVENT_USB_DEVICE_ATTACHED
+                        : ICameraService.EVENT_USB_DEVICE_DETACHED;
+                mCameraServiceRaw.notifySystemEvent(eventType, new int[]{device.getDeviceId()});
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not notify cameraserver, remote exception: " + e);
+                // Not much we can do if camera service is dead.
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private float getMinFps(CameraSessionStats cameraState) {
+        float maxFps = cameraState.getMaxPreviewFps();
+        return Math.max(Math.min(maxFps, MAX_PREVIEW_FPS), MIN_PREVIEW_FPS);
+    }
+
     private void updateActivityCount(CameraSessionStats cameraState) {
         String cameraId = cameraState.getCameraId();
         int newCameraState = cameraState.getNewCameraState();
@@ -975,6 +1058,8 @@ public class CameraServiceProxy extends SystemService
         long resultErrorCount = cameraState.getResultErrorCount();
         boolean deviceError = cameraState.getDeviceErrorFlag();
         List<CameraStreamStats> streamStats = cameraState.getStreamStats();
+        String userTag = cameraState.getUserTag();
+        int videoStabilizationMode = cameraState.getVideoStabilizationMode();
         synchronized(mLock) {
             // Update active camera list and notify NFC if necessary
             boolean wasEmpty = mActiveCameraUsage.isEmpty();
@@ -1014,7 +1099,9 @@ public class CameraServiceProxy extends SystemService
                     if (!alreadyActivePackage) {
                         WindowManagerInternal wmi =
                                 LocalServices.getService(WindowManagerInternal.class);
-                        wmi.addNonHighRefreshRatePackage(clientName);
+                        float minFps = getMinFps(cameraState);
+                        wmi.addRefreshRateRangeForPackage(clientName,
+                                minFps, MAX_PREVIEW_FPS);
                     }
 
                     // Update activity events
@@ -1026,7 +1113,8 @@ public class CameraServiceProxy extends SystemService
                     if (oldEvent != null) {
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
                         oldEvent.markCompleted(/*internalReconfigure*/0, /*requestCount*/0,
-                                /*resultErrorCount*/0, /*deviceError*/false, streamStats);
+                                /*resultErrorCount*/0, /*deviceError*/false, streamStats,
+                                /*userTag*/"", /*videoStabilizationMode*/-1);
                         mCameraUsageHistory.add(oldEvent);
                     }
                     break;
@@ -1036,7 +1124,8 @@ public class CameraServiceProxy extends SystemService
                     if (doneEvent != null) {
 
                         doneEvent.markCompleted(internalReconfigureCount, requestCount,
-                                resultErrorCount, deviceError, streamStats);
+                                resultErrorCount, deviceError, streamStats, userTag,
+                                videoStabilizationMode);
                         mCameraUsageHistory.add(doneEvent);
 
                         // Check current active camera IDs to see if this package is still
@@ -1053,7 +1142,7 @@ public class CameraServiceProxy extends SystemService
                         if (!stillActivePackage) {
                             WindowManagerInternal wmi =
                                     LocalServices.getService(WindowManagerInternal.class);
-                            wmi.removeNonHighRefreshRatePackage(clientName);
+                            wmi.removeRefreshRateRangeForPackage(clientName);
                         }
                     }
 

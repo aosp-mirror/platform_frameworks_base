@@ -16,19 +16,29 @@
 
 package com.android.systemui.flags
 
+import android.annotation.BoolRes
+import android.annotation.IntegerRes
+import android.annotation.StringRes
 import android.os.Parcel
 import android.os.Parcelable
 
-interface Flag<T> : Parcelable {
+interface Flag<T> {
     val id: Int
+    val teamfood: Boolean
+}
+
+interface ParcelableFlag<T> : Flag<T>, Parcelable {
     val default: T
-    val resourceOverride: Int
-
     override fun describeContents() = 0
+}
 
-    fun hasResourceOverride(): Boolean {
-        return resourceOverride != -1
-    }
+interface ResourceFlag<T> : Flag<T> {
+    val resourceId: Int
+}
+
+interface SysPropFlag<T> : Flag<T> {
+    val name: String
+    val default: T
 }
 
 // Consider using the "parcelize" kotlin library.
@@ -36,8 +46,8 @@ interface Flag<T> : Parcelable {
 data class BooleanFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Boolean = false,
-    override val resourceOverride: Int = -1
-) : Flag<Boolean> {
+    override val teamfood: Boolean = false
+) : ParcelableFlag<Boolean> {
 
     companion object {
         @JvmField
@@ -58,11 +68,26 @@ data class BooleanFlag @JvmOverloads constructor(
     }
 }
 
+data class ResourceBooleanFlag @JvmOverloads constructor(
+    override val id: Int,
+    @BoolRes override val resourceId: Int,
+    override val teamfood: Boolean = false
+) : ResourceFlag<Boolean>
+
+data class SysPropBooleanFlag @JvmOverloads constructor(
+    override val id: Int,
+    override val name: String,
+    override val default: Boolean = false
+) : SysPropFlag<Boolean> {
+    // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
+    override val teamfood: Boolean = false
+}
+
 data class StringFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: String = "",
-    override val resourceOverride: Int = -1
-) : Flag<String> {
+    override val teamfood: Boolean = false
+) : ParcelableFlag<String> {
     companion object {
         @JvmField
         val CREATOR = object : Parcelable.Creator<StringFlag> {
@@ -82,11 +107,17 @@ data class StringFlag @JvmOverloads constructor(
     }
 }
 
+data class ResourceStringFlag @JvmOverloads constructor(
+    override val id: Int,
+    @StringRes override val resourceId: Int,
+    override val teamfood: Boolean = false
+) : ResourceFlag<String>
+
 data class IntFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Int = 0,
-    override val resourceOverride: Int = -1
-) : Flag<Int> {
+    override val teamfood: Boolean = false
+) : ParcelableFlag<Int> {
 
     companion object {
         @JvmField
@@ -107,11 +138,17 @@ data class IntFlag @JvmOverloads constructor(
     }
 }
 
+data class ResourceIntFlag @JvmOverloads constructor(
+    override val id: Int,
+    @IntegerRes override val resourceId: Int,
+    override val teamfood: Boolean = false
+) : ResourceFlag<Int>
+
 data class LongFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Long = 0,
-    override val resourceOverride: Int = -1
-) : Flag<Long> {
+    override val teamfood: Boolean = false
+) : ParcelableFlag<Long> {
 
     companion object {
         @JvmField
@@ -135,8 +172,8 @@ data class LongFlag @JvmOverloads constructor(
 data class FloatFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Float = 0f,
-    override val resourceOverride: Int = -1
-) : Flag<Float> {
+    override val teamfood: Boolean = false
+) : ParcelableFlag<Float> {
 
     companion object {
         @JvmField
@@ -157,11 +194,17 @@ data class FloatFlag @JvmOverloads constructor(
     }
 }
 
+data class ResourceFloatFlag @JvmOverloads constructor(
+    override val id: Int,
+    override val resourceId: Int,
+    override val teamfood: Boolean = false
+) : ResourceFlag<Int>
+
 data class DoubleFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Double = 0.0,
-    override val resourceOverride: Int = -1
-) : Flag<Double> {
+    override val teamfood: Boolean = false
+) : ParcelableFlag<Double> {
 
     companion object {
         @JvmField

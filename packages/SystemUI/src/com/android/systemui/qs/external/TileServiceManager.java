@@ -26,7 +26,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.service.quicksettings.IQSTileService;
-import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
 
@@ -73,10 +72,11 @@ public class TileServiceManager {
     private boolean mStarted = false;
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component,
-            Tile tile, BroadcastDispatcher broadcastDispatcher, UserTracker userTracker) {
+            BroadcastDispatcher broadcastDispatcher, UserTracker userTracker) {
         this(tileServices, handler, userTracker, new TileLifecycleManager(handler,
-                tileServices.getContext(), tileServices, tile, new Intent().setComponent(component),
-                userTracker.getUserHandle(), broadcastDispatcher));
+                tileServices.getContext(), tileServices,
+                new PackageManagerAdapter(tileServices.getContext()), broadcastDispatcher,
+                new Intent().setComponent(component), userTracker.getUserHandle()));
     }
 
     @VisibleForTesting
@@ -92,7 +92,7 @@ public class TileServiceManager {
         filter.addDataScheme("package");
         Context context = mServices.getContext();
         context.registerReceiverAsUser(mUninstallReceiver, userTracker.getUserHandle(), filter,
-                null, mHandler);
+                null, mHandler, Context.RECEIVER_EXPORTED);
     }
 
     boolean isLifecycleStarted() {

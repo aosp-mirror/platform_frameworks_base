@@ -109,6 +109,14 @@ public class MockUtils {
     public static Bundle checkUserRestrictions(String... keys) {
         final Bundle expected = DpmTestUtils.newRestrictions(
                 java.util.Objects.requireNonNull(keys));
+        return checkUserRestrictions(expected);
+    }
+
+    public static Bundle checkUserRestrictions(Bundle expected) {
+        return createUserRestrictionsBundleMatcher(expected);
+    }
+
+    private static Bundle createUserRestrictionsBundleMatcher(Bundle expected) {
         final Matcher<Bundle> m = new BaseMatcher<Bundle>() {
             @Override
             public boolean matches(Object item) {
@@ -129,6 +137,15 @@ public class MockUtils {
     public static RestrictionsSet checkUserRestrictions(int userId, String... keys) {
         final RestrictionsSet expected = DpmTestUtils.newRestrictions(userId,
                 java.util.Objects.requireNonNull(keys));
+        return checkUserRestrictions(userId, expected);
+    }
+
+    public static RestrictionsSet checkUserRestrictions(int userId, RestrictionsSet expected) {
+        return createUserRestrictionsSetMatcher(userId, expected);
+    }
+
+    private static RestrictionsSet createUserRestrictionsSetMatcher(
+            int userId, RestrictionsSet expected) {
         final Matcher<RestrictionsSet> m = new BaseMatcher<RestrictionsSet>() {
             @Override
             public boolean matches(Object item) {

@@ -73,4 +73,12 @@
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ניהול"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"הבועה נסגרה."</string>
     <string name="restart_button_description" msgid="5887656107651190519">"צריך להקיש כדי להפעיל מחדש את האפליקציה הזו ולעבור למסך מלא."</string>
+    <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"בעיות במצלמה?\nאפשר להקיש כדי לבצע התאמה מחדש"</string>
+    <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"הבעיה לא נפתרה?\nאפשר להקיש כדי לחזור לגרסה הקודמת"</string>
+    <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"אין בעיות במצלמה? אפשר להקיש כדי לסגור."</string>
+    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"חלק מהאפליקציות פועלות בצורה הטובה ביותר במצב תצוגה לאורך"</string>
+    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"כדי להפיק את המרב משטח המסך, ניתן לנסות את אחת מהאפשרויות האלה"</string>
+    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"מסובבים את המכשיר כדי לעבור לתצוגה במסך מלא"</string>
+    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"מקישים הקשה כפולה ליד אפליקציה כדי למקם אותה מחדש"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"הבנתי"</string>
 </resources>

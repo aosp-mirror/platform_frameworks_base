@@ -32,7 +32,8 @@ import android.util.Slog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 
 import java.util.HashSet;
@@ -51,7 +52,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     @NonNull private final Context mContext;
     private final int mSensorId;
     @NonNull private final ITestSessionCallback mCallback;
-    @NonNull private final FingerprintStateCallback mFingerprintStateCallback;
+    @NonNull private final BiometricStateCallback mBiometricStateCallback;
     @NonNull private final FingerprintProvider mProvider;
     @NonNull private final Sensor mSensor;
     @NonNull private final Set<Integer> mEnrollmentIds;
@@ -117,13 +118,13 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,
             @NonNull ITestSessionCallback callback,
-            @NonNull FingerprintStateCallback fingerprintStateCallback,
+            @NonNull BiometricStateCallback biometricStateCallback,
             @NonNull FingerprintProvider provider,
             @NonNull Sensor sensor) {
         mContext = context;
         mSensorId = sensorId;
         mCallback = callback;
-        mFingerprintStateCallback = fingerprintStateCallback;
+        mBiometricStateCallback = biometricStateCallback;
         mProvider = provider;
         mSensor = sensor;
         mEnrollmentIds = new HashSet<>();
@@ -156,7 +157,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         }
 
         mEnrollmentIds.add(nextRandomId);
-        mSensor.getSessionForUser(userId).mHalSessionCallback
+        mSensor.getSessionForUser(userId).getHalSessionCallback()
                 .onEnrollmentProgress(nextRandomId, 0 /* remaining */);
     }
 
@@ -172,7 +173,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
             return;
         }
         final int fid = fingerprints.get(0).getBiometricId();
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationSucceeded(fid,
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationSucceeded(fid,
                 HardwareAuthTokenUtils.toHardwareAuthToken(new byte[69]));
     }
 
@@ -180,14 +181,14 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     public void rejectAuthentication(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationFailed();
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationFailed();
     }
 
     @Override
     public void notifyAcquired(int userId, int acquireInfo)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback
+        mSensor.getSessionForUser(userId).getHalSessionCallback()
                 .onAcquired((byte) acquireInfo, 0 /* vendorCode */);
     }
 
@@ -195,7 +196,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     public void notifyError(int userId, int errorCode)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onError((byte) errorCode,
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onError((byte) errorCode,
                 0 /* vendorCode */);
     }
 
@@ -204,7 +205,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
         Slog.d(TAG, "cleanupInternalState: " + userId);
-        mProvider.scheduleInternalCleanup(mSensorId, userId, new BaseClientMonitor.Callback() {
+        mProvider.scheduleInternalCleanup(mSensorId, userId, new ClientMonitorCallback() {
             @Override
             public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                 try {

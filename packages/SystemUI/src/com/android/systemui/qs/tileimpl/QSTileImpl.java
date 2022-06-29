@@ -60,7 +60,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
@@ -70,7 +69,6 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SideLabelTileLayout;
 import com.android.systemui.qs.logging.QSLogger;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -105,7 +103,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     protected final ActivityStarter mActivityStarter;
     private final UiEventLogger mUiEventLogger;
     private final FalsingManager mFalsingManager;
-    private final QSLogger mQSLogger;
+    protected final QSLogger mQSLogger;
     private volatile int mReadyState;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
@@ -116,7 +114,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     private boolean mAnnounceNextStateChange;
 
     private String mTileSpec;
-    private EnforcedAdmin mEnforcedAdmin;
+    @Nullable
+    @VisibleForTesting
+    protected EnforcedAdmin mEnforcedAdmin;
     private boolean mShowingDetail;
     private int mIsFullQs;
 
@@ -156,8 +156,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      *
      * Categories are defined in {@link com.android.internal.logging.nano.MetricsProto.MetricsEvent}
      * by editing frameworks/base/proto/src/metrics_constants.proto.
+     *
+     * @deprecated Not needed as this logging is deprecated. Logging tiles is done using
+     * {@link QSTile#getMetricsSpec}
      */
-    abstract public int getMetricsCategory();
+    @Deprecated
+    public int getMetricsCategory() {
+        return 0;
+    }
 
     /**
      * Performs initialization of the tile
@@ -227,7 +233,13 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
 
     @VisibleForTesting
     protected void handleStale() {
-        setListening(mStaleListener, true);
+        if (!mListeners.isEmpty()) {
+            // If the tile is already listening (it's been a long time since it refreshed), just
+            // force a refresh. Don't add the staleListener because there's already a listener there
+            refreshState();
+        } else {
+            setListening(mStaleListener, true);
+        }
     }
 
     public String getTileSpec() {
@@ -252,14 +264,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      */
     public QSIconView createTileView(Context context) {
         return new QSIconViewImpl(context);
-    }
-
-    public DetailAdapter getDetailAdapter() {
-        return null; // optional
-    }
-
-    protected DetailAdapter createDetailAdapter() {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -328,28 +332,21 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 .addTaggedData(FIELD_QS_POSITION, mHost.indexOf(mTileSpec));
     }
 
-    public void showDetail(boolean show) {
-        mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0).sendToTarget();
-    }
-
     public void refreshState() {
         refreshState(null);
     }
 
-    protected final void refreshState(Object arg) {
+    @Override
+    public final boolean isListening() {
+        return getLifecycle().getCurrentState().isAtLeast(RESUMED);
+    }
+
+    protected final void refreshState(@Nullable Object arg) {
         mHandler.obtainMessage(H.REFRESH_STATE, arg).sendToTarget();
     }
 
     public void userSwitch(int newUserId) {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId, 0).sendToTarget();
-    }
-
-    public void fireToggleStateChanged(boolean state) {
-        mHandler.obtainMessage(H.TOGGLE_STATE_CHANGED, state ? 1 : 0, 0).sendToTarget();
-    }
-
-    public void fireScanStateChanged(boolean state) {
-        mHandler.obtainMessage(H.SCAN_STATE_CHANGED, state ? 1 : 0, 0).sendToTarget();
     }
 
     public void destroy() {
@@ -426,9 +423,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      *
      * @return the intent to launch
      */
+    @Nullable
     public abstract Intent getLongClickIntent();
 
-    protected void handleRefreshState(Object arg) {
+    protected final void handleRefreshState(@Nullable Object arg) {
         handleUpdateState(mTmpState, arg);
         boolean changed = mTmpState.copyTo(mState);
         if (mReadyState == READY_STATE_READYING) {
@@ -445,49 +443,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     private void handleStateChanged() {
-        boolean delayAnnouncement = shouldAnnouncementBeDelayed();
         if (mCallbacks.size() != 0) {
             for (int i = 0; i < mCallbacks.size(); i++) {
                 mCallbacks.get(i).onStateChanged(mState);
             }
-            if (mAnnounceNextStateChange && !delayAnnouncement) {
-                String announcement = composeChangeAnnouncement();
-                if (announcement != null) {
-                    mCallbacks.get(0).onAnnouncementRequested(announcement);
-                }
-            }
-        }
-        mAnnounceNextStateChange = mAnnounceNextStateChange && delayAnnouncement;
-    }
-
-    protected boolean shouldAnnouncementBeDelayed() {
-        return false;
-    }
-
-    protected String composeChangeAnnouncement() {
-        return null;
-    }
-
-    private void handleShowDetail(boolean show) {
-        mShowingDetail = show;
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).onShowDetail(show);
-        }
-    }
-
-    protected boolean isShowingDetail() {
-        return mShowingDetail;
-    }
-
-    private void handleToggleStateChanged(boolean state) {
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).onToggleStateChanged(state);
-        }
-    }
-
-    private void handleScanStateChanged(boolean state) {
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).onScanStateChanged(state);
         }
     }
 
@@ -597,17 +556,14 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         private static final int SECONDARY_CLICK = 3;
         private static final int LONG_CLICK = 4;
         private static final int REFRESH_STATE = 5;
-        private static final int SHOW_DETAIL = 6;
-        private static final int USER_SWITCH = 7;
-        private static final int TOGGLE_STATE_CHANGED = 8;
-        private static final int SCAN_STATE_CHANGED = 9;
-        private static final int DESTROY = 10;
-        private static final int REMOVE_CALLBACKS = 11;
-        private static final int REMOVE_CALLBACK = 12;
-        private static final int SET_LISTENING = 13;
+        private static final int USER_SWITCH = 6;
+        private static final int DESTROY = 7;
+        private static final int REMOVE_CALLBACKS = 8;
+        private static final int REMOVE_CALLBACK = 9;
+        private static final int SET_LISTENING = 10;
         @VisibleForTesting
-        protected static final int STALE = 14;
-        private static final int INITIALIZE = 15;
+        protected static final int STALE = 11;
+        private static final int INITIALIZE = 12;
 
         @VisibleForTesting
         protected H(Looper looper) {
@@ -645,18 +601,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
                 } else if (msg.what == REFRESH_STATE) {
                     name = "handleRefreshState";
                     handleRefreshState(msg.obj);
-                } else if (msg.what == SHOW_DETAIL) {
-                    name = "handleShowDetail";
-                    handleShowDetail(msg.arg1 != 0);
                 } else if (msg.what == USER_SWITCH) {
                     name = "handleUserSwitch";
                     handleUserSwitch(msg.arg1);
-                } else if (msg.what == TOGGLE_STATE_CHANGED) {
-                    name = "handleToggleStateChanged";
-                    handleToggleStateChanged(msg.arg1 != 0);
-                } else if (msg.what == SCAN_STATE_CHANGED) {
-                    name = "handleScanStateChanged";
-                    handleScanStateChanged(msg.arg1 != 0);
                 } else if (msg.what == DESTROY) {
                     name = "handleDestroy";
                     handleDestroy();
@@ -793,7 +740,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
      * This may be used for CTS testing of tiles.
      */
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println(this.getClass().getSimpleName() + ":");
         pw.print("    "); pw.println(getState().toString());
     }

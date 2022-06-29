@@ -88,7 +88,8 @@ import java.util.Arrays;
  * {@link AccountManager#KEY_INTENT}.
  * <p>
  * The activity needs to return the final result when it is complete so the Intent should contain
- * the {@link AccountAuthenticatorResponse} as {@link AccountManager#KEY_ACCOUNT_MANAGER_RESPONSE}.
+ * the {@link AccountAuthenticatorResponse} as
+ * {@link AccountManager#KEY_ACCOUNT_AUTHENTICATOR_RESPONSE}.
  * The activity must then call {@link AccountAuthenticatorResponse#onResult} or
  * {@link AccountAuthenticatorResponse#onError} when it is complete.
  * <li> If the authenticator cannot synchronously process the request and return a result then it

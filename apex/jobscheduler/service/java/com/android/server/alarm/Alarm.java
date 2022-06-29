@@ -43,7 +43,7 @@ import java.util.Date;
  */
 class Alarm {
     @VisibleForTesting
-    public static final int NUM_POLICIES = 4;
+    public static final int NUM_POLICIES = 5;
     /**
      * Index used to store the time the alarm was requested to expire. To be used with
      * {@link #setPolicyElapsed(int, long)}.
@@ -67,6 +67,12 @@ class Alarm {
     public static final int BATTERY_SAVER_POLICY_INDEX = 3;
 
     /**
+     * Index used to store the earliest time the alarm can expire based on TARE policy.
+     * To be used with {@link #setPolicyElapsed(int, long)}.
+     */
+    public static final int TARE_POLICY_INDEX = 4;
+
+    /**
      * Reason to use for inexact alarms.
      */
     static final int EXACT_ALLOW_REASON_NOT_APPLICABLE = -1;
@@ -82,6 +88,10 @@ class Alarm {
      * Change wasn't enable for the caller due to compat reasons.
      */
     static final int EXACT_ALLOW_REASON_COMPAT = 2;
+    /**
+     * Caller had USE_EXACT_ALARM permission.
+     */
+    static final int EXACT_ALLOW_REASON_POLICY_PERMISSION = 3;
 
     public final int type;
     /**
@@ -113,6 +123,7 @@ class Alarm {
     public AlarmManagerService.PriorityClass priorityClass;
     /** Broadcast options to use when delivering this alarm */
     public Bundle mIdleOptions;
+    public boolean mUsingReserveQuota;
 
     Alarm(int type, long when, long requestedWhenElapsed, long windowLength, long interval,
             PendingIntent op, IAlarmListener rec, String listenerTag, WorkSource ws, int flags,
@@ -141,6 +152,7 @@ class Alarm {
         mExactAllowReason = exactAllowReason;
         sourcePackage = (operation != null) ? operation.getCreatorPackage() : packageName;
         creatorUid = (operation != null) ? operation.getCreatorUid() : this.uid;
+        mUsingReserveQuota = false;
     }
 
     public static String makeTag(PendingIntent pi, String tag, int type) {
@@ -254,8 +266,10 @@ class Alarm {
                 return "device_idle";
             case BATTERY_SAVER_POLICY_INDEX:
                 return "battery_saver";
+            case TARE_POLICY_INDEX:
+                return "tare";
             default:
-                return "--unknown--";
+                return "--unknown(" + index + ")--";
         }
     }
 
@@ -267,6 +281,8 @@ class Alarm {
                 return "compat";
             case EXACT_ALLOW_REASON_PERMISSION:
                 return "permission";
+            case EXACT_ALLOW_REASON_POLICY_PERMISSION:
+                return "policy_permission";
             case EXACT_ALLOW_REASON_NOT_APPLICABLE:
                 return "N/A";
             default:
@@ -326,6 +342,9 @@ class Alarm {
         TimeUtils.formatDuration(getWhenElapsed(), nowELAPSED, ipw);
         ipw.print(" maxWhenElapsed=");
         TimeUtils.formatDuration(mMaxWhenElapsed, nowELAPSED, ipw);
+        if (mUsingReserveQuota) {
+            ipw.print(" usingReserveQuota=true");
+        }
         ipw.println();
 
         if (alarmClock != null) {

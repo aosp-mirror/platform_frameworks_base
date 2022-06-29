@@ -17,6 +17,7 @@
 package com.android.wm.shell.onehanded;
 
 import android.content.res.Configuration;
+import android.os.SystemProperties;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
@@ -25,6 +26,9 @@ import com.android.wm.shell.common.annotations.ExternalThread;
  */
 @ExternalThread
 public interface OneHanded {
+
+    boolean sIsSupportOneHandedMode =  SystemProperties.getBoolean(
+            OneHandedController.SUPPORT_ONE_HANDED_MODE, false);
 
     /**
      * Returns a binder that can be passed to an external process to manipulate OneHanded.

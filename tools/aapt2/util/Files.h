@@ -18,6 +18,7 @@
 #define AAPT_FILES_H
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -27,7 +28,6 @@
 #include "utils/FileMap.h"
 
 #include "Diagnostics.h"
-#include "Maybe.h"
 #include "Source.h"
 
 namespace aapt {
@@ -45,7 +45,7 @@ constexpr const char sInvariantDirSep = '/';
 
 enum class FileType {
   kUnknown = 0,
-  kNonexistant,
+  kNonExistant,
   kRegular,
   kDirectory,
   kCharDev,
@@ -83,7 +83,7 @@ bool IsHidden(const android::StringPiece& path);
 std::string PackageToPath(const android::StringPiece& package);
 
 // Creates a FileMap for the file at path.
-Maybe<android::FileMap> MmapPath(const std::string& path, std::string* out_error);
+std::optional<android::FileMap> MmapPath(const std::string& path, std::string* out_error);
 
 // Reads the file at path and appends each line to the outArgList vector.
 bool AppendArgsFromFile(const android::StringPiece& path, std::vector<std::string>* out_arglist,
@@ -126,8 +126,9 @@ class FileFilter {
 
 // Returns a list of files relative to the directory identified by `path`.
 // An optional FileFilter filters out any files that don't pass.
-Maybe<std::vector<std::string>> FindFiles(const android::StringPiece& path, IDiagnostics* diag,
-                                          const FileFilter* filter = nullptr);
+std::optional<std::vector<std::string>> FindFiles(const android::StringPiece& path,
+                                                  IDiagnostics* diag,
+                                                  const FileFilter* filter = nullptr);
 
 }  // namespace file
 }  // namespace aapt

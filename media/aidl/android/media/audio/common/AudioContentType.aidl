@@ -50,4 +50,8 @@ enum AudioContentType {
      * in a game. These sounds are mostly synthesized or short Foley sounds.
      */
     SONIFICATION = 4,
+    /**
+     * Content type value to use when the content type is ultrasound.
+     */
+    ULTRASOUND = 1997,
 }

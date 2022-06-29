@@ -21,4 +21,8 @@
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(പേരില്ലാത്ത പ്രോഗ്രാം)"</string>
     <string name="pip_close" msgid="9135220303720555525">"PIP അടയ്ക്കുക"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"പൂര്‍ണ്ണ സ്ക്രീന്‍"</string>
+    <string name="pip_move" msgid="1544227837964635439">"PIP നീക്കുക"</string>
+    <string name="pip_expand" msgid="7605396312689038178">"PIP വികസിപ്പിക്കുക"</string>
+    <string name="pip_collapse" msgid="5732233773786896094">"PIP ചുരുക്കുക"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" നിയന്ത്രണങ്ങൾക്കായി "<annotation icon="home_icon">" ഹോം "</annotation>" രണ്ട് തവണ അമർത്തുക"</string>
 </resources>

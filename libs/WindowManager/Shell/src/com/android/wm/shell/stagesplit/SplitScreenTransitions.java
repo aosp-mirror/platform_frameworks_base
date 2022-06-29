@@ -127,12 +127,6 @@ class SplitScreenTransitions {
                 }
                 // TODO(shell-transitions): screenshot here
                 final Rect startBounds = new Rect(change.getStartAbsBounds());
-                if (info.getType() == TRANSIT_SPLIT_DISMISS_SNAP) {
-                    // Dismissing split via snap which means the still-visible task has been
-                    // dragged to its end position at animation start so reflect that here.
-                    startBounds.offsetTo(change.getEndAbsBounds().left,
-                            change.getEndAbsBounds().top);
-                }
                 final Rect endBounds = new Rect(change.getEndAbsBounds());
                 startBounds.offset(-info.getRootOffset().x, -info.getRootOffset().y);
                 endBounds.offset(-info.getRootOffset().x, -info.getRootOffset().y);

@@ -27,6 +27,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
@@ -101,6 +102,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_FACTORY_RESET,
             UserManager.DISALLOW_ADD_USER,
             UserManager.DISALLOW_ADD_MANAGED_PROFILE,
+            UserManager.DISALLOW_ADD_CLONE_PROFILE,
             UserManager.ENSURE_VERIFY_APPS,
             UserManager.DISALLOW_CONFIG_CELL_BROADCASTS,
             UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS,
@@ -140,7 +142,12 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_PRINTING,
             UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
             UserManager.DISALLOW_MICROPHONE_TOGGLE,
-            UserManager.DISALLOW_CAMERA_TOGGLE
+            UserManager.DISALLOW_CAMERA_TOGGLE,
+            UserManager.DISALLOW_CHANGE_WIFI_STATE,
+            UserManager.DISALLOW_WIFI_TETHERING,
+            UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI,
+            UserManager.DISALLOW_WIFI_DIRECT,
+            UserManager.DISALLOW_ADD_WIFI_CONFIG
     });
 
     public static final Set<String> DEPRECATED_USER_RESTRICTIONS = Sets.newArraySet(
@@ -184,7 +191,11 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_USER_SWITCH,
             UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
             UserManager.DISALLOW_MICROPHONE_TOGGLE,
-            UserManager.DISALLOW_CAMERA_TOGGLE
+            UserManager.DISALLOW_CAMERA_TOGGLE,
+            UserManager.DISALLOW_CHANGE_WIFI_STATE,
+            UserManager.DISALLOW_WIFI_TETHERING,
+            UserManager.DISALLOW_WIFI_DIRECT,
+            UserManager.DISALLOW_ADD_WIFI_CONFIG
     );
 
     /**
@@ -219,7 +230,11 @@ public class UserRestrictionsUtils {
             Sets.newArraySet(
                     UserManager.DISALLOW_AIRPLANE_MODE,
                     UserManager.DISALLOW_CONFIG_DATE_TIME,
-                    UserManager.DISALLOW_CONFIG_PRIVATE_DNS
+                    UserManager.DISALLOW_CONFIG_PRIVATE_DNS,
+                    UserManager.DISALLOW_CHANGE_WIFI_STATE,
+                    UserManager.DISALLOW_WIFI_TETHERING,
+                    UserManager.DISALLOW_WIFI_DIRECT,
+                    UserManager.DISALLOW_ADD_WIFI_CONFIG
     );
 
     /**
@@ -268,6 +283,19 @@ public class UserRestrictionsUtils {
             UserManager.ENSURE_VERIFY_APPS,
             UserManager.DISALLOW_AIRPLANE_MODE,
             UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
+    );
+
+    /**
+     * User restrictions available to a device owner whose type is
+     * {@link android.app.admin.DevicePolicyManager#DEVICE_OWNER_TYPE_FINANCED}.
+     */
+    private static final Set<String> FINANCED_DEVICE_OWNER_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_ADD_USER,
+            UserManager.DISALLOW_DEBUGGING_FEATURES,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            UserManager.DISALLOW_SAFE_BOOT,
+            UserManager.DISALLOW_CONFIG_DATE_TIME,
+            UserManager.DISALLOW_OUTGOING_CALLS
     );
 
     /**
@@ -441,6 +469,15 @@ public class UserRestrictionsUtils {
      */
     public static @NonNull Set<String> getDefaultEnabledForManagedProfiles() {
         return DEFAULT_ENABLED_FOR_MANAGED_PROFILES;
+    }
+
+    /**
+     * @return {@code true} only if the restriction is allowed for financed devices and can be set
+     * by a device owner. Otherwise, {@code false} would be returned.
+     */
+    public static boolean canFinancedDeviceOwnerChange(String restriction) {
+        return FINANCED_DEVICE_OWNER_RESTRICTIONS.contains(restriction)
+                && canDeviceOwnerChange(restriction);
     }
 
     /**
@@ -642,21 +679,9 @@ public class UserRestrictionsUtils {
                     break;
                 case UserManager.DISALLOW_AMBIENT_DISPLAY:
                     if (newValue) {
-                        android.provider.Settings.Secure.putIntForUser(
-                                context.getContentResolver(),
-                                Settings.Secure.DOZE_ENABLED, 0, userId);
-                        android.provider.Settings.Secure.putIntForUser(
-                                context.getContentResolver(),
-                                Settings.Secure.DOZE_ALWAYS_ON, 0, userId);
-                        android.provider.Settings.Secure.putIntForUser(
-                                context.getContentResolver(),
-                                Settings.Secure.DOZE_PICK_UP_GESTURE, 0, userId);
-                        android.provider.Settings.Secure.putIntForUser(
-                                context.getContentResolver(),
-                                Settings.Secure.DOZE_PULSE_ON_LONG_PRESS, 0, userId);
-                        android.provider.Settings.Secure.putIntForUser(
-                                context.getContentResolver(),
-                                Settings.Secure.DOZE_DOUBLE_TAP_GESTURE, 0, userId);
+                        final AmbientDisplayConfiguration config =
+                                new AmbientDisplayConfiguration(context);
+                        config.disableDozeSettings(userId);
                     }
                     break;
                 case UserManager.DISALLOW_APPS_CONTROL:

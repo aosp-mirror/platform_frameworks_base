@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -44,11 +43,11 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     private var hasFaceFeature: Boolean
     private var pendingUnlock: PendingUnlock? = null
     private val listeners = mutableListOf<OnBypassStateChangedListener>()
+    var userHasDeviceEntryIntent: Boolean = false // ie: attempted udfps auth
 
     private val faceAuthEnabledChangedCallback = object : KeyguardStateController.Callback {
         override fun onFaceAuthEnabledChanged() = notifyListeners()
     }
-    var userHasDeviceEntryIntent: Boolean = false // ie: attempted udfps auth
 
     @IntDef(
         FACE_UNLOCK_BYPASS_NO_OVERRIDE,
@@ -216,7 +215,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         pendingUnlock = null
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("KeyguardBypassController:")
         if (pendingUnlock != null) {
             pw.println("  mPendingUnlock.pendingUnlockType: ${pendingUnlock!!.pendingUnlockType}")

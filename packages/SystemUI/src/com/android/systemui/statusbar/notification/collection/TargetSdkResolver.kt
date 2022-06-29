@@ -23,7 +23,7 @@ import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.statusbar.phone.StatusBar
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import javax.inject.Inject
 
 @SysUISingleton
@@ -39,7 +39,7 @@ class TargetSdkResolver @Inject constructor(
     }
 
     private fun resolveNotificationSdk(sbn: StatusBarNotification): Int {
-        val pmUser = StatusBar.getPackageManagerForUser(context, sbn.user.identifier)
+        val pmUser = CentralSurfaces.getPackageManagerForUser(context, sbn.user.identifier)
         var targetSdk = 0
         // Extract target SDK version.
         try {

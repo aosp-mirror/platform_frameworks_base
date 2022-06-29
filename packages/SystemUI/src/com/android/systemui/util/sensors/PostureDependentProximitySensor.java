@@ -37,6 +37,8 @@ class PostureDependentProximitySensor extends ProximitySensorImpl {
     private final ThresholdSensor[] mPostureToPrimaryProxSensorMap;
     private final ThresholdSensor[] mPostureToSecondaryProxSensorMap;
 
+    private final DevicePostureController mDevicePostureController;
+
     @Inject
     PostureDependentProximitySensor(
             @PrimaryProxSensor ThresholdSensor[] postureToPrimaryProxSensorMap,
@@ -53,15 +55,24 @@ class PostureDependentProximitySensor extends ProximitySensorImpl {
         );
         mPostureToPrimaryProxSensorMap = postureToPrimaryProxSensorMap;
         mPostureToSecondaryProxSensorMap = postureToSecondaryProxSensorMap;
-        mDevicePosture = devicePostureController.getDevicePosture();
-        devicePostureController.addCallback(mDevicePostureCallback);
+        mDevicePostureController = devicePostureController;
+
+        mDevicePosture = mDevicePostureController.getDevicePosture();
+        mDevicePostureController.addCallback(mDevicePostureCallback);
 
         chooseSensors();
     }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        mDevicePostureController.removeCallback(mDevicePostureCallback);
+    }
+
     private void chooseSensors() {
         if (mDevicePosture >= mPostureToPrimaryProxSensorMap.length
                 || mDevicePosture >= mPostureToSecondaryProxSensorMap.length) {
-            Log.e("PostureDependentProxSensor",
+            Log.e("PostureDependProxSensor",
                     "unsupported devicePosture=" + mDevicePosture);
             return;
         }

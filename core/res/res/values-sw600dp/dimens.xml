@@ -41,6 +41,11 @@
     <!-- Size of lockscreen outerring on unsecure unlock LockScreen -->
     <dimen name="keyguard_lockscreen_outerring_diameter">364dp</dimen>
 
+    <!-- Copied from SysUI's @dimen/navigation_key_width for the embedded nav bar in the IME -->
+    <dimen name="input_method_navigation_key_width">128dp</dimen>
+    <!-- Copied from SysUI's @dimen/navigation_key_padding for the embedded nav bar in the IME -->
+    <dimen name="input_method_navigation_key_padding">25dp</dimen>
+
     <!-- Height of FaceUnlock view in keyguard -->
     <dimen name="face_unlock_height">430dip</dimen>
 
