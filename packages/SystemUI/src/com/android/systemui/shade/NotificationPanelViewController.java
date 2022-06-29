@@ -3881,29 +3881,37 @@ public final class NotificationPanelViewController extends PanelViewController {
     }
 
     /**
-     * Starts fold to AOD animation
+     * Starts fold to AOD animation.
+     *
+     * @param startAction invoked when the animation starts.
+     * @param endAction invoked when the animation finishes, also if it was cancelled.
+     * @param cancelAction invoked when the animation is cancelled, before endAction.
      */
-    public void startFoldToAodAnimation(Runnable endAction) {
+    public void startFoldToAodAnimation(Runnable startAction, Runnable endAction,
+            Runnable cancelAction) {
         mView.animate()
-                .translationX(0)
-                .alpha(1f)
-                .setDuration(ANIMATION_DURATION_FOLD_TO_AOD)
-                .setInterpolator(EMPHASIZED_DECELERATE)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                        endAction.run();
-                    }
+            .translationX(0)
+            .alpha(1f)
+            .setDuration(ANIMATION_DURATION_FOLD_TO_AOD)
+            .setInterpolator(EMPHASIZED_DECELERATE)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    startAction.run();
+                }
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        endAction.run();
-                    }
-                })
-                .setUpdateListener(anim -> {
-                    mKeyguardStatusViewController.animateFoldToAod(anim.getAnimatedFraction());
-                })
-                .start();
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    cancelAction.run();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    endAction.run();
+                }
+            }).setUpdateListener(anim -> {
+                mKeyguardStatusViewController.animateFoldToAod(anim.getAnimatedFraction());
+            }).start();
     }
 
     /**
