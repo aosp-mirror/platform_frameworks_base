@@ -12484,6 +12484,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public PendingIntent getRunningServiceControlPanel(ComponentName name) {
         enforceNotIsolatedCaller("getRunningServiceControlPanel");
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (name == null || getPackageManagerInternal()
+                .filterAppAccess(name.getPackageName(), callingUid, callingUserId)) {
+            return null;
+        }
         synchronized (this) {
             return mServices.getRunningServiceControlPanelLocked(name);
         }

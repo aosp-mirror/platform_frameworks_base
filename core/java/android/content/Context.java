@@ -3990,7 +3990,7 @@ public abstract class Context {
      *  sockets and networks.
      *  <dt> {@link #WIFI_SERVICE} ("wifi")
      *  <dd> A {@link android.net.wifi.WifiManager WifiManager} for management of Wi-Fi
-     *  connectivity.  On releases before NYC, it should only be obtained from an application
+     *  connectivity.  On releases before Android 7, it should only be obtained from an application
      *  context, and not from any other derived context to avoid memory leaks within the calling
      *  process.
      *  <dt> {@link #WIFI_AWARE_SERVICE} ("wifiaware")

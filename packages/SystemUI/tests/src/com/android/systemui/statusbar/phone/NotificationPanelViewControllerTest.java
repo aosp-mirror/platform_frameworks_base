@@ -106,7 +106,6 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -404,8 +403,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .thenReturn(mHeadsUpCallback);
         when(mKeyguardBottomAreaViewController.getView()).thenReturn(mKeyguardBottomArea);
         when(mView.findViewById(R.id.keyguard_bottom_area)).thenReturn(mKeyguardBottomArea);
-        when(mKeyguardBottomArea.getLeftView()).thenReturn(mock(KeyguardAffordanceView.class));
-        when(mKeyguardBottomArea.getRightView()).thenReturn(mock(KeyguardAffordanceView.class));
         when(mKeyguardBottomArea.animate()).thenReturn(mock(ViewPropertyAnimator.class));
         when(mView.findViewById(R.id.qs_frame)).thenReturn(mQsFrame);
         when(mView.findViewById(R.id.keyguard_status_view))
