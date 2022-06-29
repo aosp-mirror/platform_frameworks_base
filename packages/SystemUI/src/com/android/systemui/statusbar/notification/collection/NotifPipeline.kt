@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar.notification.collection
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderGroupListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
