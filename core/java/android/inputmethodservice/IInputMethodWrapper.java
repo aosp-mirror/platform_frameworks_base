@@ -195,18 +195,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_START_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
                 final IBinder startInputToken = (IBinder) args.arg1;
-                final IRemoteInputConnection remoteIc = (IRemoteInputConnection) args.arg2;
+                final InputConnection ic = (InputConnection) args.arg2;
                 final EditorInfo info = (EditorInfo) args.arg3;
                 final ImeOnBackInvokedDispatcher imeDispatcher =
                         (ImeOnBackInvokedDispatcher) args.arg4;
-                final CancellationGroup cancellationGroup = (CancellationGroup) args.arg5;
                 final boolean restarting = args.argi1 == 1;
                 @InputMethodNavButtonFlags
                 final int navButtonFlags = args.argi2;
-                final InputConnection ic = remoteIc != null
-                        ? new RemoteInputConnection(mTarget, remoteIc, cancellationGroup)
-                        : null;
-                info.makeCompatible(mTargetSdkVersion);
                 inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken,
                         navButtonFlags, imeDispatcher);
                 args.recycle();
@@ -358,14 +353,19 @@ class IInputMethodWrapper extends IInputMethod.Stub
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
+
+        editorInfo.makeCompatible(mTargetSdkVersion);
+
+        final InputConnection ic = inputConnection == null ? null
+                : new RemoteInputConnection(mTarget, inputConnection, mCancellationGroup);
+
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = startInputToken;
-        args.arg2 = inputConnection;
+        args.arg2 = ic;
         args.arg3 = editorInfo;
         args.argi1 = restarting ? 1 : 0;
         args.argi2 = navButtonFlags;
         args.arg4 = imeDispatcher;
-        args.arg5 = mCancellationGroup;
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_START_INPUT, args));
     }
 
