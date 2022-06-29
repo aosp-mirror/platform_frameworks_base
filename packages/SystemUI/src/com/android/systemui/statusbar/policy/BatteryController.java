@@ -119,6 +119,17 @@ public interface BatteryController extends DemoMode, Dumpable,
     }
 
     /**
+     * Returns {@code true} if the charging source is
+     * {@link android.os.BatteryManager#BATTERY_PLUGGED_DOCK}.
+     *
+     * <P>Note that charging from dock is not considered as wireless charging. In other words,
+     * {@link BatteryController#isWirelessCharging()} and this are mutually exclusive.
+     */
+    default boolean isChargingSourceDock() {
+        return false;
+    }
+
+    /**
      * A listener that will be notified whenever a change in battery level or power save mode has
      * occurred.
      */

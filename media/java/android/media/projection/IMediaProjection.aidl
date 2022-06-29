@@ -17,7 +17,7 @@
 package android.media.projection;
 
 import android.media.projection.IMediaProjectionCallback;
-import android.window.WindowContainerToken;
+import android.os.IBinder;
 
 /** {@hide} */
 interface IMediaProjection {
@@ -31,14 +31,14 @@ interface IMediaProjection {
     void unregisterCallback(IMediaProjectionCallback callback);
 
     /**
-     * Returns the {@link android.window.WindowContainerToken} identifying the task to record, or
-     * {@code null} if there is none.
+     * Returns the {@link android.os.IBinder} identifying the task to record, or {@code null} if
+     * there is none.
      */
-    WindowContainerToken getTaskRecordingWindowContainerToken();
+    IBinder getLaunchCookie();
 
     /**
-     * Updates the {@link android.window.WindowContainerToken} identifying the task to record, or
-     * {@code null} if there is none.
+     * Updates the {@link android.os.IBinder} identifying the task to record, or {@code null} if
+     * there is none.
      */
-    void setTaskRecordingWindowContainerToken(in WindowContainerToken token);
+    void setLaunchCookie(in IBinder launchCookie);
 }

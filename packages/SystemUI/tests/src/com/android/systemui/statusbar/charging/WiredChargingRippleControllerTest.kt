@@ -74,9 +74,9 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
 
         // Verify ripple added to window manager.
         captor.value.onBatteryLevelChanged(
-                0 /* unusedBatteryLevel */,
-                true /* plugged in */,
-                false /* charging */)
+                /* unusedBatteryLevel= */ 0,
+                /* plugged in= */ true,
+                /* charging= */ false)
         val attachListenerCaptor =
                 ArgumentCaptor.forClass(View.OnAttachStateChangeListener::class.java)
         verify(rippleView).addOnAttachStateChangeListener(attachListenerCaptor.capture())
@@ -143,5 +143,23 @@ class WiredChargingRippleControllerTest : SysuiTestCase() {
         controller.startRippleWithDebounce()
         // Verify that ripple is triggered.
         verify(rippleView).addOnAttachStateChangeListener(ArgumentMatchers.any())
+    }
+
+    @Test
+    fun testRipple_whenDocked_doesNotPlayRipple() {
+        `when`(batteryController.isChargingSourceDock).thenReturn(true)
+        val captor = ArgumentCaptor
+                .forClass(BatteryController.BatteryStateChangeCallback::class.java)
+        verify(batteryController).addCallback(captor.capture())
+
+        captor.value.onBatteryLevelChanged(
+                /* unusedBatteryLevel= */ 0,
+                /* plugged in= */ true,
+                /* charging= */ false)
+
+        val attachListenerCaptor =
+                ArgumentCaptor.forClass(View.OnAttachStateChangeListener::class.java)
+        verify(rippleView, never()).addOnAttachStateChangeListener(attachListenerCaptor.capture())
+        verify(windowManager, never()).addView(eq(rippleView), any<WindowManager.LayoutParams>())
     }
 }

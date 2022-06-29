@@ -175,6 +175,10 @@ public final class NotificationEntry extends ListEntry {
     public boolean mRemoteEditImeAnimatingAway;
     public boolean mRemoteEditImeVisible;
     private boolean mExpandAnimationRunning;
+    /**
+     * Flag to determine if the entry is blockable by DnD filters
+     */
+    private boolean mBlockable;
 
     /**
      * @param sbn the StatusBarNotification from system server
@@ -253,6 +257,7 @@ public final class NotificationEntry extends ListEntry {
         }
 
         mRanking = ranking.withAudiblyAlertedInfo(mRanking);
+        updateIsBlockable();
     }
 
     /*
@@ -781,15 +786,20 @@ public final class NotificationEntry extends ListEntry {
      * or is not in an allowList).
      */
     public boolean isBlockable() {
+        return mBlockable;
+    }
+
+    private void updateIsBlockable() {
         if (getChannel() == null) {
-            return false;
+            mBlockable = false;
+            return;
         }
         if (getChannel().isImportanceLockedByCriticalDeviceFunction()
                 && !getChannel().isBlockable()) {
-            return false;
+            mBlockable = false;
+            return;
         }
-
-        return true;
+        mBlockable = true;
     }
 
     private boolean shouldSuppressVisualEffect(int effect) {
