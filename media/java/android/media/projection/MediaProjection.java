@@ -25,13 +25,13 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContentRecordingSession;
 import android.view.Surface;
-import android.window.WindowContainerToken;
 
 import java.util.Map;
 
@@ -172,18 +172,16 @@ public final class MediaProjection {
             @NonNull VirtualDisplayConfig.Builder virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         try {
-            final WindowContainerToken taskWindowContainerToken =
-                    mImpl.getTaskRecordingWindowContainerToken();
+            final IBinder launchCookie = mImpl.getLaunchCookie();
             Context windowContext = null;
             ContentRecordingSession session;
-            if (taskWindowContainerToken == null) {
+            if (launchCookie == null) {
                 windowContext = mContext.createWindowContext(mContext.getDisplayNoVerify(),
                         TYPE_APPLICATION, null /* options */);
                 session = ContentRecordingSession.createDisplaySession(
                         windowContext.getWindowContextToken());
             } else {
-                session = ContentRecordingSession.createTaskSession(
-                        taskWindowContainerToken.asBinder());
+                session = ContentRecordingSession.createTaskSession(launchCookie);
             }
             virtualDisplayConfig.setWindowManagerMirroring(true);
             final DisplayManager dm = mContext.getSystemService(DisplayManager.class);

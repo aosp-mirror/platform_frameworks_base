@@ -656,7 +656,7 @@ class ActivityLaunchAnimator(
             controller.onLaunchAnimationCancelled()
         }
 
-        override fun onAnimationCancelled() {
+        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {
             if (timedOut) {
                 return
             }

@@ -139,6 +139,7 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         `when`(dialog.getButton(DialogInterface.BUTTON_NEUTRAL)).thenReturn(neutralButton)
 
         clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
+        verify(dialog).dismiss()
 
         verify(activityStarter)
             .postStartActivityDismissingKeyguard(

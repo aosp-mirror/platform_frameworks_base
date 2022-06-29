@@ -61,6 +61,7 @@ import android.view.InsetsState;
 import android.view.InsetsVisibilities;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -316,5 +317,77 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         verify(mWm.mInputManager).setInTouchMode(
                 !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false);
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_nullCookie() {
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(null);
+        assertThat(wct).isNull();
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_invalidCookie() {
+        Binder cookie = new Binder("test cookie");
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
+        assertThat(wct).isNull();
+
+        final ActivityRecord testActivity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .build();
+
+        wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
+        assertThat(wct).isNull();
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_validCookie() {
+        final Binder cookie = new Binder("ginger cookie");
+        final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
+        setupActivityWithLaunchCookie(cookie, launchRootTask);
+
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
+        assertThat(wct).isEqualTo(launchRootTask);
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_multipleCookies() {
+        final Binder cookie1 = new Binder("ginger cookie");
+        final WindowContainerToken launchRootTask1 = mock(WindowContainerToken.class);
+        setupActivityWithLaunchCookie(cookie1, launchRootTask1);
+
+        setupActivityWithLaunchCookie(new Binder("choc chip cookie"),
+                mock(WindowContainerToken.class));
+
+        setupActivityWithLaunchCookie(new Binder("peanut butter cookie"),
+                mock(WindowContainerToken.class));
+
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie1);
+        assertThat(wct).isEqualTo(launchRootTask1);
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_multipleCookies_noneValid() {
+        setupActivityWithLaunchCookie(new Binder("ginger cookie"),
+                mock(WindowContainerToken.class));
+
+        setupActivityWithLaunchCookie(new Binder("choc chip cookie"),
+                mock(WindowContainerToken.class));
+
+        setupActivityWithLaunchCookie(new Binder("peanut butter cookie"),
+                mock(WindowContainerToken.class));
+
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(
+                new Binder("some other cookie"));
+        assertThat(wct).isNull();
+    }
+
+    private void setupActivityWithLaunchCookie(IBinder launchCookie, WindowContainerToken wct) {
+        final WindowContainer.RemoteToken remoteToken = mock(WindowContainer.RemoteToken.class);
+        when(remoteToken.toWindowContainerToken()).thenReturn(wct);
+        final ActivityRecord testActivity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .build();
+        testActivity.mLaunchCookie = launchCookie;
+        testActivity.getTask().mRemoteToken = remoteToken;
     }
 }
