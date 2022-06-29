@@ -16,6 +16,7 @@
 
 package com.android.server.companion.virtual;
 
+import android.annotation.NonNull;
 import android.companion.virtual.IVirtualDevice;
 
 /**
@@ -24,16 +25,41 @@ import android.companion.virtual.IVirtualDevice;
  */
 public abstract class VirtualDeviceManagerInternal {
 
+    /** Interface to listen to the creation and destruction of virtual displays. */
+    public interface VirtualDisplayListener {
+        /** Notifies that a virtual display was created. */
+        void onVirtualDisplayCreated(int displayId);
+
+        /** Notifies that a virtual display was removed. */
+        void onVirtualDisplayRemoved(int displayId);
+    }
+
+    /** Register a listener for the creation and destruction of virtual displays. */
+    public abstract void registerVirtualDisplayListener(
+            @NonNull VirtualDisplayListener listener);
+
+    /** Unregister a listener for the creation and  destruction of virtual displays. */
+    public abstract void unregisterVirtualDisplayListener(
+            @NonNull VirtualDisplayListener listener);
+
+
     /**
      * Validate the virtual device.
      */
     public abstract boolean isValidVirtualDevice(IVirtualDevice virtualDevice);
 
     /**
-     * Notify a virtual display is removed.
+     * Notifies that a virtual display is created.
+     *
+     * @param displayId The display id of the created virtual display.
+     */
+    public abstract void onVirtualDisplayCreated(int displayId);
+
+    /**
+     * Notifies that a virtual display is removed.
      *
      * @param virtualDevice The virtual device where the virtual display located.
-     * @param displayId The display id of the removed virtual display.
+     * @param displayId     The display id of the removed virtual display.
      */
     public abstract void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId);
 
