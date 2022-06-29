@@ -21,6 +21,7 @@ import android.content.Context
 import android.media.MediaRoute2Info
 import android.os.PowerManager
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -69,6 +70,10 @@ class MediaTttChipControllerSender @Inject constructor(
     powerManager,
     R.layout.media_ttt_chip
 ) {
+    override val windowLayoutParams = commonWindowLayoutParams.apply {
+        gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
+    }
+
     private var currentlyDisplayedChipState: ChipStateSender? = null
 
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {

@@ -371,11 +371,9 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         powerManager,
         R.layout.media_ttt_chip
     ) {
-        override fun updateChipView(chipInfo: ChipInfo, currentChipView: ViewGroup) {
-
-        }
-
-        override fun getIconSize(isAppIcon: Boolean): Int? = ICON_SIZE
+        override val windowLayoutParams = commonWindowLayoutParams
+        override fun updateChipView(chipInfo: ChipInfo, currentChipView: ViewGroup) {}
+        override fun getIconSize(isAppIcon: Boolean): Int = ICON_SIZE
     }
 
     inner class ChipInfo : ChipInfoCommon {
