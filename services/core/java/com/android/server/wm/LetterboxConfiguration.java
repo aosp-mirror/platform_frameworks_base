@@ -687,6 +687,24 @@ final class LetterboxConfiguration {
         }
     }
 
+    /*
+     * Gets the horizontal position of the letterboxed app window when horizontal reachability is
+     * enabled.
+     */
+    @LetterboxHorizontalReachabilityPosition
+    int getLetterboxPositionForHorizontalReachability() {
+        return mLetterboxPositionForHorizontalReachability;
+    }
+
+    /*
+     * Gets the vertical position of the letterboxed app window when vertical reachability is
+     * enabled.
+     */
+    @LetterboxVerticalReachabilityPosition
+    int getLetterboxPositionForVerticalReachability() {
+        return mLetterboxPositionForVerticalReachability;
+    }
+
     /** Returns a string representing the given {@link LetterboxHorizontalReachabilityPosition}. */
     static String letterboxHorizontalReachabilityPositionToString(
             @LetterboxHorizontalReachabilityPosition int position) {
