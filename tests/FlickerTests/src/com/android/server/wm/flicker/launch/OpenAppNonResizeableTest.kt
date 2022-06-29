@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.RequiresDevice
 import android.view.Surface
@@ -60,10 +60,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter)
-    : OpenAppFromLockTransition(testSpec) {
+open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
+    OpenAppFromLockTransition(testSpec) {
     override val testApp = NonResizeableAppHelper(instrumentation)
-    private val colorFadComponent = FlickerComponentName("", "ColorFade BLAST#")
 
     /**
      * Checks that the nav bar layer starts invisible, becomes visible during unlocking animation

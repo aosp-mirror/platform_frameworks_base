@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.flicker.pip
 
-import android.view.Surface
 import android.platform.test.annotations.FlakyTest
+import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -74,7 +74,9 @@ class ExitPipViaExpandButtonClickTest(
                 // This will bring PipApp to fullscreen
                 pipApp.expandPipWindowToApp(wmHelper)
                 // Wait until the other app is no longer visible
-                wmHelper.waitForWindowSurfaceDisappeared(testApp.component)
+                wmHelper.StateSyncBuilder()
+                    .withWindowSurfaceDisappeared(testApp.component)
+                    .waitForAndVerify()
             }
         }
 

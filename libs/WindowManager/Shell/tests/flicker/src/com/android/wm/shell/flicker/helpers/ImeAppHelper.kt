@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
 import com.android.server.wm.traces.parser.toFlickerComponent
@@ -35,8 +34,7 @@ open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
      *
      * @param wmHelper Helper used to wait for WindowManager states
      */
-    @JvmOverloads
-    open fun openIME(wmHelper: WindowManagerStateHelper? = null) {
+    open fun openIME(wmHelper: WindowManagerStateHelper) {
         if (!isTelevision) {
             val editText = uiDevice.wait(
                 Until.findObject(By.res(getPackage(), "plain_text_input")),
@@ -47,22 +45,13 @@ open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
                     "was left in an unknown state (e.g. in split screen)"
             }
             editText.click()
-            waitAndAssertIMEShown(uiDevice, wmHelper)
+            wmHelper.StateSyncBuilder()
+                .withImeShown()
+                .waitForAndVerify()
         } else {
             // If we do the same thing as above - editText.click() - on TV, that's going to force TV
             // into the touch mode. We really don't want that.
             launchViaIntent(action = Components.ImeActivity.ACTION_OPEN_IME)
-        }
-    }
-
-    protected fun waitAndAssertIMEShown(
-        device: UiDevice,
-        wmHelper: WindowManagerStateHelper? = null
-    ) {
-        if (wmHelper == null) {
-            device.waitForIdle()
-        } else {
-            wmHelper.waitImeShown()
         }
     }
 
@@ -71,16 +60,13 @@ open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
      *
      * @param wmHelper Helper used to wait for WindowManager states
      */
-    @JvmOverloads
-    open fun closeIME(wmHelper: WindowManagerStateHelper? = null) {
+    open fun closeIME(wmHelper: WindowManagerStateHelper) {
         if (!isTelevision) {
             uiDevice.pressBack()
             // Using only the AccessibilityInfo it is not possible to identify if the IME is active
-            if (wmHelper == null) {
-                uiDevice.waitForIdle()
-            } else {
-                wmHelper.waitImeGone()
-            }
+            wmHelper.StateSyncBuilder()
+                .withImeGone()
+                .waitForAndVerify()
         } else {
             // While pressing the back button should close the IME on TV as well, it may also lead
             // to the app closing. So let's instead just ask the app to close the IME.

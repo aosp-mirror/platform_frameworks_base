@@ -2576,6 +2576,7 @@ class ActivityStarter {
             mInTask = null;
         }
         mInTaskFragment = inTaskFragment;
+        sendNewTaskFragmentResultRequestIfNeeded();
 
         mStartFlags = startFlags;
         // If the onlyIfNeeded flag is set, then we can do this if the activity being launched
@@ -2611,6 +2612,18 @@ class ActivityStarter {
             // so instead immediately send back a cancel and let the new task continue launched
             // as normal without a dependency on its originator.
             Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
+            mStartActivity.resultTo.sendResult(INVALID_UID, mStartActivity.resultWho,
+                    mStartActivity.requestCode, RESULT_CANCELED,
+                    null /* data */, null /* dataGrants */);
+            mStartActivity.resultTo = null;
+        }
+    }
+
+    private void sendNewTaskFragmentResultRequestIfNeeded() {
+        if (mStartActivity.resultTo != null && mInTaskFragment != null
+                && mInTaskFragment != mStartActivity.resultTo.getTaskFragment()) {
+            Slog.w(TAG,
+                    "Activity is launching as a new TaskFragment, so cancelling activity result.");
             mStartActivity.resultTo.sendResult(INVALID_UID, mStartActivity.resultWho,
                     mStartActivity.requestCode, RESULT_CANCELED,
                     null /* data */, null /* dataGrants */);

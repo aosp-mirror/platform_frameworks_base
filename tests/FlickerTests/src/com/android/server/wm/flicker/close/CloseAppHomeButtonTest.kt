@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.close
 
-import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
@@ -69,35 +68,27 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         get() = {
             super.transition(this)
             transitions {
+                // Can't use TAPL at the moment because of rotation test issues
+                // When pressing home, TAPL expects the orientation to remain constant
+                // However, when closing a landscape app back to a portrait-only launcher
+                // this causes an error in verifyActiveContainer();
                 device.pressHome()
-                wmHelper.waitForHomeActivityVisible()
+                wmHelper.StateSyncBuilder()
+                    .withHomeActivityVisible()
+                    .waitForAndVerify()
             }
         }
 
     /** {@inheritDoc} */
-    @FlakyTest
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 227430489)
+    @FlakyTest(bugId = 206753786)
     @Test
     override fun statusBarLayerRotatesScales() {
         super.statusBarLayerRotatesScales()
-    }
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun launcherLayerReplacesApp() {
-        super.launcherLayerReplacesApp()
-    }
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() {
-        super.entireScreenCovered()
     }
 
     /** {@inheritDoc} */

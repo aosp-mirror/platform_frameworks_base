@@ -75,6 +75,8 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_LOADING_TO_SHOW_INFO_WITH_ACTIONS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SUW_SHOW_FUNCTION_SCREEN_WITH_ACTIONS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TAKE_SCREENSHOT;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_COLLAPSE;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_EXPAND;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__UNFOLD_ANIM;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_DIALOG_OPEN;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_SWITCH;
@@ -206,6 +208,8 @@ public class InteractionJankMonitor {
     public static final int CUJ_SETTINGS_TOGGLE = 57;
     public static final int CUJ_SHADE_DIALOG_OPEN = 58;
     public static final int CUJ_USER_DIALOG_OPEN = 59;
+    public static final int CUJ_TASKBAR_EXPAND = 60;
+    public static final int CUJ_TASKBAR_COLLAPSE = 61;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -274,6 +278,8 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_TOGGLE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_DIALOG_OPEN,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__USER_DIALOG_OPEN,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_EXPAND,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__TASKBAR_COLLAPSE,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -354,6 +360,8 @@ public class InteractionJankMonitor {
             CUJ_SETTINGS_TOGGLE,
             CUJ_SHADE_DIALOG_OPEN,
             CUJ_USER_DIALOG_OPEN,
+            CUJ_TASKBAR_EXPAND,
+            CUJ_TASKBAR_COLLAPSE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -792,6 +800,10 @@ public class InteractionJankMonitor {
                 return "SHADE_DIALOG_OPEN";
             case CUJ_USER_DIALOG_OPEN:
                 return "USER_DIALOG_OPEN";
+            case CUJ_TASKBAR_EXPAND:
+                return "TASKBAR_EXPAND";
+            case CUJ_TASKBAR_COLLAPSE:
+                return "TASKBAR_COLLAPSE";
         }
         return "UNKNOWN";
     }

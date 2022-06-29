@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.pip
 
 import androidx.test.filters.RequiresDevice
-import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group3
@@ -51,7 +50,6 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest(testSpec) {
-    protected val taplInstrumentation = LauncherInstrumentation()
     /**
      * Defines the transition used to run the test
      */
@@ -70,7 +68,7 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
                 }
             }
             transitions {
-                taplInstrumentation.goHome()
+                tapl.goHome()
             }
         }
 

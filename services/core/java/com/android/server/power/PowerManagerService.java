@@ -42,12 +42,13 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.SynchronousUserSwitchObserver;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -63,6 +64,7 @@ import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatterySaverPolicyConfig;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -94,6 +96,7 @@ import android.service.dreams.DreamManagerInternal;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.sysprop.InitProperties;
+import android.sysprop.PowerProperties;
 import android.util.ArrayMap;
 import android.util.KeyValueListParser;
 import android.util.LongArray;
@@ -124,6 +127,7 @@ import com.android.server.UiThread;
 import com.android.server.UserspaceRebootLogger;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
 import com.android.server.policy.WindowManagerPolicy;
@@ -279,6 +283,17 @@ public final class PowerManagerService extends SystemService
      */
     private static final long ENHANCED_DISCHARGE_PREDICTION_BROADCAST_MIN_DELAY_MS = 60 * 1000L;
 
+    /**
+     * Apps targeting Android U and above need to define
+     * {@link android.Manifest.permission#TURN_SCREEN_ON} in their manifest for
+     * {@link android.os.PowerManager#ACQUIRE_CAUSES_WAKEUP} to have any effect.
+     * Note that most applications should use {@link android.R.attr#turnScreenOn} or
+     * {@link android.app.Activity#setTurnScreenOn(boolean)} instead, as this prevents the
+     * previous foreground app from being resumed first when the screen turns on.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long REQUIRE_TURN_SCREEN_ON_PERMISSION = 216114297L;
     /** Reason ID for holding display suspend blocker. */
     private static final String HOLDING_DISPLAY_SUSPEND_BLOCKER = "holding display";
 
@@ -302,6 +317,7 @@ public final class PowerManagerService extends SystemService
     private final SystemPropertiesWrapper mSystemProperties;
     private final Clock mClock;
     private final Injector mInjector;
+    private final PlatformCompat mPlatformCompat;
 
     private AppOpsManager mAppOpsManager;
     private LightsManager mLightsManager;
@@ -980,6 +996,11 @@ public final class PowerManagerService extends SystemService
                 public void set(String key, String val) {
                     SystemProperties.set(key, val);
                 }
+
+                @Override
+                public boolean getBoolean(String key, boolean def) {
+                    return SystemProperties.getBoolean(key, def);
+                }
             };
         }
 
@@ -1004,6 +1025,10 @@ public final class PowerManagerService extends SystemService
 
         AppOpsManager createAppOpsManager(Context context) {
             return context.getSystemService(AppOpsManager.class);
+        }
+
+        PlatformCompat createPlatformCompat(Context context) {
+            return context.getSystemService(PlatformCompat.class);
         }
     }
 
@@ -1060,6 +1085,8 @@ public final class PowerManagerService extends SystemService
                 mInjector.createInattentiveSleepWarningController();
 
         mAppOpsManager = injector.createAppOpsManager(mContext);
+
+        mPlatformCompat = injector.createPlatformCompat(mContext);
 
         mPowerGroupWakefulnessChangeListener = new PowerGroupWakefulnessChangeListener();
 
@@ -1470,18 +1497,10 @@ public final class PowerManagerService extends SystemService
         updatePowerStateLocked();
     }
 
+    @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
     private void acquireWakeLockInternal(IBinder lock, int displayId, int flags, String tag,
             String packageName, WorkSource ws, String historyTag, int uid, int pid,
             @Nullable IWakeLockCallback callback) {
-
-        boolean isCallerPrivileged = false;
-        try {
-            ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.ApplicationInfoFlags.of(0));
-            isCallerPrivileged = appInfo.uid == uid && appInfo.isPrivilegedApp();
-        } catch (PackageManager.NameNotFoundException e) {
-            // assume app is not privileged
-        }
         synchronized (mLock) {
             if (displayId != Display.INVALID_DISPLAY) {
                 final DisplayInfo displayInfo =
@@ -1528,7 +1547,7 @@ public final class PowerManagerService extends SystemService
                 notifyAcquire = true;
             }
 
-            applyWakeLockFlagsOnAcquireLocked(wakeLock, isCallerPrivileged);
+            applyWakeLockFlagsOnAcquireLocked(wakeLock);
             mDirty |= DIRTY_WAKE_LOCKS;
             updatePowerStateLocked();
             if (notifyAcquire) {
@@ -1567,33 +1586,44 @@ public final class PowerManagerService extends SystemService
         return null;
     }
 
-    private boolean isAcquireCausesWakeupFlagAllowed(String opPackageName, int opUid,
-            boolean isCallerPrivileged) {
+    @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
+    private boolean isAcquireCausesWakeupFlagAllowed(String opPackageName, int opUid) {
         if (opPackageName == null) {
             return false;
         }
-        if (isCallerPrivileged) {
-            if (DEBUG_SPEW) {
-                Slog.d(TAG, "Allowing device wake-up for privileged app, call attributed to "
-                        + opPackageName);
-            }
-            return true;
-        }
         if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_TURN_SCREEN_ON, opUid, opPackageName)
                 == AppOpsManager.MODE_ALLOWED) {
-            if (DEBUG_SPEW) {
-                Slog.d(TAG, "Allowing device wake-up for app with special access " + opPackageName);
+            if (mPlatformCompat.isChangeEnabledByPackageName(REQUIRE_TURN_SCREEN_ON_PERMISSION,
+                    opPackageName, UserHandle.getUserId(opUid))) {
+                if (mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.TURN_SCREEN_ON)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    if (DEBUG_SPEW) {
+                        Slog.d(TAG, "Allowing device wake-up from app " + opPackageName);
+                    }
+                    return true;
+                }
+            } else {
+                // android.permission.TURN_SCREEN_ON has only been introduced in Android U, only
+                // check for appOp for apps targeting lower SDK versions
+                if (DEBUG_SPEW) {
+                    Slog.d(TAG, "Allowing device wake-up from app with "
+                            + "REQUIRE_TURN_SCREEN_ON_PERMISSION disabled " + opPackageName);
+                }
+                return true;
             }
+        }
+        if (PowerProperties.permissionless_turn_screen_on().orElse(true)) {
+            Slog.d(TAG, "Device wake-up will be denied without android.permission.TURN_SCREEN_ON");
             return true;
         }
-        if (DEBUG_SPEW) {
-            Slog.d(TAG, "Not allowing device wake-up for " + opPackageName);
-        }
+        Slog.w(TAG, "Not allowing device wake-up for " + opPackageName);
         return false;
     }
 
     @GuardedBy("mLock")
-    private void applyWakeLockFlagsOnAcquireLocked(WakeLock wakeLock, boolean isCallerPrivileged) {
+    @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
+    private void applyWakeLockFlagsOnAcquireLocked(WakeLock wakeLock) {
         if ((wakeLock.mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0
                 && isScreenLock(wakeLock)) {
             String opPackageName;
@@ -1615,8 +1645,7 @@ public final class PowerManagerService extends SystemService
             }
             Integer powerGroupId = wakeLock.getPowerGroupId();
             // powerGroupId is null if the wakelock associated display is no longer available
-            if (powerGroupId != null && isAcquireCausesWakeupFlagAllowed(opPackageName, opUid,
-                    isCallerPrivileged)) {
+            if (powerGroupId != null && isAcquireCausesWakeupFlagAllowed(opPackageName, opUid)) {
                 if (powerGroupId == Display.INVALID_DISPLAY_GROUP) {
                     // wake up all display groups
                     if (DEBUG_SPEW) {
@@ -5438,6 +5467,7 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
+        @RequiresPermission(value = android.Manifest.permission.TURN_SCREEN_ON, conditional = true)
         public void acquireWakeLock(IBinder lock, int flags, String tag, String packageName,
                 WorkSource ws, String historyTag, int displayId,
                 @Nullable IWakeLockCallback callback) {

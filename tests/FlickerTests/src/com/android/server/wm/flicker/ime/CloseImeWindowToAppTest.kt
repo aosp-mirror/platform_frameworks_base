@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
-import android.platform.test.annotations.Presubmit
 import android.platform.test.annotations.FlakyTest
+import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -27,11 +27,11 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.traces.common.FlickerComponentName
@@ -64,7 +64,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
                     testApp.launchViaIntent(wmHelper)
                 }
                 eachRun {
-                    testApp.openIME(device, wmHelper)
+                    testApp.openIME(wmHelper)
                 }
             }
             teardown {
@@ -73,7 +73,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
                 }
             }
             transitions {
-                testApp.closeIME(device, wmHelper)
+                testApp.closeIME(wmHelper)
             }
         }
     }

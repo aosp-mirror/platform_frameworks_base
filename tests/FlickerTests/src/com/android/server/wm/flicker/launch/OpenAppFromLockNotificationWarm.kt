@@ -65,9 +65,9 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
             setup {
                 eachRun {
                     device.sleep()
-                    wmHelper.waitFor("noAppWindowsOnTop") {
-                        it.wmState.topVisibleAppWindow.isEmpty()
-                    }
+                    wmHelper.StateSyncBuilder()
+                        .withoutTopVisibleAppWindows()
+                        .waitForAndVerify()
                 }
             }
         }

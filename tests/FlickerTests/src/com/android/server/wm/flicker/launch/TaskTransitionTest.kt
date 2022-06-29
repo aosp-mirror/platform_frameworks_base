@@ -21,11 +21,11 @@ import android.app.WallpaperManager
 import android.platform.test.annotations.Postsubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
@@ -64,10 +64,10 @@ import org.junit.runners.Parameterized
 @Group4
 class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val tapl = LauncherInstrumentation()
     private val mTestApp: NewTasksAppHelper = NewTasksAppHelper(instrumentation)
     private val mWallpaper by lazy {
-        getWallpaperPackage(InstrumentationRegistry.getInstrumentation())
-            ?: error("Unable to obtain wallpaper")
+        getWallpaperPackage(instrumentation) ?: error("Unable to obtain wallpaper")
     }
 
     @FlickerBuilderProvider
@@ -76,19 +76,19 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
             setup {
                 eachRun {
                     mTestApp.launchViaIntent(wmHelper)
-                    wmHelper.waitForFullScreenApp(mTestApp.component)
                 }
             }
             teardown {
                 test {
-                    mTestApp.exit()
+                    mTestApp.exit(wmHelper)
                 }
             }
             transitions {
                 mTestApp.openNewTask(device, wmHelper)
-                device.pressBack()
-                wmHelper.waitForAppTransitionIdle()
-                wmHelper.waitForFullScreenApp(mTestApp.component)
+                tapl.pressBack()
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(mTestApp.component)
+                    .waitForAndVerify()
             }
         }
     }
@@ -126,7 +126,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun launcherWindowIsNeverVisible() {
         testSpec.assertWm {
-            this.isAppWindowInvisible(LAUNCHER_COMPONENT)
+            this.isAppWindowInvisible(FlickerComponentName.LAUNCHER)
         }
     }
 
@@ -138,7 +138,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun launcherLayerIsNeverVisible() {
         testSpec.assertLayers {
-            this.isInvisible(LAUNCHER_COMPONENT)
+            this.isInvisible(FlickerComponentName.LAUNCHER)
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.Presubmit
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
+import android.view.Surface
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.setRotation
+import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,14 +33,13 @@ import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test warm launching an app from launcher
+ * Test cold launching an app from launcher
  *
- * To run this test: `atest FlickerTests:OpenAppWarmTest`
+ * To run this test: `atest FlickerTests:OpenAppColdFromIcon`
  *
  * Actions:
- *     Launch [testApp]
- *     Press home
- *     Relaunch an app [testApp] and wait animation to complete (only this action is traced)
+ *     Make sure no apps are running on the device
+ *     Launch an app [testApp] by clicking it's icon on all apps and wait animation to complete
  *
  * Notes:
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
@@ -54,7 +54,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-open class OpenAppWarmTest(testSpec: FlickerTestParameter) :
+class OpenAppColdFromIcon(testSpec: FlickerTestParameter) :
     OpenAppFromLauncherTransition(testSpec) {
     /**
      * Defines the transition used to run the test
@@ -63,77 +63,104 @@ open class OpenAppWarmTest(testSpec: FlickerTestParameter) :
         get() = {
             super.transition(this)
             setup {
-                test {
-                    testApp.launchViaIntent(wmHelper)
-                }
                 eachRun {
-                    device.pressHome()
-                    wmHelper.StateSyncBuilder()
-                        .withHomeActivityVisible()
-                        .waitForAndVerify()
+                    tapl.setExpectedRotation(Surface.ROTATION_0)
+                    RemoveAllTasksButHomeRule.removeAllTasksButHome()
                     this.setRotation(testSpec.startRotation)
                 }
             }
             teardown {
-                test {
+                eachRun {
                     testApp.exit(wmHelper)
                 }
             }
             transitions {
-                testApp.launchViaIntent(wmHelper)
+                tapl.goHome()
+                    .switchToAllApps()
+                    .getAppIcon(testApp.launcherName)
+                    .launch(testApp.`package`)
             }
         }
 
-    /** {@inheritDoc} */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
-    /** {@inheritDoc} */
-    @Presubmit
+    @Postsubmit
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() =
-            super.appWindowReplacesLauncherAsTopWindow()
+        super.appWindowReplacesLauncherAsTopWindow()
 
-    /** {@inheritDoc} */
-    @Presubmit
+    @Postsubmit
+    @Test
+    override fun appLayerBecomesVisible() =
+        super.appLayerBecomesVisible()
+
+    @Postsubmit
+    @Test
+    override fun appLayerReplacesLauncher() =
+        super.appLayerReplacesLauncher()
+
+    @Postsubmit
+    @Test
+    override fun appWindowBecomesTopWindow() =
+        super.appWindowBecomesTopWindow()
+
+    @Postsubmit
+    @Test
+    override fun appWindowBecomesVisible() =
+        super.appWindowBecomesVisible()
+
+    @Postsubmit
+    @Test
+    override fun entireScreenCovered() =
+        super.entireScreenCovered()
+
+    @Postsubmit
+    @Test
+    override fun focusChanges() =
+        super.focusChanges()
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerIsVisible() =
+        super.navBarLayerIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerRotatesAndScales() =
+        super.navBarLayerRotatesAndScales()
+
+    @Postsubmit
+    @Test
+    override fun navBarWindowIsVisible() =
+        super.navBarWindowIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerRotatesScales() =
+        super.statusBarLayerRotatesScales()
+
+    @Postsubmit
+    @Test
+    override fun statusBarLayerIsVisible() =
+        super.statusBarLayerIsVisible()
+
+    @Postsubmit
+    @Test
+    override fun statusBarWindowIsVisible() =
+        super.statusBarWindowIsVisible()
+
+    @Postsubmit
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-            super.visibleLayersShownMoreThanOneConsecutiveEntry()
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
 
-    /** {@inheritDoc} */
-    @FlakyTest
+    @Postsubmit
     @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
-    /** {@inheritDoc} */
-    @Presubmit
+    @Postsubmit
     @Test
-    override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
-
-    @FlakyTest(bugId = 229735718)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    override fun appWindowIsTopWindowAtEnd() =
+        super.appWindowIsTopWindowAtEnd()
 
     companion object {
         /**

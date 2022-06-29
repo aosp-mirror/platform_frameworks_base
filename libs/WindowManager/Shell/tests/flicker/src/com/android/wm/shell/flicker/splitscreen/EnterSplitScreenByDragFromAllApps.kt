@@ -56,7 +56,7 @@ class EnterSplitScreenByDragFromAllApps(
 ) : SplitScreenBase(testSpec) {
 
     @Before
-    open fun before() {
+    fun before() {
         Assume.assumeTrue(taplInstrumentation.isTablet)
     }
 
@@ -73,8 +73,7 @@ class EnterSplitScreenByDragFromAllApps(
                 taplInstrumentation.launchedAppState.taskbar
                     .openAllApps()
                     .getAppIcon(secondaryApp.appName)
-                    .dragToSplitscreen(secondaryApp.component.packageName,
-                        primaryApp.component.packageName)
+                    .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
             }
         }
 

@@ -294,6 +294,10 @@ final class ResolveIntentHelper {
         // non-launchable IntentSender which contains the failed intent is created. The
         // SendIntentException is thrown if the IntentSender#sendIntent is invoked.
         if (ris != null && !ris.isEmpty()) {
+            // am#isIntentSenderTargetedToPackage returns false if both package name and component
+            // name are set in the intent. Clear the package name to have the api return true and
+            // prevent the package existence info from side channel leaks by the api.
+            intent.setPackage(null);
             intent.setClassName(ris.get(0).activityInfo.packageName,
                     ris.get(0).activityInfo.name);
         }

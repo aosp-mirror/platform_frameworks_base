@@ -16,18 +16,18 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.testapp.Components
@@ -66,11 +66,12 @@ open class SetRequestedOrientationWhilePinnedTest(
                         EXTRA_FIXED_ORIENTATION to ORIENTATION_LANDSCAPE.toString()))
                     // Enter PiP.
                     broadcastActionTrigger.doAction(Components.PipActivity.ACTION_ENTER_PIP)
-                    wmHelper.waitPipShown()
-                    wmHelper.waitForRotation(Surface.ROTATION_0)
-                    wmHelper.waitForAppTransitionIdle()
                     // System bar may fade out during fixed rotation.
-                    wmHelper.waitForNavBarStatusBarVisible()
+                    wmHelper.StateSyncBuilder()
+                        .withPipShown()
+                        .withRotation(Surface.ROTATION_0)
+                        .withNavBarStatusBarVisible()
+                        .waitForAndVerify()
                 }
             }
             teardown {
@@ -85,11 +86,13 @@ open class SetRequestedOrientationWhilePinnedTest(
             transitions {
                 // Launch the activity back into fullscreen and ensure that it is now in landscape
                 pipApp.launchViaIntent(wmHelper)
-                wmHelper.waitForFullScreenApp(pipApp.component)
-                wmHelper.waitForRotation(Surface.ROTATION_90)
-                wmHelper.waitForAppTransitionIdle()
                 // System bar may fade out during fixed rotation.
-                wmHelper.waitForNavBarStatusBarVisible()
+                wmHelper.StateSyncBuilder()
+                    .withFullScreenApp(pipApp.component)
+                    .withRotation(Surface.ROTATION_90)
+                    .withAppTransitionIdle()
+                    .withNavBarStatusBarVisible()
+                    .waitForAndVerify()
             }
         }
 

@@ -22,11 +22,19 @@ import android.view.Surface
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.*
+import com.android.server.wm.flicker.FlickerBuilderProvider
+import com.android.server.wm.flicker.FlickerParametersRunnerFactory
+import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group2
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import com.android.server.wm.flicker.navBarLayerIsVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
+import com.android.server.wm.flicker.statusBarLayerIsVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,15 +64,15 @@ class OpenImeWindowAndCloseTest(private val testSpec: FlickerTestParameter) {
                 eachRun {
                     simpleApp.launchViaIntent(wmHelper)
                     testApp.launchViaIntent(wmHelper)
-                    testApp.openIME(device, wmHelper)
+                    testApp.openIME(wmHelper)
                 }
             }
             transitions {
-                testApp.finishActivity(device, wmHelper)
+                testApp.finishActivity(wmHelper)
             }
             teardown {
                 test {
-                    simpleApp.exit()
+                    simpleApp.exit(wmHelper)
                 }
             }
         }

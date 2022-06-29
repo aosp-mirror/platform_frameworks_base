@@ -21,6 +21,7 @@ import android.content.Intent
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -41,6 +42,7 @@ import org.junit.Test
 
 abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
     protected val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    protected val tapl = LauncherInstrumentation()
     protected val pipApp = PipAppHelper(instrumentation)
     protected val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
     protected val broadcastActionTrigger = BroadcastActionTrigger(instrumentation)
@@ -117,13 +119,11 @@ abstract class PipTransition(protected val testSpec: FlickerTestParameter) {
                 test {
                     if (!eachRun) {
                         pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
-                        wmHelper.waitPipShown()
                     }
                 }
                 eachRun {
                     if (eachRun) {
                         pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
-                        wmHelper.waitPipShown()
                     }
                 }
             }

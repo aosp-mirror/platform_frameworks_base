@@ -1268,8 +1268,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
             backdrop.setScaleY(scale);
         });
 
-        mNotificationPanelViewController.setUserSetupComplete(mUserSetup);
-
         // Set up the quick settings tile panel
         final View container = mNotificationShadeWindowView.findViewById(R.id.qs_frame);
         if (container != null) {
@@ -3007,8 +3005,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
 
     @Override
     public boolean isInLaunchTransition() {
-        return mNotificationPanelViewController.isLaunchTransitionRunning()
-                || mNotificationPanelViewController.isLaunchTransitionFinished();
+        return mNotificationPanelViewController.isLaunchTransitionFinished();
     }
 
     /**
@@ -3040,11 +3037,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mCommandQueue.appTransitionStarting(mDisplayId, SystemClock.uptimeMillis(),
                     LightBarTransitionsController.DEFAULT_TINT_ANIMATION_DURATION, true);
         };
-        if (mNotificationPanelViewController.isLaunchTransitionRunning()) {
-            mNotificationPanelViewController.setLaunchTransitionEndRunnable(hideRunnable);
-        } else {
-            hideRunnable.run();
-        }
+        hideRunnable.run();
     }
 
     private void cancelAfterLaunchTransitionRunnables() {
@@ -3053,7 +3046,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
         }
         mLaunchTransitionEndRunnable = null;
         mLaunchTransitionCancelRunnable = null;
-        mNotificationPanelViewController.setLaunchTransitionEndRunnable(null);
     }
 
     /**
@@ -3482,24 +3474,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
     }
 
     @Override
-    public void onCameraHintStarted() {
-        mFalsingCollector.onCameraHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.camera_hint);
-    }
-
-    @Override
-    public void onVoiceAssistHintStarted() {
-        mFalsingCollector.onLeftAffordanceHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.voice_hint);
-    }
-
-    @Override
-    public void onPhoneHintStarted() {
-        mFalsingCollector.onLeftAffordanceHintStarted();
-        mKeyguardIndicationController.showTransientIndication(R.string.phone_hint);
-    }
-
-    @Override
     public void onTrackingStopped(boolean expand) {
     }
 
@@ -3683,8 +3657,7 @@ public class CentralSurfacesImpl extends CoreStartable implements
             mWakeUpCoordinator.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
             if (mLaunchCameraWhenFinishedWaking) {
-                mNotificationPanelViewController.launchCamera(
-                        false /* animate */, mLastCameraLaunchSource);
+                mNotificationPanelViewController.launchCamera(mLastCameraLaunchSource);
                 mLaunchCameraWhenFinishedWaking = false;
             }
             if (mLaunchEmergencyActionWhenFinishedWaking) {
@@ -4325,9 +4298,6 @@ public class CentralSurfacesImpl extends CoreStartable implements
                 mUserSetup = userSetup;
                 if (!mUserSetup) {
                     animateCollapseQuickSettings();
-                }
-                if (mNotificationPanelViewController != null) {
-                    mNotificationPanelViewController.setUserSetupComplete(mUserSetup);
                 }
                 updateQsExpansionEnabled();
             }

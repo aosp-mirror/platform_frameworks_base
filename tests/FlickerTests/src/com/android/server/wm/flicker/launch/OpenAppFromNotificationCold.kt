@@ -42,8 +42,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
 @Postsubmit
-open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter)
-    : OpenAppFromNotificationWarm(testSpec) {
+open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter) :
+    OpenAppFromNotificationWarm(testSpec) {
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -52,9 +52,9 @@ open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter)
                 eachRun {
                     // Close the app that posted the notification to trigger a cold start next time
                     // it is open - can't just kill it because that would remove the notification.
-                    taplInstrumentation.goHome()
-                    taplInstrumentation.workspace.switchToOverview()
-                    taplInstrumentation.overview.dismissAllTasks()
+                    tapl.goHome()
+                    tapl.workspace.switchToOverview()
+                    tapl.overview.dismissAllTasks()
                 }
             }
         }
@@ -77,7 +77,7 @@ open class OpenAppFromNotificationCold(testSpec: FlickerTestParameter)
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
-            return com.android.server.wm.flicker.FlickerTestParameterFactory.getInstance()
+            return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(repetitions = 3)
         }
     }

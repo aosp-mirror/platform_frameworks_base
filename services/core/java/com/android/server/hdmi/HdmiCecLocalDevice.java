@@ -1262,6 +1262,7 @@ abstract class HdmiCecLocalDevice {
             boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
         removeAction(AbsoluteVolumeAudioStatusAction.class);
         removeAction(SetAudioVolumeLevelDiscoveryAction.class);
+        removeAction(ActiveSourceAction.class);
 
         mPendingActionClearedCallback =
                 new PendingActionClearedCallback() {

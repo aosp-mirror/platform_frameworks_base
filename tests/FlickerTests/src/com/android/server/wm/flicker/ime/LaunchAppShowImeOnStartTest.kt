@@ -79,19 +79,21 @@ class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
         return FlickerBuilder(instrumentation).apply {
             setup {
                 eachRun {
-                    initializeApp.launchViaIntent()
+                    initializeApp.launchViaIntent(wmHelper)
                     this.setRotation(testSpec.startRotation)
                 }
             }
             teardown {
                 eachRun {
-                    initializeApp.exit()
-                    testApp.exit()
+                    initializeApp.exit(wmHelper)
+                    testApp.exit(wmHelper)
                 }
             }
             transitions {
                 testApp.launchViaIntent(wmHelper)
-                wmHelper.waitImeShown()
+                wmHelper.StateSyncBuilder()
+                    .withImeShown()
+                    .waitForAndVerify()
             }
         }
     }

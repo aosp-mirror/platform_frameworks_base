@@ -23,9 +23,9 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.LAUNCHER_COMPONENT
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.traces.common.FlickerComponentName.Companion.LAUNCHER
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -147,13 +147,13 @@ class ExpandPipOnDoubleClickTest(testSpec: FlickerTestParameter) : PipTransition
     }
 
     /**
-     * Checks [pipApp] layer remains visible throughout the animation
+     * Checks [LAUNCHER] layer remains visible throughout the animation
      */
     @Presubmit
     @Test
     fun launcherIsAlwaysVisible() {
         testSpec.assertLayers {
-            isVisible(LAUNCHER_COMPONENT)
+            isVisible(LAUNCHER)
         }
     }
 

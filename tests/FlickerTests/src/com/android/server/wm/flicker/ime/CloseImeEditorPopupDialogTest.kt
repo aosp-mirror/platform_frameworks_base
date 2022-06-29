@@ -23,9 +23,9 @@ import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
-import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
+import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeEditorPopupDialogAppHelper
@@ -54,18 +54,22 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
             setup {
                 eachRun {
                     imeTestApp.launchViaIntent(wmHelper)
-                    imeTestApp.openIME(device, wmHelper)
+                    imeTestApp.openIME(wmHelper)
                 }
             }
             transitions {
                 imeTestApp.dismissDialog(wmHelper)
-                wmHelper.waitImeGone()
+                wmHelper.StateSyncBuilder()
+                    .withImeGone()
+                    .waitForAndVerify()
             }
             teardown {
                 eachRun {
                     device.pressHome()
-                    wmHelper.waitForHomeActivityVisible()
-                    imeTestApp.exit()
+                    wmHelper.StateSyncBuilder()
+                        .withHomeActivityVisible()
+                        .waitForAndVerify()
+                    imeTestApp.exit(wmHelper)
                 }
             }
         }

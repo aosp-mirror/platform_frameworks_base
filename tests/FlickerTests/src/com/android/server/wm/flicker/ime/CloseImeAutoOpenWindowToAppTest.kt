@@ -17,10 +17,10 @@
 package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import android.platform.test.annotations.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -71,7 +71,6 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
             setup {
                 eachRun {
                     testApp.launchViaIntent(wmHelper)
-                    testApp.openIME(device, wmHelper)
                 }
             }
             teardown {
@@ -80,7 +79,7 @@ class CloseImeAutoOpenWindowToAppTest(private val testSpec: FlickerTestParameter
                 }
             }
             transitions {
-                testApp.closeIME(device, wmHelper)
+                testApp.closeIME(wmHelper)
             }
         }
     }
