@@ -5135,6 +5135,14 @@ public abstract class Context {
     public static final String PERMISSION_CHECKER_SERVICE = "permission_checker";
 
     /**
+     * Official published name of the (internal) permission enforcer service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String PERMISSION_ENFORCER_SERVICE = "permission_enforcer";
+
+    /**
      * Use with {@link #getSystemService(String) to retrieve an
      * {@link android.apphibernation.AppHibernationManager}} for
      * communicating with the hibernation service.
