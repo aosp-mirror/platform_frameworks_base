@@ -1699,6 +1699,13 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(displayContent.mPinnedTaskController.isFreezingTaskConfig(pinnedTask));
         assertEquals(pinnedActivity.getConfiguration().orientation,
                 displayContent.getConfiguration().orientation);
+
+        // No need to apply rotation if the display ignores orientation request.
+        doCallRealMethod().when(displayContent).rotationForActivityInDifferentOrientation(any());
+        pinnedActivity.mOrientation = SCREEN_ORIENTATION_LANDSCAPE;
+        displayContent.setIgnoreOrientationRequest(true);
+        assertEquals(WindowConfiguration.ROTATION_UNDEFINED,
+                displayContent.rotationForActivityInDifferentOrientation(pinnedActivity));
     }
 
     @Test
