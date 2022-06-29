@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.Clock
 import com.android.systemui.plugins.ClockAnimations
+import com.android.systemui.plugins.ClockDarkness
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
@@ -68,8 +69,8 @@ class DefaultClockProvider @Inject constructor(
  * AnimatableClockView used by the existing lockscreen clock.
  */
 class DefaultClock(
-    private val layoutInflater: LayoutInflater,
-    private val resources: Resources
+        private val layoutInflater: LayoutInflater,
+        private val resources: Resources
 ) : Clock {
     override val smallClock =
         layoutInflater.inflate(R.layout.clock_default_small, null) as AnimatableClockView
@@ -82,6 +83,15 @@ class DefaultClock(
     private val burmeseLineSpacing =
         resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale_burmese)
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
+
+    private fun updateClockColor(clock: AnimatableClockView, darkValue: ClockDarkness) {
+        val color = if (darkValue.isDark) {
+            resources.getColor(android.R.color.system_accent2_600)
+        } else {
+            resources.getColor(android.R.color.system_accent1_100)
+        }
+        clock.setColors(DOZE_COLOR, color)
+    }
 
     override val events = object : ClockEvents {
         override fun onTimeTick() = clocks.forEach { it.refreshTime() }
@@ -104,9 +114,13 @@ class DefaultClock(
             recomputePadding()
         }
 
-        override fun onColorPaletteChanged(resources: Resources) {
-            val color = resources.getColor(android.R.color.system_accent1_100)
-            clocks.forEach { it.setColors(DOZE_COLOR, color) }
+        override fun onColorPaletteChanged(
+                resources: Resources,
+                smallClockIsDark: ClockDarkness,
+                largeClockIsDark: ClockDarkness
+        ) {
+            updateClockColor(smallClock, smallClockIsDark)
+            updateClockColor(largeClock, largeClockIsDark)
         }
 
         override fun onLocaleChanged(locale: Locale) {
@@ -187,7 +201,11 @@ class DefaultClock(
     override fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float) {
         recomputePadding()
         animations = DefaultClockAnimations(dozeFraction, foldFraction)
-        events.onColorPaletteChanged(resources)
+        events.onColorPaletteChanged(
+                resources,
+                ClockDarkness.DEFAULT,
+                ClockDarkness.DEFAULT
+        )
         events.onTimeTick()
     }
 

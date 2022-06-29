@@ -21,6 +21,7 @@ import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.plugins.Clock
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockEvents
@@ -33,6 +34,7 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import java.util.TimeZone
+import java.util.concurrent.Executor
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -60,6 +62,9 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var animations: ClockAnimations
     @Mock private lateinit var events: ClockEvents
     @Mock private lateinit var clock: Clock
+    @Mock private lateinit var mainExecutor: Executor
+    @Mock private lateinit var bgExecutor: Executor
+    @Mock private lateinit var featureFlags: FeatureFlags
 
     private lateinit var clockEventController: ClockEventController
 
@@ -77,7 +82,10 @@ class ClockEventControllerTest : SysuiTestCase() {
             keyguardUpdateMonitor,
             configurationController,
             context.resources,
-            context
+            context,
+            mainExecutor,
+            bgExecutor,
+            featureFlags
         )
     }
 
@@ -105,7 +113,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         verify(configurationController).addCallback(capture(captor))
         captor.value.onThemeChanged()
 
-        verify(events).onColorPaletteChanged(any())
+        verify(events).onColorPaletteChanged(any(), any(), any())
     }
 
     @Test
