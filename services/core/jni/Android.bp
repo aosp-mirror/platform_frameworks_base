@@ -119,7 +119,7 @@ cc_defaults {
         "libutils",
         "libui",
         "libvibratorservice",
-        "PlatformProperties",
+        "libPlatformProperties",
         "libinput",
         "libinputflinger",
         "libinputflinger_base",
