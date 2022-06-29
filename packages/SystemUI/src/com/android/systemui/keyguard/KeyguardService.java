@@ -220,7 +220,6 @@ public class KeyguardService extends Service {
             public void mergeAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) {
-
             }
         };
     }
@@ -349,7 +348,7 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onAnimationCancelled() {
+        public void onAnimationCancelled(boolean isKeyguardOccluded) {
             mKeyguardViewMediator.cancelKeyguardExitAnimation();
         }
     };
