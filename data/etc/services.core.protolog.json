@@ -475,12 +475,6 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ResetTargetTaskHelper.java"
     },
-    "-1635750891": {
-      "message": "Received remote change for Display[%d], applied: [%dx%d, rot = %d]",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/RemoteDisplayChangeController.java"
-    },
     "-1633115609": {
       "message": "Key dispatch not paused for screen off",
       "level": "VERBOSE",
@@ -1711,6 +1705,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-417730399": {
+      "message": "Preparing to sync a window that was already in the sync, so try dropping buffer. win=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/WindowState.java"
+    },
     "-415865166": {
       "message": "findFocusedWindow: Found new focus @ %s",
       "level": "VERBOSE",
@@ -2136,6 +2136,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
+    "-4263657": {
+      "message": "Got a buffer for request id=%d but latest request is id=%d. Since the buffer is out-of-date, drop it. win=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "3593205": {
       "message": "commitVisibility: %s: visible=%b mVisibleRequested=%b",
@@ -2598,6 +2604,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
+    "385237117": {
+      "message": "moveFocusableActivityToTop: already on top and focused, activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "385595355": {
       "message": "Starting animation on %s: type=%d, anim=%s",
@@ -3403,6 +3415,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "1239439010": {
+      "message": "moveFocusableActivityToTop: set focused, activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "1252594551": {
       "message": "Window types in WindowContext and LayoutParams.type should match! Type from LayoutParams is %d, but type from WindowContext is %d",
       "level": "WARN",
@@ -3877,12 +3895,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
-    "1764619787": {
-      "message": "Remote change for Display[%d]: timeout reached",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/RemoteDisplayChangeController.java"
-    },
     "1774661765": {
       "message": "Devices still not ready after waiting %d milliseconds before attempting to detect safe mode.",
       "level": "WARN",
@@ -3989,12 +4001,6 @@
       "message": "Notify removed startingWindow %s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1856211951": {
-      "message": "moveFocusableActivityToTop: already on top, activity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1856783490": {

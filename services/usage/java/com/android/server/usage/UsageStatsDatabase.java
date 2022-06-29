@@ -16,6 +16,7 @@
 
 package com.android.server.usage;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
@@ -24,6 +25,7 @@ import android.app.usage.UsageStatsManager;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -55,8 +57,11 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides an interface to query for UsageStat data from a Protocol Buffer database.
@@ -1252,6 +1257,10 @@ public class UsageStatsDatabase {
             Slog.wtf(TAG, "Attempting to backup UsageStats as XML with version " + version);
             return null;
         }
+        if (version < 1 || version > BACKUP_VERSION) {
+            Slog.wtf(TAG, "Attempting to backup UsageStats with an unknown version: " + version);
+            return null;
+        }
         synchronized (mLock) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (KEY_USAGE_STATS.equals(key)) {
@@ -1300,14 +1309,26 @@ public class UsageStatsDatabase {
             }
             return baos.toByteArray();
         }
+    }
 
+    /**
+     * Updates the set of packages given to only include those that have been used within the
+     * given timeframe (as defined by {@link UsageStats#getLastTimePackageUsed()}).
+     */
+    private void calculatePackagesUsedWithinTimeframe(
+            IntervalStats stats, Set<String> packagesList, long timeframeMs) {
+        for (UsageStats stat : stats.packageStats.values()) {
+            if (stat.getLastTimePackageUsed() > timeframeMs) {
+                packagesList.add(stat.mPackageName);
+            }
+        }
     }
 
     /**
      * @hide
      */
     @VisibleForTesting
-    public void applyRestoredPayload(String key, byte[] payload) {
+    public @NonNull Set<String> applyRestoredPayload(String key, byte[] payload) {
         synchronized (mLock) {
             if (KEY_USAGE_STATS.equals(key)) {
                 // Read stats files for the current device configs
@@ -1320,12 +1341,15 @@ public class UsageStatsDatabase {
                 IntervalStats yearlyConfigSource =
                         getLatestUsageStats(UsageStatsManager.INTERVAL_YEARLY);
 
+                final Set<String> packagesRestored = new ArraySet<>();
                 try {
                     DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload));
                     int backupDataVersion = in.readInt();
 
                     // Can't handle this backup set
-                    if (backupDataVersion < 1 || backupDataVersion > BACKUP_VERSION) return;
+                    if (backupDataVersion < 1 || backupDataVersion > BACKUP_VERSION) {
+                        return packagesRestored;
+                    }
 
                     // Delete all stats files
                     // Do this after reading version and before actually restoring
@@ -1333,10 +1357,14 @@ public class UsageStatsDatabase {
                         deleteDirectoryContents(mIntervalDirs[i]);
                     }
 
+                    // 90 days before today in epoch
+                    final long timeframe = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(90);
                     int fileCount = in.readInt();
                     for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
                                 backupDataVersion);
+                        calculatePackagesUsedWithinTimeframe(stats, packagesRestored, timeframe);
+                        packagesRestored.addAll(stats.packageStats.keySet());
                         stats = mergeStats(stats, dailyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_DAILY, stats);
                     }
@@ -1345,6 +1373,7 @@ public class UsageStatsDatabase {
                     for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
                                 backupDataVersion);
+                        calculatePackagesUsedWithinTimeframe(stats, packagesRestored, timeframe);
                         stats = mergeStats(stats, weeklyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_WEEKLY, stats);
                     }
@@ -1353,6 +1382,7 @@ public class UsageStatsDatabase {
                     for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
                                 backupDataVersion);
+                        calculatePackagesUsedWithinTimeframe(stats, packagesRestored, timeframe);
                         stats = mergeStats(stats, monthlyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_MONTHLY, stats);
                     }
@@ -1361,6 +1391,7 @@ public class UsageStatsDatabase {
                     for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
                                 backupDataVersion);
+                        calculatePackagesUsedWithinTimeframe(stats, packagesRestored, timeframe);
                         stats = mergeStats(stats, yearlyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_YEARLY, stats);
                     }
@@ -1370,7 +1401,9 @@ public class UsageStatsDatabase {
                 } finally {
                     indexFilesLocked();
                 }
+                return packagesRestored;
             }
+            return Collections.EMPTY_SET;
         }
     }
 

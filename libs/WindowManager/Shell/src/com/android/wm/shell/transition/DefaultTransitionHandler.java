@@ -866,13 +866,19 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             });
         };
         va.addListener(new AnimatorListenerAdapter() {
+            private boolean mFinished = false;
+
             @Override
             public void onAnimationEnd(Animator animation) {
+                if (mFinished) return;
+                mFinished = true;
                 finisher.run();
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
+                if (mFinished) return;
+                mFinished = true;
                 finisher.run();
             }
         });

@@ -591,7 +591,7 @@ public class PipAnimationController {
                         final Rect insets = computeInsets(fraction);
                         getSurfaceTransactionHelper().scaleAndCrop(tx, leash,
                                 sourceHintRect, initialSourceValue, bounds, insets,
-                                isInPipDirection);
+                                isInPipDirection, fraction);
                         if (shouldApplyCornerRadius()) {
                             final Rect sourceBounds = new Rect(initialContainerRect);
                             sourceBounds.inset(insets);

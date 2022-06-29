@@ -46,7 +46,6 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.ContentRecordingSession;
-import android.window.WindowContainerToken;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -433,7 +432,7 @@ public final class MediaProjectionManagerService extends SystemService
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private boolean mRestoreSystemAlertWindow;
-        private WindowContainerToken mTaskRecordingWindowContainerToken = null;
+        private IBinder mLaunchCookie = null;
 
         MediaProjection(int type, int uid, String packageName, int targetSdkVersion,
                 boolean isPrivileged) {
@@ -609,14 +608,13 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         @Override // Binder call
-        public void setTaskRecordingWindowContainerToken(WindowContainerToken token) {
-            // TODO(b/221417940) set the task id to record from sysui, for the package chosen.
-            mTaskRecordingWindowContainerToken = token;
+        public void setLaunchCookie(IBinder launchCookie) {
+            mLaunchCookie = launchCookie;
         }
 
         @Override // Binder call
-        public WindowContainerToken getTaskRecordingWindowContainerToken() {
-            return mTaskRecordingWindowContainerToken;
+        public IBinder getLaunchCookie() {
+            return mLaunchCookie;
         }
 
         public MediaProjectionInfo getProjectionInfo() {

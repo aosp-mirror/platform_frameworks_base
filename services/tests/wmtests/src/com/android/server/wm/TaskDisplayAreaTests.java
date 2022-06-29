@@ -762,12 +762,20 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         Task actualRootTask = taskDisplayArea.getLaunchRootTask(WINDOWING_MODE_UNDEFINED,
                 ACTIVITY_TYPE_STANDARD, null /* options */, adjacentRootTask /* sourceTask */,
                 0 /* launchFlags */, candidateTask);
-        assertSame(rootTask, actualRootTask.getRootTask());
+        assertSame(rootTask, actualRootTask);
 
         // Verify the launch root task without candidate task
         actualRootTask = taskDisplayArea.getLaunchRootTask(WINDOWING_MODE_UNDEFINED,
                 ACTIVITY_TYPE_STANDARD, null /* options */, adjacentRootTask /* sourceTask */,
                 0 /* launchFlags */);
-        assertSame(adjacentRootTask, actualRootTask.getRootTask());
+        assertSame(adjacentRootTask, actualRootTask);
+
+        final Task pinnedTask = createTask(
+                mDisplayContent, WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
+        // Verify not adjusting launch target for pinned candidate task
+        actualRootTask = taskDisplayArea.getLaunchRootTask(WINDOWING_MODE_UNDEFINED,
+                ACTIVITY_TYPE_STANDARD, null /* options */, adjacentRootTask /* sourceTask */,
+                0 /* launchFlags */, pinnedTask /* candidateTask */);
+        assertNull(actualRootTask);
     }
 }
