@@ -471,7 +471,7 @@
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS కాల్ సేవ యాక్సెస్ అనుమతి"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"మీ ప్రమేయం లేకుండా కాల్స్‌ చేయడం కోసం IMS సేవను ఉపయోగించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ఫోన్ స్టేటస్‌ మరియు గుర్తింపుని చదవడం"</string>
-    <string name="permdesc_readPhoneState" msgid="7229063553502788058">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permdesc_readPhoneState" msgid="7229063553502788058">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ యాక్టివ్‌గా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readBasicPhoneState" msgid="3214853233263871347">"ప్రాథమిక టెలిఫోన్ స్టేటస్, గుర్తింపును చదవండి"</string>
     <string name="permdesc_readBasicPhoneState" msgid="828185691675460520">"పరికరం తాలూకు ప్రాథమిక టెలిఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageOwnCalls" msgid="9033349060307561370">"కాల్స్‌ను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
@@ -1334,7 +1334,7 @@
     <string name="sim_added_title" msgid="7930779986759414595">"సిమ్ కార్డు జోడించబడింది"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"మొబైల్ నెట్‌వర్క్‌ను యాక్సెస్ చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"రీస్టార్ట్ చేయండి"</string>
-    <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"మొబైల్ సేవను సక్రియం చేయండి"</string>
+    <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"మొబైల్ సేవను యాక్టివేట్ చేయండి"</string>
     <string name="install_carrier_app_notification_text" msgid="2781317581274192728">"మీ కొత్త SIMని సక్రియం చేయడానికి క్యారియర్ యాప్‌ను డౌన్‌లోడ్ చేయండి"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="4086877327264106484">"మీ కొత్త SIMని సక్రియం చేయడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> యాప్‌ని డౌన్‌లోడ్ చేయండి"</string>
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"యాప్‌ని డౌన్‌లోడ్ చేయి"</string>
@@ -1383,7 +1383,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"షేర్ చేయి"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"తిరస్కరిస్తున్నాను"</string>
     <string name="select_input_method" msgid="3971267998568587025">"ఇన్‌పుట్ పద్ధతిని ఎంచుకోండి"</string>
-    <string name="show_ime" msgid="6406112007347443383">"దీన్ని భౌతిక కీబోర్డ్ సక్రియంగా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
+    <string name="show_ime" msgid="6406112007347443383">"దీన్ని భౌతిక కీబోర్డ్ యాక్టివ్‌గా ఉన్నప్పుడు స్క్రీన్‌పై ఉంచుతుంది"</string>
     <string name="hardware" msgid="1800597768237606953">"వర్చువల్ కీబోర్డ్‌ను చూపు"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"భౌతిక కీబోర్డుని కాన్ఫిగర్ చేయండి"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"భాష మరియు లేఅవుట్‌ను ఎంచుకోవడానికి నొక్కండి"</string>
