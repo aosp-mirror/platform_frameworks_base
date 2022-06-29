@@ -48,8 +48,8 @@
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"تمام‌صفحه پایین"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"استفاده از حالت یک‌دستی"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"برای خارج شدن، از پایین صفحه‌نمایش تند به‌طرف بالا بکشید یا در هر جایی از بالای برنامه که می‌خواهید ضربه بزنید"</string>
-    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"آغاز «حالت تک حرکت»"</string>
-    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"خروج از «حالت تک حرکت»"</string>
+    <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"آغاز «حالت یک‌دستی»"</string>
+    <string name="accessibility_action_stop_one_handed" msgid="1369940261782179442">"خروج از «حالت یک‌دستی»"</string>
     <string name="bubbles_settings_button_description" msgid="1301286017420516912">"تنظیمات برای حبابک‌های <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="8160974472718594382">"لبریزشده"</string>
     <string name="bubble_accessibility_action_add_back" msgid="1830101076853540953">"افزودن برگشت به پشته"</string>

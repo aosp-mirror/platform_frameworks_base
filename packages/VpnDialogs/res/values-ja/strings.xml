@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"接続リクエスト"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> がネットワーク トラフィックを監視するため VPN 接続をセットアップしようとしています。信頼できるソースである場合にのみ許可してください。&lt;br /&gt; &lt;br /&gt; VPN がアクティブになると画面の上部に &lt;img src=vpn_icon /&gt; が表示されます。"</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> は、ネットワーク トラフィックを監視できるよう、VPN 接続を設定するよう求めています。ソースを信頼できる場合のみ、許可してください。VPN が有効になると、画面に &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; が表示されます。"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN接続済み"</string>
     <string name="session" msgid="6470628549473641030">"セッション:"</string>
     <string name="duration" msgid="3584782459928719435">"期間:"</string>

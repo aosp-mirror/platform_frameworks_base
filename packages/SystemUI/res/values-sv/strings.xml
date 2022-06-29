@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Rotera skärmen automatiskt"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Vill du ge <xliff:g id="APPLICATION">%1$s</xliff:g> åtkomst till <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Vill du ge <xliff:g id="APPLICATION">%1$s</xliff:g> åtkomst till <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nAppen har inte fått inspelningsbehörighet men kan spela in ljud via denna USB-enhet."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Vill du ge <xliff:g id="APPLICATION">%1$s</xliff:g> åtkomst till <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Vill du öppna <xliff:g id="APPLICATION">%1$s</xliff:g> och hantera <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Appen har inte fått inspelningsbehörighet men kan spela in ljud via denna USB-enhet. Om du använder <xliff:g id="APPLICATION">%1$s</xliff:g> med enheten kanske du inte hör samtal, aviseringar eller alarm."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Om du använder <xliff:g id="APPLICATION">%1$s</xliff:g> med enheten kanske du inte hör samtal, aviseringar eller alarm."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Vill du ge <xliff:g id="APPLICATION">%1$s</xliff:g> åtkomst till <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Vill du öppna <xliff:g id="APPLICATION">%1$s</xliff:g> och hantera <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Vill du öppna <xliff:g id="APPLICATION">%1$s</xliff:g> för att hantera <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nAppen har inte fått inspelningsbehörighet men kan spela in ljud via denna USB-enhet."</string>
@@ -876,7 +880,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Du ansluts inte till wifi automatiskt för närvarande"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Visa alla"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Koppla bort Ethernet för att växla nätverk"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"I syfte att förbättra upplevelsen med enheten kan appar och tjänster fortfarande söka efter wifi-nätverk när som helst, även om wifi har inaktiverats. "<annotation id="link">"Ändra"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"I syfte att förbättra upplevelsen med enheten kan appar och tjänster fortfarande söka efter wifi-nätverk när som helst, även om wifi har inaktiverats. Du kan ändra detta i inställningarna för wifi-sökning. "<annotation id="link">"Ändra"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Inaktivera flygplansläge"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Välj användare"</string>
 </resources>

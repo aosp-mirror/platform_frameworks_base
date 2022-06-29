@@ -18,7 +18,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="8898068901680117589">"सिम एपको डायलग"</string>
-    <string name="install_carrier_app_title" msgid="334729104862562585">"मोबाइल सेवा सक्रिय गर्नुहोस्"</string>
+    <string name="install_carrier_app_title" msgid="334729104862562585">"मोबाइल सेवा अन गर्नुहोस्"</string>
     <string name="install_carrier_app_description" msgid="4014303558674923797">"तपाईंको नयाँ SIM ले राम्रोसँग काम गर्न तपाईंले <xliff:g id="ID_1">%1$s</xliff:g> एप इन्स्टल गर्नु पर्ने हुन्छ"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"तपाईंको नयाँ SIM ले राम्रोसँग काम गर्न तपाईंले आफ्नो सेवा प्रदायकको एप इन्स्टल गर्नु पर्ने हुन्छ"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"अहिले होइन"</string>

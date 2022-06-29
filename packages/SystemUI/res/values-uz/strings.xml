@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Ekranning avtomatik burilishi"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasiga <xliff:g id="USB_DEVICE">%2$s</xliff:g> qurilmasidan foydalanishga ruxsat berilsinmi?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasiga <xliff:g id="USB_DEVICE">%2$s</xliff:g> qurilmasidan foydalanish uchun ruxsat berilsinmi?\nBu ilovaga yozib olish ruxsati berilmagan, lekin shu USB orqali ovozlarni yozib olishi mumkin."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="APPLICATION">%1$s</xliff:g> uchun <xliff:g id="USB_DEVICE">%2$s</xliff:g> ishlatish ruxsati berilsinmi?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> bilan ishlash uchun <xliff:g id="APPLICATION">%1$s</xliff:g> ochilsinmi?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Bu ilovaga yozib olish ruxsati berilmagan, lekin shu USB orqali ovozlarni yozib olishi mumkin. Bu qurilma <xliff:g id="APPLICATION">%1$s</xliff:g> orqali boshqarilsa, chaqiruv, bildirishnoma va signallar eshitilmay qolishi mumkin."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Bu qurilma <xliff:g id="APPLICATION">%1$s</xliff:g> orqali boshqarilsa, chaqiruv, bildirishnoma va signallar eshitilmay qolishi mumkin."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasiga <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> qurilmasidan foydalanishga ruxsat berilsinmi?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> bilan ishlash uchun <xliff:g id="APPLICATION">%1$s</xliff:g> ochilsinmi?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasiga <xliff:g id="USB_DEVICE">%2$s</xliff:g> qurilmasidan foydalanish uchun ruxsat berilsinmi?\nBu ilovaga yozib olish ruxsati berilmagan, lekin shu USB orqali ovozlarni yozib olishi mumkin."</string>
@@ -70,7 +74,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Tahrirlash"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Skrinshotni tahrirlash"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Skrinshot yuborish"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Yana suratga olish"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Skrinshot sohasini kengaytirish"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Skrinshotni yopish"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Skrinshotga razm solish"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Yuqori chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
@@ -328,7 +332,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Tez quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Sekin quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Foydalanuvchini almashtirish"</string>
-    <string name="user_add_user" msgid="4336657383006913022">"Foydalanuvchi"</string>
+    <string name="user_add_user" msgid="4336657383006913022">"Foydalanuvchi kiritish"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Yangi foydalanuvchi"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Mehmon olib tashlansinmi?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -485,7 +489,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Bildirishnomalar uchun kengaytirilgan boshqaruv"</string>
     <string name="power_notification_controls_description" msgid="1334963837572708952">"Bildirishnomalar uchun kengaytirilgan boshqaruv yordamida ilova bildirishnomalarining muhimlik darajasini (0-5) sozlash mumkin. \n\n"<b>"5-daraja"</b>" \n- Bildirishnomani ro‘yxatning boshida ko‘rsatish \n- To‘liq ekranli bildirishnomalarni ko‘rsatish \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"4-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"3-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n\n"<b>"2-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n\n"<b>"1-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n- Ekran qulfi va holat qatorida ko‘rsatmaslik \n- Bildirishnomani ro‘yxatning oxirida ko‘rsatish \n\n"<b>"0-daraja"</b>" \n- Ilovadan keladigan barcha bildirishnomalarni bloklash"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Tayyor"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"Joriy qilish"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"Tatbiq etish"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Bildirishnoma kelmasin"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Sokin"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Standart"</string>
@@ -813,7 +817,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"<xliff:g id="COUNT">%1$d</xliff:g> ta qurilma tanlandi"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(uzildi)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Ulanmadi. Qayta urining."</string>
-    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yangi qurilmani ulash"</string>
+    <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Yangi qurilmani juftlash"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nashr raqami"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nashr raqami vaqtinchalik xotiraga nusxalandi."</string>
     <string name="basic_status" msgid="2315371112182658176">"Suhbatni ochish"</string>

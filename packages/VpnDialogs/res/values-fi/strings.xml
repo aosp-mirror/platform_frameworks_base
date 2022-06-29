@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Yhteyspyyntö"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> haluaa tehdä asetukset VPN-yhteydellä, jonka kautta sovellus voi valvoa verkkoliikennettä. Hyväksy vain, jos lähde on luotettava. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; näkyy ruudun yläreunassa, kun VPN on käytössä."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> haluaa muodostaa VPN-yhteyden, jonka avulla se voi valvoa verkkoliikennettä. Salli tämä vain, jos luotat lähteeseen. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; näkyy näytölläsi, kun VPN on aktiivinen."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN on yhdistetty"</string>
     <string name="session" msgid="6470628549473641030">"Käyttökerta"</string>
     <string name="duration" msgid="3584782459928719435">"Kesto:"</string>

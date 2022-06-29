@@ -116,9 +116,9 @@ public class SyntheticPasswordManager {
     // 256-bit synthetic password
     private static final byte SYNTHETIC_PASSWORD_LENGTH = 256 / 8;
 
-    private static final int PASSWORD_SCRYPT_N = 11;
-    private static final int PASSWORD_SCRYPT_R = 3;
-    private static final int PASSWORD_SCRYPT_P = 1;
+    private static final int PASSWORD_SCRYPT_LOG_N = 11;
+    private static final int PASSWORD_SCRYPT_LOG_R = 3;
+    private static final int PASSWORD_SCRYPT_LOG_P = 1;
     private static final int PASSWORD_SALT_LENGTH = 16;
     private static final int PASSWORD_TOKEN_LENGTH = 32;
     private static final String TAG = "SyntheticPasswordManager";
@@ -186,7 +186,11 @@ public class SyntheticPasswordManager {
             mVersion = version;
         }
 
-        private byte[] derivePassword(byte[] personalization) {
+        /**
+         * Derives a subkey from the synthetic password. For v3 and later synthetic passwords the
+         * subkeys are 256-bit; for v1 and v2 they are 512-bit.
+         */
+        private byte[] deriveSubkey(byte[] personalization) {
             if (mVersion == SYNTHETIC_PASSWORD_VERSION_V3) {
                 return (new SP800Derive(mSyntheticPassword))
                     .withContext(personalization, PERSONALISATION_CONTEXT);
@@ -197,28 +201,28 @@ public class SyntheticPasswordManager {
         }
 
         public byte[] deriveKeyStorePassword() {
-            return bytesToHex(derivePassword(PERSONALIZATION_KEY_STORE_PASSWORD));
+            return bytesToHex(deriveSubkey(PERSONALIZATION_KEY_STORE_PASSWORD));
         }
 
         public byte[] deriveGkPassword() {
-            return derivePassword(PERSONALIZATION_SP_GK_AUTH);
+            return deriveSubkey(PERSONALIZATION_SP_GK_AUTH);
         }
 
         public byte[] deriveDiskEncryptionKey() {
-            return derivePassword(PERSONALIZATION_FBE_KEY);
+            return deriveSubkey(PERSONALIZATION_FBE_KEY);
         }
 
         public byte[] deriveVendorAuthSecret() {
-            return derivePassword(PERSONALIZATION_AUTHSECRET_KEY);
+            return deriveSubkey(PERSONALIZATION_AUTHSECRET_KEY);
         }
 
         public byte[] derivePasswordHashFactor() {
-            return derivePassword(PERSONALIZATION_PASSWORD_HASH);
+            return deriveSubkey(PERSONALIZATION_PASSWORD_HASH);
         }
 
         /** Derives key used to encrypt password metrics */
         public byte[] deriveMetricsKey() {
-            return derivePassword(PERSONALIZATION_PASSWORD_METRICS);
+            return deriveSubkey(PERSONALIZATION_PASSWORD_METRICS);
         }
 
         /**
@@ -268,9 +272,8 @@ public class SyntheticPasswordManager {
          * AuthenticationToken.mSyntheticPassword for details on what each block means.
          */
         private void recreate(byte[] escrowSplit0, byte[] escrowSplit1) {
-            mSyntheticPassword = String.valueOf(HexEncoding.encode(
-                    SyntheticPasswordCrypto.personalisedHash(
-                            PERSONALIZATION_SP_SPLIT, escrowSplit0, escrowSplit1))).getBytes();
+            mSyntheticPassword = bytesToHex(SyntheticPasswordCrypto.personalisedHash(
+                    PERSONALIZATION_SP_SPLIT, escrowSplit0, escrowSplit1));
         }
 
         /**
@@ -304,9 +307,9 @@ public class SyntheticPasswordManager {
     }
 
     static class PasswordData {
-        byte scryptN;
-        byte scryptR;
-        byte scryptP;
+        byte scryptLogN;
+        byte scryptLogR;
+        byte scryptLogP;
         public int credentialType;
         byte[] salt;
         // For GateKeeper-based credential, this is the password handle returned by GK,
@@ -315,9 +318,9 @@ public class SyntheticPasswordManager {
 
         public static PasswordData create(int passwordType) {
             PasswordData result = new PasswordData();
-            result.scryptN = PASSWORD_SCRYPT_N;
-            result.scryptR = PASSWORD_SCRYPT_R;
-            result.scryptP = PASSWORD_SCRYPT_P;
+            result.scryptLogN = PASSWORD_SCRYPT_LOG_N;
+            result.scryptLogR = PASSWORD_SCRYPT_LOG_R;
+            result.scryptLogP = PASSWORD_SCRYPT_LOG_P;
             result.credentialType = passwordType;
             result.salt = secureRandom(PASSWORD_SALT_LENGTH);
             return result;
@@ -329,9 +332,9 @@ public class SyntheticPasswordManager {
             buffer.put(data, 0, data.length);
             buffer.flip();
             result.credentialType = buffer.getInt();
-            result.scryptN = buffer.get();
-            result.scryptR = buffer.get();
-            result.scryptP = buffer.get();
+            result.scryptLogN = buffer.get();
+            result.scryptLogR = buffer.get();
+            result.scryptLogP = buffer.get();
             int saltLen = buffer.getInt();
             result.salt = new byte[saltLen];
             buffer.get(result.salt);
@@ -351,9 +354,9 @@ public class SyntheticPasswordManager {
                     + Integer.BYTES + salt.length + Integer.BYTES +
                     (passwordHandle != null ? passwordHandle.length : 0));
             buffer.putInt(credentialType);
-            buffer.put(scryptN);
-            buffer.put(scryptR);
-            buffer.put(scryptP);
+            buffer.put(scryptLogN);
+            buffer.put(scryptLogR);
+            buffer.put(scryptLogP);
             buffer.putInt(salt.length);
             buffer.put(salt);
             if (passwordHandle != null && passwordHandle.length > 0) {
@@ -1369,8 +1372,8 @@ public class SyntheticPasswordManager {
 
     private byte[] computePasswordToken(LockscreenCredential credential, PasswordData data) {
         final byte[] password = credential.isNone() ? DEFAULT_PASSWORD : credential.getCredential();
-        return scrypt(password, data.salt, 1 << data.scryptN, 1 << data.scryptR, 1 << data.scryptP,
-                PASSWORD_TOKEN_LENGTH);
+        return scrypt(password, data.salt, 1 << data.scryptLogN, 1 << data.scryptLogR,
+                1 << data.scryptLogP, PASSWORD_TOKEN_LENGTH);
     }
 
     private byte[] passwordTokenToGkInput(byte[] token) {
@@ -1411,18 +1414,9 @@ public class SyntheticPasswordManager {
         return result;
     }
 
-    protected static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
-    private static byte[] bytesToHex(byte[] bytes) {
-        if (bytes == null) {
-            return "null".getBytes();
-        }
-        byte[] hexBytes = new byte[bytes.length * 2];
-        for ( int j = 0; j < bytes.length; j++ ) {
-            int v = bytes[j] & 0xFF;
-            hexBytes[j * 2] = HEX_ARRAY[v >>> 4];
-            hexBytes[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return hexBytes;
+    @VisibleForTesting
+    static byte[] bytesToHex(byte[] bytes) {
+        return HexEncoding.encodeToString(bytes).getBytes();
     }
 
     /**

@@ -230,12 +230,12 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Kôd za uparivanje putem Wi-Fija"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Uparivanje nije uspjelo"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Provjerite je li uređaj povezan na istu mrežu."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Uparivanje uređaja putem Wi-Fija skeniranjem QR koda"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Uparite uređaj putem Wi-Fija skeniranjem QR koda"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Uparivanje uređaja…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Uparivanje uređaja nije uspjelo. QR kôd je neispravan ili uređaj nije povezan na istu mrežu."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP adresa i priključak"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Skenirajte QR kôd"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Uparivanje uređaja putem Wi-Fija skeniranjem QR koda"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Uparite uređaj putem Wi-Fija skeniranjem QR koda"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Povežite se s Wifi mrežom"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje pogrešaka, razvoj"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečac izvješća o pogreškama"</string>
@@ -340,11 +340,11 @@
     <string name="show_touches" msgid="8437666942161289025">"Prikaži dodire"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Prikaži vizualne povratne informacije za dodire"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Prikaži ažur. površine"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Površina prozora bljeska pri ažuriranju."</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Pokaži ažuriranja prikaza"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"Površina prozora bljeska pri ažuriranju"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Prikaži ažuriranja prikaza"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Bljeskanje prikaza u prozorima pri crtanju"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Prikaži ažuriranja hardverskih slojeva"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hardverski slojevi bljeskaju zeleno pri ažuriranju."</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Hardverski slojevi bljeskaju zeleno pri ažuriranju"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Rješavanje GPU preklapanja"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Onemogući dijeljenje mem."</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Uvijek koristi GPU za slaganje zaslona"</string>
@@ -353,7 +353,7 @@
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Onemogući USB audiousmj."</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onemogući aut. usmjeravanje na USB audioperiferiju"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Prikaži okvir prikaza"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Prikazuju se obrubi, margine itd. isječaka."</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Prikazuju se obrubi, margine itd. isječaka"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Nametni zdesna ulijevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Nametni smjer zdesna ulijevo za sve zemlje/jezike"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Dopusti zamućenja na razini prozora"</string>
@@ -364,17 +364,17 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Omogući slojeve za otklanjanje pogrešaka GPU-a"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Omogućite učitavanje slojeva za otklanjanje pogrešaka GPU-a za aplikacije za otklanjanje pogrešaka"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Omogući opširni zapisnik"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Uključite dodatne zapisnike dobavljača pojedinog uređaja u izvješća o programskoj pogrešci koja mogu sadržavati privatne podatke, trošiti više baterije i/ili zauzeti više prostora za pohranu."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Uključite dodatne zapisnike dobavljača pojedinog uređaja u izvješća o programskim pogreškama koja mogu sadržavati privatne podatke, trošiti više baterije i/ili zauzeti više prostora za pohranu."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Brzina animacije prozora"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Brzina animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Razmjer duljine animatora"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulacija sek. zaslona"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
-    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Uklanjanje aktivnosti"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Aktivnost se prekida čim je korisnik napusti."</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ukloni aktivnosti"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Aktivnost se uklanja čim je korisnik napusti"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Ograničenje pozadinskog procesa"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Pokaži pozadinske ANR-ove"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Dijalog o pozadinskim aplikacijama koje ne reagiraju"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloškog okvira o pozadinskim aplikacijama koje ne reagiraju"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikaži upozorenja kanala obavijesti"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikazuje upozorenje na zaslonu kada aplikacija objavi obavijest bez važećeg kanala"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Prisilno dopusti aplikacije u vanjskoj pohrani"</string>
@@ -558,12 +558,12 @@
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profilni podaci"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Prije izrade ograničenog profila trebate postaviti zaključavanje zaslona radi zaštite svojih aplikacija i osobnih podataka."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Postavi zaključavanje"</string>
-    <string name="user_switch_to_user" msgid="6975428297154968543">"Prelazak na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="user_switch_to_user" msgid="6975428297154968543">"Prijeđi na korisnika <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Izrada novog korisnika…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Izrada novog korisnika nije uspjela"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nadimak"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodavanje gosta"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Uklanjanje gosta"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Poništi gostujuću sesiju"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Poništiti gostujuću sesiju?"</string>
@@ -606,4 +606,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Prekinuta je veza s ethernetom."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Bez poziva."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Skeniraj QR kôd"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Da biste počeli slušati, centrirajte QR kôd u nastavku"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kôd nije u važećem formatu"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Zaustaviti emitiranje aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ako emitirate aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g> ili promijenite izlaz, vaše će se trenutačno emitiranje zaustaviti"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiranje aplikacije <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promjena izlaza"</string>
 </resources>

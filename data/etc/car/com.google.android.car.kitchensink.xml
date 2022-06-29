@@ -95,6 +95,6 @@
         <permission name="android.car.permission.CONTROL_CAR_EVS_ACTIVITY" />
         <permission name="android.car.permission.USE_CAR_EVS_CAMERA" />
         <permission name="android.car.permission.MONITOR_CAR_EVS_STATUS" />
-        <permission name="android.car.permission.USE_CAR_TELEMETRY_SERVICE" />
+        <permission name="com.android.car.permission.USE_CAR_TELEMETRY_SERVICE" />
     </privapp-permissions>
 </permissions>

@@ -348,10 +348,10 @@
     <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Дозволува апликацијата да ја прошири или собере статусната лента."</string>
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"да прикажува известувања како активности на цел екран на заклучен уред"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Дозволува апликацијата да прикажува известувања како активности на цел екран на заклучен уред"</string>
-    <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталирај кратенки"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Овозможува апликацијата да додава кратенки до почетниот екран без интервенција на корисникот."</string>
+    <string name="permlab_install_shortcut" msgid="7451554307502256221">"инсталирање кратенки"</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Овозможува апликацијата да додава кратенки на почетниот екран без интервенција на корисникот."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"деинсталирај кратенки"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Овозможува апликацијата да отстранува кратенки до почетниот екран без интервенција на корисникот."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Овозможува апликацијата да отстранува кратенки од почетниот екран без интервенција на корисникот."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"пренасочи појдовни повици"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Дозволува апликацијата да го види бројот што се повикува за време на појдовен повик, со опција да го пренасочи повикот кон друг број или да го прекине повикот."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"одговара телефонски повици"</string>
@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ВКЛУЧЕНО"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИСКЛУЧЕНО"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Дали дозволувате <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако вклучите <xliff:g id="SERVICE">%1$s</xliff:g>, уредот нема да го користи заклучувањето на екранот за да го подобри шифрирањето на податоците."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
@@ -1880,13 +1879,13 @@
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Трета деловна <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Побарај PIN пред откачување"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Побарај шема за откл. пред откачување"</string>
-    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Прашај за лозинка пред откачување"</string>
+    <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Побарај лозинка пред откачување"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Инсталирано од администраторот"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Избришано од администраторот"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Во ред"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува темна тема и ја ограничува или исклучува активноста во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"„Штедачот на батерија“ вклучува „Темна тема“ и ограничува или исклучува активност во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"„Штедачот на батерија“ вклучува „Темна тема“ и ограничува или исклучува активност во заднина, некои визуелни ефекти, одредени функции и некои мрежни врски."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"За да се намали користењето интернет, „Штедачот на интернет“ спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Одредена апликација што ја користите ќе може да користи интернет, но можеби тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажуваат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Да се вклучи „Штедач на интернет“?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Вклучи"</string>
@@ -2170,7 +2169,7 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"За работа"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Работен приказ"</string>
-    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од вашиот IT-администратор"</string>
+    <string name="resolver_cross_profile_blocked" msgid="3014597376026044840">"Блокирано од IT-администраторот"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="9071442683080586643">"Овие содржини не може да се споделуваат со работни апликации"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овие содржини не може да се отвораат со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овие содржини не може да се споделуваат со лични апликации"</string>

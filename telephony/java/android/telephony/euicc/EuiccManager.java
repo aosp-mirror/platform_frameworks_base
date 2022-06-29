@@ -19,6 +19,7 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
  *
  * <p>See {@link #isEnabled} before attempting to use these APIs.
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_EUICC)
 public class EuiccManager {
 
     /**
@@ -759,7 +761,7 @@ public class EuiccManager {
     public static final int ERROR_INSTALL_PROFILE = 10009;
 
     /**
-     * Failed to load profile onto eUICC due to Profile Poicly Rules.
+     * Failed to load profile onto eUICC due to Profile Policy Rules.
      * @see #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE for details
      */
     public static final int ERROR_DISALLOWED_BY_PPR = 10010;

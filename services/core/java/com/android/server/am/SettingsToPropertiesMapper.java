@@ -238,7 +238,7 @@ public class SettingsToPropertiesMapper {
             }
             value = "";
         } else if (value.length() > SYSTEM_PROPERTY_MAX_LENGTH) {
-            log(value + " exceeds system property max length.");
+            log("key=" + key + " value=" + value + " exceeds system property max length.");
             return;
         }
 

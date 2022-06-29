@@ -200,6 +200,10 @@ public final class NotificationRecord {
     private boolean mIsAppImportanceLocked;
     private ArraySet<Uri> mGrantableUris;
 
+    // Storage for phone numbers that were found to be associated with
+    // contacts in this notification.
+    private ArraySet<String> mPhoneNumbers;
+
     // Whether this notification record should have an update logged the next time notifications
     // are sorted.
     private boolean mPendingLogUpdate = false;
@@ -1523,6 +1527,26 @@ public final class NotificationRecord {
     // setPendingLogUpdate to false to make sure other callers don't also do so.
     protected boolean hasPendingLogUpdate() {
         return mPendingLogUpdate;
+    }
+
+    /**
+     * Merge the given set of phone numbers into the list of phone numbers that
+     * are cached on this notification record.
+     */
+    public void mergePhoneNumbers(ArraySet<String> phoneNumbers) {
+        // if the given phone numbers are null or empty then don't do anything
+        if (phoneNumbers == null || phoneNumbers.size() == 0) {
+            return;
+        }
+        // initialize if not already
+        if (mPhoneNumbers == null) {
+            mPhoneNumbers = new ArraySet<>();
+        }
+        mPhoneNumbers.addAll(phoneNumbers);
+    }
+
+    public ArraySet<String> getPhoneNumbers() {
+        return mPhoneNumbers;
     }
 
     @VisibleForTesting

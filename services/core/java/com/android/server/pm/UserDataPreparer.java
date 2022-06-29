@@ -286,11 +286,6 @@ class UserDataPreparer {
         return Environment.getDataUserDeDirectory(volumeUuid, userId);
     }
 
-    @VisibleForTesting
-    protected boolean isFileEncryptedEmulatedOnly() {
-        return StorageManager.isFileEncryptedEmulatedOnly();
-    }
-
     /**
      * Enforce that serial number stored in user directory inode matches the
      * given expected value. Gracefully sets the serial number if currently
@@ -300,14 +295,6 @@ class UserDataPreparer {
      *             number is mismatched.
      */
     void enforceSerialNumber(File file, int serialNumber) throws IOException {
-        if (isFileEncryptedEmulatedOnly()) {
-            // When we're emulating FBE, the directory may have been chmod
-            // 000'ed, meaning we can't read the serial number to enforce it;
-            // instead of destroying the user, just log a warning.
-            Slog.w(TAG, "Device is emulating FBE; assuming current serial number is valid");
-            return;
-        }
-
         final int foundSerial = getSerialNumber(file);
         Slog.v(TAG, "Found " + file + " with serial number " + foundSerial);
 

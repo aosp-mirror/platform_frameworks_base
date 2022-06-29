@@ -26,7 +26,6 @@ import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Handler;
 import android.os.IBinder;
@@ -135,42 +134,15 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     @NonNull private final RestartAuthRunnable mRestartAuthRunnable;
 
     private static class TestableBiometricScheduler extends BiometricScheduler {
-        @NonNull private final TestableInternalCallback mInternalCallback;
         @NonNull private Fingerprint21UdfpsMock mFingerprint21;
 
-        TestableBiometricScheduler(@NonNull String tag,
+        TestableBiometricScheduler(@NonNull String tag, @NonNull Handler handler,
                 @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-            super(tag, BiometricScheduler.SENSOR_TYPE_FP_OTHER,
-                    gestureAvailabilityDispatcher);
-            mInternalCallback = new TestableInternalCallback();
-        }
-
-        class TestableInternalCallback extends InternalCallback {
-            @Override
-            public void onClientStarted(BaseClientMonitor clientMonitor) {
-                super.onClientStarted(clientMonitor);
-                Slog.d(TAG, "Client started: " + clientMonitor);
-                mFingerprint21.setDebugMessage("Started: " + clientMonitor);
-            }
-
-            @Override
-            public void onClientFinished(BaseClientMonitor clientMonitor, boolean success) {
-                super.onClientFinished(clientMonitor, success);
-                Slog.d(TAG, "Client finished: " + clientMonitor);
-                mFingerprint21.setDebugMessage("Finished: " + clientMonitor);
-            }
+            super(tag, BiometricScheduler.SENSOR_TYPE_FP_OTHER, gestureAvailabilityDispatcher);
         }
 
         void init(@NonNull Fingerprint21UdfpsMock fingerprint21) {
             mFingerprint21 = fingerprint21;
-        }
-
-        /**
-         * Expose the internal finish callback so it can be used for testing
-         */
-        @Override
-        @NonNull protected InternalCallback getInternalCallback() {
-            return mInternalCallback;
         }
     }
 
@@ -280,7 +252,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
 
         final Handler handler = new Handler(Looper.getMainLooper());
         final TestableBiometricScheduler scheduler =
-                new TestableBiometricScheduler(TAG, gestureAvailabilityDispatcher);
+                new TestableBiometricScheduler(TAG, handler, gestureAvailabilityDispatcher);
         final MockHalResultController controller =
                 new MockHalResultController(sensorProps.sensorId, context, handler, scheduler);
         return new Fingerprint21UdfpsMock(context, fingerprintStateCallback, sensorProps, scheduler,

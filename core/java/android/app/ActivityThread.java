@@ -244,6 +244,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -271,11 +272,6 @@ public final class ActivityThread extends ClientTransactionHandler
     private static final boolean DEBUG_PROVIDER = false;
     public static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
-    /**
-     * If the activity doesn't become idle in time, the timeout will ensure to apply the pending top
-     * process state.
-     */
-    private static final long PENDING_TOP_PROCESS_STATE_TIMEOUT = 1000;
     /**
      * The delay to release the provider when it has no more references. It reduces the number of
      * transactions for acquiring and releasing provider if the client accesses the provider
@@ -345,11 +341,9 @@ public final class ActivityThread extends ClientTransactionHandler
      */
     @UnsupportedAppUsage
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
-    /**
-     * Maps from activity token to local record of the activities that are preparing to be launched.
-     */
-    final Map<IBinder, ActivityClientRecord> mLaunchingActivities =
-            Collections.synchronizedMap(new ArrayMap<IBinder, ActivityClientRecord>());
+    /** Maps from activity token to the pending override configuration. */
+    @GuardedBy("mPendingOverrideConfigs")
+    private final ArrayMap<IBinder, Configuration> mPendingOverrideConfigs = new ArrayMap<>();
     /** The activities to be truly destroyed (not include relaunch). */
     final Map<IBinder, ClientTransactionItem> mActivitiesToBeDestroyed =
             Collections.synchronizedMap(new ArrayMap<IBinder, ClientTransactionItem>());
@@ -359,10 +353,9 @@ public final class ActivityThread extends ClientTransactionHandler
     // Number of activities that are currently visible on-screen.
     @UnsupportedAppUsage
     int mNumVisibleActivities = 0;
+    private final AtomicInteger mNumLaunchingActivities = new AtomicInteger();
     @GuardedBy("mAppThread")
     private int mLastProcessState = PROCESS_STATE_UNKNOWN;
-    @GuardedBy("mAppThread")
-    private int mPendingProcessState = PROCESS_STATE_UNKNOWN;
     ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
     final ArrayMap<IBinder, CreateServiceData> mServicesData = new ArrayMap<>();
@@ -556,10 +549,6 @@ public final class ActivityThread extends ClientTransactionHandler
         boolean hideForNow;
         Configuration createdConfig;
         Configuration overrideConfig;
-        // Used to save the last reported configuration from server side so that activity
-        // configuration transactions can always use the latest configuration.
-        @GuardedBy("this")
-        private Configuration mPendingOverrideConfig;
         // Used for consolidating configs before sending on to Activity.
         private Configuration tmpConfig = new Configuration();
         // Callback used for updating activity override config.
@@ -2323,7 +2312,6 @@ public final class ActivityThread extends ClientTransactionHandler
             if (stopProfiling) {
                 mProfiler.stopProfiling();
             }
-            applyPendingProcessState();
             return false;
         }
     }
@@ -3330,21 +3318,6 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     @Override
-    public void addLaunchingActivity(IBinder token, ActivityClientRecord activity) {
-        mLaunchingActivities.put(token, activity);
-    }
-
-    @Override
-    public ActivityClientRecord getLaunchingActivity(IBinder token) {
-        return mLaunchingActivities.get(token);
-    }
-
-    @Override
-    public void removeLaunchingActivity(IBinder token) {
-        mLaunchingActivities.remove(token);
-    }
-
-    @Override
     public ActivityClientRecord getActivityClient(IBinder token) {
         return mActivities.get(token);
     }
@@ -3385,16 +3358,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
             wasCached = isCachedProcessState();
             mLastProcessState = processState;
-            // Defer the top state for VM to avoid aggressive JIT compilation affecting activity
-            // launch time.
-            if (processState == ActivityManager.PROCESS_STATE_TOP
-                    && !mLaunchingActivities.isEmpty()) {
-                mPendingProcessState = processState;
-                mH.postDelayed(this::applyPendingProcessState, PENDING_TOP_PROCESS_STATE_TIMEOUT);
-            } else {
-                mPendingProcessState = PROCESS_STATE_UNKNOWN;
-                updateVmProcessState(processState);
-            }
+            updateVmProcessState(processState);
             if (localLOGV) {
                 Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
                         + (fromIpc ? " (from ipc" : ""));
@@ -3404,7 +3368,7 @@ public final class ActivityThread extends ClientTransactionHandler
         // Handle the pending configuration if the process state is changed from cached to
         // non-cached. Except the case where there is a launching activity because the
         // LaunchActivityItem will handle it.
-        if (wasCached && !isCachedProcessState() && mLaunchingActivities.isEmpty()) {
+        if (wasCached && !isCachedProcessState() && mNumLaunchingActivities.get() == 0) {
             final Configuration pendingConfig =
                     mConfigurationController.getPendingConfiguration(false /* clearPending */);
             if (pendingConfig == null) {
@@ -3428,18 +3392,9 @@ public final class ActivityThread extends ClientTransactionHandler
         VMRuntime.getRuntime().updateProcessState(state);
     }
 
-    private void applyPendingProcessState() {
-        synchronized (mAppThread) {
-            if (mPendingProcessState == PROCESS_STATE_UNKNOWN) {
-                return;
-            }
-            final int pendingState = mPendingProcessState;
-            mPendingProcessState = PROCESS_STATE_UNKNOWN;
-            // Only apply the pending state if the last state doesn't change.
-            if (pendingState == mLastProcessState) {
-                updateVmProcessState(pendingState);
-            }
-        }
+    @Override
+    public void countLaunchingActivities(int num) {
+        mNumLaunchingActivities.getAndAdd(num);
     }
 
     @UnsupportedAppUsage
@@ -6071,31 +6026,31 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     /**
-     * Sets the supplied {@code overrideConfig} as pending for the {@code activityToken}. Calling
+     * Sets the supplied {@code overrideConfig} as pending for the {@code token}. Calling
      * this method prevents any calls to
      * {@link #handleActivityConfigurationChanged(ActivityClientRecord, Configuration, int)} from
      * processing any configurations older than {@code overrideConfig}.
      */
     @Override
-    public void updatePendingActivityConfiguration(ActivityClientRecord r,
-            Configuration overrideConfig) {
-        synchronized (r) {
-            if (r.mPendingOverrideConfig != null
-                    && !r.mPendingOverrideConfig.isOtherSeqNewer(overrideConfig)) {
+    public void updatePendingActivityConfiguration(IBinder token, Configuration overrideConfig) {
+        synchronized (mPendingOverrideConfigs) {
+            final Configuration pendingOverrideConfig = mPendingOverrideConfigs.get(token);
+            if (pendingOverrideConfig != null
+                    && !pendingOverrideConfig.isOtherSeqNewer(overrideConfig)) {
                 if (DEBUG_CONFIGURATION) {
-                    Slog.v(TAG, "Activity has newer configuration pending so drop this"
-                            + " transaction. overrideConfig=" + overrideConfig
-                            + " r.mPendingOverrideConfig=" + r.mPendingOverrideConfig);
+                    Slog.v(TAG, "Activity has newer configuration pending so this transaction will"
+                            + " be dropped. overrideConfig=" + overrideConfig
+                            + " pendingOverrideConfig=" + pendingOverrideConfig);
                 }
                 return;
             }
-            r.mPendingOverrideConfig = overrideConfig;
+            mPendingOverrideConfigs.put(token, overrideConfig);
         }
     }
 
     /**
      * Handle new activity configuration and/or move to a different display. This method is a noop
-     * if {@link #updatePendingActivityConfiguration(ActivityClientRecord, Configuration)} has been
+     * if {@link #updatePendingActivityConfiguration(IBinder, Configuration)} has been
      * called with a newer config than {@code overrideConfig}.
      *
      * @param r Target activity record.
@@ -6106,16 +6061,17 @@ public final class ActivityThread extends ClientTransactionHandler
     @Override
     public void handleActivityConfigurationChanged(ActivityClientRecord r,
             @NonNull Configuration overrideConfig, int displayId) {
-        synchronized (r) {
-            if (overrideConfig.isOtherSeqNewer(r.mPendingOverrideConfig)) {
+        synchronized (mPendingOverrideConfigs) {
+            final Configuration pendingOverrideConfig = mPendingOverrideConfigs.get(r.token);
+            if (overrideConfig.isOtherSeqNewer(pendingOverrideConfig)) {
                 if (DEBUG_CONFIGURATION) {
                     Slog.v(TAG, "Activity has newer configuration pending so drop this"
                             + " transaction. overrideConfig=" + overrideConfig
-                            + " r.mPendingOverrideConfig=" + r.mPendingOverrideConfig);
+                            + " pendingOverrideConfig=" + pendingOverrideConfig);
                 }
                 return;
             }
-            r.mPendingOverrideConfig = null;
+            mPendingOverrideConfigs.remove(r.token);
         }
 
         if (displayId == INVALID_DISPLAY) {

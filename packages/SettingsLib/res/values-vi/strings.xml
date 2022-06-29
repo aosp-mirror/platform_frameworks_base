@@ -371,7 +371,7 @@
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Mô phỏng màn hình phụ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Ứng dụng"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Không lưu hoạt động"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Hủy mọi hoạt động ngay khi người dùng rời khỏi"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Xoá mọi hoạt động ngay khi người dùng rời khỏi"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Giới hạn quá trình nền"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Hiển thị ANR nền"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Hiện hộp thoại Ứng dụng không phản hồi cho các ứng dụng nền"</string>
@@ -562,7 +562,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Không tạo được người dùng mới"</string>
     <string name="user_nickname" msgid="262624187455825083">"Biệt hiệu"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Thêm khách"</string>
-    <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa phiên khách"</string>
+    <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa khách"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Đặt lại phiên khách"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Khách"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Đặt lại phiên khách?"</string>
@@ -605,4 +605,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Đã ngắt kết nối Ethernet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Không thể gọi điện."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Quét mã QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Để bắt đầu nghe, hãy hướng máy ảnh vào mã QR bên dưới và căn sao cho mã nằm chính giữa"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Định dạng của mã QR là không hợp lệ"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Dừng phát <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Nếu bạn phát <xliff:g id="SWITCHAPP">%1$s</xliff:g> hoặc thay đổi đầu ra, phiên truyền phát hiện tại sẽ dừng"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Phát <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Thay đổi đầu ra"</string>
 </resources>

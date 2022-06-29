@@ -100,6 +100,7 @@
     <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
     <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
+    <protected-broadcast android:name="android.app.action.MANAGED_PROFILE_PROVISIONED" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED" />
@@ -711,7 +712,7 @@
     <protected-broadcast android:name="android.scheduling.action.REBOOT_READY" />
     <protected-broadcast android:name="android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED" />
     <protected-broadcast android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
-    <protected-broadcast android:name="android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER" />
+    <protected-broadcast android:name="android.app.action.SHOW_NEW_USER_DISCLAIMER" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -1535,7 +1536,7 @@
         android:protectionLevel="normal"
         android:permissionFlags="removed"/>
 
-    <!-- @hide We need to keep this around for backwards compatibility -->
+    <!-- @SystemApi @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_SMS"
         android:protectionLevel="normal"
         android:permissionFlags="removed"/>
@@ -1613,7 +1614,7 @@
     <permission android:name="android.permission.RECEIVE_EMERGENCY_BROADCAST"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to monitor incoming Bluetooth MAP messages, to record
+    <!-- @SystemApi Allows an application to monitor incoming Bluetooth MAP messages, to record
          or perform processing on them. -->
     <!-- @hide -->
     <permission android:name="android.permission.RECEIVE_BLUETOOTH_MAP"
@@ -6321,10 +6322,6 @@
         </service>
 
         <service android:name="com.android.server.camera.CameraStatsJobService"
-                 android:permission="android.permission.BIND_JOB_SERVICE" >
-        </service>
-
-        <service android:name="com.android.server.timezone.TimeZoneUpdateIdler"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 

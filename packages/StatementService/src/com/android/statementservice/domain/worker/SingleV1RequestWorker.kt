@@ -71,16 +71,18 @@ class SingleV1RequestWorker(appContext: Context, params: WorkerParameters) :
 
         // Coerce failure results into success so that final collection task gets a chance to run
         when (result) {
-            is Result.Success -> Result.success(
-                Data.Builder()
-                    .putInt("$HOST_SUCCESS_PREFIX$host", status.value)
-                    .build()
-            )
-            is Result.Failure -> Result.success(
-                Data.Builder()
-                    .putInt("$HOST_FAILURE_PREFIX$host", status.value)
-                    .build()
-            )
+            is Result.Success -> {
+                val deContext = appContext.createDeviceProtectedStorageContext()
+                val sp = deContext?.getSharedPreferences(packageName, Context.MODE_PRIVATE)
+                sp?.edit()?.putInt("$HOST_SUCCESS_PREFIX$host", status.value)?.apply()
+                Result.success()
+            }
+            is Result.Failure -> {
+                val deContext = appContext.createDeviceProtectedStorageContext()
+                val sp = deContext?.getSharedPreferences(packageName, Context.MODE_PRIVATE)
+                sp?.edit()?.putInt("$HOST_FAILURE_PREFIX$host", status.value)?.apply()
+                Result.success()
+            }
             else -> result
         }
     }

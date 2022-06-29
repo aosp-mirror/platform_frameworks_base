@@ -35,7 +35,7 @@ android_test {
         "truth-prebuilt",
     ],
     test_suites: ["general-tests"],
-    platform_apis: true,
+    sdk_version: "test_current",
 }
 
 filegroup {

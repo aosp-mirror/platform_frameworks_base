@@ -2267,6 +2267,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 throw new IllegalArgumentException("padding must be positive: " + padding);
             }
 
+            int maxSize = getMaximumSizeDimension(displayId);
+
+            final int paddingWidth = padding.left + padding.right;
+            final int paddingHeight = padding.top + padding.bottom;
+            if (paddingWidth > maxSize) {
+                throw new IllegalArgumentException("padding width " + paddingWidth
+                        + " exceeds max width " + maxSize);
+            }
+            if (paddingHeight > maxSize) {
+                throw new IllegalArgumentException("padding height " + paddingHeight
+                        + " exceeds max height " + maxSize);
+            }
+
             final DisplayData wpdData = getDisplayDataOrCreate(displayId);
             if (!padding.equals(wpdData.mPadding)) {
                 wpdData.mPadding.set(padding);

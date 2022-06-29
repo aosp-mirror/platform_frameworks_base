@@ -281,7 +281,7 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Selecionar modo DNS privado"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desativado"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automático"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome de anfitrião do fornecedor DNS privado"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Nome do anfitrião do fornecedor DNS privado"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Introduza nome - anfitrião do fornecedor DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Não foi possível estabelecer ligação"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções da certificação de display sem fios"</string>
@@ -310,7 +310,7 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revogar acesso à depuração USB de todos os computadores anteriormente autorizados?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permitir definições de programação?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Estas definições destinam-se apenas a programação. Podem fazer com que o seu aparelho e as aplicações nele existentes falhem ou funcionem mal."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verificar aplicações de USB"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verificar apps por USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Verificar as aplicações instaladas via ADB/ADT para detetar comportamento perigoso"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"São apresentados os dispositivos Bluetooth sem nomes (apenas endereços MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desativa a funcionalidade de volume absoluto do Bluetooth caso existam problemas de volume com dispositivos remotos, como um volume insuportavelmente alto ou a ausência de controlo"</string>
@@ -347,7 +347,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Piscar camadas de hardware em verde ao atualizar"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Depurar sobreposição GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desativar sobreposições HW"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"Utilizar sempre GPU para a composição do ecrã"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"Usar sempre GPU para a composição do ecrã"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simular espaço da cor"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Ativar vestígios OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desativar encaminhamento áudio USB"</string>
@@ -543,7 +543,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Utilizador"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo utilizador?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com aplicações, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com apps, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar apps para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o utilizador agora?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Certifique-se de que a pessoa está disponível para levar o dispositivo e configurar o seu espaço"</string>
@@ -605,4 +605,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet desligada."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sem chamadas."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Leia o código QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Para começar a ouvir, centre o código QR abaixo"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"O código QR não é um formato válido"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Interromper a transmissão da app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Se transmitir a app <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou alterar a saída, a sua transmissão atual é interrompida"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Transmita a app <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Altere a saída"</string>
 </resources>

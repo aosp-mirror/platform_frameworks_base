@@ -140,7 +140,7 @@ public final class Trace {
             String trackName, String name, int cookie);
     @FastNative
     private static native void nativeAsyncTraceForTrackEnd(long tag,
-            String trackName, String name, int cookie);
+            String trackName, int cookie);
     @FastNative
     private static native void nativeInstant(long tag, String name);
     @FastNative
@@ -281,8 +281,10 @@ public final class Trace {
     /**
      * Writes a trace message to indicate that a given section of code has
      * begun. Must be followed by a call to {@link #asyncTraceForTrackEnd} using the same
-     * tag. This function operates exactly like {@link #asyncTraceBegin(long, String, int)},
+     * track name and cookie.
+     * This function operates exactly like {@link #asyncTraceBegin(long, String, int)},
      * except with the inclusion of a track name argument for where this method should appear.
+     * The cookie must be unique on the trackName level, not the methodName level
      *
      * @param traceTag The trace tag.
      * @param trackName The track where the event should appear in the trace.
@@ -302,19 +304,31 @@ public final class Trace {
      * Writes a trace message to indicate that the current method has ended.
      * Must be called exactly once for each call to
      * {@link #asyncTraceForTrackBegin(long, String, String, int)}
-     * using the same tag, track name, name and cookie.
+     * using the same tag, track name, and cookie.
      *
      * @param traceTag The trace tag.
      * @param trackName The track where the event should appear in the trace.
-     * @param methodName The method name to appear in the trace.
      * @param cookie Unique identifier for distinguishing simultaneous events
      *
      * @hide
      */
     public static void asyncTraceForTrackEnd(long traceTag,
+            @NonNull String trackName, int cookie) {
+        if (isTagEnabled(traceTag)) {
+            nativeAsyncTraceForTrackEnd(traceTag, trackName, cookie);
+        }
+    }
+
+    /**
+     * @deprecated use asyncTraceForTrackEnd without methodName argument
+     *
+     * @hide
+     */
+    @Deprecated
+    public static void asyncTraceForTrackEnd(long traceTag,
             @NonNull String trackName, @NonNull String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
-            nativeAsyncTraceForTrackEnd(traceTag, trackName, methodName, cookie);
+            nativeAsyncTraceForTrackEnd(traceTag, trackName, cookie);
         }
     }
 

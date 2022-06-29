@@ -33,6 +33,12 @@ import androidx.annotation.NonNull;
  * The base adapter can be used for {@link RemoteAnimationTarget} that is simple open/close.
  */
 class TaskFragmentAnimationAdapter {
+
+    /**
+     * If {@link #mOverrideLayer} is set to this value, we don't want to override the surface layer.
+     */
+    private static final int LAYER_NO_OVERRIDE = -1;
+
     final Animation mAnimation;
     final RemoteAnimationTarget mTarget;
     final SurfaceControl mLeash;
@@ -42,6 +48,7 @@ class TaskFragmentAnimationAdapter {
     final float[] mVecs = new float[4];
     final Rect mRect = new Rect();
     private boolean mIsFirstFrame = true;
+    private int mOverrideLayer = LAYER_NO_OVERRIDE;
 
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
             @NonNull RemoteAnimationTarget target) {
@@ -58,10 +65,21 @@ class TaskFragmentAnimationAdapter {
         mLeash = leash;
     }
 
+    /**
+     * Surface layer to be set at the first frame of the animation. We will not set the layer if it
+     * is set to {@link #LAYER_NO_OVERRIDE}.
+     */
+    final void overrideLayer(int layer) {
+        mOverrideLayer = layer;
+    }
+
     /** Called on frame update. */
     final void onAnimationUpdate(@NonNull SurfaceControl.Transaction t, long currentPlayTime) {
         if (mIsFirstFrame) {
             t.show(mLeash);
+            if (mOverrideLayer != LAYER_NO_OVERRIDE) {
+                t.setLayer(mLeash, mOverrideLayer);
+            }
             mIsFirstFrame = false;
         }
 

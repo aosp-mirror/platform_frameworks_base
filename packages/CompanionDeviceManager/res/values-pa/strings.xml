@@ -22,6 +22,6 @@
     <string name="profile_name_watch" msgid="576290739483672360">"ਸਮਾਰਟ-ਵਾਚ"</string>
     <string name="confirmation_title" msgid="8455544820286920304">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ਨੂੰ ਤੁਹਾਡੇ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
     <string name="profile_summary" msgid="2059360676631420073">"ਤੁਹਾਡੇ <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ ਲਈ ਇਹ ਐਪ ਲੋੜੀਂਦੀ ਹੈ। <xliff:g id="PRIVILEGES_DISCPLAIMER">%2$s</xliff:g>"</string>
-    <string name="consent_yes" msgid="8344487259618762872">"ਇਜਾਜ਼ਤ ਦਿਓ"</string>
-    <string name="consent_no" msgid="2640796915611404382">"ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ"</string>
+    <string name="consent_yes" msgid="8344487259618762872">"ਆਗਿਆ ਦਿਓ"</string>
+    <string name="consent_no" msgid="2640796915611404382">"ਆਗਿਆ ਨਾ ਦਿਓ"</string>
 </resources>

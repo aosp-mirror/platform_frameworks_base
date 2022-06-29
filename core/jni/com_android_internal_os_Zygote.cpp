@@ -94,6 +94,10 @@
 
 #include "nativebridge/native_bridge.h"
 
+#if defined(__BIONIC__)
+extern "C" void android_reset_stack_guards();
+#endif
+
 namespace {
 
 // TODO (chriswailes): Add a function to initialize native Zygote data.
@@ -412,6 +416,7 @@ static void sendSigChildStatus(const pid_t pid, const uid_t uid, const int statu
 }
 
 // This signal handler is for zygote mode, since the zygote must reap its children
+NO_STACK_PROTECTOR
 static void SigChldHandler(int /*signal_number*/, siginfo_t* info, void* /*ucontext*/) {
     pid_t pid;
     int status;
@@ -1153,8 +1158,8 @@ static void relabelDir(const char* path, const char* context, fail_fn_t fail_fn)
   }
 }
 
-// Relabel all directories under a path non-recursively.
-static void relabelAllDirs(const char* path, const char* context, fail_fn_t fail_fn) {
+// Relabel the subdirectories and symlinks in the given directory, non-recursively.
+static void relabelSubdirs(const char* path, const char* context, fail_fn_t fail_fn) {
   DIR* dir = opendir(path);
   if (dir == nullptr) {
     fail_fn(CREATE_ERROR("Failed to opendir %s", path));
@@ -1231,10 +1236,18 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   snprintf(internalDePath, PATH_MAX, "/data/user_de");
   snprintf(externalPrivateMountPath, PATH_MAX, "/mnt/expand");
 
-  char* dataDataContext = nullptr;
-  if (getfilecon(internalDePath, &dataDataContext) < 0) {
-    fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", internalDePath,
+  // Get the "u:object_r:system_userdir_file:s0" security context.  This can be
+  // gotten from several different places; we use /data/user.
+  char* dataUserdirContext = nullptr;
+  if (getfilecon(internalCePath, &dataUserdirContext) < 0) {
+    fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", internalCePath,
         strerror(errno)));
+  }
+  // Get the "u:object_r:system_data_file:s0" security context.  This can be
+  // gotten from several different places; we use /data/misc.
+  char* dataFileContext = nullptr;
+  if (getfilecon("/data/misc", &dataFileContext) < 0) {
+    fail_fn(CREATE_ERROR("Unable to getfilecon on /data/misc %s", strerror(errno)));
   }
 
   MountAppDataTmpFs(internalLegacyCePath, fail_fn);
@@ -1330,19 +1343,19 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   // the file operations on tmpfs. If we set the label when we mount
   // tmpfs, SELinux will not happy as we are changing system_data_files.
   // Relabel dir under /data/user, including /data/user/0
-  relabelAllDirs(internalCePath, dataDataContext, fail_fn);
+  relabelSubdirs(internalCePath, dataFileContext, fail_fn);
 
   // Relabel /data/user
-  relabelDir(internalCePath, dataDataContext, fail_fn);
+  relabelDir(internalCePath, dataUserdirContext, fail_fn);
 
   // Relabel /data/data
-  relabelDir(internalLegacyCePath, dataDataContext, fail_fn);
+  relabelDir(internalLegacyCePath, dataFileContext, fail_fn);
 
-  // Relabel dir under /data/user_de
-  relabelAllDirs(internalDePath, dataDataContext, fail_fn);
+  // Relabel subdirectories of /data/user_de
+  relabelSubdirs(internalDePath, dataFileContext, fail_fn);
 
   // Relabel /data/user_de
-  relabelDir(internalDePath, dataDataContext, fail_fn);
+  relabelDir(internalDePath, dataUserdirContext, fail_fn);
 
   // Relabel CE and DE dirs under /mnt/expand
   dir = opendir(externalPrivateMountPath);
@@ -1355,14 +1368,15 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
     auto cePath = StringPrintf("%s/user", volPath.c_str());
     auto dePath = StringPrintf("%s/user_de", volPath.c_str());
 
-    relabelAllDirs(cePath.c_str(), dataDataContext, fail_fn);
-    relabelDir(cePath.c_str(), dataDataContext, fail_fn);
-    relabelAllDirs(dePath.c_str(), dataDataContext, fail_fn);
-    relabelDir(dePath.c_str(), dataDataContext, fail_fn);
+    relabelSubdirs(cePath.c_str(), dataFileContext, fail_fn);
+    relabelDir(cePath.c_str(), dataUserdirContext, fail_fn);
+    relabelSubdirs(dePath.c_str(), dataFileContext, fail_fn);
+    relabelDir(dePath.c_str(), dataUserdirContext, fail_fn);
   }
   closedir(dir);
 
-  freecon(dataDataContext);
+  freecon(dataUserdirContext);
+  freecon(dataFileContext);
 }
 
 static void insertPackagesToMergedList(JNIEnv* env,
@@ -2033,6 +2047,7 @@ static std::set<int>* gPreloadFds = nullptr;
 static bool gPreloadFdsExtracted = false;
 
 // Utility routine to fork a process from the zygote.
+NO_STACK_PROTECTOR
 pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
                          const std::vector<int>& fds_to_close,
                          const std::vector<int>& fds_to_ignore,
@@ -2089,6 +2104,11 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
       setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MIN);
     }
 
+#if defined(__BIONIC__)
+    // Reset the stack guard for the new process.
+    android_reset_stack_guards();
+#endif
+
     // The child process.
     PreApplicationInit();
 
@@ -2121,6 +2141,7 @@ static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jcl
   PreApplicationInit();
 }
 
+NO_STACK_PROTECTOR
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids, jint runtime_flags,
         jobjectArray rlimits, jint mount_external, jstring se_info, jstring nice_name,
@@ -2175,6 +2196,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
     return pid;
 }
 
+NO_STACK_PROTECTOR
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
         JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
         jint runtime_flags, jobjectArray rlimits, jlong permitted_capabilities,
@@ -2246,6 +2268,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
  * @param is_priority_fork  Controls the nice level assigned to the newly created process
  * @return child pid in the parent, 0 in the child
  */
+NO_STACK_PROTECTOR
 static jint com_android_internal_os_Zygote_nativeForkApp(JNIEnv* env,
                                                          jclass,
                                                          jint read_pipe_fd,
@@ -2260,6 +2283,7 @@ static jint com_android_internal_os_Zygote_nativeForkApp(JNIEnv* env,
                             args_known == JNI_TRUE, is_priority_fork == JNI_TRUE, true);
 }
 
+NO_STACK_PROTECTOR
 int zygote::forkApp(JNIEnv* env,
                     int read_pipe_fd,
                     int write_pipe_fd,

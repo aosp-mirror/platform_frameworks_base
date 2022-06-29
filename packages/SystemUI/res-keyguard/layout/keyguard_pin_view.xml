@@ -16,7 +16,6 @@
 ** limitations under the License.
 */
 -->
-
 <com.android.keyguard.KeyguardPINView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/res-auto"
@@ -185,8 +184,6 @@
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
     <include layout="@layout/keyguard_eca"
              android:id="@+id/keyguard_selector_fade_container"

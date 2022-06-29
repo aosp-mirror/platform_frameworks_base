@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"සම්බන්ධතා ඉල්ලීම"</string>
     <string name="warning" msgid="809658604548412033">"ජාල තදබදය නිරීක්ෂණය කිරීමට ඉඩ දෙන VPN සම්බන්ධතාවක් සැකසීමට <xliff:g id="APP">%s</xliff:g> අවශ්‍යය වේ. ප්‍රභවය ඔබ විශ්වාස කරන්නේ නම් පමණක් පිළිගන්න. VPN සක්‍රිය විට &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"ජාල තදබදය නිරීක්ෂණය කිරීමට ඉඩ දෙන VPN සම්බන්ධතාවක් සැකසීමට <xliff:g id="APP">%s</xliff:g> හට අවශ්‍ය වේ. ඔබ මූලාශ්‍රය විශ්වාස කරන්නේ නම් පමණක් පිළිගන්න. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; VPN සක්‍රිය විට ඔබගේ තිරයෙහි දිස් වේ."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN සම්බන්ධිතයි"</string>
     <string name="session" msgid="6470628549473641030">"සැසිය:"</string>
     <string name="duration" msgid="3584782459928719435">"කාල සීමාව:"</string>

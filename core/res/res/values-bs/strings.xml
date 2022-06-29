@@ -591,7 +591,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Pokušajte s drugim otiskom prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Presvijetlo"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Pokušajte podesiti"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Svaki put blago promijenite položaj prsta"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Svaki put pomalo promijenite položaj prsta"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisak prsta je potvrđen"</string>
@@ -634,8 +634,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Previše je tamno. Pokušajte s jačim osvjetljenjem."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Odmaknite telefon."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Primaknite telefon."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Podignite telefon."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Spustite telefon."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Pomjerite telefon naviše."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Pomjerite telefon naniže."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Pomjerite telefon ulijevo."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Pomjerite telefon udesno."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Gledajte direktno u uređaj."</string>
@@ -1395,7 +1395,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Punjenje povezanog uređaja putem USB-a"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Uključen je način rada Prijenos fajlova putem USB-a"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Uključen je način rada PTP putem USB-a"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Uključen je način rada Povezivanje mobitela putem USB-a"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"Dijeljenje internetske veze putem USB-a je uključeno"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Uključen je način rada MIDI putem USB-a"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Povezan je USB periferni uređaj"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Dodirnite za više opcija."</string>
@@ -1425,7 +1425,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"Odaberite način unosa"</string>
     <string name="show_ime" msgid="6406112007347443383">"Prikaži na ekranu dok je fizička tastatura aktivna"</string>
     <string name="hardware" msgid="1800597768237606953">"Prikaz virtuelne tastature"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfiguriraj fizičku tastaturu"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurirajte fizičku tastaturu"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Dodirnite za odabir jezika i rasporeda"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1733,10 +1733,9 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"UKLJUČENO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ISKLJUČENO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Dozvoliti da usluga <xliff:g id="SERVICE">%1$s</xliff:g> ima punu kontrolu nad vašim uređajem?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ako uključite uslugu <xliff:g id="SERVICE">%1$s</xliff:g>, uređaj neće koristiti zaključavanje ekrana za poboljšanje šifriranja podataka."</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Puna kontrola je prikladna za aplikacije koje vam pomažu kod potreba za pristupačnosti, ali nije za većinu aplikacija."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Puna kontrola je prikladna za aplikacije koje vam pomažu kod potreba pristupačnosti, ali nije za većinu aplikacija."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Prikaz i kontrola ekrana"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Može čitati sav sadržaj na ekranu i prikazivati sadržaj u drugim aplikacijama."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Može čitati sav sadržaj na ekranu i prikazivati sadržaj preko drugih aplikacija."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Prikaz i izvršavanje radnji"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Može pratiti vaše interakcije s aplikacijom ili hardverskim senzorom te ostvariti interakciju s aplikacijama umjesto vas."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dozvoli"</string>
@@ -2144,7 +2143,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Uredu"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Isključi"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saznajte više"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Poboljšana obavještenja su zamijenila Prilagodljiva obavještenja Androida u verziji Android 12. Ova funkcija prikazuje predložene radnje i odgovore te organizira vaša obavještenja.\n\nPoboljšana obavještenja mogu pristupiti sadržaju obavještenja, uključujući lične informacije kao što su imena kontakata i poruke. Ova funkcija također može odbacivati obavještenja ili odgovarati na njih, npr. može odgovarati na telefonske pozive i kontrolirati funkciju Ne ometaj."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Poboljšana obavještenja su zamijenila Prilagodljiva obavještenja Androida u verziji Android 12. Ova funkcija prikazuje predložene radnje i odgovore te organizira vaša obavještenja.\n\nPoboljšana obavještenja mogu pristupiti sadržaju obavještenja, uključujući lične informacije kao što su imena kontakata i poruke. Ova funkcija također može odbacivati obavještenja ili reagirati na njih, npr. može odgovarati na telefonske pozive i kontrolirati funkciju Ne ometaj."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Obavještenje za informacije Rutinskog načina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Moguće je da će se baterija isprazniti prije uobičajenog punjenja"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Ušteda baterije je aktivirana da bi se produžio vijek trajanja baterije"</string>
@@ -2178,7 +2177,7 @@
       <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajla</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajlova</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nema preporučenih osoba za dijeljenje"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nema preporučenih osoba s kojima biste dijelili"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista aplikacija"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ovoj aplikaciji nije dato odobrenje za snimanje, ali može snimati zvuk putem ovog USB uređaja."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Početna stranica"</string>

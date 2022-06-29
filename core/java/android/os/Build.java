@@ -165,9 +165,11 @@ public class Build {
      * Gets the hardware serial number, if available.
      *
      * <p class="note"><b>Note:</b> Root access may allow you to modify device identifiers, such as
-     * the hardware serial number. If you change these identifiers, you can use
+     * the hardware serial number. If you change these identifiers, you can not use
      * <a href="/training/articles/security-key-attestation.html">key attestation</a> to obtain
-     * proof of the device's original identifiers.
+     * proof of the device's original identifiers. KeyMint will reject an ID attestation request
+     * if the identifiers provided by the frameworks do not match the identifiers it was
+     * provisioned with.
      *
      * <p>Starting with API level 29, persistent device identifiers are guarded behind additional
      * restrictions, and apps are recommended to use resettable identifiers (see <a

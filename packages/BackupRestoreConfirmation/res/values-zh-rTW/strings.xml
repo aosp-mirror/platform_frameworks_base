@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"請在下方輸入你的裝置加密密碼，這也會用來加密備份封存檔。"</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"請輸入完整備份資料加密專用的密碼。如果你沒有輸入密碼，系統會使用你目前的備用密碼："</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"如果你想要將完整備份資料進行加密，請在下面輸入一組密碼："</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"由於你的裝置已加密，因此你必須為你的備份加密。請在下方輸入密碼："</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"如果還原的資料經過加密處理，請在下面輸入密碼："</string>
     <string name="toast_backup_started" msgid="550354281452756121">"正在開始備份..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"備份完畢"</string>
