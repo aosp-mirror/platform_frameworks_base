@@ -1178,20 +1178,9 @@ public class Vpn {
                 cleanupVpnStateLocked();
             } else if (mVpnRunner != null) {
                 if (!VpnConfig.LEGACY_VPN.equals(mPackage)) {
-                    mAppOpsManager.finishOp(
-                            AppOpsManager.OPSTR_ESTABLISH_VPN_MANAGER, mOwnerUID, mPackage, null);
-                    // The underlying network, NetworkCapabilities and LinkProperties are not
-                    // necessary to send to VPN app since the purpose of this event is to notify
-                    // VPN app that VPN is deactivated by the user.
-                    // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-                    //  ConnectivityServiceTest.
-                    if (SdkLevel.isAtLeastT()) {
-                        sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
-                                -1 /* errorClass */, -1 /* errorCode*/, mPackage,
-                                getSessionKeyLocked(), makeVpnProfileStateLocked(),
-                                null /* underlyingNetwork */, null /* nc */, null /* lp */);
-                    }
+                    notifyVpnManagerVpnStopped(mPackage, mOwnerUID);
                 }
+
                 // cleanupVpnStateLocked() is called from mVpnRunner.exit()
                 mVpnRunner.exit();
             }
@@ -4090,7 +4079,25 @@ public class Vpn {
         // To stop the VPN profile, the caller must be the current prepared package and must be
         // running an Ikev2VpnProfile.
         if (isCurrentIkev2VpnLocked(packageName)) {
-            prepareInternal(VpnConfig.LEGACY_VPN);
+            notifyVpnManagerVpnStopped(packageName, mOwnerUID);
+
+            mVpnRunner.exit();
+        }
+    }
+
+    private synchronized void notifyVpnManagerVpnStopped(String packageName, int ownerUID) {
+        mAppOpsManager.finishOp(
+                AppOpsManager.OPSTR_ESTABLISH_VPN_MANAGER, ownerUID, packageName, null);
+        // The underlying network, NetworkCapabilities and LinkProperties are not
+        // necessary to send to VPN app since the purpose of this event is to notify
+        // VPN app that VPN is deactivated by the user.
+        // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
+        //  ConnectivityServiceTest.
+        if (SdkLevel.isAtLeastT()) {
+            sendEventToVpnManagerApp(VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
+                    -1 /* errorClass */, -1 /* errorCode*/, packageName,
+                    getSessionKeyLocked(), makeVpnProfileStateLocked(),
+                    null /* underlyingNetwork */, null /* nc */, null /* lp */);
         }
     }
 
