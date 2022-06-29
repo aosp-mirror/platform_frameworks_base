@@ -22,50 +22,22 @@ package {
 }
 
 android_library {
-    name: "SystemUIComposeGalleryLib",
+    name: "SystemUIComposeTesting",
     manifest: "AndroidManifest.xml",
 
     srcs: [
         "src/**/*.kt",
     ],
 
-    resource_dirs: [
-        "res",
-    ],
-
     static_libs: [
         "SystemUIComposeCore",
-        "SystemUIComposeFeatures",
+        "SystemUIScreenshotLib",
 
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
-        "androidx.compose.material_material-icons-extended",
-        "androidx.activity_activity-compose",
-        "androidx.navigation_navigation-compose",
-
-        "androidx.appcompat_appcompat",
+        "androidx.compose.ui_ui-test-junit4",
+        "androidx.compose.ui_ui-test-manifest",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],
-}
-
-android_app {
-    name: "SystemUIComposeGallery",
-    defaults: ["platform_app_defaults"],
-    manifest: "app/AndroidManifest.xml",
-
-    static_libs: [
-        "SystemUIComposeGalleryLib",
-    ],
-
-    platform_apis: true,
-    system_ext_specific: true,
-    certificate: "platform",
-    privileged: true,
-
-    optimize: {
-        proguard_flags_files: ["proguard-rules.pro"],
-    },
-
-    dxflags: ["--multi-dex"],
 }

@@ -16,6 +16,10 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.systemui.compose.gallery">
-
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.systemui.testing.compose">
+    <application
+        android:appComponentFactory="androidx.core.app.AppComponentFactory"
+        tools:replace="android:appComponentFactory">
+    </application>
 </manifest>
