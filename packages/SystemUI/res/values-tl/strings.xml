@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"I-auto rotate ang screen"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na ma-access ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na i-access ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nHindi nabigyan ng pahintulot ang app na ito para mag-record pero nakakapag-capture ito ng audio sa pamamagitan ng USB device na ito."</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na i-access ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"Buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> para pangasiwaan ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Hindi nabigyan ng pahintulot ang app na ito na mag-record pero puwede itong mag-capture ng audio sa pamamagitan ng USB device na ito. Kapag ginamit ang <xliff:g id="APPLICATION">%1$s</xliff:g> sa device na ito, posibleng hindi marinig ang mga tawag, notification, at alarm."</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"Kapag ginamit ang <xliff:g id="APPLICATION">%1$s</xliff:g> sa device na ito, posibleng hindi marinig ang mga tawag, notification, at alarm."</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"Payagan ang <xliff:g id="APPLICATION">%1$s</xliff:g> na ma-access ang <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"Buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> upang pamahalaan ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"Buksan ang <xliff:g id="APPLICATION">%1$s</xliff:g> para pangasiwaan ang <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nHindi nabigyan ng pahintulot ang app na ito para mag-record pero nakakapag-capture ito ng audio sa pamamagitan ng USB device na ito."</string>
@@ -338,7 +342,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Magsimulang muli"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Oo, magpatuloy"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"Magdagdag ng bagong user?"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay maaaring mag-update ng mga app para sa lahat ng iba pang user."</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"Kapag nagdagdag ka ng bagong user, kailangang i-set up ng taong iyon ang kanyang espasyo.\n\nAng sinumang user ay puwedeng mag-update ng mga app para sa lahat ng iba pang user."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Naabot na ang limitasyon sa user"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Maaari kang magdagdag ng hanggang <xliff:g id="COUNT">%d</xliff:g> user.</item>
@@ -455,7 +459,7 @@
     <string name="enable_demo_mode" msgid="3180345364745966431">"I-enable ang demo mode"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Ipakita ang demo mode"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"I-set up para makapagsagawa ng mas mabibilis, mas secure na pagbili gamit ang telepono mo"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Ipakita lahat"</string>

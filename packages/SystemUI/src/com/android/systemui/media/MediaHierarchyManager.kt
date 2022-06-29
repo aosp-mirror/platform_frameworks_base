@@ -28,6 +28,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import androidx.annotation.VisibleForTesting
+import com.android.keyguard.KeyguardViewController
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
@@ -39,7 +40,6 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.Utils
@@ -82,7 +82,7 @@ class MediaHierarchyManager @Inject constructor(
     private val notifLockscreenUserManager: NotificationLockscreenUserManager,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
-    private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    private val keyguardViewController: KeyguardViewController
 ) {
 
     /**
@@ -998,7 +998,7 @@ class MediaHierarchyManager @Inject constructor(
 
     private fun isLockScreenVisibleToUser(): Boolean {
         return !statusBarStateController.isDozing &&
-                !statusBarKeyguardViewManager.isBouncerShowing &&
+                !keyguardViewController.isBouncerShowing &&
                 statusBarStateController.state == StatusBarState.KEYGUARD &&
                 notifLockscreenUserManager.shouldShowLockscreenNotifications() &&
                 statusBarStateController.isExpanded &&
@@ -1007,7 +1007,7 @@ class MediaHierarchyManager @Inject constructor(
 
     private fun isLockScreenShadeVisibleToUser(): Boolean {
         return !statusBarStateController.isDozing &&
-                !statusBarKeyguardViewManager.isBouncerShowing &&
+                !keyguardViewController.isBouncerShowing &&
                 (statusBarStateController.state == StatusBarState.SHADE_LOCKED ||
                         (statusBarStateController.state == StatusBarState.KEYGUARD && qsExpanded))
     }

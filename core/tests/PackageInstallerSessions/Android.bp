@@ -50,6 +50,6 @@ android_test {
         ":PackageManagerTestAppVersion1",
     ],
 
-    platform_apis: true,
+    sdk_version: "core_platform",
     test_suites: ["device-tests"],
 }

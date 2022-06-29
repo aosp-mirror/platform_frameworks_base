@@ -261,11 +261,6 @@ public class UserDataPreparerTest {
         protected File getDataUserDeDirectory(String volumeUuid, int userId) {
             return new File(testDir, "user_de_" + userId);
         }
-
-        @Override
-        protected boolean isFileEncryptedEmulatedOnly() {
-            return false;
-        }
     }
 
 }

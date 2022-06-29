@@ -286,7 +286,7 @@
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"No s\'ha pogut connectar"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta el nivell de registre de la connexió Wi‑Fi i es mostra per SSID RSSI al selector de Wi‑Fi"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Redueix el consum de bateria i millora el rendiment de la xarxa"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Exhaureix menys la bateria i millora el rendiment de la xarxa"</string>
     <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quan aquest mode està activat, és possible que l’adreça MAC d’aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
@@ -605,4 +605,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"S\'ha desconnectat l\'Ethernet."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Sense trucades."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Escaneja un codi QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Per començar a escoltar, centra el codi QR més avall"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"El codi QR no té un format vàlid"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Vols deixar d\'emetre <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si emets <xliff:g id="SWITCHAPP">%1$s</xliff:g> o canvies la sortida, l\'emissió actual s\'aturarà"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emet <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Canvia la sortida"</string>
 </resources>

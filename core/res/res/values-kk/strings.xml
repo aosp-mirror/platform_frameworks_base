@@ -314,8 +314,8 @@
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"құрылғыдағы фотосуреттерге, мультимедиаға және файлдарға қол жеткізу"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жазу"</string>
-    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Іс-қимыл"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"іс-қимыл дерегін алу"</string>
+    <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Қимыл-қозғалыс"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"қимыл-қозғалыс дерегін алу"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"суретке түсіріп, бейне жазу"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Маңайдағы құрылғылар"</string>
@@ -349,9 +349,9 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсету"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Қолданбаның құлыпталған құрылғыда хабарландыруларды толық экрандағы әрекеттер түрінде көрсетуіне рұқсат береді."</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"таңбаша орнату"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Қолданбаға Негізгі экранға таңбашаларды пайдаланушының қатысуынсыз қосу мүмкіндігін береді."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"төте пернелерді алып тастау"</string>
-    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экранның төте пернелерін пайдаланушының қатысуынсыз алып тастау мүмкіндігін береді."</string>
+    <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Қолданбаға Негізгі экрандағы таңбашаларды пайдаланушының қатысуынсыз өшіру мүмкіндігін береді."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"шығыс қоңырауларды қайта бағыттау"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Қолданбаға шығыс қоңырау кезінде қоңырауды басқа нөмірге қайта бағыттау немесе қоңырауды мүлде доғару опциясы бар теріліп жатқан нөмірді көруге рұқсат береді."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"телефон қоңырауларына жауап беру"</string>
@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ҚОСУЛЫ"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ӨШІРУЛІ"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> қызметіне құрылғыны толық басқаруға рұқсат етілсін бе?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> қоссаңыз, құрылғыңыз деректерді шифрлау үшін экранды бекітуді пайдаланбайды."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Арнайы мүмкіндіктер бойынша көмектесетін қолданбаларға ғана құрылғыны толық басқару рұқсатын берген дұрыс."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Экранды көру және басқару"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ол экрандағы мазмұнды толық оқиды және мазмұнды басқа қолданбалардың үстінен көрсете алады."</string>
@@ -1885,8 +1884,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Әкімші жаңартқан"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Әкімші жойған"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Жарайды"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батареяны үнемдеу режимі қараңғы тақырыпты іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Батареяны үнемдеу режимі қараңғы тақырыпты іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Батареяны үнемдеу режимі қараңғы режимді іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Батареяны үнемдеу режимі қараңғы режимді іске қосады және фондық әрекеттерге, кейбір визуалдық әсерлерге, белгілі бір функциялар мен кейбір желі байланыстарына шектеу қояды немесе оларды өшіреді."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
@@ -2111,7 +2110,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Жарайды"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Өшіру"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Толығырақ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде кеңейтілген хабарландырулар функциясы бейімделетін хабарландырулар функциясын алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарлар) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беру және Мазаламау режимін басқару) болады."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде \"Бейімделетін хабарландырулар\" функциясын \"Кеңейтілген хабарландырулар\" алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарларды) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беруге және Мазаламау режимін басқаруға) болады."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея заряды азаюы мүмкін"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Батареяны үнемдеу режимі іске қосылды"</string>

@@ -103,7 +103,7 @@
     <string name="serviceClassVoice" msgid="2065556932043454987">"व्हॉइस"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"डेटा"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"फॅक्स"</string>
-    <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
+    <string name="serviceClassSMS" msgid="1547664561704509004">"एसएमएस"</string>
     <string name="serviceClassDataAsync" msgid="2029856900898545984">"असंकालिक"</string>
     <string name="serviceClassDataSync" msgid="7895071363569133704">"सिंक करा"</string>
     <string name="serviceClassPacket" msgid="1430642951399303804">"पॅकेट"</string>
@@ -308,7 +308,7 @@
     <string name="permgroupdesc_location" msgid="1995955142118450685">"या डिव्हाइसच्या स्थानावर प्रवेश"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"आपल्या कॅलेंडरवर प्रवेश"</string>
-    <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
+    <string name="permgrouplab_sms" msgid="795737735126084874">"एसएमएस"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS मेसेज पाठवणे आणि पाहणे हे"</string>
     <string name="permgrouplab_storage" msgid="1938416135375282333">"फाइल आणि मीडिया"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"तुमच्या डिव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अ‍ॅक्सेस"</string>
@@ -349,7 +349,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"लॉक केलेल्या डिव्हाइसवर फुल स्क्रीन अ‍ॅक्टिव्हिटी म्हणून सूचना प्रदर्शित करणे"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"लॉक केलेल्या डिव्हाइसवर फुल स्क्रीन अ‍ॅक्टिव्हिटी म्हणून सूचना प्रदर्शित करण्यासाठी ॲपला अनुमती द्या"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"शॉर्टकट इंस्टॉल करा"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"अनुप्रयोगाला वापरकर्ता हस्‍तक्षेपाशिवाय मुख्‍यस्‍क्रीन शॉर्टकट जोडण्‍याची अनुमती देते."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"ॲप्लिकेशनला वापरकर्ता हस्‍तक्षेपाशिवाय मुख्‍यस्‍क्रीन शॉर्टकट जोडण्‍याची अनुमती देते"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"शॉर्टकट विस्‍थापित करा"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"अनुप्रयोगाला वापरकर्ता हस्‍तक्षेपाशिवाय मुख्‍यस्‍क्रीन शॉर्टकट काढण्‍याची अनुमती देते."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"केले जाणारे कॉल पुन्हा मार्गस्थ करा"</string>
@@ -400,7 +400,7 @@
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"अ‍ॅपला पृष्‍ठभाग सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"अ‍ॅप संचयन स्थान मोजा"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"अ‍ॅप ला त्याचा कोड, डेटा आणि कॅशे    आकार पुनर्प्राप्त करण्यासाठी अनुमती देते"</string>
-    <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टम सेटिंग्ज सुधारित करा"</string>
+    <string name="permlab_writeSettings" msgid="8057285063719277394">"सिस्टीम सेटिंग्ज सुधारित करा"</string>
     <string name="permdesc_writeSettings" msgid="8293047411196067188">"सिस्टीमचा सेटिंग्ज डेटा सुधारित करण्यासाठी अ‍ॅप ला अनुमती देते. दुर्भावनापूर्ण अ‍ॅप्स आपल्या सिस्टीमचे कॉंफिगरेशन दूषित करू शकतात."</string>
     <string name="permlab_receiveBootCompleted" msgid="6643339400247325379">"सुरूवातीस चालवा"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="5565659082718177484">"जसे सिस्टम बूट करणे समाप्त करते तसे अ‍ॅप ला स्वतः सुरू करण्यास अनुमती देते. यामुळे टॅबलेट सुरू करण्यास वेळ लागू शकतो आणि नेहमी सुरू राहून एकंदर टॅबलेटला धीमे करण्यास अ‍ॅप ला अनुमती देते."</string>
@@ -1499,7 +1499,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"तुम्ही हा अ‍ॅप आपल्या कार्य प्रोफाईलमध्‍ये वापरत आहात"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"इनपुट पद्धत"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"सिंक करा"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"प्रवेशयोग्यता"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"अ‍ॅक्सेसिबिलिटी"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"वॉलपेपर"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"वॉलपेपर बदला"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"सूचना ऐकणारा"</string>
@@ -1711,12 +1711,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"सुरू आहे"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"बंद आहे"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ला तुमचे डिव्हाइसच संपूर्णपणे नियंत्रित करायची अनुमती द्यायची का?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तुम्ही <xliff:g id="SERVICE">%1$s</xliff:g> सुरू केल्‍यास, तुमचे डिव्हाइस डेटा एंक्रिप्शनमध्ये सुधारणा करण्‍यासाठी स्क्रीन लॉक वापरणार नाही."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"जी ॲप्स तुमच्या ॲक्सेसिबिलिटी गरजा पूर्ण करतात अशा ॲप्ससाठी संपूर्ण नियंत्रण योग्य आहे. पण ते सर्व ॲप्सना लागू होईल असे नाही."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन पहा आणि नियंत्रित करा"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ते स्क्रीनवरील सर्व आशय वाचू शकते आणि इतर ॲप्सवर आशय प्रदर्शित करू शकते."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"पहा आणि क्रिया करा"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"तुम्ही ॲप किंवा हार्डवेअर सेन्सर कसे वापरता याचा हे मागोवा घेऊ शकते आणि इतर ॲप्ससोबत तुमच्या वतीने काम करू शकते."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"हे तुम्ही ॲप किंवा हार्डवेअर सेन्सर कसे वापरता ते ट्रॅक करू शकते आणि इतर ॲप्ससोबत तुमच्या वतीने संवाद साधू शकते."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमती द्या"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नकार द्या"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"वैशिष्ट्य वापरणे सुरू करण्यासाठी त्यावर टॅप करा:"</string>
@@ -1887,7 +1886,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ओके"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"बॅटरी सेव्हर गडद थीम सुरू करते आणि बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट, ठरावीक वैशिष्ट्ये व काही नेटवर्क कनेक्शन मर्यादित किंवा बंद करते."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"बॅटरी सेव्हर गडद थीम सुरू करते आणि बॅकग्राउंड ॲक्टिव्हिटी, काही व्हिज्युअल इफेक्ट, ठरावीक वैशिष्ट्ये व काही नेटवर्क कनेक्शन मर्यादित किंवा बंद करते."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना बॅकग्राउंडमध्ये डेटा पाठवण्यास किंवा मिळवण्यास डेटा सर्व्हर प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा की, तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असे होऊ शकते."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"डेटाचा वापर कमी करण्यात मदत करण्यासाठी काही अ‍ॅप्सना बॅकग्राउंडमध्ये डेटा पाठवण्यास किंवा मिळवण्यास डेटा सर्व्हर प्रतिबंध करतो. तुम्ही सध्या वापरत असलेले अ‍ॅप डेटा अ‍ॅक्सेस करू शकते, पण तसे खूप कमी वेळा होते. याचाच अर्थ असा, की तुम्ही इमेजवर टॅप करेपर्यंत त्या डिस्प्ले होणार नाहीत असे होऊ शकते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेव्हर सुरू करायचे?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सुरू करा"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">

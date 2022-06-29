@@ -121,7 +121,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Batal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Berpasangan memberi anda akses kepada kenalan dan sejarah panggilan apabila disambungkan."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Tidak dapat berpasangan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat berpasangan dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kerana PIN atau kunci laluan yang salah."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Tidak dapat berganding dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> kerana PIN atau kunci laluan yang salah."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Tidak boleh berkomunikasi dengan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Pasangan ditolak oleh <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Komputer"</string>
@@ -362,7 +362,7 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nyahpepijat operasi keratan bukan segi empat tepat"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Pemaparan HWUI profil"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Dayakan lepasan nyahpepijat GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Bnrkn pemuatan lpsn nyhppjt GPU utk apl pnyhppjtn"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Benarkan pemuatan lapisan nyahpepijat GPU untuk apl penyahpepijatan"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Dayakan pengelogan vendor berjela"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sertakan log tambahan vendor khusus peranti dalam laporan pepijat, yang mungkin mengandungi maklumat peribadi, menggunakan lebih banyak kuasa bateri dan/atau menggunakan lebih banyak storan."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animasi tetingkap"</string>
@@ -449,8 +449,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Tablet mungkin ditutup tidak lama lagi (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Peranti mungkin ditutup tidak lama lagi (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi hingga penuh"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi hingga penuh"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> lagi sebelum penuh"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> lagi sebelum penuh"</string>
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> - Pengecasan terhad sementara"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Tidak diketahui"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Mengecas"</string>
@@ -605,4 +605,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet diputuskan sambungan."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Tiada panggilan."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Imbas kod QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Untuk mula mendengar, pusatkan kod QR di bawah"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Kod QR bukan dalam format yang sah"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Hentikan siaran <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Jika anda siarkan <xliff:g id="SWITCHAPP">%1$s</xliff:g> atau tukarkan output, siaran semasa anda akan berhenti"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Siarkan <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Tukar output"</string>
 </resources>

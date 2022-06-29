@@ -61,7 +61,7 @@
     <shortcode country="bg" pattern="\\d{4,5}" premium="18(?:16|423)|19(?:1[56]|35)" free="116\\d{3}|1988|1490" />
 
     <!-- Bahrain: 1-5 digits (standard system default, not country specific) -->
-    <shortcode country="bh" pattern="\\d{1,5}" free="81181" />
+    <shortcode country="bh" pattern="\\d{1,5}" free="81181|85999" />
 
     <!-- Brazil: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="br" pattern="\\d{1,5}" free="6000[012]\\d|876|5500|9963|4141|8000" />
@@ -83,7 +83,7 @@
     <shortcode country="cn" premium="1066.*" free="1065.*" />
 
     <!-- Colombia: 1-6 digits (not confirmed) -->
-    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160|892255|898002|898880|899960|899948|87739" />
+    <shortcode country="co" pattern="\\d{1,6}" free="890350|908160|892255|898002|898880|899960|899948|87739|85517" />
 
     <!-- Cyprus: 4-6 digits (not confirmed), known premium codes listed, plus EU -->
     <shortcode country="cy" pattern="\\d{4,6}" premium="7510" free="116\\d{3}" />
@@ -190,7 +190,7 @@
     <shortcode country="mk" pattern="\\d{1,6}" free="129005|122" />
 
     <!-- Mexico: 4-5 digits (not confirmed), known premium codes listed -->
-    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963" />
+    <shortcode country="mx" pattern="\\d{4,5}" premium="53035|7766" free="26259|46645|50025|50052|5050|76551|88778|9963|91101" />
 
     <!-- Malaysia: 5 digits: http://www.skmm.gov.my/attachment/Consumer_Regulation/Mobile_Content_Services_FAQs.pdf -->
     <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099|28288|66668" />

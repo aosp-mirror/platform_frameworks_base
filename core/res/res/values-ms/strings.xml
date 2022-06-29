@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"B."</string>
+    <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="kilobyteShort" msgid="2214285521564195803">"kB"</string>
     <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
     <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
@@ -302,7 +302,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistem Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Beralih ke profil peribadi"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Beralih ke profil kerja"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kenalan"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"mengakses kenalan anda"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"mengakses lokasi peranti ini"</string>
@@ -424,7 +424,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Membenarkan apl untuk mengubah suai panggilan tablet anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Membenarkan apl mengubah suai log panggilan peranti Android TV anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakan keupayaan ini untuk memadamkan atau mengubah suai log panggilan anda."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Membenarkan apl untuk mengubah suai panggilan telefon anda, termasuk data tentang panggilan masuk dan keluar. Apl hasad boleh menggunakannya untuk memadam atau mengubah suai log panggilan anda."</string>
-    <string name="permlab_bodySensors" msgid="3411035315357380862">"akss pndia bdn (spt pmntau kdr dnyt jntg)"</string>
+    <string name="permlab_bodySensors" msgid="3411035315357380862">"Akses penderia badan (seperti pemantau kadar denyut jantung)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Membenarkan apl mengakses data dari penderia yang memantau keadaan fizikal anda, seperti kadar denyutan jantung anda."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Baca acara dan butiran kalendar"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Apl ini boleh membaca semua acara kalendar yang disimpan pada tablet anda dan berkongsi atau menyimpan data kalendar anda."</string>
@@ -1501,7 +1501,7 @@
     <string name="sync_binding_label" msgid="469249309424662147">"Penyegerakan"</string>
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Kebolehaksesan"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Kertas dinding"</string>
-    <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar kertas dinding"</string>
+    <string name="chooser_wallpaper" msgid="3082405680079923708">"Tukar hiasan latar"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Pendengar pemberitahuan"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Pendengar VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Pembekal keadaan"</string>
@@ -1641,7 +1641,7 @@
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Paparan wayarles"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Hantar"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Sambung ke peranti"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Hantar skrin ke peranti"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Hantar skrin kepada peranti"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Mencari peranti..."</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Tetapan"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Putuskan sambungan"</string>
@@ -1711,12 +1711,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"HIDUP"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"MATI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Benarkan <xliff:g id="SERVICE">%1$s</xliff:g> mempunyai kawalan penuh atas peranti anda?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jika anda menghidupkan <xliff:g id="SERVICE">%1$s</xliff:g>, peranti anda tidak akan menggunakan kunci skrin anda untuk meningkatkan penyulitan data."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Lihat dan laksanakan tindakan"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Tindakan ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ciri ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Benarkan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>

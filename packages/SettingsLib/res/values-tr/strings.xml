@@ -121,7 +121,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"İptal"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Eşleme işlemi, bağlantı kurulduğunda kişilerinize ve çağrı geçmişine erişim izni verir."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN veya parola yanlış olduğundan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile eşlenemedi."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ile iletişim kurulamıyor."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Eşleme <xliff:g id="DEVICE_NAME">%1$s</xliff:g> tarafından reddedildi."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Bilgisayar"</string>
@@ -255,7 +255,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Kablosuz ekran sertifikası"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kablosuz Ayrıntılı Günlük Kaydını etkinleştir"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Kablosuz ağ taramasını kısma"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Kablosuz kalıcı olmayan MAC rastgele hale getirme süreci"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="882650208573834301">"Kablosuz kalıcı olmayan MAC rastgele hale getirme modu"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil veri her zaman etkin"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering donanım hızlandırıcısı"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Adsız Bluetooth cihazlarını göster"</string>
@@ -342,7 +342,7 @@
     <string name="show_screen_updates" msgid="2078782895825535494">"Yüzey güncellemelerini göster"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Güncellenirken tüm pencere yüzeylerini yakıp söndür"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"Görünüm güncellemelerini göster"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Çizim yapılırken görünümleri pencerede çiz"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Çizildiğinde pencerelerin içini yakıp söndür"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Donanım katmanı güncellemelerini göster"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Güncellenirken donanım katmanlarını yeşil renkte yanıp söndür"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU fazla çizim hatasını ayıkla"</string>
@@ -355,7 +355,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"Düzen sınırlarını göster"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Klip sınırlarını, kenar boşluklarını vb. göster"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Sağdan sola düzenini zorla"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorlar"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Tüm yerel ayarlar için sağdan sola ekran düzenini zorla"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Pencere bulanıklaştırmaya izin ver"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA\'yı zorla"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 uygulamalarda 4x MSAA\'yı etkinleştir"</string>
@@ -374,7 +374,7 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Kullanıcının ayrıldığı her etkinliği hemen yok et"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Arka plan işlem sınırı"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Arka plan ANR\'leri göster"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor mesajını göster"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Arka plan uygulamalar için Uygulama Yanıt Vermiyor iletişimini göster"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Bildirim kanalı uyarılarını göster"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bir uygulama geçerli kanal olmadan bildirim yayınladığında ekranda uyarı gösterir"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Harici birimdeki uygulamalara izin vermeye zorla"</string>
@@ -543,7 +543,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Kullanıcı"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Kısıtlı profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Yeni kullanıcı eklensin mi?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ek kullanıcılar oluşturarak bu cihazı başkalarıyla paylaşabilirsiniz. Her kullanıcının uygulamalarla, duvar kağıdıyla ve başka ayarlarla özelleştirebileceği kendi alanı olur. Kullanıcılar ayrıca kablosuz ağ gibi herkesi etkileyen cihaz ayarlarını değiştirebilirler.\n\nYeni bir kullanıcı eklediğinizde, ilgili kişinin kendi alanını ayarlaması gerekir.\n\nHer kullanıcı diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ek kullanıcılar oluşturarak bu cihazı başkalarıyla paylaşabilirsiniz. Her kullanıcının uygulamalarla, duvar kağıdıyla ve başka ayarlarla özelleştirebileceği kendi alanı olur. Kullanıcılar ayrıca kablosuz ağ gibi herkesi etkileyen cihaz ayarlarını değiştirebilirler.\n\nYeni bir kullanıcı eklediğinizde, ilgili kişinin kendi alanını ayarlaması gerekir.\n\nHer kullanıcı diğer tüm kullanıcılar için uygulamaları güncelleyebilir. Erişilebilirlik ayarları ve hizmetleri yeni kullanıcıya aktarılamayabilir."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Yeni bir kullanıcı eklediğinizde, bu kişinin kendi alanını ayarlaması gerekir.\n\nHerhangi bir kullanıcı, diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Kullanıcı şimdi ayarlansın mı?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"İlgili kişinin cihazı almak ve kendi alanını ayarlamak için müsait olduğundan emin olun"</string>
@@ -605,4 +605,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet bağlantısı kesildi."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Çağrı yok."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"QR kodunu tara"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Dinlemeye başlamak için aşağıdaki QR kodunu ortalayın"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR kodu geçerli bir biçim değil"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulamasında anons durdurulsun mu?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapar veya çıkışı değiştirirseniz mevcut anonsunuz duraklatılır"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapın"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Çıkışı değiştirme"</string>
 </resources>

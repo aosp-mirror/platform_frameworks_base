@@ -82,12 +82,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
-        ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
-                mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
-                mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
-                client, mAssistToken, mFixedRotationAdjustments, mShareableActivityToken,
-                mLaunchedFromBubble);
-        client.addLaunchingActivity(token, r);
+        client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
         client.updatePendingConfiguration(mCurConfig);
         if (mActivityClientController != null) {
@@ -99,7 +94,11 @@ public class LaunchActivityItem extends ClientTransactionItem {
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-        ActivityClientRecord r = client.getLaunchingActivity(token);
+        ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
+                mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
+                mPendingResults, mPendingNewIntents, mActivityOptions, mIsForward, mProfilerInfo,
+                client, mAssistToken, mFixedRotationAdjustments, mShareableActivityToken,
+                mLaunchedFromBubble);
         client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -107,7 +106,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
     @Override
     public void postExecute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
-        client.removeLaunchingActivity(token);
+        client.countLaunchingActivities(-1);
     }
 
 

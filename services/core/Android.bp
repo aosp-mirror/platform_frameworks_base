@@ -132,8 +132,6 @@ java_library_static {
     ],
 
     static_libs: [
-        "time_zone_distro",
-        "time_zone_distro_installer",
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.boot-V1.0-java",
         "android.hardware.boot-V1.1-java",

@@ -354,8 +354,8 @@
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Permite que o app remova atalhos da tela inicial sem a intervenção do usuário."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"redirecionar as chamadas efetuadas"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Permite que o app veja o número discado ao realizar uma chamada, com a opção de redirecionar a chamada para outro número ou abortá-la."</string>
-    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"atender chamadas telefônicas"</string>
-    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permite que o app atenda uma chamada recebida."</string>
+    <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"atender ligações telefônicas"</string>
+    <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Permite que o app atenda uma ligação recebida."</string>
     <string name="permlab_receiveSms" msgid="505961632050451881">"receber mensagens de texto (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="1797345626687832285">"Permite que o app receba e processe mensagens SMS. Isso significa que o app pode monitorar ou excluir mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
     <string name="permlab_receiveMms" msgid="4000650116674380275">"receber mensagens de texto (MMS)"</string>
@@ -419,7 +419,7 @@
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"Permite que o app modifique os dados sobre os contatos armazenados no dispositivo Android TV. Essa permissão autoriza os apps a excluírem dados de contato."</string>
     <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"Permite que o app modifique os dados sobre os contatos armazenados no smartphone. Essa permissão autoriza os apps a excluírem dados de contato."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"ler registro de chamadas"</string>
-    <string name="permdesc_readCallLog" msgid="8964770895425873433">"Este app pode ler seu histórico de chamadas."</string>
+    <string name="permdesc_readCallLog" msgid="8964770895425873433">"Este app pode ler seu histórico de ligações."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"salvar no registo de chamadas"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Permite que o app modifique o registro de chamadas de seu tablet, incluindo dados sobre chamadas recebidas e efetuadas. Apps maliciosos podem usar esta permissão para apagar ou modificar seu registro de chamadas."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Permite que o app modifique o registro de chamadas do seu dispositivo Android TV, incluindo dados sobre chamadas recebidas e realizadas. Apps maliciosos podem usar essa permissão para apagar ou modificar seu registro de chamadas."</string>
@@ -436,8 +436,8 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Este app pode adicionar, remover ou alterar eventos da agenda no seu smartphone. Ele também pode enviar mensagens que aparentem ser de autoria do proprietário da agenda ou alterar eventos sem notificar o proprietário."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"acessar comandos extras do provedor de localização"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite que o app acesse comandos do provedor não relacionados à localização. Isso pode permitir que o app interfira no funcionamento do GPS ou de outras fontes de localização."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acessar localização precisa apenas em primeiro plano"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Esse app poderá acessar sua localização exata com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local. Isso pode aumentar o uso da bateria."</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acessar local exato apenas em primeiro plano"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Esse app poderá acessar seu local exato com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local. Isso pode aumentar o uso da bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"acessar local aproximado apenas em primeiro plano"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Esse app poderá acessar sua localização aproximada com os Serviços de localização enquanto estiver sendo usado. Os Serviços de localização do dispositivo precisam estar ativados para que o app possa acessar o local."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acessar a localização em segundo plano"</string>
@@ -550,7 +550,7 @@
     <string name="permlab_nfc" msgid="1904455246837674977">"controlar a comunicação a curta distância"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (comunicação a curta distância)."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desativar o bloqueio de tela"</string>
-    <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma chamada e o reativa quando a chamada é finalizada."</string>
+    <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma ligação e o reativa quando a chamada é finalizada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Solicitar complexidade do bloqueio de tela"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Permite que o app saiba o nível de complexidade do bloqueio de tela (alto, médio, baixo ou nenhum), que indica o intervalo possível de comprimento e o tipo de bloqueio de tela. O app também pode sugerir a atualização do bloqueio de tela até um certo nível, mas os usuários podem ignorar a sugestão. O bloqueio de tela não é armazenado em texto simples, então o app não tem acesso à senha exata."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"Usar hardware de biometria"</string>
@@ -750,7 +750,7 @@
     <string name="policydesc_wipeData" product="automotive" msgid="660804547737323300">"Apaga os dados sem aviso, redefinindo o sistema de infoentretenimento para a configuração original."</string>
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Apaga os dados sem aviso redefinindo o smartphone para a configuração original."</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Apagar dados do perfil"</string>
-    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Limpar dados do usuário"</string>
+    <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Remover dados do usuário"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Limpa os dados do usuário neste tablet sem aviso prévio."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Limpa os dados do usuário neste dispositivo Android TV sem aviso prévio."</string>
     <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Apaga os dados do perfil do sistema de infoentretenimento sem aviso."</string>
@@ -1711,10 +1711,9 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ATIVADO"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"DESATIVADO"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Permitir que o <xliff:g id="SERVICE">%1$s</xliff:g> tenha controle total do seu dispositivo?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se o <xliff:g id="SERVICE">%1$s</xliff:g> for ativado, o dispositivo não usará o bloqueio de tela para melhorar a criptografia de dados."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"O controle total é adequado para apps que ajudam você com as necessidades de acessibilidade, mas não para a maioria dos apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar tela"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo na tela e mostrar conteúdo sobreposto a outros apps."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o conteúdo na tela e o conteúdo se sobrepõe ao de outros apps."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ver e realizar ações"</string>
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode monitorar suas interações com um app ou um sensor de hardware e interagir com apps em seu nome."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
@@ -1730,7 +1729,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correção de cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mais escuro"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Escurecer a tela"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume pressionadas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume pressionadas. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Toque nos dois botões de volume e os mantenha pressionados por três segundo para usar o <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1887,7 +1886,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"A Economia de bateria ativa o tema escuro e limita ou desativa atividades em segundo plano, alguns efeitos visuais, recursos específicos e algumas conexões de rede."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"A Economia de bateria ativa o tema escuro e limita ou desativa atividades em segundo plano, alguns efeitos visuais, recursos específicos e algumas conexões de rede."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você esteja usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não sejam exibidas até que você toque nelas."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Para ajudar a reduzir o uso de dados, a Economia de dados impede que alguns apps enviem ou recebam dados em segundo plano. Um app que você está usando no momento pode acessar dados, mas com menos frequência. Isso pode fazer com que imagens não apareçam até você tocar nelas."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ativar a Economia de dados?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
@@ -1967,7 +1966,7 @@
     <string name="call_notification_hang_up_action" msgid="9130720590159188131">"Desligar"</string>
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Chamada recebida"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Chamada em andamento"</string>
-    <string name="call_notification_screening_text" msgid="8396931408268940208">"Filtrando uma chamada recebida"</string>
+    <string name="call_notification_screening_text" msgid="8396931408268940208">"Filtrando uma ligação recebida"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionado</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
@@ -2111,7 +2110,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Desativar"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Saiba mais"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações avançadas substituíram as notificações adaptáveis. Esse recurso exibe ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações avançadas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender chamadas telefônicas e controlar o Não perturbe."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"No Android 12, as notificações avançadas substituíram as notificações adaptáveis. Esse recurso mostra ações e respostas sugeridas, além de organizar suas notificações.\n\nAs notificações avançadas podem acessar o conteúdo das notificações, incluindo informações pessoais como nomes de contatos e mensagens. Elas também podem dispensar ou responder às notificações, como atender ligações telefônicas e controlar o Não perturbe."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informação do modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A bateria pode acabar antes da recarga normal"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"A Economia de bateria foi ativada para aumentar a duração da carga"</string>

@@ -32,7 +32,8 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        receivedSmartspaceCardLatency: Int
+        receivedSmartspaceCardLatency: Int,
+        isSsReactivated: Boolean
     ) {
         if (oldKey != null && oldKey != key && entries.contains(oldKey)) {
             entries[key] = data to entries.remove(oldKey)?.second
@@ -46,8 +47,7 @@ class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
     override fun onSmartspaceMediaDataLoaded(
         key: String,
         data: SmartspaceMediaData,
-        shouldPrioritize: Boolean,
-        isSsReactivated: Boolean
+        shouldPrioritize: Boolean
     ) {
         listeners.toSet().forEach { it.onSmartspaceMediaDataLoaded(key, data) }
     }

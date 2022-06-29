@@ -355,7 +355,7 @@
     <string name="permlab_fullScreenIntent" msgid="4310888199502509104">"Показ уведомлений в полноэкранном режиме на заблокированном устройстве"</string>
     <string name="permdesc_fullScreenIntent" msgid="1100721419406643997">"Приложение сможет показывать уведомления в полноэкранном режиме на заблокированном устройстве"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"Создание ярлыков"</string>
-    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Приложение сможет добавлять ярлыки на главный экран без вмешательства пользователя."</string>
+    <string name="permdesc_install_shortcut" msgid="4476328467240212503">"приложения смогут добавлять ярлыки на главный экран без вмешательства пользователя."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"Удаление ярлыков"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Приложение сможет удалять ярлыки с главного экрана без вмешательства пользователя."</string>
     <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"Перенаправление исходящих вызовов"</string>
@@ -1755,7 +1755,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"Включено"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"Выключено"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Предоставить сервису \"<xliff:g id="SERVICE">%1$s</xliff:g>\" полный контроль над устройством?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Если включить сервис \"<xliff:g id="SERVICE">%1$s</xliff:g>\", устройство не будет использовать блокировку экрана для защиты данных."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Полный контроль нужен приложениям для реализации специальных возможностей и не нужен большинству остальных."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Просмотр и контроль экрана"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Сервис может просматривать весь контент на экране и отображать контент поверх других приложений"</string>
@@ -2107,7 +2106,7 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> варианта автозаполнения</item>
     </plurals>
     <string name="autofill_save_title" msgid="7719802414283739775">"Сохранить в сервисе "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Сохранить данные (<xliff:g id="TYPE">%1$s</xliff:g>) в сервисе "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Сохран. данные (<xliff:g id="TYPE">%1$s</xliff:g>) в сервисе "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Сохранить данные (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>) в сервисе "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Сохранить данные (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, <xliff:g id="TYPE_2">%3$s</xliff:g>) в сервисе "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"Обновить в сервисе "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>

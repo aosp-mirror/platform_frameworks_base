@@ -35,6 +35,8 @@
         <option name="push" value="ApkVerityTestCert.der->/data/local/tmp/ApkVerityTestCert.der" />
     </target_preparer>
 
+    <!-- Skip on HWASan. TODO(b/232288278): Re-enable -->
+    <object type="module_controller" class="com.android.tradefed.testtype.suite.module.SkipHWASanModuleController" />
     <test class="com.android.compatibility.common.tradefed.testtype.JarHostTest" >
         <option name="jar" value="ApkVerityTest.jar" />
     </test>

@@ -606,4 +606,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Веза са етернетом је прекинута."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Етернет."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Без позивања."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Скенирајте QR кôд"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Да бисте почели да слушате, центрирајте QR кôд испод"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"QR кôд није у важећем формату"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Желите да зауставите емитовање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Ако емитујете апликацију <xliff:g id="SWITCHAPP">%1$s</xliff:g> или промените излаз, актуелно емитовање ће се зауставити"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Емитујте апликацију <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Промените излаз"</string>
 </resources>

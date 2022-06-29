@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Verbindingversoek"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> wil \'n VPN-verbinding opstel wat dit sal toelaat om netwerkverkeer te monitor. Aanvaar dit net as jy die bron vertrou. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; verskyn boaan jou skerm as VPN aktief is."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> wil \'n VPN-verbinding opstel wat dit toelaat om netwerkverkeer te monitor. Aanvaar dit net as jy die bron vertrou. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; verskyn op jou skerm wanneer VPN aktief is."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN is gekoppel"</string>
     <string name="session" msgid="6470628549473641030">"Sessie:"</string>
     <string name="duration" msgid="3584782459928719435">"Tydsduur:"</string>

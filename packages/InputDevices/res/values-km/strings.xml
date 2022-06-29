@@ -32,10 +32,10 @@
     <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"ហុងគ្រី"</string>
     <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"អ៊ីស្លង់"</string>
     <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"ប្រេស៊ីល"</string>
-    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"ព័រទុយហ្គាល់"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"ព័រទុយហ្កាល់"</string>
     <string name="keyboard_layout_slovak" msgid="2469379934672837296">"ស្លូវ៉ាគី"</string>
     <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"ស្លូវ៉ានី"</string>
-    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"ទួរគី"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"តួកគី"</string>
     <string name="keyboard_layout_turkish_f" msgid="9130320856010776018">"តួកគី F"</string>
     <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"អ៊ុយក្រែន"</string>
     <string name="keyboard_layout_arabic" msgid="5671970465174968712">"អារ៉ាប់"</string>

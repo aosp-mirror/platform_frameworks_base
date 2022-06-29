@@ -247,6 +247,7 @@ public final class Parcel {
     private ArrayMap<Class, Object> mClassCookies;
 
     private RuntimeException mStack;
+    private boolean mRecycled = false;
 
     /** @hide */
     @TestApi
@@ -347,7 +348,15 @@ public final class Parcel {
     private static final int EX_SERVICE_SPECIFIC = -8;
     private static final int EX_PARCELABLE = -9;
     /** @hide */
+    // WARNING: DO NOT add more 'reply' headers. These also need to add work to native
+    // code and this encodes extra information in object statuses. If we need to expand
+    // this design, we should add a generic way to attach parcelables/structured parcelables
+    // to transactions which can work across languages.
     public static final int EX_HAS_NOTED_APPOPS_REPLY_HEADER = -127; // special; see below
+    // WARNING: DO NOT add more 'reply' headers. These also need to add work to native
+    // code and this encodes extra information in object statuses. If we need to expand
+    // this design, we should add a generic way to attach parcelables/structured parcelables
+    // to transactions which can work across languages.
     private static final int EX_HAS_STRICTMODE_REPLY_HEADER = -128;  // special; see below
     // EX_TRANSACTION_FAILED is used exclusively in native code.
     // see libbinder's binder/Status.h
@@ -520,6 +529,7 @@ public final class Parcel {
         if (res == null) {
             res = new Parcel(0);
         } else {
+            res.mRecycled = false;
             if (DEBUG_RECYCLE) {
                 res.mStack = new RuntimeException();
             }
@@ -548,7 +558,16 @@ public final class Parcel {
      * the object after this call.
      */
     public final void recycle() {
-        if (DEBUG_RECYCLE) mStack = null;
+        if (mRecycled) {
+            Log.w(TAG, "Recycle called on unowned Parcel. (recycle twice?)", mStack);
+        }
+        mRecycled = true;
+
+        // We try to reset the entire object here, but in order to be
+        // able to print a stack when a Parcel is recycled twice, that
+        // is cleared in obtain instead.
+
+        mClassCookies = null;
         freeBuffer();
 
         if (mOwnsNativeParcelObject) {
@@ -1990,7 +2009,20 @@ public final class Parcel {
     }
 
     /**
-     * @hide
+     * Flatten a List containing a particular object type into the parcel, at
+     * the current dataPosition() and growing dataCapacity() if needed.  The
+     * type of the objects in the list must be one that implements Parcelable.
+     * Unlike the generic writeList() method, however, only the raw data of the
+     * objects is written and not their type, so you must use the corresponding
+     * readTypedList() to unmarshall them.
+     *
+     * @param val The list of objects to be written.
+     * @param parcelableFlags Contextual flags as per
+     * {@link Parcelable#writeToParcel(Parcel, int) Parcelable.writeToParcel()}.
+     *
+     * @see #createTypedArrayList
+     * @see #readTypedList
+     * @see Parcelable
      */
     public <T extends Parcelable> void writeTypedList(@Nullable List<T> val, int parcelableFlags) {
         if (val == null) {
@@ -5083,6 +5115,7 @@ public final class Parcel {
         if (res == null) {
             res = new Parcel(obj);
         } else {
+            res.mRecycled = false;
             if (DEBUG_RECYCLE) {
                 res.mStack = new RuntimeException();
             }
@@ -5131,7 +5164,8 @@ public final class Parcel {
     @Override
     protected void finalize() throws Throwable {
         if (DEBUG_RECYCLE) {
-            if (mStack != null) {
+            // we could always have this log on, but it's spammy
+            if (!mRecycled) {
                 Log.w(TAG, "Client did not call Parcel.recycle()", mStack);
             }
         }

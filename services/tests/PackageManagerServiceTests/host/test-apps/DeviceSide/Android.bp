@@ -25,6 +25,7 @@ package {
 
 android_test_helper_app {
     name: "PackageManagerServiceDeviceSideTests",
+    sdk_version: "test_current",
     srcs: ["src/**/*.kt"],
     libs: [
         "android.test.base",
@@ -37,5 +38,4 @@ android_test_helper_app {
         "androidx.test.rules",
         "truth-prebuilt",
     ],
-    platform_apis: true,
 }

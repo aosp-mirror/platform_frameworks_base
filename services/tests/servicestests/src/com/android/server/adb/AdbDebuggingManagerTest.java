@@ -36,8 +36,6 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
-import com.android.server.FgThread;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +46,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -88,6 +91,7 @@ public final class AdbDebuggingManagerTest {
     private long mOriginalAllowedConnectionTime;
     private File mAdbKeyXmlFile;
     private File mAdbKeyFile;
+    private FakeTicker mFakeTicker;
 
     @Before
     public void setUp() throws Exception {
@@ -96,14 +100,25 @@ public final class AdbDebuggingManagerTest {
         if (mAdbKeyFile.exists()) {
             mAdbKeyFile.delete();
         }
-        mManager = new AdbDebuggingManager(mContext, ADB_CONFIRM_COMPONENT, mAdbKeyFile);
         mAdbKeyXmlFile = new File(mContext.getFilesDir(), "test_adb_keys.xml");
         if (mAdbKeyXmlFile.exists()) {
             mAdbKeyXmlFile.delete();
         }
+
+        mFakeTicker = new FakeTicker();
+        // Set the ticker time to October 22, 2008 (the day the T-Mobile G1 was released)
+        mFakeTicker.advance(1224658800L);
+
         mThread = new AdbDebuggingThreadTest();
-        mKeyStore = mManager.new AdbKeyStore(mAdbKeyXmlFile);
-        mHandler = mManager.new AdbDebuggingHandler(FgThread.get().getLooper(), mThread, mKeyStore);
+        mManager = new AdbDebuggingManager(
+                mContext, ADB_CONFIRM_COMPONENT, mAdbKeyFile, mAdbKeyXmlFile, mThread, mFakeTicker);
+
+        mHandler = mManager.mHandler;
+        mThread.setHandler(mHandler);
+
+        mHandler.initKeyStore();
+        mKeyStore = mHandler.mAdbKeyStore;
+
         mOriginalAllowedConnectionTime = mKeyStore.getAllowedConnectionTime();
         mBlockingQueue = new ArrayBlockingQueue<>(1);
     }
@@ -122,7 +137,7 @@ public final class AdbDebuggingManagerTest {
     private void setAllowedConnectionTime(long connectionTime) {
         Settings.Global.putLong(mContext.getContentResolver(),
                 Settings.Global.ADB_ALLOWED_CONNECTION_TIME, connectionTime);
-    };
+    }
 
     @Test
     public void testAllowNewKeyOnce() throws Exception {
@@ -158,20 +173,15 @@ public final class AdbDebuggingManagerTest {
         // Allow a connection from a new key with the 'Always allow' option selected.
         runAdbTest(TEST_KEY_1, true, true, false);
 
-        // Get the last connection time for the currently connected key to verify that it is updated
-        // after the disconnect.
-        long lastConnectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
-
-        // Sleep for a small amount of time to ensure a difference can be observed in the last
-        // connection time after a disconnect.
-        Thread.sleep(10);
+        // Advance the clock by 10ms to ensure there's a difference
+        mFakeTicker.advance(10 * 1_000_000);
 
         // Send the disconnect message for the currently connected key to trigger an update of the
         // last connection time.
         disconnectKey(TEST_KEY_1);
-        assertNotEquals(
+        assertEquals(
                 "The last connection time was not updated after the disconnect",
-                lastConnectionTime,
+                mFakeTicker.currentTimeMillis(),
                 mKeyStore.getLastConnectionTime(TEST_KEY_1));
     }
 
@@ -244,8 +254,8 @@ public final class AdbDebuggingManagerTest {
         // Get the current last connection time for comparison after the scheduled job is run
         long lastConnectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
 
-        // Sleep a small amount of time to ensure that the updated connection time changes
-        Thread.sleep(10);
+        // Advance a small amount of time to ensure that the updated connection time changes
+        mFakeTicker.advance(10);
 
         // Send a message to the handler to update the last connection time for the active key
         updateKeyStore();
@@ -269,13 +279,13 @@ public final class AdbDebuggingManagerTest {
         persistKeyStore();
         assertTrue(
                 "The key with the 'Always allow' option selected was not persisted in the keystore",
-                mManager.new AdbKeyStore(mAdbKeyXmlFile).isKeyAuthorized(TEST_KEY_1));
+                mManager.new AdbKeyStore().isKeyAuthorized(TEST_KEY_1));
 
         // Get the current last connection time to ensure it is updated in the persisted keystore.
         long lastConnectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
 
-        // Sleep a small amount of time to ensure the last connection time is updated.
-        Thread.sleep(10);
+        // Advance a small amount of time to ensure the last connection time is updated.
+        mFakeTicker.advance(10);
 
         // Send a message to the handler to update the last connection time for the active key.
         updateKeyStore();
@@ -286,7 +296,7 @@ public final class AdbDebuggingManagerTest {
         assertNotEquals(
                 "The last connection time in the key file was not updated after the update "
                         + "connection time message", lastConnectionTime,
-                mManager.new AdbKeyStore(mAdbKeyXmlFile).getLastConnectionTime(TEST_KEY_1));
+                mManager.new AdbKeyStore().getLastConnectionTime(TEST_KEY_1));
         // Verify that the key is in the adb_keys file
         assertTrue("The key was not in the adb_keys file after persisting the keystore",
                 isKeyInFile(TEST_KEY_1, mAdbKeyFile));
@@ -327,8 +337,8 @@ public final class AdbDebuggingManagerTest {
         // Set the allowed window to a small value to ensure the time is beyond the allowed window.
         setAllowedConnectionTime(1);
 
-        // Sleep for a small amount of time to exceed the allowed window.
-        Thread.sleep(10);
+        // Advance a small amount of time to exceed the allowed window.
+        mFakeTicker.advance(10);
 
         // The AdbKeyStore has a method to get the time of the next key expiration to ensure the
         // scheduled job runs at the time of the next expiration or after 24 hours, whichever occurs
@@ -478,9 +488,12 @@ public final class AdbDebuggingManagerTest {
         // Set the current expiration time to a minute from expiration and verify this new value is
         // returned.
         final long newExpirationTime = 60000;
-        mKeyStore.setLastConnectionTime(TEST_KEY_1,
-                System.currentTimeMillis() - Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME
-                        + newExpirationTime, true);
+        mKeyStore.setLastConnectionTime(
+                TEST_KEY_1,
+                mFakeTicker.currentTimeMillis()
+                        - Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME
+                        + newExpirationTime,
+                true);
         expirationTime = mKeyStore.getNextExpirationTime();
         if (Math.abs(expirationTime - newExpirationTime) > epsilon) {
             fail("The expiration time for a key about to expire, " + expirationTime
@@ -525,7 +538,7 @@ public final class AdbDebuggingManagerTest {
         // Get the last connection time for the key to verify that it is updated when the connected
         // key message is sent.
         long connectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
-        Thread.sleep(10);
+        mFakeTicker.advance(10);
         mHandler.obtainMessage(AdbDebuggingManager.AdbDebuggingHandler.MESSAGE_ADB_CONNECTED_KEY,
                 TEST_KEY_1).sendToTarget();
         flushHandlerQueue();
@@ -536,7 +549,7 @@ public final class AdbDebuggingManagerTest {
 
         // Verify that the scheduled job updates the connection time of the key.
         connectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
-        Thread.sleep(10);
+        mFakeTicker.advance(10);
         updateKeyStore();
         assertNotEquals(
                 "The connection time for the key must be updated when the update keystore message"
@@ -545,7 +558,7 @@ public final class AdbDebuggingManagerTest {
 
         // Verify that the connection time is updated when the key is disconnected.
         connectionTime = mKeyStore.getLastConnectionTime(TEST_KEY_1);
-        Thread.sleep(10);
+        mFakeTicker.advance(10);
         disconnectKey(TEST_KEY_1);
         assertNotEquals(
                 "The connection time for the key must be updated when the disconnected message is"
@@ -628,11 +641,11 @@ public final class AdbDebuggingManagerTest {
         setAllowedConnectionTime(Settings.Global.DEFAULT_ADB_ALLOWED_CONNECTION_TIME);
 
         // The untracked keys should be added to the keystore as part of the constructor.
-        AdbDebuggingManager.AdbKeyStore adbKeyStore = mManager.new AdbKeyStore(mAdbKeyXmlFile);
+        AdbDebuggingManager.AdbKeyStore adbKeyStore = mManager.new AdbKeyStore();
 
         // Verify that the connection time for each test key is within a small value of the current
         // time.
-        long time = System.currentTimeMillis();
+        long time = mFakeTicker.currentTimeMillis();
         for (String key : testKeys) {
             long connectionTime = adbKeyStore.getLastConnectionTime(key);
             if (Math.abs(connectionTime - connectionTime) > epsilon) {
@@ -651,11 +664,11 @@ public final class AdbDebuggingManagerTest {
         runAdbTest(TEST_KEY_1, true, true, false);
         runAdbTest(TEST_KEY_2, true, true, false);
 
-        // Sleep a small amount of time to ensure the connection time is updated by the scheduled
+        // Advance a small amount of time to ensure the connection time is updated by the scheduled
         // job.
         long connectionTime1 = mKeyStore.getLastConnectionTime(TEST_KEY_1);
         long connectionTime2 = mKeyStore.getLastConnectionTime(TEST_KEY_2);
-        Thread.sleep(10);
+        mFakeTicker.advance(10);
         updateKeyStore();
         assertNotEquals(
                 "The connection time for test key 1 must be updated after the scheduled job runs",
@@ -669,7 +682,7 @@ public final class AdbDebuggingManagerTest {
         disconnectKey(TEST_KEY_2);
         connectionTime1 = mKeyStore.getLastConnectionTime(TEST_KEY_1);
         connectionTime2 = mKeyStore.getLastConnectionTime(TEST_KEY_2);
-        Thread.sleep(10);
+        mFakeTicker.advance(10);
         updateKeyStore();
         assertNotEquals(
                 "The connection time for test key 1 must be updated after another key is "
@@ -686,8 +699,6 @@ public final class AdbDebuggingManagerTest {
         // to clear the adb authorizations when adb is disabled after a boot a NullPointerException
         // was thrown as deleteKeyStore is invoked against the key store. This test ensures the
         // key store can be successfully cleared when adb is disabled.
-        mHandler = mManager.new AdbDebuggingHandler(FgThread.get().getLooper());
-
         clearKeyStore();
     }
 
@@ -723,10 +734,102 @@ public final class AdbDebuggingManagerTest {
 
         // Now remove one of the keys and make sure the other key is still there
         mKeyStore.removeKey(TEST_KEY_1);
+        // Wait for the handler queue to receive the MESSAGE_ADB_PERSIST_KEYSTORE
+        flushHandlerQueue();
+
         assertFalse("The key was still in the adb_keys file after removing the key",
                 isKeyInFile(TEST_KEY_1, mAdbKeyFile));
         assertTrue("The key was not in the adb_keys file after removing a different key",
                 isKeyInFile(TEST_KEY_2, mAdbKeyFile));
+    }
+
+    @Test
+    public void testAdbKeyStore_addDuplicateKey_doesNotAddDuplicateToAdbKeyFile() throws Exception {
+        setAllowedConnectionTime(0);
+
+        runAdbTest(TEST_KEY_1, true, true, false);
+        persistKeyStore();
+        runAdbTest(TEST_KEY_1, true, true, false);
+        persistKeyStore();
+
+        assertEquals("adb_keys contains duplicate keys", 1, adbKeyFileKeys(mAdbKeyFile).size());
+    }
+
+    @Test
+    public void testAdbKeyStore_adbTempKeysFile_readsLastConnectionTimeFromXml() throws Exception {
+        long insertTime = mFakeTicker.currentTimeMillis();
+        runAdbTest(TEST_KEY_1, true, true, false);
+        persistKeyStore();
+
+        mFakeTicker.advance(10);
+        AdbDebuggingManager.AdbKeyStore newKeyStore = mManager.new AdbKeyStore();
+
+        assertEquals(
+                "KeyStore not populated from the XML file.",
+                insertTime,
+                newKeyStore.getLastConnectionTime(TEST_KEY_1));
+    }
+
+    @Test
+    public void test_notifyKeyFilesUpdated_filesDeletedRemovesPreviouslyAddedKey()
+            throws Exception {
+        runAdbTest(TEST_KEY_1, true, true, false);
+        persistKeyStore();
+
+        Files.delete(mAdbKeyXmlFile.toPath());
+        Files.delete(mAdbKeyFile.toPath());
+
+        mManager.notifyKeyFilesUpdated();
+        flushHandlerQueue();
+
+        assertFalse(
+                "Key is authorized after reloading deleted key files. Was state preserved?",
+                mKeyStore.isKeyAuthorized(TEST_KEY_1));
+    }
+
+    @Test
+    public void test_notifyKeyFilesUpdated_newKeyIsAuthorized() throws Exception {
+        runAdbTest(TEST_KEY_1, true, true, false);
+        persistKeyStore();
+
+        // Back up the existing key files
+        Path tempXmlFile = Files.createTempFile("adbKeyXmlFile", ".tmp");
+        Path tempAdbKeysFile = Files.createTempFile("adb_keys", ".tmp");
+        Files.copy(mAdbKeyXmlFile.toPath(), tempXmlFile, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(mAdbKeyFile.toPath(), tempAdbKeysFile, StandardCopyOption.REPLACE_EXISTING);
+
+        // Delete the existing key files
+        Files.delete(mAdbKeyXmlFile.toPath());
+        Files.delete(mAdbKeyFile.toPath());
+
+        // Notify the manager that adb key files have changed.
+        mManager.notifyKeyFilesUpdated();
+        flushHandlerQueue();
+
+        // Copy the files back
+        Files.copy(tempXmlFile, mAdbKeyXmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(tempAdbKeysFile, mAdbKeyFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        // Tell the manager that the key files have changed.
+        mManager.notifyKeyFilesUpdated();
+        flushHandlerQueue();
+
+        assertTrue(
+                "Key is not authorized after reloading key files.",
+                mKeyStore.isKeyAuthorized(TEST_KEY_1));
+    }
+
+    @Test
+    public void testAdbKeyStore_adbWifiConnect_storesBssidWhenAlwaysAllow() throws Exception {
+        String trustedNetwork = "My Network";
+        mKeyStore.addTrustedNetwork(trustedNetwork);
+        persistKeyStore();
+
+        AdbDebuggingManager.AdbKeyStore newKeyStore = mManager.new AdbKeyStore();
+
+        assertTrue(
+                "Persisted trusted network not found in new keystore instance.",
+                newKeyStore.isTrustedNetwork(trustedNetwork));
     }
 
     @Test
@@ -1030,28 +1133,27 @@ public final class AdbDebuggingManagerTest {
         if (key == null) {
             return false;
         }
+        return adbKeyFileKeys(keyFile).contains(key);
+    }
+
+    private static List<String> adbKeyFileKeys(File keyFile) throws Exception {
+        List<String> keys = new ArrayList<>();
         if (keyFile.exists()) {
             try (BufferedReader in = new BufferedReader(new FileReader(keyFile))) {
                 String currKey;
                 while ((currKey = in.readLine()) != null) {
-                    if (key.equals(currKey)) {
-                        return true;
-                    }
+                    keys.add(currKey);
                 }
             }
         }
-        return false;
+        return keys;
     }
 
     /**
      * Helper class that extends AdbDebuggingThread to receive the response from AdbDebuggingManager
      * indicating whether the key should be allowed to  connect.
      */
-    class AdbDebuggingThreadTest extends AdbDebuggingManager.AdbDebuggingThread {
-        AdbDebuggingThreadTest() {
-            mManager.super();
-        }
-
+    private class AdbDebuggingThreadTest extends AdbDebuggingManager.AdbDebuggingThread {
         @Override
         public void sendResponse(String msg) {
             TestResult result = new TestResult(TestResult.RESULT_RESPONSE_RECEIVED, msg);
@@ -1089,6 +1191,19 @@ public final class AdbDebuggingManagerTest {
         @Override
         public String toString() {
             return "{mReturnCode = " + mReturnCode + ", mMessage = " + mMessage + "}";
+        }
+    }
+
+    private static class FakeTicker implements AdbDebuggingManager.Ticker {
+        private long mCurrentTime;
+
+        private void advance(long milliseconds) {
+            mCurrentTime += milliseconds;
+        }
+
+        @Override
+        public long currentTimeMillis() {
+            return mCurrentTime;
         }
     }
 }

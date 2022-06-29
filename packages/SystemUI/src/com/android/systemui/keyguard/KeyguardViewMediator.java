@@ -112,6 +112,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -209,7 +210,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private static final int KEYGUARD_DONE_PENDING_TIMEOUT = 13;
     private static final int NOTIFY_STARTED_WAKING_UP = 14;
     private static final int NOTIFY_SCREEN_TURNED_ON = 15;
-    private static final int NOTIFY_SCREEN_TURNED_OFF = 16;
     private static final int NOTIFY_STARTED_GOING_TO_SLEEP = 17;
     private static final int SYSTEM_READY = 18;
     private static final int CANCEL_KEYGUARD_EXIT_ANIM = 19;
@@ -324,6 +324,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     // the properties of the keyguard
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final Lazy<NotificationShadeWindowController> mNotificationShadeWindowControllerLazy;
 
     /**
      * Last SIM state reported by the telephony system.
@@ -439,7 +440,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     private boolean mInGestureNavigationMode;
 
     private boolean mWakeAndUnlocking;
-    private IKeyguardDrawnCallback mDrawnCallback;
     private CharSequence mCustomMessage;
 
     /**
@@ -846,7 +846,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             KeyguardStateController keyguardStateController,
             Lazy<KeyguardUnlockAnimationController> keyguardUnlockAnimationControllerLazy,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
-            Lazy<NotificationShadeDepthController> notificationShadeDepthController) {
+            Lazy<NotificationShadeDepthController> notificationShadeDepthController,
+            Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy) {
         super(context);
         mFalsingCollector = falsingCollector;
         mLockPatternUtils = lockPatternUtils;
@@ -862,6 +863,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         mKeyguardDisplayManager = keyguardDisplayManager;
         dumpManager.registerDumpable(getClass().getName(), this);
         mDeviceConfig = deviceConfig;
+        mNotificationShadeWindowControllerLazy = notificationShadeWindowControllerLazy;
         mShowHomeOverLockscreen = mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 NAV_BAR_HANDLE_SHOW_OVER_LOCKSCREEN,
@@ -1260,7 +1262,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     }
 
     public void onScreenTurnedOff() {
-        notifyScreenTurnedOff();
         mUpdateMonitor.dispatchScreenTurnedOff();
     }
 
@@ -1484,9 +1485,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
     public void doKeyguardTimeout(Bundle options) {
         mHandler.removeMessages(KEYGUARD_TIMEOUT);
         Message msg = mHandler.obtainMessage(KEYGUARD_TIMEOUT, options);
-        // Treat these messages with priority - A call to timeout means the device should lock
-        // as soon as possible and not wait for other messages on the thread to process first.
-        mHandler.sendMessageAtFrontOfQueue(msg);
+        mHandler.sendMessage(msg);
     }
 
     /**
@@ -1656,26 +1655,17 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         mHandler.sendMessage(msg);
     }
 
-    private void notifyScreenTurnedOff() {
-        if (DEBUG) Log.d(TAG, "notifyScreenTurnedOff");
-        Message msg = mHandler.obtainMessage(NOTIFY_SCREEN_TURNED_OFF);
-        mHandler.sendMessage(msg);
-    }
-
     /**
      * Send message to keyguard telling it to show itself
      * @see #handleShow
      */
     private void showLocked(Bundle options) {
-        Trace.beginSection("KeyguardViewMediator#showLocked acquiring mShowKeyguardWakeLock");
+        Trace.beginSection("KeyguardViewMediator#showLocked aqcuiring mShowKeyguardWakeLock");
         if (DEBUG) Log.d(TAG, "showLocked");
         // ensure we stay awake until we are finished displaying the keyguard
         mShowKeyguardWakeLock.acquire();
         Message msg = mHandler.obtainMessage(SHOW, options);
-        // Treat these messages with priority - This call can originate from #doKeyguardTimeout,
-        // meaning the device should lock as soon as possible and not wait for other messages on
-        // the thread to process first.
-        mHandler.sendMessageAtFrontOfQueue(msg);
+        mHandler.sendMessage(msg);
         Trace.endSection();
     }
 
@@ -1849,9 +1839,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                     handleNotifyScreenTurnedOn();
                     Trace.endSection();
                     break;
-                case NOTIFY_SCREEN_TURNED_OFF:
-                    handleNotifyScreenTurnedOff();
-                    break;
                 case NOTIFY_STARTED_WAKING_UP:
                     Trace.beginSection(
                             "KeyguardViewMediator#handleMessage NOTIFY_STARTED_WAKING_UP");
@@ -1876,7 +1863,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 case KEYGUARD_TIMEOUT:
                     synchronized (KeyguardViewMediator.this) {
                         doKeyguardLocked((Bundle) msg.obj);
-                        notifyDefaultDisplayCallbacks(mShowing);
                     }
                     break;
                 case DISMISS:
@@ -1887,10 +1873,13 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                     Trace.beginSection(
                             "KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
-                    handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration,
-                            params.mApps, params.mWallpapers, params.mNonApps,
-                            params.mFinishedCallback);
-                    mFalsingCollector.onSuccessfulUnlock();
+                    mNotificationShadeWindowControllerLazy.get().batchApplyWindowLayoutParams(
+                            () -> {
+                                handleStartKeyguardExitAnimation(params.startTime,
+                                        params.fadeoutDuration, params.mApps, params.mWallpapers,
+                                        params.mNonApps, params.mFinishedCallback);
+                                mFalsingCollector.onSuccessfulUnlock();
+                            });
                     Trace.endSection();
                     break;
                 case CANCEL_KEYGUARD_EXIT_ANIM:
@@ -2188,10 +2177,12 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
                 mKeyguardGoingAwayRunnable.run();
             } else {
                 // TODO(bc-unlock): Fill parameters
-                handleStartKeyguardExitAnimation(
-                        SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
-                        mHideAnimation.getDuration(), null /* apps */,  null /* wallpapers */,
-                        null /* nonApps */, null /* finishedCallback */);
+                mNotificationShadeWindowControllerLazy.get().batchApplyWindowLayoutParams(() -> {
+                    handleStartKeyguardExitAnimation(
+                            SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
+                            mHideAnimation.getDuration(), null /* apps */, null /* wallpapers */,
+                            null /* nonApps */, null /* finishedCallback */);
+                });
             }
         }
         Trace.endSection();
@@ -2227,16 +2218,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             mHiding = false;
             IRemoteAnimationRunner runner = mKeyguardExitAnimationRunner;
             mKeyguardExitAnimationRunner = null;
-
-            if (mWakeAndUnlocking && mDrawnCallback != null) {
-
-                // Hack level over 9000: To speed up wake-and-unlock sequence, force it to report
-                // the next draw from here so we don't have to wait for window manager to signal
-                // this to our ViewRootImpl.
-                mKeyguardViewControllerLazy.get().getViewRootImpl().setReportNextDraw();
-                notifyDrawn(mDrawnCallback);
-                mDrawnCallback = null;
-            }
 
             LatencyTracker.getInstance(mContext)
                     .onActionEnd(LatencyTracker.ACTION_LOCKSCREEN_UNLOCK);
@@ -2593,11 +2574,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
 
             mKeyguardViewControllerLazy.get().onScreenTurningOn();
             if (callback != null) {
-                if (mWakeAndUnlocking) {
-                    mDrawnCallback = callback;
-                } else {
-                    notifyDrawn(callback);
-                }
+                notifyDrawn(callback);
             }
         }
         Trace.endSection();
@@ -2610,13 +2587,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             mKeyguardViewControllerLazy.get().onScreenTurnedOn();
         }
         Trace.endSection();
-    }
-
-    private void handleNotifyScreenTurnedOff() {
-        synchronized (this) {
-            if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOff");
-            mDrawnCallback = null;
-        }
     }
 
     private void notifyDrawn(final IKeyguardDrawnCallback callback) {
@@ -2787,7 +2757,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
         pw.print("  mPendingLock: "); pw.println(mPendingLock);
         pw.print("  mPendingDrawnTasks: "); pw.println(mPendingDrawnTasks.get());
         pw.print("  mWakeAndUnlocking: "); pw.println(mWakeAndUnlocking);
-        pw.print("  mDrawnCallback: "); pw.println(mDrawnCallback);
     }
 
     /**
@@ -2886,7 +2855,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             for (int i = size - 1; i >= 0; i--) {
                 IKeyguardStateCallback callback = mKeyguardStateCallbacks.get(i);
                 try {
-                    callback.onShowingStateChanged(showing, KeyguardUpdateMonitor.getCurrentUser());
+                    callback.onShowingStateChanged(showing);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to call onShowingStateChanged", e);
                     if (e instanceof DeadObjectException) {
@@ -2920,7 +2889,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable,
             mKeyguardStateCallbacks.add(callback);
             try {
                 callback.onSimSecureStateChanged(mUpdateMonitor.isSimPinSecure());
-                callback.onShowingStateChanged(mShowing, KeyguardUpdateMonitor.getCurrentUser());
+                callback.onShowingStateChanged(mShowing);
                 callback.onInputRestrictedStateChanged(mInputRestricted);
                 callback.onTrustedChanged(mUpdateMonitor.getUserHasTrust(
                         KeyguardUpdateMonitor.getCurrentUser()));

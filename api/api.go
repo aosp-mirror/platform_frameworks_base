@@ -148,17 +148,18 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
-// This produces the same annotations.zip as framework-doc-stubs, but by using
-// outputs from individual modules instead of all the source code.
-func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
-	props := genruleProps{}
-	props.Name = proptools.StringPtr("sdk-annotations.zip")
-	props.Tools = []string{"merge_annotation_zips", "soong_zip"}
-	props.Out = []string{"annotations.zip"}
-	props.Cmd = proptools.StringPtr("$(location merge_annotation_zips) $(genDir)/out $(in) && " +
-		"$(location soong_zip) -o $(out) -C $(genDir)/out -D $(genDir)/out")
-	props.Srcs = append([]string{":android-non-updatable-doc-stubs{.annotations.zip}"}, createSrcs(modules, "{.public.annotations.zip}")...)
-	ctx.CreateModule(genrule.GenRuleFactory, &props)
+func createMergedPublicAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
+	props := fgProps{}
+	props.Name = proptools.StringPtr("all-modules-public-annotations")
+	props.Srcs = createSrcs(modules, "{.public.annotations.zip}")
+	ctx.CreateModule(android.FileGroupFactory, &props)
+}
+
+func createMergedSystemAnnotationsFilegroup(ctx android.LoadHookContext, modules []string) {
+	props := fgProps{}
+	props.Name = proptools.StringPtr("all-modules-system-annotations")
+	props.Srcs = createSrcs(modules, "{.system.annotations.zip}")
+	ctx.CreateModule(android.FileGroupFactory, &props)
 }
 
 func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
@@ -179,7 +180,7 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	// Note: order matters: first parameter is the full api-versions.xml
 	// after that the stubs files in any order
 	// stubs files are all modules that export API surfaces EXCEPT ART
-	props.Srcs = append([]string{":framework-doc-stubs{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
+	props.Srcs = append([]string{":api_versions_public{.api_versions.xml}"}, createSrcs(modules, ".stubs{.jar}")...)
 	props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
@@ -299,7 +300,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedFrameworkModuleLibStubs(ctx, bootclasspath)
 	createMergedFrameworkImpl(ctx, bootclasspath)
 
-	createMergedAnnotations(ctx, bootclasspath)
+	createMergedPublicAnnotationsFilegroup(ctx, bootclasspath)
+	createMergedSystemAnnotationsFilegroup(ctx, bootclasspath)
 
 	createFilteredApiVersions(ctx, bootclasspath)
 

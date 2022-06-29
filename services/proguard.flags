@@ -33,6 +33,11 @@
   public <init>(...);
 }
 
+# Accessed from com.android.compos APEX
+-keep,allowoptimization,allowaccessmodification class com.android.internal.art.ArtStatsLog {
+   public static void write(...);
+}
+
 # Binder interfaces
 -keep,allowoptimization,allowaccessmodification class * extends android.os.IInterface
 -keep,allowoptimization,allowaccessmodification class * extends android.os.IHwInterface

@@ -176,8 +176,9 @@ public class MobileRadioPowerCalculatorTest {
                 .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
 
         BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
+        // 10_000_000 micro-Coulomb * 1/1000 milli/micro * 1/3600 hour/second = 2.77778 mAh
         assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
-                .isWithin(PRECISION).of(4.31711);
+                .isWithin(PRECISION).of(2.77778);
         assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_MEASURED_ENERGY);
 

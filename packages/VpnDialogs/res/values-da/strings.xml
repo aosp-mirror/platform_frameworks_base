@@ -18,7 +18,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Forbindelsesanmodning"</string>
     <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> vil konfigurere en VPN-forbindelse, der giver appen mulighed for at registrere netværkstrafik. Du bør kun acceptere dette, hvis du har tillid til kilden. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; vises øverst på din skærm, når VPN-forbindelsen er aktiv."</string>
-    <string name="warning" product="tv" msgid="5188957997628124947">"<xliff:g id="APP">%s</xliff:g> anmoder om at konfigurere en VPN-forbindelse, der giver appen tilladelse til at holde øje med netværkstrafik. Du bør kun acceptere dette, hvis du har tillid til appen. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; vises på din skærm, når VPN-forbindelsen er aktiv."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN er tilsluttet"</string>
     <string name="session" msgid="6470628549473641030">"Session:"</string>
     <string name="duration" msgid="3584782459928719435">"Varighed:"</string>

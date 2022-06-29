@@ -123,7 +123,7 @@ public class TimingsTraceLogTest {
     public void testLogDuration() throws Exception {
         TimingsTraceLog log = new TimingsTraceLog(TAG, TRACE_TAG_APP, 10);
         log.logDuration("logro", 42);
-        verify((MockedVoidMethod) () -> Slog.d(eq(TAG), contains("logro took to complete: 42ms")));
+        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), contains("logro took to complete: 42ms")));
     }
 
     @Test
@@ -134,7 +134,7 @@ public class TimingsTraceLogTest {
 
         verify((MockedVoidMethod) () -> Trace.traceBegin(TRACE_TAG_APP, "test"));
         verify((MockedVoidMethod) () -> Trace.traceEnd(TRACE_TAG_APP));
-        verify((MockedVoidMethod) () -> Slog.d(eq(TAG), matches("test took to complete: \\dms")));
+        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("test took to complete: \\dms")));
     }
 
     @Test
@@ -149,8 +149,8 @@ public class TimingsTraceLogTest {
         verify((MockedVoidMethod) () -> Trace.traceBegin(TRACE_TAG_APP, "L2"));
         verify((MockedVoidMethod) () -> Trace.traceEnd(TRACE_TAG_APP), times(2)); // L1 and L2
 
-        verify((MockedVoidMethod) () -> Slog.d(eq(TAG), matches("L2 took to complete: \\d+ms")));
-        verify((MockedVoidMethod) () -> Slog.d(eq(TAG), matches("L1 took to complete: \\d+ms")));
+        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("L2 took to complete: \\d+ms")));
+        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("L1 took to complete: \\d+ms")));
     }
 
     @Test
@@ -170,9 +170,9 @@ public class TimingsTraceLogTest {
         verify((MockedVoidMethod) () -> Trace.traceBegin(TRACE_TAG_APP, "L3"));
         verify((MockedVoidMethod) () -> Trace.traceEnd(TRACE_TAG_APP), times(3));
 
-        verify((MockedVoidMethod) () -> Slog.d(eq(TAG), matches("L2 took to complete: \\d+ms")));
-        verify((MockedVoidMethod) () -> Slog.d(eq(TAG), matches("L1 took to complete: \\d+ms")));
-        verify((MockedVoidMethod) () -> Slog.d(eq(TAG), matches("L3 took to complete: \\d+ms")),
+        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("L2 took to complete: \\d+ms")));
+        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("L1 took to complete: \\d+ms")));
+        verify((MockedVoidMethod) () -> Slog.v(eq(TAG), matches("L3 took to complete: \\d+ms")),
                 never());
 
         verify((MockedVoidMethod) () -> Slog.w(TAG, "not tracing duration of 'L3' "

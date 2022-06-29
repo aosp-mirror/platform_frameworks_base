@@ -1642,7 +1642,7 @@
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Truyền"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Kết nối với thiết bị"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Truyền màn hình tới thiết bị"</string>
-    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Đang tìm kiếm thiết bị…"</string>
+    <string name="media_route_chooser_searching" msgid="6119673534251329535">"Đang tìm thiết bị…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Cài đặt"</string>
     <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Ngắt kết nối"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Đang quét..."</string>
@@ -1711,7 +1711,6 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ĐANG BẬT"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ĐANG TẮT"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Cho phép <xliff:g id="SERVICE">%1$s</xliff:g> toàn quyền kiểm soát thiết bị của bạn?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Nếu bạn bật <xliff:g id="SERVICE">%1$s</xliff:g>, thiết bị của bạn sẽ không dùng phương thức khóa màn hình để tăng cường mã hóa dữ liệu."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Bạn chỉ nên cấp toàn quyền kiểm soát cho những ứng dụng trợ giúp mình khi cần hỗ trợ tiếp cận, chứ không nên cấp cho hầu hết các ứng dụng."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Xem và điều khiển màn hình"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dịch vụ này có thể đọc toàn bộ nội dung trên màn hình và hiển thị nội dung trên các ứng dụng khác."</string>

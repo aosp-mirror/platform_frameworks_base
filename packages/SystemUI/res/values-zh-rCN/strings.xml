@@ -31,6 +31,10 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"自动旋转屏幕"</string>
     <string name="usb_device_permission_prompt" msgid="4414719028369181772">"要允许<xliff:g id="APPLICATION">%1$s</xliff:g>访问<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"是否允许<xliff:g id="APPLICATION">%1$s</xliff:g>访问<xliff:g id="USB_DEVICE">%2$s</xliff:g>？\n此应用未获得录音权限，但能通过此 USB 设备录制音频。"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"允许“<xliff:g id="APPLICATION">%1$s</xliff:g>”访问<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
+    <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"打开“<xliff:g id="APPLICATION">%1$s</xliff:g>”来处理<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
+    <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"此应用未获得录音权限，但能通过此 USB 设备录制音频。如果在此设备上使用“<xliff:g id="APPLICATION">%1$s</xliff:g>”，您可能无法听见来电、通知和闹钟的音效。"</string>
+    <string name="usb_audio_device_prompt" msgid="7944987408206252949">"如果在此设备上使用“<xliff:g id="APPLICATION">%1$s</xliff:g>”，您可能无法听见来电、通知和闹钟的音效。"</string>
     <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"要允许<xliff:g id="APPLICATION">%1$s</xliff:g>访问<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>吗？"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"要打开<xliff:g id="APPLICATION">%1$s</xliff:g>来处理<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"要打开<xliff:g id="APPLICATION">%1$s</xliff:g>来使用<xliff:g id="USB_DEVICE">%2$s</xliff:g>吗？\n此应用未获得录音权限，但能通过此 USB 设备录制音频。"</string>
@@ -338,7 +342,7 @@
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新开始"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"是，继续"</string>
     <string name="user_add_user_title" msgid="4172327541504825032">"要添加新用户吗？"</string>
-    <string name="user_add_user_message_short" msgid="2599370307878014791">"当您添加新用户时，该用户必须设置自己的空间。\n\n任何用户均可为其他所有用户更新应用。"</string>
+    <string name="user_add_user_message_short" msgid="2599370307878014791">"当您添加新用户后，该用户需要自行设置个人空间。\n\n任何用户都可以为所有其他用户更新应用。"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"已达到用户数上限"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="other">您最多可以添加 <xliff:g id="COUNT">%d</xliff:g> 位用户。</item>

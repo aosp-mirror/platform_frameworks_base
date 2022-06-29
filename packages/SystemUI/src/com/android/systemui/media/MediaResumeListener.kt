@@ -184,7 +184,8 @@ class MediaResumeListener @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        receivedSmartspaceCardLatency: Int
+        receivedSmartspaceCardLatency: Int,
+        isSsReactivated: Boolean
     ) {
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live

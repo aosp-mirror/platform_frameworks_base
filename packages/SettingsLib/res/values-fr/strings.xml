@@ -160,7 +160,7 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Aucun paramètre par défaut défini"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Paramètres de la synthèse vocale"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Sortie de la synthèse vocale"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Cadence"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Débit"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Vitesse à laquelle le texte est énoncé"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Ton"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Affecte le ton utilisé pour la synthèse vocale"</string>
@@ -208,7 +208,7 @@
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Les paramètres de partage de connexion ne sont pas disponibles pour cet utilisateur."</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Les paramètres de point d\'accès ne sont pas disponibles pour cet utilisateur."</string>
     <string name="enable_adb" msgid="8072776357237289039">"Débogage USB"</string>
-    <string name="enable_adb_summary" msgid="3711526030096574316">"Mode débogage lorsqu\'un câble USB est connecté"</string>
+    <string name="enable_adb_summary" msgid="3711526030096574316">"Mode de débogage en connexion USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Annuler autorisations pour débog. USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Débogage sans fil"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Mode de débogage en connexion Wi-Fi"</string>
@@ -504,7 +504,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes et rappels"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Autoriser à définir des alarmes et des rappels"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes et rappels"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autorisez cette appli à définir des alarmes et à programmer des actions à certaines heures. Elle s\'exécutera alors en arrière-plan, ce qui peut solliciter davantage la batterie.\n\nSi l\'autorisation est désactivée, les alarmes existantes et les événements programmés par l\'appli ne fonctionneront pas."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Autoriser cette appli à définir des alarmes et à programmer des actions à certaines heures. Elle s\'exécutera alors en arrière-plan, ce qui peut solliciter davantage la batterie.\n\nSi l\'autorisation est désactivée, les alarmes existantes et les événements programmés par l\'appli ne fonctionneront pas."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"définir, alarme, rappel, horloge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
@@ -605,4 +605,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet déconnecté"</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Pas d\'appels."</string>
+    <string name="bt_le_audio_scan_qr_code" msgid="3521809854780392679">"Scanner un code QR"</string>
+    <string name="bt_le_audio_scan_qr_code_scanner" msgid="4679500020630341107">"Pour commencer à écouter, centrez le code QR ci-dessous"</string>
+    <string name="bt_le_audio_qr_code_is_not_valid_format" msgid="6092191081849434734">"Le format de code QR n\'est pas valide"</string>
+    <string name="bt_le_audio_broadcast_dialog_title" msgid="5392738488989777074">"Arrêter la diffusion de <xliff:g id="APP_NAME">%1$s</xliff:g> ?"</string>
+    <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"Si vous diffusez <xliff:g id="SWITCHAPP">%1$s</xliff:g> ou que vous modifiez le résultat, votre annonce actuelle s\'arrêtera"</string>
+    <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Diffuser <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
+    <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Modifier le résultat"</string>
 </resources>

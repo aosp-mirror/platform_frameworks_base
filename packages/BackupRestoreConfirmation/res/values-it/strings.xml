@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Inserisci la tua password di crittografia dispositivo di seguito. Verrà utilizzata anche per crittografare l\'archivio di backup."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Inserisci una password da utilizzare per la crittografia dei dati di backup completi. Se non ne inserisci una, verrà utilizzata la tua password di backup corrente:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Se desideri crittografare tutti i dati di backup, inserisci una password qui di seguito:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Il dispositivo è criptato, quindi devi criptare il backup. Inserisci una password di seguito:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Se i dati di ripristino sono criptati, inserisci la password qui di seguito:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Avvio del backup..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Backup terminato"</string>

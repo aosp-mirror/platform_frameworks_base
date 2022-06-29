@@ -1294,45 +1294,46 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
     std::string defaultMsg = "Unknown Error";
 
     /* translate OS errors to Java API CryptoException errorCodes (which are positive) */
+    jint jerr = 0;
     switch (err) {
         case ERROR_DRM_NO_LICENSE:
-            err = gCryptoErrorCodes.cryptoErrorNoKey;
+            jerr = gCryptoErrorCodes.cryptoErrorNoKey;
             defaultMsg = "Crypto key not available";
             break;
         case ERROR_DRM_LICENSE_EXPIRED:
-            err = gCryptoErrorCodes.cryptoErrorKeyExpired;
+            jerr = gCryptoErrorCodes.cryptoErrorKeyExpired;
             defaultMsg = "License expired";
             break;
         case ERROR_DRM_RESOURCE_BUSY:
-            err = gCryptoErrorCodes.cryptoErrorResourceBusy;
+            jerr = gCryptoErrorCodes.cryptoErrorResourceBusy;
             defaultMsg = "Resource busy or unavailable";
             break;
         case ERROR_DRM_INSUFFICIENT_OUTPUT_PROTECTION:
-            err = gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection;
+            jerr = gCryptoErrorCodes.cryptoErrorInsufficientOutputProtection;
             defaultMsg = "Required output protections are not active";
             break;
         case ERROR_DRM_SESSION_NOT_OPENED:
-            err = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
+            jerr = gCryptoErrorCodes.cryptoErrorSessionNotOpened;
             defaultMsg = "Attempted to use a closed session";
             break;
         case ERROR_DRM_INSUFFICIENT_SECURITY:
-            err = gCryptoErrorCodes.cryptoErrorInsufficientSecurity;
+            jerr = gCryptoErrorCodes.cryptoErrorInsufficientSecurity;
             defaultMsg = "Required security level is not met";
             break;
         case ERROR_DRM_CANNOT_HANDLE:
-            err = gCryptoErrorCodes.cryptoErrorUnsupportedOperation;
+            jerr = gCryptoErrorCodes.cryptoErrorUnsupportedOperation;
             defaultMsg = "Operation not supported in this configuration";
             break;
         case ERROR_DRM_FRAME_TOO_LARGE:
-            err = gCryptoErrorCodes.cryptoErrorFrameTooLarge;
+            jerr = gCryptoErrorCodes.cryptoErrorFrameTooLarge;
             defaultMsg = "Decrytped frame exceeds size of output buffer";
             break;
         case ERROR_DRM_SESSION_LOST_STATE:
-            err = gCryptoErrorCodes.cryptoErrorLostState;
+            jerr = gCryptoErrorCodes.cryptoErrorLostState;
             defaultMsg = "Session state was lost, open a new session and retry";
             break;
         default:  /* Other negative DRM error codes go out best-effort. */
-            err = MediaErrorToJavaError(err);
+            jerr = MediaErrorToJavaError(err);
             defaultMsg = StrCryptoError(err);
             break;
     }
@@ -1344,7 +1345,7 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
     jstring msgObj = env->NewStringUTF(msgStr.c_str());
 
     jthrowable exception =
-        (jthrowable)env->NewObject(clazz.get(), constructID, err, msgObj);
+        (jthrowable)env->NewObject(clazz.get(), constructID, jerr, msgObj);
 
     env->Throw(exception);
 }

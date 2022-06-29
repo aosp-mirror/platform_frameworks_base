@@ -1724,16 +1724,15 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vai izmantot pieejamības saīsni?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kad īsinājumtaustiņš ir ieslēgts, nospiežot abas skaļuma pogas un 3 sekundes turot tās, tiks aktivizēta pieejamības funkcija."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Vai ieslēgt pieejamības funkciju saīsni?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Turot nospiestus abus skaļuma taustiņus dažas sekundes, tiek ieslēgtas pieejamības funkcijas. Tas var mainīt ierīces darbību.\n\nPašreizējās funkcijas:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAtlasītās funkcijas varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Turot nospiestas abas skaļuma pogas dažas sekundes, tiek ieslēgtas pieejamības funkcijas. Tas var mainīt ierīces darbību.\n\nPašreizējās funkcijas:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAtlasītās funkcijas varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="1909518473488345266">"Vai ieslēgt <xliff:g id="SERVICE">%1$s</xliff:g> saīsni?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Turot nospiestus abus skaļuma taustiņus dažas sekundes, tiek ieslēgta pieejamības funkcija <xliff:g id="SERVICE">%1$s</xliff:g>. Tas var mainīt ierīces darbību.\n\nŠo saīsni uz citu funkciju varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Turot nospiestas abas skaļuma pogas dažas sekundes, tiek ieslēgta pieejamības funkcija <xliff:g id="SERVICE">%1$s</xliff:g>. Tas var mainīt ierīces darbību.\n\nŠo saīsni uz citu funkciju varat mainīt šeit: Iestatījumi &gt; Pieejamība."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ieslēgt"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Neieslēgt"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"IESLĒGTA"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"IZSLĒGTA"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vai atļaut pakalpojumam <xliff:g id="SERVICE">%1$s</xliff:g> pilnībā kontrolēt jūsu ierīci?"</string>
-    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ja ieslēgsiet pakalpojumu <xliff:g id="SERVICE">%1$s</xliff:g>, ierīce neizmantos ekrāna bloķēšanu datu šifrēšanas uzlabošanai."</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pilnīga kontrole ir piemērota lietotnēm, kas nepieciešamas lietotājiem ar īpašām vajadzībām, taču ne lielākajai daļai lietotņu."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skatīt un pārvaldīt ekrānu"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Tā var nolasīt visu ekrānā esošo saturu un attēlot saturu citām lietotnēm."</string>
@@ -1743,7 +1742,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Neatļaut"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Pieskarieties funkcijai, lai sāktu to izmantot"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Izvēlieties funkcijas, ko izmantot ar pieejamības pogu"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Izvēlieties funkcijas, ko izmantot ar skaļuma pogu īsinājumtaustiņu"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Izvēlieties funkcijas, ko izmantot ar skaļuma pogu saīsni"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> ir izslēgts."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediģēt īsinājumtaustiņus"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gatavs"</string>
@@ -1755,7 +1754,7 @@
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Papildu aptumšošana"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika ieslēgts."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika izslēgts."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Lai izmantotu pakalpojumu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, nospiediet abus skaļuma taustiņus un turiet tos trīs sekundes."</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Lai izmantotu pakalpojumu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, nospiediet abus skaļuma pogas un turiet tos trīs sekundes."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Izvēlieties funkciju, ko izmantot, kad pieskaraties pieejamības pogai."</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Izvēlieties funkciju, ko izmantot ar pieejamības žestu (vilkšana ar diviem pirkstiem augšup no ekrāna apakšdaļas)."</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Izvēlieties funkciju, ko izmantot ar pieejamības žestu (vilkšana ar trīs pirkstiem augšup no ekrāna apakšdaļas)."</string>

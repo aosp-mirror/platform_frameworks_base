@@ -83,6 +83,9 @@ public abstract class ClientTransactionHandler {
     /** Set current process state. */
     public abstract void updateProcessState(int processState, boolean fromIpc);
 
+    /** Count how many activities are launching. */
+    public abstract void countLaunchingActivities(int num);
+
     // Execute phase related logic and handlers. Methods here execute actual lifecycle transactions
     // and deliver callbacks.
 
@@ -139,7 +142,7 @@ public abstract class ClientTransactionHandler {
     public abstract void performRestartActivity(@NonNull ActivityClientRecord r, boolean start);
 
     /** Set pending activity configuration in case it will be updated by other transaction item. */
-    public abstract void updatePendingActivityConfiguration(@NonNull ActivityClientRecord r,
+    public abstract void updatePendingActivityConfiguration(@NonNull IBinder token,
             Configuration overrideConfig);
 
     /** Deliver activity (override) configuration change. */
@@ -187,26 +190,6 @@ public abstract class ClientTransactionHandler {
     /** Apply addition adjustments to override display information. */
     public abstract void handleFixedRotationAdjustments(IBinder token,
             FixedRotationAdjustments fixedRotationAdjustments);
-
-    /**
-     * Add {@link ActivityClientRecord} that is preparing to be launched.
-     * @param token Activity token.
-     * @param activity An initialized instance of {@link ActivityClientRecord} to use during launch.
-     */
-    public abstract void addLaunchingActivity(IBinder token, ActivityClientRecord activity);
-
-    /**
-     * Get {@link ActivityClientRecord} that is preparing to be launched.
-     * @param token Activity token.
-     * @return An initialized instance of {@link ActivityClientRecord} to use during launch.
-     */
-    public abstract ActivityClientRecord getLaunchingActivity(IBinder token);
-
-    /**
-     * Remove {@link ActivityClientRecord} from the launching activity list.
-     * @param token Activity token.
-     */
-    public abstract void removeLaunchingActivity(IBinder token);
 
     /**
      * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the
