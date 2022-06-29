@@ -8042,11 +8042,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Horizontal position
         int offsetX = 0;
         if (parentBounds.width() != screenResolvedBounds.width()) {
-            if (screenResolvedBounds.width() >= parentAppBounds.width()) {
-                // If resolved bounds overlap with insets, center within app bounds.
-                offsetX = getCenterOffset(
-                        parentAppBounds.width(), screenResolvedBounds.width());
-            } else {
+            if (screenResolvedBounds.width() <= parentAppBounds.width()) {
                 float positionMultiplier =
                         mLetterboxUiController.getHorizontalPositionMultiplier(
                                 newParentConfiguration);
@@ -8058,11 +8054,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Vertical position
         int offsetY = 0;
         if (parentBounds.height() != screenResolvedBounds.height()) {
-            if (screenResolvedBounds.height() >= parentAppBounds.height()) {
-                // If resolved bounds overlap with insets, center within app bounds.
-                offsetY = getCenterOffset(
-                        parentAppBounds.height(), screenResolvedBounds.height());
-            } else {
+            if (screenResolvedBounds.height() <= parentAppBounds.height()) {
                 float positionMultiplier =
                         mLetterboxUiController.getVerticalPositionMultiplier(
                                 newParentConfiguration);
@@ -8078,6 +8070,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             offsetBounds(resolvedConfig, dx, dy);
         } else {
             offsetBounds(resolvedConfig, offsetX, offsetY);
+        }
+
+        // If the top is aligned with parentAppBounds add the vertical insets back so that the app
+        // content aligns with the status bar
+        if (resolvedConfig.windowConfiguration.getAppBounds().top == parentAppBounds.top) {
+            resolvedConfig.windowConfiguration.getBounds().top = parentBounds.top;
+            if (mSizeCompatBounds != null) {
+                mSizeCompatBounds.top = parentBounds.top;
+            }
         }
 
         // Since bounds has changed, the configuration needs to be computed accordingly.
@@ -8457,7 +8458,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Above coordinates are in "@" space, now place "*" and "#" to screen space.
         final boolean fillContainer = resolvedBounds.equals(containingBounds);
         final int screenPosX = fillContainer ? containerBounds.left : containerAppBounds.left;
-        final int screenPosY  = fillContainer ? containerBounds.top : containerAppBounds.top;
+        final int screenPosY = fillContainer ? containerBounds.top : containerAppBounds.top;
 
         if (screenPosX != 0 || screenPosY != 0) {
             if (mSizeCompatBounds != null) {
@@ -8803,24 +8804,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Also account for the insets (e.g. display cutouts, navigation bar), which will be
         // clipped away later in {@link Task#computeConfigResourceOverrides()}, i.e., the out
         // bounds are the app bounds restricted by aspect ratio + clippable insets. Otherwise,
-        // the app bounds would end up too small.
+        // the app bounds would end up too small. To achieve this we will also add clippable insets
+        // when the corresponding dimension fully fills the parent
+
         int right = activityWidth + containingAppBounds.left;
+        int left = containingAppBounds.left;
         if (right >= containingAppBounds.right) {
-            right += containingBounds.right - containingAppBounds.right;
+            right = containingBounds.right;
+            left = containingBounds.left;
         }
         int bottom = activityHeight + containingAppBounds.top;
+        int top = containingAppBounds.top;
         if (bottom >= containingAppBounds.bottom) {
-            bottom += containingBounds.bottom - containingAppBounds.bottom;
+            bottom = containingBounds.bottom;
+            top = containingBounds.top;
         }
-        outBounds.set(containingBounds.left, containingBounds.top, right, bottom);
-
-        // If the bounds are restricted by fixed aspect ratio, then out bounds should be put in the
-        // container app bounds. Otherwise the entire container bounds are available.
-        if (!outBounds.equals(containingBounds)) {
-            // The horizontal position should not cover insets (e.g. display cutout).
-            outBounds.left = containingAppBounds.left;
-        }
-
+        outBounds.set(left, top, right, bottom);
         return true;
     }
 
