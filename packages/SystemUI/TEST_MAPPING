@@ -52,6 +52,17 @@
       ]
     },
     {
+      "name": "SystemUIGoogleScreenshotTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
       // Permission indicators
       "name": "CtsPermission4TestCases",
       "options": [
