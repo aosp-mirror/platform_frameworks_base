@@ -31,13 +31,11 @@ import android.os.ResultReceiver;
 import android.util.Log;
 import android.view.InputChannel;
 import android.view.MotionEvent;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodSession;
 import android.view.inputmethod.InputMethodSubtype;
-import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
@@ -98,9 +96,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
      *
      * <p>This field must be set and cleared only from the binder thread(s), where the system
      * guarantees that {@link #bindInput(InputBinding)},
-     * {@link #startInput(IBinder, IRemoteInputConnection, int, EditorInfo, boolean, boolean)}, and
-     * {@link #unbindInput()} are called with the same order as the original calls
-     * in {@link com.android.server.inputmethod.InputMethodManagerService}.
+     * {@link #startInput(IInputMethod.StartInputParams)}, and {@link #unbindInput()} are called
+     * with the same order as the original calls in
+     * {@link com.android.server.inputmethod.InputMethodManagerService}.
      * See {@link IBinder#FLAG_ONEWAY} for detailed semantics.</p>
      */
     @Nullable
@@ -194,16 +192,10 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 return;
             case DO_START_INPUT: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                final IBinder startInputToken = (IBinder) args.arg1;
-                final InputConnection ic = (InputConnection) args.arg2;
-                final EditorInfo info = (EditorInfo) args.arg3;
-                final ImeOnBackInvokedDispatcher imeDispatcher =
-                        (ImeOnBackInvokedDispatcher) args.arg4;
-                final boolean restarting = args.argi1 == 1;
-                @InputMethodNavButtonFlags
-                final int navButtonFlags = args.argi2;
-                inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken,
-                        navButtonFlags, imeDispatcher);
+                final InputConnection inputConnection = (InputConnection) args.arg1;
+                final IInputMethod.StartInputParams params =
+                        (IInputMethod.StartInputParams) args.arg2;
+                inputMethod.dispatchStartInput(inputConnection, params);
                 args.recycle();
                 return;
             }
@@ -345,28 +337,19 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void startInput(IBinder startInputToken, IRemoteInputConnection inputConnection,
-            EditorInfo editorInfo, boolean restarting,
-            @InputMethodNavButtonFlags int navButtonFlags,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+    public void startInput(@NonNull IInputMethod.StartInputParams params) {
         if (mCancellationGroup == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
 
-        editorInfo.makeCompatible(mTargetSdkVersion);
+        params.editorInfo.makeCompatible(mTargetSdkVersion);
 
-        final InputConnection ic = inputConnection == null ? null
-                : new RemoteInputConnection(mTarget, inputConnection, mCancellationGroup);
+        final InputConnection ic = params.remoteInputConnection == null ? null
+                : new RemoteInputConnection(mTarget, params.remoteInputConnection,
+                        mCancellationGroup);
 
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = startInputToken;
-        args.arg2 = ic;
-        args.arg3 = editorInfo;
-        args.argi1 = restarting ? 1 : 0;
-        args.argi2 = navButtonFlags;
-        args.arg4 = imeDispatcher;
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_START_INPUT, args));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_START_INPUT, ic, params));
     }
 
     @BinderThread

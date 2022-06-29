@@ -144,6 +144,7 @@ import android.window.WindowMetricsHelper;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.ImeTracing;
@@ -821,25 +822,23 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public final void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
-                @NonNull EditorInfo editorInfo, boolean restarting,
-                @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags,
-                @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-            mPrivOps.reportStartInputAsync(startInputToken);
-            mNavigationBarController.onNavButtonFlagsChanged(navButtonFlags);
-            if (restarting) {
-                restartInput(inputConnection, editorInfo);
+        public final void dispatchStartInput(@Nullable InputConnection inputConnection,
+                @NonNull IInputMethod.StartInputParams params) {
+            mPrivOps.reportStartInputAsync(params.startInputToken);
+            mNavigationBarController.onNavButtonFlagsChanged(params.navigationBarFlags);
+            if (params.restarting) {
+                restartInput(inputConnection, params.editorInfo);
             } else {
-                startInput(inputConnection, editorInfo);
+                startInput(inputConnection, params.editorInfo);
             }
             // Update the IME dispatcher last, so that the previously registered back callback
             // (if any) can be unregistered using the old dispatcher if {@link #doFinishInput()}
             // is called from {@link #startInput(InputConnection, EditorInfo)} or
             // {@link #restartInput(InputConnection, EditorInfo)}.
-            mImeDispatcher = imeDispatcher;
+            mImeDispatcher = params.imeDispatcher;
             if (mWindow != null) {
                 mWindow.getOnBackInvokedDispatcher().setImeOnBackInvokedDispatcher(
-                        imeDispatcher);
+                        params.imeDispatcher);
             }
         }
 
