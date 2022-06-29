@@ -29,6 +29,7 @@ import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.DeviceNotAssociatedException;
+import android.companion.ISystemDataTransferCallback;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.companion.datatransfer.SystemDataTransferRequest;
 import android.content.ComponentName;
@@ -167,8 +168,11 @@ public class SystemDataTransferProcessor {
     /**
      * Start system data transfer. It should first try to establish a secure channel and then sync
      * system data.
+     *
+     * TODO: execute callback when the transfer finishes successfully or with errors.
      */
-    public void startSystemDataTransfer(String packageName, int userId, int associationId) {
+    public void startSystemDataTransfer(String packageName, int userId, int associationId,
+            ISystemDataTransferCallback callback) {
         Slog.i(LOG_TAG, "Start system data transfer for package [" + packageName
                 + "] userId [" + userId + "] associationId [" + associationId + "]");
 

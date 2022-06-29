@@ -38,6 +38,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.MacAddress;
 import android.os.Handler;
+import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -964,12 +965,44 @@ public final class CompanionDeviceManager {
      * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
      *                      of the companion device recorded by CompanionDeviceManager
      * @throws DeviceNotAssociatedException Exception if the companion device is not associated
+     *
+     * @deprecated Use {@link #startSystemDataTransfer(int, Executor, OutcomeReceiver)} instead.
      */
+    @Deprecated
     @UserHandleAware
     public void startSystemDataTransfer(int associationId) throws DeviceNotAssociatedException {
         try {
             mService.startSystemDataTransfer(mContext.getOpPackageName(), mContext.getUserId(),
-                    associationId);
+                    associationId, null);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start system data transfer which has been previously approved by the user.
+     *
+     * <p>Before calling this method, the app needs to make sure there's a communication channel
+     * between two devices, and has prompted user consent dialogs built by one of these methods:
+     * {@link #buildPermissionTransferUserConsentIntent(int)}.
+     * The transfer may fail if the communication channel is disconnected during the transfer.</p>
+     *
+     * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
+     *                      of the companion device recorded by CompanionDeviceManager
+     * @param executor The executor which will be used to invoke the result callback.
+     * @param result The callback to notify the app of the result of the system data transfer.
+     * @throws DeviceNotAssociatedException Exception if the companion device is not associated
+     */
+    @UserHandleAware
+    public void startSystemDataTransfer(
+            int associationId,
+            @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, CompanionException> result)
+            throws DeviceNotAssociatedException {
+        try {
+            mService.startSystemDataTransfer(mContext.getOpPackageName(), mContext.getUserId(),
+                    associationId, new SystemDataTransferCallbackProxy(executor, result));
         } catch (RemoteException e) {
             ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
             throw e.rethrowFromSystemServer();
@@ -1042,6 +1075,27 @@ public final class CompanionDeviceManager {
         @Override
         public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
             mExecutor.execute(() -> mListener.onAssociationsChanged(associations));
+        }
+    }
+
+    private static class SystemDataTransferCallbackProxy extends ISystemDataTransferCallback.Stub {
+        private final Executor mExecutor;
+        private final OutcomeReceiver<Void, CompanionException> mCallback;
+
+        private SystemDataTransferCallbackProxy(Executor executor,
+                OutcomeReceiver<Void, CompanionException> callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onResult() {
+            mExecutor.execute(() -> mCallback.onResult(null));
+        }
+
+        @Override
+        public void onError(String error) {
+            mExecutor.execute(() -> mCallback.onError(new CompanionException(error)));
         }
     }
 
