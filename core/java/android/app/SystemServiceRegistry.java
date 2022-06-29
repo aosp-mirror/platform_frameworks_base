@@ -172,6 +172,7 @@ import android.os.IThermalService;
 import android.os.IUserManager;
 import android.os.IncidentManager;
 import android.os.PerformanceHintManager;
+import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.ServiceManager;
@@ -1363,6 +1364,14 @@ public final class SystemServiceRegistry {
                     public PermissionCheckerManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
                         return new PermissionCheckerManager(ctx.getOuterContext());
+                    }});
+
+        registerService(Context.PERMISSION_ENFORCER_SERVICE, PermissionEnforcer.class,
+                new CachedServiceFetcher<PermissionEnforcer>() {
+                    @Override
+                    public PermissionEnforcer createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new PermissionEnforcer(ctx.getOuterContext());
                     }});
 
         registerService(Context.DYNAMIC_SYSTEM_SERVICE, DynamicSystemManager.class,
