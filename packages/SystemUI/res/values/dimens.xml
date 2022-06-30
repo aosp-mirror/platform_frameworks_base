@@ -671,6 +671,9 @@
     <!-- The minimum background radius when swiping to a side for the camera / phone affordances. -->
     <dimen name="keyguard_affordance_min_background_radius">30dp</dimen>
 
+    <!-- The size of the touch targets on the keyguard for the affordances. -->
+    <dimen name="keyguard_affordance_touch_target_size">120dp</dimen>
+
     <!-- The grow amount for the camera and phone circles when hinting -->
     <dimen name="hint_grow_amount_sideways">60dp</dimen>
 
@@ -1048,6 +1051,7 @@
     <!-- Since the generic icon isn't circular, we need to scale it down so it still fits within
          the circular chip. -->
     <dimen name="media_ttt_generic_icon_size_receiver">70dp</dimen>
+    <dimen name="media_ttt_receiver_vert_translation">20dp</dimen>
 
     <!-- Window magnification -->
     <dimen name="magnification_border_drag_size">35dp</dimen>

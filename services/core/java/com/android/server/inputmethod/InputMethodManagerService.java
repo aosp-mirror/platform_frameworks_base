@@ -2108,9 +2108,24 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean isStylusHandwritingAvailable() {
+    public boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
+        if (UserHandle.getCallingUserId() != userId) {
+            mContext.enforceCallingPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, null);
+        }
+
         synchronized (ImfLock.class) {
-            return mBindingController.supportsStylusHandwriting();
+            if (userId == mSettings.getCurrentUserId()) {
+                return mBindingController.supportsStylusHandwriting();
+            }
+
+            //TODO(b/197848765): This can be optimized by caching multi-user methodMaps/methodList.
+            //TODO(b/210039666): use cache.
+            final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
+            final InputMethodSettings settings = new InputMethodSettings(mContext.getResources(),
+                    mContext.getContentResolver(), methodMap, userId, true);
+            final InputMethodInfo imi = methodMap.get(settings.getSelectedInputMethod());
+            return imi != null && imi.supportsStylusHandwriting();
         }
     }
 

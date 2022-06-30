@@ -56,6 +56,10 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_T
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_WARM_LAUNCH;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__NOT_LETTERBOXED_POSITION;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
 import static com.android.internal.util.FrameworkStatsLog.CAMERA_COMPAT_CONTROL_EVENT_REPORTED__EVENT__APPEARED_APPLY_TREATMENT;
@@ -1376,7 +1380,7 @@ class ActivityMetricsLogger {
             return;
         }
 
-        logAppCompatStateInternal(activity, state, packageUid, compatStateInfo);
+        logAppCompatStateInternal(activity, state, compatStateInfo);
     }
 
     /**
@@ -1416,18 +1420,61 @@ class ActivityMetricsLogger {
             }
         }
         if (activityToLog != null && stateToLog != APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE) {
-            logAppCompatStateInternal(activityToLog, stateToLog, packageUid, compatStateInfo);
+            logAppCompatStateInternal(activityToLog, stateToLog, compatStateInfo);
         }
     }
 
+    private static boolean isAppCompateStateChangedToLetterboxed(int state) {
+        return state == APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO
+                || state == APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION
+                || state == APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
+    }
+
     private void logAppCompatStateInternal(@NonNull ActivityRecord activity, int state,
-            int packageUid, PackageCompatStateInfo compatStateInfo) {
+             PackageCompatStateInfo compatStateInfo) {
         compatStateInfo.mLastLoggedState = state;
         compatStateInfo.mLastLoggedActivity = activity;
-        FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPAT_STATE_CHANGED, packageUid, state);
+        int packageUid = activity.info.applicationInfo.uid;
+
+        int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__NOT_LETTERBOXED_POSITION;
+        if (isAppCompateStateChangedToLetterboxed(state)) {
+            positionToLog = activity.mLetterboxUiController.getLetterboxPositionForLogging();
+        }
+        FrameworkStatsLog.write(FrameworkStatsLog.APP_COMPAT_STATE_CHANGED,
+                packageUid, state, positionToLog);
 
         if (DEBUG_METRICS) {
-            Slog.i(TAG, String.format("APP_COMPAT_STATE_CHANGED(%s, %s)", packageUid, state));
+            Slog.i(TAG, String.format("APP_COMPAT_STATE_CHANGED(%s, %s, %s)",
+                    packageUid, state, positionToLog));
+        }
+    }
+
+    /**
+     * Logs the changing of the letterbox position along with its package UID
+     */
+    void logLetterboxPositionChange(@NonNull ActivityRecord activity, int position) {
+        int packageUid = activity.info.applicationInfo.uid;
+        FrameworkStatsLog.write(FrameworkStatsLog.LETTERBOX_POSITION_CHANGED, packageUid, position);
+
+        if (!mPackageUidToCompatStateInfo.contains(packageUid)) {
+            // There is no last logged activity for this packageUid so we should not log the
+            // position change as we can only log the position change for the current activity
+            return;
+        }
+        final PackageCompatStateInfo compatStateInfo = mPackageUidToCompatStateInfo.get(packageUid);
+        final ActivityRecord lastLoggedActivity = compatStateInfo.mLastLoggedActivity;
+        if (activity != lastLoggedActivity) {
+            // Only log the position change for the current activity to be consistent with
+            // findAppCompatStateToLog and ensure that metrics for the state changes are computed
+            // correctly
+            return;
+        }
+        int state = activity.getAppCompatState();
+        logAppCompatStateInternal(activity, state, compatStateInfo);
+
+        if (DEBUG_METRICS) {
+            Slog.i(TAG, String.format("LETTERBOX_POSITION_CHANGED(%s, %s)",
+                    packageUid, position));
         }
     }
 

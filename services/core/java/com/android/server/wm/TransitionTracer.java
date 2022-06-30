@@ -79,7 +79,7 @@ public class TransitionTracer {
             final ProtoOutputStream outputStream = new ProtoOutputStream();
             final long transitionEntryToken = outputStream.start(TRANSITION);
 
-            outputStream.write(ID, transition.getDebugId());
+            outputStream.write(ID, transition.getSyncId());
             outputStream.write(TIMESTAMP, SystemClock.elapsedRealtimeNanos());
             outputStream.write(TRANSITION_TYPE, transition.mType);
             outputStream.write(STATE, transition.getState());
