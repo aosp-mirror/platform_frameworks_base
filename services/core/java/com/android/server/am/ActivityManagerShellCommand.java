@@ -24,6 +24,7 @@ import static android.app.WaitResult.launchStateToString;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
@@ -175,6 +176,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private String mAgent;  // Agent to attach on startup.
     private boolean mAttachAgentDuringBind;  // Whether agent should be attached late.
     private int mDisplayId;
+    private int mTaskDisplayAreaFeatureId;
     private int mWindowingMode;
     private int mActivityType;
     private int mTaskId;
@@ -368,6 +370,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mStreaming = false;
         mUserId = defUser;
         mDisplayId = INVALID_DISPLAY;
+        mTaskDisplayAreaFeatureId = FEATURE_UNDEFINED;
         mWindowingMode = WINDOWING_MODE_UNDEFINED;
         mActivityType = ACTIVITY_TYPE_UNDEFINED;
         mTaskId = INVALID_TASK_ID;
@@ -423,6 +426,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mReceiverPermission = getNextArgRequired();
                 } else if (opt.equals("--display")) {
                     mDisplayId = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--task-display-area-feature-id")) {
+                    mTaskDisplayAreaFeatureId = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--windowingMode")) {
                     mWindowingMode = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--activityType")) {
@@ -553,6 +558,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             if (mDisplayId != INVALID_DISPLAY) {
                 options = ActivityOptions.makeBasic();
                 options.setLaunchDisplayId(mDisplayId);
+            }
+            if (mTaskDisplayAreaFeatureId != FEATURE_UNDEFINED) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setLaunchTaskDisplayAreaFeatureId(mTaskDisplayAreaFeatureId);
             }
             if (mWindowingMode != WINDOWING_MODE_UNDEFINED) {
                 if (options == null) {
