@@ -17431,7 +17431,8 @@ public final class Settings {
              * Whether touch and hold to edit WF is enabled
              * @hide
              */
-            public static final String TOUCH_AND_HOLD_WATCH_FACE = "touch_and_hold_watchface";
+            public static final String GESTURE_TOUCH_AND_HOLD_WATCH_FACE_ENABLED =
+                    "gesture_touch_and_hold_watchface_enabled";
 
             /**
              * Whether bedtime mode is enabled.
