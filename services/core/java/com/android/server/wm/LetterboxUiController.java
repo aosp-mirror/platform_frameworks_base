@@ -21,6 +21,20 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__CENTER;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__LEFT;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__RIGHT;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__TOP;
+import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__UNKNOWN_POSITION;
+import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__BOTTOM_TO_CENTER;
+import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_BOTTOM;
+import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_LEFT;
+import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_RIGHT;
+import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_TOP;
+import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__LEFT_TO_CENTER;
+import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__RIGHT_TO_CENTER;
+import static com.android.internal.util.FrameworkStatsLog.LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__TOP_TO_CENTER;
 import static com.android.server.wm.ActivityRecord.computeAspectRatio;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -28,6 +42,12 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 import static com.android.server.wm.LetterboxConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTypeToString;
 
@@ -259,12 +279,26 @@ final class LetterboxUiController {
             return;
         }
 
+        int letterboxPositionForHorizontalReachability = mLetterboxConfiguration
+                .getLetterboxPositionForHorizontalReachability();
         if (mLetterbox.getInnerFrame().left > x) {
             // Moving to the next stop on the left side of the app window: right > center > left.
             mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextLeftStop();
+            int changeToLog =
+                    letterboxPositionForHorizontalReachability
+                            == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
+                                ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_LEFT
+                                : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__RIGHT_TO_CENTER;
+            logLetterboxPositionChange(changeToLog);
         } else if (mLetterbox.getInnerFrame().right < x) {
             // Moving to the next stop on the right side of the app window: left > center > right.
             mLetterboxConfiguration.movePositionForHorizontalReachabilityToNextRightStop();
+            int changeToLog =
+                    letterboxPositionForHorizontalReachability
+                            == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
+                                ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_RIGHT
+                                : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__LEFT_TO_CENTER;
+            logLetterboxPositionChange(changeToLog);
         }
 
         // TODO(197549949): Add animation for transition.
@@ -280,13 +314,26 @@ final class LetterboxUiController {
             // Only react to clicks at the top and bottom of the letterboxed app window.
             return;
         }
-
+        int letterboxPositionForVerticalReachability = mLetterboxConfiguration
+                .getLetterboxPositionForVerticalReachability();
         if (mLetterbox.getInnerFrame().top > y) {
             // Moving to the next stop on the top side of the app window: bottom > center > top.
             mLetterboxConfiguration.movePositionForVerticalReachabilityToNextTopStop();
+            int changeToLog =
+                    letterboxPositionForVerticalReachability
+                            == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
+                                ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_TOP
+                                : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__BOTTOM_TO_CENTER;
+            logLetterboxPositionChange(changeToLog);
         } else if (mLetterbox.getInnerFrame().bottom < y) {
             // Moving to the next stop on the bottom side of the app window: top > center > bottom.
             mLetterboxConfiguration.movePositionForVerticalReachabilityToNextBottomStop();
+            int changeToLog =
+                    letterboxPositionForVerticalReachability
+                            == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
+                                ? LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__CENTER_TO_BOTTOM
+                                : LETTERBOX_POSITION_CHANGED__POSITION_CHANGE__TOP_TO_CENTER;
+            logLetterboxPositionChange(changeToLog);
         }
 
         // TODO(197549949): Add animation for transition.
@@ -577,4 +624,63 @@ final class LetterboxUiController {
         return "UNKNOWN_REASON";
     }
 
+    private int letterboxHorizontalReachabilityPositionToLetterboxPosition(
+            @LetterboxConfiguration.LetterboxHorizontalReachabilityPosition int position) {
+        switch (position) {
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT:
+                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__LEFT;
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER:
+                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__CENTER;
+            case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT:
+                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__RIGHT;
+            default:
+                throw new AssertionError(
+                        "Unexpected letterbox horizontal reachability position type: "
+                                + position);
+        }
+    }
+
+    private int letterboxVerticalReachabilityPositionToLetterboxPosition(
+            @LetterboxConfiguration.LetterboxVerticalReachabilityPosition int position) {
+        switch (position) {
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP:
+                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__TOP;
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER:
+                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__CENTER;
+            case LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM:
+                return APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
+            default:
+                throw new AssertionError(
+                        "Unexpected letterbox vertical reachability position type: "
+                                + position);
+        }
+    }
+
+    int getLetterboxPositionForLogging() {
+        int positionToLog = APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__UNKNOWN_POSITION;
+        if (isHorizontalReachabilityEnabled()) {
+            int letterboxPositionForHorizontalReachability = getLetterboxConfiguration()
+                    .getLetterboxPositionForHorizontalReachability();
+            positionToLog = letterboxHorizontalReachabilityPositionToLetterboxPosition(
+                            letterboxPositionForHorizontalReachability);
+        } else if (isVerticalReachabilityEnabled()) {
+            int letterboxPositionForVerticalReachability = getLetterboxConfiguration()
+                    .getLetterboxPositionForVerticalReachability();
+            positionToLog = letterboxVerticalReachabilityPositionToLetterboxPosition(
+                            letterboxPositionForVerticalReachability);
+        }
+        return positionToLog;
+    }
+
+    private LetterboxConfiguration getLetterboxConfiguration() {
+        return mLetterboxConfiguration;
+    }
+
+    /**
+     * Logs letterbox position changes via {@link ActivityMetricsLogger#logLetterboxPositionChange}.
+     */
+    private void logLetterboxPositionChange(int letterboxPositionChange) {
+        mActivityRecord.mTaskSupervisor.getActivityMetricsLogger()
+                .logLetterboxPositionChange(mActivityRecord, letterboxPositionChange);
+    }
 }
