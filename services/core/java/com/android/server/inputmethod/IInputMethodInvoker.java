@@ -108,12 +108,17 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-            int configChanges, boolean stylusHwSupported,
-            @InputMethodNavButtonFlags int navButtonFlags) {
+    void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privilegedOperations,
+            int configChanges, boolean stylusHandWritingSupported,
+            @InputMethodNavButtonFlags int navigationBarFlags) {
+        final IInputMethod.InitParams params = new IInputMethod.InitParams();
+        params.token = token;
+        params.privilegedOperations = privilegedOperations;
+        params.configChanges = configChanges;
+        params.stylusHandWritingSupported = stylusHandWritingSupported;
+        params.navigationBarFlags = navigationBarFlags;
         try {
-            mTarget.initializeInternal(token, privOps, configChanges, stylusHwSupported,
-                    navButtonFlags);
+            mTarget.initializeInternal(params);
         } catch (RemoteException e) {
             logRemoteException(e);
         }

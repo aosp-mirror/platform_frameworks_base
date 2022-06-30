@@ -40,7 +40,6 @@ import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputMethod;
-import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IInputMethodSession;
 import com.android.internal.inputmethod.IInputMethodSessionCallback;
 import com.android.internal.inputmethod.IRemoteInputConnection;
@@ -172,17 +171,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 args.recycle();
                 return;
             }
-            case DO_INITIALIZE_INTERNAL: {
-                SomeArgs args = (SomeArgs) msg.obj;
-                try {
-                    inputMethod.initializeInternal((IBinder) args.arg1,
-                            (IInputMethodPrivilegedOperations) args.arg2, msg.arg1,
-                            (boolean) args.arg3, msg.arg2);
-                } finally {
-                    args.recycle();
-                }
+            case DO_INITIALIZE_INTERNAL:
+                inputMethod.initializeInternal((IInputMethod.InitParams) msg.obj);
                 return;
-            }
             case DO_SET_INPUT_CONTEXT: {
                 inputMethod.bindInput((InputBinding)msg.obj);
                 return;
@@ -293,11 +284,8 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-            int configChanges, boolean stylusHwSupported,
-            @InputMethodNavButtonFlags int navButtonFlags) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOO(DO_INITIALIZE_INTERNAL,
-                configChanges, navButtonFlags, token, privOps, stylusHwSupported));
+    public void initializeInternal(@NonNull IInputMethod.InitParams params) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_INITIALIZE_INTERNAL, params));
     }
 
     @BinderThread
