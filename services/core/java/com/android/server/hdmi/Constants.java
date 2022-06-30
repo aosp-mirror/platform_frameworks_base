@@ -337,6 +337,8 @@ final class Constants {
     static final int AUDIO_CODEC_WMAPRO = 0xE; // Support WMA-Pro
     static final int AUDIO_CODEC_MAX = 0xF;
 
+    static final int AUDIO_FORMAT_MASK = 0b0111_1000;
+
     @StringDef({
         AUDIO_DEVICE_ARC_IN,
         AUDIO_DEVICE_SPDIF,
