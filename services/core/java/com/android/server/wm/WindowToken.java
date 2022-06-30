@@ -362,7 +362,7 @@ class WindowToken extends WindowContainer<WindowState> {
     @Override
     void assignLayer(SurfaceControl.Transaction t, int layer) {
         if (mRoundedCornerOverlay) {
-            super.assignLayer(t, WindowManagerPolicy.SCREEN_DECOR_DISPLAY_OVERLAY_LAYER);
+            super.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
         } else {
             super.assignLayer(t, layer);
         }
@@ -372,7 +372,7 @@ class WindowToken extends WindowContainer<WindowState> {
     SurfaceControl.Builder makeSurface() {
         final SurfaceControl.Builder builder = super.makeSurface();
         if (mRoundedCornerOverlay) {
-            builder.setParent(getDisplayContent().getOverlayLayer());
+            builder.setParent(null);
         }
         return builder;
     }

@@ -173,11 +173,6 @@ class ScreenRotationAnimation {
 
             if (isSizeChanged) {
                 mRoundedCornerOverlay = displayContent.findRoundedCornerOverlays();
-            } else {
-                // Exclude rounded corner overlay from screenshot buffer. Rounded
-                // corner overlay windows are un-rotated during rotation animation
-                // for a seamless transition.
-                builder.setExcludeLayers(displayContent.findRoundedCornerOverlays());
             }
 
             SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
