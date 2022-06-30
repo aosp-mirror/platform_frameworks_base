@@ -136,11 +136,6 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public boolean hasEnrolledBiometrics(int userId) {
-            return false;
-        }
-
-        @Override
         public int binderGetCallingUid() {
             return Process.SYSTEM_UID;
         }
