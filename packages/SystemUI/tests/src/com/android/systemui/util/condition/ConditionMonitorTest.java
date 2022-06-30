@@ -159,6 +159,24 @@ public class ConditionMonitorTest extends SysuiTestCase {
         Mockito.clearInvocations(callback);
     }
 
+    // Ensure that updating a callback that is removed doesn't result in an exception due to the
+    // absence of the condition.
+    @Test
+    public void testUpdateRemovedCallback() {
+        final Monitor.Callback callback1 =
+                mock(Monitor.Callback.class);
+        final Monitor.Subscription.Token subscription1 =
+                mConditionMonitor.addSubscription(getDefaultBuilder(callback1).build());
+        ArgumentCaptor<Condition.Callback> monitorCallback =
+                ArgumentCaptor.forClass(Condition.Callback.class);
+        mExecutor.runAllReady();
+        verify(mCondition1).addCallback(monitorCallback.capture());
+        // This will execute first before the handler for onConditionChanged.
+        mConditionMonitor.removeSubscription(subscription1);
+        monitorCallback.getValue().onConditionChanged(mCondition1);
+        mExecutor.runAllReady();
+    }
+
     @Test
     public void addCallback_addFirstCallback_addCallbackToAllConditions() {
         final Monitor.Callback callback1 =
