@@ -374,7 +374,7 @@
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、ネットワーク トラフィックが監視されることもあります"</string>
     <string name="quick_settings_financed_disclosure_named_management" msgid="2307703784594859524">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> から提供されています"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="4137564460025113168">"これは組織が所有するデバイスで、<xliff:g id="VPN_APP">%1$s</xliff:g>を介してインターネットに接続しています"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスで、<xliff:g id="VPN_APP">%2$s</xliff:g>を介してインターネットに接続しています"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="2169227918166358741">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有し、<xliff:g id="VPN_APP">%2$s</xliff:g> を介してインターネットに接続されています"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"これは組織が所有するデバイスです"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"これは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> が所有するデバイスです"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="929181757984262902">"これは組織が所有するデバイスで、VPN を介してインターネットに接続しています"</string>
@@ -953,4 +953,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> をブロードキャスト"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"出力を変更"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"不明"</string>
+    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
+    <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
+    <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
 </resources>
