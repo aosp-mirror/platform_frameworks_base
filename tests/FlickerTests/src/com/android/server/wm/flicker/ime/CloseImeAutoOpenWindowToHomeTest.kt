@@ -37,7 +37,7 @@ import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -108,9 +108,9 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun imeAppWindowBecomesInvisible() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(testApp.component)
+            this.isAppWindowOnTop(testApp)
                 .then()
-                .isAppWindowNotOnTop(testApp.component)
+                .isAppWindowNotOnTop(testApp)
         }
     }
 
@@ -122,7 +122,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun imeLayerVisibleStart() {
         testSpec.assertLayersStart {
-            this.isVisible(FlickerComponentName.IME)
+            this.isVisible(ComponentMatcher.IME)
         }
     }
 
@@ -130,7 +130,7 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun imeLayerInvisibleEnd() {
         testSpec.assertLayersEnd {
-            this.isInvisible(FlickerComponentName.IME)
+            this.isInvisible(ComponentMatcher.IME)
         }
     }
 
@@ -142,9 +142,9 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     @Test
     fun imeAppLayerBecomesInvisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
                     .then()
-                    .isInvisible(testApp.component)
+                    .isInvisible(testApp)
         }
     }
 
@@ -169,8 +169,8 @@ class CloseImeAutoOpenWindowToHomeTest(private val testSpec: FlickerTestParamete
     fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(listOf(
-                FlickerComponentName.IME,
-                FlickerComponentName.SPLASH_SCREEN))
+                ComponentMatcher.IME,
+                ComponentMatcher.SPLASH_SCREEN))
         }
     }
 

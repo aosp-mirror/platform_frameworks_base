@@ -30,7 +30,7 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -86,7 +86,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
                 testApp.openSecondActivity(device, wmHelper)
                 tapl.pressBack()
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp.component)
+                    .withFullScreenApp(testApp)
                     .waitForAndVerify()
             }
         }
@@ -123,7 +123,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     fun entireScreenCovered() = testSpec.entireScreenCovered()
 
     /**
-     * Checks that the [FlickerComponentName.LAUNCHER] window is not on top. The launcher cannot be
+     * Checks that the [ComponentMatcher.LAUNCHER] window is not on top. The launcher cannot be
      * asserted with `isAppWindowVisible` because it contains 2 windows with the exact same name,
      * and both are never simultaneously visible
      */
@@ -131,17 +131,17 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun launcherWindowNotOnTop() {
         testSpec.assertWm {
-            this.isAppWindowNotOnTop(FlickerComponentName.LAUNCHER)
+            this.isAppWindowNotOnTop(ComponentMatcher.LAUNCHER)
         }
     }
 
     /**
-     * Checks that the [FlickerComponentName.LAUNCHER] layer is never visible during the transition
+     * Checks that the [ComponentMatcher.LAUNCHER] layer is never visible during the transition
      */
     @Presubmit
     @Test
     fun launcherLayerNotVisible() {
-        testSpec.assertLayers { this.isInvisible(FlickerComponentName.LAUNCHER) }
+        testSpec.assertLayers { this.isInvisible(ComponentMatcher.LAUNCHER) }
     }
 
     companion object {

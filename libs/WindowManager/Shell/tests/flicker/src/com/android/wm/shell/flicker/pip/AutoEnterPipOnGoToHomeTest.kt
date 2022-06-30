@@ -80,9 +80,8 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
         }
 
     override fun pipLayerReduces() {
-        val layerName = pipApp.component.toLayerName()
         testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
                 current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
@@ -96,9 +95,8 @@ class AutoEnterPipOnGoToHomeTest(testSpec: FlickerTestParameter) : EnterPipTest(
     fun pipLayerMovesTowardsRightBottomCorner() {
         // in gestural nav the swipe makes PiP first go upwards
         Assume.assumeFalse(testSpec.isGesturalNavigation)
-        val layerName = pipApp.component.toLayerName()
         testSpec.assertLayers {
-            val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
+            val pipLayerList = this.layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             // Pip animates towards the right bottom corner, but because it is being resized at the
             // same time, it is possible it shrinks first quickly below the default position and get
             // moved up after that in just few last frames

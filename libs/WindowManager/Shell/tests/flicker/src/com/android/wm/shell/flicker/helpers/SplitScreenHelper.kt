@@ -26,17 +26,16 @@ import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.testapp.Components
-import org.junit.Assert
 
 class SplitScreenHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    componentsInfo: FlickerComponentName
+    componentsInfo: IComponentMatcher
 ) : BaseAppHelper(instrumentation, activityLabel, componentsInfo) {
 
     companion object {
@@ -111,9 +110,9 @@ class SplitScreenHelper(
             }
 
             // Drag to split
-            var dragStart = notificationContent.visibleCenter
-            var dragMiddle = Point(dragStart.x + 50, dragStart.y)
-            var dragEnd = Point(displayBounds.width / 4, displayBounds.width / 4)
+            val dragStart = notificationContent.visibleCenter
+            val dragMiddle = Point(dragStart.x + 50, dragStart.y)
+            val dragEnd = Point(displayBounds.width / 4, displayBounds.width / 4)
             val downTime = SystemClock.uptimeMillis()
 
             touch(
@@ -199,10 +198,7 @@ class SplitScreenHelper(
             val allApps = taplInstrumentation.workspace.switchToAllApps()
             allApps.freeze()
             try {
-                val appIconSrc = allApps.getAppIcon(appName)
-                Assert.assertNotNull("Unable to find app icon", appIconSrc)
-                val appIconDest = appIconSrc.dragToHotseat(0)
-                Assert.assertNotNull("Unable to drag app icon on hotseat", appIconDest)
+                allApps.getAppIcon(appName).dragToHotseat(0)
             } finally {
                 allApps.unfreeze()
             }

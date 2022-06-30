@@ -20,7 +20,7 @@ package com.android.wm.shell.flicker
 import android.view.Surface
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.common.region.Region
 
 fun FlickerTestParameter.appPairsDividerIsVisibleAtEnd() {
@@ -48,7 +48,7 @@ fun FlickerTestParameter.splitScreenDividerBecomesVisible() {
 }
 
 fun FlickerTestParameter.layerBecomesVisible(
-    component: FlickerComponentName
+    component: IComponentMatcher
 ) {
     assertLayers {
         this.isInvisible(component)
@@ -58,7 +58,7 @@ fun FlickerTestParameter.layerBecomesVisible(
 }
 
 fun FlickerTestParameter.layerIsVisibleAtEnd(
-    component: FlickerComponentName
+    component: IComponentMatcher
 ) {
     assertLayersEnd {
         this.isVisible(component)
@@ -67,7 +67,7 @@ fun FlickerTestParameter.layerIsVisibleAtEnd(
 
 fun FlickerTestParameter.splitAppLayerBoundsBecomesVisible(
     rotation: Int,
-    component: FlickerComponentName,
+    component: IComponentMatcher,
     splitLeftTop: Boolean
 ) {
     assertLayers {
@@ -88,7 +88,7 @@ fun FlickerTestParameter.splitAppLayerBoundsBecomesVisible(
 
 fun FlickerTestParameter.splitAppLayerBoundsIsVisibleAtEnd(
     rotation: Int,
-    component: FlickerComponentName,
+    component: IComponentMatcher,
     splitLeftTop: Boolean
 ) {
     assertLayersEnd {
@@ -104,7 +104,7 @@ fun FlickerTestParameter.splitAppLayerBoundsIsVisibleAtEnd(
 }
 
 fun FlickerTestParameter.appWindowBecomesVisible(
-    component: FlickerComponentName
+    component: IComponentMatcher
 ) {
     assertWm {
         this.isAppWindowInvisible(component)
@@ -114,7 +114,7 @@ fun FlickerTestParameter.appWindowBecomesVisible(
 }
 
 fun FlickerTestParameter.appWindowIsVisibleAtEnd(
-    component: FlickerComponentName
+    component: IComponentMatcher
 ) {
     assertWmEnd {
         this.isAppWindowVisible(component)
@@ -151,7 +151,7 @@ fun FlickerTestParameter.dockedStackDividerNotExistsAtEnd() {
 
 fun FlickerTestParameter.appPairsPrimaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    primaryComponent: FlickerComponentName
+    primaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
         val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
@@ -162,7 +162,7 @@ fun FlickerTestParameter.appPairsPrimaryBoundsIsVisibleAtEnd(
 
 fun FlickerTestParameter.dockedStackPrimaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    primaryComponent: FlickerComponentName
+    primaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
         val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region
@@ -173,7 +173,7 @@ fun FlickerTestParameter.dockedStackPrimaryBoundsIsVisibleAtEnd(
 
 fun FlickerTestParameter.appPairsSecondaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    secondaryComponent: FlickerComponentName
+    secondaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
         val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
@@ -184,7 +184,7 @@ fun FlickerTestParameter.appPairsSecondaryBoundsIsVisibleAtEnd(
 
 fun FlickerTestParameter.dockedStackSecondaryBoundsIsVisibleAtEnd(
     rotation: Int,
-    secondaryComponent: FlickerComponentName
+    secondaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
         val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region

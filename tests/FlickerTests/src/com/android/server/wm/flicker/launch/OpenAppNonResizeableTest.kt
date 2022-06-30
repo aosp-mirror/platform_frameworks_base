@@ -29,7 +29,7 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerPositionEnd
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -72,9 +72,9 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Test
     fun navBarLayerVisibilityChanges() {
         testSpec.assertLayers {
-            this.isInvisible(FlickerComponentName.NAV_BAR)
+            this.isInvisible(ComponentMatcher.NAV_BAR)
                 .then()
-                .isVisible(FlickerComponentName.NAV_BAR)
+                .isVisible(ComponentMatcher.NAV_BAR)
         }
     }
 
@@ -85,7 +85,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Test
     fun appWindowBecomesVisibleAtEnd() {
         testSpec.assertWmEnd {
-            this.isAppWindowVisible(testApp.component)
+            this.isAppWindowVisible(testApp)
         }
     }
 
@@ -97,9 +97,9 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Test
     fun navBarWindowsVisibilityChanges() {
         testSpec.assertWm {
-            this.isNonAppWindowInvisible(FlickerComponentName.NAV_BAR)
+            this.isNonAppWindowInvisible(ComponentMatcher.NAV_BAR)
                 .then()
-                .isAboveAppWindowVisible(FlickerComponentName.NAV_BAR)
+                .isAboveAppWindowVisible(ComponentMatcher.NAV_BAR)
         }
     }
 
@@ -112,7 +112,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
     @Test
     override fun statusBarLayerIsVisible() {
         testSpec.assertLayersEnd {
-            this.isVisible(FlickerComponentName.STATUS_BAR)
+            this.isVisible(ComponentMatcher.STATUS_BAR)
         }
     }
 
@@ -128,7 +128,7 @@ open class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) :
         testSpec.assertLayersEnd {
             val display = this.entry.displays.minByOrNull { it.id }
                 ?: error("There is no display!")
-            this.visibleRegion(FlickerComponentName.STATUS_BAR)
+            this.visibleRegion(ComponentMatcher.STATUS_BAR)
                 .coversExactly(WindowUtils.getStatusBarPosition(display))
         }
     }

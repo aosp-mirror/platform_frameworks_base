@@ -19,7 +19,7 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Test
 
 /**
@@ -40,17 +40,17 @@ abstract class OpenAppFromLauncherTransition(testSpec: FlickerTestParameter) :
     }
 
     /**
-     * Checks that [FlickerComponentName.LAUNCHER] layer is visible at the start of the transition,
+     * Checks that [ComponentMatcher.LAUNCHER] layer is visible at the start of the transition,
      * and is replaced by [testApp], which remains visible until the end
      */
     open fun appLayerReplacesLauncher() {
-        testSpec.replacesLayer(FlickerComponentName.LAUNCHER, testApp.component,
+        testSpec.replacesLayer(ComponentMatcher.LAUNCHER, testApp,
                 ignoreEntriesWithRotationLayer = true, ignoreSnapshot = true,
                 ignoreSplashscreen = true)
     }
 
     /**
-     * Checks that [FlickerComponentName.LAUNCHER] window is visible at the start of the
+     * Checks that [ComponentMatcher.LAUNCHER] window is visible at the start of the
      * transition, and is replaced by a snapshot or splash screen (optional), and finally, is
      * replaced by [testApp], which remains visible until the end
      */
@@ -58,13 +58,13 @@ abstract class OpenAppFromLauncherTransition(testSpec: FlickerTestParameter) :
     @Test
     open fun appWindowReplacesLauncherAsTopWindow() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(FlickerComponentName.LAUNCHER)
-                    .then()
-                    .isAppWindowOnTop(
-                        testApp.component
-                            .or(FlickerComponentName.SNAPSHOT)
-                            .or(FlickerComponentName.SPLASH_SCREEN)
-                    )
+            this.isAppWindowOnTop(ComponentMatcher.LAUNCHER)
+                .then()
+                .isAppWindowOnTop(
+                    testApp
+                        .or(ComponentMatcher.SNAPSHOT)
+                        .or(ComponentMatcher.SPLASH_SCREEN)
+                )
         }
     }
 }

@@ -28,7 +28,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerIsVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Test
 
 /**
@@ -101,9 +101,9 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     open fun visibleLayersShownMoreThanOneConsecutiveEntry() {
         testSpec.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
-                ignoreLayers = listOf(FlickerComponentName.SPLASH_SCREEN,
-                    FlickerComponentName.SNAPSHOT,
-                    FlickerComponentName("", "SecondaryHomeHandle")
+                ignoreLayers = listOf(ComponentMatcher.SPLASH_SCREEN,
+                    ComponentMatcher.SNAPSHOT,
+                    ComponentMatcher("", "SecondaryHomeHandle")
                 )
             )
         }
@@ -136,7 +136,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     open fun appLayerRotates_StartingPos() {
         testSpec.assertLayersStart {
             this.entry.displays.map { display ->
-                this.visibleRegion(testApp.component).coversExactly(display.layerStackSpace)
+                this.visibleRegion(testApp).coversExactly(display.layerStackSpace)
             }
         }
     }
@@ -149,7 +149,7 @@ abstract class RotationTransition(protected val testSpec: FlickerTestParameter) 
     open fun appLayerRotates_EndingPos() {
         testSpec.assertLayersEnd {
             this.entry.displays.map { display ->
-                this.visibleRegion(testApp.component).coversExactly(display.layerStackSpace)
+                this.visibleRegion(testApp).coversExactly(display.layerStackSpace)
             }
         }
     }

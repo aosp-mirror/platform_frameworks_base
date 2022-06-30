@@ -89,7 +89,7 @@ open class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) :
             transitions {
                 tapl.overview.currentTask.open()
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(testApp.component)
+                    .withFullScreenApp(testApp)
                     .waitForAndVerify()
             }
         }

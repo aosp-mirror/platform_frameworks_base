@@ -30,7 +30,7 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.ImeStateInitializeHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -99,38 +99,38 @@ class LaunchAppShowImeOnStartTest(private val testSpec: FlickerTestParameter) {
     }
 
     /**
-     * Checks that [FlickerComponentName.IME] window becomes visible during the transition
+     * Checks that [ComponentMatcher.IME] window becomes visible during the transition
      */
     @Presubmit
     @Test
     fun imeWindowBecomesVisible() = testSpec.imeWindowBecomesVisible()
 
     /**
-     * Checks that [FlickerComponentName.IME] layer becomes visible during the transition
+     * Checks that [ComponentMatcher.IME] layer becomes visible during the transition
      */
     @Presubmit
     @Test
     fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
 
     /**
-     * Checks that [FlickerComponentName.IME] layer is invisible at the start of the transition
+     * Checks that [ComponentMatcher.IME] layer is invisible at the start of the transition
      */
     @Presubmit
     @Test
     fun imeLayerNotExistsStart() {
         testSpec.assertLayersStart {
-            this.isInvisible(FlickerComponentName.IME)
+            this.isInvisible(ComponentMatcher.IME)
         }
     }
 
     /**
-     * Checks that [FlickerComponentName.IME] layer is visible at the end of the transition
+     * Checks that [ComponentMatcher.IME] layer is visible at the end of the transition
      */
     @Presubmit
     @Test
     fun imeLayerExistsEnd() {
         testSpec.assertLayersEnd {
-            this.isVisible(FlickerComponentName.IME)
+            this.isVisible(ComponentMatcher.IME)
         }
     }
 

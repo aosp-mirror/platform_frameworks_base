@@ -28,7 +28,7 @@ import com.android.server.wm.flicker.helpers.ShowWhenLockedAppHelper
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerPositionEnd
 import com.android.server.wm.flicker.statusBarLayerPositionEnd
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,7 +67,7 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
                     // Launch an activity that is shown when the device is locked
                     showWhenLockedApp.launchViaIntent(wmHelper)
                     wmHelper.StateSyncBuilder()
-                        .withFullScreenApp(showWhenLockedApp.component)
+                        .withFullScreenApp(showWhenLockedApp)
                         .waitForAndVerify()
 
                     device.sleep()
@@ -90,9 +90,9 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
         testSpec.assertWm {
             this.hasNoVisibleAppWindow()
                     .then()
-                    .isAppWindowOnTop(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isAppWindowOnTop(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowOnTop(showWhenLockedApp.component)
+                    .isAppWindowOnTop(showWhenLockedApp)
         }
     }
 
@@ -100,11 +100,11 @@ class OpenAppFromLockNotificationWithLockOverlayApp(testSpec: FlickerTestParamet
     @Postsubmit
     fun showWhenLockedAppLayerBecomesVisible() {
         testSpec.assertLayers {
-            this.isInvisible(showWhenLockedApp.component)
+            this.isInvisible(showWhenLockedApp)
                     .then()
-                    .isVisible(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isVisible(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isVisible(showWhenLockedApp.component)
+                    .isVisible(showWhenLockedApp)
         }
     }
 

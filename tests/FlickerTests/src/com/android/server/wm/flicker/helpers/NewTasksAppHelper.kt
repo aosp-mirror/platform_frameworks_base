@@ -23,14 +23,14 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
 class NewTasksAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
     launcherName: String = ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_LAUNCHER_NAME,
-    component: FlickerComponentName =
+    component: IComponentMatcher =
         ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME.toFlickerComponent(),
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
         .getInstance(instr)
@@ -47,7 +47,7 @@ class NewTasksAppHelper @JvmOverloads constructor(
         }
         button.click()
         wmHelper.StateSyncBuilder()
-            .withFullScreenApp(component)
+            .withFullScreenApp(this)
             .waitForAndVerify()
     }
 }

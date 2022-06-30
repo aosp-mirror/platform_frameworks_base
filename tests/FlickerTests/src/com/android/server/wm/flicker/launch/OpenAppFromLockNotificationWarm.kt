@@ -26,7 +26,7 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.navBarLayerPositionEnd
 import com.android.server.wm.flicker.statusBarLayerPositionEnd
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -83,11 +83,11 @@ open class OpenAppFromLockNotificationWarm(testSpec: FlickerTestParameter) :
         testSpec.assertWm {
             this.hasNoVisibleAppWindow()
                     .then()
-                    .isAppWindowOnTop(FlickerComponentName.SNAPSHOT, isOptional = true)
+                    .isAppWindowOnTop(ComponentMatcher.SNAPSHOT, isOptional = true)
                     .then()
-                    .isAppWindowOnTop(FlickerComponentName.SPLASH_SCREEN, isOptional = true)
+                    .isAppWindowOnTop(ComponentMatcher.SPLASH_SCREEN, isOptional = true)
                     .then()
-                    .isAppWindowOnTop(testApp.component)
+                    .isAppWindowOnTop(testApp)
         }
     }
 

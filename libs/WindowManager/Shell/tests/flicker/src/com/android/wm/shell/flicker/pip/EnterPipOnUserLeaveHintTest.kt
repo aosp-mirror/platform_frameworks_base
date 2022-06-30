@@ -76,9 +76,9 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
         if (!testSpec.isGesturalNavigation) super.pipAppLayerAlwaysVisible() else {
             // pip layer in gesture nav will disappear during transition
             testSpec.assertLayers {
-                this.isVisible(pipApp.component)
-                    .then().isInvisible(pipApp.component)
-                    .then().isVisible(pipApp.component)
+                this.isVisible(pipApp)
+                    .then().isInvisible(pipApp)
+                    .then().isVisible(pipApp)
             }
         }
     }
@@ -99,10 +99,10 @@ class EnterPipOnUserLeaveHintTest(testSpec: FlickerTestParameter) : EnterPipTest
         if (!testSpec.isGesturalNavigation) super.pipLayerRemainInsideVisibleBounds() else {
             // pip layer in gesture nav will disappear during transition
             testSpec.assertLayersStart {
-                this.visibleRegion(pipApp.component).coversAtMost(displayBounds)
+                this.visibleRegion(pipApp).coversAtMost(displayBounds)
             }
             testSpec.assertLayersEnd {
-                this.visibleRegion(pipApp.component).coversAtMost(displayBounds)
+                this.visibleRegion(pipApp).coversAtMost(displayBounds)
             }
         }
     }

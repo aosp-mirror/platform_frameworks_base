@@ -75,7 +75,7 @@ class ExitPipViaExpandButtonClickTest(
                 pipApp.expandPipWindowToApp(wmHelper)
                 // Wait until the other app is no longer visible
                 wmHelper.StateSyncBuilder()
-                    .withWindowSurfaceDisappeared(testApp.component)
+                    .withWindowSurfaceDisappeared(testApp)
                     .waitForAndVerify()
             }
         }

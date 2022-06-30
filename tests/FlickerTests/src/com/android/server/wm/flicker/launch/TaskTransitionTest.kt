@@ -37,9 +37,10 @@ import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarWindowIsVisible
 import com.android.server.wm.flicker.testapp.ActivityOptions.LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME
 import com.android.server.wm.flicker.testapp.ActivityOptions.SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
-import com.android.server.wm.traces.common.FlickerComponentName
-import com.android.server.wm.traces.common.FlickerComponentName.Companion.SPLASH_SCREEN
-import com.android.server.wm.traces.common.FlickerComponentName.Companion.WALLPAPER_BBQ_WRAPPER
+import com.android.server.wm.traces.common.ComponentMatcher
+import com.android.server.wm.traces.common.ComponentMatcher.Companion.SPLASH_SCREEN
+import com.android.server.wm.traces.common.ComponentMatcher.Companion.WALLPAPER_BBQ_WRAPPER
+import com.android.server.wm.traces.common.IComponentMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -87,7 +88,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
                 mTestApp.openNewTask(device, wmHelper)
                 tapl.pressBack()
                 wmHelper.StateSyncBuilder()
-                    .withFullScreenApp(mTestApp.component)
+                    .withFullScreenApp(mTestApp)
                     .waitForAndVerify()
             }
         }
@@ -126,7 +127,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun launcherWindowIsNeverVisible() {
         testSpec.assertWm {
-            this.isAppWindowInvisible(FlickerComponentName.LAUNCHER)
+            this.isAppWindowInvisible(ComponentMatcher.LAUNCHER)
         }
     }
 
@@ -138,7 +139,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Test
     fun launcherLayerIsNeverVisible() {
         testSpec.assertLayers {
-            this.isInvisible(FlickerComponentName.LAUNCHER)
+            this.isInvisible(ComponentMatcher.LAUNCHER)
         }
     }
 
@@ -148,7 +149,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
     @Postsubmit
     @Test
     fun colorLayerIsVisibleDuringTransition() {
-        val bgColorLayer = FlickerComponentName("", "colorBackgroundLayer")
+        val bgColorLayer = ComponentMatcher("", "colorBackgroundLayer")
         val displayBounds = WindowUtils.getDisplayBounds(testSpec.startRotation)
 
         testSpec.assertLayers {
@@ -237,7 +238,7 @@ class TaskTransitionTest(val testSpec: FlickerTestParameter) {
                 LAUNCH_NEW_TASK_ACTIVITY_COMPONENT_NAME.toFlickerComponent()
         private val SIMPLE_ACTIVITY = SIMPLE_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME.toFlickerComponent()
 
-        private fun getWallpaperPackage(instrumentation: Instrumentation): FlickerComponentName? {
+        private fun getWallpaperPackage(instrumentation: Instrumentation): IComponentMatcher? {
             val wallpaperManager = WallpaperManager.getInstance(instrumentation.targetContext)
 
             return wallpaperManager.wallpaperInfo?.component?.toFlickerComponent()

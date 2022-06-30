@@ -34,7 +34,7 @@ import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
-import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.ComponentMatcher
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
@@ -91,9 +91,9 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
         testSpec.assertWm {
             this.visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(
-                FlickerComponentName.IME,
-                FlickerComponentName.SPLASH_SCREEN,
-                FlickerComponentName.SNAPSHOT))
+                ComponentMatcher.IME,
+                ComponentMatcher.SPLASH_SCREEN,
+                ComponentMatcher.SNAPSHOT))
         }
     }
 
@@ -101,7 +101,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun imeAppWindowIsAlwaysVisible() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(testApp.component)
+            this.isAppWindowOnTop(testApp)
         }
     }
 
@@ -151,7 +151,7 @@ class CloseImeWindowToAppTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun imeAppLayerIsAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
         }
     }
 

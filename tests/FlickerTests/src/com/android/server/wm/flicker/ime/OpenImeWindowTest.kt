@@ -94,7 +94,7 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun appWindowAlwaysVisibleOnTop() {
         testSpec.assertWm {
-            this.isAppWindowOnTop(testApp.component)
+            this.isAppWindowOnTop(testApp)
         }
     }
 
@@ -118,7 +118,7 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun layerAlwaysVisible() {
         testSpec.assertLayers {
-            this.isVisible(testApp.component)
+            this.isVisible(testApp)
         }
     }
 
