@@ -230,10 +230,10 @@ public class Watchdog implements Dumpable {
         private final String mName;
         private final ArrayList<Monitor> mMonitors = new ArrayList<Monitor>();
         private final ArrayList<Monitor> mMonitorQueue = new ArrayList<Monitor>();
-        private long mWaitMax;
+        private long mWaitMaxMillis;
         private boolean mCompleted;
         private Monitor mCurrentMonitor;
-        private long mStartTime;
+        private long mStartTimeMillis;
         private int mPauseCount;
 
         HandlerChecker(Handler handler, String name) {
@@ -254,7 +254,7 @@ public class Watchdog implements Dumpable {
          * @param handlerCheckerTimeoutMillis the timeout to use for this run
          */
         public void scheduleCheckLocked(long handlerCheckerTimeoutMillis) {
-            mWaitMax = handlerCheckerTimeoutMillis;
+            mWaitMaxMillis = handlerCheckerTimeoutMillis;
             if (mCompleted) {
                 // Safe to update monitors in queue, Handler is not in the middle of work
                 mMonitors.addAll(mMonitorQueue);
@@ -279,7 +279,7 @@ public class Watchdog implements Dumpable {
 
             mCompleted = false;
             mCurrentMonitor = null;
-            mStartTime = SystemClock.uptimeMillis();
+            mStartTimeMillis = SystemClock.uptimeMillis();
             mHandler.postAtFrontOfQueue(this);
         }
 
@@ -287,10 +287,10 @@ public class Watchdog implements Dumpable {
             if (mCompleted) {
                 return COMPLETED;
             } else {
-                long latency = SystemClock.uptimeMillis() - mStartTime;
-                if (latency < mWaitMax/2) {
+                long latency = SystemClock.uptimeMillis() - mStartTimeMillis;
+                if (latency < mWaitMaxMillis / 2) {
                     return WAITING;
-                } else if (latency < mWaitMax) {
+                } else if (latency < mWaitMaxMillis) {
                     return WAITED_HALF;
                 }
             }
@@ -306,14 +306,17 @@ public class Watchdog implements Dumpable {
         }
 
         String describeBlockedStateLocked() {
+            final String prefix;
+            if (mCurrentMonitor == null) {
+                prefix = "Blocked in handler on ";
+            } else {
+                prefix =  "Blocked in monitor " + mCurrentMonitor.getClass().getName();
+            }
             Thread thread = getThread();
             String threadIdentifier = thread.getName() + ", tid=" + thread.getId();
-            if (mCurrentMonitor == null) {
-                return "Blocked in handler on " + mName + " (" + threadIdentifier + ")";
-            } else {
-                return "Blocked in monitor " + mCurrentMonitor.getClass().getName()
-                        + " on " + mName + " (" + threadIdentifier + ")";
-            }
+            long latencySeconds = (SystemClock.uptimeMillis() - mStartTimeMillis) / 1000;
+            return prefix + " on " + mName + " (" + threadIdentifier + ")"
+                + " for " + latencySeconds + "s";
         }
 
         @Override
