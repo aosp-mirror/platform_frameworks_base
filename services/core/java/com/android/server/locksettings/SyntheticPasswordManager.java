@@ -599,47 +599,19 @@ public class SyntheticPasswordManager {
     }
 
     /**
-     * Initializing a new Authentication token, possibly from an existing credential and hash.
+     * Initializes a new Authentication token for the given user.
      *
-     * The authentication token would bear a randomly-generated synthetic password.
+     * The authentication token will bear a randomly-generated synthetic password.
      *
-     * This method has the side effect of rebinding the SID of the given user to the
-     * newly-generated SP.
-     *
-     * If the existing credential hash is non-null, the existing SID mill be migrated so
-     * the synthetic password in the authentication token will produce the same SID
-     * (the corresponding synthetic password handle is persisted by SyntheticPasswordManager
-     * in a per-user data storage.)
-     *
-     * If the existing credential hash is null, it means the given user should have no SID so
-     * SyntheticPasswordManager will nuke any SP handle previously persisted. In this case,
-     * the supplied credential parameter is also ignored.
+     * Any existing SID for the user is cleared.
      *
      * Also saves the escrow information necessary to re-generate the synthetic password under
      * an escrow scheme. This information can be removed with {@link #destroyEscrowData} if
      * password escrow should be disabled completely on the given user.
-     *
      */
-    public AuthenticationToken newSyntheticPasswordAndSid(IGateKeeperService gatekeeper,
-            byte[] hash, LockscreenCredential credential, int userId) {
+    AuthenticationToken newSyntheticPassword(int userId) {
+        clearSidForUser(userId);
         AuthenticationToken result = AuthenticationToken.create();
-        GateKeeperResponse response;
-        if (hash != null) {
-            try {
-                response = gatekeeper.enroll(userId, hash, credential.getCredential(),
-                        result.deriveGkPassword());
-            } catch (RemoteException e) {
-                throw new IllegalStateException("Failed to enroll credential duing SP init", e);
-            }
-            if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
-                Slog.w(TAG, "Fail to migrate SID, assuming no SID, user " + userId);
-                clearSidForUser(userId);
-            } else {
-                saveSyntheticPasswordHandle(response.getPayload(), userId);
-            }
-        } else {
-            clearSidForUser(userId);
-        }
         saveEscrowData(result, userId);
         return result;
     }

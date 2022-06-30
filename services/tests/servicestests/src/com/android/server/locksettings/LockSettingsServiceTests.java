@@ -42,11 +42,8 @@ import android.service.gatekeeper.GateKeeperResponse;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
-import com.android.server.locksettings.FakeGateKeeperService.VerifyHandle;
-import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -96,17 +93,16 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
     @Test
     public void testChangePasswordFailPrimaryUser() throws RemoteException {
-        final long sid = 1234;
-        initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("password"), sid);
+        initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("password"));
 
         assertFalse(mService.setLockCredential(newPassword("newpwd"), newPassword("badpwd"),
                     PRIMARY_USER_ID));
-        assertVerifyCredentials(PRIMARY_USER_ID, newPassword("password"), sid);
+        assertVerifyCredentials(PRIMARY_USER_ID, newPassword("password"));
     }
 
     @Test
     public void testClearPasswordPrimaryUser() throws RemoteException {
-        initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("password"), 1234);
+        initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("password"));
         assertTrue(mService.setLockCredential(nonePassword(), newPassword("password"),
                 PRIMARY_USER_ID));
         assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(PRIMARY_USER_ID));
@@ -264,10 +260,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     public void testSetLockCredential_forProfileWithSeparateChallenge_updatesCredentials()
             throws Exception {
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, true, null);
-        initializeStorageWithCredential(
-                MANAGED_PROFILE_USER_ID,
-                newPattern("12345"),
-                1234);
+        initializeStorageWithCredential(MANAGED_PROFILE_USER_ID, newPattern("12345"));
 
         assertTrue(mService.setLockCredential(
                 newPassword("newPassword"),
@@ -300,8 +293,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                     throws Exception {
         final LockscreenCredential oldCredential = newPassword("oldPassword");
         final LockscreenCredential newCredential = newPassword("newPassword");
-        initializeStorageWithCredential(
-                PRIMARY_USER_ID, oldCredential, 1234);
+        initializeStorageWithCredential(PRIMARY_USER_ID, oldCredential);
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
 
         assertTrue(mService.setLockCredential(
@@ -321,7 +313,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     public void
             testSetLockCredential_forPrimaryUserWithUnifiedChallengeProfile_removesBothCredentials()
                     throws Exception {
-        initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("oldPassword"), 1234);
+        initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("oldPassword"));
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
 
         assertTrue(mService.setLockCredential(
@@ -337,10 +329,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
     @Test
     public void testSetLockCredential_nullCredential_removeBiometrics() throws RemoteException {
-        initializeStorageWithCredential(
-                PRIMARY_USER_ID,
-                newPattern("123654"),
-                1234);
+        initializeStorageWithCredential(PRIMARY_USER_ID, newPattern("123654"));
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
 
         mService.setLockCredential(nonePassword(), newPattern("123654"), PRIMARY_USER_ID);
@@ -358,7 +347,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
             throws Exception {
         final LockscreenCredential parentPassword = newPassword("parentPassword");
         final LockscreenCredential profilePassword = newPassword("profilePassword");
-        initializeStorageWithCredential(PRIMARY_USER_ID, parentPassword, 1234);
+        initializeStorageWithCredential(PRIMARY_USER_ID, parentPassword);
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
 
         assertTrue(mService.setLockCredential(
@@ -377,7 +366,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                     throws Exception {
         final LockscreenCredential parentPassword = newPassword("parentPassword");
         final LockscreenCredential profilePassword = newPattern("12345");
-        initializeStorageWithCredential(PRIMARY_USER_ID, parentPassword, 1234);
+        initializeStorageWithCredential(PRIMARY_USER_ID, parentPassword);
         // Create and verify separate profile credentials.
         testCreateCredential(MANAGED_PROFILE_USER_ID, profilePassword);
 
@@ -393,7 +382,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     @Test
     public void testVerifyCredential_forPrimaryUser_sendsCredentials() throws Exception {
         final LockscreenCredential password = newPassword("password");
-        initializeStorageWithCredential(PRIMARY_USER_ID, password, 1234);
+        initializeStorageWithCredential(PRIMARY_USER_ID, password);
         reset(mRecoverableKeyStoreManager);
 
         mService.verifyCredential(password, PRIMARY_USER_ID, 0 /* flags */);
@@ -424,7 +413,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     public void verifyCredential_forPrimaryUserWithUnifiedChallengeProfile_sendsCredentialsForBoth()
                     throws Exception {
         final LockscreenCredential pattern = newPattern("12345");
-        initializeStorageWithCredential(PRIMARY_USER_ID, pattern, 1234);
+        initializeStorageWithCredential(PRIMARY_USER_ID, pattern);
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
         reset(mRecoverableKeyStoreManager);
 
@@ -464,7 +453,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
     private void testCreateCredential(int userId, LockscreenCredential credential)
             throws RemoteException {
         assertTrue(mService.setLockCredential(credential, nonePassword(), userId));
-        assertVerifyCredentials(userId, credential, -1);
+        assertVerifyCredentials(userId, credential);
     }
 
     private void testCreateCredentialFailsWithoutLockScreen(
@@ -483,19 +472,17 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
 
     private void testChangeCredentials(int userId, LockscreenCredential newCredential,
             LockscreenCredential oldCredential) throws RemoteException {
-        final long sid = 1234;
-        initializeStorageWithCredential(userId, oldCredential, sid);
+        initializeStorageWithCredential(userId, oldCredential);
         assertTrue(mService.setLockCredential(newCredential, oldCredential, userId));
-        assertVerifyCredentials(userId, newCredential, sid);
+        assertVerifyCredentials(userId, newCredential);
     }
 
-    private void assertVerifyCredentials(int userId, LockscreenCredential credential, long sid)
+    private void assertVerifyCredentials(int userId, LockscreenCredential credential)
             throws RemoteException{
         VerifyCredentialResponse response = mService.verifyCredential(credential, userId,
                 0 /* flags */);
 
         assertEquals(GateKeeperResponse.RESPONSE_OK, response.getResponseCode());
-        if (sid != -1) assertEquals(sid, mGateKeeperService.getSecureUserId(userId));
         if (credential.isPassword()) {
             assertEquals(CREDENTIAL_TYPE_PASSWORD, mService.getCredentialType(userId));
         } else if (credential.isPin()) {
@@ -517,19 +504,11 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 badCredential, userId, 0 /* flags */).getResponseCode());
     }
 
-    private void initializeStorageWithCredential(int userId, LockscreenCredential credential,
-            long sid) throws RemoteException {
-        byte[] oldHash = new VerifyHandle(credential.getCredential(), sid).toBytes();
-        if (mService.shouldMigrateToSyntheticPasswordLocked(userId)) {
-            mService.initializeSyntheticPasswordLocked(oldHash, credential, userId);
-        } else {
-            if (credential.isPassword() || credential.isPin()) {
-                mStorage.writeCredentialHash(CredentialHash.create(oldHash,
-                        LockPatternUtils.CREDENTIAL_TYPE_PASSWORD), userId);
-            } else {
-                mStorage.writeCredentialHash(CredentialHash.create(oldHash,
-                        LockPatternUtils.CREDENTIAL_TYPE_PATTERN), userId);
-            }
-        }
+    @SuppressWarnings("GuardedBy") // for initializeSyntheticPasswordLocked
+    private void initializeStorageWithCredential(int userId, LockscreenCredential credential)
+            throws RemoteException {
+        assertEquals(0, mGateKeeperService.getSecureUserId(userId));
+        mService.initializeSyntheticPasswordLocked(credential, userId);
+        assertNotEquals(0, mGateKeeperService.getSecureUserId(userId));
     }
 }

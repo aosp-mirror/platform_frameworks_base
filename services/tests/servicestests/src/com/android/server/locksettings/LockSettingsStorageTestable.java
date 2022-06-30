@@ -64,18 +64,6 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     }
 
     @Override
-    String getLockPatternFilename(int userId) {
-        return makeDirs(mStorageDir,
-                super.getLockPatternFilename(userId)).getAbsolutePath();
-    }
-
-    @Override
-    String getLockPasswordFilename(int userId) {
-        return makeDirs(mStorageDir,
-                super.getLockPasswordFilename(userId)).getAbsolutePath();
-    }
-
-    @Override
     String getChildProfileLockFile(int userId) {
         return makeDirs(mStorageDir,
                 super.getChildProfileLockFile(userId)).getAbsolutePath();

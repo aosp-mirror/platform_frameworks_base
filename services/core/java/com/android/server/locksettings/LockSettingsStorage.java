@@ -85,8 +85,6 @@ class LockSettingsStorage extends WatchableImpl {
     };
 
     private static final String SYSTEM_DIRECTORY = "/system/";
-    private static final String LOCK_PATTERN_FILE = "gatekeeper.pattern.key";
-    private static final String LOCK_PASSWORD_FILE = "gatekeeper.password.key";
     private static final String CHILD_PROFILE_LOCK_FILE = "gatekeeper.profile.key";
 
     private static final String REBOOT_ESCROW_FILE = "reboot.escrow.key";
@@ -248,38 +246,6 @@ class LockSettingsStorage extends WatchableImpl {
             }
             cursor.close();
         }
-
-        // Populate cache by reading the password and pattern files.
-        readCredentialHash(userId);
-    }
-
-    private CredentialHash readPasswordHashIfExists(int userId) {
-        byte[] stored = readFile(getLockPasswordFilename(userId));
-        if (!ArrayUtils.isEmpty(stored)) {
-            return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN);
-        }
-        return null;
-    }
-
-    private CredentialHash readPatternHashIfExists(int userId) {
-        byte[] stored = readFile(getLockPatternFilename(userId));
-        if (!ArrayUtils.isEmpty(stored)) {
-            return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PATTERN);
-        }
-        return null;
-    }
-
-    public CredentialHash readCredentialHash(int userId) {
-        CredentialHash passwordHash = readPasswordHashIfExists(userId);
-        if (passwordHash != null) {
-            return passwordHash;
-        }
-
-        CredentialHash patternHash = readPatternHashIfExists(userId);
-        if (patternHash != null) {
-            return patternHash;
-        }
-        return CredentialHash.createEmptyHash();
     }
 
     public void removeChildProfileLock(int userId) {
@@ -334,14 +300,6 @@ class LockSettingsStorage extends WatchableImpl {
 
     public void removeRebootEscrowServerBlob() {
         deleteFile(getRebootEscrowServerBlob());
-    }
-
-    public boolean hasPassword(int userId) {
-        return hasFile(getLockPasswordFilename(userId));
-    }
-
-    public boolean hasPattern(int userId) {
-        return hasFile(getLockPatternFilename(userId));
     }
 
     private boolean hasFile(String name) {
@@ -427,33 +385,6 @@ class LockSettingsStorage extends WatchableImpl {
             }
             dispatchChange(this);
         }
-    }
-
-    public void writeCredentialHash(CredentialHash hash, int userId) {
-        byte[] patternHash = null;
-        byte[] passwordHash = null;
-        if (hash.type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN
-                || hash.type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
-                || hash.type == LockPatternUtils.CREDENTIAL_TYPE_PIN) {
-            passwordHash = hash.hash;
-        } else if (hash.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
-            patternHash = hash.hash;
-        } else {
-            Preconditions.checkArgument(hash.type == LockPatternUtils.CREDENTIAL_TYPE_NONE,
-                    "Unknown credential type");
-        }
-        writeFile(getLockPasswordFilename(userId), passwordHash);
-        writeFile(getLockPatternFilename(userId), patternHash);
-    }
-
-    @VisibleForTesting
-    String getLockPatternFilename(int userId) {
-        return getLockCredentialFilePathForUser(userId, LOCK_PATTERN_FILE);
-    }
-
-    @VisibleForTesting
-    String getLockPasswordFilename(int userId) {
-        return getLockCredentialFilePathForUser(userId, LOCK_PASSWORD_FILE);
     }
 
     @VisibleForTesting
@@ -567,12 +498,7 @@ class LockSettingsStorage extends WatchableImpl {
 
         if (parentInfo == null) {
             // This user owns its lock settings files - safe to delete them
-            synchronized (mFileWriteLock) {
-                deleteFilesAndRemoveCache(
-                        getLockPasswordFilename(userId),
-                        getLockPatternFilename(userId),
-                        getRebootEscrowFile(userId));
-            }
+            deleteFile(getRebootEscrowFile(userId));
         } else {
             // Managed profile
             removeChildProfileLock(userId);
@@ -592,17 +518,6 @@ class LockSettingsStorage extends WatchableImpl {
             db.endTransaction();
         }
         dispatchChange(this);
-    }
-
-    private void deleteFilesAndRemoveCache(String... names) {
-        for (String name : names) {
-            File file = new File(name);
-            if (file.exists()) {
-                file.delete();
-                mCache.putFile(name, null);
-                dispatchChange(this);
-            }
-        }
     }
 
     public void setBoolean(String key, boolean value, int userId) {
