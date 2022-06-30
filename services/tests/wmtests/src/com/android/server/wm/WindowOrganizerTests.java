@@ -458,6 +458,23 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRegisterTaskOrganizerWithExistingTasks_noSurfaceControl()
+            throws RemoteException {
+        final Task rootTask = createRootTask();
+        final Task task = createTask(rootTask);
+        final Task rootTask2 = createRootTask();
+        final Task task2 = createTask(rootTask2);
+        rootTask2.setSurfaceControl(null);
+        ArrayList<TaskAppearedInfo> existingTasks = new ArrayList<>();
+        final ITaskOrganizer organizer = registerMockOrganizer(existingTasks);
+        assertContainsTasks(existingTasks, rootTask);
+
+        // Verify we don't get onTaskAppeared if we are returned the tasks
+        verify(organizer, never())
+                .onTaskAppeared(any(RunningTaskInfo.class), any(SurfaceControl.class));
+    }
+
+    @Test
     public void testTaskTransaction() {
         removeGlobalMinSizeRestriction();
         final Task rootTask = new TaskBuilder(mSupervisor)
