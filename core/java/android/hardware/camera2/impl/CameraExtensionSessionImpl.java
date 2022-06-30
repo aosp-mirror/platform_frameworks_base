@@ -1739,6 +1739,20 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                     // abruptly.
                     Log.w(TAG, "Output surface likely abandoned, dropping buffer!");
                     img.close();
+                } catch (RuntimeException e) {
+                    // NOTE: This is intended to catch RuntimeException from ImageReader.detachImage
+                    // ImageReader.detachImage is not supposed to throw RuntimeExceptions but the
+                    // bug went unchecked for a few years and now its behavior cannot be changed
+                    // without breaking backwards compatibility.
+
+                    if (!e.getClass().equals(RuntimeException.class)) {
+                        // re-throw any exceptions that aren't base RuntimeException since they are
+                        // coming from elsewhere, and we shouldn't silently drop those.
+                        throw e;
+                    }
+
+                    Log.w(TAG, "Output surface likely abandoned, dropping buffer!");
+                    img.close();
                 }
             }
         }
@@ -1773,9 +1787,23 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
                 }
                 try {
                     reader.detachImage(img);
-                } catch (Exception e) {
-                    Log.e(TAG,
-                            "Failed to detach image!");
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, "Failed to detach image!");
+                    img.close();
+                    return;
+                } catch (RuntimeException e) {
+                    // NOTE: This is intended to catch RuntimeException from ImageReader.detachImage
+                    // ImageReader.detachImage is not supposed to throw RuntimeExceptions but the
+                    // bug went unchecked for a few years and now its behavior cannot be changed
+                    // without breaking backwards compatibility.
+
+                    if (!e.getClass().equals(RuntimeException.class)) {
+                        // re-throw any exceptions that aren't base RuntimeException since they are
+                        // coming from elsewhere, and we shouldn't silently drop those.
+                        throw e;
+                    }
+
+                    Log.e(TAG, "Failed to detach image!");
                     img.close();
                     return;
                 }
