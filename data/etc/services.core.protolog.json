@@ -13,11 +13,23 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-2123789565": {
+      "message": "Found no matching mirror display for id=%d for DEFAULT_DISPLAY. Nothing to mirror.",
+      "level": "WARN",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-2121056984": {
       "message": "%s",
       "level": "WARN",
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/LockTaskController.java"
+    },
+    "-2113780196": {
+      "message": "Successfully created a ContentRecordingSession for displayId=%d to mirror content from displayId=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-2111539867": {
       "message": "remove IME snapshot, caller=%s",
@@ -1297,6 +1309,12 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-838378223": {
+      "message": "Attempting to mirror self on %d",
+      "level": "WARN",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-814760297": {
       "message": "Looking for task of %s in %s",
       "level": "DEBUG",
@@ -1404,6 +1422,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
+    "-729864558": {
+      "message": "Attempting to mirror %d from %d but no DisplayContent associated. Changing to mirror default display.",
+      "level": "WARN",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-729530161": {
       "message": "Moving to DESTROYED: %s (no app)",

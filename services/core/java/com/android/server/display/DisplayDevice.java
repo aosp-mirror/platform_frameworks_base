@@ -127,12 +127,13 @@ abstract class DisplayDevice {
 
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
-     * is not provided for layer mirroring by SurfaceFlinger.
-     * Only used for mirroring started from MediaProjection.
+     * is not provided for layer mirroring by SurfaceFlinger. For non virtual displays, this will
+     * be the actual display device's size.
      */
     @Nullable
     public Point getDisplaySurfaceDefaultSizeLocked() {
-        return null;
+        DisplayDeviceInfo displayDeviceInfo = getDisplayDeviceInfoLocked();
+        return new Point(displayDeviceInfo.width, displayDeviceInfo.height);
     }
 
     /**

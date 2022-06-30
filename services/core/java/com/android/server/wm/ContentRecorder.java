@@ -87,6 +87,10 @@ final class ContentRecorder {
         mContentRecordingSession = session;
     }
 
+    boolean isContentRecordingSessionSet() {
+        return mContentRecordingSession != null;
+    }
+
     /**
      * Returns {@code true} if this DisplayContent is currently recording.
      */
@@ -299,8 +303,7 @@ final class ContentRecorder {
                         mDisplayContent.mWmService.mWindowContextListenerController.getContainer(
                                 tokenToRecord);
                 if (wc == null) {
-                    // Un-set the window token to record for this VirtualDisplay. Fall back to
-                    // Display stack capture for the entire display.
+                    // Fall back to screenrecording using the data sent to DisplayManager
                     mDisplayContent.mWmService.mDisplayManagerInternal.setWindowManagerMirroring(
                             mDisplayContent.getDisplayId(), false);
                     handleStartRecordingFailed();
