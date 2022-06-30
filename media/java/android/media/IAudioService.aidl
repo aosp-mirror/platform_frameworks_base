@@ -54,6 +54,7 @@ import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.net.Uri;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.view.KeyEvent;
 
@@ -85,6 +86,8 @@ interface IAudioService {
     oneway void releaseRecorder(in int riid);
 
     oneway void playerSessionId(in int piid, in int sessionId);
+
+    oneway void portEvent(in int portId, in int event, in @nullable PersistableBundle extras);
 
     // Java-only methods below.
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);

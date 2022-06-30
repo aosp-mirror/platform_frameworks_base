@@ -134,6 +134,7 @@ import android.os.HwBinder;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -11139,6 +11140,16 @@ public class AudioService extends IAudioService.Stub
      */
     public void playerEvent(int piid, int event, int eventValue) {
         mPlaybackMonitor.playerEvent(piid, event, eventValue, Binder.getCallingUid());
+    }
+
+    /**
+     * Update event for port id
+     * @param portId Port id to update
+     * @param event The new event for the given port
+     * @param extras Bundle of extra values to describe the event
+     */
+    public void portEvent(int portId, int event, @Nullable PersistableBundle extras) {
+        mPlaybackMonitor.portEvent(portId, event, extras, Binder.getCallingUid());
     }
 
     public void playerHasOpPlayAudio(int piid, boolean hasOpPlayAudio) {

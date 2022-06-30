@@ -172,6 +172,11 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * The state used to update port id, does not actually change the state of the player
      */
     public static final int PLAYER_UPDATE_PORT_ID = 6;
+    /**
+     * @hide
+     * Used to update the mute state of a player through its port id
+     */
+    public static final int PLAYER_UPDATE_MUTED = 7;
 
     /** @hide */
     @IntDef({
@@ -183,6 +188,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         PLAYER_STATE_STOPPED,
         PLAYER_UPDATE_DEVICE_ID,
         PLAYER_UPDATE_PORT_ID,
+        PLAYER_UPDATE_MUTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PlayerState {}
@@ -198,9 +204,48 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_STATE_STOPPED: return "PLAYER_STATE_STOPPED";
             case PLAYER_UPDATE_DEVICE_ID: return "PLAYER_UPDATE_DEVICE_ID";
             case PLAYER_UPDATE_PORT_ID: return "PLAYER_UPDATE_PORT_ID";
+            case PLAYER_UPDATE_MUTED: return "PLAYER_UPDATE_MUTED";
             default:
                 return "invalid state " + state;
         }
+    }
+
+    /**
+     * @hide
+     * Used to update the mute state of a player through its port ID. Must be kept in sync with
+     * frameworks/native/include/audiomanager/AudioManager.h
+     */
+    public static final String EXTRA_PLAYER_EVENT_MUTE =
+            "android.media.extra.PLAYER_EVENT_MUTE";
+
+    /**
+     * @hide
+     * Flag used when muted by master volume.
+     */
+    public static final int PLAYER_MUTE_MASTER = (1 << 0);
+    /**
+     * @hide
+     * Flag used when muted by stream volume.
+     */
+    public static final int PLAYER_MUTE_STREAM_VOLUME = (1 << 1);
+    /**
+     * @hide
+     * Flag used when muted by stream mute.
+     */
+    public static final int PLAYER_MUTE_STREAM_MUTED = (1 << 2);
+    /**
+     * @hide
+     * Flag used when playback is restricted by AppOps manager with OP_PLAY_AUDIO.
+     */
+    public static final int PLAYER_MUTE_PLAYBACK_RESTRICTED = (1 << 3);
+
+    /** @hide */
+    @IntDef(
+            flag = true,
+            value = {PLAYER_MUTE_MASTER, PLAYER_MUTE_STREAM_VOLUME, PLAYER_MUTE_STREAM_MUTED,
+                    PLAYER_MUTE_PLAYBACK_RESTRICTED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PlayerMuteEvent {
     }
 
     // immutable data
@@ -678,6 +723,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_STATE_STOPPED: return "stopped";
             case PLAYER_UPDATE_DEVICE_ID: return "device updated";
             case PLAYER_UPDATE_PORT_ID: return "port updated";
+            case PLAYER_UPDATE_MUTED: return "muted updated";
             default:
                 return "unknown player state - FIXME";
         }
