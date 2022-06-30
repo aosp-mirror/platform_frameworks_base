@@ -32,6 +32,7 @@ import android.util.Printer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
@@ -102,6 +103,10 @@ public final class SQLiteConnectionPool implements Closeable {
     private final ArrayList<SQLiteConnection> mAvailableNonPrimaryConnections =
             new ArrayList<SQLiteConnection>();
     private SQLiteConnection mAvailablePrimaryConnection;
+
+    // Prepare statement cache statistics
+    public int mTotalPrepareStatementCacheMiss = 0;
+    public int mTotalPrepareStatements = 0;
 
     @GuardedBy("mLock")
     private IdleConnectionHandler mIdleConnectionHandler;
@@ -507,6 +512,12 @@ public final class SQLiteConnectionPool implements Closeable {
             for (SQLiteConnection connection : mAcquiredConnections.keySet()) {
                 connection.collectDbStatsUnsafe(dbStatsList);
             }
+
+            // Global pool stats
+            DbStats poolStats = new DbStats(mConfiguration.path, 0, 0, 0,
+                    mTotalPrepareStatements - mTotalPrepareStatementCacheMiss,
+                    mTotalPrepareStatementCacheMiss, mTotalPrepareStatements, true);
+            dbStatsList.add(poolStats);
         }
     }
 
@@ -1201,6 +1212,16 @@ public final class SQLiteConnectionPool implements Closeable {
                 indentedPrinter.println("<none>");
             }
         }
+    }
+
+    /** @hide */
+    @NeverCompile
+    public double getStatementCacheMissRate() {
+        if (mTotalPrepareStatements == 0) {
+            // no statements executed thus no miss rate.
+            return 0;
+        }
+        return (double) mTotalPrepareStatementCacheMiss / (double) mTotalPrepareStatements;
     }
 
     public long getTotalStatementsTime() {

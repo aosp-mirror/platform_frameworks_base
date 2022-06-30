@@ -975,8 +975,8 @@ package android.database.sqlite {
   }
 
   public static class SQLiteDebug.DbStats {
-    ctor public SQLiteDebug.DbStats(String, long, long, int, int, int, int);
-    field public String cache;
+    ctor public SQLiteDebug.DbStats(@NonNull String, long, long, int, int, int, int, boolean);
+    field public final boolean arePoolStats;
     field public String dbName;
     field public long dbSize;
     field public int lookaside;

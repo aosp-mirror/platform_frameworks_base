@@ -45,6 +45,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Printer;
 import com.android.internal.util.Preconditions;
+
+import dalvik.annotation.optimization.NeverCompile;
 import dalvik.system.CloseGuard;
 import java.io.File;
 import java.io.FileFilter;
@@ -2233,6 +2235,16 @@ public final class SQLiteDatabase extends SQLiteClosable {
         }
     }
 
+    /** @hide */
+    @NeverCompile
+    public double getStatementCacheMissRate() {
+        synchronized (mLock) {
+            throwIfNotOpenLocked();
+
+            return mConnectionPoolLocked.getStatementCacheMissRate();
+        }
+    }
+
     /**
      * Sets whether foreign key constraints are enabled for the database.
      * <p>
@@ -2487,6 +2499,22 @@ public final class SQLiteDatabase extends SQLiteClosable {
             }
         }
         return connectionPools;
+    }
+
+    /** @hide */
+    @NeverCompile
+    public int getTotalPreparedStatements() {
+        throwIfNotOpenLocked();
+
+        return mConnectionPoolLocked.mTotalPrepareStatements;
+    }
+
+    /** @hide */
+    @NeverCompile
+    public int getTotalStatementCacheMisses() {
+        throwIfNotOpenLocked();
+
+        return mConnectionPoolLocked.mTotalPrepareStatementCacheMiss;
     }
 
     /**
