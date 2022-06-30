@@ -199,7 +199,7 @@ public class RankingCoordinator implements Coordinator {
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onDozingChanged(boolean isDozing) {
-                    mDndVisualEffectsFilter.invalidateList();
+                    mDndVisualEffectsFilter.invalidateList("onDozingChanged to " + isDozing);
                 }
             };
 }

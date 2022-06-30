@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static junit.framework.Assert.assertFalse;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -55,6 +56,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.verification.VerificationMode;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -130,7 +132,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         doAnswer(i -> {
             mNotifStabilityManager.onBeginRun();
             return null;
-        }).when(mInvalidateListener).onPluggableInvalidated(eq(mNotifStabilityManager));
+        }).when(mInvalidateListener).onPluggableInvalidated(eq(mNotifStabilityManager), any());
     }
 
     @Test
@@ -280,7 +282,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.uptimeMillis());
 
         // THEN the notification list is invalidated
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -295,7 +297,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.currentTimeMillis());
 
         // THEN invalidate is not called because this entry was never suppressed from reordering
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
@@ -312,7 +314,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN invalidate is not called because this entry was never suppressed from reordering;
         // THEN section changes are allowed for this notification
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
 
         // WHEN we're pulsing (now disallowing reordering)
@@ -341,13 +343,13 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         // WHEN we temporarily allow section changes for this notification entry
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.currentTimeMillis());
         // can now reorder, so invalidates
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
 
         // WHEN reordering is now allowed because device isn't pulsing anymore
         setPulsing(false);
 
         // THEN invalidate isn't called a second time since reordering was already allowed
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -368,7 +370,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN we never see any calls to invalidate since there weren't any notifications that
         // were being suppressed from grouping or section changes
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
@@ -386,7 +388,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(false);
 
         //  invalidate is called because we were previously suppressing a group change
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -400,7 +402,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setActivityLaunching(false);
 
         // invalidate is called, b/c we were previously suppressing the pipeline from running
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -414,7 +416,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelCollapsing(false);
 
         // invalidate is called, b/c we were previously suppressing the pipeline from running
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -426,7 +428,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelCollapsing(false);
 
         // THEN invalidate is not called, b/c nothing has been suppressed
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
@@ -438,7 +440,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setActivityLaunching(false);
 
         // THEN invalidate is not called, b/c nothing has been suppressed
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
@@ -457,7 +459,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(false);
 
         //  invalidate is called because we were previously suppressing an entry reorder
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -474,7 +476,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(false);
 
         // invalidate is not called because we were not told that an entry reorder was suppressed
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
@@ -497,6 +499,10 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // BUT pruning the group for which this is the summary would still NOT be allowed.
         assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
+    }
+
+    private void verifyStabilityManagerWasInvalidated(VerificationMode mode) {
+        verify(mInvalidateListener, mode).onPluggableInvalidated(eq(mNotifStabilityManager), any());
     }
 
     private void setActivityLaunching(boolean activityLaunching) {

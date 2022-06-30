@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import dagger.BindsInstance
@@ -79,7 +80,7 @@ class SensitiveContentCoordinatorTest : SysuiTestCase() {
 
         dynamicPrivacyListener.onDynamicPrivacyChanged()
 
-        verify(invalidationListener).onPluggableInvalidated(invalidator)
+        verify(invalidationListener).onPluggableInvalidated(eq(invalidator), any())
     }
 
     @Test

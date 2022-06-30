@@ -25,8 +25,15 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.StateName
+import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.getStateName
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.util.Compile
 import javax.inject.Inject
@@ -60,68 +67,63 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
-    fun logPreRenderInvalidated(filterName: String, pipelineState: Int) {
+    private fun logPluggableInvalidated(
+        type: String,
+        pluggable: Pluggable<*>,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) {
         buffer.log(TAG, DEBUG, {
-            str1 = filterName
+            str1 = type
+            str2 = pluggable.name
             int1 = pipelineState
+            str3 = reason
         }, {
-            """Pre-render Invalidator "$str1" invalidated; pipeline state is $int1"""
+            """Invalidated while ${getStateName(int1)} by $str1 "$str2" because $str3"""
         })
     }
 
-    fun logPreGroupFilterInvalidated(filterName: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = filterName
-            int1 = pipelineState
-        }, {
-            """Pre-group NotifFilter "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logPreRenderInvalidated(
+        invalidator: Invalidator,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("Pre-render Invalidator", invalidator, pipelineState, reason)
 
-    fun logReorderingAllowedInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """ReorderingNowAllowed "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logPreGroupFilterInvalidated(
+        filter: NotifFilter,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("Pre-group NotifFilter", filter, pipelineState, reason)
 
-    fun logPromoterInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """NotifPromoter "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logReorderingAllowedInvalidated(
+        stabilityManager: NotifStabilityManager,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("ReorderingNowAllowed", stabilityManager, pipelineState, reason)
 
-    fun logNotifSectionInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """NotifSection "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logPromoterInvalidated(
+        promoter: NotifPromoter,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("NotifPromoter", promoter, pipelineState, reason)
 
-    fun logNotifComparatorInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """NotifComparator "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logNotifSectionInvalidated(
+        sectioner: NotifSectioner,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("NotifSection", sectioner, pipelineState, reason)
 
-    fun logFinalizeFilterInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """Finalize NotifFilter "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logNotifComparatorInvalidated(
+        comparator: NotifComparator,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("NotifComparator", comparator, pipelineState, reason)
+
+    fun logFinalizeFilterInvalidated(
+        filter: NotifFilter,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("Finalize NotifFilter", filter, pipelineState, reason)
 
     fun logDuplicateSummary(
         buildId: Int,

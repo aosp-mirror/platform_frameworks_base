@@ -35,21 +35,23 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
+import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.TimeUnit
 
 @SmallTest
 class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
@@ -349,7 +351,7 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
 
         // THEN the new pipeline is invalidated (but the old one isn't because it's not
         // necessary) because the notif should no longer be filtered out
-        verify(pluggableListener).onPluggableInvalidated(filter)
+        verify(pluggableListener).onPluggableInvalidated(eq(filter), any())
         verify(notificationEntryManager, never()).updateNotifications(anyString())
         assertFalse(filter.shouldFilterOut(entry2HasNotRecentlyAlerted, now))
     }
@@ -387,7 +389,7 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
     }
 
     private fun verifyPipelinesInvalidated() {
-        verify(pluggableListener).onPluggableInvalidated(filter)
+        verify(pluggableListener).onPluggableInvalidated(eq(filter), any())
         verify(notificationEntryManager).updateNotifications(anyString())
     }
 
@@ -396,7 +398,7 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
     }
 
     private fun verifyPipelinesNotInvalidated() {
-        verify(pluggableListener, never()).onPluggableInvalidated(filter)
+        verify(pluggableListener, never()).onPluggableInvalidated(eq(filter), any())
         verify(notificationEntryManager, never()).updateNotifications(anyString())
     }
 

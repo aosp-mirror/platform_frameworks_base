@@ -1028,37 +1028,37 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // WHEN each pluggable is invalidated THEN the list is re-rendered
 
         clearInvocations(mOnRenderListListener);
-        packageFilter.invalidateList();
+        packageFilter.invalidateList(null);
         assertTrue(mPipelineChoreographer.isScheduled());
         mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
-        idPromoter.invalidateList();
+        idPromoter.invalidateList(null);
         assertTrue(mPipelineChoreographer.isScheduled());
         mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
-        section.invalidateList();
+        section.invalidateList(null);
         assertTrue(mPipelineChoreographer.isScheduled());
         mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
-        hypeComparator.invalidateList();
+        hypeComparator.invalidateList(null);
         assertTrue(mPipelineChoreographer.isScheduled());
         mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
-        sectionComparator.invalidateList();
+        sectionComparator.invalidateList(null);
         assertTrue(mPipelineChoreographer.isScheduled());
         mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
-        preRenderInvalidator.invalidateList();
+        preRenderInvalidator.invalidateList(null);
         assertTrue(mPipelineChoreographer.isScheduled());
         mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
@@ -1584,7 +1584,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // WHEN visual stability manager allows group changes again
         mStabilityManager.setAllowGroupChanges(true);
-        mStabilityManager.invalidateList();
+        mStabilityManager.invalidateList(null);
         mPipelineChoreographer.runIfScheduled();
 
         // THEN entries are grouped
@@ -1623,7 +1623,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // WHEN section changes are allowed again
         mStabilityManager.setAllowSectionChanges(true);
-        mStabilityManager.invalidateList();
+        mStabilityManager.invalidateList(null);
         mPipelineChoreographer.runIfScheduled();
 
         // THEN the section updates
@@ -1719,7 +1719,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     public void testOutOfOrderPreGroupFilterInvalidationThrows() {
         // GIVEN a PreGroupNotifFilter that gets invalidated during the grouping stage
         NotifFilter filter = new PackageFilter(PACKAGE_5);
-        OnBeforeTransformGroupsListener listener = (list) -> filter.invalidateList();
+        OnBeforeTransformGroupsListener listener = (list) -> filter.invalidateList(null);
         mListBuilder.addPreGroupFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
@@ -1735,7 +1735,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a NotifPromoter that gets invalidated during the sorting stage
         NotifPromoter promoter = new IdPromoter(47);
         OnBeforeSortListener listener =
-                (list) -> promoter.invalidateList();
+                (list) -> promoter.invalidateList(null);
         mListBuilder.addPromoter(promoter);
         mListBuilder.addOnBeforeSortListener(listener);
 
@@ -1751,7 +1751,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a NotifComparator that gets invalidated during the finalizing stage
         NotifComparator comparator = new HypeComparator(PACKAGE_5);
         OnBeforeRenderListListener listener =
-                (list) -> comparator.invalidateList();
+                (list) -> comparator.invalidateList(null);
         mListBuilder.setComparators(singletonList(comparator));
         mListBuilder.addOnBeforeRenderListListener(listener);
 
@@ -1766,7 +1766,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     public void testOutOfOrderPreRenderFilterInvalidationThrows() {
         // GIVEN a PreRenderNotifFilter that gets invalidated during the finalizing stage
         NotifFilter filter = new PackageFilter(PACKAGE_5);
-        OnBeforeRenderListListener listener = (list) -> filter.invalidateList();
+        OnBeforeRenderListListener listener = (list) -> filter.invalidateList(null);
         mListBuilder.addFinalizeFilter(filter);
         mListBuilder.addOnBeforeRenderListListener(listener);
 
@@ -1903,7 +1903,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     public void testInOrderPreRenderFilter() {
         // GIVEN a PreRenderFilter that gets invalidated during the grouping stage
         NotifFilter filter = new PackageFilter(PACKAGE_5);
-        OnBeforeTransformGroupsListener listener = (list) -> filter.invalidateList();
+        OnBeforeTransformGroupsListener listener = (list) -> filter.invalidateList(null);
         mListBuilder.addFinalizeFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
@@ -1936,8 +1936,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addFinalizeFilter(filter2);
 
         // WHEN both filters invalidate
-        filter1.invalidateList();
-        filter2.invalidateList();
+        filter1.invalidateList(null);
+        filter2.invalidateList(null);
 
         // THEN the pipeline choreographer is scheduled to evaluate, AND the pipeline hasn't
         // actually run.
