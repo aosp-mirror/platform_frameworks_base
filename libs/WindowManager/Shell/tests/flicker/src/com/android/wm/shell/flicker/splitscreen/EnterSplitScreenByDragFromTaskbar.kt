@@ -76,8 +76,8 @@ class EnterSplitScreenByDragFromTaskbar(
                 taplInstrumentation.launchedAppState.taskbar
                     .getAppIcon(secondaryApp.appName)
                     .dragToSplitscreen(
-                        secondaryApp.component.`package`,
-                        primaryApp.component.`package`
+                        secondaryApp.`package`,
+                        primaryApp.`package`
                     )
             }
         }
