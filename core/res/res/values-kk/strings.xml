@@ -1164,7 +1164,7 @@
     <string name="replace" msgid="7842675434546657444">"… сөзін алмастыру"</string>
     <string name="delete" msgid="1514113991712129054">"Жою"</string>
     <string name="copyUrl" msgid="6229645005987260230">"URL мекенжайын көшіру"</string>
-    <string name="selectTextMode" msgid="3225108910999318778">"Мәтінді бөлектеу"</string>
+    <string name="selectTextMode" msgid="3225108910999318778">"Мәтінді ерекшелеу"</string>
     <string name="undo" msgid="3175318090002654673">"Қайтару"</string>
     <string name="redo" msgid="7231448494008532233">"Қайтару"</string>
     <string name="autofill" msgid="511224882647795296">"Aвтотолтыру"</string>
