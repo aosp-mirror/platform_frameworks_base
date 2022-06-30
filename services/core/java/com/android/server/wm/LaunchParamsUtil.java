@@ -63,7 +63,7 @@ class LaunchParamsUtil {
      * Calculate the default size for a freeform environment. |defaultSize| is used as the default
      * DP size, but if this is null, the portrait phone size is used.
      */
-    static Size getDefaultFreeformSize(@NonNull ActivityInfo info,
+    static Size getDefaultFreeformSize(@NonNull ActivityRecord activityRecord,
             @NonNull TaskDisplayArea displayArea,
             @NonNull ActivityInfo.WindowLayout layout, int orientation,
             @NonNull Rect stableBounds) {
@@ -98,8 +98,8 @@ class LaunchParamsUtil {
         final float aspectRatio = (float) Math.max(width, height) / (float) Math.min(width, height);
 
         // Aspect ratio requirements.
-        final float minAspectRatio = info.getMinAspectRatio(orientation);
-        final float maxAspectRatio = info.getMaxAspectRatio();
+        final float minAspectRatio = activityRecord.getMinAspectRatio();
+        final float maxAspectRatio = activityRecord.info.getMaxAspectRatio();
 
         // Adjust the width and height to the aspect ratio requirements.
         int adjWidth = width;
