@@ -8,6 +8,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.NotificationPanelViewController
+import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
 import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager
 import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.FakeConfigurationController
@@ -49,8 +50,7 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
                 context,
                 splitShadeOverScrollerFactory = { _, _ -> splitShadeOverScroller },
                 noOpOverScroller,
-                scrimShadeTransitionController
-            )
+                scrimShadeTransitionController)
 
         // Resetting as they are notified upon initialization.
         reset(noOpOverScroller, splitShadeOverScroller)
@@ -91,6 +91,16 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
         verifyZeroInteractions(splitShadeOverScroller)
     }
 
+    @Test
+    fun onPanelStateChanged_forwardsToScrimTransitionController() {
+        initLateProperties()
+
+        startPanelExpansion()
+
+        verify(scrimShadeTransitionController).onPanelStateChanged(STATE_OPENING)
+        verify(scrimShadeTransitionController).onPanelExpansionChanged(DEFAULT_EXPANSION_EVENT)
+    }
+
     private fun initLateProperties() {
         controller.qs = qs
         controller.notificationStackScrollLayoutController = nsslController
@@ -112,14 +122,20 @@ class ShadeTransitionControllerTest : SysuiTestCase() {
 
     private fun startPanelExpansion() {
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f,
-            expanded = true,
-            tracking = true,
-            dragDownPxAmount = DEFAULT_DRAG_DOWN_AMOUNT
+            DEFAULT_EXPANSION_EVENT.fraction,
+            DEFAULT_EXPANSION_EVENT.expanded,
+            DEFAULT_EXPANSION_EVENT.tracking,
+            DEFAULT_EXPANSION_EVENT.dragDownPxAmount,
         )
     }
 
     companion object {
         private const val DEFAULT_DRAG_DOWN_AMOUNT = 123f
+        private val DEFAULT_EXPANSION_EVENT =
+            PanelExpansionChangeEvent(
+                fraction = 0.5f,
+                expanded = true,
+                tracking = true,
+                dragDownPxAmount = DEFAULT_DRAG_DOWN_AMOUNT)
     }
 }
