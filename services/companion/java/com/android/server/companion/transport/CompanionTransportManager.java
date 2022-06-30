@@ -200,6 +200,9 @@ public class CompanionTransportManager {
             try {
                 sendMessage(message, sequence, data);
             } catch (IOException e) {
+                synchronized (mPendingRequests) {
+                    mPendingRequests.remove(sequence);
+                }
                 pending.completeExceptionally(e);
             }
             return pending;
