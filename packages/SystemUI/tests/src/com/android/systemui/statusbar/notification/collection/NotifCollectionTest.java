@@ -1684,9 +1684,9 @@ public class NotifCollectionTest extends SysuiTestCase {
         return new CollectionEvent(rawEvent, requireNonNull(mEntryCaptor.getValue()));
     }
 
-    private void verifyBuiltList(Collection<NotificationEntry> list) {
-        verify(mBuildListener).onBuildList(mBuildListCaptor.capture());
-        assertEquals(new ArraySet<>(list), new ArraySet<>(mBuildListCaptor.getValue()));
+    private void verifyBuiltList(Collection<NotificationEntry> expectedList) {
+        verify(mBuildListener).onBuildList(mBuildListCaptor.capture(), any());
+        assertThat(mBuildListCaptor.getValue()).containsExactly(expectedList.toArray());
     }
 
     private static class RecordingCollectionListener implements NotifCollectionListener {
