@@ -304,11 +304,11 @@ public class ShadeListBuilder implements Dumpable {
     private final CollectionReadyForBuildListener mReadyForBuildListener =
             new CollectionReadyForBuildListener() {
                 @Override
-                public void onBuildList(Collection<NotificationEntry> entries) {
+                public void onBuildList(Collection<NotificationEntry> entries, String reason) {
                     Assert.isMainThread();
                     mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
 
-                    mLogger.logOnBuildList();
+                    mLogger.logOnBuildList(reason);
                     mAllEntries = entries;
                     mChoreographer.schedule();
                 }
@@ -456,7 +456,8 @@ public class ShadeListBuilder implements Dumpable {
         mLogger.logEndBuildList(
                 mIterationCount,
                 mReadOnlyNotifList.size(),
-                countChildren(mReadOnlyNotifList));
+                countChildren(mReadOnlyNotifList),
+                /* enforcedVisualStability */ !mNotifStabilityManager.isEveryChangeAllowed());
         if (mAlwaysLogList || mIterationCount % 10 == 0) {
             Trace.beginSection("ShadeListBuilder.logFinalList");
             mLogger.logFinalList(mNotifList);
