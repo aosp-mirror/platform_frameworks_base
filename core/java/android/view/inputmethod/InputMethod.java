@@ -29,9 +29,9 @@ import android.util.Log;
 import android.view.InputChannel;
 import android.view.MotionEvent;
 import android.view.View;
-import android.window.ImeOnBackInvokedDispatcher;
 
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
+import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
@@ -210,47 +210,30 @@ public interface InputMethod {
     public void restartInput(InputConnection inputConnection, EditorInfo editorInfo);
 
     /**
-     * This method is called when {@code {@link #startInput(InputConnection, EditorInfo)} or
-     * {@code {@link #restartInput(InputConnection, EditorInfo)} needs to be dispatched.
+     * This method is called when {@link #startInput(InputConnection, EditorInfo)} or
+     * {@link #restartInput(InputConnection, EditorInfo)} needs to be dispatched.
      *
-     * <p>Note: This method is hidden because the {@code startInputToken} that this method is
-     * dealing with is one of internal details, which should not be exposed to the IME developers.
-     * If you override this method, you are responsible for not breaking existing IMEs that expect
+     * <p>Note: This method is hidden because {@link IInputMethod.StartInputParams} is an internal
+     * details, which should not be exposed to the IME developers. If you override this method, you
+     * are responsible for not breaking existing IMEs that expect
      * {@link #startInput(InputConnection, EditorInfo)} to be still called back.</p>
      *
      * @param inputConnection optional specific input connection for communicating with the text
      *                        box; if {@code null}, you should use the generic bound input
      *                        connection
-     * @param editorInfo information about the text box (typically, an EditText) that requests input
-     * @param restarting {@code false} if this corresponds to
-     *                   {@link #startInput(InputConnection, EditorInfo)}. Otherwise this
-     *                   corresponds to {@link #restartInput(InputConnection, EditorInfo)}.
-     * @param startInputToken a token that identifies a logical session that starts with this method
-     *                        call. Some internal IPCs such as {@link
-     *                        InputMethodManager#setImeWindowStatus(IBinder, IBinder, int, int)}
-     *                        require this token to work, and you have to keep the token alive until
-     *                        the next {@link #startInput(InputConnection, EditorInfo, IBinder)} as
-     *                        long as your implementation of {@link InputMethod} relies on such
-     *                        IPCs
-     * @param navButtonFlags {@link InputMethodNavButtonFlags} in the initial state of this session.
-     * @param imeDispatcher The {@link ImeOnBackInvokedDispatcher} to be set on the
-     *                      IME's {@link android.window.WindowOnBackInvokedDispatcher}, so that IME
-     *                      {@link android.window.OnBackInvokedCallback}s can be forwarded to
-     *                      the client requesting to start input.
+     * @param params Raw object of {@link IInputMethod.StartInputParams}.
      * @see #startInput(InputConnection, EditorInfo)
      * @see #restartInput(InputConnection, EditorInfo)
      * @see EditorInfo
      * @hide
      */
     @MainThread
-    default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
-            @NonNull EditorInfo editorInfo, boolean restarting,
-            @NonNull IBinder startInputToken, @InputMethodNavButtonFlags int navButtonFlags,
-            @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
-        if (restarting) {
-            restartInput(inputConnection, editorInfo);
+    default void dispatchStartInput(@Nullable InputConnection inputConnection,
+            @NonNull IInputMethod.StartInputParams params) {
+        if (params.restarting) {
+            restartInput(inputConnection, params.editorInfo);
         } else {
-            startInput(inputConnection, editorInfo);
+            startInput(inputConnection, params.editorInfo);
         }
     }
 

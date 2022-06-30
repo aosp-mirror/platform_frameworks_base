@@ -148,13 +148,19 @@ final class IInputMethodInvoker {
     }
 
     @AnyThread
-    void startInput(IBinder startInputToken, IRemoteInputConnection inputConnection,
+    void startInput(IBinder startInputToken, IRemoteInputConnection remoteInputConnection,
             EditorInfo editorInfo, boolean restarting,
             @InputMethodNavButtonFlags int navButtonFlags,
             @NonNull ImeOnBackInvokedDispatcher imeDispatcher) {
+        final IInputMethod.StartInputParams params = new IInputMethod.StartInputParams();
+        params.startInputToken = startInputToken;
+        params.remoteInputConnection = remoteInputConnection;
+        params.editorInfo = editorInfo;
+        params.restarting = restarting;
+        params.navigationBarFlags = navButtonFlags;
+        params.imeDispatcher = imeDispatcher;
         try {
-            mTarget.startInput(startInputToken, inputConnection, editorInfo, restarting,
-                    navButtonFlags, imeDispatcher);
+            mTarget.startInput(params);
         } catch (RemoteException e) {
             logRemoteException(e);
         }
