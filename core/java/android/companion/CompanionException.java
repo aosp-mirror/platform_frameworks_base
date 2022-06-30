@@ -19,7 +19,10 @@ package android.companion;
 import android.annotation.NonNull;
 
 /**
- * {@code CompanionException} can be thrown during the companion system data transfer process.
+ * {@code CompanionException} can be thrown during the companion system data
+ * transfer process.
+ *
+ * @hide
  */
 public class CompanionException extends RuntimeException {
     /** @hide */

@@ -800,18 +800,15 @@ public final class CompanionDeviceManager {
      *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public void dispatchMessage(int messageId, int associationId, @NonNull byte[] message)
             throws DeviceNotAssociatedException {
-        try {
-            mService.dispatchMessage(messageId, associationId, message);
-        } catch (RemoteException e) {
-            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
-            throw e.rethrowFromSystemServer();
-        }
+        Log.w(LOG_TAG, "dispatchMessage replaced by attachSystemDataTransport");
     }
 
     /** {@hide} */
+    @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void attachSystemDataTransport(int associationId, @NonNull InputStream in,
             @NonNull OutputStream out) throws DeviceNotAssociatedException {
         synchronized (mTransports) {
@@ -830,6 +827,7 @@ public final class CompanionDeviceManager {
     }
 
     /** {@hide} */
+    @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void detachSystemDataTransport(int associationId)
             throws DeviceNotAssociatedException {
         synchronized (mTransports) {
@@ -927,7 +925,7 @@ public final class CompanionDeviceManager {
      *
      * <p>The permission transfer doesn't happen immediately after the call or user consented.
      * The app needs to trigger the system data transfer manually by calling
-     * {@link #startSystemDataTransfer(int)}, when it confirms the communication channel between
+     * {@code #startSystemDataTransfer(int)}, when it confirms the communication channel between
      * the two devices is established.</p>
      *
      * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the association
@@ -965,8 +963,8 @@ public final class CompanionDeviceManager {
      * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
      *                      of the companion device recorded by CompanionDeviceManager
      * @throws DeviceNotAssociatedException Exception if the companion device is not associated
-     *
      * @deprecated Use {@link #startSystemDataTransfer(int, Executor, OutcomeReceiver)} instead.
+     * @hide
      */
     @Deprecated
     @UserHandleAware
@@ -993,6 +991,7 @@ public final class CompanionDeviceManager {
      * @param executor The executor which will be used to invoke the result callback.
      * @param result The callback to notify the app of the result of the system data transfer.
      * @throws DeviceNotAssociatedException Exception if the companion device is not associated
+     * @hide
      */
     @UserHandleAware
     public void startSystemDataTransfer(
@@ -1125,12 +1124,14 @@ public final class CompanionDeviceManager {
 
         public void start() throws IOException {
             final ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair();
-            mLocalIn = new ParcelFileDescriptor.AutoCloseInputStream(pair[0]);
-            mLocalOut = new ParcelFileDescriptor.AutoCloseOutputStream(pair[0]);
+            final ParcelFileDescriptor localFd = pair[0];
+            final ParcelFileDescriptor remoteFd = pair[1];
+            mLocalIn = new ParcelFileDescriptor.AutoCloseInputStream(localFd);
+            mLocalOut = new ParcelFileDescriptor.AutoCloseOutputStream(localFd);
 
             try {
                 mService.attachSystemDataTransport(mContext.getPackageName(),
-                        mContext.getUserId(), mAssociationId, pair[1]);
+                        mContext.getUserId(), mAssociationId, remoteFd);
             } catch (RemoteException e) {
                 throw new IOException("Failed to configure transport", e);
             }

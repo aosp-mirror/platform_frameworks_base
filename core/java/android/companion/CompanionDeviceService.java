@@ -156,9 +156,12 @@ public abstract class CompanionDeviceService extends Service {
      * @param messageId system assigned id of the message to be sent
      * @param associationId association id of the associated device
      * @param message message to be sent
+     * @hide
      */
+    @Deprecated
     public void onMessageDispatchedFromSystem(int messageId, int associationId,
             @NonNull byte[] message) {
+        Log.w(LOG_TAG, "Replaced by attachSystemDataTransport");
         // do nothing. Companion apps can override this function for system to send messages.
     }
 
@@ -185,22 +188,14 @@ public abstract class CompanionDeviceService extends Service {
      * @param messageId id of the message
      * @param associationId id of the associated device
      * @param message message received from the associated device
+     * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void dispatchMessageToSystem(int messageId, int associationId,
             @NonNull byte[] message)
             throws DeviceNotAssociatedException {
-        if (getBaseContext() == null) {
-            Log.e(LOG_TAG, "Dispatch failed. Start your service before calling this method.");
-            return;
-        }
-        CompanionDeviceManager companionDeviceManager =
-                getSystemService(CompanionDeviceManager.class);
-        if (companionDeviceManager != null) {
-            companionDeviceManager.dispatchMessage(messageId, associationId, message);
-        } else {
-            Log.e(LOG_TAG, "CompanionDeviceManager is null. Can't dispatch messages.");
-        }
+        Log.w(LOG_TAG, "Replaced by attachSystemDataTransport");
     }
 
     /**
@@ -223,10 +218,13 @@ public abstract class CompanionDeviceService extends Service {
      *            device
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void attachSystemDataTransport(int associationId, @NonNull InputStream in,
             @NonNull OutputStream out) throws DeviceNotAssociatedException {
         getSystemService(CompanionDeviceManager.class)
-                .attachSystemDataTransport(associationId, in, out);
+                .attachSystemDataTransport(associationId,
+                        Objects.requireNonNull(in),
+                        Objects.requireNonNull(out));
     }
 
     /**
@@ -236,6 +234,7 @@ public abstract class CompanionDeviceService extends Service {
      * @param associationId id of the associated device
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void detachSystemDataTransport(int associationId)
             throws DeviceNotAssociatedException {
         getSystemService(CompanionDeviceManager.class)
@@ -298,14 +297,6 @@ public abstract class CompanionDeviceService extends Service {
         @Override
         public void onDeviceDisappeared(AssociationInfo associationInfo) {
             mMainHandler.postAtFrontOfQueue(() -> mService.onDeviceDisappeared(associationInfo));
-        }
-
-        @Override
-        public void onMessageDispatchedFromSystem(int messageId, int associationId,
-                @NonNull byte[] message) {
-            mMainHandler.postAtFrontOfQueue(
-                    () -> mService.onMessageDispatchedFromSystem(messageId, associationId,
-                            message));
         }
     }
 }
