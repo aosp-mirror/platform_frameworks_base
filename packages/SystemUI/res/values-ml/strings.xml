@@ -572,7 +572,7 @@
     <string name="monitoring_description_do_learn_more_separator" msgid="1467280496376492558">" 5"</string>
     <string name="monitoring_description_do_learn_more" msgid="645149183455573790">"കൂടുതലറിയുക"</string>
     <string name="monitoring_description_do_body_vpn" msgid="7699280130070502303">"നിങ്ങൾ <xliff:g id="VPN_APP">%1$s</xliff:g> ആപ്പിലേക്ക് കണക്റ്റുചെയ്‌തിരിക്കുന്നു, ഇമെയിലുകൾ, ആപ്‌സ്, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാൻ ഈ ആപ്പിന് കഴിയും."</string>
-    <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" 5"</string>
+    <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"VPN ക്രമീകരണം തുറക്കുക"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" 5"</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"പരിചിത ക്രെഡൻഷ്യലുകൾ തുറക്കുക"</string>
