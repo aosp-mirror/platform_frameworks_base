@@ -2755,7 +2755,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // uids the original and new state are the same object
                 if (!origPermissions.hasRequestedPermission(permName)
                         && (pkg.getImplicitPermissions().contains(permName)
-                                || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
+                        || (permName.equals(Manifest.permission.ACTIVITY_RECOGNITION)))) {
                     if (pkg.getImplicitPermissions().contains(permName)) {
                         // If permName is an implicit permission, try to auto-grant
                         newImplicitPermissions.add(permName);
@@ -2771,21 +2771,28 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         // or has updated its target SDK and AR is no longer implicit to it.
                         // This is a compatibility workaround for apps when AR permission was
                         // split in Q.
-                        final List<SplitPermissionInfoParcelable> permissionList =
-                                getSplitPermissions();
-                        int numSplitPerms = permissionList.size();
-                        for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
-                            SplitPermissionInfoParcelable sp = permissionList.get(splitPermNum);
-                            String splitPermName = sp.getSplitPermission();
-                            if (sp.getNewPermissions().contains(permName)
-                                    && origPermissions.hasInstallPermission(splitPermName)) {
-                                upgradedActivityRecognitionPermission = splitPermName;
-                                newImplicitPermissions.add(permName);
+                        // b/210065877: Check that the installed version is pre Q to auto-grant in
+                        // case of OS update
+                        if (mPackageManagerInt.getInstalledSdkVersion(pkg)
+                                < Build.VERSION_CODES.Q) {
+                            final List<SplitPermissionInfoParcelable> permissionList =
+                                    getSplitPermissions();
+                            int numSplitPerms = permissionList.size();
+                            for (int splitPermNum = 0; splitPermNum < numSplitPerms;
+                                    splitPermNum++) {
+                                SplitPermissionInfoParcelable sp = permissionList.get(splitPermNum);
+                                String splitPermName = sp.getSplitPermission();
+                                if (sp.getNewPermissions().contains(permName)
+                                        && origPermissions.hasInstallPermission(splitPermName)) {
+                                    upgradedActivityRecognitionPermission = splitPermName;
+                                    newImplicitPermissions.add(permName);
 
-                                if (DEBUG_PERMISSIONS) {
-                                    Slog.i(TAG, permName + " is newly added for " + friendlyName);
+                                    if (DEBUG_PERMISSIONS) {
+                                        Slog.i(TAG, permName + " is newly added for "
+                                                + friendlyName);
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
                     }
