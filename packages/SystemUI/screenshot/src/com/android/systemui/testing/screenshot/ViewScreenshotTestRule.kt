@@ -60,11 +60,17 @@ class ViewScreenshotTestRule(testSpec: ScreenshotTestSpec) : TestRule {
     ) {
         var dialog: Dialog? = null
         activityRule.scenario.onActivity { activity ->
-            // Make sure that the dialog draws full screen and fits the whole display instead of the
-            // system bars.
             dialog =
                 dialogProvider(activity).apply {
+                    // Make sure that the dialog draws full screen and fits the whole display
+                    // instead of the system bars.
                     window.setDecorFitsSystemWindows(false)
+
+                    // Disable enter/exit animations.
+                    create()
+                    window.setWindowAnimations(0)
+
+                    // Show the dialog.
                     show()
                 }
         }
@@ -74,7 +80,11 @@ class ViewScreenshotTestRule(testSpec: ScreenshotTestSpec) : TestRule {
         activityRule.scenario.onActivity {
             // Check that the content is what we expected.
             val dialog = dialog ?: error("dialog is null")
-            screenshotRule.screenshotTest(goldenIdentifier, dialog.window.decorView)
+            try {
+                screenshotRule.screenshotTest(goldenIdentifier, dialog.window.decorView)
+            } finally {
+                dialog.dismiss()
+            }
         }
     }
 }
