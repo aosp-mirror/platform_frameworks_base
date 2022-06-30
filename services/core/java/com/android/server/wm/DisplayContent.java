@@ -1610,7 +1610,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (mTransitionController.useShellTransitionsRotation()) {
             return ROTATION_UNDEFINED;
         }
-        if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM) {
+        if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM
+                || getIgnoreOrientationRequest()) {
             return ROTATION_UNDEFINED;
         }
         if (r.mOrientation == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
